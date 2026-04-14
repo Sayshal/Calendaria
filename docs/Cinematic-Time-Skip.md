@@ -23,6 +23,8 @@ Any time jump that meets the threshold triggers the cinematic, including the tim
 
 When the **Trigger on Rest** setting is enabled, rest-initiated time advances (long rests) trigger the cinematic regardless of threshold. Any forward advance during rest plays the overlay.
 
+The "Trigger on Rest" setting requires **Advance Time on Rest** (in the Time tab) to be enabled. When that setting is off, "Trigger on Rest" is disabled with a tooltip explaining the dependency.
+
 ---
 
 ## Multiplayer

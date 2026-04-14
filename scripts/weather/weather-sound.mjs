@@ -25,8 +25,10 @@ export function initializeWeatherSound() {
   Hooks.on(HOOKS.WEATHER_CHANGE, onWeatherChange);
   Hooks.on('canvasReady', onCanvasReady);
   Hooks.on('updateScene', onSceneUpdate);
-  const weather = WeatherManager.getCurrentWeather();
-  playSound(weather || null);
+  if (!isSoundDisabledForScene(canvas?.scene)) {
+    const weather = WeatherManager.getCurrentWeather();
+    playSound(weather || null);
+  }
   log(3, 'WeatherSound initialized');
 }
 
@@ -113,7 +115,7 @@ async function fadeOutAndStop(sound) {
  */
 function isSoundDisabledForScene(scene) {
   if (!scene) return false;
-  return scene.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_SOUND_DISABLED);
+  return scene.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_SOUND_DISABLED) || scene.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_DISABLED);
 }
 
 /**

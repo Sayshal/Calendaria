@@ -142,13 +142,13 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
   static PARTS = { header: { template: TEMPLATES.SHEETS.CALENDAR_HEADER }, content: { template: TEMPLATES.SHEETS.CALENDAR_CONTENT } };
 
   /** @override */
-  async render(options = {}, _options = {}) {
+  _preRender(context, options) {
     if (!canViewBigCal()) {
       if (!options.silent) ui.notifications.warn('CALENDARIA.Permissions.NoAccess', { localize: true });
-      return this;
+      return false;
     }
     Hooks.callAll(HOOKS.PRE_RENDER_CALENDAR, { app: this, displayMode: this._displayMode, calendar: CalendarManager.getActiveCalendar() });
-    return super.render(options, _options);
+    return super._preRender(context, options);
   }
 
   /** @override */

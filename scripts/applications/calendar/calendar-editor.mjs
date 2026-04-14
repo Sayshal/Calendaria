@@ -370,6 +370,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       typeOptions: monthTypeOptions.map((opt) => ({ ...opt, selected: (opt.value || null) === (month.type || null) }))
     }));
     const festivalsArr = Object.entries(this.#calendarData.festivals);
+    context.festivalsCanEditNotes = !!(this.#isEditing && this.#calendarId);
     context.festivalsWithNav = festivalsArr.map(([key, festival]) => {
       const noteStub = this.#calendarId ? FestivalManager.getFestivalNoteByKey(this.#calendarId, key) : null;
       const effectiveTree = noteStub?.flagData?.conditionTree ?? festival.conditionTree;
@@ -984,15 +985,19 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @private
    */
   #updateObjectFromFormData(data, prefix, targetObj, fields) {
-    const keys = new Set();
+    const formKeys = new Set();
     for (const key of Object.keys(data)) {
       const match = key.match(new RegExp(`^${prefix}\\.([^.]+)\\.`));
-      if (match) keys.add(match[1]);
+      if (match) formKeys.add(match[1]);
     }
-    for (const k of Object.keys(targetObj)) delete targetObj[k];
+    const existingKeys = Object.keys(targetObj);
+    const orderedKeys = existingKeys.filter((k) => formKeys.has(k));
+    for (const k of formKeys) if (!orderedKeys.includes(k)) orderedKeys.push(k);
+    for (const k of existingKeys) if (!formKeys.has(k)) delete targetObj[k];
     let ordinal = 1;
-    for (const itemKey of keys) {
-      const item = { ordinal: ordinal++ };
+    for (const itemKey of orderedKeys) {
+      const existing = targetObj[itemKey] || {};
+      const item = { ...existing, ordinal: ordinal++ };
       for (const field of fields) {
         const key = `${prefix}.${itemKey}.${field}`;
         if (data[key] !== undefined) {
@@ -1005,6 +1010,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
           else item[field] = data[key];
         }
       }
+      delete targetObj[itemKey];
       targetObj[itemKey] = item;
     }
   }
@@ -1730,7 +1736,16 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const afterKey = target.dataset.key;
     const totalFestivals = Object.keys(this.#calendarData.festivals ?? {}).length + 1;
     const newKey = foundry.utils.randomID();
-    const newFestival = { name: format('CALENDARIA.Editor.Default.FestivalName', { num: totalFestivals }), month: 0, dayOfMonth: 0, conditionTree: null, description: '', color: '', icon: '' };
+    const today = game.time?.components ?? { month: 0, dayOfMonth: 0 };
+    const newFestival = {
+      name: format('CALENDARIA.Editor.Default.FestivalName', { num: totalFestivals }),
+      month: today.month ?? 0,
+      dayOfMonth: today.dayOfMonth ?? 0,
+      conditionTree: null,
+      description: '',
+      color: '',
+      icon: ''
+    };
     if (afterKey) this.#calendarData.festivals = this.#insertAfterKey(this.#calendarData.festivals, afterKey, newKey, newFestival);
     else this.#calendarData.festivals[newKey] = newFestival;
     this.#isDirty = true;

@@ -11,6 +11,9 @@ import { WeatherManager } from '../weather/_module.mjs';
 /** @type {number|null} Last hour we calculated darkness for */
 let lastHour = null;
 
+/** @type {number|null} Last minute we calculated darkness for */
+let lastMinute = null;
+
 /**
  * Calculate darkness level based on time of day, shaped by sunrise and sunset.
  * @param {number} hours - Hours (0 to hoursPerDay-1)
@@ -299,8 +302,10 @@ export async function updateDarknessFromWorldTime(worldTime, dt) {
   const calendar = game.time.calendar;
   const components = game.time.components ?? calendar?.timeToComponents(worldTime);
   const currentHour = components?.hour ?? 0;
-  if (lastHour !== null && lastHour === currentHour) return;
+  const currentMinute = components?.minute ?? 0;
+  if (lastHour !== null && lastHour === currentHour && lastMinute === currentMinute) return;
   lastHour = currentHour;
+  lastMinute = currentMinute;
   const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
   const minutesPerHour = calendar?.days?.minutesPerHour ?? 60;
   const secondsPerHour = (calendar?.days?.secondsPerMinute ?? 60) * minutesPerHour;
@@ -309,7 +314,7 @@ export async function updateDarknessFromWorldTime(worldTime, dt) {
     const zone = WeatherManager.getActiveZone?.(null, scene);
     const sunrise = calendar?.sunrise?.(components, zone) ?? null;
     const sunset = calendar?.sunset?.(components, zone) ?? null;
-    const baseDarkness = calculateDarknessFromTime(currentHour, 0, hoursPerDay, minutesPerHour, sunrise, sunset);
+    const baseDarkness = calculateDarknessFromTime(currentHour, currentMinute, hoursPerDay, minutesPerHour, sunrise, sunset);
     const darkness = calculateAdjustedDarkness(baseDarkness, scene);
     const lighting = calculateEnvironmentLighting(scene);
     const envData = buildEnvironmentUpdateData(scene, lighting);
@@ -351,6 +356,7 @@ function getDarknessScenes() {
 export async function onMoonPhaseChange() {
   if (!CalendariaSocket.isPrimaryGM()) return;
   lastHour = null;
+  lastMinute = null;
   await updateDarknessFromWorldTime(game.time.worldTime, 0);
 }
 
@@ -362,13 +368,14 @@ export async function onWeatherChange() {
   const calendar = game.time.calendar;
   const components = game.time.components;
   const currentHour = components?.hour ?? 0;
+  const currentMinute = components?.minute ?? 0;
   const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
   const minutesPerHour = calendar?.days?.minutesPerHour ?? 60;
   const updates = getDarknessScenes().map((scene) => {
     const zone = WeatherManager.getActiveZone?.(null, scene);
     const sunrise = calendar?.sunrise?.(components, zone) ?? null;
     const sunset = calendar?.sunset?.(components, zone) ?? null;
-    const baseDarkness = calculateDarknessFromTime(currentHour, 0, hoursPerDay, minutesPerHour, sunrise, sunset);
+    const baseDarkness = calculateDarknessFromTime(currentHour, currentMinute, hoursPerDay, minutesPerHour, sunrise, sunset);
     const darkness = calculateAdjustedDarkness(baseDarkness, scene);
     const lighting = calculateEnvironmentLighting(scene);
     const envData = buildEnvironmentUpdateData(scene, lighting);
@@ -392,15 +399,17 @@ export async function onUpdateScene(scene, change) {
   else CalendariaSocket.emit(SOCKET_TYPES.HUD_VISIBILITY, { visible: true });
   if (!shouldSyncSceneDarkness(scene)) return;
   lastHour = null;
+  lastMinute = null;
   const calendar = game.time.calendar;
   const components = game.time.components;
   const currentHour = components?.hour ?? 0;
+  const currentMinute = components?.minute ?? 0;
   const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
   const minutesPerHour = calendar?.days?.minutesPerHour ?? 60;
   const zone = WeatherManager.getActiveZone?.(null, scene);
   const sunrise = calendar?.sunrise?.(components, zone) ?? null;
   const sunset = calendar?.sunset?.(components, zone) ?? null;
-  const baseDarkness = calculateDarknessFromTime(currentHour, 0, hoursPerDay, minutesPerHour, sunrise, sunset);
+  const baseDarkness = calculateDarknessFromTime(currentHour, currentMinute, hoursPerDay, minutesPerHour, sunrise, sunset);
   const darkness = calculateAdjustedDarkness(baseDarkness, scene);
   const lighting = calculateEnvironmentLighting(scene);
   const envData = buildEnvironmentUpdateData(scene, lighting);

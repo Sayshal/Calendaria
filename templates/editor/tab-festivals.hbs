@@ -26,11 +26,13 @@
 
               <div class="item-controls col-controls">
                 <button type="button" data-action="editFestivalNote" data-key="{{this.key}}" data-tooltip
-                  aria-label="{{localize 'CALENDARIA.Editor.Tooltip.EditFestival'}}">
+                  {{#unless ../festivalsCanEditNotes}}disabled{{/unless}}
+                  aria-label="{{#if ../festivalsCanEditNotes}}{{localize 'CALENDARIA.Editor.Tooltip.EditFestival'}}{{else}}{{localize 'CALENDARIA.Editor.Tooltip.EditFestivalDisabled'}}{{/if}}">
                   <i class="fas fa-pen-to-square"></i>
                 </button>
                 <button type="button" data-action="refreshFestival" data-key="{{this.key}}" data-tooltip
-                  aria-label="{{localize 'CALENDARIA.Editor.Tooltip.RefreshFestival'}}">
+                  {{#unless ../festivalsCanEditNotes}}disabled{{/unless}}
+                  aria-label="{{#if ../festivalsCanEditNotes}}{{localize 'CALENDARIA.Editor.Tooltip.RefreshFestival'}}{{else}}{{localize 'CALENDARIA.Editor.Tooltip.RefreshFestivalDisabled'}}{{/if}}">
                   <i class="fas fa-sync"></i>
                 </button>
                 <button type="button" data-action="addFestival" data-key="{{this.key}}" data-tooltip

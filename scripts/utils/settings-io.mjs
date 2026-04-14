@@ -5,8 +5,9 @@
 
 import { CalendarManager } from '../calendar/_module.mjs';
 import { MODULE, SETTINGS } from '../constants.mjs';
+import { FestivalManager } from '../festivals/_module.mjs';
+import { getAllPresets, sanitizeNoteData } from '../notes/_module.mjs';
 import NoteManager from '../notes/note-manager.mjs';
-import { sanitizeNoteData } from '../notes/_module.mjs';
 import { format, localize } from './localization.mjs';
 import { log } from './logger.mjs';
 
@@ -121,7 +122,6 @@ const EXPORTABLE_SETTINGS = [
   SETTINGS.MINI_CAL_WEATHER_DISPLAY_MODE,
   SETTINGS.PERMISSIONS,
   SETTINGS.PRECIPITATION_UNIT,
-  SETTINGS.PRIMARY_GM,
   SETTINGS.SAVED_TIMEPOINTS,
   SETTINGS.SHOW_BIG_CAL,
   SETTINGS.SHOW_CALENDAR_HUD,
@@ -186,28 +186,34 @@ async function importNotes(notes, calendarId) {
   if (!notes?.length) return 0;
   const idMap = new Map();
   let imported = 0;
+  const existingNotes = NoteManager.getAllNotes();
+  const existingKeys = new Set(
+    existingNotes.map((n) => {
+      const sd = n.flagData?.startDate;
+      return `${n.name}|${sd?.year ?? ''}|${sd?.month ?? ''}|${sd?.dayOfMonth ?? ''}`;
+    })
+  );
+  const knownPresetIds = new Set(getAllPresets().map((p) => p.id));
   for (const note of notes) {
+    if (note.system?.linkedFestival) continue;
     const targetCalendarId = calendarId || note.calendarId;
     const noteData = sanitizeNoteData(note.system || {});
-    // Clear references that won't resolve in the new world
     noteData.macro = null;
     noteData.sceneId = null;
     noteData.playlistId = null;
     noteData.linkedEvent = null;
     noteData.connectedEvents = undefined;
-    const page = await NoteManager.createNote({
-      name: note.name,
-      content: note.content || '',
-      noteData,
-      calendarId: targetCalendarId,
-      openSheet: false
-    });
+    if (Array.isArray(noteData.categories)) noteData.categories = noteData.categories.filter((id) => knownPresetIds.has(id));
+    const sd = noteData.startDate;
+    const noteKey = `${note.name}|${sd?.year ?? ''}|${sd?.month ?? ''}|${sd?.dayOfMonth ?? ''}`;
+    if (existingKeys.has(noteKey)) continue;
+    existingKeys.add(noteKey);
+    const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData, calendarId: targetCalendarId, openSheet: false });
     if (page) {
       idMap.set(note.id, page.id);
       imported++;
     }
   }
-  // Second pass: re-link notes that reference each other
   for (const note of notes) {
     const linked = note.system?.linkedEvent;
     const connected = note.system?.connectedEvents;
@@ -264,9 +270,11 @@ export async function exportSettings() {
     exportData.settings[key] = game.settings.get(MODULE.ID, key);
   }
   if (includeCalendar && activeCalendar) {
-    const calendarData = activeCalendar.toObject();
+    if (calendarId) await FestivalManager.syncFestivalDefinitionsFromNotes(calendarId);
+    const refreshedCalendar = (calendarId && CalendarManager.getCalendar(calendarId)) || activeCalendar;
+    const calendarData = refreshedCalendar.toObject();
     const currentDate = CalendarManager.getCurrentDateTime();
-    calendarData.currentDate = { year: currentDate.year - (activeCalendar.yearZero ?? 0), month: currentDate.month, dayOfMonth: currentDate.dayOfMonth };
+    calendarData.currentDate = { year: currentDate.year - (refreshedCalendar.yearZero ?? 0), month: currentDate.month, dayOfMonth: currentDate.dayOfMonth };
     exportData.calendarData = calendarData;
     log(3, `Included active calendar data: ${calendarData.name}`);
     if (calendarId) {
@@ -297,6 +305,7 @@ export async function importSettings(onComplete) {
       const text = await foundry.utils.readTextFromFile(file);
       const importData = JSON.parse(text);
       if (!importData.settings || typeof importData.settings !== 'object') throw new Error('Invalid settings file format');
+      if (importData.calendarData && !importData.calendarData.name) throw new Error('Calendar data is missing a name');
       const hasCalendarData = !!importData.calendarData?.name;
       const hasNotes = Array.isArray(importData.notes) && importData.notes.length > 0;
       const settingsCount = Object.keys(importData.settings).length;
@@ -346,33 +355,52 @@ export async function importSettings(onComplete) {
       let imported = 0;
       for (const [key, value] of Object.entries(importData.settings)) {
         if (EXPORTABLE_SETTINGS.includes(key)) {
-          await game.settings.set(MODULE.ID, key, value);
-          imported++;
+          try {
+            await game.settings.set(MODULE.ID, key, value);
+            imported++;
+          } catch (err) {
+            log(1, `Skipped setting ${key}: ${err.message}`);
+          }
         }
       }
       ui.notifications.info(format('CALENDARIA.SettingsPanel.ImportSettings.Success', { count: imported }));
       let importedCalendarId = null;
       if (hasCalendarData && doImportCalendar) {
-        const calendarData = importData.calendarData;
-        const calendarId = calendarData.name
-          .toLowerCase()
-          .replace(/[^\da-z]+/g, '-')
-          .replace(/^-|-$/g, '')
-          .substring(0, 32);
-        const calendar = await CalendarManager.createCustomCalendar(calendarId, calendarData);
-        if (calendar) {
-          importedCalendarId = calendar.metadata?.id || `custom-${calendarId}`;
-          ui.notifications.info(format('CALENDARIA.SettingsPanel.ImportSettings.CalendarImported', { name: calendarName }));
-          if (setActive) {
-            await CalendarManager.switchCalendar(importedCalendarId);
-            ui.notifications.info(format('CALENDARIA.SettingsPanel.ImportSettings.CalendarActivated', { name: calendarName }));
+        try {
+          const calendarData = importData.calendarData;
+          try {
+            if (hasNotes && calendarData.festivals) FestivalManager.applyFestivalDatesToCalendarData(calendarData, importData.notes);
+          } catch (festivalError) {
+            log(1, 'Festival date patching failed (continuing import):', festivalError);
           }
+          const calendarId = calendarData.name
+            .toLowerCase()
+            .replace(/[^\da-z]+/g, '-')
+            .replace(/^-|-$/g, '')
+            .substring(0, 32);
+          const calendar = await CalendarManager.createCustomCalendar(calendarId, calendarData);
+          if (calendar) {
+            importedCalendarId = calendar.metadata?.id || `custom-${calendarId}`;
+            ui.notifications.info(format('CALENDARIA.SettingsPanel.ImportSettings.CalendarImported', { name: calendarName }));
+            if (setActive) {
+              await CalendarManager.switchCalendar(importedCalendarId);
+              ui.notifications.info(format('CALENDARIA.SettingsPanel.ImportSettings.CalendarActivated', { name: calendarName }));
+            }
+          }
+        } catch (calError) {
+          log(1, 'Calendar import failed:', calError);
+          ui.notifications.error(`Calendar import failed: ${calError.message}`);
         }
       }
       if (hasNotes && doImportNotes) {
-        const noteCalendarId = importedCalendarId || CalendarManager.getActiveCalendar()?.metadata?.id;
-        const noteCount = await importNotes(importData.notes, noteCalendarId);
-        if (noteCount > 0) ui.notifications.info(format('CALENDARIA.SettingsPanel.ImportSettings.NotesImported', { count: noteCount }));
+        try {
+          const noteCalendarId = importedCalendarId || CalendarManager.getActiveCalendar()?.metadata?.id;
+          const noteCount = await importNotes(importData.notes, noteCalendarId);
+          if (noteCount > 0) ui.notifications.info(format('CALENDARIA.SettingsPanel.ImportSettings.NotesImported', { count: noteCount }));
+        } catch (noteError) {
+          log(1, 'Note import failed:', noteError);
+          ui.notifications.error(`Note import failed: ${noteError.message}`);
+        }
       }
       if (onComplete) onComplete();
     } catch (error) {

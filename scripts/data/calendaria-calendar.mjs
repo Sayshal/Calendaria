@@ -1240,7 +1240,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     const components = typeof time === 'number' ? this.timeToComponents(time) : time;
     const currentDays = this._componentsToDays(components);
     const ref = moon.referenceDate;
-    const referenceDays = this._componentsToDays({ year: ref.year, month: ref.month, dayOfMonth: ref.dayOfMonth ?? 0 });
+    const yearZero = this.years?.yearZero ?? 0;
+    const referenceDays = this._componentsToDays({ year: ref.year - yearZero, month: ref.month, dayOfMonth: ref.dayOfMonth ?? 0 });
     const daysSinceReference = currentDays - referenceDays;
     const phases = moon.phases ? Object.values(moon.phases) : [];
     if (!phases.length) return null;
@@ -1618,7 +1619,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       if (!stages?.length) continue;
       const epochValue = epochValues[cycle.basedOn] ?? 0;
       const adjustedValue = epochValue + (cycle.offset || 0);
-      let stageIndex = adjustedValue % stages.length;
+      let stageIndex = Math.floor(adjustedValue / cycle.length) % stages.length;
       if (stageIndex < 0) stageIndex += stages.length;
       const stage = stages[stageIndex];
       values.push({ cycleName: cycle.name, entryName: stage?.name ?? '', index: stageIndex });
@@ -1678,7 +1679,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     const epochValues = this._getCycleEpochValues(components, displayYear);
     const epochValue = epochValues[cycle.basedOn] ?? 0;
     const adjustedValue = epochValue + (cycle.offset || 0);
-    let stageIndex = adjustedValue % stages.length;
+    let stageIndex = Math.floor(adjustedValue / cycle.length) % stages.length;
     if (stageIndex < 0) stageIndex += stages.length;
     const cycleNumber = Math.max(1, Math.floor(adjustedValue / cycle.length) + 1);
     const stage = stages[stageIndex];

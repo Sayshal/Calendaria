@@ -53,6 +53,8 @@ Access these via `CALENDARIA.api.replaceableElements`.
 
 ### Basic Button Widget
 
+Widgets registered during `calendaria.ready` appear on the first render of all Calendaria applications.
+
 ```javascript
 Hooks.once('calendaria.ready', () => {
   CALENDARIA.api.registerWidget('my-module', {

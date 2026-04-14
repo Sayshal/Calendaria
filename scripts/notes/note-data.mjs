@@ -150,12 +150,18 @@ export function validateNoteData(noteData) {
   return { valid: errors.length === 0, errors };
 }
 
+/** Legacy `repeat` values that are superseded by conditionTree. `'computed'` is still functional via computedConfig. */
+const DEPRECATED_REPEAT_VALUES = new Set(['daily', 'weekly', 'monthly', 'yearly', 'moon', 'random', 'linked', 'seasonal', 'weekOfMonth', 'range']);
+
 /**
  * Sanitize and normalize note data.
  * @param {object} noteData  Raw note data
  * @returns {object}  Sanitized note data
  */
 export function sanitizeNoteData(noteData) {
+  if (noteData?.repeat && DEPRECATED_REPEAT_VALUES.has(noteData.repeat)) {
+    foundry.utils.logCompatibilityWarning(`Calendaria: noteData.repeat ('${noteData.repeat}') is deprecated. Use noteData.conditionTree instead.`, { since: '1.0.0', until: '1.2.0', once: true });
+  }
   const defaults = getDefaultNoteData();
   return {
     startDate: noteData.startDate || defaults.startDate,

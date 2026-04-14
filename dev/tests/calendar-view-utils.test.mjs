@@ -22,7 +22,7 @@ vi.mock('../../scripts/weather/weather-manager.mjs', async () => {
   return { default: WeatherManager };
 });
 vi.mock('../../scripts/utils/formatting/format-utils.mjs', () => ({ formatCustom: vi.fn(() => ''), toRomanNumeral: vi.fn((n) => String(n)) }));
-vi.mock('../../scripts/utils/permissions.mjs', () => ({ canViewWeatherForecast: vi.fn(() => true) }));
+vi.mock('../../scripts/utils/permissions.mjs', () => ({ canViewWeatherForecast: vi.fn(() => true), canViewBigCal: vi.fn(() => true), canViewChronicle: vi.fn(() => true), canViewHUD: vi.fn(() => true), canViewMiniCal: vi.fn(() => true), canViewStopwatch: vi.fn(() => true), canViewSunDial: vi.fn(() => true), canViewTimeKeeper: vi.fn(() => true) }));
 vi.mock('../../scripts/utils/socket.mjs', () => ({ CalendariaSocket: { executeAsGM: vi.fn(), isPrimaryGM: vi.fn(() => true) } }));
 vi.mock('../../scripts/applications/_module.mjs', () => ({ BigCal: { show: vi.fn(), hide: vi.fn(), toggle: vi.fn() }, HUD: { show: vi.fn(), hide: vi.fn() }, MiniCal: { show: vi.fn(), hide: vi.fn() }, Stopwatch: { show: vi.fn() }, SunDial: { show: vi.fn() }, TimeKeeper: { show: vi.fn() } }));
 vi.mock('../../scripts/applications/calendar/note-viewer.mjs', () => ({ NoteViewer: class {} }));

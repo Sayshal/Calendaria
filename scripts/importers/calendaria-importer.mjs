@@ -4,6 +4,8 @@
  * @author Tyler
  */
 
+import { FestivalManager } from '../festivals/_module.mjs';
+import { NoteManager, getAllPresets, sanitizeNoteData } from '../notes/_module.mjs';
 import { log } from '../utils/_module.mjs';
 import BaseImporter from './base-importer.mjs';
 
@@ -47,8 +49,6 @@ export default class CalendariaImporter extends BaseImporter {
 
   /**
    * Extract notes from Calendaria export data.
-   * Handles both the full settings export format (top-level `notes` array with `system` data)
-   * and the legacy format with flat note properties.
    * @param {object} data - Raw Calendaria export data
    * @returns {Promise<object[]>} Array of note data objects
    */
@@ -57,13 +57,16 @@ export default class CalendariaImporter extends BaseImporter {
     if (!notes?.length) return [];
     return notes.map((note) => {
       if (note.system) {
+        const linked = note.system.linkedFestival;
         return {
           name: note.name,
           content: note.content || '',
           calendarId: note.calendarId,
           system: note.system,
+          startDate: note.system.startDate,
           originalId: note.id,
-          suggestedType: 'note'
+          festivalKey: linked?.festivalKey ?? null,
+          suggestedType: linked ? 'festival' : 'note'
         };
       }
       return {
@@ -75,6 +78,7 @@ export default class CalendariaImporter extends BaseImporter {
         repeat: note.repeat || 'never',
         categories: note.categories || [],
         originalId: note.id,
+        festivalKey: null,
         suggestedType: 'note'
       };
     });
@@ -90,10 +94,50 @@ export default class CalendariaImporter extends BaseImporter {
     const monthValues = calendarData.months?.values;
     if (!calendarData.name || !monthValues || !Object.values(monthValues).length) throw new Error('Invalid Calendaria export format');
     log(3, `Transforming Calendaria export: ${calendarData.name}`);
+    const bundleNotes = data.notes || calendarData.notes;
+    if (calendarData.festivals && Array.isArray(bundleNotes)) FestivalManager.applyFestivalDatesToCalendarData(calendarData, bundleNotes);
     const metadata = { ...calendarData.metadata };
     delete metadata.id;
     delete metadata.importedAt;
     metadata.importedFrom = 'calendaria';
     return { ...calendarData, metadata };
+  }
+
+  /**
+   * Import notes selected via the importer dialog (those marked as 'note').
+   * @param {object[]} notes - Notes to import (already filtered to type 'note')
+   * @param {object} options - Import options
+   * @param {string} options.calendarId - Target calendar ID
+   * @returns {Promise<{success: boolean, count: number, errors: string[]}>} Import result with per-note error messages
+   */
+  async importNotes(notes, options = {}) {
+    const { calendarId } = options;
+    const errors = [];
+    let count = 0;
+    log(3, `Starting Calendaria note import: ${notes.length} notes to calendar ${calendarId}`);
+    for (const note of notes) {
+      try {
+        const noteData = sanitizeNoteData(
+          note.system || { startDate: note.startDate, endDate: note.endDate, allDay: note.allDay ?? true, repeat: note.repeat || 'never', categories: note.categories || [] }
+        );
+        noteData.macro = null;
+        noteData.sceneId = null;
+        noteData.playlistId = null;
+        noteData.linkedEvent = null;
+        noteData.linkedFestival = null;
+        noteData.connectedEvents = undefined;
+        if (Array.isArray(noteData.categories)) {
+          const knownIds = new Set(getAllPresets().map((p) => p.id));
+          noteData.categories = noteData.categories.filter((id) => knownIds.has(id));
+        }
+        const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData, calendarId, openSheet: false });
+        if (page) count++;
+        else errors.push(`Failed to create note: ${note.name}`);
+      } catch (error) {
+        errors.push(`Error creating note "${note.name}": ${error.message}`);
+      }
+    }
+    log(3, `Calendaria note import complete: ${count}/${notes.length} imported, ${errors.length} errors`);
+    return { success: errors.length === 0, count, errors };
   }
 }

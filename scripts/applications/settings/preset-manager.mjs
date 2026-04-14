@@ -115,6 +115,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
   _preSyncPartState(partId, newElement, priorElement, state) {
     super._preSyncPartState(partId, newElement, priorElement, state);
     if (partId === 'main' && priorElement && !this.#skipFlush) this.#flushFormData();
+    this.#skipFlush = false;
   }
 
   /** @override */
@@ -319,6 +320,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!id) return;
     this.#flushFormData();
     this._selectedId = id;
+    this.#skipFlush = true;
     this.render();
   }
 
@@ -390,6 +392,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
     else this._presets = this._presets.filter((c) => c.id !== id);
     if (this._selectedId === id) this._selectedId = this._presets.find((c) => !c.hidden)?.id || null;
     this.#isDirty = true;
+    this.#skipFlush = true;
     this.render();
   }
 
@@ -416,6 +419,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
       }
     }
     this.#isDirty = true;
+    this.#skipFlush = true;
     this.render();
   }
 
@@ -564,7 +568,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
     const seed = cat.builtin ? getBuiltinPresetSeeds().find((s) => s.id === cat.id) : null;
     const sd = seed?.defaults || {};
     if (seed) {
-      if (cat.id !== DEFAULT_PRESET_ID) cat.label = seed.label;
+      cat.label = seed.label;
       cat.icon = seed.icon;
       cat.color = seed.color;
       cat.playerUsable = cat.id === DEFAULT_PRESET_ID ? true : (seed.playerUsable ?? true);
@@ -601,7 +605,6 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#isDirty = true;
     this.#skipFlush = true;
     this.render();
-    this.#skipFlush = false;
   }
 
   /**
@@ -711,15 +714,20 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     const preset = this._presets.find((c) => c.id === this._selectedId);
     if (!preset) return;
-    if (preset.id === DEFAULT_PRESET_ID) {
-      ui.notifications.warn('CALENDARIA.PresetManager.SyncDefaultNotAllowed', { localize: true });
-      return;
-    }
     const allNotes = NoteManager.getAllNotes();
-    const affected = allNotes.filter((stub) => {
-      const cats = stub.flagData?.categories;
-      return Array.isArray(cats) && cats.includes(preset.id);
-    });
+    let affected;
+    if (preset.id === DEFAULT_PRESET_ID) {
+      const customPresetIds = new Set(this._presets.filter((p) => p.id !== DEFAULT_PRESET_ID).map((p) => p.id));
+      affected = allNotes.filter((stub) => {
+        const cats = stub.flagData?.categories ?? [];
+        return !cats.length || !cats.some((c) => customPresetIds.has(c));
+      });
+    } else {
+      affected = allNotes.filter((stub) => {
+        const cats = stub.flagData?.categories;
+        return Array.isArray(cats) && cats.includes(preset.id);
+      });
+    }
     if (!affected.length) {
       ui.notifications.info('CALENDARIA.PresetManager.SyncNoNotes', { localize: true });
       return;

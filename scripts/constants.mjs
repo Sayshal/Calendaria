@@ -507,6 +507,7 @@ export const HOOKS = {
   NOTE_UPDATED: 'calendaria.noteUpdated',
   PRE_RENDER_CALENDAR: 'calendaria.preRenderCalendar',
   READY: 'calendaria.ready',
+  RENDERED: 'calendaria.rendered',
   REMINDER_RECEIVED: 'calendaria.reminderReceived',
   REMOTE_CALENDAR_SWITCH: 'calendaria.remoteCalendarSwitch',
   REMOTE_DATE_CHANGE: 'calendaria.remoteDateChange',

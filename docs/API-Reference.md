@@ -1393,7 +1393,6 @@ const note = await CALENDARIA.api.createNote({
   startDate: { year: 1492, month: 5, day: 15, hour: 14, minute: 0 },
   endDate: { year: 1492, month: 5, day: 15, hour: 16, minute: 0 },
   allDay: false,
-  repeat: 'never',
   categories: ['meeting'],
   icon: 'fas fa-handshake',
   color: '#4a90e2',
@@ -1406,10 +1405,10 @@ const note = await CALENDARIA.api.createNote({
 | ----------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------- |
 | `options.name`          | `string`                | Note title                                                                                              |
 | `options.content`       | `string`                | Note content (HTML). If omitted and categories are set, the preset's content template is used.          |
-| `options.startDate`     | `object`                | Start date `{year, month, day, hour?, minute?}`                                                         |
+| `options.startDate`     | `object`                | Start date `{year, month, day, hour?, minute?}` (1-indexed month/day)                                   |
 | `options.endDate`       | `object`                | End date (optional)                                                                                     |
 | `options.allDay`        | `boolean`               | All-day event (default: `true`)                                                                         |
-| `options.conditionTree` | `object`                | Condition tree for recurrence scheduling (replaces `repeat`)                                            |
+| `options.conditionTree` | `object`                | Condition tree for recurrence scheduling (see below)                                                    |
 | `options.categories`    | `string[]`              | Preset IDs                                                                                              |
 | `options.icon`          | `string`                | Icon path or class                                                                                      |
 | `options.color`         | `string`                | Event color (hex)                                                                                       |
@@ -1417,8 +1416,31 @@ const note = await CALENDARIA.api.createNote({
 | `options.displayStyle`  | `string`                | `'icon'`, `'pip'`, or `'banner'` (default: `'icon'`)                                                    |
 | `options.openSheet`     | `false\|'edit'\|'view'` | Open the note sheet after creation in the given mode (default: `'edit'`). Pass boolean `false` to skip. |
 
+#### Recurrence with `conditionTree`
+
+A `conditionTree` is a group of conditions evaluated against each candidate date. For a recurring annual event, use a fixed `month`/`day` group:
+
+```javascript
+// Birthday on Aug 23 every year
+await CALENDARIA.api.createNote({
+  name: "Aldric's Birthday",
+  startDate: { year: 1492, month: 8, day: 23 },
+  categories: ['birthday'],
+  conditionTree: {
+    type: 'group',
+    mode: 'and',
+    children: [
+      { type: 'condition', field: 'month', op: '==', value: 8 },
+      { type: 'condition', field: 'day', op: '==', value: 23 }
+    ]
+  }
+});
+```
+
+The `type: 'group'` field is required on the root — without it the tree is silently ignored and the note only fires on its exact `startDate`. Inside conditions, `month` and `day` values are 1-indexed (matching what you see in the UI), even though `startDate.month` / `startDate.dayOfMonth` are 0-indexed internally — the public API converts those for you.
+
 > [!WARNING]
-> The `repeat` parameter is deprecated. Use `conditionTree` instead. Passing `repeat` still works but will show a deprecation warning.
+> The legacy `repeat` field on noteData (`'daily'`, `'weekly'`, `'monthly'`, `'yearly'`, etc.) is deprecated as of 1.0.0 and will be removed in 1.2.0. Express recurrence with `conditionTree` instead. Passing a deprecated `repeat` value will emit a Foundry compatibility warning.
 
 **Returns:** `Promise<object|null>` - Created note page.
 

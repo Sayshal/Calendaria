@@ -11,8 +11,6 @@
         {{/if}}
       </div>
     {{/if}}
-
-    {{!-- Display --}}
     <div class="settings-row">
       <fieldset>
         <legend
@@ -45,7 +43,6 @@
           </label>
         </div>
       </fieldset>
-
       <fieldset class="display-style-fieldset">
         <legend
           data-tooltip-html="<b>{{localize 'CALENDARIA.Common.Icon'}}</b>: {{localize 'CALENDARIA.Note.DisplayStyle.IconHint'}}<br><b>{{localize 'CALENDARIA.Note.DisplayStyle.Pip'}}</b>: {{localize 'CALENDARIA.Note.DisplayStyle.PipHint'}}<br><b>{{localize 'CALENDARIA.Note.DisplayStyle.Banner'}}</b>: {{localize 'CALENDARIA.Note.DisplayStyle.BannerHint'}}">
@@ -63,7 +60,6 @@
           </option>
         </select>
       </fieldset>
-
       <fieldset class="macro-fieldset">
         <legend data-tooltip aria-label="{{localize 'CALENDARIA.Note.Tooltip.Macro'}}">{{localize
             "CALENDARIA.Common.Macro"}}</legend>
@@ -75,19 +71,20 @@
         </select>
       </fieldset>
     </div>
-
-    {{!-- Duration --}}
     <fieldset class="duration-fieldset">
-      <legend data-tooltip aria-label="{{localize 'CALENDARIA.Note.Tooltip.Duration'}}">{{localize
-          "CALENDARIA.Common.Duration"}}</legend>
+      <legend data-tooltip
+        aria-label="{{#if durationLockedByRange}}{{localize 'CALENDARIA.Note.Duration.LockedByRange'}}{{else}}{{localize 'CALENDARIA.Note.Tooltip.Duration'}}{{/if}}">
+        {{localize "CALENDARIA.Common.Duration"}}
+      </legend>
       <div class="duration-grid">
         <div class="duration-cell">
           <label data-tooltip aria-label="{{localize 'CALENDARIA.Note.Duration.EnableHint'}}">
-            <input type="checkbox" name="system.hasDuration" {{checked system.hasDuration}}>
+            <input type="checkbox" name="system.hasDuration" {{checked system.hasDuration}}
+              {{#if durationLockedByRange}}disabled{{/if}}>
             {{localize "CALENDARIA.Common.HasDuration"}}
           </label>
           <input type="number" name="system.duration" value="{{system.duration}}" min="1" step="1"
-            {{#unless system.hasDuration}}disabled{{/unless}}>
+            {{#if durationLockedByRange}}disabled{{else}}{{#unless system.hasDuration}}disabled{{/unless}}{{/if}}>
         </div>
         <div class="duration-cell">
           <label data-tooltip aria-label="{{localize 'CALENDARIA.Note.Duration.ShowBookendsHint'}}">
@@ -107,8 +104,6 @@
         </div>
       </div>
     </fieldset>
-
-    {{!-- Reminders --}}
     <fieldset class="reminder-fieldset">
       <legend data-tooltip aria-label="{{localize 'CALENDARIA.Note.Tooltip.Reminder'}}">{{localize
           "CALENDARIA.Reminder.Label"}}</legend>
@@ -149,8 +144,6 @@
         {{/if}}
       </div>
     </fieldset>
-
-    {{!-- Categories --}}
     <fieldset class="presets-fieldset">
       <legend data-tooltip aria-label="{{localize 'CALENDARIA.Note.Tooltip.Categories'}}">{{localize
           "CALENDARIA.Note.Categories"}}</legend>
@@ -169,8 +162,6 @@
         </button>
       </div>
     </fieldset>
-
-    {{!-- Ownership --}}
     <fieldset class="ownership-fieldset"
       {{#unless isGM}}disabled{{else}}{{#unless (eq system.visibility "visible")}}disabled{{/unless}}{{/unless}}
       data-tooltip data-tooltip-direction="UP"

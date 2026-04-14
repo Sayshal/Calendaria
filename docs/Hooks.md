@@ -20,7 +20,7 @@ Hooks.on('calendaria.init', () => {
 
 ### calendaria.ready
 
-Fired during Foundry's `ready` hook after all Calendaria managers are initialized.
+Fired during Foundry's `ready` hook after all Calendaria managers are initialized but before any Calendaria applications (HUD, BigCal, MiniCal, etc.) render. Use this hook to register widgets or configure integrations before the UI is built.
 
 **Parameters:**
 
@@ -32,6 +32,16 @@ Fired during Foundry's `ready` hook after all Calendaria managers are initialize
 ```javascript
 Hooks.on('calendaria.ready', ({ api, calendar, version }) => {
   console.log(`Calendaria v${version} ready with calendar: ${calendar?.id}`);
+});
+```
+
+### calendaria.rendered
+
+Fired after all Calendaria applications configured to show on load have rendered and are visible. Use this for integrations that need the UI to be fully initialized.
+
+```javascript
+Hooks.on('calendaria.rendered', () => {
+  console.log('All Calendaria UIs are now visible');
 });
 ```
 

@@ -4,9 +4,11 @@
  * @author Tyler
  */
 
+import { CalendarManager, isBundledCalendar } from '../calendar/_module.mjs';
 import { DISPLAY_STYLES, NOTE_VISIBILITY } from '../constants.mjs';
 import { NoteManager } from '../notes/_module.mjs';
 import { localize, log } from '../utils/_module.mjs';
+import { getMidpoint } from '../utils/calendar-math.mjs';
 
 /**
  * Manages the lifecycle of festival notes — creation, deletion, and template refresh.
@@ -111,6 +113,69 @@ export default class FestivalManager {
   }
 
   /**
+   * Patch a calendar data object's festival definitions in-place.
+   * @param {object} calendarData - Mutable calendarData
+   * @param {object[]} notes - Serialized note array (entries with `system.linkedFestival`)
+   * @returns {number} Number of festival definitions patched
+   */
+  static applyFestivalDatesToCalendarData(calendarData, notes) {
+    if (!calendarData?.festivals || !Array.isArray(notes)) return 0;
+    let patched = 0;
+    for (const note of notes) {
+      const linked = note?.system?.linkedFestival;
+      if (!linked?.festivalKey) continue;
+      const festival = calendarData.festivals[linked.festivalKey];
+      if (!festival) continue;
+      const tree = note.system.conditionTree ?? null;
+      const derived = this.deriveDateFromConditionTree(tree);
+      const nextMonth = derived?.month ?? note.system.startDate?.month ?? festival.month ?? 0;
+      const nextDay = derived?.dayOfMonth ?? note.system.startDate?.dayOfMonth ?? festival.dayOfMonth ?? 0;
+      festival.month = nextMonth;
+      festival.dayOfMonth = nextDay;
+      if (tree) festival.conditionTree = tree;
+      patched++;
+    }
+    return patched;
+  }
+
+  /**
+   * Walk all festival notes for a calendar and write each note's date.
+   * @param {string} calendarId - Calendar ID
+   * @returns {Promise<number>} Number of festivals updated
+   */
+  static async syncFestivalDefinitionsFromNotes(calendarId) {
+    if (!game.user.isGM) return 0;
+    const calendar = CalendarManager.getCalendar(calendarId);
+    if (!calendar?.festivals) return 0;
+    const data = calendar.toObject();
+    let changed = 0;
+    for (const stub of this.getFestivalNotes(calendarId)) {
+      const key = stub.flagData?.linkedFestival?.festivalKey;
+      const festival = key ? data.festivals[key] : null;
+      if (!festival) continue;
+      const page = NoteManager.getFullNote(stub.id);
+      const pageSystem = page?.system?.toObject?.() ?? page?.system ?? stub.flagData;
+      if (!pageSystem) continue;
+      const newTree = pageSystem.conditionTree ?? null;
+      const derived = newTree ? this.deriveDateFromConditionTree(newTree) : null;
+      const nextMonth = derived?.month ?? pageSystem.startDate?.month ?? festival.month ?? 0;
+      const nextDay = derived?.dayOfMonth ?? pageSystem.startDate?.dayOfMonth ?? festival.dayOfMonth ?? 0;
+      const treeUnchanged = JSON.stringify(festival.conditionTree ?? null) === JSON.stringify(newTree);
+      if (festival.month === nextMonth && festival.dayOfMonth === nextDay && treeUnchanged) continue;
+      festival.month = nextMonth;
+      festival.dayOfMonth = nextDay;
+      festival.conditionTree = newTree;
+      changed++;
+    }
+    if (changed) {
+      if (isBundledCalendar(calendarId)) await CalendarManager.saveDefaultOverride(calendarId, data);
+      else await CalendarManager.updateCustomCalendar(calendarId, data);
+      log(3, `Synced ${changed} festival definitions from notes for ${calendarId}`);
+    }
+    return changed;
+  }
+
+  /**
    * Delete all festival notes for a calendar (used on calendar reset/delete).
    * @param {string} calendarId - Calendar ID
    * @returns {Promise<number>} Number of notes deleted
@@ -194,9 +259,11 @@ export default class FestivalManager {
    * @private
    */
   static #getFestivalStartDate(festival, currentDate, calendar) {
-    if (festival.month != null && festival.dayOfMonth != null) {
-      return { year: currentDate.year, month: festival.month, dayOfMonth: festival.dayOfMonth, hour: 0, minute: 0 };
-    }
+    const fromTree = this.deriveDateFromConditionTree(festival.conditionTree);
+    if (fromTree) return { year: currentDate.year, month: fromTree.month, dayOfMonth: fromTree.dayOfMonth, hour: 0, minute: 0 };
+    const fromAstro = this.#resolveAstronomicalDate(festival.conditionTree, currentDate, calendar);
+    if (fromAstro) return { year: currentDate.year, month: fromAstro.month, dayOfMonth: fromAstro.dayOfMonth, hour: 0, minute: 0 };
+    if (festival.month != null && festival.dayOfMonth != null) return { year: currentDate.year, month: festival.month, dayOfMonth: festival.dayOfMonth, hour: 0, minute: 0 };
     if (festival.dayOfYear != null) {
       const yearZero = calendar.years?.yearZero ?? 0;
       const months = calendar.monthsArray ?? [];
@@ -214,6 +281,120 @@ export default class FestivalManager {
       return { year: currentDate.year, month, dayOfMonth: remaining, hour: 0, minute: 0 };
     }
     return { year: currentDate.year, month: 0, dayOfMonth: 0, hour: 0, minute: 0 };
+  }
+
+  /**
+   * Extract a fixed { month, dayOfMonth }.
+   * @param {object|null} tree - Condition tree from a festival or note
+   * @returns {{month: number, dayOfMonth: number}|null} 0-indexed date or null if the tree isn't a fixed-date pattern
+   */
+  static deriveDateFromConditionTree(tree) {
+    if (!tree || typeof tree !== 'object') return null;
+    const inner = this.#unwrapLeapYearGroup(tree);
+    if (!inner || inner.type !== 'group' || inner.mode !== 'and' || !Array.isArray(inner.children)) return null;
+    let month = null;
+    let day = null;
+    for (const child of inner.children) {
+      if (child?.type !== 'condition' || child.op !== '==') continue;
+      const value = Number(child.value);
+      if (!Number.isFinite(value)) continue;
+      if (child.field === 'month') month = value - 1;
+      else if (child.field === 'day') day = value - 1;
+    }
+    if (month == null || day == null || month < 0 || day < 0) return null;
+    return { month, dayOfMonth: day };
+  }
+
+  /**
+   * If the tree is `isLeapYear AND <inner>`, return the inner group; otherwise return the tree as-is.
+   * @param {object} tree - Condition tree
+   * @returns {object|null} The inner group if leap-year wrapped, the original tree otherwise
+   * @private
+   */
+  static #unwrapLeapYearGroup(tree) {
+    if (tree?.type !== 'group' || tree.mode !== 'and' || !Array.isArray(tree.children) || tree.children.length !== 2) return tree;
+    const [a, b] = tree.children;
+    const isLeapCheck = (c) => c?.type === 'condition' && c.field === 'isLeapYear';
+    if (isLeapCheck(a)) return b;
+    if (isLeapCheck(b)) return a;
+    return tree;
+  }
+
+  /**
+   * Resolve an astronomical date (equinox/solstice) from a condition tree.
+   * @param {object|null} tree - Condition tree
+   * @param {object} currentDate - Current date components
+   * @param {object} calendar - Calendar instance
+   * @returns {{month: number, dayOfMonth: number}|null} 0-indexed date or null
+   * @private
+   */
+  static #resolveAstronomicalDate(tree, currentDate, calendar) {
+    if (!tree || !calendar) return null;
+    const astroField = this.#findAstronomicalField(tree);
+    if (!astroField) return null;
+    const seasons = calendar.seasonsArray ?? [];
+    if (!seasons.length) return null;
+    const yearZero = calendar.years?.yearZero ?? 0;
+    const totalDays = calendar.getDaysInYear?.(currentDate.year - yearZero) ?? 365;
+    let summerIdx = seasons.findIndex((s) => /summer/i.test(s.name));
+    let winterIdx = seasons.findIndex((s) => /winter/i.test(s.name));
+    let springIdx = seasons.findIndex((s) => /spring/i.test(s.name));
+    let autumnIdx = seasons.findIndex((s) => /autumn|fall/i.test(s.name));
+    if (summerIdx === -1 && seasons.length >= 4) summerIdx = 1;
+    if (winterIdx === -1 && seasons.length >= 4) winterIdx = 3;
+    if (springIdx === -1 && seasons.length >= 4) springIdx = 0;
+    if (autumnIdx === -1 && seasons.length >= 4) autumnIdx = 2;
+    let dayOfYear = null;
+    switch (astroField) {
+      case 'isLongestDay': {
+        if (summerIdx === -1) return null;
+        const s = seasons[summerIdx];
+        dayOfYear = getMidpoint(s.dayStart ?? 0, s.dayEnd ?? 0, totalDays);
+        break;
+      }
+      case 'isShortestDay': {
+        if (winterIdx === -1) return null;
+        const s = seasons[winterIdx];
+        dayOfYear = getMidpoint(s.dayStart ?? 0, s.dayEnd ?? 0, totalDays);
+        break;
+      }
+      case 'isSpringEquinox':
+        if (springIdx === -1) return null;
+        dayOfYear = seasons[springIdx].dayStart ?? 0;
+        break;
+      case 'isAutumnEquinox':
+        if (autumnIdx === -1) return null;
+        dayOfYear = seasons[autumnIdx].dayStart ?? 0;
+        break;
+    }
+    if (dayOfYear == null) return null;
+    const months = calendar.monthsArray ?? [];
+    let remaining = dayOfYear;
+    for (let m = 0; m < months.length; m++) {
+      const daysInMonth = calendar.getDaysInMonth(m, currentDate.year - yearZero);
+      if (remaining < daysInMonth) return { month: m, dayOfMonth: remaining };
+      remaining -= daysInMonth;
+    }
+    return null;
+  }
+
+  /**
+   * Find an astronomical condition field in a condition tree.
+   * @param {object} node - Condition tree node
+   * @returns {string|null} Field name or null
+   * @private
+   */
+  static #findAstronomicalField(node) {
+    if (!node) return null;
+    const astroFields = new Set(['isLongestDay', 'isShortestDay', 'isSpringEquinox', 'isAutumnEquinox']);
+    if (node.type === 'condition' && astroFields.has(node.field)) return node.field;
+    if (node.children) {
+      for (const child of node.children) {
+        const found = this.#findAstronomicalField(child);
+        if (found) return found;
+      }
+    }
+    return null;
   }
 
   /**

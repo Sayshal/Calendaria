@@ -272,6 +272,29 @@ describe('sanitizeNoteData()', () => {
   it('sets macro to null when missing', () => {
     expect(sanitizeNoteData({}).macro).toBeNull();
   });
+  it('emits a deprecation warning for legacy repeat values', () => {
+    foundry.utils.logCompatibilityWarning.mockClear();
+    sanitizeNoteData({ repeat: 'yearly' });
+    expect(foundry.utils.logCompatibilityWarning).toHaveBeenCalledWith(
+      expect.stringContaining("repeat ('yearly')"),
+      expect.objectContaining({ since: '1.0.0', until: '1.2.0' })
+    );
+  });
+  it('does not warn for repeat: never (default)', () => {
+    foundry.utils.logCompatibilityWarning.mockClear();
+    sanitizeNoteData({ repeat: 'never' });
+    expect(foundry.utils.logCompatibilityWarning).not.toHaveBeenCalled();
+  });
+  it('does not warn for repeat: computed (still functional)', () => {
+    foundry.utils.logCompatibilityWarning.mockClear();
+    sanitizeNoteData({ repeat: 'computed' });
+    expect(foundry.utils.logCompatibilityWarning).not.toHaveBeenCalled();
+  });
+  it('does not warn when repeat is omitted entirely', () => {
+    foundry.utils.logCompatibilityWarning.mockClear();
+    sanitizeNoteData({});
+    expect(foundry.utils.logCompatibilityWarning).not.toHaveBeenCalled();
+  });
 });
 
 describe('getAllPresets()', () => {

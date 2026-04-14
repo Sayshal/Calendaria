@@ -301,12 +301,19 @@ describe('generateWeather()', () => {
     const result = generateWeather({ zoneConfig, season: 'Summer', seed: 42 });
     expect(result.preset.id).toBe('clear');
   });
-  it('applies preset-level temp overrides from zone config', () => {
-    const seasonClimate = { presets: { 0: { id: 'clear', chance: 100 } }, temperatures: { min: 10, max: 20 } };
+  it('applies preset-level temp overrides from zone config when overlapping', () => {
+    const seasonClimate = { presets: { 0: { id: 'clear', chance: 100 } }, temperatures: { min: 10, max: 40 } };
     const zoneConfig = { presets: { 0: { id: 'clear', enabled: true, tempMin: 30, tempMax: 35 } } };
     const result = generateWeather({ seasonClimate, zoneConfig, seed: 42 });
     expect(result.temperature).toBeGreaterThanOrEqual(30);
     expect(result.temperature).toBeLessThanOrEqual(35);
+  });
+  it('falls back to season range when preset override conflicts', () => {
+    const seasonClimate = { presets: { 0: { id: 'clear', chance: 100 } }, temperatures: { min: 10, max: 20 } };
+    const zoneConfig = { presets: { 0: { id: 'clear', enabled: true, tempMin: 30, tempMax: 35 } } };
+    const result = generateWeather({ seasonClimate, zoneConfig, seed: 42 });
+    expect(result.temperature).toBeGreaterThanOrEqual(10);
+    expect(result.temperature).toBeLessThanOrEqual(20);
   });
   it('generates precipitation for rain preset', () => {
     const result = generateWeather({ seasonClimate: { presets: { 0: { id: 'rain', chance: 100 } }, temperatures: { min: 10, max: 20 } }, seed: 42 });

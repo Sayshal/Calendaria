@@ -11,7 +11,6 @@
         {{/if}}
       </div>
     {{/if}}
-
     <div class="form-row-dates">
       <fieldset class="date-fieldset">
         <legend data-tooltip aria-label="{{localize 'CALENDARIA.Note.Tooltip.Date'}}">
@@ -40,7 +39,6 @@
           <input type="hidden" name="system.endDate.dayOfMonth" value="{{system.endDate.dayOfMonth}}">
         </div>
       </fieldset>
-
       <fieldset class="time-fieldset">
         <legend data-tooltip aria-label="{{localize 'CALENDARIA.Note.Tooltip.Time'}}">
           {{localize "CALENDARIA.Common.Time"}}
@@ -48,12 +46,12 @@
         <div class="time-grid">
           <label>{{localize "CALENDARIA.Common.Start"}}</label>
           <div class="time-inputs">
-            <input type="number" name="system.startDate.hour" value="{{system.startDate.hour}}" min="0"
-              max="{{maxHour}}" step="1" {{#if system.allDay}}disabled{{/if}} data-tooltip
+            <input type="text" inputmode="numeric" name="system.startDate.hour" value="{{startHourPadded}}"
+              maxlength="2" size="2" {{#if system.allDay}}disabled{{/if}} data-tooltip
               aria-label="{{localize 'CALENDARIA.Common.Hour'}}">
             <span class="time-separator">:</span>
-            <input type="number" name="system.startDate.minute" value="{{system.startDate.minute}}" min="0" max="59"
-              step="1" {{#if system.allDay}}disabled{{/if}} data-tooltip
+            <input type="text" inputmode="numeric" name="system.startDate.minute" value="{{startMinutePadded}}"
+              maxlength="2" size="2" {{#if system.allDay}}disabled{{/if}} data-tooltip
               aria-label="{{localize 'CALENDARIA.Common.Minute'}}">
           </div>
           <label class="all-day-label">
@@ -63,29 +61,26 @@
           </label>
           <label>{{localize "CALENDARIA.Common.End"}}</label>
           <div class="time-inputs">
-            <input type="number" name="system.endDate.hour" value="{{system.endDate.hour}}" min="0" max="{{maxHour}}"
-              step="1" {{#if system.allDay}}disabled{{/if}} data-tooltip
+            <input type="text" inputmode="numeric" name="system.endDate.hour" value="{{endHourPadded}}" maxlength="2"
+              size="2" {{#if system.allDay}}disabled{{/if}} data-tooltip
               aria-label="{{localize 'CALENDARIA.Common.Hour'}}">
             <span class="time-separator">:</span>
-            <input type="number" name="system.endDate.minute" value="{{system.endDate.minute}}" min="0" max="59"
-              step="1" {{#if system.allDay}}disabled{{/if}} data-tooltip
+            <input type="text" inputmode="numeric" name="system.endDate.minute" value="{{endMinutePadded}}"
+              maxlength="2" size="2" {{#if system.allDay}}disabled{{/if}} data-tooltip
               aria-label="{{localize 'CALENDARIA.Common.Minute'}}">
           </div>
         </div>
       </fieldset>
     </div>
-
     <div class="schedule-row">
       <fieldset class="conditions-fieldset">
         <legend data-tooltip aria-label="{{localize 'CALENDARIA.Note.Schedule.ConditionBuilderHint'}}">
           {{localize "CALENDARIA.Condition.Builder.Title"}}
         </legend>
-
         <div class="condition-actions">
           <button type="button" class="cb-open-builder" data-action="openConditionBuilder">
             <i class="fas fa-sitemap"></i> {{localize "CALENDARIA.Condition.Builder.OpenBuilder"}}
           </button>
-
           <div class="preset-group">
             <select class="preset-select">
               <option value="">{{localize "CALENDARIA.Note.Schedule.SelectPreset"}}</option>
@@ -100,7 +95,6 @@
             </select>
           </div>
         </div>
-
         {{#if conditionSummaryHtml}}
           <div class="condition-groups">
             {{{conditionSummaryHtml}}}
@@ -109,7 +103,6 @@
           <p class="hint">{{localize "CALENDARIA.Note.Schedule.NoConditions"}}</p>
         {{/if}}
       </fieldset>
-
       <fieldset class="max-occurrences-fieldset">
         <legend data-tooltip aria-label="{{localize 'CALENDARIA.Note.Schedule.MaxOccurrencesTooltip'}}">
           {{localize "CALENDARIA.Note.Schedule.MaxOccurrences"}}
@@ -118,7 +111,6 @@
           placeholder="∞">
       </fieldset>
     </div>
-
     {{#if occurrences.length}}
       <fieldset class="occurrences-fieldset">
         <legend data-tooltip aria-label="{{localize 'CALENDARIA.Note.Tooltip.Occurrences'}}">

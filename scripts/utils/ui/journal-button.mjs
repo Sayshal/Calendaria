@@ -7,6 +7,7 @@
 import { BigCal, Chronicle, HUD, MiniCal, Stopwatch, SunDial, TimeKeeper } from '../../applications/_module.mjs';
 import { MODULE, SETTINGS } from '../../constants.mjs';
 import { localize } from '../localization.mjs';
+import { canViewBigCal, canViewChronicle, canViewHUD, canViewMiniCal, canViewStopwatch, canViewSunDial, canViewTimeKeeper } from '../permissions.mjs';
 
 /**
  * Handle Journal Directory activation.
@@ -32,15 +33,16 @@ function replaceFooter({ element }) {
   const buttons = document.createElement('div');
   buttons.className = 'calendaria-footer footer-buttons';
   const apps = [
-    { id: 'bigcal', icon: 'fa-calendar-days', tooltip: 'CALENDARIA.Common.BigCal', toggle: () => BigCal.toggle() },
-    { id: 'minical', icon: 'fa-compress', tooltip: 'CALENDARIA.Common.MiniCal', toggle: () => MiniCal.toggle() },
-    { id: 'hud', icon: 'fa-landmark-dome', tooltip: 'CALENDARIA.SettingsPanel.Tab.HUD', toggle: () => HUD.toggle() },
-    { id: 'timekeeper', icon: 'fa-gauge', tooltip: 'CALENDARIA.Common.TimeKeeper', toggle: () => TimeKeeper.toggle() },
-    { id: 'sundial', icon: 'fa-sun', tooltip: 'CALENDARIA.SettingsPanel.Tab.SunDial', toggle: () => SunDial.toggle() },
-    { id: 'stopwatch', icon: 'fa-stopwatch', tooltip: 'CALENDARIA.Common.StopWatch', toggle: () => Stopwatch.toggle() },
-    { id: 'chronicle', icon: 'fa-scroll', tooltip: 'CALENDARIA.Chronicle.Title', toggle: () => Chronicle.toggle() }
+    { id: 'bigcal', icon: 'fa-calendar-days', tooltip: 'CALENDARIA.Common.BigCal', toggle: () => BigCal.toggle(), canView: canViewBigCal },
+    { id: 'minical', icon: 'fa-compress', tooltip: 'CALENDARIA.Common.MiniCal', toggle: () => MiniCal.toggle(), canView: canViewMiniCal },
+    { id: 'hud', icon: 'fa-landmark-dome', tooltip: 'CALENDARIA.SettingsPanel.Tab.HUD', toggle: () => HUD.toggle(), canView: canViewHUD },
+    { id: 'timekeeper', icon: 'fa-gauge', tooltip: 'CALENDARIA.Common.TimeKeeper', toggle: () => TimeKeeper.toggle(), canView: canViewTimeKeeper },
+    { id: 'sundial', icon: 'fa-sun', tooltip: 'CALENDARIA.SettingsPanel.Tab.SunDial', toggle: () => SunDial.toggle(), canView: canViewSunDial },
+    { id: 'stopwatch', icon: 'fa-stopwatch', tooltip: 'CALENDARIA.Common.StopWatch', toggle: () => Stopwatch.toggle(), canView: canViewStopwatch },
+    { id: 'chronicle', icon: 'fa-scroll', tooltip: 'CALENDARIA.Chronicle.Title', toggle: () => Chronicle.toggle(), canView: canViewChronicle }
   ];
   for (const app of apps) {
+    if (!app.canView()) continue;
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'calendaria-footer-btn';

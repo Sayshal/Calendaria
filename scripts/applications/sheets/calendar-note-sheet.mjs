@@ -24,6 +24,7 @@ import {
   validateConditions,
   wrapInRootGroup
 } from '../../notes/_module.mjs';
+import { daysBetween, isSameDay } from '../../notes/date-utils.mjs';
 import { CalendariaSocket, convertToConditionTree, format, localize, log } from '../../utils/_module.mjs';
 import { CalendarEditor, ConditionBuilderDialog } from '../_module.mjs';
 
@@ -234,6 +235,11 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     this.element.classList.toggle('edit-mode', this.isEditMode);
     this.element.classList.remove('dnd5e2', 'dnd5e-journal');
     for (const select of this.element.querySelectorAll('select[data-ownership-user]')) select.addEventListener('change', (e) => this.#onOwnershipChange(e));
+    for (const input of this.element.querySelectorAll('.time-inputs input[type="text"]')) {
+      input.addEventListener('blur', () => {
+        input.value = String(parseInt(input.value) || 0).padStart(2, '0');
+      });
+    }
   }
 
   /**
@@ -349,6 +355,13 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const endDay = endDateRaw ? (endDateRaw.dayOfMonth ?? 0) + 1 : startDay;
     context.endDateDisplay = this._formatDateDisplay(calendar, endYear, endMonth, endDay);
     context.maxHour = hoursPerDay - 1;
+    context.startHourPadded = String(this.document.system.startDate.hour ?? 0).padStart(2, '0');
+    context.startMinutePadded = String(this.document.system.startDate.minute ?? 0).padStart(2, '0');
+    context.endHourPadded = String(this.document.system.endDate?.hour ?? 0).padStart(2, '0');
+    context.endMinutePadded = String(this.document.system.endDate?.minute ?? 0).padStart(2, '0');
+    const startDateObj = this.document.system.startDate;
+    const endDateObj = this.document.system.endDate;
+    context.durationLockedByRange = !!(endDateObj && !isSameDay(startDateObj, endDateObj));
     context.isFestival = !!this.document.system.linkedFestival;
     const visibility = this.document.system.visibility || 'visible';
     const visibilityConfig = {
@@ -604,7 +617,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     super._onChangeForm(formConfig, event);
     if (target?.name === 'system.allDay') {
       const checked = target.checked;
-      const timeInputs = this.element.querySelectorAll('.time-inputs input[type="number"]');
+      const timeInputs = this.element.querySelectorAll('.time-inputs input[type="text"]');
       timeInputs.forEach((input) => (input.disabled = checked));
       const endDateBtn = this.element.querySelector('[data-date-field="endDate"]');
       if (endDateBtn) endDateBtn.disabled = checked;
@@ -748,6 +761,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
 
   /** @override */
   async _processSubmitData(event, form, submitData, options = {}) {
+    CalendarNoteSheet.#enforceDurationFromDateRange(submitData);
     const newCategories = submitData.system?.categories || [];
     const oldCategories = this.document.system.categories || [];
     const addedPreset = newCategories.find((id) => !oldCategories.includes(id));
@@ -758,6 +772,19 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     } finally {
       NoteManager.disableSuppressOwnershipRebuild();
     }
+  }
+
+  /**
+   * Force hasDuration and duration when start/end date define a multi-day range.
+   * Disabled form fields are excluded from submitData, so we inject them here.
+   * @param {object} submitData - The form submit data
+   */
+  static #enforceDurationFromDateRange(submitData) {
+    const start = submitData.system?.startDate;
+    const end = submitData.system?.endDate;
+    if (!start || !end || isSameDay(start, end)) return;
+    submitData.system.hasDuration = true;
+    submitData.system.duration = daysBetween(start, end) + 1;
   }
 
   /**
@@ -918,8 +945,50 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
         displaySpan.textContent = `${result.day} ${monthName}, ${result.year}`;
       }
     }
+    CalendarNoteSheet.#syncDurationFromDateRange(form);
     const changeEvent = new Event('change', { bubbles: true });
     form.dispatchEvent(changeEvent);
+  }
+
+  /**
+   * Compare startDate and endDate hidden inputs and auto-lock/unlock duration controls.
+   * When the date range spans multiple days, hasDuration is checked, duration is derived
+   * from the range, and the duration controls are disabled.
+   * @param {HTMLFormElement} form - The note sheet form
+   */
+  static #syncDurationFromDateRange(form) {
+    const startYear = parseInt(form.querySelector('[name="system.startDate.year"]')?.value);
+    const startMonth = parseInt(form.querySelector('[name="system.startDate.month"]')?.value);
+    const startDay = parseInt(form.querySelector('[name="system.startDate.dayOfMonth"]')?.value);
+    const endYear = parseInt(form.querySelector('[name="system.endDate.year"]')?.value);
+    const endMonth = parseInt(form.querySelector('[name="system.endDate.month"]')?.value);
+    const endDay = parseInt(form.querySelector('[name="system.endDate.dayOfMonth"]')?.value);
+    if ([startYear, startMonth, startDay, endYear, endMonth, endDay].some((v) => isNaN(v))) return;
+    const start = { year: startYear, month: startMonth, dayOfMonth: startDay };
+    const end = { year: endYear, month: endMonth, dayOfMonth: endDay };
+    const isRange = !isSameDay(start, end);
+    const hasDurationCheckbox = form.querySelector('[name="system.hasDuration"]');
+    const durationInput = form.querySelector('[name="system.duration"]');
+    const showBookendsCheckbox = form.querySelector('[name="system.showBookends"]');
+    const limitedRepeatCheckbox = form.querySelector('[name="system.limitedRepeat"]');
+    const limitedRepeatDaysInput = form.querySelector('[name="system.limitedRepeatDays"]');
+    if (!hasDurationCheckbox || !durationInput) return;
+    if (isRange) {
+      const days = daysBetween(start, end) + 1;
+      hasDurationCheckbox.checked = true;
+      hasDurationCheckbox.disabled = true;
+      durationInput.value = days;
+      durationInput.disabled = true;
+      if (showBookendsCheckbox) showBookendsCheckbox.disabled = false;
+      if (limitedRepeatCheckbox) limitedRepeatCheckbox.disabled = false;
+      if (limitedRepeatDaysInput) limitedRepeatDaysInput.disabled = !limitedRepeatCheckbox?.checked;
+    } else {
+      hasDurationCheckbox.disabled = false;
+      durationInput.disabled = !hasDurationCheckbox.checked;
+      if (showBookendsCheckbox) showBookendsCheckbox.disabled = !hasDurationCheckbox.checked;
+      if (limitedRepeatCheckbox) limitedRepeatCheckbox.disabled = !hasDurationCheckbox.checked;
+      if (limitedRepeatDaysInput) limitedRepeatDaysInput.disabled = !(hasDurationCheckbox.checked && limitedRepeatCheckbox?.checked);
+    }
   }
 
   /**

@@ -389,15 +389,33 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
       if (match) noteTypes[parseInt(match[1])] = value;
     }
     if (this.#extractedNotes?.length > 0) {
-      const festivals = [];
+      const newFestivals = [];
       this.#extractedNotes.forEach((note, index) => {
         const noteType = noteTypes[index] || note.suggestedType;
-        if (noteType === 'festival') festivals.push({ name: note.name, month: note.startDate?.month ?? 0, dayOfMonth: note.startDate?.dayOfMonth ?? 0, countsForWeekday: false });
+        // Linked-festival notes are already represented in transformedData.festivals.
+        // If the user kept them as 'festival', skip — the existing definition stays.
+        // If they overrode to 'note' or 'skip', strip the matching festival entry so
+        // we don't end up with both a journal note and a duplicate festival.
+        if (note.festivalKey) {
+          if (noteType !== 'festival' && this.#transformedData.festivals) {
+            if (Array.isArray(this.#transformedData.festivals)) {
+              this.#transformedData.festivals = this.#transformedData.festivals.filter((f) => f._key !== note.festivalKey);
+            } else {
+              delete this.#transformedData.festivals[note.festivalKey];
+            }
+          }
+          return;
+        }
+        if (noteType === 'festival') newFestivals.push({ name: note.name, month: note.startDate?.month ?? 0, dayOfMonth: note.startDate?.dayOfMonth ?? 0, countsForWeekday: false });
       });
-      if (festivals.length > 0) {
+      if (newFestivals.length > 0) {
         if (!this.#transformedData.festivals) this.#transformedData.festivals = [];
-        this.#transformedData.festivals.push(...festivals);
-        log(3, `Added ${festivals.length} festivals to calendar data`);
+        if (Array.isArray(this.#transformedData.festivals)) {
+          this.#transformedData.festivals.push(...newFestivals);
+        } else {
+          for (const fest of newFestivals) this.#transformedData.festivals[foundry.utils.randomID()] = fest;
+        }
+        log(3, `Added ${newFestivals.length} festivals to calendar data`);
       }
     }
     this.#transformedData.name = calendarName;
