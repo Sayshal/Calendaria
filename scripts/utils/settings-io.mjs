@@ -122,7 +122,6 @@ const EXPORTABLE_SETTINGS = [
   SETTINGS.MINI_CAL_WEATHER_DISPLAY_MODE,
   SETTINGS.PERMISSIONS,
   SETTINGS.PRECIPITATION_UNIT,
-  SETTINGS.PRIMARY_GM,
   SETTINGS.SAVED_TIMEPOINTS,
   SETTINGS.SHOW_BIG_CAL,
   SETTINGS.SHOW_CALENDAR_HUD,
@@ -356,34 +355,52 @@ export async function importSettings(onComplete) {
       let imported = 0;
       for (const [key, value] of Object.entries(importData.settings)) {
         if (EXPORTABLE_SETTINGS.includes(key)) {
-          await game.settings.set(MODULE.ID, key, value);
-          imported++;
+          try {
+            await game.settings.set(MODULE.ID, key, value);
+            imported++;
+          } catch (err) {
+            log(1, `Skipped setting ${key}: ${err.message}`);
+          }
         }
       }
       ui.notifications.info(format('CALENDARIA.SettingsPanel.ImportSettings.Success', { count: imported }));
       let importedCalendarId = null;
       if (hasCalendarData && doImportCalendar) {
-        const calendarData = importData.calendarData;
-        if (hasNotes && calendarData.festivals) FestivalManager.applyFestivalDatesToCalendarData(calendarData, importData.notes);
-        const calendarId = calendarData.name
-          .toLowerCase()
-          .replace(/[^\da-z]+/g, '-')
-          .replace(/^-|-$/g, '')
-          .substring(0, 32);
-        const calendar = await CalendarManager.createCustomCalendar(calendarId, calendarData);
-        if (calendar) {
-          importedCalendarId = calendar.metadata?.id || `custom-${calendarId}`;
-          ui.notifications.info(format('CALENDARIA.SettingsPanel.ImportSettings.CalendarImported', { name: calendarName }));
-          if (setActive) {
-            await CalendarManager.switchCalendar(importedCalendarId);
-            ui.notifications.info(format('CALENDARIA.SettingsPanel.ImportSettings.CalendarActivated', { name: calendarName }));
+        try {
+          const calendarData = importData.calendarData;
+          try {
+            if (hasNotes && calendarData.festivals) FestivalManager.applyFestivalDatesToCalendarData(calendarData, importData.notes);
+          } catch (festivalError) {
+            log(1, 'Festival date patching failed (continuing import):', festivalError);
           }
+          const calendarId = calendarData.name
+            .toLowerCase()
+            .replace(/[^\da-z]+/g, '-')
+            .replace(/^-|-$/g, '')
+            .substring(0, 32);
+          const calendar = await CalendarManager.createCustomCalendar(calendarId, calendarData);
+          if (calendar) {
+            importedCalendarId = calendar.metadata?.id || `custom-${calendarId}`;
+            ui.notifications.info(format('CALENDARIA.SettingsPanel.ImportSettings.CalendarImported', { name: calendarName }));
+            if (setActive) {
+              await CalendarManager.switchCalendar(importedCalendarId);
+              ui.notifications.info(format('CALENDARIA.SettingsPanel.ImportSettings.CalendarActivated', { name: calendarName }));
+            }
+          }
+        } catch (calError) {
+          log(1, 'Calendar import failed:', calError);
+          ui.notifications.error(`Calendar import failed: ${calError.message}`);
         }
       }
       if (hasNotes && doImportNotes) {
-        const noteCalendarId = importedCalendarId || CalendarManager.getActiveCalendar()?.metadata?.id;
-        const noteCount = await importNotes(importData.notes, noteCalendarId);
-        if (noteCount > 0) ui.notifications.info(format('CALENDARIA.SettingsPanel.ImportSettings.NotesImported', { count: noteCount }));
+        try {
+          const noteCalendarId = importedCalendarId || CalendarManager.getActiveCalendar()?.metadata?.id;
+          const noteCount = await importNotes(importData.notes, noteCalendarId);
+          if (noteCount > 0) ui.notifications.info(format('CALENDARIA.SettingsPanel.ImportSettings.NotesImported', { count: noteCount }));
+        } catch (noteError) {
+          log(1, 'Note import failed:', noteError);
+          ui.notifications.error(`Note import failed: ${noteError.message}`);
+        }
       }
       if (onComplete) onComplete();
     } catch (error) {
