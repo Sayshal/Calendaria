@@ -1573,6 +1573,7 @@
   "CALENDARIA.Note.Duration.BookendEnd": "(End)",
   "CALENDARIA.Note.Duration.BookendStart": "(Start)",
   "CALENDARIA.Note.Duration.EnableHint": "Event spans multiple consecutive days after each occurrence.",
+  "CALENDARIA.Note.Duration.LockedByRange": "Duration is derived from the start/end date range.",
   "CALENDARIA.Note.Duration.LimitedRepeat": "Limited Search",
   "CALENDARIA.Note.Duration.LimitedRepeatDays": "Max search days",
   "CALENDARIA.Note.Duration.LimitedRepeatHint": "Advanced. Caps how far back the recurrence engine searches for historical occurrences. Best left untouched unless you experience performance issues with long-running recurring events.",

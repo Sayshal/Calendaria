@@ -141,7 +141,11 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @override */
   static PARTS = { header: { template: TEMPLATES.SHEETS.CALENDAR_HEADER }, content: { template: TEMPLATES.SHEETS.CALENDAR_CONTENT } };
 
-  /** @override */
+  /**
+   * @param options
+   * @param _options
+   * @todo this pattern isnt valid and needs repair in Calendaria
+   */
   async render(options = {}, _options = {}) {
     if (!canViewBigCal()) {
       if (!options.silent) ui.notifications.warn('CALENDARIA.Permissions.NoAccess', { localize: true });

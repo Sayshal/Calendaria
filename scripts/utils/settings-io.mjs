@@ -293,6 +293,7 @@ export async function importSettings(onComplete) {
       const text = await foundry.utils.readTextFromFile(file);
       const importData = JSON.parse(text);
       if (!importData.settings || typeof importData.settings !== 'object') throw new Error('Invalid settings file format');
+      if (importData.calendarData && !importData.calendarData.name) throw new Error('Calendar data is missing a name');
       const hasCalendarData = !!importData.calendarData?.name;
       const hasNotes = Array.isArray(importData.notes) && importData.notes.length > 0;
       const settingsCount = Object.keys(importData.settings).length;
