@@ -119,7 +119,7 @@ Synced fields include all Settings and Schedule defaults. The following fields a
 - Schedule dates and conditions
 
 > [!NOTE]
-> Sync only affects notes that already use this preset as their category. It does not assign the preset to uncategorized notes.
+> Custom preset sync only affects notes that already use that preset as their category. The **Default** preset syncs to all notes that don't match any custom preset, including imported notes with missing or unrecognized categories.
 
 ---
 

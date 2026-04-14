@@ -548,12 +548,6 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Parse a temperature input value, preserving +/- relative modifiers as strings.
-   * @param {string} raw - Raw input value
-   * @param {number} fallback - Fallback value if input is empty/invalid
-   * @returns {number|string} Celsius value (number) or "+N"/"-N" modifier (string)
-   */
-  /**
    * Snapshot the currently rendered season's preset data from the DOM into #data.seasonOverrides.
    */
   #snapshotSeasonPresets() {
@@ -588,6 +582,12 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#data.seasonOverrides[renderedSeason].presets = seasonPresets;
   }
 
+  /**
+   * Parse a temperature input value, preserving +/- relative modifiers as strings.
+   * @param {string} raw - Raw input value
+   * @param {number} fallback - Fallback value if input is empty/invalid
+   * @returns {number|string} Celsius value (number) or "+N"/"-N" modifier (string)
+   */
   static #parseTempInput(raw, fallback) {
     if (!raw && raw !== '0') return fallback != null ? fromDisplayUnit(fallback) : null;
     if (/^\d+(\.\d+)?[+-]$/.test(raw)) {

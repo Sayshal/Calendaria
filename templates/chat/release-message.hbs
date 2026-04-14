@@ -12,21 +12,25 @@
 
     <h4>Bug Fixes</h4>
     <ul>
-      <li>Calendar exports now include notes</li>
-      <li>Climate zone format tokens (z/zzzz) returning empty</li>
-      <li>Festival condition summary not refreshing after note edits</li>
-      <li>MiniCal timeskip ignoring increment changes on first skip</li>
-      <li>PF1e rests advancing time during SBC statblock imports</li>
-      <li>Scene config breaking on systems that extend it (Torg Eternity)</li>
-      <li>STK import dropping events on wrong dates</li>
-      <li>Weather preset name overrides missing from calendar exports</li>
-      <li>Weather unit abbreviations (km/h, mm/h, in/h)</li>
+      <li>Cinematic not playing on long rest</li>
+      <li>Cycle stages advancing every unit instead of respecting length</li>
+      <li>Darkness flickering on sub-hour time advances</li>
+      <li>Equinox/solstice festival notes on wrong dates</li>
+      <li>Moon phases wrong when yearZero is non-zero</li>
+      <li>Preset manager labels shifting on select/reset/restore</li>
+      <li>Reminders with "Notify Before" of 0 not firing</li>
+      <li>Settings import failing between worlds</li>
+      <li>Weather breaking at extreme temperatures</li>
+      <li>Weather sounds persisting when scene FX disabled</li>
+      <li>Weekday reorder not persisting after save</li>
     </ul>
 
     <h4>Improvements</h4>
     <ul>
-      <li>Macro-based Simple Timekeeping import with instructions panel</li>
-      <li>Settings export "Include Notes" toggle removed; notes export with the calendar</li>
+      <li>Season temp range is now the authority for weather generation</li>
+      <li>Default preset can sync to imported/uncategorized notes</li>
+      <li>New <code>calendaria.rendered</code> hook fires after all apps are visible</li>
+      <li>Widgets registered during <code>calendaria.ready</code> appear on first render</li>
     </ul>
   </div>
 

@@ -381,7 +381,6 @@ export default class WeatherManager {
       const periods = existing?.periods ? { ...existing.periods } : {};
       periods[targetPeriod] = { ...weather };
       if (targetPeriod !== currentPeriod && existing) {
-        // Saving to a non-current period: keep the root weather showing the current period
         existing.periods = periods;
         await this.#saveWeather(existing, options.broadcast !== false, zoneId);
       } else {

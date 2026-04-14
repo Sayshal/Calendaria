@@ -23,11 +23,11 @@ let pf1eRestTimer = null;
 
 /**
  * Handle pre-rest hook to enable time advancement.
- * @param {object} actor - The actor taking the rest
+ * @param {object} _actor - The actor taking the rest
  * @param {object} config - Rest configuration
  * @returns {void}
  */
-export function onPreRest(actor, config) {
+export function onPreRest(_actor, config) {
   if (TimeClock.locked) {
     log(2, 'Rest time advancement blocked (clock locked)');
     return;

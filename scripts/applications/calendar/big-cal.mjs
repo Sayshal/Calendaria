@@ -141,18 +141,14 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @override */
   static PARTS = { header: { template: TEMPLATES.SHEETS.CALENDAR_HEADER }, content: { template: TEMPLATES.SHEETS.CALENDAR_CONTENT } };
 
-  /**
-   * @param options
-   * @param _options
-   * @todo this pattern isnt valid and needs repair in Calendaria
-   */
-  async render(options = {}, _options = {}) {
+  /** @override */
+  _preRender(context, options) {
     if (!canViewBigCal()) {
       if (!options.silent) ui.notifications.warn('CALENDARIA.Permissions.NoAccess', { localize: true });
-      return this;
+      return false;
     }
     Hooks.callAll(HOOKS.PRE_RENDER_CALENDAR, { app: this, displayMode: this._displayMode, calendar: CalendarManager.getActiveCalendar() });
-    return super.render(options, _options);
+    return super._preRender(context, options);
   }
 
   /** @override */

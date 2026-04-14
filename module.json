@@ -11,7 +11,7 @@
   "changelog": "https://github.com/Sayshal/calendaria/releases",
   "compatibility": {
     "minimum": "13.351",
-    "verified": "13.351"
+    "verified": "14.361"
   },
   "description": "A FVTT Module to handle calendar operations, passage of real time, and automated effect expiry.",
   "documentTypes": {

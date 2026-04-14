@@ -1,17 +1,26 @@
 ## Bug Fixes
 
-- Calendar exports now include calendar notes
-- Calendaria SceneConfig replacement breaking system-specific scene config sheets (Torg Eternity)
-- Climate zone format tokens (z/zzzz) returning empty strings
-- Festival condition summary not updating after editing the linked festival note
-- Festival-backed notes appearing as duplicates in calendar exports
-- MiniCal timeskip using stale increment on first skip after changing it
-- Pathfinder 1e rests fired by SBC statblock imports advancing world time
-- Simple Timekeeping import dropping events on wrong dates due to leap year/intercalary drift
-- Weather preset name overrides not included in calendar exports
-- Weather unit abbreviations not matching international standards (kph → km/h, mm/hr → mm/h, in/hr → in/h)
+- Cinematic not playing on long rest for individual actors or with Rest Recovery
+- Climate editor losing preset weights when switching between seasons
+- Cycle stages advancing every unit instead of respecting the configured length
+- Darkness level flickering when advancing time by sub-hour increments
+- Equinox and solstice festival notes anchoring to the wrong date
+- Moon reference date producing wrong phases when yearZero is non-zero
+- "Notify Before" set to 0 producing no notification
+- Preset manager labels shifting between presets on select, reset, delete, and restore
+- Random weather and manual weather selection ignoring the season temperature range
+- Settings import failing between worlds due to world-specific user IDs
+- Time inputs on note sheets displaying single-digit minutes (3 instead of 03)
+- Weather sounds persisting when "Disable weather fx" is checked on a scene
+- Weather system breaking at extreme temperatures
+- Weekday reorder via Move Up/Down not persisting after save
+- Old imported notes not affected by ownership sync on presets
+- Zero-weight warning border not clearing after entering a value
 
 ## Changes
 
-- New macro-based Simple Timekeeping import flow
-- Settings export dialog "Include Notes" toggle removed; notes export with the calendar
+- `calendaria.ready` hook now fires before apps render; new `calendaria.rendered` hook fires after
+- Default preset can now sync to all notes without a matching custom preset
+- Season temperature range is now the authority for weather generation
+- Settings import is resilient to individual failures instead of aborting entirely
+- "Trigger on Rest" setting disabled when "Advance Time on Rest" is off

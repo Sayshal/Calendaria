@@ -55,9 +55,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
     for (const id of SC_MODULE_IDS) {
       try {
         return game.settings.get(id, key);
-      } catch {
-        // Module not registered, try next
-      }
+      } catch {}
     }
     return null;
   }
@@ -557,6 +555,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
   /**
    * Import SC note categories as Calendaria custom presets.
    * @param {object[]} scCategories - SC note category definitions
+   * @returns {Promise<Map<string, string>>} Map of SC category ID to Calendaria preset ID
    */
   async #importNoteCategories(scCategories) {
     const existing = getAllPresets();

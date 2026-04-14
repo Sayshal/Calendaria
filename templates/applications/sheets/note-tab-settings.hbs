@@ -11,8 +11,6 @@
         {{/if}}
       </div>
     {{/if}}
-
-    {{!-- Display --}}
     <div class="settings-row">
       <fieldset>
         <legend
@@ -45,7 +43,6 @@
           </label>
         </div>
       </fieldset>
-
       <fieldset class="display-style-fieldset">
         <legend
           data-tooltip-html="<b>{{localize 'CALENDARIA.Common.Icon'}}</b>: {{localize 'CALENDARIA.Note.DisplayStyle.IconHint'}}<br><b>{{localize 'CALENDARIA.Note.DisplayStyle.Pip'}}</b>: {{localize 'CALENDARIA.Note.DisplayStyle.PipHint'}}<br><b>{{localize 'CALENDARIA.Note.DisplayStyle.Banner'}}</b>: {{localize 'CALENDARIA.Note.DisplayStyle.BannerHint'}}">
@@ -63,7 +60,6 @@
           </option>
         </select>
       </fieldset>
-
       <fieldset class="macro-fieldset">
         <legend data-tooltip aria-label="{{localize 'CALENDARIA.Note.Tooltip.Macro'}}">{{localize
             "CALENDARIA.Common.Macro"}}</legend>
@@ -75,8 +71,6 @@
         </select>
       </fieldset>
     </div>
-
-    {{!-- Duration --}}
     <fieldset class="duration-fieldset">
       <legend data-tooltip
         aria-label="{{#if durationLockedByRange}}{{localize 'CALENDARIA.Note.Duration.LockedByRange'}}{{else}}{{localize 'CALENDARIA.Note.Tooltip.Duration'}}{{/if}}">
@@ -110,8 +104,6 @@
         </div>
       </div>
     </fieldset>
-
-    {{!-- Reminders --}}
     <fieldset class="reminder-fieldset">
       <legend data-tooltip aria-label="{{localize 'CALENDARIA.Note.Tooltip.Reminder'}}">{{localize
           "CALENDARIA.Reminder.Label"}}</legend>
@@ -152,8 +144,6 @@
         {{/if}}
       </div>
     </fieldset>
-
-    {{!-- Categories --}}
     <fieldset class="presets-fieldset">
       <legend data-tooltip aria-label="{{localize 'CALENDARIA.Note.Tooltip.Categories'}}">{{localize
           "CALENDARIA.Note.Categories"}}</legend>
@@ -172,8 +162,6 @@
         </button>
       </div>
     </fieldset>
-
-    {{!-- Ownership --}}
     <fieldset class="ownership-fieldset"
       {{#unless isGM}}disabled{{else}}{{#unless (eq system.visibility "visible")}}disabled{{/unless}}{{/unless}}
       data-tooltip data-tooltip-direction="UP"

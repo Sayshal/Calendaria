@@ -49,11 +49,6 @@ export default class CalendariaImporter extends BaseImporter {
 
   /**
    * Extract notes from Calendaria export data.
-   * Handles both the full settings export format (top-level `notes` array with `system` data)
-   * and the legacy format with flat note properties. Festival-linked notes are
-   * surfaced with `suggestedType: 'festival'` and a `festivalKey` reference so
-   * the importer dialog can show them pre-tagged as festivals (and so the
-   * submit handler can dedupe them against the calendar's existing festivals).
    * @param {object} data - Raw Calendaria export data
    * @returns {Promise<object[]>} Array of note data objects
    */
@@ -110,10 +105,6 @@ export default class CalendariaImporter extends BaseImporter {
 
   /**
    * Import notes selected via the importer dialog (those marked as 'note').
-   * Notes that originally had a linkedFestival pointer get the pointer
-   * stripped — by the time importNotes runs, the user's choice has already
-   * pulled the linked festival out of the calendar definition (or kept it,
-   * in which case the festival path skipped this note entirely).
    * @param {object[]} notes - Notes to import (already filtered to type 'note')
    * @param {object} options - Import options
    * @param {string} options.calendarId - Target calendar ID
@@ -127,15 +118,8 @@ export default class CalendariaImporter extends BaseImporter {
     for (const note of notes) {
       try {
         const noteData = sanitizeNoteData(
-          note.system || {
-            startDate: note.startDate,
-            endDate: note.endDate,
-            allDay: note.allDay ?? true,
-            repeat: note.repeat || 'never',
-            categories: note.categories || []
-          }
+          note.system || { startDate: note.startDate, endDate: note.endDate, allDay: note.allDay ?? true, repeat: note.repeat || 'never', categories: note.categories || [] }
         );
-        // Strip references that won't resolve in this world
         noteData.macro = null;
         noteData.sceneId = null;
         noteData.playlistId = null;

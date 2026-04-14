@@ -7,8 +7,8 @@
 import { CalendarManager, isBundledCalendar } from '../calendar/_module.mjs';
 import { DISPLAY_STYLES, NOTE_VISIBILITY } from '../constants.mjs';
 import { NoteManager } from '../notes/_module.mjs';
-import { getMidpoint } from '../utils/calendar-math.mjs';
 import { localize, log } from '../utils/_module.mjs';
+import { getMidpoint } from '../utils/calendar-math.mjs';
 
 /**
  * Manages the lifecycle of festival notes — creation, deletion, and template refresh.
@@ -113,11 +113,7 @@ export default class FestivalManager {
   }
 
   /**
-   * Patch a calendar data object's festival definitions in-place using dates
-   * from any festival-linked notes in the supplied note bundle. Used during
-   * import to heal v1.0.3-era exports whose festival definitions kept the
-   * editor default of month 0 / day 0 even though the user edited the linked
-   * notes to the correct dates. Pure (mutates `calendarData`, no Foundry API).
+   * Patch a calendar data object's festival definitions in-place.
    * @param {object} calendarData - Mutable calendarData
    * @param {object[]} notes - Serialized note array (entries with `system.linkedFestival`)
    * @returns {number} Number of festival definitions patched
@@ -143,11 +139,7 @@ export default class FestivalManager {
   }
 
   /**
-   * Walk all festival notes for a calendar and write each note's date and
-   * conditionTree back into the calendar's festival definition. Heals
-   * calendars whose festival definitions drifted from their notes (e.g.
-   * pre-fix worlds where editing a festival via the note sheet never
-   * propagated month/dayOfMonth back to the calendar).
+   * Walk all festival notes for a calendar and write each note's date.
    * @param {string} calendarId - Calendar ID
    * @returns {Promise<number>} Number of festivals updated
    */
@@ -260,10 +252,6 @@ export default class FestivalManager {
 
   /**
    * Compute a start date for the festival note (used as the note's anchor date).
-   * Prefers a fixed month/day encoded in the festival's conditionTree (the
-   * authoritative source after a user edit) before falling back to the
-   * legacy month/dayOfMonth fields, so re-imports of older data with stale
-   * (0, 0) defaults still resolve to the correct date.
    * @param {object} festival - Festival definition
    * @param {object} currentDate - Current game time components
    * @param {object} calendar - Calendar instance
@@ -275,9 +263,7 @@ export default class FestivalManager {
     if (fromTree) return { year: currentDate.year, month: fromTree.month, dayOfMonth: fromTree.dayOfMonth, hour: 0, minute: 0 };
     const fromAstro = this.#resolveAstronomicalDate(festival.conditionTree, currentDate, calendar);
     if (fromAstro) return { year: currentDate.year, month: fromAstro.month, dayOfMonth: fromAstro.dayOfMonth, hour: 0, minute: 0 };
-    if (festival.month != null && festival.dayOfMonth != null) {
-      return { year: currentDate.year, month: festival.month, dayOfMonth: festival.dayOfMonth, hour: 0, minute: 0 };
-    }
+    if (festival.month != null && festival.dayOfMonth != null) return { year: currentDate.year, month: festival.month, dayOfMonth: festival.dayOfMonth, hour: 0, minute: 0 };
     if (festival.dayOfYear != null) {
       const yearZero = calendar.years?.yearZero ?? 0;
       const months = calendar.monthsArray ?? [];
@@ -298,9 +284,7 @@ export default class FestivalManager {
   }
 
   /**
-   * Extract a fixed { month, dayOfMonth } (0-indexed) from a simple
-   * "month == M AND day == D" condition tree, optionally wrapped in an
-   * isLeapYear group. Returns null for trees that aren't a fixed date.
+   * Extract a fixed { month, dayOfMonth }.
    * @param {object|null} tree - Condition tree from a festival or note
    * @returns {{month: number, dayOfMonth: number}|null} 0-indexed date or null if the tree isn't a fixed-date pattern
    */

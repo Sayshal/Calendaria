@@ -73,7 +73,7 @@ vi.mock('../../scripts/weather/weather-manager.mjs', () => ({
   }
 }));
 vi.mock('../../scripts/utils/socket.mjs', () => ({ CalendariaSocket: { isPrimaryGM: vi.fn(() => true), emit: vi.fn() } }));
-vi.mock('../../scripts/utils/permissions.mjs', () => ({ canAddNotes: vi.fn(() => true), canChangeActiveCalendar: vi.fn(() => true), canChangeDateTime: vi.fn(() => true), canEditCalendars: vi.fn(() => true), canViewWeatherForecast: vi.fn(() => true) }));
+vi.mock('../../scripts/utils/permissions.mjs', () => ({ canAddNotes: vi.fn(() => true), canChangeActiveCalendar: vi.fn(() => true), canChangeDateTime: vi.fn(() => true), canEditCalendars: vi.fn(() => true), canViewWeatherForecast: vi.fn(() => true), canViewBigCal: vi.fn(() => true), canViewChronicle: vi.fn(() => true), canViewHUD: vi.fn(() => true), canViewMiniCal: vi.fn(() => true), canViewStopwatch: vi.fn(() => true), canViewSunDial: vi.fn(() => true), canViewTimeKeeper: vi.fn(() => true) }));
 vi.mock('../../scripts/time/time-clock.mjs', () => ({ default: { running: false, realTimeSpeed: 1, start: vi.fn(), stop: vi.fn(), toggle: vi.fn(), gatedAdvance: vi.fn(async () => true) } }));
 vi.mock('../../scripts/time/time-tracker.mjs', () => ({ default: {} }));
 vi.mock('../../scripts/utils/search-manager.mjs', () => ({ default: { search: vi.fn(() => []) } }));

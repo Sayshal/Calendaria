@@ -5,7 +5,6 @@
  */
 
 import { CalendarManager, CalendarRegistry, getEquivalentDates } from '../../calendar/_module.mjs';
-import { daysBetween, isSameDay } from '../../notes/date-utils.mjs';
 import { MODULE, SETTINGS, SOCKET_TYPES, TEMPLATES } from '../../constants.mjs';
 import {
   addCustomPreset,
@@ -25,6 +24,7 @@ import {
   validateConditions,
   wrapInRootGroup
 } from '../../notes/_module.mjs';
+import { daysBetween, isSameDay } from '../../notes/date-utils.mjs';
 import { CalendariaSocket, convertToConditionTree, format, localize, log } from '../../utils/_module.mjs';
 import { CalendarEditor, ConditionBuilderDialog } from '../_module.mjs';
 
