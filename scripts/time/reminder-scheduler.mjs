@@ -144,6 +144,7 @@ export default class ReminderScheduler {
         const eventHour = startDate.hour ?? 0;
         const eventMinute = startDate.minute ?? 0;
         const eventMinutes = eventHour * minutesPerHour + eventMinute;
+        if (offsetMinutes === 0) return currentMinutes >= eventMinutes;
         const reminderMinutes = eventMinutes - offsetMinutes;
         return currentMinutes >= reminderMinutes && currentMinutes < eventMinutes;
       }
@@ -166,6 +167,7 @@ export default class ReminderScheduler {
       const eventHour = note.flagData.allDay ? 0 : isFirstDay ? (startDate.hour ?? 0) : 0;
       const eventMinute = note.flagData.allDay ? 0 : isFirstDay ? (startDate.minute ?? 0) : 0;
       const eventMinutes = eventHour * minutesPerHour + eventMinute;
+      if (offsetMinutes === 0) return currentMinutes >= eventMinutes;
       const reminderMinutes = eventMinutes - offsetMinutes;
       return currentMinutes >= reminderMinutes && currentMinutes < eventMinutes;
     }

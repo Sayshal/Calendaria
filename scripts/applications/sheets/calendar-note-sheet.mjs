@@ -235,6 +235,11 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     this.element.classList.toggle('edit-mode', this.isEditMode);
     this.element.classList.remove('dnd5e2', 'dnd5e-journal');
     for (const select of this.element.querySelectorAll('select[data-ownership-user]')) select.addEventListener('change', (e) => this.#onOwnershipChange(e));
+    for (const input of this.element.querySelectorAll('.time-inputs input[type="text"]')) {
+      input.addEventListener('blur', () => {
+        input.value = String(parseInt(input.value) || 0).padStart(2, '0');
+      });
+    }
   }
 
   /**
@@ -350,6 +355,10 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const endDay = endDateRaw ? (endDateRaw.dayOfMonth ?? 0) + 1 : startDay;
     context.endDateDisplay = this._formatDateDisplay(calendar, endYear, endMonth, endDay);
     context.maxHour = hoursPerDay - 1;
+    context.startHourPadded = String(this.document.system.startDate.hour ?? 0).padStart(2, '0');
+    context.startMinutePadded = String(this.document.system.startDate.minute ?? 0).padStart(2, '0');
+    context.endHourPadded = String(this.document.system.endDate?.hour ?? 0).padStart(2, '0');
+    context.endMinutePadded = String(this.document.system.endDate?.minute ?? 0).padStart(2, '0');
     const startDateObj = this.document.system.startDate;
     const endDateObj = this.document.system.endDate;
     context.durationLockedByRange = !!(endDateObj && !isSameDay(startDateObj, endDateObj));
@@ -608,7 +617,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     super._onChangeForm(formConfig, event);
     if (target?.name === 'system.allDay') {
       const checked = target.checked;
-      const timeInputs = this.element.querySelectorAll('.time-inputs input[type="number"]');
+      const timeInputs = this.element.querySelectorAll('.time-inputs input[type="text"]');
       timeInputs.forEach((input) => (input.disabled = checked));
       const endDateBtn = this.element.querySelector('[data-date-field="endDate"]');
       if (endDateBtn) endDateBtn.disabled = checked;

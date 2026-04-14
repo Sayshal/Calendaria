@@ -48,12 +48,12 @@
         <div class="time-grid">
           <label>{{localize "CALENDARIA.Common.Start"}}</label>
           <div class="time-inputs">
-            <input type="number" name="system.startDate.hour" value="{{system.startDate.hour}}" min="0"
-              max="{{maxHour}}" step="1" {{#if system.allDay}}disabled{{/if}} data-tooltip
+            <input type="text" inputmode="numeric" name="system.startDate.hour" value="{{startHourPadded}}"
+              maxlength="2" size="2" {{#if system.allDay}}disabled{{/if}} data-tooltip
               aria-label="{{localize 'CALENDARIA.Common.Hour'}}">
             <span class="time-separator">:</span>
-            <input type="number" name="system.startDate.minute" value="{{system.startDate.minute}}" min="0" max="59"
-              step="1" {{#if system.allDay}}disabled{{/if}} data-tooltip
+            <input type="text" inputmode="numeric" name="system.startDate.minute" value="{{startMinutePadded}}"
+              maxlength="2" size="2" {{#if system.allDay}}disabled{{/if}} data-tooltip
               aria-label="{{localize 'CALENDARIA.Common.Minute'}}">
           </div>
           <label class="all-day-label">
@@ -63,12 +63,12 @@
           </label>
           <label>{{localize "CALENDARIA.Common.End"}}</label>
           <div class="time-inputs">
-            <input type="number" name="system.endDate.hour" value="{{system.endDate.hour}}" min="0" max="{{maxHour}}"
-              step="1" {{#if system.allDay}}disabled{{/if}} data-tooltip
+            <input type="text" inputmode="numeric" name="system.endDate.hour" value="{{endHourPadded}}"
+              maxlength="2" size="2" {{#if system.allDay}}disabled{{/if}} data-tooltip
               aria-label="{{localize 'CALENDARIA.Common.Hour'}}">
             <span class="time-separator">:</span>
-            <input type="number" name="system.endDate.minute" value="{{system.endDate.minute}}" min="0" max="59"
-              step="1" {{#if system.allDay}}disabled{{/if}} data-tooltip
+            <input type="text" inputmode="numeric" name="system.endDate.minute" value="{{endMinutePadded}}"
+              maxlength="2" size="2" {{#if system.allDay}}disabled{{/if}} data-tooltip
               aria-label="{{localize 'CALENDARIA.Common.Minute'}}">
           </div>
         </div>
