@@ -360,6 +360,7 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const seasonSelect = this.element.querySelector('.season-override-select');
     if (seasonSelect) {
       seasonSelect.addEventListener('change', () => {
+        this.#snapshotSeasonPresets();
         this.#selectedSeason = seasonSelect.value;
         this.render({ parts: ['presets'] });
       });
@@ -372,6 +373,16 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     for (const input of this.element.querySelectorAll('.preset-season-chance')) {
       input.addEventListener('input', () => {
         input.classList.toggle('modifier-relative', /^\d+(\.\d+)?[+-]$/.test(input.value.trim()));
+        const row = input.closest('.preset-row');
+        const enabled = row?.querySelector('input[type="checkbox"]')?.checked;
+        input.classList.toggle('zero-weight-warning', !!enabled && !input.value.trim());
+      });
+    }
+    for (const checkbox of this.element.querySelectorAll('.preset-row input[type="checkbox"]')) {
+      checkbox.addEventListener('change', () => {
+        const row = checkbox.closest('.preset-row');
+        const chanceInput = row?.querySelector('.preset-season-chance');
+        if (chanceInput) chanceInput.classList.toggle('zero-weight-warning', checkbox.checked && !chanceInput.value.trim());
       });
     }
     for (const input of this.element.querySelectorAll('.preset-alias-input')) {
@@ -542,6 +553,41 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {number} fallback - Fallback value if input is empty/invalid
    * @returns {number|string} Celsius value (number) or "+N"/"-N" modifier (string)
    */
+  /**
+   * Snapshot the currently rendered season's preset data from the DOM into #data.seasonOverrides.
+   */
+  #snapshotSeasonPresets() {
+    const renderedSeason = this.element?.querySelector('[data-rendered-season]')?.dataset.renderedSeason;
+    if (!renderedSeason) return;
+    const customPresets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
+    const allPresets = getAllPresets(customPresets);
+    if (!this.#data.seasonOverrides) this.#data.seasonOverrides = {};
+    if (!this.#data.seasonOverrides[renderedSeason]) this.#data.seasonOverrides[renderedSeason] = {};
+    const seasonPresets = {};
+    for (const preset of allPresets) {
+      const pData = { id: preset.id };
+      const row = this.element.querySelector(`.preset-row[data-preset-id="${preset.id}"]`);
+      if (!row) continue;
+      pData.enabled = !!row.querySelector(`[name="preset_${preset.id}_enabled"]`)?.checked;
+      const raw = (row.querySelector(`[name="preset_${preset.id}_seasonChance"]`)?.value ?? '').trim();
+      if (raw) {
+        if (/^\d+(\.\d+)?[+-]$/.test(raw)) pData.chance = raw;
+        else {
+          const num = parseFloat(raw);
+          if (Number.isFinite(num)) pData.chance = num;
+        }
+      }
+      const tMinRaw = (row.querySelector(`[name="preset_${preset.id}_tempMin"]`)?.value ?? '').trim();
+      const tMaxRaw = (row.querySelector(`[name="preset_${preset.id}_tempMax"]`)?.value ?? '').trim();
+      if (tMinRaw) pData.tempMin = ClimateEditor.#parseTempInput(tMinRaw, null);
+      if (tMaxRaw) pData.tempMax = ClimateEditor.#parseTempInput(tMaxRaw, null);
+      const iwRaw = row.querySelector(`[name="preset_${preset.id}_inertiaWeight"]`)?.value ?? '';
+      if (iwRaw !== '') pData.inertiaWeight = parseFloat(iwRaw);
+      seasonPresets[preset.id] = pData;
+    }
+    this.#data.seasonOverrides[renderedSeason].presets = seasonPresets;
+  }
+
   static #parseTempInput(raw, fallback) {
     if (!raw && raw !== '0') return fallback != null ? fromDisplayUnit(fallback) : null;
     if (/^\d+(\.\d+)?[+-]$/.test(raw)) {

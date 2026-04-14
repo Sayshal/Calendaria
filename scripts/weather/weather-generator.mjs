@@ -57,7 +57,7 @@ function weightedSelect(weights, randomFn = Math.random) {
   const totalWeight = entries.reduce((sum, [, w]) => sum + w, 0);
   if (totalWeight <= 0) {
     log(2, 'Weather selection: all weights zero, using random fallback');
-    return entries[0][0];
+    return entries[Math.floor(randomFn() * entries.length)][0];
   }
   let roll = randomFn() * totalWeight;
   for (const [id, weight] of entries) {
@@ -187,8 +187,16 @@ export function generateWeather({ seasonClimate, zoneConfig, season, seed, custo
   }
   for (const [id, weight] of Object.entries(probabilities)) {
     if (weight <= 0) continue;
+    const seasonP = zoneOverride?.presets?.[id];
+    const zoneP = Object.values(zoneConfig?.presets ?? {}).find((pp) => pp.id === id && pp.enabled !== false);
+    const hasOverride = seasonP?.tempMin != null || seasonP?.tempMax != null || zoneP?.tempMin != null || zoneP?.tempMax != null;
+    if (!hasOverride) continue;
     const p = getPreset(id, customPresets);
-    if (p?.tempMin != null && p?.tempMax != null && (p.tempMin > tempRange.max || p.tempMax < tempRange.min)) probabilities[id] = 0;
+    const effMin = seasonP?.tempMin ?? zoneP?.tempMin ?? p?.tempMin;
+    const effMax = seasonP?.tempMax ?? zoneP?.tempMax ?? p?.tempMax;
+    const resolvedMin = effMin != null ? applyTempModifier(effMin, tempRange.min) : null;
+    const resolvedMax = effMax != null ? applyTempModifier(effMax, tempRange.max) : null;
+    if (resolvedMin != null && resolvedMax != null && (resolvedMin > tempRange.max || resolvedMax < tempRange.min)) probabilities[id] = 0;
   }
   if (currentWeatherId && inertia > 0) probabilities = applyWeatherInertia(currentWeatherId, probabilities, inertia, customPresets, zoneConfig, season);
   const weatherId = weightedSelect(probabilities, randomFn);
@@ -196,10 +204,14 @@ export function generateWeather({ seasonClimate, zoneConfig, season, seed, custo
   let finalTempRange = { ...tempRange };
   const seasonPresetConfig = zoneOverride?.presets?.[weatherId];
   const zonePresetConfig = Object.values(zoneConfig?.presets ?? {}).find((p) => p.id === weatherId && p.enabled !== false);
-  const effectiveTempMin = seasonPresetConfig?.tempMin ?? zonePresetConfig?.tempMin ?? preset?.tempMin;
-  const effectiveTempMax = seasonPresetConfig?.tempMax ?? zonePresetConfig?.tempMax ?? preset?.tempMax;
-  if (effectiveTempMin != null) finalTempRange.min = Math.max(finalTempRange.min, applyTempModifier(effectiveTempMin, tempRange.min));
-  if (effectiveTempMax != null) finalTempRange.max = Math.min(finalTempRange.max, applyTempModifier(effectiveTempMax, tempRange.max));
+  const hasPresetOverride = seasonPresetConfig?.tempMin != null || seasonPresetConfig?.tempMax != null || zonePresetConfig?.tempMin != null || zonePresetConfig?.tempMax != null;
+  if (hasPresetOverride) {
+    const effectiveTempMin = seasonPresetConfig?.tempMin ?? zonePresetConfig?.tempMin ?? preset?.tempMin;
+    const effectiveTempMax = seasonPresetConfig?.tempMax ?? zonePresetConfig?.tempMax ?? preset?.tempMax;
+    if (effectiveTempMin != null) finalTempRange.min = Math.max(finalTempRange.min, applyTempModifier(effectiveTempMin, tempRange.min));
+    if (effectiveTempMax != null) finalTempRange.max = Math.min(finalTempRange.max, applyTempModifier(effectiveTempMax, tempRange.max));
+    if (finalTempRange.min > finalTempRange.max) finalTempRange = { ...tempRange };
+  }
   let temperature = Math.round(finalTempRange.min + randomFn() * (finalTempRange.max - finalTempRange.min));
   const resolvedPreset = preset || { id: weatherId, label: weatherId, icon: 'fa-question', color: '#888888' };
   const wind = generateWind(resolvedPreset, zoneConfig, randomFn);
