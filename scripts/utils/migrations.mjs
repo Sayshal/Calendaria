@@ -462,12 +462,12 @@ async function migrateCustomThemeColors() {
  * @returns {Promise<void>}
  */
 export async function runAllMigrations() {
+  await migrateCustomThemeColors();
   if (!game.user?.isGM) return;
   await migrateNotesDataModel();
   await migrateNoteVisibility();
   await migratePresetSchema();
   await migrateFestivalPresetRemoval();
-  await migrateCustomThemeColors();
   await recoverOrphanedPresets();
 }
 

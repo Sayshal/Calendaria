@@ -1571,6 +1571,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         .map((v) => ({ value: v, label: localize(`CALENDARIA.ThemeEditor.Presets.${v.charAt(0).toUpperCase() + v.slice(1)}`), selected: forceTheme === v }))
         .sort((a, b) => a.label.localeCompare(b.label));
       const forceCustom = Object.entries(themes)
+        .filter(([, entry]) => entry && typeof entry === 'object' && entry.name)
         .map(([key, entry]) => ({ value: key, label: entry.name, selected: forceTheme === key }))
         .sort((a, b) => a.label.localeCompare(b.label));
       context.forceThemeOptions = [{ value: 'none', label: localize('CALENDARIA.Settings.ForceTheme.None'), selected: forceTheme === 'none' }, ...forcePresets, ...forceCustom];
@@ -1581,6 +1582,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       .map((v) => ({ key: v, label: localize(`CALENDARIA.ThemeEditor.Presets.${v.charAt(0).toUpperCase() + v.slice(1)}`), selected: displayMode === v }))
       .sort((a, b) => a.label.localeCompare(b.label));
     context.customThemes = Object.entries(themes)
+      .filter(([, entry]) => entry && typeof entry === 'object' && entry.name)
       .map(([key, entry]) => ({ key, label: entry.name, selected: displayMode === key }))
       .sort((a, b) => a.label.localeCompare(b.label));
     context.isCustomThemeActive = isCustomThemeKey(themeMode);
