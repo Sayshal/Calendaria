@@ -641,6 +641,8 @@ export default class WeatherManager {
     const plan = zoneId ? (fullPlan[zoneId] ?? {}) : {};
     const components = game.time.components;
     const getDaysInMonth = this.#makeDaysInMonth(calendar);
+    const zoneConfig = this.getActiveZone(zoneId);
+    const seasonResolver = this.#makeSeasonResolver(calendar);
     let year = components.year;
     let month = components.month;
     let dayOfMonth = components.dayOfMonth ?? 0;
@@ -661,7 +663,11 @@ export default class WeatherManager {
       if (entry.periods && isGM) forecastEntry.periods = entry.periods;
       if (!isGM && accuracy < 100) {
         const seed = dateSeed(year, month, dayOfMonth);
-        const varied = applyForecastVariance({ preset, temperature: entry.temperature }, i + 1, days, accuracy, seededRandom(seed + 1), customPresets);
+        const seasonData = seasonResolver(year, month, dayOfMonth);
+        const zoneOverride = seasonData?.name && zoneConfig?.seasonOverrides?.[seasonData.name];
+        const { probabilities } = mergeClimateConfig(seasonData?.climate, zoneOverride, zoneConfig, seasonData?.name);
+        const validPresetIds = Object.keys(probabilities ?? {});
+        const varied = applyForecastVariance({ preset, temperature: entry.temperature }, i + 1, days, accuracy, seededRandom(seed + 1), customPresets, validPresetIds);
         forecastEntry = { year, month, dayOfMonth, ...varied, wind: entry.wind, precipitation: entry.precipitation };
       }
       result.push(forecastEntry);

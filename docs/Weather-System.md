@@ -214,7 +214,7 @@ Adds uncertainty to forecasts shown to players, simulating imperfect weather pre
 ### How Variance Works
 
 - **Temperature**: Forecasts may show temperatures slightly off from the actual plan, with closer days being more accurate
-- **Preset swapping**: Distant forecasts have a chance to show a different weather type from the same category
+- **Preset swapping**: Distant forecasts have a chance to show a different weather type from the same category, restricted to presets that are valid for the current season and climate zone
 - **GM always accurate**: GMs always see the true forecast plan without variance
 
 ---
