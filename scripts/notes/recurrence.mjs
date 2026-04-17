@@ -481,11 +481,9 @@ function matchesRandom(randomConfig, targetDate, startDate) {
  */
 export function getOccurrencesInRange(noteData, rangeStart, rangeEnd, maxOccurrences = 100) {
   ensureFieldHandlersRegistered();
-  const { startDate, limitedRepeat, limitedRepeatDays } = noteData;
-  if (limitedRepeat && limitedRepeatDays > 0) {
-    const earliest = addDays(rangeEnd, -limitedRepeatDays);
-    if (compareDays(earliest, rangeStart) > 0) rangeStart = earliest;
-  }
+  const { startDate } = noteData;
+  const earliest = addDays(rangeEnd, -365);
+  if (compareDays(earliest, rangeStart) > 0) rangeStart = earliest;
   if (noteData.conditionTree?.type) return getOccurrencesInRangeForTree(noteData, rangeStart, rangeEnd, maxOccurrences);
   const occurrences = [];
   const afterStart = compareDays(startDate, rangeStart) >= 0;

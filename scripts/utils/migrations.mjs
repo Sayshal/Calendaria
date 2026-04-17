@@ -458,6 +458,31 @@ async function migrateCustomThemeColors() {
 }
 
 /**
+ * Remove limitedRepeat and limitedRepeatDays properties from all calendar notes.
+ * Occurrence search now always clamps to a 365-day lookback window.
+ * @since 1.0.6
+ * @deprecated Remove in 1.2.0
+ * @returns {Promise<void>}
+ */
+async function migrateLimitedRepeatRemoval() {
+  const KEY = 'limitedRepeatRemovalComplete';
+  if (!game.user?.isGM) return;
+  if (game.settings.get(MODULE.ID, KEY)) return;
+  let migrated = 0;
+  for (const journal of game.journal) {
+    for (const page of journal.pages) {
+      if (page.type !== 'calendaria.calendarnote') continue;
+      const source = page.toObject().system;
+      if (source.limitedRepeat === undefined && source.limitedRepeatDays === undefined) continue;
+      await page.update({ 'system.-=limitedRepeat': null, 'system.-=limitedRepeatDays': null });
+      migrated++;
+    }
+  }
+  if (migrated > 0) log(3, `Removed limitedRepeat fields from ${migrated} notes`);
+  await game.settings.set(MODULE.ID, KEY, true);
+}
+
+/**
  * Run all migrations.
  * @returns {Promise<void>}
  */
@@ -468,6 +493,7 @@ export async function runAllMigrations() {
   await migrateNoteVisibility();
   await migratePresetSchema();
   await migrateFestivalPresetRemoval();
+  await migrateLimitedRepeatRemoval();
   await recoverOrphanedPresets();
 }
 

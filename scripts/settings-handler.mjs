@@ -424,6 +424,7 @@ export default class CalendariaSettings {
       noteVisibilityMigrationComplete: { name: 'Note Visibility Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       presetSchemaV2MigrationComplete: { name: 'Preset Schema V2 Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       festivalPresetRemovalComplete: { name: 'Festival Preset Removal Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
+      limitedRepeatRemovalComplete: { name: 'Limited Repeat Removal Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.DARKNESS_SYNC]: {
         name: 'CALENDARIA.Settings.DarknessSync.Name',
         hint: 'CALENDARIA.Settings.DarknessSync.Hint',

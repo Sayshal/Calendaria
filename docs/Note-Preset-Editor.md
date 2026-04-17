@@ -88,10 +88,8 @@ Optional editor for defining default note content. When a note is created with t
 - **Has Duration**: Whether the note has a duration by default
 - **Duration**: Default duration in days (minimum 1)
 - **Show Bookends**: Show start/end markers on multi-day events
-- **Limited Repeat**: Cap how far back the recurrence engine searches for historical occurrences
-- **Limited Repeat Days**: Number of days to search back
 
-When **Has Duration** is unchecked, the Duration, Show Bookends, and Limited Repeat fields are disabled. When **Limited Repeat** is unchecked, the Limited Repeat Days field is disabled.
+When **Has Duration** is unchecked, the Duration and Show Bookends fields are disabled.
 
 #### Reminders
 

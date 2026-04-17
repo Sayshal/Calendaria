@@ -106,8 +106,6 @@ export class CalendarNoteDataModel extends foundry.abstract.TypeDataModel {
       hasDuration: new fields.BooleanField({ initial: false }),
       duration: new fields.NumberField({ integer: true, min: 1, initial: 1 }),
       showBookends: new fields.BooleanField({ initial: false }),
-      limitedRepeat: new fields.BooleanField({ initial: false }),
-      limitedRepeatDays: new fields.NumberField({ integer: true, min: 1, initial: 365 }),
       displayStyle: new fields.StringField({ choices: [DISPLAY_STYLES.ICON, DISPLAY_STYLES.PIP, DISPLAY_STYLES.BANNER], initial: DISPLAY_STYLES.ICON }),
       visibility: new fields.StringField({ choices: [NOTE_VISIBILITY.VISIBLE, NOTE_VISIBILITY.HIDDEN, NOTE_VISIBILITY.SECRET], initial: NOTE_VISIBILITY.VISIBLE }),
       silent: new fields.BooleanField({ initial: false }),

@@ -55,6 +55,12 @@ Festival notes display an info banner on each tab, linking to the calendar edito
 - **Max Occurrences**: Limit how many times a recurring note appears (leave blank for unlimited)
 - **Occurrence Preview**: Read-only list of the next upcoming dates for recurring notes
 
+#### Duration
+
+- **Has Duration**: Toggle to make the note span multiple days
+- **Duration**: Number of days the event spans
+- **Show Bookends**: Start/end markers on the first and last days
+
 ### Settings Tab
 
 #### Display
@@ -63,14 +69,6 @@ Festival notes display an info banner on each tab, linking to the calendar edito
 - **Silent**: Suppress reminders and event announcements
 - **Display Style**: Icon, pip, or banner
 - **Macro**: Select a macro to execute when the event triggers
-
-#### Duration
-
-- **Has Duration**: Toggle to make the note span multiple days
-- **Duration**: Number of days the event spans
-- **Show Bookends**: Start/end markers on the first and last days
-- **Limited Repeat**: Cap how far back the system searches for historical occurrences
-- **Limited Repeat Days**: Search window in days (default 365)
 
 #### Reminders
 
@@ -204,7 +202,6 @@ Three visibility levels:
 Enable **Has Duration** to make a note span multiple days. Multi-day events render as continuous bars across calendar days in BigCal.
 
 - **Show Bookends**: Start/end markers on the first and last days
-- **Limited Repeat**: Caps how far back the system searches for historical occurrences
 
 ### Display Styles
 

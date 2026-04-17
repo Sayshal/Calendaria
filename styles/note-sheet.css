@@ -634,8 +634,49 @@
   .note-tab-schedule {
     .form-row-dates {
       gap: 0.5rem;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr auto auto;
       display: grid;
+    }
+
+    .duration-grid {
+      gap: 0.5rem;
+      display: flex;
+
+      .duration-cell {
+        gap: 0.375rem;
+        display: flex;
+        align-items: flex-end;
+
+        label {
+          gap: 0.125rem;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          font-weight: normal;
+          font-size: var(--font-size-10);
+          white-space: nowrap;
+          cursor: pointer;
+
+          input[type='checkbox'] {
+            margin: 0;
+          }
+        }
+
+        .duration-days-label {
+          gap: 0.125rem;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          font-weight: normal;
+          font-size: var(--font-size-10);
+          white-space: nowrap;
+          cursor: pointer;
+
+          input[type='number'] {
+            width: 3.5rem;
+          }
+        }
+      }
     }
 
     .date-fieldset {
@@ -710,8 +751,8 @@
         display: flex;
         align-items: center;
 
-        input[type='number'] {
-          width: 2.5rem;
+        input {
+          width: 2rem !important;
           padding: 0.125rem 0.25rem;
           border-radius: 0.1875rem;
           font-size: var(--font-size-11);
@@ -976,31 +1017,6 @@
         display: flex;
         align-items: center;
         font-size: var(--font-size-11);
-      }
-    }
-
-    .duration-grid {
-      gap: 0.5rem;
-      grid-template-columns: 1fr 1fr 1fr;
-      display: grid;
-
-      .duration-cell {
-        gap: 0.375rem;
-        display: flex;
-        align-items: center;
-
-        label {
-          gap: 0.25rem;
-          display: flex;
-          align-items: center;
-          font-size: var(--font-size-11);
-          white-space: nowrap;
-          cursor: pointer;
-        }
-
-        input[type='number'] {
-          width: 3.5rem;
-        }
       }
     }
 

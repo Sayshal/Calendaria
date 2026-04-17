@@ -163,17 +163,13 @@ describe('sanitizeNoteData with duration/display fields', () => {
     expect(result.hasDuration).toBe(false);
     expect(result.duration).toBe(1);
     expect(result.showBookends).toBe(false);
-    expect(result.limitedRepeat).toBe(false);
-    expect(result.limitedRepeatDays).toBe(365);
     expect(result.displayStyle).toBe('icon');
   });
   it('preserves provided values', () => {
-    const result = sanitizeNoteData({ startDate: { year: 1, month: 0, dayOfMonth: 0 }, hasDuration: true, duration: 7, showBookends: true, limitedRepeat: true, limitedRepeatDays: 30, displayStyle: 'pip' });
+    const result = sanitizeNoteData({ startDate: { year: 1, month: 0, dayOfMonth: 0 }, hasDuration: true, duration: 7, showBookends: true, displayStyle: 'pip' });
     expect(result.hasDuration).toBe(true);
     expect(result.duration).toBe(7);
     expect(result.showBookends).toBe(true);
-    expect(result.limitedRepeat).toBe(true);
-    expect(result.limitedRepeatDays).toBe(30);
     expect(result.displayStyle).toBe('pip');
   });
 });
@@ -184,8 +180,6 @@ describe('getDefaultNoteData includes duration/display fields', () => {
     expect(data.hasDuration).toBe(false);
     expect(data.duration).toBe(1);
     expect(data.showBookends).toBe(false);
-    expect(data.limitedRepeat).toBe(false);
-    expect(data.limitedRepeatDays).toBe(365);
     expect(data.displayStyle).toBe('icon');
   });
 });
