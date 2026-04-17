@@ -322,12 +322,15 @@
                       aria-label="{{localize 'CALENDARIA.Editor.Tooltip.RisingName'}}">{{localize "CALENDARIA.Common.Rising"}}</span>
                     <span class="col-fading" data-tooltip
                       aria-label="{{localize 'CALENDARIA.Editor.Tooltip.FadingName'}}">{{localize "CALENDARIA.Common.Fading"}}</span>
-                    {{#unless this.isRandomized}}
+                    {{#if this.isRandomized}}
+                      <span class="col-weight" data-tooltip
+                        aria-label="{{localize 'CALENDARIA.Editor.Tooltip.PhaseWeight'}}">{{localize "CALENDARIA.Editor.Column.Weight"}}</span>
+                    {{else}}
                       <span class="col-start" data-tooltip
                         aria-label="{{localize 'CALENDARIA.Editor.Tooltip.PhaseStart'}}">{{localize "CALENDARIA.Editor.Column.StartPercent"}}</span>
                       <span class="col-end" data-tooltip
                         aria-label="{{localize 'CALENDARIA.Editor.Tooltip.PhaseEnd'}}">{{localize "CALENDARIA.Editor.Column.EndPercent"}}</span>
-                    {{/unless}}
+                    {{/if}}
                     <span class="col-controls"></span>
                   </div>
 
@@ -357,14 +360,19 @@
                       <input type="text" id="editor-moon-{{this.moonKey}}-phase-{{this.phaseKey}}-fading"
                         name="moons.{{this.moonKey}}.phases.{{this.phaseKey}}.fading" value="{{this.fading}}"
                         class="col-fading" placeholder="{{localize 'CALENDARIA.Common.Fading'}}">
-                      {{#unless ../isRandomized}}
+                      {{#if ../isRandomized}}
+                        <input type="number" id="editor-moon-{{this.moonKey}}-phase-{{this.phaseKey}}-weight"
+                          name="moons.{{this.moonKey}}.phases.{{this.phaseKey}}.weight" value="{{this.weight}}" min="1"
+                          step="1" class="col-weight" data-tooltip
+                          aria-label="{{localize 'CALENDARIA.Editor.Tooltip.PhaseWeight'}}">
+                      {{else}}
                         <input type="number" id="editor-moon-{{this.moonKey}}-phase-{{this.phaseKey}}-start"
                           name="moons.{{this.moonKey}}.phases.{{this.phaseKey}}.startPercent"
                           value="{{this.startPercent}}" min="0" max="100" step="0.01" class="col-start">
                         <input type="number" id="editor-moon-{{this.moonKey}}-phase-{{this.phaseKey}}-end"
                           name="moons.{{this.moonKey}}.phases.{{this.phaseKey}}.endPercent" value="{{this.endPercent}}"
                           min="0" max="100" step="0.01" class="col-end">
-                      {{/unless}}
+                      {{/if}}
                       <div class="col-controls item-controls">
                         <button type="button" data-action="addMoonPhase" data-moon-key="{{this.moonKey}}" data-tooltip
                           aria-label="{{localize 'CALENDARIA.Editor.Tooltip.AddPhase'}}">

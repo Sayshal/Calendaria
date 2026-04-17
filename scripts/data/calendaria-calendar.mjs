@@ -523,7 +523,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
               fading: new StringField({ required: false }),
               icon: new StringField({ required: false }),
               start: new NumberField({ required: true, min: 0, max: 1 }),
-              end: new NumberField({ required: true, min: 0, max: 1 })
+              end: new NumberField({ required: true, min: 0, max: 1 }),
+              weight: new NumberField({ required: false, nullable: false, initial: 1, min: 1 })
             }),
             { initial: DEFAULT_MOON_PHASES }
           ),
@@ -1358,27 +1359,26 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     const dateComponents = { year: components.year, month: components.month, dayOfMonth: components.dayOfMonth ?? components.day ?? 0 };
     const normalizedPosition = resolveRandomizedPhase(moon, absoluteDay, dateComponents);
     const dayIndex = Math.floor(normalizedPosition * moon.cycleLength);
-    const hasRanges = phases.length > 0 && phases[0].start !== undefined && phases[0].end !== undefined;
     let phaseArrayIndex = 0;
     let dayWithinPhase = 0;
     let phaseDuration = 1;
-    if (hasRanges) {
+    if (phases.length > 0) {
+      const weights = phases.map((p) => Math.max(1, p.weight ?? 1));
+      const totalWeight = weights.reduce((a, b) => a + b, 0);
+      let cursor = 0;
       for (let i = 0; i < phases.length; i++) {
-        const phase = phases[i];
-        if (normalizedPosition >= (phase.start ?? 0) && normalizedPosition < (phase.end ?? 1)) {
+        const start = cursor / totalWeight;
+        cursor += weights[i];
+        const end = i === phases.length - 1 ? 1 : cursor / totalWeight;
+        if (normalizedPosition >= start && normalizedPosition < end) {
           phaseArrayIndex = i;
-          const startDay = Math.round((phase.start ?? 0) * moon.cycleLength);
-          const endDay = Math.round((phase.end ?? 1) * moon.cycleLength);
+          const startDay = Math.round(start * moon.cycleLength);
+          const endDay = Math.round(end * moon.cycleLength);
           phaseDuration = Math.max(1, endDay - startDay);
           dayWithinPhase = dayIndex - startDay;
           break;
         }
       }
-    } else {
-      const numPhases = phases.length || 8;
-      phaseArrayIndex = Math.min(Math.floor(normalizedPosition * numPhases), numPhases - 1);
-      phaseDuration = Math.max(1, Math.round(moon.cycleLength / numPhases));
-      dayWithinPhase = dayIndex % phaseDuration;
     }
     const matchedPhase = phases[phaseArrayIndex] || phases[0];
     if (!matchedPhase) return null;

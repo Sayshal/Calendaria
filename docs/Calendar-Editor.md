@@ -367,12 +367,13 @@ Define the phases of the lunar cycle. Each phase covers a percentage range of th
 
 | Column      | Description                                                           |
 | ----------- | --------------------------------------------------------------------- |
-| **Icon**    | Click to pick a phase icon (SVG or emoji)                             |
-| **Phase**   | Phase name (e.g., "Full Moon")                                        |
-| **Rising**  | Name for the transitional sub-phase as the moon approaches this phase |
-| **Fading**  | Name for the transitional sub-phase as the moon leaves this phase     |
-| **Start %** | Percentage through the cycle when this phase begins                   |
-| **End %**   | Percentage through the cycle when this phase ends                     |
+| **Icon**    | Click to pick a phase icon (SVG or emoji)                                                                                   |
+| **Phase**   | Phase name (e.g., "Full Moon")                                                                                              |
+| **Rising**  | Name for the transitional sub-phase as the moon approaches this phase                                                       |
+| **Fading**  | Name for the transitional sub-phase as the moon leaves this phase                                                           |
+| **Start %** | Percentage through the cycle when this phase begins (fixed mode only)                                                       |
+| **End %**   | Percentage through the cycle when this phase ends (fixed mode only)                                                         |
+| **Weight**  | Relative likelihood of this phase in **Randomized** mode (minimum `1`). Replaces Start %/End % columns when mode is set to Randomized. Higher weight means the phase occupies a larger share of the cycle. |
 
 ### Phase Slider
 
@@ -385,7 +386,7 @@ Interactive visual slider showing all phases as colored segments. Syncs bidirect
 - **Click percentage labels** to toggle between percentage and days display.
 
 > [!NOTE]
-> The phase slider and the Start %/End % columns are hidden when the moon uses **Randomized** phase mode, since randomized moons do not use fixed percentage boundaries.
+> The phase slider and the Start %/End % columns are hidden when the moon uses **Randomized** phase mode. A **Weight** column replaces them, controlling each phase's relative likelihood.
 
 ### Moon Brightness
 
@@ -410,6 +411,7 @@ When phase mode is set to **Randomized**, additional controls appear:
 
 - **Seed.** Integer seed for the random number generator. The same seed always produces the same phase sequence. Click the dice button to generate a random seed.
 - **Cycle Variance.** Range slider (0 to 1) controlling how much the moon's effective cycle length deviates from its base cycle length. At 0, the randomized cycle stays close to the base length. At 1, cycle lengths vary widely.
+- **Phase Weight** (per phase). Number input (minimum 1) in the phases table. Weight controls each phase's share of the cycle. All phases at weight 1 produces a uniform distribution; doubling a phase's weight doubles its likelihood of appearing.
 
 #### Anchor Phases
 

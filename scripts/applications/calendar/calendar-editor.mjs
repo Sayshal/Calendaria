@@ -453,7 +453,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
             startPercent: rawStart.toFixed(2),
             endPercent: rawEnd.toFixed(2),
             widthPercent,
-            widthFormatted: widthPercent.toFixed(2)
+            widthFormatted: widthPercent.toFixed(2),
+            weight: Math.max(1, phase.weight ?? 1)
           };
         })
       };
@@ -1189,6 +1190,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         const phaseIcon = data[`moons.${mKey}.phases.${pKey}.icon`];
         const phaseStartPercent = data[`moons.${mKey}.phases.${pKey}.startPercent`];
         const phaseEndPercent = data[`moons.${mKey}.phases.${pKey}.endPercent`];
+        const phaseWeight = data[`moons.${mKey}.phases.${pKey}.weight`];
         const existingPhase = existingPhases[pKey] ?? existingPhasesArr[pIdx];
         phases[pKey] = {
           name: phaseName ?? existingPhase?.name ?? '',
@@ -1196,7 +1198,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
           fading: phaseFadingName ?? existingPhase?.fading ?? '',
           icon: phaseIcon ?? existingPhase?.icon ?? '',
           start: phaseStartPercent != null ? parseFloat(phaseStartPercent) / 100 : (existingPhase?.start ?? pIdx * 0.125),
-          end: phaseEndPercent != null ? parseFloat(phaseEndPercent) / 100 : (existingPhase?.end ?? (pIdx + 1) * 0.125)
+          end: phaseEndPercent != null ? parseFloat(phaseEndPercent) / 100 : (existingPhase?.end ?? (pIdx + 1) * 0.125),
+          weight: phaseWeight != null ? Math.max(1, parseFloat(phaseWeight) || 1) : (existingPhase?.weight ?? 1)
         };
         pIdx++;
       }

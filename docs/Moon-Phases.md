@@ -50,10 +50,11 @@ The moon follows an erratic, non-cyclical pattern driven by seeded randomness. T
 
 Randomized moons are configured with:
 
-| Setting        | Description                                                                                                                                                                                               |
-| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Seed           | Integer seed for randomization. The same seed always produces the same sequence. Use the dice button to randomize.                                                                                        |
-| Cycle Variance | Slider (`0`–`1`) controlling how much the moon deviates from its base cycle length. At `0`, the moon behaves identically to fixed mode. At `1`, phases shift dramatically and unpredictably between days. |
+| Setting        | Description                                                                                                                                                                                                              |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Seed           | Integer seed for randomization. The same seed always produces the same sequence. Use the dice button to randomize.                                                                                                       |
+| Cycle Variance | Slider (`0`–`1`) controlling how much the moon deviates from its base cycle length. At `0`, the moon behaves identically to fixed mode. At `1`, phases shift dramatically and unpredictably between days.                |
+| Phase Weight   | Per-phase number (minimum `1`) controlling how likely that phase is relative to the others. A phase with weight `2` occupies twice as much of the cycle as a phase with weight `1`, making it twice as likely to appear. |
 
 Same seed always produces the same results.
 
