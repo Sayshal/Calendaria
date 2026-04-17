@@ -59,6 +59,32 @@ Climate settings follow a layered approach. The first matching value wins:
 2. **Season base.** Season climate temperatures and preset weights
 3. **Zone base.** Enabled/disabled filter and base temperatures
 
+```mermaid
+graph TD
+    A["<b>Request</b><br/><i>Given a Season and Zone,<br/>resolve the active climate</i>"] --> B{"<b>Layer 1</b><br/>Zone has a per-season<br/>override for this season?"}
+    B -->|Yes| C["<b>Zone Season Override</b><br/><i>Most specific: this zone<br/>in this season</i>"]
+    B -->|No| D{"<b>Layer 2</b><br/>Season defines its own<br/>base climate?"}
+    D -->|Yes| E["<b>Season Base</b><br/><i>Season-wide defaults<br/>across all zones</i>"]
+    D -->|No| F["<b>Layer 3: Zone Base</b><br/><i>Zone-wide fallback<br/>used when no season<br/>data is set</i>"]
+    C --> G["<b>Resolved Climate</b><br/><i>Preset weights +<br/>temperature range<br/>feed weather generation</i>"]
+    E --> G
+    F --> G
+
+    classDef request fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#0d47a1
+    classDef decision fill:#fff8e1,stroke:#f9a825,stroke-width:2px,color:#5d4037
+    classDef layer1 fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1b5e20
+    classDef layer2 fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#4a148c
+    classDef layer3 fill:#fce4ec,stroke:#c2185b,stroke-width:2px,color:#880e4f
+    classDef result fill:#e0f2f1,stroke:#00695c,stroke-width:3px,color:#004d40
+
+    class A request
+    class B,D decision
+    class C layer1
+    class E layer2
+    class F layer3
+    class G result
+```
+
 ### Temperature Constraint Resolution
 
 The season temperature range is the authority. Per-preset temperature constraints only apply when explicitly configured in the Climate Editor:
