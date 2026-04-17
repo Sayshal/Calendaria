@@ -483,6 +483,23 @@ async function migrateLimitedRepeatRemoval() {
 }
 
 /**
+ * Migrate the deprecated restToSunrise boolean to the REST_ADVANCE_MODE enum.
+ * Reads raw world storage since the old setting is no longer registered.
+ * @since 1.0.6
+ * @deprecated Remove in 1.2.0
+ * @returns {Promise<void>}
+ */
+async function migrateRestAdvanceMode() {
+  const KEY = 'restAdvanceModeMigrationComplete';
+  if (!game.user?.isGM) return;
+  if (game.settings.get(MODULE.ID, KEY)) return;
+  const legacy = game.settings.storage.get('world').find((s) => s.key === `${MODULE.ID}.restToSunrise`);
+  if (legacy?.value === 'true' || legacy?.value === true) await game.settings.set(MODULE.ID, SETTINGS.REST_ADVANCE_MODE, 'sunrise');
+  if (legacy) await legacy.delete();
+  await game.settings.set(MODULE.ID, KEY, true);
+}
+
+/**
  * Run all migrations.
  * @returns {Promise<void>}
  */
@@ -494,6 +511,7 @@ export async function runAllMigrations() {
   await migratePresetSchema();
   await migrateFestivalPresetRemoval();
   await migrateLimitedRepeatRemoval();
+  await migrateRestAdvanceMode();
   await recoverOrphanedPresets();
 }
 

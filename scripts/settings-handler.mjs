@@ -1128,13 +1128,21 @@ export default class CalendariaSettings {
         config: false,
         type: new BooleanField({ initial: false })
       },
-      [SETTINGS.REST_TO_SUNRISE]: {
-        name: 'CALENDARIA.Settings.RestToSunrise.Name',
-        hint: 'CALENDARIA.Settings.RestToSunrise.Hint',
+      [SETTINGS.REST_ADVANCE_MODE]: {
+        name: 'CALENDARIA.Settings.RestAdvanceMode.Name',
+        hint: 'CALENDARIA.Settings.RestAdvanceMode.Hint',
         scope: 'world',
         config: false,
-        type: new BooleanField({ initial: false })
+        type: new StringField({ initial: 'newDay' })
       },
+      [SETTINGS.REST_FIXED_HOURS]: {
+        name: 'CALENDARIA.Settings.RestFixedHours.Name',
+        hint: 'CALENDARIA.Settings.RestFixedHours.Hint',
+        scope: 'world',
+        config: false,
+        type: new NumberField({ integer: true, min: 1, initial: 8 })
+      },
+      restAdvanceModeMigrationComplete: { name: 'Rest Advance Mode Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.CLOCK_LOCKED]: { name: 'Clock Locked', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.SYNC_CLOCK_PAUSE]: {
         name: 'CALENDARIA.Settings.SyncClockPause.Name',

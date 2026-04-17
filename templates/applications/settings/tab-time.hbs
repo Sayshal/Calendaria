@@ -50,11 +50,29 @@
       </div>
 
       <div class="form-group" data-depends-on="advanceTimeOnRest">
-        <label for="restToSunrise">{{localize "CALENDARIA.Settings.RestToSunrise.Name"}}</label>
+        <label for="restAdvanceMode">{{localize "CALENDARIA.Settings.RestAdvanceMode.Name"}}</label>
         <div class="form-fields">
-          <input type="checkbox" id="restToSunrise" name="restToSunrise" {{#if restToSunrise}}checked{{/if}}>
+          <select id="restAdvanceMode" name="restAdvanceMode">
+            <option value="newDay" {{#if (eq restAdvanceMode "newDay")}}selected{{/if}}>
+              {{localize "CALENDARIA.Settings.RestAdvanceMode.NewDay"}}
+            </option>
+            <option value="sunrise" {{#if (eq restAdvanceMode "sunrise")}}selected{{/if}}>
+              {{localize "CALENDARIA.Settings.RestAdvanceMode.Sunrise"}}
+            </option>
+            <option value="fixed" {{#if (eq restAdvanceMode "fixed")}}selected{{/if}}>
+              {{localize "CALENDARIA.Settings.RestAdvanceMode.Fixed"}}
+            </option>
+          </select>
         </div>
-        <p class="hint">{{localize "CALENDARIA.Settings.RestToSunrise.Hint"}}</p>
+        <p class="hint">{{localize "CALENDARIA.Settings.RestAdvanceMode.Hint"}}</p>
+      </div>
+
+      <div class="form-group" data-depends-on="restAdvanceMode:fixed">
+        <label for="restFixedHours">{{localize "CALENDARIA.Settings.RestFixedHours.Name"}}</label>
+        <div class="form-fields">
+          <input type="number" id="restFixedHours" name="restFixedHours" value="{{restFixedHours}}" min="1" step="1">
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.RestFixedHours.Hint"}}</p>
       </div>
 
       <div class="form-group">

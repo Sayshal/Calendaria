@@ -136,11 +136,19 @@ How frequently the time system processes updates (in seconds).
 - Range: `1` to `120`
 - Default: `6`
 
-### Rest to Sunrise
+### Rest Advance Mode
 
-When enabled, long rests advance time to the next sunrise instead of a fixed duration.
+How long rests advance time.
 
-- Default: `false`
+- **8 AM**: Skip to 8 AM the next day (default)
+- **Sunrise**: Skip to the zone's sunrise hour, falling back to 8 AM if not configured
+- **Fixed**: Advance a fixed number of hours (set via **Rest Hours**). Useful for systems like PF2e that specify an 8-hour rest regardless of time of day.
+
+### Rest Hours
+
+Number of hours to advance when Rest Advance Mode is set to **Fixed**.
+
+- Default: `8`
 
 ### Sync with Game Pause
 

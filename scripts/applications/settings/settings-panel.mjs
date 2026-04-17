@@ -256,14 +256,15 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#setupDependentFields();
   }
 
-  /** Wire up data-depends-on fields to toggle disabled state based on a parent checkbox. */
+  /** Wire up data-depends-on fields to toggle disabled state based on a parent checkbox or select value (name:value). */
   #setupDependentFields() {
     for (const group of this.element.querySelectorAll('[data-depends-on]')) {
-      const parentName = group.dataset.dependsOn;
+      const dep = group.dataset.dependsOn;
+      const [parentName, expectedValue] = dep.includes(':') ? dep.split(':') : [dep, null];
       const parentInput = this.element.querySelector(`[name="${parentName}"]`);
       if (!parentInput) continue;
       const toggle = () => {
-        const enabled = parentInput.checked;
+        const enabled = expectedValue != null ? parentInput.value === expectedValue : parentInput.checked;
         group.classList.toggle('disabled', !enabled);
         for (const input of group.querySelectorAll('input, select')) {
           input.disabled = !enabled || input.hasAttribute('data-force-disabled');
@@ -677,7 +678,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.ADVANCE_TIME_ON_REST]: { tab: 'time', label: 'CALENDARIA.Settings.AdvanceTimeOnRest.Name' },
     [SETTINGS.SYNC_CLOCK_PAUSE]: { tab: 'time', label: 'CALENDARIA.Settings.SyncClockPause.Name' },
     [SETTINGS.CLOCK_RUN_DURING_COMBAT]: { tab: 'time', label: 'CALENDARIA.Settings.ClockRunDuringCombat.Name' },
-    [SETTINGS.REST_TO_SUNRISE]: { tab: 'time', label: 'CALENDARIA.Settings.RestToSunrise.Name' },
+    [SETTINGS.REST_ADVANCE_MODE]: { tab: 'time', label: 'CALENDARIA.Settings.RestAdvanceMode.Name' },
+    [SETTINGS.REST_FIXED_HOURS]: { tab: 'time', label: 'CALENDARIA.Settings.RestFixedHours.Name' },
     [SETTINGS.TIME_SPEED_MULTIPLIER]: { tab: 'time', label: 'CALENDARIA.Settings.TimeSpeedMultiplier.Name' },
     [SETTINGS.TIME_SPEED_INCREMENT]: { tab: 'time', label: 'CALENDARIA.Settings.TimeSpeedIncrement.Name' },
     [SETTINGS.TIME_ADVANCE_INTERVAL]: { tab: 'time', label: 'CALENDARIA.Settings.TimeAdvanceInterval.Name' },
@@ -911,7 +913,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     'sunDial-display': [SETTINGS.SHOW_SUN_DIAL, SETTINGS.FORCE_SUN_DIAL, SETTINGS.SUN_DIAL_CRANK_MODE, SETTINGS.SUN_DIAL_AUTO_FADE, SETTINGS.SUN_DIAL_IDLE_OPACITY, SETTINGS.SUN_DIAL_COMBAT_MODE],
     'sunDial-sticky': [SETTINGS.SUN_DIAL_STICKY_STATES],
     'time-realtime': [SETTINGS.TIME_SPEED_MULTIPLIER, SETTINGS.TIME_SPEED_INCREMENT, SETTINGS.TIME_ADVANCE_INTERVAL],
-    'time-integration': [SETTINGS.ADVANCE_TIME_ON_REST, SETTINGS.REST_TO_SUNRISE, SETTINGS.SYNC_CLOCK_PAUSE, SETTINGS.CLOCK_RUN_DURING_COMBAT],
+    'time-integration': [SETTINGS.ADVANCE_TIME_ON_REST, SETTINGS.REST_ADVANCE_MODE, SETTINGS.REST_FIXED_HOURS, SETTINGS.SYNC_CLOCK_PAUSE, SETTINGS.CLOCK_RUN_DURING_COMBAT],
     'chat-timestamps': [SETTINGS.CHAT_TIMESTAMP_MODE, SETTINGS.CHAT_TIMESTAMP_SHOW_TIME],
     'canvas-sticky-zones': [SETTINGS.HUD_STICKY_ZONES_ENABLED, SETTINGS.ALLOW_SIDEBAR_OVERLAP],
     'canvas-scene-integration': [
@@ -1019,7 +1021,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   async #prepareTimeContext(context) {
     context.advanceTimeOnRest = game.settings.get(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST);
-    context.restToSunrise = game.settings.get(MODULE.ID, SETTINGS.REST_TO_SUNRISE);
+    context.restAdvanceMode = game.settings.get(MODULE.ID, SETTINGS.REST_ADVANCE_MODE);
+    context.restFixedHours = game.settings.get(MODULE.ID, SETTINGS.REST_FIXED_HOURS);
     context.syncClockPause = game.settings.get(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE);
     context.clockRunDuringCombat = game.settings.get(MODULE.ID, SETTINGS.CLOCK_RUN_DURING_COMBAT);
     context.roundTimeDisabled = CONFIG.time.roundTime === 0;
@@ -1874,7 +1877,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('colorShiftSync' in data) await game.settings.set(MODULE.ID, SETTINGS.COLOR_SHIFT_SYNC, data.colorShiftSync);
     if ('darknessMoonSync' in data) await game.settings.set(MODULE.ID, SETTINGS.DARKNESS_MOON_SYNC, data.darknessMoonSync);
     if ('advanceTimeOnRest' in data) await game.settings.set(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST, data.advanceTimeOnRest);
-    if ('restToSunrise' in data) await game.settings.set(MODULE.ID, SETTINGS.REST_TO_SUNRISE, data.restToSunrise);
+    if ('restAdvanceMode' in data) await game.settings.set(MODULE.ID, SETTINGS.REST_ADVANCE_MODE, data.restAdvanceMode);
+    if ('restFixedHours' in data) await game.settings.set(MODULE.ID, SETTINGS.REST_FIXED_HOURS, data.restFixedHours);
     if ('syncClockPause' in data) await game.settings.set(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE, data.syncClockPause);
     if ('clockRunDuringCombat' in data) await game.settings.set(MODULE.ID, SETTINGS.CLOCK_RUN_DURING_COMBAT, data.clockRunDuringCombat);
     if ('chatTimestampMode' in data) await game.settings.set(MODULE.ID, SETTINGS.CHAT_TIMESTAMP_MODE, data.chatTimestampMode);
