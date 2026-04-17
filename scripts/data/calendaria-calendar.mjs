@@ -632,6 +632,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
               latitude: new NumberField({ required: false, nullable: true, initial: null, min: -90, max: 90 }),
               shortestDay: new NumberField({ required: false, nullable: true, initial: null, min: 0 }),
               longestDay: new NumberField({ required: false, nullable: true, initial: null, min: 0 }),
+              sunriseOverride: new NumberField({ required: false, nullable: true, initial: null, min: 0 }),
+              sunsetOverride: new NumberField({ required: false, nullable: true, initial: null, min: 0 }),
               temperatures: new foundry.data.fields.ObjectField({ required: false, initial: {} }),
               presets: new TypedObjectField(
                 new SchemaField({
@@ -935,6 +937,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    * @returns {number} - Sunrise time in hours.
    */
   sunrise(time = game.time.components, zone = null) {
+    const override = this.#resolveSunOverrides(zone);
+    if (override) return override.sunrise;
     const daylightHrs = this._getDaylightHoursForDay(time, zone);
     const midday = this.days.hoursPerDay / 2;
     return midday - daylightHrs / 2;
@@ -947,9 +951,26 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    * @returns {number} - Sunset time in hours.
    */
   sunset(time = game.time.components, zone = null) {
+    const override = this.#resolveSunOverrides(zone);
+    if (override) return override.sunset;
     const daylightHrs = this._getDaylightHoursForDay(time, zone);
     const midday = this.days.hoursPerDay / 2;
     return midday + daylightHrs / 2;
+  }
+
+  /**
+   * Validate and return absolute sunrise/sunset overrides from a zone.
+   * @param {object} [zone] - Zone config
+   * @returns {{sunrise:number, sunset:number}|null} Override pair, or null when not usable
+   * @private
+   */
+  #resolveSunOverrides(zone) {
+    const r = zone?.sunriseOverride;
+    const s = zone?.sunsetOverride;
+    if (r == null || s == null) return null;
+    const hoursPerDay = this.days.hoursPerDay;
+    if (r < 0 || s > hoursPerDay || r >= s) return null;
+    return { sunrise: r, sunset: s };
   }
 
   /**
@@ -982,6 +1003,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    * @private
    */
   _getDaylightHoursForDay(time = game.time.components, zone = null) {
+    const override = this.#resolveSunOverrides(zone);
+    if (override) return override.sunset - override.sunrise;
     const components = typeof time === 'number' ? this.timeToComponents(time) : time;
     const hoursPerDay = this.days.hoursPerDay;
     const daysPerYear = this.days.daysPerYear ?? 365;

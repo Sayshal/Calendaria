@@ -600,6 +600,13 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     if (this.#navCollapsed) this.element.classList.add('nav-collapsed');
     this.#setupLeapRuleListener();
     this.#setupWeekNumberDuplicateListener();
+    const daylightToggle = this.element.querySelector('input[name="daylight.enabled"]');
+    if (daylightToggle) {
+      const configRows = this.element.querySelectorAll('.daylight-config');
+      daylightToggle.addEventListener('change', () => {
+        configRows.forEach((row) => (row.hidden = !daylightToggle.checked));
+      });
+    }
     for (const colorInput of this.element.querySelectorAll('color-picker[name^="moons."][name$=".color"]')) {
       colorInput.addEventListener('change', (event) => {
         const preview = event.target.closest('.color-input-wrapper')?.querySelector('.moon-color-preview');
@@ -942,8 +949,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#calendarData.secondsPerRound = parseInt(data.secondsPerRound) || 6;
     if (!this.#calendarData.daylight) this.#calendarData.daylight = {};
     this.#calendarData.daylight.enabled = data['daylight.enabled'] ?? false;
-    this.#calendarData.daylight.shortestDay = parseFloat(data['daylight.shortestDay']) || 8;
-    this.#calendarData.daylight.longestDay = parseFloat(data['daylight.longestDay']) || 16;
+    const shortRaw = parseFloat(data['daylight.shortestDay']);
+    const longRaw = parseFloat(data['daylight.longestDay']);
+    this.#calendarData.daylight.shortestDay = Number.isFinite(shortRaw) ? shortRaw : 8;
+    this.#calendarData.daylight.longestDay = Number.isFinite(longRaw) ? longRaw : 16;
     const winterMonth = parseInt(data['daylight.winterSolsticeMonth']) || 0;
     const winterDay = (parseInt(data['daylight.winterSolsticeDay']) || 1) - 1;
     this.#calendarData.daylight.winterSolstice = this.#monthDayToDayOfYear(winterMonth, winterDay);

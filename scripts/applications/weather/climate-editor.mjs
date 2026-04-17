@@ -220,9 +220,12 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     let hoursPerDay = 24;
     let zoneShortestDay = this.#data.shortestDay ?? '';
     let zoneLongestDay = this.#data.longestDay ?? '';
+    let zoneSunriseOverride = this.#data.sunriseOverride ?? '';
+    let zoneSunsetOverride = this.#data.sunsetOverride ?? '';
     let defaultShortestDay = '';
     let defaultLongestDay = '';
-    const hasManualDaylight = zoneShortestDay !== '' || zoneLongestDay !== '';
+    const lockSunTimes = zoneSunriseOverride !== '' && zoneSunsetOverride !== '';
+    const hasManualDaylight = zoneShortestDay !== '' || zoneLongestDay !== '' || lockSunTimes;
     let shortestDayDate = '';
     let longestDayDate = '';
     if (isZoneMode) {
@@ -248,7 +251,11 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       };
       shortestDayDate = dayOfYearToDate(winterSolstice);
       longestDayDate = dayOfYearToDate(summerSolstice);
-      if (hasManualDaylight) {
+      if (lockSunTimes) {
+        const fixedHours = parseFloat(zoneSunsetOverride) - parseFloat(zoneSunriseOverride);
+        shortestDayHours = `${fixedHours.toFixed(1)}h`;
+        longestDayHours = `${fixedHours.toFixed(1)}h`;
+      } else if (hasManualDaylight) {
         shortestDayHours = `${parseFloat(zoneShortestDay || globalShort).toFixed(1)}h`;
         longestDayHours = `${parseFloat(zoneLongestDay || globalLong).toFixed(1)}h`;
       } else if (latitude != null) {
@@ -300,9 +307,12 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       zoneId: this.#data.id,
       latitude: latitude ?? '',
       hasManualDaylight,
+      lockSunTimes,
       hoursPerDay,
       zoneShortestDay,
       zoneLongestDay,
+      zoneSunriseOverride,
+      zoneSunsetOverride,
       defaultShortestDay,
       defaultLongestDay,
       shortestDayHours,
@@ -329,15 +339,23 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       });
     }
     const forceCheckbox = this.element.querySelector('[name="forceSolstice"]');
+    const lockCheckbox = this.element.querySelector('[name="lockSunTimes"]');
     const latGroup = this.element.querySelector('.daylight-latitude');
     const manualGroups = this.element.querySelectorAll('.daylight-manual');
-    if (forceCheckbox) {
-      forceCheckbox.addEventListener('change', () => {
-        const manual = forceCheckbox.checked;
-        if (latGroup) latGroup.hidden = manual;
-        manualGroups.forEach((g) => (g.hidden = !manual));
-      });
-    }
+    const hoursGroups = this.element.querySelectorAll('.daylight-hours');
+    const fixedGroups = this.element.querySelectorAll('.daylight-fixed');
+    const updateDaylightVisibility = () => {
+      const manual = forceCheckbox?.checked ?? false;
+      const lockTimes = lockCheckbox?.checked ?? false;
+      if (latGroup) latGroup.hidden = manual;
+      manualGroups.forEach((g) => (g.hidden = !manual));
+      if (manual) {
+        hoursGroups.forEach((g) => (g.hidden = lockTimes));
+        fixedGroups.forEach((g) => (g.hidden = !lockTimes));
+      }
+    };
+    forceCheckbox?.addEventListener('change', updateDaylightVisibility);
+    lockCheckbox?.addEventListener('change', updateDaylightVisibility);
     const latInput = this.element.querySelector('[name="latitude"]');
     if (latInput) {
       const shortestVal = this.element.querySelector('[data-daylight="shortest"]');
@@ -428,15 +446,21 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const darkHue = ClimateEditor.#normToHue(data.darkHue);
     const darkSat = data.darkSaturation !== '' && data.darkSaturation != null ? parseFloat(data.darkSaturation) : null;
     const forceSolstice = data.forceSolstice;
+    const lockSunTimes = !!data.lockSunTimes;
     const latVal = data.latitude !== '' && data.latitude != null ? parseFloat(data.latitude) : null;
     const shortDayVal = data.shortestDay !== '' && data.shortestDay != null ? parseFloat(data.shortestDay) : null;
     const longDayVal = data.longestDay !== '' && data.longestDay != null ? parseFloat(data.longestDay) : null;
+    const sunriseVal = data.sunriseOverride !== '' && data.sunriseOverride != null ? parseFloat(data.sunriseOverride) : null;
+    const sunsetVal = data.sunsetOverride !== '' && data.sunsetOverride != null ? parseFloat(data.sunsetOverride) : null;
+    const useSunOverride = forceSolstice && lockSunTimes && sunriseVal != null && sunsetVal != null && sunriseVal < sunsetVal;
     const result = {
       description: data.description || '',
       brightnessMultiplier: parseFloat(data.brightnessMultiplier) || 1.0,
       latitude: forceSolstice ? null : latVal,
-      shortestDay: forceSolstice ? shortDayVal : null,
-      longestDay: forceSolstice ? longDayVal : null,
+      shortestDay: forceSolstice && !useSunOverride ? shortDayVal : null,
+      longestDay: forceSolstice && !useSunOverride ? longDayVal : null,
+      sunriseOverride: useSunOverride ? sunriseVal : null,
+      sunsetOverride: useSunOverride ? sunsetVal : null,
       environmentBase: baseHue !== null || baseSat !== null ? { hue: baseHue, saturation: baseSat } : null,
       environmentDark: darkHue !== null || darkSat !== null ? { hue: darkHue, saturation: darkSat } : null,
       temperatures: {},
