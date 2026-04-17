@@ -19,7 +19,8 @@
             data-action="selectTimeSlot">
             {{#each ../eventBlocks}}
               {{#if (eq ../hour startHour)}}
-                <div class="week-event-block {{#if allDay}}all-day{{/if}} {{#if (eq hourSpan 1)}}compact{{/if}}"
+                <div
+                  class="week-event-block {{#if allDay}}all-day{{/if}} {{#if (eq hourSpan 1)}}compact{{/if}} {{#if continuationLeft}}cont-left{{/if}} {{#if continuationRight}}cont-right{{/if}}"
                   style="--hour-span: {{hourSpan}}; background-color: {{color}};" data-tooltip
                   aria-label="{{name}}: {{startTime}}{{#if endTime}} - {{endTime}}{{/if}}" data-action="editNote"
                   data-note-id="{{id}}">

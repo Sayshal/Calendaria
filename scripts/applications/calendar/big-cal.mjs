@@ -12,9 +12,11 @@ import {
   addDays,
   clearDisplayPropsCache,
   dayOfWeek,
+  daysBetween,
   enrichNoteForDisplay,
   extractNoteMatchData,
   getEffectiveDuration,
+  getOccurrencesInRange,
   isRecurringMatch,
   resolveNoteDisplayProps,
   topologicalSortNotes
@@ -1154,73 +1156,110 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const blocks = [];
     const calendar = CalendarManager.getActiveCalendar();
     const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
+    const rangeStart = days[0];
+    const rangeEnd = days[days.length - 1];
     notes.forEach((note) => {
       const resolved = resolveNoteDisplayProps(note);
-      const start = note.system.startDate;
-      const end = note.system.endDate;
+      const origStart = note.system.startDate;
+      const origEnd = note.system.endDate;
       const allDay = note.system.allDay;
-      const hasValidEnd = end && end.year != null && end.month != null && end.dayOfMonth != null;
-      const isSameDay = !hasValidEnd || (end.year === start.year && end.month === start.month && end.dayOfMonth === start.dayOfMonth);
-      if (isSameDay) {
-        const dayMatch = days.find((d) => d.year === start.year && d.month === start.month && d.dayOfMonth === start.dayOfMonth);
-        if (!dayMatch) return;
-        const startHour = allDay ? 0 : (start.hour ?? 0);
-        let hourSpan = 1;
-        if (allDay) {
-          hourSpan = hoursPerDay;
-        } else if (hasValidEnd) {
-          const endHour = end.hour ?? startHour;
-          hourSpan = Math.max(endHour - startHour, 1);
-        }
-        const startTime = allDay ? 'All Day' : `${startHour.toString().padStart(2, '0')}:${(start.minute ?? 0).toString().padStart(2, '0')}`;
-        const endTime = hasValidEnd && !allDay ? `${(end.hour ?? 0).toString().padStart(2, '0')}:${(end.minute ?? 0).toString().padStart(2, '0')}` : null;
-        blocks.push({
-          id: note.id,
-          name: note.name,
-          color: resolved.color,
-          icon: resolved.icon,
-          iconType: resolved.iconType,
-          day: start.dayOfMonth + 1,
-          dayOfMonth: start.dayOfMonth,
-          month: start.month,
-          year: start.year,
-          startHour,
-          hourSpan,
-          startTime,
-          endTime,
-          allDay
-        });
-      } else {
-        const eventStartHour = allDay ? 0 : (start.hour ?? 0);
-        const eventEndHour = allDay ? hoursPerDay : (end.hour ?? eventStartHour);
-        const eventHourSpan = allDay ? hoursPerDay : Math.max(eventEndHour - eventStartHour, 1);
-        const eventStartTime = allDay ? 'All Day' : `${eventStartHour.toString().padStart(2, '0')}:${(start.minute ?? 0).toString().padStart(2, '0')}`;
-        const eventEndTime = allDay ? null : `${eventEndHour.toString().padStart(2, '0')}:${(end.minute ?? 0).toString().padStart(2, '0')}`;
-        for (const dayData of days) {
-          const afterStart =
-            dayData.year > start.year ||
-            (dayData.year === start.year && dayData.month > start.month) ||
-            (dayData.year === start.year && dayData.month === start.month && dayData.dayOfMonth >= start.dayOfMonth);
-          const beforeEnd =
-            dayData.year < end.year || (dayData.year === end.year && dayData.month < end.month) || (dayData.year === end.year && dayData.month === end.month && dayData.dayOfMonth <= end.dayOfMonth);
-          if (!afterStart || !beforeEnd) continue;
+      const hasValidEnd = origEnd && origEnd.year != null && origEnd.month != null && origEnd.dayOfMonth != null;
+      const origIsSameDay = hasValidEnd && origEnd.year === origStart.year && origEnd.month === origStart.month && origEnd.dayOfMonth === origStart.dayOfMonth;
+      const origEndDayOffset = hasValidEnd && !origIsSameDay ? daysBetween(origStart, origEnd) : 0;
+      const noteData = { startDate: origStart, endDate: origEnd, hasDuration: note.system.hasDuration, duration: note.system.duration, conditionTree: note.system.conditionTree };
+      const duration = getEffectiveDuration(noteData);
+      const searchStart = duration > 0 ? addDays(rangeStart, -duration) : rangeStart;
+      const occurrences = getOccurrencesInRange(noteData, searchStart, rangeEnd);
+      for (const occDate of occurrences) {
+        const start = { ...occDate, hour: origStart.hour, minute: origStart.minute };
+        const end = hasValidEnd ? { ...addDays(occDate, origEndDayOffset), hour: origEnd.hour, minute: origEnd.minute } : null;
+        const effectiveEnd = duration > 0 ? addDays(start, duration) : end;
+        const isMultiDay = duration > 0 || (hasValidEnd && !origIsSameDay);
+        if (!isMultiDay) {
+          const dayMatch = days.find((d) => d.year === start.year && d.month === start.month && d.dayOfMonth === start.dayOfMonth);
+          if (!dayMatch) continue;
+          const startHour = allDay ? 0 : (start.hour ?? 0);
+          let hourSpan = 1;
+          if (allDay) {
+            hourSpan = hoursPerDay;
+          } else if (hasValidEnd) {
+            const endHour = end.hour ?? startHour;
+            hourSpan = Math.max(endHour - startHour, 1);
+          }
+          const startTime = allDay ? 'All Day' : `${startHour.toString().padStart(2, '0')}:${(start.minute ?? 0).toString().padStart(2, '0')}`;
+          const endTime = hasValidEnd && !allDay ? `${(end.hour ?? 0).toString().padStart(2, '0')}:${(end.minute ?? 0).toString().padStart(2, '0')}` : null;
           blocks.push({
             id: note.id,
             name: note.name,
             color: resolved.color,
             icon: resolved.icon,
             iconType: resolved.iconType,
-            day: dayData.day,
-            dayOfMonth: dayData.dayOfMonth,
-            month: dayData.month,
-            year: dayData.year,
-            startHour: eventStartHour,
-            hourSpan: eventHourSpan,
-            startTime: eventStartTime,
-            endTime: eventEndTime,
-            allDay,
-            isMultiDay: true
+            day: start.dayOfMonth + 1,
+            dayOfMonth: start.dayOfMonth,
+            month: start.month,
+            year: start.year,
+            startHour,
+            hourSpan,
+            startTime,
+            endTime,
+            allDay
           });
+        } else {
+          const rangeEnd = effectiveEnd || end;
+          for (const dayData of days) {
+            const afterStart =
+              dayData.year > start.year ||
+              (dayData.year === start.year && dayData.month > start.month) ||
+              (dayData.year === start.year && dayData.month === start.month && dayData.dayOfMonth >= start.dayOfMonth);
+            const beforeEnd =
+              dayData.year < rangeEnd.year ||
+              (dayData.year === rangeEnd.year && dayData.month < rangeEnd.month) ||
+              (dayData.year === rangeEnd.year && dayData.month === rangeEnd.month && dayData.dayOfMonth <= rangeEnd.dayOfMonth);
+            if (!afterStart || !beforeEnd) continue;
+            const isStartDay = dayData.year === start.year && dayData.month === start.month && dayData.dayOfMonth === start.dayOfMonth;
+            const isEndDay = dayData.year === rangeEnd.year && dayData.month === rangeEnd.month && dayData.dayOfMonth === rangeEnd.dayOfMonth;
+            let startHour, hourSpan, startTime, endTime, dayAllDay;
+            if (isStartDay && !allDay) {
+              startHour = start.hour ?? 0;
+              hourSpan = hoursPerDay - startHour;
+              startTime = `${startHour.toString().padStart(2, '0')}:${(start.minute ?? 0).toString().padStart(2, '0')}`;
+              endTime = null;
+              dayAllDay = false;
+            } else if (isEndDay && hasValidEnd && !allDay) {
+              startHour = 0;
+              hourSpan = Math.max(end.hour ?? 1, 1);
+              startTime = '00:00';
+              endTime = `${(end.hour ?? 0).toString().padStart(2, '0')}:${(end.minute ?? 0).toString().padStart(2, '0')}`;
+              dayAllDay = false;
+            } else {
+              startHour = 0;
+              hourSpan = hoursPerDay;
+              startTime = 'All Day';
+              endTime = null;
+              dayAllDay = true;
+            }
+            const continuationLeft = !isStartDay;
+            const continuationRight = !isEndDay;
+            blocks.push({
+              id: note.id,
+              name: note.name,
+              color: resolved.color,
+              icon: resolved.icon,
+              iconType: resolved.iconType,
+              day: dayData.day,
+              dayOfMonth: dayData.dayOfMonth,
+              month: dayData.month,
+              year: dayData.year,
+              startHour,
+              hourSpan,
+              startTime,
+              endTime,
+              allDay: dayAllDay,
+              isMultiDay: true,
+              continuationLeft,
+              continuationRight
+            });
+          }
         }
       }
     });
