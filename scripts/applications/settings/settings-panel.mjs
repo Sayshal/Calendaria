@@ -680,6 +680,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.CLOCK_RUN_DURING_COMBAT]: { tab: 'time', label: 'CALENDARIA.Settings.ClockRunDuringCombat.Name' },
     [SETTINGS.REST_ADVANCE_MODE]: { tab: 'time', label: 'CALENDARIA.Settings.RestAdvanceMode.Name' },
     [SETTINGS.REST_FIXED_HOURS]: { tab: 'time', label: 'CALENDARIA.Settings.RestFixedHours.Name' },
+    [SETTINGS.ADVANCE_BASTION_ORDERS]: { tab: 'time', label: 'CALENDARIA.Settings.AdvanceBastionOrders.Name' },
     [SETTINGS.TIME_SPEED_MULTIPLIER]: { tab: 'time', label: 'CALENDARIA.Settings.TimeSpeedMultiplier.Name' },
     [SETTINGS.TIME_SPEED_INCREMENT]: { tab: 'time', label: 'CALENDARIA.Settings.TimeSpeedIncrement.Name' },
     [SETTINGS.TIME_ADVANCE_INTERVAL]: { tab: 'time', label: 'CALENDARIA.Settings.TimeAdvanceInterval.Name' },
@@ -913,7 +914,14 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     'sunDial-display': [SETTINGS.SHOW_SUN_DIAL, SETTINGS.FORCE_SUN_DIAL, SETTINGS.SUN_DIAL_CRANK_MODE, SETTINGS.SUN_DIAL_AUTO_FADE, SETTINGS.SUN_DIAL_IDLE_OPACITY, SETTINGS.SUN_DIAL_COMBAT_MODE],
     'sunDial-sticky': [SETTINGS.SUN_DIAL_STICKY_STATES],
     'time-realtime': [SETTINGS.TIME_SPEED_MULTIPLIER, SETTINGS.TIME_SPEED_INCREMENT, SETTINGS.TIME_ADVANCE_INTERVAL],
-    'time-integration': [SETTINGS.ADVANCE_TIME_ON_REST, SETTINGS.REST_ADVANCE_MODE, SETTINGS.REST_FIXED_HOURS, SETTINGS.SYNC_CLOCK_PAUSE, SETTINGS.CLOCK_RUN_DURING_COMBAT],
+    'time-integration': [
+      SETTINGS.ADVANCE_TIME_ON_REST,
+      SETTINGS.REST_ADVANCE_MODE,
+      SETTINGS.REST_FIXED_HOURS,
+      SETTINGS.ADVANCE_BASTION_ORDERS,
+      SETTINGS.SYNC_CLOCK_PAUSE,
+      SETTINGS.CLOCK_RUN_DURING_COMBAT
+    ],
     'chat-timestamps': [SETTINGS.CHAT_TIMESTAMP_MODE, SETTINGS.CHAT_TIMESTAMP_SHOW_TIME],
     'canvas-sticky-zones': [SETTINGS.HUD_STICKY_ZONES_ENABLED, SETTINGS.ALLOW_SIDEBAR_OVERLAP],
     'canvas-scene-integration': [
@@ -1023,6 +1031,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.advanceTimeOnRest = game.settings.get(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST);
     context.restAdvanceMode = game.settings.get(MODULE.ID, SETTINGS.REST_ADVANCE_MODE);
     context.restFixedHours = game.settings.get(MODULE.ID, SETTINGS.REST_FIXED_HOURS);
+    context.advanceBastionOrders = game.settings.get(MODULE.ID, SETTINGS.ADVANCE_BASTION_ORDERS);
+    context.showBastionSetting = game.system?.id === 'dnd5e';
     context.syncClockPause = game.settings.get(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE);
     context.clockRunDuringCombat = game.settings.get(MODULE.ID, SETTINGS.CLOCK_RUN_DURING_COMBAT);
     context.roundTimeDisabled = CONFIG.time.roundTime === 0;
@@ -1879,6 +1889,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('advanceTimeOnRest' in data) await game.settings.set(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST, data.advanceTimeOnRest);
     if ('restAdvanceMode' in data) await game.settings.set(MODULE.ID, SETTINGS.REST_ADVANCE_MODE, data.restAdvanceMode);
     if ('restFixedHours' in data) await game.settings.set(MODULE.ID, SETTINGS.REST_FIXED_HOURS, data.restFixedHours);
+    if ('advanceBastionOrders' in data) await game.settings.set(MODULE.ID, SETTINGS.ADVANCE_BASTION_ORDERS, data.advanceBastionOrders);
     if ('syncClockPause' in data) await game.settings.set(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE, data.syncClockPause);
     if ('clockRunDuringCombat' in data) await game.settings.set(MODULE.ID, SETTINGS.CLOCK_RUN_DURING_COMBAT, data.clockRunDuringCombat);
     if ('chatTimestampMode' in data) await game.settings.set(MODULE.ID, SETTINGS.CHAT_TIMESTAMP_MODE, data.chatTimestampMode);

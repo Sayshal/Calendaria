@@ -75,6 +75,17 @@
         <p class="hint">{{localize "CALENDARIA.Settings.RestFixedHours.Hint"}}</p>
       </div>
 
+      {{#if showBastionSetting}}
+        <div class="form-group">
+          <label for="advanceBastionOrders">{{localize "CALENDARIA.Settings.AdvanceBastionOrders.Name"}}</label>
+          <div class="form-fields">
+            <input type="checkbox" id="advanceBastionOrders" name="advanceBastionOrders"
+              {{#if advanceBastionOrders}}checked{{/if}}>
+          </div>
+          <p class="hint">{{localize "CALENDARIA.Settings.AdvanceBastionOrders.Hint"}}</p>
+        </div>
+      {{/if}}
+
       <div class="form-group">
         <label for="syncClockPause">{{localize "CALENDARIA.Settings.SyncClockPause.Name"}}</label>
         <div class="form-fields">

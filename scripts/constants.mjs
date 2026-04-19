@@ -28,7 +28,9 @@ export const KEYBINDS = {
 /** @enum {string} Settings keys for Foundry VTT game settings */
 export const SETTINGS = {
   ACTIVE_CALENDAR: 'activeCalendar',
+  ADVANCE_BASTION_ORDERS: 'advanceBastionOrders',
   ADVANCE_TIME_ON_REST: 'advanceTimeOnRest',
+  BASTION_LAST_ADVANCE: 'bastionLastAdvance',
   ALLOW_SIDEBAR_OVERLAP: 'allowSidebarOverlap',
   AMBIENCE_SYNC: 'ambienceSync',
   AUTO_GENERATE_WEATHER: 'autoGenerateWeather',

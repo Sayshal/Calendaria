@@ -1128,6 +1128,19 @@ export default class CalendariaSettings {
         config: false,
         type: new BooleanField({ initial: false })
       },
+      [SETTINGS.ADVANCE_BASTION_ORDERS]: {
+        name: 'CALENDARIA.Settings.AdvanceBastionOrders.Name',
+        hint: 'CALENDARIA.Settings.AdvanceBastionOrders.Hint',
+        scope: 'world',
+        config: false,
+        type: new BooleanField({ initial: true })
+      },
+      [SETTINGS.BASTION_LAST_ADVANCE]: {
+        name: 'Bastion Last Advance World Time',
+        scope: 'world',
+        config: false,
+        type: new NumberField({ initial: null, nullable: true })
+      },
       [SETTINGS.REST_ADVANCE_MODE]: {
         name: 'CALENDARIA.Settings.RestAdvanceMode.Name',
         hint: 'CALENDARIA.Settings.RestAdvanceMode.Hint',

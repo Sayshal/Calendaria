@@ -150,6 +150,17 @@ Number of hours to advance when Rest Advance Mode is set to **Fixed**.
 
 - Default: `8`
 
+### Advance Bastion Orders (dnd5e only)
+
+Automatically advance dnd5e bastion facility orders as world time passes. When enough days elapse since the last advance (using the duration configured in the dnd5e **Bastion Configuration** menu, default 7), every player character's active facility orders are ticked forward. Large time jumps (e.g. advancing 30 days at once) collapse into a single advance covering the full span.
+
+The dnd5e **Advance Bastion Turn** button is also patched while this setting is on: clicking it now advances the world clock by one turn's duration (with a confirmation prompt) instead of only ticking progress.
+
+- Only visible in dnd5e worlds
+- Requires **Bastion Configuration → Enabled** on the dnd5e side
+- Default: `true`
+- Respects **Clock Locked** — locked clocks block both automatic and button-triggered advances
+
 ### Sync with Game Pause
 
 Clock automatically stops when the game is paused. When enabled, the clock also pauses during active combat.
