@@ -399,6 +399,24 @@ export async function addCustomPreset(label, color = '#868e96', icon = 'fas fa-t
 }
 
 /**
+ * Add a bundled custom preset to world settings by full object, preserving its ID.
+ * @param {object} preset - Full preset definition (id, label, color, icon, sortOrder, playerUsable, defaults, ...)
+ * @returns {Promise<object|null>} The added preset, or null if skipped due to ID collision
+ */
+export async function upsertBundledCustomPreset(preset) {
+  if (!preset?.id || !preset?.label) return null;
+  const raw = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_PRESETS) || [];
+  if (raw.find((c) => c.id === preset.id)) return null;
+  const maxSort = raw.reduce((max, c) => Math.max(max, c.sortOrder ?? 0), -1);
+  const toAdd = { ...preset, builtin: false, sortOrder: preset.sortOrder ?? maxSort + 1, defaults: preset.defaults ?? emptyDefaults() };
+  raw.push(toAdd);
+  invalidatePresetCache();
+  await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_PRESETS, raw);
+  Hooks.callAll(HOOKS.PRESETS_CHANGED, getAllPresets());
+  return toAdd;
+}
+
+/**
  * Delete a preset from world settings.
  * @param {string} presetId  Preset ID to delete
  * @returns {Promise<boolean>}  True if deleted

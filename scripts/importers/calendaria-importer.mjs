@@ -4,8 +4,9 @@
  * @author Tyler
  */
 
+import { SETTINGS } from '../constants.mjs';
 import { FestivalManager } from '../festivals/_module.mjs';
-import { NoteManager, getAllPresets, sanitizeNoteData } from '../notes/_module.mjs';
+import { NoteManager, getAllPresets, sanitizeNoteData, upsertBundledCustomPreset } from '../notes/_module.mjs';
 import { log } from '../utils/_module.mjs';
 import BaseImporter from './base-importer.mjs';
 
@@ -21,6 +22,9 @@ export default class CalendariaImporter extends BaseImporter {
   static supportsFileUpload = true;
   static supportsLiveImport = false;
   static fileExtensions = ['.json'];
+
+  /** @type {object[]} Custom presets bundled with the export, restored on note import */
+  #bundledCustomPresets = [];
 
   /**
    * Check if data is a settings export file and extract calendar data if so.
@@ -96,6 +100,7 @@ export default class CalendariaImporter extends BaseImporter {
     log(3, `Transforming Calendaria export: ${calendarData.name}`);
     const bundleNotes = data.notes || calendarData.notes;
     if (calendarData.festivals && Array.isArray(bundleNotes)) FestivalManager.applyFestivalDatesToCalendarData(calendarData, bundleNotes);
+    this.#bundledCustomPresets = data.customPresets || data.settings?.[SETTINGS.CUSTOM_PRESETS] || [];
     const metadata = { ...calendarData.metadata };
     delete metadata.id;
     delete metadata.importedAt;
@@ -115,6 +120,15 @@ export default class CalendariaImporter extends BaseImporter {
     const errors = [];
     let count = 0;
     log(3, `Starting Calendaria note import: ${notes.length} notes to calendar ${calendarId}`);
+    if (this.#bundledCustomPresets.length) {
+      let restored = 0;
+      for (const preset of this.#bundledCustomPresets) {
+        if (preset.builtin) continue;
+        const added = await upsertBundledCustomPreset(preset);
+        if (added) restored++;
+      }
+      if (restored) log(3, `Restored ${restored} bundled custom presets`);
+    }
     for (const note of notes) {
       try {
         const noteData = sanitizeNoteData(
