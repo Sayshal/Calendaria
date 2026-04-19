@@ -1035,6 +1035,7 @@
   "CALENDARIA.Enricher.Tooltip.Calendar": "Calendar: {value}",
   "CALENDARIA.Enricher.Tooltip.CalendarSummary": "Calendar Summary",
   "CALENDARIA.Enricher.Tooltip.Category": "Category: {preset} — {count}",
+  "CALENDARIA.Enricher.Tooltip.Chronicle": "Open Chronicle: {start} to {end}",
   "CALENDARIA.Enricher.Tooltip.ClimateZone": "Climate Zone: {value}",
   "CALENDARIA.Enricher.Tooltip.Countdown": "{value} until {date}",
   "CALENDARIA.Enricher.Tooltip.CurrentDate": "Current Date: {value}",

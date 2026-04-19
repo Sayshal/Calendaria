@@ -566,7 +566,11 @@ const ENRICHER_CATEGORIES = [
   { label: 'CALENDARIA.Enricher.Category.Sun', keys: ['sunrise', 'sunset', 'daylight', 'isdaytime', 'dayprogress', 'nightprogress', 'untilsunrise', 'untilsunset'] },
   { label: 'CALENDARIA.Enricher.Category.Moon', keys: ['moon', 'moons', 'nextfullmoon', 'convergence', 'eclipse', 'nexteclipse'] },
   { label: 'CALENDARIA.Enricher.Category.Weather', keys: ['weather', 'temperature', 'wind', 'precipitation', 'weathericon', 'zone', 'forecast'] },
-  { label: 'CALENDARIA.Enricher.Category.Notes', keys: ['event', 'notes', 'next', 'category'], examples: { event: 'Winter Solstice', category: 'quest' } },
+  {
+    label: 'CALENDARIA.Enricher.Category.Notes',
+    keys: ['event', 'notes', 'next', 'category', 'chronicle'],
+    examples: { event: 'Winter Solstice', category: 'quest', chronicle: '1 1 1500 to 14 1 1500' }
+  },
   { label: 'CALENDARIA.Enricher.Category.Composite', keys: ['summary', 'almanac', 'format', 'compare', 'peek'], examples: { format: 'MMMM YYYY', compare: '1 1 2025 cal=gregorian', peek: '+7d' } }
 ];
 

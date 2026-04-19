@@ -35,6 +35,18 @@
       pointer-events: none;
     }
 
+    .toolbar-title--locked {
+      gap: 0.375rem;
+      display: inline-flex;
+      align-items: center;
+      max-width: 22rem;
+      overflow: hidden;
+      color: var(--calendaria-accent, var(--calendaria-text));
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      pointer-events: auto;
+    }
+
     .toolbar-actions {
       gap: 0.375rem;
       display: flex;
@@ -378,23 +390,23 @@
       }
 
       .timeline-entries::before {
-        content: '';
+        opacity: 0.4;
         position: absolute;
-        left: 50%;
         top: 0;
         bottom: 0;
+        left: 50%;
         width: 0.1875rem;
+        content: '';
         background: var(--calendaria-accent);
-        opacity: 0.4;
         transform: translateX(-50%);
       }
 
       .timeline-entry {
-        position: relative;
         display: flex;
+        position: relative;
         align-items: flex-start;
-        padding: 0.75rem 0;
         width: 100%;
+        padding: 0.75rem 0;
       }
 
       .timeline-entry:nth-child(odd) {
@@ -402,8 +414,8 @@
       }
 
       .timeline-entry:nth-child(odd) .timeline-card {
-        margin-left: 2.5rem;
         margin-right: 0;
+        margin-left: 2.5rem;
       }
 
       .timeline-entry:nth-child(odd) .timeline-date-banner {
@@ -421,37 +433,37 @@
         max-width: calc(50% - 2.5rem);
         border: 0.0625rem solid var(--calendaria-border);
         border-radius: 0.5rem;
-        background: color-mix(in srgb, var(--calendaria-bg-lighter, var(--calendaria-bg)) 95%, var(--calendaria-accent));
         overflow: hidden;
+        background: color-mix(in srgb, var(--calendaria-bg-lighter, var(--calendaria-bg)) 95%, var(--calendaria-accent));
         box-shadow: 0 0.125rem 0.5rem rgb(0 0 0 / 25%);
       }
 
       .timeline-node {
-        position: absolute;
-        left: 50%;
-        top: 1.25rem;
-        transform: translateX(-50%);
         z-index: 2;
+        position: absolute;
+        top: 1.25rem;
+        left: 50%;
+        transform: translateX(-50%);
       }
 
       .timeline-node-dot {
         width: 1rem;
         height: 1rem;
-        border-radius: 50%;
         border: 0.1875rem solid var(--calendaria-border);
+        border-radius: 50%;
         background: var(--calendaria-bg);
         box-shadow: 0 0 0 0.125rem var(--calendaria-bg);
       }
 
       .timeline-node::after {
-        content: '';
+        opacity: 0.5;
         position: absolute;
         top: 50%;
-        transform: translateY(-50%);
         width: 2.25rem;
         height: 0.125rem;
+        content: '';
         background: var(--calendaria-border);
-        opacity: 0.5;
+        transform: translateY(-50%);
       }
 
       .timeline-entry:nth-child(odd) .timeline-node::after {
@@ -477,12 +489,12 @@
       }
 
       .timeline-date-banner {
+        gap: 0.375rem;
         display: flex;
         align-items: center;
-        gap: 0.375rem;
         padding: 0.375rem 0.625rem;
-        background: color-mix(in srgb, var(--calendaria-accent) 25%, var(--calendaria-bg-lighter, var(--calendaria-bg)));
         border-bottom: 0.125rem solid var(--calendaria-accent);
+        background: color-mix(in srgb, var(--calendaria-accent) 25%, var(--calendaria-bg-lighter, var(--calendaria-bg)));
       }
 
       .timeline-weekday {
@@ -513,9 +525,9 @@
       }
 
       .timeline-fog-overlay {
+        gap: 0.375rem;
         display: flex;
         align-items: center;
-        gap: 0.375rem;
         padding: 0.625rem;
         color: var(--calendaria-text-dim);
         font-style: italic;
@@ -529,19 +541,19 @@
       }
 
       .timeline-entry--empty .timeline-node-dot {
+        opacity: 0.5;
         width: 0.625rem;
         height: 0.625rem;
-        opacity: 0.5;
       }
 
       .note-item {
-        cursor: pointer;
         padding: 0.25rem 0;
+        cursor: pointer;
       }
 
       .note-name {
-        font-size: var(--font-size-12, 0.75rem);
         font-weight: 600;
+        font-size: var(--font-size-12, 0.75rem);
       }
 
       .note-excerpt {
@@ -555,20 +567,20 @@
 
         img {
           max-width: 100%;
-          border-radius: 0.25rem;
           margin-top: 0.25rem;
+          border-radius: 0.25rem;
         }
       }
 
       .entry-banner {
-        font-size: var(--font-size-11, 0.6875rem);
         margin-bottom: 0.25rem;
+        font-size: var(--font-size-11, 0.6875rem);
       }
 
       .add-note-btn {
         opacity: 0;
-        transition: opacity 0.15s;
         margin-top: 0.25rem;
+        transition: opacity 0.15s;
       }
 
       .timeline-entry:hover .add-note-btn {
@@ -576,9 +588,9 @@
       }
 
       .entry-empty {
-        font-size: var(--font-size-11, 0.6875rem);
         color: var(--calendaria-text-dim);
         font-style: italic;
+        font-size: var(--font-size-11, 0.6875rem);
       }
     }
   }

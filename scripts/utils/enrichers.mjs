@@ -3,7 +3,7 @@
  * @module Utils/Enrichers
  */
 
-import { BigCal, MiniCal } from '../applications/_module.mjs';
+import { BigCal, Chronicle, MiniCal } from '../applications/_module.mjs';
 import { CalendarManager, CalendarRegistry } from '../calendar/_module.mjs';
 import { COMPASS_DIRECTIONS, HOOKS, MODULE, SETTINGS, WIND_SPEEDS } from '../constants.mjs';
 import { NoteManager, addDays, addMonths, addYears, daysBetween, getNextOccurrences, monthsBetween } from '../notes/_module.mjs';
@@ -72,6 +72,7 @@ export const handlers = {
   notes: enrichNotes,
   next: enrichNext,
   category: enrichCategory,
+  chronicle: enrichChronicle,
   summary: enrichSummary,
   almanac: enrichAlmanac,
   format: enrichFormat,
@@ -1550,6 +1551,34 @@ function enrichCategory(config, label) {
 }
 
 /**
+ * Chronicle range link — opens Chronicle locked to the date range on click.
+ * @param {object} config - Parsed enricher config
+ * @param {string|null} label - Custom label override
+ * @returns {HTMLElement} Enricher element
+ */
+function enrichChronicle(config, label) {
+  const { calendar } = resolveCalendar(config);
+  if (!calendar) return createErrorElement('CALENDARIA.Enricher.Error.NoCalendar');
+  const dates = parseTwoDates(config.values);
+  if (!dates) return createErrorElement('CALENDARIA.Enricher.Error.InvalidDate');
+  const { date1: startPublic, date2: endPublic } = dates;
+  const startText = formatDate(startPublic, 'dateLong', calendar);
+  const endText = formatDate(endPublic, 'dateLong', calendar);
+  const text = label || `${startText} - ${endText}`;
+  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.Chronicle', { start: startText, end: endText });
+  const dataset = {
+    calChronicleFromYear: startPublic.year,
+    calChronicleFromMonth: startPublic.month - 1,
+    calChronicleFromDay: startPublic.day - 1,
+    calChronicleToYear: endPublic.year,
+    calChronicleToMonth: endPublic.month - 1,
+    calChronicleToDay: endPublic.day - 1
+  };
+  if (config.cal) dataset.calChronicleCalendarId = config.cal;
+  return createContentLink('chronicle', text, dataset, 'fa-scroll', tooltip);
+}
+
+/**
  * Calendar summary.
  * @param {object} config - Parsed enricher config
  * @param {string|null} label - Custom label override
@@ -1748,7 +1777,8 @@ async function enrichCalendaria(match, _options) {
   }
   if (!CalendarManager.getActiveCalendar()) return createElement(typeLower, label || '', configStr?.trim() || '', true, 'fa-spinner fa-spin');
   const config = parseConfig(configStr);
-  return label ? applyLabel(handler(config, label), label) : handler(config, null);
+  const result = await handler(config, label);
+  return label ? applyLabel(result, label) : result;
 }
 
 /**
@@ -1829,6 +1859,16 @@ export function registerEnrichers() {
     const month = link.dataset.calMonth;
     const day = link.dataset.calDay;
     if (year && month && day) navigateToDate(Number(year), Number(month), Number(day));
+  });
+  document.body.addEventListener('click', (e) => {
+    const link = e.target.closest('.calendaria-enricher--chronicle.calendaria-enricher--link');
+    if (!link) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const ds = link.dataset;
+    const startDate = { year: Number(ds.calChronicleFromYear), month: Number(ds.calChronicleFromMonth), dayOfMonth: Number(ds.calChronicleFromDay) };
+    const endDate = { year: Number(ds.calChronicleToYear), month: Number(ds.calChronicleToMonth), dayOfMonth: Number(ds.calChronicleToDay) };
+    Chronicle.show({ startDate, endDate, lockedRange: true, calendarId: ds.calChronicleCalendarId || null });
   });
   LiveUpdateManager.initialize(refreshElement);
   Hooks.once('calendaria.ready', () => LiveUpdateManager.scheduleRefresh());

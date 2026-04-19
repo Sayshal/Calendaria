@@ -4,9 +4,20 @@
  * @author Tyler
  */
 
+import { CalendarManager } from '../../calendar/_module.mjs';
 import { HOOKS, MODULE, SETTINGS, SOCKET_TYPES, TEMPLATES } from '../../constants.mjs';
 import { NoteManager, addDays } from '../../notes/_module.mjs';
-import { CalendariaSocket, buildOpenAppsMenuItem, buildScrollEntries, canViewChronicle, getDefaultDateRange, isCombatBlocked, localize, warnShowToAll } from '../../utils/_module.mjs';
+import {
+  CalendariaSocket,
+  buildOpenAppsMenuItem,
+  buildScrollEntries,
+  canViewChronicle,
+  dateFormattingParts,
+  getDefaultDateRange,
+  isCombatBlocked,
+  localize,
+  warnShowToAll
+} from '../../utils/_module.mjs';
 import { SettingsPanel } from '../_module.mjs';
 
 const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
@@ -28,6 +39,7 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
     this._startDate = options.startDate || null;
     this._endDate = options.endDate || null;
     this._calendarId = options.calendarId || null;
+    this._lockedRange = !!options.lockedRange;
     this._entryDepth = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_ENTRY_DEPTH) || 'excerpt';
     this._showEmpty = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_SHOW_EMPTY) || false;
     this._viewMode = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_VIEW_MODE) || 'scroll';
@@ -89,6 +101,7 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
     if (options.startDate) instance._startDate = options.startDate;
     if (options.endDate) instance._endDate = options.endDate;
     if (options.calendarId) instance._calendarId = options.calendarId;
+    if ('lockedRange' in options) instance._lockedRange = !!options.lockedRange;
     instance.render({ force: true });
     return instance;
   }
@@ -145,6 +158,16 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
       { id: 'scroll', label: localize('CALENDARIA.Chronicle.ViewMode.Scroll'), active: this._viewMode === 'scroll' },
       { id: 'timeline', label: localize('CALENDARIA.Chronicle.ViewMode.Timeline'), active: this._viewMode === 'timeline' }
     ];
+    context.lockedRange = this._lockedRange;
+    if (this._lockedRange) {
+      const calendar = CalendarManager.getActiveCalendar();
+      const yearZero = calendar?.years?.yearZero ?? 0;
+      const startInternal = { year: this._startDate.year - yearZero, month: this._startDate.month, dayOfMonth: this._startDate.dayOfMonth };
+      const endInternal = { year: this._endDate.year - yearZero, month: this._endDate.month, dayOfMonth: this._endDate.dayOfMonth };
+      const startParts = dateFormattingParts(calendar, startInternal);
+      const endParts = dateFormattingParts(calendar, endInternal);
+      context.lockedRangeText = `${startParts.D} ${startParts.MMMM} ${startParts.y} - ${endParts.D} ${endParts.MMMM} ${endParts.y}`;
+    }
     return context;
   }
 
@@ -174,6 +197,7 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     requestAnimationFrame(() => {
       this._loading = false;
+      if (this._lockedRange) return;
       const container = this.element?.querySelector('.scroll-container');
       if (container && container.scrollHeight <= container.clientHeight) this.#loadEarlier(container);
     });
@@ -345,6 +369,7 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** Set up infinite scroll — load more entries when near top/bottom edges. */
   #enableInfiniteScroll() {
+    if (this._lockedRange) return;
     const container = this.element?.querySelector('.scroll-container');
     if (!container) return;
     container.addEventListener('scroll', () => {
