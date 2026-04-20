@@ -30,7 +30,7 @@
     </legend>
     {{#if zoneList.length}}
       <div class="items-list zone-climate-list">
-{{#each zoneList}}
+        {{#each zoneList}}
           <div class="item flexrow">
             <input type="text" name="weather.zones.{{this.key}}.name" value="{{this.name}}" class="col-name">
             <div class="item-controls col-controls">
@@ -38,6 +38,10 @@
                 class="{{#if this.hasPresets}}toggled{{/if}}" data-tooltip
                 aria-label="{{localize 'CALENDARIA.Editor.Weather.Zone.EditClimate'}}">
                 <i class="fas fa-cloud-sun"></i>
+              </button>
+              <button type="button" data-action="duplicateZone" data-key="{{this.key}}" data-tooltip
+                aria-label="{{localize 'CALENDARIA.Editor.Weather.Zone.Duplicate'}}">
+                <i class="fas fa-copy"></i>
               </button>
               <button type="button" data-action="addZone" data-key="{{this.key}}" data-tooltip
                 aria-label="{{localize 'CALENDARIA.Editor.Weather.Zone.Add'}}">

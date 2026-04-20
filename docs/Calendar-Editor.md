@@ -521,6 +521,7 @@ Two-column list of all climate zones with inline controls:
 
 - **Name.** Inline-editable zone name
 - **Edit** (pencil icon): Open the [Climate Editor](Climate-Editor) in zone mode for full configuration
+- **Duplicate** (copy icon): Clone this zone below, including presets, season overrides, and preset aliases. The copy inherits a unique ID and a "Copy of <name>" label
 - **Add** (+): Insert a new zone after this row
 - **Remove** (trash icon): Delete this zone
 

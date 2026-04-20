@@ -40,6 +40,8 @@ Per-season temperature ranges with support for **relative modifier syntax**:
 | `3-`   | Subtract 3 from base | Zone is 3° cooler than season default |
 | `25`   | Absolute value       | Fixed at 25° regardless of season     |
 
+Leave a min or max blank to inherit the matching value from the season climate's temperature range. Clearing both fields for a season falls back fully to the season climate.
+
 #### Wind Configuration
 
 | Field                 | Description                                                  |
@@ -64,7 +66,7 @@ Per-preset overrides for this zone:
 | **Enabled**  | Checkbox. Disabled presets are excluded from generation and dimmed in the picker. Enabled state is derived from whether the preset has a nonzero weight in any season. Saved per-season.                     |
 | **Icon**     | Preset icon (read-only)                                                                                                                                                                                      |
 | **Name**     | Preset name with alias input (type to override, empty for default). Per-zone aliases take priority over Weather Editor name overrides. See [display name resolution](Weather-System#display-name-resolution) |
-| **Weight**   | Season override weight for this preset (select a season from the dropdown above). Supports relative modifiers                                                                                                |
+| **Weight**   | Season override weight for this preset (select a season from the dropdown above). Supports relative modifiers. Leave blank to inherit the season climate's base weight for this preset; enter `0` to explicitly disable                                                                                                |
 | **Temp Min** | Minimum temperature override (supports relative modifiers). Saved per-season. Placeholder shows the preset's built-in constraint when no override is set.                                                    |
 | **Temp Max** | Maximum temperature override (supports relative modifiers). Saved per-season. Placeholder shows the preset's built-in constraint when no override is set.                                                    |
 | **Inertia**  | Per-preset inertia weight multiplier (0–2, overrides built-in default). Saved per-season.                                                                                                                    |

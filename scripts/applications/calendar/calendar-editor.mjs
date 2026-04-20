@@ -75,6 +75,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       deleteCalendar: CalendarEditor.#onDeleteCalendar,
       addZone: CalendarEditor.#onAddZone,
       editZoneClimate: CalendarEditor.#onEditZoneClimate,
+      duplicateZone: CalendarEditor.#onDuplicateZone,
       deleteZone: CalendarEditor.#onDeleteZone,
       createNew: CalendarEditor.#onCreateNew,
       showTokenReference: CalendarEditor.#onShowTokenReference,
@@ -2274,6 +2275,43 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         editor.render({ parts: ['weather'] });
       }
     });
+  }
+
+  /**
+   * Duplicate a climate zone (copies presets, season overrides, and preset aliases).
+   * @param {Event} _event - Click event
+   * @param {HTMLElement} target - Target element
+   */
+  static #onDuplicateZone(_event, target) {
+    const zoneKey = target.dataset.key;
+    const zonesObj = this.#calendarData.weather?.zones ?? {};
+    const sourceZone = zonesObj[zoneKey];
+    if (!sourceZone) return;
+    const cloned = foundry.utils.deepClone(sourceZone);
+    const baseId = sourceZone.id || 'zone';
+    const existingIds = Object.values(zonesObj).map((z) => z.id);
+    let newId = `${baseId}-copy`;
+    let counter = 2;
+    while (existingIds.includes(newId)) newId = `${baseId}-copy-${counter++}`;
+    cloned.id = newId;
+    const sourceName = localize(sourceZone.name || '') || sourceZone.name || '';
+    cloned.name = format('CALENDARIA.Editor.CopyOfName', { name: sourceName });
+    const newKey = foundry.utils.randomID();
+    this.#calendarData.weather.zones = this.#insertAfterKey(zonesObj, zoneKey, newKey, cloned);
+    const sourcePresetIds = Object.values(sourceZone.presets ?? {})
+      .map((p) => p?.id)
+      .filter(Boolean);
+    const aliasMap = {};
+    for (const presetId of sourcePresetIds) {
+      const alias = this.#pendingPresetAliases?.[sourceZone.id]?.[presetId] ?? (this.#calendarId ? getPresetAlias(presetId, this.#calendarId, sourceZone.id) : null);
+      if (alias) aliasMap[presetId] = alias;
+    }
+    if (Object.keys(aliasMap).length) {
+      this.#pendingPresetAliases ??= {};
+      this.#pendingPresetAliases[newId] = aliasMap;
+    }
+    this.#isDirty = true;
+    this.render();
   }
 
   /**

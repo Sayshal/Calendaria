@@ -501,10 +501,6 @@ async function migrateRestAdvanceMode() {
 
 /**
  * Migrate users off removed/consolidated bundled calendars.
- * Redirects the active calendar setting when a world was using a calendar that has been removed:
- * khorvaire → galifar (Eberron calendar consolidation; they name the same canonical system)
- * greyhawk-364 → greyhawk (the 364-day variant is now the canonical form of the main greyhawk preset)
- * Month/weekday/moon/festival IDs are preserved across each pair, so notes continue to resolve without edits.
  * @since 1.0.6
  * @deprecated Remove in 1.2.0
  * @returns {Promise<void>}
@@ -526,6 +522,68 @@ export async function migrateRemovedCalendars() {
 }
 
 /**
+ * Null out zone temperature entries that were saved as the buggy {0,19}/{0,20}.
+ * @since 1.0.6
+ * @deprecated Remove in 1.2.0
+ * @returns {Promise<void>}
+ */
+async function migrateZoneTempBlankInheritance() {
+  const KEY = 'zoneTempBlankInheritanceMigrationComplete';
+  if (!game.user?.isGM) return;
+  if (game.settings.get(MODULE.ID, KEY)) return;
+  const isBuggyDefault = (entry) => entry && typeof entry === 'object' && entry.min === 0 && (entry.max === 19 || entry.max === 20);
+  const sweepCalendar = (calendar) => {
+    let touched = 0;
+    const zones = calendar?.weather?.zones;
+    if (!zones || typeof zones !== 'object') return touched;
+    for (const zone of Object.values(zones)) {
+      const temps = zone?.temperatures;
+      if (!temps || typeof temps !== 'object') continue;
+      for (const [season, range] of Object.entries(temps)) {
+        if (season === '_default') continue;
+        if (isBuggyDefault(range)) {
+          temps[season] = null;
+          touched++;
+        }
+      }
+      const overrides = zone?.seasonOverrides;
+      if (overrides && typeof overrides === 'object') {
+        for (const override of Object.values(overrides)) {
+          if (isBuggyDefault(override?.temperatures)) {
+            override.temperatures = null;
+            touched++;
+          }
+        }
+      }
+    }
+    return touched;
+  };
+  let totalTouched = 0;
+  const customs = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CALENDARS) || {};
+  let customDirty = false;
+  for (const calendar of Object.values(customs)) {
+    const n = sweepCalendar(calendar);
+    if (n) {
+      customDirty = true;
+      totalTouched += n;
+    }
+  }
+  if (customDirty) await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_CALENDARS, customs);
+  const overrides = game.settings.get(MODULE.ID, SETTINGS.DEFAULT_OVERRIDES) || {};
+  let overrideDirty = false;
+  for (const calendar of Object.values(overrides)) {
+    const n = sweepCalendar(calendar);
+    if (n) {
+      overrideDirty = true;
+      totalTouched += n;
+    }
+  }
+  if (overrideDirty) await game.settings.set(MODULE.ID, SETTINGS.DEFAULT_OVERRIDES, overrides);
+  if (totalTouched) log(3, `Cleared ${totalTouched} buggy zone temperature ranges so they inherit season climate defaults`);
+  await game.settings.set(MODULE.ID, KEY, true);
+}
+
+/**
  * Run all migrations.
  * @returns {Promise<void>}
  */
@@ -539,6 +597,7 @@ export async function runAllMigrations() {
   await migrateLimitedRepeatRemoval();
   await migrateRestAdvanceMode();
   await migrateRemovedCalendars();
+  await migrateZoneTempBlankInheritance();
   await recoverOrphanedPresets();
 }
 
