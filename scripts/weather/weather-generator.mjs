@@ -229,6 +229,35 @@ export function generateWeather({ seasonClimate, zoneConfig, season, seed, custo
 }
 
 /**
+ * Roll a temperature value for a preset using the same range resolution as generateWeather.
+ * @param {object} options - Roll options
+ * @param {string} options.presetId - Preset ID to roll against
+ * @param {object} [options.seasonClimate] - Season's base climate { temperatures, presets }
+ * @param {object} [options.zoneConfig] - Zone config { temperatures, presets, seasonOverrides }
+ * @param {string} [options.season] - Season name for zone overrides / fallbacks
+ * @param {object[]} [options.customPresets] - Custom presets list
+ * @param {Function} [options.randomFn] - Random function (defaults to Math.random)
+ * @returns {number} Rounded temperature value (internal units)
+ */
+export function rollPresetTemperature({ presetId, seasonClimate, zoneConfig, season, customPresets = [], randomFn = Math.random }) {
+  const zoneOverride = season && zoneConfig?.seasonOverrides?.[season];
+  const { tempRange } = mergeClimateConfig(seasonClimate, zoneOverride, zoneConfig, season);
+  const preset = getPreset(presetId, customPresets);
+  let finalTempRange = { ...tempRange };
+  const seasonPresetConfig = zoneOverride?.presets?.[presetId];
+  const zonePresetConfig = Object.values(zoneConfig?.presets ?? {}).find((p) => p.id === presetId && p.enabled !== false);
+  const hasPresetOverride = seasonPresetConfig?.tempMin != null || seasonPresetConfig?.tempMax != null || zonePresetConfig?.tempMin != null || zonePresetConfig?.tempMax != null;
+  if (hasPresetOverride) {
+    const effectiveTempMin = seasonPresetConfig?.tempMin ?? zonePresetConfig?.tempMin ?? preset?.tempMin;
+    const effectiveTempMax = seasonPresetConfig?.tempMax ?? zonePresetConfig?.tempMax ?? preset?.tempMax;
+    if (effectiveTempMin != null) finalTempRange.min = Math.max(finalTempRange.min, applyTempModifier(effectiveTempMin, tempRange.min));
+    if (effectiveTempMax != null) finalTempRange.max = Math.min(finalTempRange.max, applyTempModifier(effectiveTempMax, tempRange.max));
+    if (finalTempRange.min > finalTempRange.max) finalTempRange = { ...tempRange };
+  }
+  return Math.round(finalTempRange.min + randomFn() * (finalTempRange.max - finalTempRange.min));
+}
+
+/**
  * Generate weather for a specific date using zone config.
  * @param {object} options - Generation options
  * @param {object} [options.seasonClimate] - Season's base climate
