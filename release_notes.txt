@@ -1,47 +1,7 @@
-## Breaking Changes
-
-- Galifar moon cycle lengths updated to canonical Baker/Perkins 2005 Dragonshards values
-- Starfinder Pact Standard `firstWeekday` corrected to 0; Somal moon removed
-- `khorvaire` and `greyhawk-364` removed as redundant variants; one-time migration redirects active calendar setting
-
-## New Features
-
-- Bastion facility orders auto-advance with world time (dnd5e)
-- Calendar exports bundle custom note presets referenced by the calendar's notes
-- Chat `/advance` triggers cinematic overlay; `cinematic=` override supported
-- Duplicate button on climate zones deep-clones presets, overrides, and aliases
-- New `[[cal.chronicle D M Y to D M Y]]` enricher with locked-range Chronicle mode
-- PF2E/SF2E WorldClock sync works with every bundled calendar
-- Per-phase Weight values on Randomized moons
-- Per-zone fixed sunrise and sunset hours to lock daylight to exact times
-- Rest advance dropdown: 8 AM, Sunrise, or Fixed Hours (dnd5e, PF1E, PF2E, SF2E)
-- System Sync section in calendar editor for picking the date theme
-- `setDateTime` and `jumpToDate` API accept `{ cinematic }` option
-
 ## Bug Fixes
 
-- "Clear" localization collision between action buttons and weather presets
-- Canonical corrections to 14 prebuilt calendars (months, weekdays, festivals, moons)
-- Climate zone temperature inheritance saving as 0/19 or 0/20 instead of inheriting season defaults
-- Forecast variance selecting presets outside the current season and zone
-- Multi-day events no longer render as a single unsplit block in week view
-- Multi-million-iteration freeze on recurring notes with stale start dates
-- Per-user note ownership lost when toggling visibility or re-saving the sheet with no changes
-- Settings panel crash on legacy custom theme data
-- Slash commands silently failing in Foundry v13+ due to ProseMirror paragraph wrapping
-- Weather Picker leaving temperature blank after selecting a preset
-- Weather Picker not inheriting icon, color, FXMaster preset, sound, or FX macro overrides
-- Week view not rendering recurring notes on every matching day
-- Zone preset weight warnings ignoring season climate inheritance
-
-## Changes
-
-- Bundled calendar count reduced to 19; `khorvaire` and `greyhawk-364` consolidated into `galifar` and `greyhawk`
-- Duration controls moved from Settings tab to Schedule tab on the note sheet
-- GMs can edit per-user ownership in every visibility mode
-- Golarion, Golarion Imperial, and Pact Standard now use Gregorian leap rules for Luxon alignment
-- Limited-repeat option removed; recurring notes use a fixed 365-day lookback
-
-## Documentation
-
-- Climate layering diagram added to Weather System docs
+- Date-triggered notes fire within one tick of their scheduled time instead of waiting up to 30 minutes for the next check
+- Event macros scheduled at midnight no longer race with auto-generated weather, so setWeather calls from date-triggered macros stick instead of getting overwritten
+- Silent events now suppress only the chat announcement; their hooks and macros still run
+- Toggling a note's visibility to Hidden no longer triggers Foundry v13 ownership validation errors
+- Wind direction on setWeather accepts compass strings (N, NNE, NE, ...) or degrees, normalized to 0-360
