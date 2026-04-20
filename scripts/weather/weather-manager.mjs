@@ -29,6 +29,9 @@ export default class WeatherManager {
   /** @type {{ key: string, forecast: object[] }|null} Cached legacy forecast to prevent re-randomization on re-render */
   static #legacyForecastCache = null;
 
+  /** @type {Promise<void> | null} Promise of the currently running day-change auto-gen work. Null when idle. */
+  static #dayChangeWork = null;
+
   /** @type {string} Default zone key used when no climate zone is configured */
   static DEFAULT_ZONE = '_default';
 
@@ -350,6 +353,7 @@ export default class WeatherManager {
       return this.getCurrentWeather(zoneId);
     }
     const temperature = options.temperature ?? this.#generateTemperatureForPreset(presetId);
+    const normalizedOptionWind = options.wind ? { ...options.wind, direction: this.#normalizeWindDirection(options.wind.direction) } : null;
     const weather = {
       id: preset.id,
       label: preset.label,
@@ -358,7 +362,7 @@ export default class WeatherManager {
       color: preset.color,
       category: preset.category,
       temperature,
-      wind: options.wind ?? preset.wind ?? { speed: 0, direction: null, forced: false },
+      wind: normalizedOptionWind ?? preset.wind ?? { speed: 0, direction: null, forced: false },
       precipitation: options.precipitation ?? preset.precipitation ?? { type: null, intensity: 0 },
       darknessPenalty: preset.darknessPenalty ?? 0,
       environmentBase: this.#resolveEnvironmentBase(preset),
@@ -749,11 +753,34 @@ export default class WeatherManager {
   }
 
   /**
+   * Return a promise that resolves when the currently running day-change auto-gen work is complete. Resolves immediately if no work is in flight.
+   * @returns {Promise<void>}
+   */
+  static whenDayChangeSettled() {
+    return this.#dayChangeWork ?? Promise.resolve();
+  }
+
+  /**
    * Handle day change for auto-generation.
    * @param {object} data - Hook data with previous/current components and calendar
    * @private
    */
   static async #onDayChange(data) {
+    const work = this.#doDayChangeWork(data);
+    this.#dayChangeWork = work;
+    try {
+      await work;
+    } finally {
+      if (this.#dayChangeWork === work) this.#dayChangeWork = null;
+    }
+  }
+
+  /**
+   * Core day-change work. Wrapped by `#onDayChange` so the in-flight promise is externally awaitable via `whenDayChangeSettled()`.
+   * @param {object} data - Hook data with previous/current components and calendar
+   * @private
+   */
+  static async #doDayChangeWork(data) {
     this.#legacyForecastCache = null;
     if (!CalendariaSocket.isPrimaryGM()) return;
     const calendar = CalendarManager.getActiveCalendar();
@@ -1906,6 +1933,27 @@ export default class WeatherManager {
     if (speed == null) return '';
     const entry = Object.values(WIND_SPEEDS).find((w) => w.value === speed);
     return entry ? localize(entry.label) : '';
+  }
+
+  /**
+   * Normalize a wind direction input to degrees.
+   * @param {number|string|null|undefined} value - Raw direction input
+   * @returns {number|null} Direction in degrees wrapped to 0-360, or null for unrecognized/missing input
+   * @private
+   */
+  static #normalizeWindDirection(value) {
+    if (value == null) return null;
+    if (typeof value === 'number') {
+      if (!Number.isFinite(value)) return null;
+      const wrapped = ((value % 360) + 360) % 360;
+      return wrapped;
+    }
+    if (typeof value === 'string') {
+      const key = value.trim().toUpperCase();
+      const deg = COMPASS_DIRECTIONS[key];
+      return typeof deg === 'number' ? deg : null;
+    }
+    return null;
   }
 
   /**

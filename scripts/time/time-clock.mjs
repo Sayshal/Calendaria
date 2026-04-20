@@ -624,10 +624,10 @@ export default class TimeClock {
    * @param {number} dt - The delta time in seconds
    */
   static async onUpdateWorldTime(worldTime, dt) {
-    EventScheduler.onUpdateWorldTime(worldTime, dt);
     await updateDarknessFromWorldTime(worldTime, dt);
     ReminderScheduler.onUpdateWorldTime(worldTime, dt);
     TimeTracker.onUpdateWorldTime(worldTime, dt);
     Hooks.callAll(HOOKS.WORLD_TIME_UPDATED, worldTime, dt);
+    await EventScheduler.onUpdateWorldTime(worldTime, dt);
   }
 }

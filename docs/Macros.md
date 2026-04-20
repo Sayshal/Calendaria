@@ -242,6 +242,14 @@ if (notes.length > 0) {
 // Set specific weather
 await CALENDARIA.api.setWeather('thunderstorm', { temperature: 55 });
 
+// Override wind and precipitation on top of a preset (morning period only)
+await CALENDARIA.api.setWeather('cloudy', {
+  period: 'morning',
+  temperature: 11,
+  wind: { speed: 2, direction: 'SW', forced: false }, // speed 0-5; direction: compass string ('SW') or degrees (225)
+  precipitation: { type: null, intensity: 0 } // type: null|drizzle|rain|snow|sleet|hail
+});
+
 // Generate weather from climate zone
 await CALENDARIA.api.generateWeather();
 

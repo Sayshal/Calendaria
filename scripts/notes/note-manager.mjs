@@ -188,11 +188,15 @@ export default class NoteManager {
             const journal = page.parent;
             if (journal?.getFlag(MODULE.ID, 'isCalendarNote')) {
               const authorId = page.system?.author?._id;
-              const ownership = this.#buildOwnership(changes.system.visibility, authorId);
-              const update = {};
-              for (const [k, v] of Object.entries(ownership)) update[`ownership.${k}`] = v;
-              if (authorId && !(authorId in ownership) && journal.ownership?.[authorId] !== undefined) update[`ownership.-=${authorId}`] = null;
-              await journal.update(update);
+              const defaults = this.#buildOwnership(changes.system.visibility, authorId);
+              const nextOwnership = {};
+              for (const [k, v] of Object.entries(journal.ownership ?? {})) if (typeof v === 'number' && !k.startsWith('-=')) nextOwnership[k] = v;
+              nextOwnership.default = defaults.default;
+              if (authorId) {
+                if (authorId in defaults) nextOwnership[authorId] = defaults[authorId];
+                else delete nextOwnership[authorId];
+              }
+              await journal.update({ ownership: nextOwnership });
               log(3, `Updated journal ownership defaults for visibility change: ${changes.system.visibility}`);
             }
           }

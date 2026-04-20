@@ -8,6 +8,7 @@ import { CalendarManager } from '../calendar/_module.mjs';
 import { HOOKS, MODULE, TEMPLATES } from '../constants.mjs';
 import { NoteManager, compareDates, generateRandomOccurrences, getCurrentDate, needsRandomRegeneration } from '../notes/_module.mjs';
 import { CalendariaSocket, format, localize, log } from '../utils/_module.mjs';
+import { WeatherManager } from '../weather/_module.mjs';
 
 /**
  * Event Scheduler class that monitors time changes and triggers event notifications.
@@ -18,12 +19,6 @@ export default class EventScheduler {
 
   /** @type {Set<string>} Set of event IDs that have been triggered today (prevents duplicate notifications) */
   static #triggeredToday = new Set();
-
-  /** @type {number} Last world time when triggers were checked (throttle to every 30 game minutes) */
-  static #lastTriggerCheckTime = 0;
-
-  /** @type {number} Minimum interval between trigger checks in game seconds (30 minutes) */
-  static TRIGGER_CHECK_INTERVAL = 1800;
 
   /** @type {boolean} Flag to skip event triggers on next update (for timepoint jumps) */
   static #skipNext = false;
@@ -44,11 +39,11 @@ export default class EventScheduler {
 
   /**
    * Handle world time updates.
-   * @param {number} worldTime - The new world time in seconds
+   * @param {number} _worldTime - The new world time in seconds
    * @param {number} _delta - The time delta in seconds
    * @returns {void}
    */
-  static onUpdateWorldTime(worldTime, _delta) {
+  static async onUpdateWorldTime(_worldTime, _delta) {
     if (!CalendariaSocket.isPrimaryGM()) return;
     if (this.#skipNext) {
       this.#skipNext = false;
@@ -59,15 +54,14 @@ export default class EventScheduler {
     const currentDate = getCurrentDate();
     if (!currentDate) return;
     if (!NoteManager.isInitialized()) return;
-    if (this.#lastDate && this.#hasDateChanged(this.#lastDate, currentDate)) {
+    const dateChanged = this.#lastDate && this.#hasDateChanged(this.#lastDate, currentDate);
+    if (dateChanged) {
       this.#triggeredToday.clear();
       this.#updateMultiDayEventProgress(currentDate);
       this.#checkRandomEventRegeneration(currentDate);
+      await WeatherManager.whenDayChangeSettled();
     }
-    if (worldTime - this.#lastTriggerCheckTime >= this.TRIGGER_CHECK_INTERVAL) {
-      this.#checkEventTriggers(this.#lastDate, currentDate);
-      this.#lastTriggerCheckTime = worldTime;
-    }
+    if (this.#lastDate) await this.#checkEventTriggers(this.#lastDate, currentDate);
     this.#lastDate = { ...currentDate };
   }
 
@@ -77,14 +71,13 @@ export default class EventScheduler {
    * @param {object} currentDate - Current date components
    * @private
    */
-  static #checkEventTriggers(previousDate, currentDate) {
+  static async #checkEventTriggers(previousDate, currentDate) {
     const allNotes = NoteManager.getAllNotes();
     for (const note of allNotes) {
       if (this.#triggeredToday.has(note.id)) continue;
-      if (note.flagData.silent) continue;
       if (this.#shouldTrigger(note, previousDate, currentDate)) {
-        this.#triggerEvent(note, currentDate);
         this.#triggeredToday.add(note.id);
+        await this.#triggerEvent(note, currentDate);
       }
     }
   }
@@ -139,11 +132,11 @@ export default class EventScheduler {
    * @param {object} currentDate - Current date components
    * @private
    */
-  static #triggerEvent(note, currentDate) {
+  static async #triggerEvent(note, currentDate) {
     log(3, `Triggering event: ${note.name}`);
-    this.#sendChatAnnouncement(note);
+    if (!note.flagData.silent) this.#sendChatAnnouncement(note);
     Hooks.callAll(HOOKS.EVENT_TRIGGERED, { id: note.id, name: note.name, flagData: note.flagData, currentDate });
-    this.#executeMacro(note);
+    await this.#executeMacro(note);
   }
 
   /**
@@ -152,14 +145,14 @@ export default class EventScheduler {
    * @param {object} [context] - Additional context to pass to the macro
    * @private
    */
-  static #executeMacro(note, context = {}) {
+  static async #executeMacro(note, context = {}) {
     const macroId = note.flagData.macro;
     if (!macroId) return;
     const macro = game.macros.get(macroId);
     if (!macro) return;
     log(3, `Executing macro for event ${note.name}: ${macro.name}`);
     const scope = { event: { id: note.id, name: note.name, flagData: note.flagData }, ...context };
-    macro.execute(scope);
+    await macro.execute(scope);
   }
 
   /**

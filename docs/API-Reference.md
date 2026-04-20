@@ -2200,14 +2200,26 @@ await CALENDARIA.api.setWeather('thunderstorm', { temperature: 65 });
 await CALENDARIA.api.setWeather('rain', { period: 'morning' });
 // Set all periods at once:
 await CALENDARIA.api.setWeather('snow', { allPeriods: true });
+// Override wind and precipitation on top of the preset:
+await CALENDARIA.api.setWeather('cloudy', {
+  temperature: 11,
+  wind: { speed: 2, direction: 'SW', forced: false },
+  precipitation: { type: null, intensity: 0 }
+});
 ```
 
-| Parameter             | Type      | Description                                                                                          |
-| --------------------- | --------- | ---------------------------------------------------------------------------------------------------- |
-| `presetId`            | `string`  | Weather preset ID (e.g., `'clear'`, `'rain'`, `'thunderstorm'`)                                      |
-| `options.temperature` | `number`  | Optional temperature value                                                                           |
-| `options.period`      | `string`  | Specific period to set when intraday is enabled (`'night'`, `'morning'`, `'afternoon'`, `'evening'`) |
-| `options.allPeriods`  | `boolean` | Set all periods to this weather when intraday is enabled                                             |
+| Parameter               | Type      | Description                                                                                          |
+| ----------------------- | --------- | ---------------------------------------------------------------------------------------------------- |
+| `presetId`              | `string`  | Weather preset ID (e.g., `'clear'`, `'rain'`, `'thunderstorm'`)                                      |
+| `options.temperature`   | `number`  | Optional temperature value                                                                           |
+| `options.wind`          | `object`  | Wind override `{ speed, direction, forced }` (falls back to preset wind when omitted)                |
+| `options.precipitation` | `object`  | Precipitation override `{ type, intensity }` (falls back to preset precipitation when omitted)       |
+| `options.period`        | `string`  | Specific period to set when intraday is enabled (`'night'`, `'morning'`, `'afternoon'`, `'evening'`) |
+| `options.allPeriods`    | `boolean` | Set all periods to this weather when intraday is enabled                                             |
+
+**Wind values:** `speed` is an integer `0`-`5` (calm, light, moderate, strong, severe, extreme — see `WIND_SPEEDS` in `scripts/constants.mjs`). `direction` can be a number in degrees (`0` = N, `90` = E, `180` = S, `270` = W), a 16-point compass string (`'N'`, `'NNE'`, `'NE'`, ..., `'NW'`, `'NNW'`), or `null`. Strings are converted to degrees internally via `COMPASS_DIRECTIONS` — pass a number if you need precise rotation. `forced` is a boolean that locks the wind against generator inertia.
+
+**Precipitation values:** `type` is `null`, `'drizzle'`, `'rain'`, `'snow'`, `'sleet'`, or `'hail'`. `intensity` is a number in the range `0`-`1`.
 
 **Returns:** `Promise<object>` - The set weather.
 
