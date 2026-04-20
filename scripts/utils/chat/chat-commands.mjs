@@ -13,6 +13,7 @@ import {
   cmdCycle,
   cmdDate,
   cmdDateTime,
+  cmdEnrichers,
   cmdFestival,
   cmdForecast,
   cmdMoon,
@@ -27,8 +28,7 @@ import {
   cmdToday,
   cmdWeather,
   cmdWeatherProb,
-  cmdWeekday,
-  cmdEnrichers
+  cmdWeekday
 } from './chat-command-handler.mjs';
 
 /** Command patterns for parsing chat input. */
@@ -65,7 +65,10 @@ const COMMAND_PATTERNS = {
  * @returns {boolean|void} False to cancel default processing, undefined otherwise
  */
 export function onChatMessage(_chatLog, message, _chatData) {
-  const trimmed = message.trim();
+  const trimmed = message
+    .replace(/^\s*<p(?:\s[^>]*)?>/i, '')
+    .replace(/<\/p>\s*$/i, '')
+    .trim();
   if (!trimmed.startsWith('/')) return;
   for (const [cmd, pattern] of Object.entries(COMMAND_PATTERNS)) {
     const match = trimmed.match(pattern);

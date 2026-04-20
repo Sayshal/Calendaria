@@ -327,6 +327,7 @@ Advance the world time by a specified amount. GM only.
 
 - Amount (number)
 - Unit (see table below)
+- Optional: `cinematic=true` or `cinematic=false` to override the configured cinematic threshold
 
 **Supported Units:**
 
@@ -344,10 +345,12 @@ Advance the world time by a specified amount. GM only.
 **Examples:**
 
 ```text
-/advance 8 hours       # Skip to 8 hours later
-/advance 1 week        # Advance one week
-/advance 10 rounds     # Advance 10 combat rounds
-/advance 30 m          # Advance 30 minutes
+/advance 8 hours                   # Skip to 8 hours later
+/advance 1 week                    # Advance one week
+/advance 10 rounds                 # Advance 10 combat rounds
+/advance 30 m                      # Advance 30 minutes
+/advance 1 week cinematic=true     # Force the cinematic overlay even below threshold
+/advance 8 hours cinematic=false   # Skip the cinematic overlay even above threshold
 ```
 
 **Output:** Advances time silently.

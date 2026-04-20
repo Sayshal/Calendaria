@@ -151,6 +151,10 @@ await CALENDARIA.api.advanceTimeToPreset('sunrise');
 
 // Advance to next sunset
 await CALENDARIA.api.advanceTimeToPreset('sunset');
+
+// Force the cinematic overlay when advancing
+await CALENDARIA.api.advanceTime({ day: 7 }, { cinematic: true });
+await CALENDARIA.api.jumpToDate({ year: 1492, month: 5, day: 15 }, { cinematic: true });
 ```
 
 ### Clock Control

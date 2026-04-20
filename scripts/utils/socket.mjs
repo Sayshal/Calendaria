@@ -383,15 +383,21 @@ export class CalendariaSocket {
    * @param {number} [data.delta] - Time delta in seconds (for 'advance')
    * @param {object} [data.components] - Time components (for 'set')
    * @param {object} [data.date] - Date object (for 'jump')
+   * @param {boolean|null} [data.cinematicOverride] - Explicit cinematic override (true/false); null/undefined means threshold-gated
    * @returns {void}
    */
   static async #handleTimeRequest(data) {
     if (!this.isPrimaryGM()) return;
-    const { action, delta, components, date } = data;
+    const { action, delta, components, date, cinematicOverride = null } = data;
     log(3, `Primary GM handling time request: ${action}`, data);
+    const runAdvance = async (seconds) => {
+      if (cinematicOverride === true) await CinematicOverlay.triggerFromAdvance(seconds);
+      else if (cinematicOverride === false) await game.time.advance(seconds);
+      else await CinematicOverlay.gatedAdvance(seconds);
+    };
     switch (action) {
       case 'advance':
-        await CinematicOverlay.gatedAdvance(delta);
+        await runAdvance(delta);
         break;
       case 'set': {
         const calendar = CalendarManager.getActiveCalendar();
@@ -400,7 +406,7 @@ export class CalendariaSocket {
         const merged = { ...currentComponents, ...components };
         const targetSeconds = calendar.componentsToTime(merged);
         const timeDelta = targetSeconds - game.time.worldTime;
-        await CinematicOverlay.gatedAdvance(timeDelta);
+        await runAdvance(timeDelta);
         break;
       }
       case 'jump': {
@@ -410,7 +416,7 @@ export class CalendariaSocket {
         const targetComponents = { ...current, year: date.year, month: date.month, dayOfMonth: date.day };
         const targetSeconds = calendar.componentsToTime(targetComponents);
         const timeDelta = targetSeconds - game.time.worldTime;
-        await CinematicOverlay.gatedAdvance(timeDelta);
+        await runAdvance(timeDelta);
         break;
       }
     }

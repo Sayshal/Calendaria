@@ -325,18 +325,19 @@ export function cmdSunset(formatStr) {
 
 /**
  * /advance — advance time by specified amount.
- * @param {string} args - Time amount and unit (e.g., "2 hours")
+ * @param {string} args - Time amount and unit (e.g., "2 hours", "1 week cinematic=true")
  * @returns {Promise<{ content: string }|null>} Null if no calendar or invalid input
  */
 export async function cmdAdvance(args) {
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return null;
-  const match = args?.trim().match(/^(-?\d+)\s*(\w+)$/i);
+  const match = args?.trim().match(/^(-?\d+)\s*(\w+)(?:\s+cinematic=(true|false))?$/i);
   if (!match) return { content: localize('CALENDARIA.ChatCommand.InvalidTimeFormat'), error: true };
   const value = parseInt(match[1], 10);
   const unitInput = match[2].toLowerCase();
   const baseUnit = TIME_UNIT_MAP[unitInput];
   if (!baseUnit) return { content: localize('CALENDARIA.ChatCommand.InvalidTimeFormat'), error: true };
+  const cinematicOverride = match[3] ? match[3].toLowerCase() === 'true' : null;
   const dt = getCurrentDateTime();
   const daysPerWeek = calendar.weeks?.values?.length ?? 7;
   const secondsPerRound = calendar.secondsPerRound ?? 6;
@@ -353,8 +354,16 @@ export async function cmdAdvance(args) {
   };
   const components = { ...dt, ...updates[baseUnit] };
   components.year -= yearZero;
-  if (!game.user.isGM) CalendariaSocket.emit(SOCKET_TYPES.TIME_REQUEST, { action: 'set', components });
-  else await game.time.set(components);
+  if (!game.user.isGM) {
+    CalendariaSocket.emit(SOCKET_TYPES.TIME_REQUEST, { action: 'set', components, cinematicOverride });
+  } else {
+    const { CinematicOverlay } = await import('../../applications/_module.mjs');
+    const targetSeconds = calendar.componentsToTime(components);
+    const timeDelta = targetSeconds - game.time.worldTime;
+    if (cinematicOverride === true) await CinematicOverlay.triggerFromAdvance(timeDelta);
+    else if (cinematicOverride === false) await game.time.advance(timeDelta);
+    else await CinematicOverlay.gatedAdvance(timeDelta);
+  }
   log(3, `Advanced time by ${value} ${unitInput}`);
   return { content: format('CALENDARIA.ChatCommand.TimeAdvanced', { value, unit: unitInput }) };
 }
