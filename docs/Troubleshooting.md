@@ -67,6 +67,10 @@ These errors appear when a non-GM user attempts GM-only actions:
 3. Try resetting position: **Settings Panel** > **MiniCal** > **Reset Position**
 4. Check if UI is off-screen (resize browser window)
 
+### Golarion / Pact Standard Dates Shift by One Day After Feb 28
+
+Golarion (AR), Golarion (IC), and Pact Standard (AG) follow Gregorian leap rules, matching Luxon's leap-year model on PF2E/SF2E World Clock syncs. In non-PF2E worlds using these calendars, saved `worldTime` values past Feb 28 of a leap year resolve one day later than under custom leap rules. If a campaign recorded dates under the older leap rule, adjust stored dates or re-derive `worldTime` from the intended in-game date.
+
 ---
 
 ## Time Control Issues

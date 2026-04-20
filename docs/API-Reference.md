@@ -599,7 +599,7 @@ const cycles = CALENDARIA.api.getCycleValues();
 
 ### getSunrise(zone)
 
-Get today's sunrise time in hours.
+Get today's sunrise time in hours. Zones with both `sunriseOverride` and `sunsetOverride` set (and `sunrise < sunset`, within `0` to `hoursPerDay`) return the fixed override unchanged across the year, bypassing latitude and shortest/longest interpolation.
 
 ```javascript
 const sunrise = CALENDARIA.api.getSunrise();
@@ -618,7 +618,7 @@ const sunrise = CALENDARIA.api.getSunrise(myZone);
 
 ### getSunset(zone)
 
-Get today's sunset time in hours.
+Get today's sunset time in hours. Zones with both `sunriseOverride` and `sunsetOverride` set (and `sunrise < sunset`, within `0` to `hoursPerDay`) return the fixed override unchanged across the year.
 
 ```javascript
 const sunset = CALENDARIA.api.getSunset();
@@ -637,7 +637,7 @@ const sunset = CALENDARIA.api.getSunset(myZone);
 
 ### getDaylightHours(zone)
 
-Get hours of daylight today.
+Get hours of daylight today. Zones with both `sunriseOverride` and `sunsetOverride` set return `sunsetOverride - sunriseOverride` as a constant across the year.
 
 ```javascript
 const hours = CALENDARIA.api.getDaylightHours();
@@ -2100,6 +2100,7 @@ CALENDARIA.api.toggleStopwatch();
 
 // Chronicle
 CALENDARIA.api.showChronicle();
+CALENDARIA.api.showChronicle({ startDate, endDate, lockedRange: true, calendarId });
 CALENDARIA.api.hideChronicle();
 CALENDARIA.api.toggleChronicle();
 
@@ -2114,6 +2115,19 @@ CALENDARIA.api.toggleNoteViewer();
 // Secondary Calendar
 CALENDARIA.api.showSecondaryCalendar('greyhawk');
 ```
+
+### showChronicle(options)
+
+Show the Chronicle with an optional locked date range.
+
+| Parameter             | Type      | Description                                              |
+| --------------------- | --------- | -------------------------------------------------------- |
+| `options.startDate`   | `object`  | Range start `{year, month (1-indexed), day (1-indexed)}` |
+| `options.endDate`     | `object`  | Range end `{year, month (1-indexed), day (1-indexed)}`   |
+| `options.lockedRange` | `boolean` | Locks the view to `startDate`/`endDate`                  |
+| `options.calendarId`  | `string`  | Calendar ID whose entries drive the view                 |
+
+**Returns:** `Chronicle` - The chronicle instance.
 
 ### showNoteViewer(options)
 

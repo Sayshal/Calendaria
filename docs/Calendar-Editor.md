@@ -31,6 +31,12 @@ Configure calendar identity and selection.
 - **Name.** Display name for the calendar (required)
 - **Description.** Optional notes about the calendar
 
+### System Sync
+
+Only shown when the active game system is PF2E or SF2E.
+
+- **Date Theme.** Selects the theme reported to the system's World Clock and stored on the calendar as `metadata.luxonSync.theme`. Options reuse the system's own date-theme labels (AR, IC, AG, CE). Calendars with no compatible theme hide the system's in-game Show Clock button.
+
 ---
 
 ## Display Tab
@@ -196,7 +202,7 @@ When using non-standard time:
 
 Control sunrise and sunset times throughout the year.
 
-- **Enabled.** Toggle daylight calculations on/off
+- **Enabled.** Toggle daylight calculations on/off. When unchecked, Shortest Day, Longest Day, Winter Solstice, and Summer Solstice are hidden
 - **Shortest Day.** Hours of daylight on the winter solstice
 - **Longest Day.** Hours of daylight on the summer solstice
 - **Winter Solstice.** Month and day of the shortest day

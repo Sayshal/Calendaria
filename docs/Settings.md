@@ -33,6 +33,8 @@ Select which calendar system to use. Changing this requires a world reload.
 
 - Default: `gregorian`
 
+On PF2E and SF2E worlds, the picker tags calendars lacking a `metadata.luxonSync.theme` with a "likely incompatible" suffix and shows a warning banner. The active calendar's date theme syncs to the system World Clock when compatible; when not, the in-system Show Clock button is hidden.
+
 ### Open Calendar Editor
 
 Launch the Calendar Editor for creating/modifying calendars.
@@ -159,7 +161,8 @@ The dnd5e **Advance Bastion Turn** button is also patched while this setting is 
 - Only visible in dnd5e worlds
 - Requires **Bastion Configuration → Enabled** on the dnd5e side
 - Default: `true`
-- Respects **Clock Locked** — locked clocks block both automatic and button-triggered advances
+- Automatic advances run on the Primary GM only
+- Respects **Clock Locked**. Locked clocks block both automatic and button-triggered advances
 
 ### Sync with Game Pause
 
@@ -519,7 +522,7 @@ Minimum time advance to trigger the cinematic. Smaller advances play without it.
 - Default: `Week`
 
 > [!NOTE]
-> Only the dedicated "Cinematic Advance" button in the Set Date dialog triggers the cinematic. Normal Set Date, API calls, and socket requests do not.
+> The threshold gates advances initiated from the HUD, MiniCal, and Time Keeper jump buttons, the chat `/advance` command, socket time requests, and the "Cinematic Advance" button in the Set Date dialog.
 
 ### Panel Duration
 

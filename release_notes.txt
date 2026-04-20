@@ -1,26 +1,47 @@
+## Breaking Changes
+
+- Galifar moon cycle lengths updated to canonical Baker/Perkins 2005 Dragonshards values
+- Starfinder Pact Standard `firstWeekday` corrected to 0; Somal moon removed
+- `khorvaire` and `greyhawk-364` removed as redundant variants; one-time migration redirects active calendar setting
+
+## New Features
+
+- Bastion facility orders auto-advance with world time (dnd5e)
+- Calendar exports bundle custom note presets referenced by the calendar's notes
+- Chat `/advance` triggers cinematic overlay; `cinematic=` override supported
+- Duplicate button on climate zones deep-clones presets, overrides, and aliases
+- New `[[cal.chronicle D M Y to D M Y]]` enricher with locked-range Chronicle mode
+- PF2E/SF2E WorldClock sync works with every bundled calendar
+- Per-phase Weight values on Randomized moons
+- Per-zone fixed sunrise and sunset hours to lock daylight to exact times
+- Rest advance dropdown: 8 AM, Sunrise, or Fixed Hours (dnd5e, PF1E, PF2E, SF2E)
+- System Sync section in calendar editor for picking the date theme
+- `setDateTime` and `jumpToDate` API accept `{ cinematic }` option
+
 ## Bug Fixes
 
-- Cinematic not playing on long rest for individual actors or with Rest Recovery
-- Climate editor losing preset weights when switching between seasons
-- Cycle stages advancing every unit instead of respecting the configured length
-- Darkness level flickering when advancing time by sub-hour increments
-- Equinox and solstice festival notes anchoring to the wrong date
-- Moon reference date producing wrong phases when yearZero is non-zero
-- "Notify Before" set to 0 producing no notification
-- Preset manager labels shifting between presets on select, reset, delete, and restore
-- Random weather and manual weather selection ignoring the season temperature range
-- Settings import failing between worlds due to world-specific user IDs
-- Time inputs on note sheets displaying single-digit minutes (3 instead of 03)
-- Weather sounds persisting when "Disable weather fx" is checked on a scene
-- Weather system breaking at extreme temperatures
-- Weekday reorder via Move Up/Down not persisting after save
-- Old imported notes not affected by ownership sync on presets
-- Zero-weight warning border not clearing after entering a value
+- "Clear" localization collision between action buttons and weather presets
+- Canonical corrections to 14 prebuilt calendars (months, weekdays, festivals, moons)
+- Climate zone temperature inheritance saving as 0/19 or 0/20 instead of inheriting season defaults
+- Forecast variance selecting presets outside the current season and zone
+- Multi-day events no longer render as a single unsplit block in week view
+- Multi-million-iteration freeze on recurring notes with stale start dates
+- Per-user note ownership lost when toggling visibility or re-saving the sheet with no changes
+- Settings panel crash on legacy custom theme data
+- Slash commands silently failing in Foundry v13+ due to ProseMirror paragraph wrapping
+- Weather Picker leaving temperature blank after selecting a preset
+- Weather Picker not inheriting icon, color, FXMaster preset, sound, or FX macro overrides
+- Week view not rendering recurring notes on every matching day
+- Zone preset weight warnings ignoring season climate inheritance
 
 ## Changes
 
-- `calendaria.ready` hook now fires before apps render; new `calendaria.rendered` hook fires after
-- Default preset can now sync to all notes without a matching custom preset
-- Season temperature range is now the authority for weather generation
-- Settings import is resilient to individual failures instead of aborting entirely
-- "Trigger on Rest" setting disabled when "Advance Time on Rest" is off
+- Bundled calendar count reduced to 19; `khorvaire` and `greyhawk-364` consolidated into `galifar` and `greyhawk`
+- Duration controls moved from Settings tab to Schedule tab on the note sheet
+- GMs can edit per-user ownership in every visibility mode
+- Golarion, Golarion Imperial, and Pact Standard now use Gregorian leap rules for Luxon alignment
+- Limited-repeat option removed; recurring notes use a fixed 365-day lookback
+
+## Documentation
+
+- Climate layering diagram added to Weather System docs

@@ -70,6 +70,8 @@ Calendaria includes 19 pre-built calendars:
 | Thyatian                     | Mystara             |
 | Traveller                    | Traveller RPG       |
 
+Gregorian, Golarion (Absalom Reckoning), Golarion (Imperial Calendar), and Pact Standard (After Gap) sync with the PF2E/SF2E World Clock out of the box. Other bundled calendars are tagged "likely incompatible" in the Calendaria settings picker on PF2E/SF2E worlds.
+
 To create a custom calendar or import from another source, use the buttons in the Calendar tab. See [Calendar Editor](Calendar-Editor) and [Importing Calendars](Importing-Calendars) for details.
 
 ### 3. Configure Applications
