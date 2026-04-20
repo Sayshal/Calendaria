@@ -46,31 +46,29 @@ On first load, the MiniCal appears with the Gregorian calendar selected by defau
 > [!NOTE]
 > GMs can enable **Show Active Calendar to Players** to let players see the currently active calendar name. Use the search box at the top of the sidebar to quickly find settings.
 
-Calendaria includes 21 pre-built calendars:
+Calendaria includes 19 pre-built calendars:
 
-| Calendar                     | Setting                             |
-| ---------------------------- | ----------------------------------- |
-| Athasian                     | Dark Sun / Athas                    |
-| Barovian                     | Ravenloft / Barovia                 |
-| Cerilian                     | Birthright                          |
-| Drakkenheim                  | Drakkenheim                         |
-| Exandrian                    | Critical Role / Exandria            |
-| Forbidden Lands              | Forbidden Lands                     |
-| Galifar                      | Eberron variant                     |
-| Golarion (Absalom Reckoning) | Pathfinder (AR era)                 |
-| Golarion (Imperial Calendar) | Pathfinder (IC era)                 |
-| Gregorian                    | Real-world calendar                 |
-| Greyhawk                     | World of Greyhawk                   |
-| Greyhawk (Dragon #68)        | World of Greyhawk (364-day variant) |
-| Harptos                      | Forgotten Realms                    |
-| Imperial (Warhammer)         | Warhammer Fantasy                   |
-| Khorvaire                    | Eberron                             |
-| Krynn (Elven)                | Dragonlance                         |
-| Krynn (Solamnic)             | Dragonlance                         |
-| Pact Standard (After Gap)    | Starfinder 2E                       |
-| Renescara                    | Homebrew showcase                   |
-| Thyatian                     | Mystara                             |
-| Traveller                    | Traveller RPG                       |
+| Calendar                     | Setting             |
+| ---------------------------- | ------------------- |
+| Athasian                     | Dark Sun / Athas    |
+| Barovian                     | Ravenloft / Barovia |
+| Cerilian                     | Birthright          |
+| Drakkenheim                  | Drakkenheim         |
+| Exandrian                    | Critical Role       |
+| Forbidden Lands              | Forbidden Lands     |
+| Galifar                      | Eberron             |
+| Golarion (Absalom Reckoning) | Pathfinder (AR era) |
+| Golarion (Imperial Calendar) | Pathfinder (IC era) |
+| Gregorian                    | Real-world calendar |
+| Greyhawk                     | World of Greyhawk   |
+| Harptos                      | Forgotten Realms    |
+| Imperial (Warhammer)         | Warhammer Fantasy   |
+| Krynn (Elven)                | Dragonlance         |
+| Krynn (Solamnic)             | Dragonlance         |
+| Pact Standard (After Gap)    | Starfinder 2E       |
+| Renescara                    | Homebrew showcase   |
+| Thyatian                     | Mystara             |
+| Traveller                    | Traveller RPG       |
 
 To create a custom calendar or import from another source, use the buttons in the Calendar tab. See [Calendar Editor](Calendar-Editor) and [Importing Calendars](Importing-Calendars) for details.
 

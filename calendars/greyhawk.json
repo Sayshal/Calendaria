@@ -16,91 +16,91 @@
       "fireseek00000000": {
         "name": "Fireseek",
         "abbreviation": "Fire",
-        "ordinal": 1,
+        "ordinal": 2,
         "days": 28
       },
       "readying00000000": {
         "name": "Readying",
         "abbreviation": "Ready",
-        "ordinal": 2,
+        "ordinal": 3,
         "days": 28
       },
       "coldeven00000000": {
         "name": "Coldeven",
         "abbreviation": "Cold",
-        "ordinal": 3,
+        "ordinal": 4,
         "days": 28
       },
       "growfest00000000": {
         "name": "Growfest",
         "abbreviation": "Grow",
-        "ordinal": 4,
+        "ordinal": 5,
         "days": 7
       },
       "planting00000000": {
         "name": "Planting",
         "abbreviation": "Plant",
-        "ordinal": 4,
+        "ordinal": 6,
         "days": 28
       },
       "flocktime0000000": {
         "name": "Flocktime",
         "abbreviation": "Flock",
-        "ordinal": 5,
+        "ordinal": 7,
         "days": 28
       },
       "wealsun000000000": {
         "name": "Wealsun",
         "abbreviation": "Weal",
-        "ordinal": 6,
+        "ordinal": 8,
         "days": 28
       },
       "richfest00000000": {
         "name": "Richfest",
         "abbreviation": "Rich",
-        "ordinal": 7,
+        "ordinal": 9,
         "days": 7
       },
       "reaping000000000": {
         "name": "Reaping",
         "abbreviation": "Reap",
-        "ordinal": 7,
+        "ordinal": 10,
         "days": 28
       },
       "goodmonth0000000": {
         "name": "Goodmonth",
         "abbreviation": "Good",
-        "ordinal": 8,
+        "ordinal": 11,
         "days": 28
       },
       "harvester0000000": {
         "name": "Harvester",
         "abbreviation": "Harv",
-        "ordinal": 9,
+        "ordinal": 12,
         "days": 28
       },
       "brewfest00000000": {
         "name": "Brewfest",
         "abbreviation": "Brew",
-        "ordinal": 10,
+        "ordinal": 13,
         "days": 7
       },
       "patchwall0000000": {
         "name": "Patchwall",
         "abbreviation": "Patch",
-        "ordinal": 10,
+        "ordinal": 14,
         "days": 28
       },
       "readyreat0000000": {
         "name": "Ready'reat",
         "abbreviation": "R'reat",
-        "ordinal": 11,
+        "ordinal": 15,
         "days": 28
       },
       "sunsebb000000000": {
         "name": "Sunsebb",
         "abbreviation": "Sun",
-        "ordinal": 12,
+        "ordinal": 16,
         "days": 28
       }
     }
@@ -150,44 +150,162 @@
     "minutesPerHour": 60,
     "secondsPerMinute": 60
   },
-  "festivals": {},
+  "festivals": {
+    "mummergin0000000": {
+      "name": "Mummergin",
+      "month": 0,
+      "duration": 1,
+      "icon": "fa-masks-theater",
+      "color": "#9370DB",
+      "description": "Midwinter night festival of theatrical performances, mummery, and festive celebrations.",
+      "dayOfMonth": 3,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 1
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 4
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "walpurgis0000000": {
+      "name": "Walpurgis",
+      "month": 6,
+      "duration": 1,
+      "icon": "fa-skull-crossbones",
+      "color": "#8B0000",
+      "description": "Extremely sacred day to priests of evil, observed with elaborate ceremonies on the Greyhawk analogue of Walpurgisnacht.",
+      "dayOfMonth": 17,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 7
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 18
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "midsummernight00": {
+      "name": "Midsummer Night",
+      "month": 8,
+      "duration": 1,
+      "icon": "fa-sun",
+      "color": "#FFD700",
+      "description": "Midsummer evening when both Luna and Celene are full, holiest day for followers of Pelor.",
+      "dayOfMonth": 3,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 9
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 4
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    }
+  },
   "seasons": {
     "values": {
-      "spring0000000000": {
-        "name": "CALENDARIA.Season.Spring",
-        "icon": "fas fa-seedling",
-        "color": "#90ee90",
-        "seasonalType": "spring",
-        "dayStart": 49,
-        "dayEnd": 139,
-        "abbreviation": "Spr"
-      },
-      "summer0000000000": {
-        "name": "CALENDARIA.Season.Summer",
-        "icon": "fas fa-sun",
-        "color": "#ffd700",
-        "seasonalType": "summer",
-        "dayStart": 140,
-        "dayEnd": 230,
-        "abbreviation": "Sum"
-      },
-      "fall000000000000": {
-        "name": "Fall",
-        "icon": "fas fa-leaf",
-        "color": "#d2691e",
-        "seasonalType": "autumn",
-        "dayStart": 231,
-        "dayEnd": 321,
-        "abbreviation": "Fal"
-      },
       "winter0000000000": {
         "name": "CALENDARIA.Season.Winter",
         "icon": "fas fa-snowflake",
         "color": "#87ceeb",
         "seasonalType": "winter",
-        "dayStart": 322,
-        "dayEnd": 48,
+        "dayStart": 336,
+        "dayEnd": 34,
         "abbreviation": "Win"
+      },
+      "spring0000000000": {
+        "name": "CALENDARIA.Season.Spring",
+        "icon": "fas fa-seedling",
+        "color": "#90ee90",
+        "seasonalType": "spring",
+        "dayStart": 35,
+        "dayEnd": 90,
+        "abbreviation": "Spr"
+      },
+      "lowsummer0000000": {
+        "name": "Low Summer",
+        "icon": "fas fa-sun",
+        "color": "#ffeb3b",
+        "seasonalType": "summer",
+        "dayStart": 91,
+        "dayEnd": 181,
+        "abbreviation": "LSm"
+      },
+      "highsummer000000": {
+        "name": "High Summer",
+        "icon": "fas fa-sun",
+        "color": "#ffa000",
+        "seasonalType": "summer",
+        "dayStart": 182,
+        "dayEnd": 272,
+        "abbreviation": "HSm"
+      },
+      "autumn0000000000": {
+        "name": "Autumn",
+        "icon": "fas fa-leaf",
+        "color": "#d2691e",
+        "seasonalType": "autumn",
+        "dayStart": 273,
+        "dayEnd": 335,
+        "abbreviation": "Aut"
       }
     }
   },
@@ -325,8 +443,8 @@
     "enabled": true,
     "shortestDay": 8,
     "longestDay": 16,
-    "winterSolstice": 358,
-    "summerSolstice": 174
+    "winterSolstice": 3,
+    "summerSolstice": 185
   },
   "cycles": {},
   "canonicalHours": {},

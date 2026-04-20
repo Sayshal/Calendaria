@@ -162,6 +162,42 @@
       "reminderType": "none",
       "reminderOffset": 0
     },
+    "dayofmourning000": {
+      "name": "Day of Mourning",
+      "month": 1,
+      "icon": "fa-cloud",
+      "color": "#4A4A4A",
+      "description": "Annual remembrance of the destruction of Cyre on 20 Olarune 994 YK, when an unknown cataclysm transformed the kingdom into the Mournland.",
+      "dayOfMonth": 19,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 2
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 20
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
     "brightblade00000": {
       "name": "Brightblade",
       "month": 3,
@@ -416,10 +452,10 @@
     },
     "throneholdday000": {
       "name": "Thronehold Day",
-      "month": 8,
+      "month": 10,
       "icon": "fa-scroll",
       "color": "#483D8B",
-      "description": "Anniversary of the Treaty of Thronehold that ended the Last War.",
+      "description": "Anniversary of the Treaty of Thronehold signed on 11 Aryth 996 YK, formally ending the Last War.",
       "dayOfMonth": 10,
       "duration": 1,
       "countsForWeekday": true,
@@ -432,7 +468,7 @@
             "type": "condition",
             "field": "month",
             "op": "==",
-            "value": 9
+            "value": 11
           },
           {
             "type": "condition",
@@ -566,7 +602,7 @@
         "icon": "fas fa-snowflake",
         "color": "#87ceeb",
         "seasonalType": "winter",
-        "dayStart": 309,
+        "dayStart": 308,
         "dayEnd": 55,
         "abbreviation": "Win"
       },
@@ -594,7 +630,7 @@
         "color": "#d2691e",
         "seasonalType": "autumn",
         "dayStart": 224,
-        "dayEnd": 308,
+        "dayEnd": 307,
         "abbreviation": "Aut"
       }
     }
@@ -610,7 +646,7 @@
   "moons": {
     "zarantyr00000000": {
       "name": "Zarantyr",
-      "cycleLength": 28,
+      "cycleLength": 77,
       "color": "#ADD8E6",
       "phases": {
         "newmoon000000000": {
@@ -670,7 +706,7 @@
     },
     "olarune000000000": {
       "name": "Olarune",
-      "cycleLength": 28,
+      "cycleLength": 56,
       "color": "#87CEEB",
       "cycleDayAdjust": 2,
       "phases": {
@@ -731,7 +767,7 @@
     },
     "therendor0000000": {
       "name": "Therendor",
-      "cycleLength": 28,
+      "cycleLength": 42,
       "color": "#90EE90",
       "cycleDayAdjust": 4,
       "phases": {
@@ -792,7 +828,7 @@
     },
     "eyre000000000000": {
       "name": "Eyre",
-      "cycleLength": 28,
+      "cycleLength": 63,
       "color": "#FFD700",
       "cycleDayAdjust": 6,
       "phases": {
@@ -853,7 +889,7 @@
     },
     "dravago000000000": {
       "name": "Dravago",
-      "cycleLength": 28,
+      "cycleLength": 91,
       "color": "#FFA500",
       "cycleDayAdjust": 8,
       "phases": {
@@ -975,7 +1011,7 @@
     },
     "lharvion00000000": {
       "name": "Lharvion",
-      "cycleLength": 28,
+      "cycleLength": 98,
       "color": "#DC143C",
       "cycleDayAdjust": 12,
       "phases": {
@@ -1036,7 +1072,7 @@
     },
     "barrakas00000000": {
       "name": "Barrakas",
-      "cycleLength": 28,
+      "cycleLength": 105,
       "color": "#8B0000",
       "cycleDayAdjust": 14,
       "phases": {
@@ -1097,7 +1133,7 @@
     },
     "rhaan00000000000": {
       "name": "Rhaan",
-      "cycleLength": 28,
+      "cycleLength": 49,
       "color": "#DAA520",
       "cycleDayAdjust": 16,
       "phases": {
@@ -1158,7 +1194,7 @@
     },
     "sypheros00000000": {
       "name": "Sypheros",
-      "cycleLength": 28,
+      "cycleLength": 35,
       "color": "#696969",
       "cycleDayAdjust": 18,
       "phases": {
@@ -1219,7 +1255,7 @@
     },
     "aryth00000000000": {
       "name": "Aryth",
-      "cycleLength": 28,
+      "cycleLength": 84,
       "color": "#2F4F4F",
       "cycleDayAdjust": 20,
       "phases": {
@@ -1280,7 +1316,7 @@
     },
     "vult000000000000": {
       "name": "Vult",
-      "cycleLength": 28,
+      "cycleLength": 70,
       "color": "#191970",
       "cycleDayAdjust": 22,
       "phases": {
@@ -1344,8 +1380,8 @@
     "enabled": true,
     "shortestDay": 9,
     "longestDay": 15,
-    "winterSolstice": 322,
-    "summerSolstice": 154
+    "winterSolstice": 14,
+    "summerSolstice": 182
   },
   "cycles": {},
   "canonicalHours": {},

@@ -22,7 +22,7 @@ Watch the sun and moon arc across a realistic sky dome, or choose from compact d
 
 ### Custom Calendars
 
-Use bundled calendars (Gregorian, Harptos, Exandria, Golarian, and more) or create your own with the [Calendar Editor](Calendar-Editor). Support for custom months, weekdays, leap years, intercalary days, and year zero handling.
+Use bundled calendars (Gregorian, Harptos, Exandria, Golarion, and more) or create your own with the [Calendar Editor](Calendar-Editor). Support for custom months, weekdays, leap years, intercalary days, and year zero handling.
 
 ### Smart Events
 

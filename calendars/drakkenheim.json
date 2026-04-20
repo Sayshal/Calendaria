@@ -269,6 +269,48 @@
       "hasDuration": true,
       "reminderType": "none",
       "reminderOffset": 0
+    },
+    "tarnascomet00000": {
+      "name": "Tarna's Comet",
+      "month": 10,
+      "duration": 30,
+      "icon": "fa-meteor",
+      "color": "#FFD700",
+      "description": "The most well-known celestial object in Elyrian skies, Tarna's Comet appears once every 433 years as a golden streak across the night, brightest during the dark winter evenings of Rimewind.",
+      "dayOfMonth": 0,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "year",
+            "op": "%",
+            "value": 433
+          },
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 11
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 1
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": true,
+      "reminderType": "none",
+      "reminderOffset": 0
     }
   },
   "seasons": {
@@ -323,7 +365,7 @@
     "luna000000000000": {
       "name": "Luna",
       "cycleLength": 29,
-      "color": "#C0C0C0",
+      "color": "#A8C8E8",
       "phases": {
         "newmoon000000000": {
           "name": "CALENDARIA.MoonPhase.NewMoon",

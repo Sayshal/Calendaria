@@ -500,6 +500,32 @@ async function migrateRestAdvanceMode() {
 }
 
 /**
+ * Migrate users off removed/consolidated bundled calendars.
+ * Redirects the active calendar setting when a world was using a calendar that has been removed:
+ * khorvaire → galifar (Eberron calendar consolidation; they name the same canonical system)
+ * greyhawk-364 → greyhawk (the 364-day variant is now the canonical form of the main greyhawk preset)
+ * Month/weekday/moon/festival IDs are preserved across each pair, so notes continue to resolve without edits.
+ * @since 1.0.6
+ * @deprecated Remove in 1.2.0
+ * @returns {Promise<void>}
+ */
+export async function migrateRemovedCalendars() {
+  const KEY = 'removedCalendarsMigrationComplete';
+  if (!game.user?.isGM) return;
+  if (game.settings.get(MODULE.ID, KEY)) return;
+  const active = game.settings.get(MODULE.ID, SETTINGS.ACTIVE_CALENDAR);
+  const redirects = { khorvaire: 'galifar', 'greyhawk-364': 'greyhawk' };
+  const target = redirects[active];
+  if (target) {
+    await game.settings.set(MODULE.ID, SETTINGS.ACTIVE_CALENDAR, target);
+    const content = `<p><strong>Calendaria 1.0.6:</strong> Active calendar migrated from <code>${active}</code> to <code>${target}</code>.</p><p>The <code>${active}</code> preset has been removed; <code>${target}</code> is the canonical equivalent. Month, weekday, moon, and festival IDs are preserved, so your notes will continue to resolve on their existing dates. World time is unchanged.</p>`;
+    await ChatMessage.create({ user: game.user.id, whisper: ChatMessage.getWhisperRecipients('GM').map((u) => u.id), content, flags: { calendaria: { migrationNotice: true } } });
+    log(3, `Migrated active calendar: ${active} → ${target}`);
+  }
+  await game.settings.set(MODULE.ID, KEY, true);
+}
+
+/**
  * Run all migrations.
  * @returns {Promise<void>}
  */
@@ -512,6 +538,7 @@ export async function runAllMigrations() {
   await migrateFestivalPresetRemoval();
   await migrateLimitedRepeatRemoval();
   await migrateRestAdvanceMode();
+  await migrateRemovedCalendars();
   await recoverOrphanedPresets();
 }
 

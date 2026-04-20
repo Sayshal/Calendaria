@@ -9,7 +9,7 @@ A procedural weather system with climate zones, seasonal temperatures, wind, pre
 
 ## Getting Started
 
-All 20 bundled calendar presets include default climate zone configurations with full weather data. Weather generation works out of the box when using a bundled calendar, no manual zone setup required.
+All 19 bundled calendar presets include default climate zone configurations with full weather data. Weather generation works out of the box when using a bundled calendar, no manual zone setup required.
 
 To customize the weather profile, open the [Climate Editor](Climate-Editor) and modify the bundled zone or add additional zones.
 

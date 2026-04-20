@@ -17,18 +17,12 @@
       "nachhexen000000": {
         "name": "Nachhexen",
         "abbreviation": "Nach",
-        "ordinal": 1,
+        "ordinal": 2,
         "days": 32
       },
       "jahrdrung000000": {
         "name": "Jahrdrung",
         "abbreviation": "Jahr",
-        "ordinal": 2,
-        "days": 33
-      },
-      "pflugzeit000000": {
-        "name": "Pflugzeit",
-        "abbreviation": "Pflug",
         "ordinal": 3,
         "days": 33
       },
@@ -39,86 +33,92 @@
         "days": 1,
         "type": "intercalary"
       },
+      "pflugzeit000000": {
+        "name": "Pflugzeit",
+        "abbreviation": "Pflug",
+        "ordinal": 5,
+        "days": 33
+      },
       "sigmarzeit00000": {
         "name": "Sigmarzeit",
         "abbreviation": "Sig",
-        "ordinal": 4,
+        "ordinal": 6,
         "days": 33
       },
       "sommerzeit00000": {
         "name": "Sommerzeit",
         "abbreviation": "Som",
-        "ordinal": 5,
+        "ordinal": 7,
         "days": 33
       },
       "sonnstill000000": {
         "name": "Sonnstill",
         "abbreviation": "Sonn",
-        "ordinal": 6,
+        "ordinal": 8,
         "days": 1,
         "type": "intercalary"
       },
       "vorgeheim000000": {
         "name": "Vorgeheim",
         "abbreviation": "Vorg",
-        "ordinal": 6,
+        "ordinal": 9,
         "days": 33
       },
       "geheimnisna0000": {
-        "name": "Geheimnisnacht",
+        "name": "Geheimnistag",
         "abbreviation": "Geh",
-        "ordinal": 7,
+        "ordinal": 10,
         "days": 1,
         "type": "intercalary"
       },
       "nachgeheim00000": {
         "name": "Nachgeheim",
         "abbreviation": "Nachg",
-        "ordinal": 7,
+        "ordinal": 11,
         "days": 32
       },
       "erntezeit000000": {
         "name": "Erntezeit",
         "abbreviation": "Ernt",
-        "ordinal": 8,
+        "ordinal": 12,
         "days": 33
       },
       "mittherbst00000": {
         "name": "Mittherbst",
         "abbreviation": "Mith",
-        "ordinal": 9,
+        "ordinal": 13,
         "days": 1,
         "type": "intercalary"
       },
       "brauzeit0000000": {
         "name": "Brauzeit",
         "abbreviation": "Brau",
-        "ordinal": 9,
+        "ordinal": 14,
         "days": 33
       },
       "kaldezeit000000": {
         "name": "Kaldezeit",
         "abbreviation": "Kald",
-        "ordinal": 10,
+        "ordinal": 15,
+        "days": 33
+      },
+      "ulriczeit000000": {
+        "name": "Ulriczeit",
+        "abbreviation": "Ulr",
+        "ordinal": 16,
         "days": 33
       },
       "mondstille00000": {
         "name": "Mondstille",
         "abbreviation": "Mond",
-        "ordinal": 11,
+        "ordinal": 17,
         "days": 1,
         "type": "intercalary"
-      },
-      "ulriczeit000000": {
-        "name": "Ulriczeit",
-        "abbreviation": "Ulr",
-        "ordinal": 11,
-        "days": 33
       },
       "vorhexen0000000": {
         "name": "Vorhexen",
         "abbreviation": "Vorh",
-        "ordinal": 12,
+        "ordinal": 18,
         "days": 33
       }
     }
@@ -164,7 +164,7 @@
         "name": "Festag",
         "ordinal": 8,
         "abbreviation": "Fes",
-        "restDay": true
+        "isRestDay": true
       }
     },
     "daysPerYear": 400,
@@ -211,7 +211,7 @@
     },
     "mitterfruhlfe00": {
       "name": "Mitterfruhl",
-      "month": 4,
+      "month": 3,
       "countsForWeekday": false,
       "icon": "fa-seedling",
       "color": "#90EE90",
@@ -227,7 +227,7 @@
             "type": "condition",
             "field": "month",
             "op": "==",
-            "value": 5
+            "value": 4
           },
           {
             "type": "condition",
@@ -282,12 +282,12 @@
       "reminderOffset": 0
     },
     "geheimnisfest00": {
-      "name": "Geheimnisnacht",
+      "name": "Geheimnistag",
       "month": 9,
       "countsForWeekday": false,
       "icon": "fa-ghost",
       "color": "#4B0082",
-      "description": "The Night of Mysteries, when the barrier between the living and dead grows thin. Morrslieb hangs full, its green light casting eerie shadows. A night of terror and dark portent.",
+      "description": "The Day of Mystery. The eve (Geheimnisnacht) sees the barrier between the living and dead grow thin; Morrslieb hangs full, its green light casting eerie shadows across the Empire.",
       "dayOfMonth": 0,
       "duration": 1,
       "leapYearOnly": false,
@@ -355,7 +355,7 @@
     },
     "mondstillefe000": {
       "name": "Mondstille",
-      "month": 15,
+      "month": 16,
       "countsForWeekday": false,
       "icon": "fa-moon",
       "color": "#4682B4",
@@ -371,7 +371,7 @@
             "type": "condition",
             "field": "month",
             "op": "==",
-            "value": 16
+            "value": 17
           },
           {
             "type": "condition",
@@ -397,8 +397,8 @@
         "icon": "fas fa-seedling",
         "color": "#90ee90",
         "seasonalType": "spring",
-        "dayStart": 67,
-        "dayEnd": 166,
+        "dayStart": 17,
+        "dayEnd": 116,
         "abbreviation": "Spr"
       },
       "summer0000000000": {
@@ -406,8 +406,8 @@
         "icon": "fas fa-sun",
         "color": "#ffd700",
         "seasonalType": "summer",
-        "dayStart": 167,
-        "dayEnd": 266,
+        "dayStart": 117,
+        "dayEnd": 217,
         "abbreviation": "Sum"
       },
       "autumn0000000000": {
@@ -415,8 +415,8 @@
         "icon": "fas fa-leaf",
         "color": "#d2691e",
         "seasonalType": "autumn",
-        "dayStart": 267,
-        "dayEnd": 366,
+        "dayStart": 218,
+        "dayEnd": 317,
         "abbreviation": "Aut"
       },
       "winter0000000000": {
@@ -424,8 +424,8 @@
         "icon": "fas fa-snowflake",
         "color": "#87ceeb",
         "seasonalType": "winter",
-        "dayStart": 367,
-        "dayEnd": 66,
+        "dayStart": 318,
+        "dayEnd": 16,
         "abbreviation": "Win"
       }
     }
@@ -585,8 +585,8 @@
     "enabled": true,
     "shortestDay": 8,
     "longestDay": 16,
-    "winterSolstice": 383,
-    "summerSolstice": 183
+    "winterSolstice": 366,
+    "summerSolstice": 166
   },
   "cycles": {},
   "canonicalHours": {},

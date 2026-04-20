@@ -2024,7 +2024,7 @@
     "id": "golarion-imperial",
     "description": "CALENDARIA.Calendar.GolarionImperial.Description",
     "author": "calendaria",
-    "system": "Pathfinder2e (Golarion — Tian Xia)"
+    "system": "Pathfinder2e (Golarion, Tian Xia)"
   },
   "weather": {
     "activeZone": "temperate",

@@ -3,7 +3,7 @@
   "name": "CALENDARIA.Calendar.PactStandard.Name",
   "years": {
     "yearZero": -1700,
-    "firstWeekday": 6,
+    "firstWeekday": 0,
     "leapYear": {
       "leapStart": 0,
       "leapInterval": 4
@@ -187,68 +187,7 @@
       "endYear": null
     }
   },
-  "moons": {
-    "somal00000000000": {
-      "name": "Somal",
-      "cycleLength": 29,
-      "color": "#E8E8E8",
-      "phases": {
-        "newmoon000000000": {
-          "name": "CALENDARIA.MoonPhase.NewMoon",
-          "icon": "modules/calendaria/assets/moon-phases/01_newmoon.svg",
-          "start": 0,
-          "end": 0.125
-        },
-        "waxingcrescent00": {
-          "name": "CALENDARIA.MoonPhase.WaxingCrescent",
-          "icon": "modules/calendaria/assets/moon-phases/02_waxingcrescent.svg",
-          "start": 0.125,
-          "end": 0.25
-        },
-        "firstquarter0000": {
-          "name": "CALENDARIA.MoonPhase.FirstQuarter",
-          "icon": "modules/calendaria/assets/moon-phases/03_firstquarter.svg",
-          "start": 0.25,
-          "end": 0.375
-        },
-        "waxinggibbous000": {
-          "name": "CALENDARIA.MoonPhase.WaxingGibbous",
-          "icon": "modules/calendaria/assets/moon-phases/04_waxinggibbous.svg",
-          "start": 0.375,
-          "end": 0.5
-        },
-        "fullmoon00000000": {
-          "name": "CALENDARIA.MoonPhase.FullMoon",
-          "icon": "modules/calendaria/assets/moon-phases/05_fullmoon.svg",
-          "start": 0.5,
-          "end": 0.625
-        },
-        "waninggibbous000": {
-          "name": "CALENDARIA.MoonPhase.WaningGibbous",
-          "icon": "modules/calendaria/assets/moon-phases/06_waninggibbous.svg",
-          "start": 0.625,
-          "end": 0.75
-        },
-        "lastquarter00000": {
-          "name": "CALENDARIA.MoonPhase.LastQuarter",
-          "icon": "modules/calendaria/assets/moon-phases/07_lastquarter.svg",
-          "start": 0.75,
-          "end": 0.875
-        },
-        "waningcrescent00": {
-          "name": "CALENDARIA.MoonPhase.WaningCrescent",
-          "icon": "modules/calendaria/assets/moon-phases/08_waningcrescent.svg",
-          "start": 0.875,
-          "end": 1
-        }
-      },
-      "referenceDate": {
-        "year": 0,
-        "month": 0,
-        "dayOfMonth": 0
-      }
-    }
-  },
+  "moons": {},
   "daylight": {
     "enabled": true,
     "shortestDay": 8,

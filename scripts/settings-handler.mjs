@@ -1156,6 +1156,7 @@ export default class CalendariaSettings {
         type: new NumberField({ integer: true, min: 1, initial: 8 })
       },
       restAdvanceModeMigrationComplete: { name: 'Rest Advance Mode Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
+      removedCalendarsMigrationComplete: { name: 'Removed Calendars Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.CLOCK_LOCKED]: { name: 'Clock Locked', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.SYNC_CLOCK_PAUSE]: {
         name: 'CALENDARIA.Settings.SyncClockPause.Name',
