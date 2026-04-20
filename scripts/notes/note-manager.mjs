@@ -51,6 +51,9 @@ export default class NoteManager {
   /** @type {boolean} Guard flag to prevent ownership rebuild during sheet form submission */
   static #suppressOwnershipRebuild = false;
 
+  /** @type {Map<string, string|undefined>} Prior visibility stashed in preUpdate, read in updateJournalEntryPage */
+  static #priorVisibilityByPage = new Map();
+
   /** @type {Map<string, object>} Festival removals captured in preDelete, persisted in deleteJournalEntry */
   static #pendingFestivalRemovals = new Map();
 
@@ -137,6 +140,17 @@ export default class NoteManager {
   }
 
   /**
+   * Handle preUpdateJournalEntryPage hook.
+   * @param {object} page - The page about to be updated
+   * @param {object} changes - The pending changes
+   * @param {object} _options - Update options
+   * @param {string} _userId - User ID performing the update
+   */
+  static onPreUpdateJournalEntryPage(page, changes, _options, _userId) {
+    if (changes.system?.visibility !== undefined) NoteManager.#priorVisibilityByPage.set(page.id, page.system?.visibility);
+  }
+
+  /**
    * Handle updateJournalEntryPage hook.
    * @param {object} page - The updated page
    * @param {object} changes - The changes made
@@ -144,6 +158,8 @@ export default class NoteManager {
    * @param {string} _userId - User ID who updated the page
    */
   static async onUpdateJournalEntryPage(page, changes, _options, _userId) {
+    const priorVisibility = NoteManager.#priorVisibilityByPage.get(page.id);
+    NoteManager.#priorVisibilityByPage.delete(page.id);
     const stub = createNoteStub(page);
     if (stub) {
       if (!game.user.isGM && changes.system?.visibility !== undefined) {
@@ -168,13 +184,17 @@ export default class NoteManager {
           if (linked?.calendarId && linked?.festivalKey) await NoteManager.#syncFestivalDateToCalendar(linked, page.system);
         }
         if (changes.system?.visibility !== undefined) {
-          const journal = page.parent;
-          if (journal?.getFlag(MODULE.ID, 'isCalendarNote')) {
-            const ownership = this.#buildOwnership(changes.system.visibility, page.system?.author?._id);
-            const update = { ownership };
-            for (const key of Object.keys(journal.ownership)) if (key !== 'default' && !(key in ownership)) update[`ownership.-=${key}`] = null;
-            await journal.update(update);
-            log(3, `Updated journal ownership for visibility change: ${changes.system.visibility}`);
+          if (priorVisibility !== changes.system.visibility) {
+            const journal = page.parent;
+            if (journal?.getFlag(MODULE.ID, 'isCalendarNote')) {
+              const authorId = page.system?.author?._id;
+              const ownership = this.#buildOwnership(changes.system.visibility, authorId);
+              const update = {};
+              for (const [k, v] of Object.entries(ownership)) update[`ownership.${k}`] = v;
+              if (authorId && !(authorId in ownership) && journal.ownership?.[authorId] !== undefined) update[`ownership.-=${authorId}`] = null;
+              await journal.update(update);
+              log(3, `Updated journal ownership defaults for visibility change: ${changes.system.visibility}`);
+            }
           }
         }
       }

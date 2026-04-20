@@ -652,15 +652,6 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       this.element.querySelector('select[name="system.reminderTargets"]')?.setAttribute('disabled', disabled);
       this.element.querySelector('input[name="system.reminderOffset"]')?.setAttribute('disabled', disabled);
     }
-    if (target?.name === 'system.visibility') {
-      const fieldset = this.element.querySelector('.ownership-fieldset');
-      if (fieldset) {
-        const isVisible = target.value === 'visible';
-        fieldset.disabled = !isVisible;
-        const tooltip = isVisible ? game.i18n.localize('CALENDARIA.Note.Tooltip.Ownership') : game.i18n.localize('CALENDARIA.Note.Ownership.DisabledByVisibility');
-        fieldset.setAttribute('aria-label', tooltip);
-      }
-    }
   }
 
   /**

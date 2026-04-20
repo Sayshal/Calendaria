@@ -68,6 +68,7 @@ export function registerHooks() {
   Hooks.on('preCreateChatMessage', onPreCreateChatMessage);
   Hooks.on('preDeleteFolder', NoteManager.onPreDeleteFolder.bind(NoteManager));
   Hooks.on('preDeleteJournalEntry', NoteManager.onPreDeleteJournalEntry.bind(NoteManager));
+  Hooks.on('preUpdateJournalEntryPage', NoteManager.onPreUpdateJournalEntryPage.bind(NoteManager));
   Hooks.on('quenchReady', (quench) => registerBatches(quench));
   Hooks.on('renderChatMessageHTML', onRenderAnnouncementMessage);
   Hooks.on('renderChatMessageHTML', onRenderChatMessageHTML);

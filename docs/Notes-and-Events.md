@@ -86,7 +86,9 @@ Festival notes display an info banner on each tab, linking to the calendar edito
 
 #### Ownership
 
-Per-user permission dropdowns. Each user can be set to **None**, **Observer**, or **Owner**. GM and note author are fixed at Owner. Ownership dropdowns are disabled for hidden and secret notes.
+Per-user permission dropdowns. Each user can be set to **None**, **Observer**, or **Owner**. GM and note author are fixed at Owner.
+
+Per-user grants layer on top of the visibility default and are editable in every visibility mode. Set a Hidden note to "GM and author plus Player X" by granting Player X Observer; set a Visible note to "everyone except Player Y" by granting Player Y None. Flipping visibility updates the default tier (Visible raises it to Observer, Hidden and Secret drop it to None) but does not touch existing per-user grants, so manually configured access survives visibility changes.
 
 Only GMs can manage note permissions. Non-GM users see a disabled ownership fieldset with a tooltip explaining that permission management is restricted to the GM.
 
