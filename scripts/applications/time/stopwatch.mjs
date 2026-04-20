@@ -821,7 +821,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
         },
         {
           action: 'clear',
-          label: localize('CALENDARIA.Common.Clear'),
+          label: localize('CALENDARIA.Common.ClearAction'),
           icon: 'fas fa-times',
           callback: () => ({ threshold: null, type: null, sound: null })
         }
