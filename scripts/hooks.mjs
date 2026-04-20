@@ -84,6 +84,7 @@ export function registerHooks() {
   Hooks.once('ready', () => Stopwatch.restore());
   Hooks.once('ready', patchTooltipActivate);
   Hooks.once('ready', patchBastionButton);
+  Hooks.once('pf2e.systemReady', () => CalendarManager.reapplyActiveCalendar());
   for (const config of WIDGET_COMBAT_CONFIGS) registerWidgetCombatHooks(config);
   log(3, 'Hooks registered');
 }

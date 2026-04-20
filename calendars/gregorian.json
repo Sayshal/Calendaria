@@ -926,7 +926,10 @@
     "id": "gregorian",
     "description": "CALENDARIA.Calendar.Gregorian.Description",
     "author": "calendaria",
-    "system": "Real World"
+    "system": "Real World",
+    "luxonSync": {
+      "theme": "CE"
+    }
   },
   "weather": {
     "activeZone": "temperate",

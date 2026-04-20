@@ -31,12 +31,17 @@
           data-tooltip aria-label="{{localize "CALENDARIA.Settings.ActiveCalendar.DisabledTitle"}}" {{/unless}}>
           {{#each calendarOptions}}
             <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>
-              {{this.label}}{{#if this.isCustom}} ({{localize "CALENDARIA.Editor.Custom"}}){{/if}}
+              {{this.label}}
+              {{#if this.isCustom}}({{localize "CALENDARIA.Editor.Custom"}}){{/if}}
+              {{#if this.incompatible}}({{localize "CALENDARIA.Settings.ActiveCalendar.LuxonLikelyIncompatible"}}){{/if}}
             </option>
           {{/each}}
         </select>
       </div>
       <p class="hint">{{localize "CALENDARIA.Settings.ActiveCalendar.Hint"}}</p>
+      {{#if luxonSyncRequired}}
+        <p class="notification error" role="alert">{{luxonSyncNotice}}</p>
+      {{/if}}
     </div>
     {{#if isGM}}
       <div class="button-row">

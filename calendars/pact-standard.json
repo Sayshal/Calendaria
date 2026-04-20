@@ -222,7 +222,10 @@
     "id": "pact-standard",
     "description": "CALENDARIA.Calendar.PactStandard.Description",
     "author": "calendaria",
-    "system": "Starfinder2e (Golarion)"
+    "system": "Starfinder2e (Golarion)",
+    "luxonSync": {
+      "theme": "AG"
+    }
   },
   "weather": {
     "activeZone": "temperate",
@@ -627,5 +630,9 @@
         }
       }
     }
+  },
+  "leapYearConfig": {
+    "rule": "gregorian",
+    "start": 0
   }
 }

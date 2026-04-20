@@ -8,6 +8,7 @@ import { CalendarManager, CalendarRegistry, isBundledCalendar, preLocalizeCalend
 import { ASSETS, DEFAULT_MOON_PHASES, HOOKS, TEMPLATES } from '../../constants.mjs';
 import { FestivalManager } from '../../festivals/_module.mjs';
 import { createImporter } from '../../importers/_module.mjs';
+import { isLuxonSyncRequired } from '../../integrations/luxon-sync.mjs';
 import { NoteManager, summarizeConditionTree } from '../../notes/_module.mjs';
 import { RangeSlider, format, localize, log, serializeNotes, validateFormatString } from '../../utils/_module.mjs';
 import { CLIMATE_ZONE_TEMPLATES, getBlankZoneConfig, getClimateTemplateOptions, getDefaultZoneConfig, getPresetAlias, setPresetAlias } from '../../weather/_module.mjs';
@@ -223,7 +224,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       weeks: { enabled: false, type: 'year-based', names: {} },
       amPmNotation: { am: 'AM', pm: 'PM', amAbbr: 'AM', pmAbbr: 'PM' },
       dateFormats: { short: 'D MMM', long: 'D MMMM, YYYY', full: 'MMMM D, YYYY', time: 'HH:mm', time12: 'h:mm a', weekHeader: '[W]', yearHeader: '[YYYY]', yearLabel: '[YYYY] [GGGG]' },
-      metadata: { id: '', description: '', author: game.user?.name ?? '', system: '' },
+      metadata: { id: '', description: '', author: game.user?.name ?? '', system: '', luxonSync: null },
       weather: { activeZone: null, zones: {} }
     };
   }
@@ -340,6 +341,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     context.isEditing = this.#isEditing;
     context.calendarId = this.#calendarId;
     context.isCustom = this.#calendarId ? CalendarManager.isCustomCalendar(this.#calendarId) : true;
+    context.luxonSyncAvailable = isLuxonSyncRequired();
     context.templates = CalendarManager.getCalendarTemplates();
     context.calculatedDaysPerYear = this.#calculateDaysPerYear();
     context.calculatedLeapDaysPerYear = this.#calculateDaysPerYear(true);
@@ -921,6 +923,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#calendarData.name = data.name || '';
     this.#calendarData.metadata.description = data['metadata.description'] || '';
     this.#calendarData.metadata.system = data['metadata.system'] || '';
+    const luxonTheme = data['metadata.luxonSync.theme'] || null;
+    this.#calendarData.metadata.luxonSync = luxonTheme ? { theme: luxonTheme } : null;
     this.#calendarData.years.yearZero = parseInt(data['years.yearZero']) || 0;
     this.#calendarData.years.firstWeekday = parseInt(data['years.firstWeekday']) || 0;
     this.#calendarData.years.resetWeekdays = data['years.resetWeekdays'] ?? false;

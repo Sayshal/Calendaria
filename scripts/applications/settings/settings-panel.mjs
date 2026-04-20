@@ -7,6 +7,7 @@
 import { BUNDLED_CALENDARS, CalendarManager, CalendarRegistry } from '../../calendar/_module.mjs';
 import { HOOKS, MODULE, SETTINGS, TEMPLATES } from '../../constants.mjs';
 import { FestivalManager } from '../../festivals/_module.mjs';
+import { isLuxonCompatible, isLuxonSyncRequired } from '../../integrations/luxon-sync.mjs';
 import { addDays, getAllPresets } from '../../notes/_module.mjs';
 import { TimeClock, getTimeIncrements } from '../../time/_module.mjs';
 import {
@@ -649,16 +650,22 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     const activeCalendarId = game.settings.get(MODULE.ID, SETTINGS.ACTIVE_CALENDAR);
     const customCalendars = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CALENDARS) || {};
     context.canChangeCalendar = context.isGM || canChangeActiveCalendar();
+    const luxonRequired = isLuxonSyncRequired();
+    context.luxonSyncRequired = luxonRequired;
+    context.luxonSyncNotice = luxonRequired ? format('CALENDARIA.Settings.ActiveCalendar.LuxonRequiredNotice', { system: game.system.id.toUpperCase() }) : '';
     context.calendarOptions = [];
     for (const id of BUNDLED_CALENDARS) {
       const key = id
         .split('-')
         .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
         .join('');
-      context.calendarOptions.push({ value: id, label: localize(`CALENDARIA.Calendar.${key}.Name`), selected: id === activeCalendarId, isCustom: false });
+      const cal = CalendarRegistry.get(id);
+      const incompatible = luxonRequired && !isLuxonCompatible(cal);
+      context.calendarOptions.push({ value: id, label: localize(`CALENDARIA.Calendar.${key}.Name`), selected: id === activeCalendarId, isCustom: false, incompatible });
     }
     for (const [id, data] of Object.entries(customCalendars)) {
-      context.calendarOptions.push({ value: id, label: localize(data.name) || data.name || id, selected: id === activeCalendarId, isCustom: true });
+      const incompatible = luxonRequired && !isLuxonCompatible(data);
+      context.calendarOptions.push({ value: id, label: localize(data.name) || data.name || id, selected: id === activeCalendarId, isCustom: true, incompatible });
     }
     context.calendarOptions.sort((a, b) => a.label.localeCompare(b.label, game.i18n.lang));
     context.showEquivalentDatesSection = context.isGM;
