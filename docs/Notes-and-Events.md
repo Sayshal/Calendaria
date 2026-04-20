@@ -55,6 +55,12 @@ Festival notes display an info banner on each tab, linking to the calendar edito
 - **Max Occurrences**: Limit how many times a recurring note appears (leave blank for unlimited)
 - **Occurrence Preview**: Read-only list of the next upcoming dates for recurring notes
 
+#### Duration
+
+- **Has Duration**: Toggle to make the note span multiple days
+- **Duration**: Number of days the event spans
+- **Show Bookends**: Start/end markers on the first and last days
+
 ### Settings Tab
 
 #### Display
@@ -63,14 +69,6 @@ Festival notes display an info banner on each tab, linking to the calendar edito
 - **Silent**: Suppress reminders and event announcements
 - **Display Style**: Icon, pip, or banner
 - **Macro**: Select a macro to execute when the event triggers
-
-#### Duration
-
-- **Has Duration**: Toggle to make the note span multiple days
-- **Duration**: Number of days the event spans
-- **Show Bookends**: Start/end markers on the first and last days
-- **Limited Repeat**: Cap how far back the system searches for historical occurrences
-- **Limited Repeat Days**: Search window in days (default 365)
 
 #### Reminders
 
@@ -88,7 +86,9 @@ Festival notes display an info banner on each tab, linking to the calendar edito
 
 #### Ownership
 
-Per-user permission dropdowns. Each user can be set to **None**, **Observer**, or **Owner**. GM and note author are fixed at Owner. Ownership dropdowns are disabled for hidden and secret notes.
+Per-user permission dropdowns. Each user can be set to **None**, **Observer**, or **Owner**. GM and note author are fixed at Owner.
+
+Per-user grants layer on top of the visibility default and are editable in every visibility mode. Set a Hidden note to "GM and author plus Player X" by granting Player X Observer; set a Visible note to "everyone except Player Y" by granting Player Y None. Flipping visibility updates the default tier (Visible raises it to Observer, Hidden and Secret drop it to None) but does not touch existing per-user grants, so manually configured access survives visibility changes.
 
 Only GMs can manage note permissions. Non-GM users see a disabled ownership fieldset with a tooltip explaining that permission management is restricted to the GM.
 
@@ -204,7 +204,6 @@ Three visibility levels:
 Enable **Has Duration** to make a note span multiple days. Multi-day events render as continuous bars across calendar days in BigCal.
 
 - **Show Bookends**: Start/end markers on the first and last days
-- **Limited Repeat**: Caps how far back the system searches for historical occurrences
 
 ### Display Styles
 

@@ -7,53 +7,53 @@
   },
   "months": {
     "values": {
-      "winterwane000000": {
-        "name": "Winterwane",
-        "abbreviation": "WWn",
-        "ordinal": 1,
-        "days": 45
-      },
       "springrise000000": {
         "name": "Springrise",
         "abbreviation": "SpR",
-        "ordinal": 2,
+        "ordinal": 1,
         "days": 45
       },
       "springwane000000": {
         "name": "Springwane",
         "abbreviation": "SpW",
+        "ordinal": 2,
+        "days": 46
+      },
+      "summerrise000000": {
+        "name": "Summerrise",
+        "abbreviation": "SuR",
         "ordinal": 3,
-        "days": 45
+        "days": 46
       },
-      "summermaze000000": {
-        "name": "Summermaze",
-        "abbreviation": "SMz",
+      "summerwane000000": {
+        "name": "Summerwane",
+        "abbreviation": "SuW",
         "ordinal": 4,
-        "days": 45
+        "days": 46
       },
-      "summerend0000000": {
-        "name": "Summerend",
-        "abbreviation": "SEn",
+      "fallrise00000000": {
+        "name": "Fallrise",
+        "abbreviation": "FlR",
         "ordinal": 5,
-        "days": 45
-      },
-      "harvestfall00000": {
-        "name": "Harvestfall",
-        "abbreviation": "HvF",
-        "ordinal": 6,
         "days": 45
       },
       "fallwane00000000": {
         "name": "Fallwane",
         "abbreviation": "FlW",
+        "ordinal": 6,
+        "days": 46
+      },
+      "winterrise000000": {
+        "name": "Winterrise",
+        "abbreviation": "WiR",
         "ordinal": 7,
         "days": 45
       },
-      "winterdeep000000": {
-        "name": "Winterdeep",
-        "abbreviation": "WDp",
+      "winterwane000000": {
+        "name": "Winterwane",
+        "abbreviation": "WiW",
         "ordinal": 8,
-        "days": 45
+        "days": 46
       }
     }
   },
@@ -70,23 +70,33 @@
         "abbreviation": "Moo"
       },
       "bladeday00000000": {
-        "name": "Bladeday",
+        "name": "Bloodday",
         "ordinal": 3,
-        "abbreviation": "Bla"
+        "abbreviation": "Blo"
       },
       "spiritday0000000": {
-        "name": "Spiritday",
+        "name": "Earthday",
         "ordinal": 4,
-        "abbreviation": "Spi"
+        "abbreviation": "Ear"
+      },
+      "growthday0000000": {
+        "name": "Growthday",
+        "ordinal": 5,
+        "abbreviation": "Gro"
+      },
+      "feastday00000000": {
+        "name": "Feastday",
+        "ordinal": 6,
+        "abbreviation": "Fea"
       },
       "stillday00000000": {
         "name": "Stillday",
-        "ordinal": 5,
+        "ordinal": 7,
         "abbreviation": "Sti",
         "isRestDay": true
       }
     },
-    "daysPerYear": 360,
+    "daysPerYear": 365,
     "hoursPerDay": 24,
     "minutesPerHour": 60,
     "secondsPerMinute": 60
@@ -94,10 +104,46 @@
   "festivals": {
     "awakeningday0000": {
       "name": "Awakening Day",
-      "month": 1,
+      "month": 0,
       "icon": "fa-leaf",
       "color": "#90EE90",
-      "description": "Spring's arrival and the awakening of the land from winter's grip.",
+      "description": "First festival of the year, marking the end of winter and the awakening of the land.",
+      "dayOfMonth": 0,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 1
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 1
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "springrisefestiv": {
+      "name": "Springturn",
+      "month": 1,
+      "icon": "fa-seedling",
+      "color": "#FF69B4",
+      "description": "Midspring festival marking the turn from spring's rise to its flowering.",
       "dayOfMonth": 0,
       "duration": 1,
       "countsForWeekday": true,
@@ -128,49 +174,13 @@
       "reminderType": "none",
       "reminderOffset": 0
     },
-    "springrisefestiv": {
-      "name": "Springrise Festival",
-      "month": 1,
-      "icon": "fa-seedling",
-      "color": "#FF69B4",
-      "description": "Celebration of spring's full bloom when life returns to the Forbidden Lands.",
-      "dayOfMonth": 22,
-      "duration": 1,
-      "countsForWeekday": true,
-      "leapYearOnly": false,
-      "conditionTree": {
-        "type": "group",
-        "mode": "and",
-        "children": [
-          {
-            "type": "condition",
-            "field": "month",
-            "op": "==",
-            "value": 2
-          },
-          {
-            "type": "condition",
-            "field": "day",
-            "op": "==",
-            "value": 23
-          }
-        ]
-      },
-      "allDay": true,
-      "displayStyle": "banner",
-      "visibility": "visible",
-      "silent": true,
-      "hasDuration": false,
-      "reminderType": "none",
-      "reminderOffset": 0
-    },
     "midsummerblot000": {
-      "name": "Midsummer Blot",
+      "name": "Midsummer",
       "month": 3,
       "icon": "fa-fire",
       "color": "#FF4500",
-      "description": "Sacrificial festival at the height of summer honoring the gods with offerings and sacred rites.",
-      "dayOfMonth": 22,
+      "description": "The height of summer, a phase with two full moons considered among the most powerful of the year.",
+      "dayOfMonth": 0,
       "duration": 1,
       "countsForWeekday": true,
       "leapYearOnly": false,
@@ -188,7 +198,7 @@
             "type": "condition",
             "field": "day",
             "op": "==",
-            "value": 23
+            "value": 1
           }
         ]
       },
@@ -201,12 +211,12 @@
       "reminderOffset": 0
     },
     "harvestfeast0000": {
-      "name": "Harvest Feast",
-      "month": 5,
+      "name": "Harvest Day",
+      "month": 4,
       "icon": "fa-wheat-awn",
       "color": "#CD853F",
-      "description": "Autumn celebration of the harvest bounty with feasting and thanksgiving.",
-      "dayOfMonth": 22,
+      "description": "Autumn festival marking the harvest and the start of Fallrise.",
+      "dayOfMonth": 0,
       "duration": 1,
       "countsForWeekday": true,
       "leapYearOnly": false,
@@ -218,13 +228,13 @@
             "type": "condition",
             "field": "month",
             "op": "==",
-            "value": 6
+            "value": 5
           },
           {
             "type": "condition",
             "field": "day",
             "op": "==",
-            "value": 23
+            "value": 1
           }
         ]
       },
@@ -237,12 +247,12 @@
       "reminderOffset": 0
     },
     "winternight00000": {
-      "name": "Winter Night",
+      "name": "Midwinter",
       "month": 7,
       "icon": "fa-snowflake",
       "color": "#4682B4",
-      "description": "Midwinter festival when servants of the gods decree next year's celebrations.",
-      "dayOfMonth": 22,
+      "description": "The depth of winter, when the most prominent servants of the gods decree when the year's festivals will be celebrated.",
+      "dayOfMonth": 0,
       "duration": 1,
       "countsForWeekday": true,
       "leapYearOnly": false,
@@ -260,7 +270,115 @@
             "type": "condition",
             "field": "day",
             "op": "==",
-            "value": 23
+            "value": 1
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "lushday000000000": {
+      "name": "Lushday",
+      "month": 2,
+      "icon": "fa-cloud-sun",
+      "color": "#7CFC00",
+      "description": "Early summer festival marking the start of Summerrise when the land is at its most verdant.",
+      "dayOfMonth": 0,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 3
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 1
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "fallturn00000000": {
+      "name": "Fallturn",
+      "month": 5,
+      "icon": "fa-leaf",
+      "color": "#B8860B",
+      "description": "Midautumn festival marking the turn from Fallrise to Fallwane as the leaves die and the cold winds come.",
+      "dayOfMonth": 0,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 6
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 1
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "rotday0000000000": {
+      "name": "Rotday",
+      "month": 6,
+      "icon": "fa-skull",
+      "color": "#556B2F",
+      "description": "Start of Winterrise, a grim festival honoring decay, death, and the returning cold.",
+      "dayOfMonth": 0,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 7
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 1
           }
         ]
       },
@@ -275,22 +393,13 @@
   },
   "seasons": {
     "values": {
-      "winter0000000000": {
-        "name": "CALENDARIA.Season.Winter",
-        "icon": "fas fa-snowflake",
-        "color": "#87ceeb",
-        "seasonalType": "winter",
-        "dayStart": 0,
-        "dayEnd": 44,
-        "abbreviation": "Win"
-      },
       "spring0000000000": {
         "name": "CALENDARIA.Season.Spring",
         "icon": "fas fa-seedling",
         "color": "#90ee90",
         "seasonalType": "spring",
-        "dayStart": 45,
-        "dayEnd": 134,
+        "dayStart": 0,
+        "dayEnd": 90,
         "abbreviation": "Spr"
       },
       "summer0000000000": {
@@ -298,8 +407,8 @@
         "icon": "fas fa-sun",
         "color": "#ffd700",
         "seasonalType": "summer",
-        "dayStart": 135,
-        "dayEnd": 224,
+        "dayStart": 91,
+        "dayEnd": 182,
         "abbreviation": "Sum"
       },
       "autumn0000000000": {
@@ -307,17 +416,17 @@
         "icon": "fas fa-leaf",
         "color": "#d2691e",
         "seasonalType": "autumn",
-        "dayStart": 225,
-        "dayEnd": 314,
+        "dayStart": 183,
+        "dayEnd": 273,
         "abbreviation": "Aut"
       },
-      "winter0000000002": {
+      "winter0000000000": {
         "name": "CALENDARIA.Season.Winter",
         "icon": "fas fa-snowflake",
         "color": "#87ceeb",
         "seasonalType": "winter",
-        "dayStart": 315,
-        "dayEnd": 359,
+        "dayStart": 274,
+        "dayEnd": 364,
         "abbreviation": "Win"
       }
     }
@@ -396,8 +505,8 @@
     "enabled": true,
     "shortestDay": 6,
     "longestDay": 18,
-    "winterSolstice": 338,
-    "summerSolstice": 158
+    "winterSolstice": 319,
+    "summerSolstice": 137
   },
   "cycles": {},
   "canonicalHours": {},

@@ -14,6 +14,7 @@ import {
   cmdCycle,
   cmdDate,
   cmdDateTime,
+  cmdEnrichers,
   cmdFestival,
   cmdForecast,
   cmdMoon,
@@ -28,8 +29,7 @@ import {
   cmdToday,
   cmdWeather,
   cmdWeatherProb,
-  cmdWeekday,
-  cmdEnrichers
+  cmdWeekday
 } from '../utils/chat/chat-command-handler.mjs';
 
 /** @type {{key: string, example: string}[]} Date format presets for autocomplete. */
@@ -192,11 +192,10 @@ function registerCommands() {
         if (!canChangeDateTime()) return {};
         try {
           await cmdAdvance(parameters?.trim());
-        } catch {
-          /* silent */
-        }
+        } catch {}
         return {};
-      }
+      },
+      autocompleteCallback: autocompleteAdvance
     },
     {
       name: '/setdate',
@@ -207,9 +206,7 @@ function registerCommands() {
         if (!canChangeDateTime()) return {};
         try {
           await cmdSetDate(parameters?.trim());
-        } catch {
-          /* silent */
-        }
+        } catch {}
         return {};
       }
     },
@@ -222,9 +219,7 @@ function registerCommands() {
         if (!canChangeDateTime()) return {};
         try {
           await cmdSetTime(parameters?.trim());
-        } catch {
-          /* silent */
-        }
+        } catch {}
         return {};
       }
     },
@@ -253,9 +248,7 @@ function registerCommands() {
         if (!canChangeActiveCalendar()) return {};
         try {
           await cmdSwitchCal(parameters?.trim());
-        } catch {
-          /* silent */
-        }
+        } catch {}
         return {};
       },
       autocompleteCallback: autocompleteSwitchCal
@@ -411,6 +404,40 @@ function autocompleteWeather() {
     game.chatCommands.createCommandElement('/weather', `<span class="command-title">${localize('CALENDARIA.ChatCommander.WeatherCurrent')}</span>`),
     game.chatCommands.createCommandElement('/weather [year] [month] [day]', `<span class="command-title">${localize('CALENDARIA.ChatCommander.WeatherHistorical')}</span>`)
   ];
+}
+
+/**
+ * Autocomplete for /advance - suggest common amounts and the cinematic override.
+ * @param {object} _menu - Autocomplete menu instance
+ * @param {string} _alias - Command alias used
+ * @param {string} parameters - Current input parameters
+ * @returns {HTMLElement[]} Autocomplete entries
+ */
+function autocompleteAdvance(_menu, _alias, parameters) {
+  const entries = [];
+  const term = parameters?.trim() || '';
+  const amountUnit = term.match(/^(-?\d+)\s*(\w+)$/i);
+  if (amountUnit) {
+    const base = `${amountUnit[1]} ${amountUnit[2]}`;
+    entries.push(
+      game.chatCommands.createCommandElement(
+        `/advance ${base} cinematic=true`,
+        `<span class="command-title">${base} cinematic=true</span> <span class="notes">${localize('CALENDARIA.ChatCommander.AdvanceCinematicTrue')}</span>`
+      )
+    );
+    entries.push(
+      game.chatCommands.createCommandElement(
+        `/advance ${base} cinematic=false`,
+        `<span class="command-title">${base} cinematic=false</span> <span class="notes">${localize('CALENDARIA.ChatCommander.AdvanceCinematicFalse')}</span>`
+      )
+    );
+    return entries;
+  }
+  const presets = ['1 hour', '8 hours', '1 day', '1 week', '1 month', '1 year'];
+  const filtered = term ? presets.filter((p) => p.toLowerCase().includes(term.toLowerCase())) : presets;
+  for (const p of filtered) entries.push(game.chatCommands.createCommandElement(`/advance ${p}`, `<span class="command-title">${p}</span>`));
+  entries.push(game.chatCommands.createInfoElement(`<span class="notes">${localize('CALENDARIA.ChatCommander.AdvanceCinematicHint')}</span>`));
+  return entries;
 }
 
 /**

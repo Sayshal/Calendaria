@@ -507,6 +507,21 @@ Uses the category's icon.
 
 ---
 
+### chronicle
+
+Clickable. Opens the Chronicle View locked to the date range — infinite scroll is disabled at the boundaries and the Today button is hidden.
+
+```text
+[[cal.chronicle 1 10 1492 to 31 10 1492]] → 1 Shadowmoon, 1492 - 31 Shadowmoon, 1492
+[[cal.chronicle 1 1 1500 to 14 1 1500]]{The Founding Week} → The Founding Week
+```
+
+| Parameter | Type     | Description                                      |
+| --------- | -------- | ------------------------------------------------ |
+| `cal`     | `string` | Calendar ID to scope notes/weather to (optional) |
+
+---
+
 ## Composite
 
 ### summary

@@ -44,4 +44,31 @@
         placeholder="{{localize 'CALENDARIA.Editor.Placeholder.Description'}}">{{calendar.metadata.description}}</textarea>
     </div>
   </fieldset>
+
+  {{#if luxonSyncAvailable}}
+    <fieldset>
+      <legend>{{localize "CALENDARIA.Editor.Section.LuxonSync"}}</legend>
+      <div class="form-group">
+        <label for="editor-luxon-theme">{{localize "CALENDARIA.Editor.Field.LuxonSyncTheme"}}</label>
+        <div class="form-fields">
+          <select id="editor-luxon-theme" name="metadata.luxonSync.theme">
+            <option value="">{{localize "CALENDARIA.Editor.Field.LuxonSyncNone"}}</option>
+            <option value="AR" {{#if (eq calendar.metadata.luxonSync.theme "AR")}}selected{{/if}}>
+              {{localize "PF2E.SETTINGS.WorldClock.DateThemes.AR"}}
+            </option>
+            <option value="IC" {{#if (eq calendar.metadata.luxonSync.theme "IC")}}selected{{/if}}>
+              {{localize "PF2E.SETTINGS.WorldClock.DateThemes.IC"}}
+            </option>
+            <option value="AG" {{#if (eq calendar.metadata.luxonSync.theme "AG")}}selected{{/if}}>
+              {{localize "PF2E.SETTINGS.WorldClock.DateThemes.AG"}}
+            </option>
+            <option value="CE" {{#if (eq calendar.metadata.luxonSync.theme "CE")}}selected{{/if}}>
+              {{localize "PF2E.SETTINGS.WorldClock.DateThemes.CE"}}
+            </option>
+          </select>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Editor.Hint.LuxonSync"}}</p>
+      </div>
+    </fieldset>
+  {{/if}}
 </section>

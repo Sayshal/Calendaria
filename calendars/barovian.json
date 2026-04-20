@@ -43,20 +43,20 @@
         "days": 31
       },
       "iyun000000000000": {
-        "name": "Iyun",
-        "abbreviation": "Iyn",
+        "name": "Eyune",
+        "abbreviation": "Eyu",
         "ordinal": 6,
         "days": 30
       },
       "iyul000000000000": {
-        "name": "Iyul",
-        "abbreviation": "Iyl",
+        "name": "Eyule",
+        "abbreviation": "Eyl",
         "ordinal": 7,
         "days": 31
       },
       "avhust0000000000": {
-        "name": "Avhust",
-        "abbreviation": "Avh",
+        "name": "Avgust",
+        "abbreviation": "Avg",
         "ordinal": 8,
         "days": 31
       },
@@ -67,14 +67,14 @@
         "days": 30
       },
       "oktyavr000000000": {
-        "name": "Oktyavr",
-        "abbreviation": "Okt",
+        "name": "Octyavr",
+        "abbreviation": "Oct",
         "ordinal": 10,
         "days": 31
       },
       "noyavr0000000000": {
-        "name": "Noyavr",
-        "abbreviation": "Noy",
+        "name": "Nekavr",
+        "abbreviation": "Nek",
         "ordinal": 11,
         "days": 30
       },
@@ -89,19 +89,19 @@
   "days": {
     "values": {
       "lunadi0000000000": {
-        "name": "Lunadi",
+        "name": "Ponedi",
         "ordinal": 1,
-        "abbreviation": "Lun"
+        "abbreviation": "Pon"
       },
       "martedi000000000": {
-        "name": "Martedi",
+        "name": "Vtordi",
         "ordinal": 2,
-        "abbreviation": "Mar"
+        "abbreviation": "Vto"
       },
       "merkadi000000000": {
-        "name": "Merkadi",
+        "name": "Sredi",
         "ordinal": 3,
-        "abbreviation": "Mer"
+        "abbreviation": "Sre"
       },
       "zhevdi0000000000": {
         "name": "Zhevdi",

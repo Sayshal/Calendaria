@@ -33,10 +33,10 @@ await CALENDARIA.api.advanceTime(3600); // advance by raw seconds
 await CALENDARIA.api.advanceTime({ hour: 8 }, { cinematic: true });
 ```
 
-| Parameter           | Type             | Description                                                                     |
-| ------------------- | ---------------- | ------------------------------------------------------------------------------- |
-| `delta`             | `number\|object` | Seconds or time delta object (e.g., `{day: 1, hour: 2}`)                        |
-| `options.cinematic` | `boolean`        | Trigger the cinematic overlay, bypassing the threshold check (default: `false`) |
+| Parameter           | Type             | Description                                              |
+| ------------------- | ---------------- | -------------------------------------------------------- |
+| `delta`             | `number\|object` | Seconds or time delta object (e.g., `{day: 1, hour: 2}`) |
+| `options.cinematic` | `boolean`        | Trigger the cinematic overlay (default: `false`)         |
 
 > **Note:** API calls do not trigger the cinematic overlay by default. Pass `cinematic: true` to opt in.
 
@@ -44,47 +44,49 @@ await CALENDARIA.api.advanceTime({ hour: 8 }, { cinematic: true });
 
 ---
 
-### setDateTime(components)
+### setDateTime(components, options)
 
 Set time to specific values. GM only.
 
 ```javascript
-await CALENDARIA.api.setDateTime({
-  year: 1492,
-  month: 5,
-  day: 15,
-  hour: 10,
-  minute: 30
-});
+await CALENDARIA.api.setDateTime({ year: 1492, month: 5, day: 15, hour: 10, minute: 30 });
+await CALENDARIA.api.setDateTime({ year: 1492, month: 5, day: 15 }, { cinematic: true });
 ```
 
-| Parameter    | Type     | Description            |
-| ------------ | -------- | ---------------------- |
-| `components` | `object` | Time components to set |
+| Parameter           | Type      | Description                                      |
+| ------------------- | --------- | ------------------------------------------------ |
+| `components`        | `object`  | Time components to set                           |
+| `options.cinematic` | `boolean` | Trigger the cinematic overlay (default: `false`) |
 
 **Returns:** `Promise<number>` - New world time in seconds.
 
+> **Note:** API calls do not trigger the cinematic overlay by default. Pass `cinematic: true` to opt in.
+
 ---
 
-### jumpToDate(options)
+### jumpToDate(options, advanceOptions)
 
 Jump to a specific date while preserving current time of day. GM only.
 
 ```javascript
 await CALENDARIA.api.jumpToDate({
   year: 1492,
-  month: 5, // 0-indexed
+  month: 5, // 1-indexed
   day: 1
 });
+await CALENDARIA.api.jumpToDate({ year: 1492, month: 5, day: 1 }, { cinematic: true });
 ```
 
-| Parameter       | Type     | Description              |
-| --------------- | -------- | ------------------------ |
-| `options.year`  | `number` | Target year              |
-| `options.month` | `number` | Target month (0-indexed) |
-| `options.day`   | `number` | Target day of month      |
+| Parameter                  | Type      | Description                                      |
+| -------------------------- | --------- | ------------------------------------------------ |
+| `options.year`             | `number`  | Target year                                      |
+| `options.month`            | `number`  | Target month (1-indexed)                         |
+| `options.day`              | `number`  | Target day of month (1-indexed)                  |
+| `advanceOptions.cinematic` | `boolean` | Trigger the cinematic overlay (default: `false`) |
 
 **Returns:** `Promise<void>`
+
+> **Note:** API calls do not trigger the cinematic overlay by default. Pass `cinematic: true` to opt in.
 
 ---
 
@@ -98,10 +100,10 @@ await CALENDARIA.api.advanceTimeToPreset('midnight');
 await CALENDARIA.api.advanceTimeToPreset('sunrise', { cinematic: true });
 ```
 
-| Parameter           | Type      | Description                                                                     |
-| ------------------- | --------- | ------------------------------------------------------------------------------- |
-| `preset`            | `string`  | `'sunrise'`, `'midday'`, `'noon'`, `'sunset'`, or `'midnight'`                  |
-| `options.cinematic` | `boolean` | Trigger the cinematic overlay, bypassing the threshold check (default: `false`) |
+| Parameter           | Type      | Description                                                    |
+| ------------------- | --------- | -------------------------------------------------------------- |
+| `preset`            | `string`  | `'sunrise'`, `'midday'`, `'noon'`, `'sunset'`, or `'midnight'` |
+| `options.cinematic` | `boolean` | Trigger the cinematic overlay (default: `false`)               |
 
 > **Note:** API calls do not trigger the cinematic overlay by default. Pass `cinematic: true` to opt in.
 
@@ -597,7 +599,7 @@ const cycles = CALENDARIA.api.getCycleValues();
 
 ### getSunrise(zone)
 
-Get today's sunrise time in hours.
+Get today's sunrise time in hours. Zones with both `sunriseOverride` and `sunsetOverride` set (and `sunrise < sunset`, within `0` to `hoursPerDay`) return the fixed override unchanged across the year, bypassing latitude and shortest/longest interpolation.
 
 ```javascript
 const sunrise = CALENDARIA.api.getSunrise();
@@ -616,7 +618,7 @@ const sunrise = CALENDARIA.api.getSunrise(myZone);
 
 ### getSunset(zone)
 
-Get today's sunset time in hours.
+Get today's sunset time in hours. Zones with both `sunriseOverride` and `sunsetOverride` set (and `sunrise < sunset`, within `0` to `hoursPerDay`) return the fixed override unchanged across the year.
 
 ```javascript
 const sunset = CALENDARIA.api.getSunset();
@@ -635,7 +637,7 @@ const sunset = CALENDARIA.api.getSunset(myZone);
 
 ### getDaylightHours(zone)
 
-Get hours of daylight today.
+Get hours of daylight today. Zones with both `sunriseOverride` and `sunsetOverride` set return `sunsetOverride - sunriseOverride` as a constant across the year.
 
 ```javascript
 const hours = CALENDARIA.api.getDaylightHours();
@@ -2098,6 +2100,7 @@ CALENDARIA.api.toggleStopwatch();
 
 // Chronicle
 CALENDARIA.api.showChronicle();
+CALENDARIA.api.showChronicle({ startDate, endDate, lockedRange: true, calendarId });
 CALENDARIA.api.hideChronicle();
 CALENDARIA.api.toggleChronicle();
 
@@ -2112,6 +2115,19 @@ CALENDARIA.api.toggleNoteViewer();
 // Secondary Calendar
 CALENDARIA.api.showSecondaryCalendar('greyhawk');
 ```
+
+### showChronicle(options)
+
+Show the Chronicle with an optional locked date range.
+
+| Parameter             | Type      | Description                                              |
+| --------------------- | --------- | -------------------------------------------------------- |
+| `options.startDate`   | `object`  | Range start `{year, month (1-indexed), day (1-indexed)}` |
+| `options.endDate`     | `object`  | Range end `{year, month (1-indexed), day (1-indexed)}`   |
+| `options.lockedRange` | `boolean` | Locks the view to `startDate`/`endDate`                  |
+| `options.calendarId`  | `string`  | Calendar ID whose entries drive the view                 |
+
+**Returns:** `Chronicle` - The chronicle instance.
 
 ### showNoteViewer(options)
 

@@ -2024,7 +2024,10 @@
     "id": "golarion",
     "description": "CALENDARIA.Calendar.Golarion.Description",
     "author": "calendaria",
-    "system": "Pathfinder2e (Golarion)"
+    "system": "Pathfinder2e (Golarion)",
+    "luxonSync": {
+      "theme": "AR"
+    }
   },
   "weather": {
     "activeZone": "temperate",
@@ -2429,5 +2432,9 @@
         }
       }
     }
+  },
+  "leapYearConfig": {
+    "rule": "gregorian",
+    "start": 0
   }
 }

@@ -1,6 +1,12 @@
 <div class="scroll-toolbar">
   <i class="fas fa-scroll toolbar-icon"></i>
-  <span class="toolbar-title">{{localize "CALENDARIA.Chronicle.Title"}}</span>
+  {{#if lockedRange}}
+    <span class="toolbar-title toolbar-title--locked" data-tooltip="{{lockedRangeText}}">
+      <i class="fas fa-lock"></i> {{lockedRangeText}}
+    </span>
+  {{else}}
+    <span class="toolbar-title">{{localize "CALENDARIA.Chronicle.Title"}}</span>
+  {{/if}}
 
   <div class="toolbar-actions">
     <select class="toolbar-select view-mode-select">
@@ -17,9 +23,12 @@
       data-tooltip="{{#if showEmpty}}{{localize 'CALENDARIA.Chronicle.Mode.EventsOnly'}}{{else}}{{localize 'CALENDARIA.Chronicle.Mode.FullChronicle'}}{{/if}}">
       <i class="fas {{#if showEmpty}}fa-eye{{else}}fa-eye-slash{{/if}}"></i>
     </button>
-    <button type="button" class="toolbar-btn" data-action="today" data-tooltip="{{localize 'CALENDARIA.Common.Today'}}">
-      <i class="fas fa-calendar-day"></i>
-    </button>
+    {{#unless lockedRange}}
+      <button type="button" class="toolbar-btn" data-action="today"
+        data-tooltip="{{localize 'CALENDARIA.Common.Today'}}">
+        <i class="fas fa-calendar-day"></i>
+      </button>
+    {{/unless}}
     <button type="button" class="toolbar-btn close-btn" data-action="closeScroll"
       data-tooltip="{{localize 'CALENDARIA.Common.Close'}}">
       <i class="fas fa-times"></i>

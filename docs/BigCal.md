@@ -34,6 +34,8 @@ Detailed 7-day layout with hourly time slots:
 - 24-hour time grid with current hour highlighted
 - All-day events displayed at the top of each column
 - Timed events positioned by start hour and duration
+- Recurring notes render on every matching day within the visible week
+- Multi-day events split into a timed start block, all-day middle days, and a timed end block; continuation edges drop their rounded corners so the bars read as contiguous across days
 - Click any time slot to select it, then click Add Note to create an event at that hour
 - Each time cell (day:hour intersection) has a "+" button for quick note creation at that specific hour
 

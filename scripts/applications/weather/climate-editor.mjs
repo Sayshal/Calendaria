@@ -147,21 +147,23 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     if (isZoneMode) {
       const seasonNames = this.#seasonNames.length ? this.#seasonNames : ['CALENDARIA.Season.Spring', 'CALENDARIA.Season.Summer', 'CALENDARIA.Season.Autumn', 'CALENDARIA.Season.Winter'];
       temperatureRows = seasonNames.map((season) => {
-        const temp = this.#data.temperatures?.[season] || this.#data.temperatures?._default || { min: 10, max: 22 };
+        const stored = this.#data.temperatures?.[season];
+        const temp = stored !== undefined ? (stored ?? { min: null, max: null }) : (this.#data.temperatures?._default ?? { min: 10, max: 22 });
         const isRelativeMin = typeof temp.min === 'string' && /[+-]$/.test(temp.min);
         const isRelativeMax = typeof temp.max === 'string' && /[+-]$/.test(temp.max);
-        return {
-          seasonName: season,
-          label: localize(season),
-          min: isRelativeMin ? `${toDisplayDelta(Number(temp.min.slice(0, -1)))}${temp.min.slice(-1)}` : toDisplayUnit(temp.min),
-          max: isRelativeMax ? `${toDisplayDelta(Number(temp.max.slice(0, -1)))}${temp.max.slice(-1)}` : toDisplayUnit(temp.max),
-          isRelativeMin,
-          isRelativeMax
-        };
+        const formatMin = temp.min == null ? '' : isRelativeMin ? `${toDisplayDelta(Number(temp.min.slice(0, -1)))}${temp.min.slice(-1)}` : toDisplayUnit(temp.min);
+        const formatMax = temp.max == null ? '' : isRelativeMax ? `${toDisplayDelta(Number(temp.max.slice(0, -1)))}${temp.max.slice(-1)}` : toDisplayUnit(temp.max);
+        return { seasonName: season, label: localize(season), min: formatMin, max: formatMax, isRelativeMin, isRelativeMax };
       });
     }
     const selectedSeason = isZoneMode ? this.#selectedSeason : null;
     const seasonOptions = isZoneMode ? this.#seasonNames.map((name) => ({ value: name, label: localize(name), selected: name === selectedSeason })) : [];
+    let selectedSeasonClimate = null;
+    if (isZoneMode && selectedSeason) {
+      const calendarSeasons = this.#calendarData?.seasons?.values ?? CalendarManager.getCalendar(this.#calendarId)?.seasons?.values ?? {};
+      const seasonObj = Object.values(calendarSeasons).find((s) => s?.name === selectedSeason);
+      selectedSeasonClimate = seasonObj?.climate ?? null;
+    }
     const categories = Object.values(WEATHER_CATEGORIES)
       .map((cat) => {
         const categoryPresets = allPresets.filter((p) => p.category === cat.id);
@@ -177,6 +179,8 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
             const seasonChanceDisplay = seasonChance != null ? String(seasonChance) : '';
             const isRelativeChance = typeof seasonChance === 'string' && /[+-]$/.test(seasonChance);
             const effectiveEnabled = seasonOverride.enabled ?? saved.enabled ?? false;
+            const baseChance = Object.values(selectedSeasonClimate?.presets ?? {}).find((p) => p?.id === preset.id)?.chance;
+            const effectiveChance = ClimateEditor.#resolveEffectiveChance(baseChance, seasonChance);
             const effectiveTempMin = seasonOverride.tempMin ?? saved.tempMin;
             const effectiveTempMax = seasonOverride.tempMax ?? saved.tempMax;
             const effectiveInertia = seasonOverride.inertiaWeight ?? saved.inertiaWeight;
@@ -188,7 +192,7 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
               alias,
               hasAlias: !!alias,
               enabled: effectiveEnabled,
-              enabledNoWeight: effectiveEnabled && !seasonChanceDisplay,
+              enabledNoWeight: effectiveEnabled && !(effectiveChance > 0),
               seasonChance: seasonChanceDisplay,
               isRelativeChance,
               tempMin: ClimateEditor.#formatTempValue(effectiveTempMin),
@@ -220,9 +224,12 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     let hoursPerDay = 24;
     let zoneShortestDay = this.#data.shortestDay ?? '';
     let zoneLongestDay = this.#data.longestDay ?? '';
+    let zoneSunriseOverride = this.#data.sunriseOverride ?? '';
+    let zoneSunsetOverride = this.#data.sunsetOverride ?? '';
     let defaultShortestDay = '';
     let defaultLongestDay = '';
-    const hasManualDaylight = zoneShortestDay !== '' || zoneLongestDay !== '';
+    const lockSunTimes = zoneSunriseOverride !== '' && zoneSunsetOverride !== '';
+    const hasManualDaylight = zoneShortestDay !== '' || zoneLongestDay !== '' || lockSunTimes;
     let shortestDayDate = '';
     let longestDayDate = '';
     if (isZoneMode) {
@@ -248,7 +255,11 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       };
       shortestDayDate = dayOfYearToDate(winterSolstice);
       longestDayDate = dayOfYearToDate(summerSolstice);
-      if (hasManualDaylight) {
+      if (lockSunTimes) {
+        const fixedHours = parseFloat(zoneSunsetOverride) - parseFloat(zoneSunriseOverride);
+        shortestDayHours = `${fixedHours.toFixed(1)}h`;
+        longestDayHours = `${fixedHours.toFixed(1)}h`;
+      } else if (hasManualDaylight) {
         shortestDayHours = `${parseFloat(zoneShortestDay || globalShort).toFixed(1)}h`;
         longestDayHours = `${parseFloat(zoneLongestDay || globalLong).toFixed(1)}h`;
       } else if (latitude != null) {
@@ -300,9 +311,12 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       zoneId: this.#data.id,
       latitude: latitude ?? '',
       hasManualDaylight,
+      lockSunTimes,
       hoursPerDay,
       zoneShortestDay,
       zoneLongestDay,
+      zoneSunriseOverride,
+      zoneSunsetOverride,
       defaultShortestDay,
       defaultLongestDay,
       shortestDayHours,
@@ -329,15 +343,23 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       });
     }
     const forceCheckbox = this.element.querySelector('[name="forceSolstice"]');
+    const lockCheckbox = this.element.querySelector('[name="lockSunTimes"]');
     const latGroup = this.element.querySelector('.daylight-latitude');
     const manualGroups = this.element.querySelectorAll('.daylight-manual');
-    if (forceCheckbox) {
-      forceCheckbox.addEventListener('change', () => {
-        const manual = forceCheckbox.checked;
-        if (latGroup) latGroup.hidden = manual;
-        manualGroups.forEach((g) => (g.hidden = !manual));
-      });
-    }
+    const hoursGroups = this.element.querySelectorAll('.daylight-hours');
+    const fixedGroups = this.element.querySelectorAll('.daylight-fixed');
+    const updateDaylightVisibility = () => {
+      const manual = forceCheckbox?.checked ?? false;
+      const lockTimes = lockCheckbox?.checked ?? false;
+      if (latGroup) latGroup.hidden = manual;
+      manualGroups.forEach((g) => (g.hidden = !manual));
+      if (manual) {
+        hoursGroups.forEach((g) => (g.hidden = lockTimes));
+        fixedGroups.forEach((g) => (g.hidden = !lockTimes));
+      }
+    };
+    forceCheckbox?.addEventListener('change', updateDaylightVisibility);
+    lockCheckbox?.addEventListener('change', updateDaylightVisibility);
     const latInput = this.element.querySelector('[name="latitude"]');
     if (latInput) {
       const shortestVal = this.element.querySelector('[data-daylight="shortest"]');
@@ -428,15 +450,21 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const darkHue = ClimateEditor.#normToHue(data.darkHue);
     const darkSat = data.darkSaturation !== '' && data.darkSaturation != null ? parseFloat(data.darkSaturation) : null;
     const forceSolstice = data.forceSolstice;
+    const lockSunTimes = !!data.lockSunTimes;
     const latVal = data.latitude !== '' && data.latitude != null ? parseFloat(data.latitude) : null;
     const shortDayVal = data.shortestDay !== '' && data.shortestDay != null ? parseFloat(data.shortestDay) : null;
     const longDayVal = data.longestDay !== '' && data.longestDay != null ? parseFloat(data.longestDay) : null;
+    const sunriseVal = data.sunriseOverride !== '' && data.sunriseOverride != null ? parseFloat(data.sunriseOverride) : null;
+    const sunsetVal = data.sunsetOverride !== '' && data.sunsetOverride != null ? parseFloat(data.sunsetOverride) : null;
+    const useSunOverride = forceSolstice && lockSunTimes && sunriseVal != null && sunsetVal != null && sunriseVal < sunsetVal;
     const result = {
       description: data.description || '',
       brightnessMultiplier: parseFloat(data.brightnessMultiplier) || 1.0,
       latitude: forceSolstice ? null : latVal,
-      shortestDay: forceSolstice ? shortDayVal : null,
-      longestDay: forceSolstice ? longDayVal : null,
+      shortestDay: forceSolstice && !useSunOverride ? shortDayVal : null,
+      longestDay: forceSolstice && !useSunOverride ? longDayVal : null,
+      sunriseOverride: useSunOverride ? sunriseVal : null,
+      sunsetOverride: useSunOverride ? sunsetVal : null,
       environmentBase: baseHue !== null || baseSat !== null ? { hue: baseHue, saturation: baseSat } : null,
       environmentDark: darkHue !== null || darkSat !== null ? { hue: darkHue, saturation: darkSat } : null,
       temperatures: {},
@@ -445,10 +473,9 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     for (const season of seasonNames) {
       const minRaw = String(data[`temp_${season}_min`] ?? '').trim();
       const maxRaw = String(data[`temp_${season}_max`] ?? '').trim();
-      result.temperatures[season] = {
-        min: ClimateEditor.#parseTempInput(minRaw, 0),
-        max: ClimateEditor.#parseTempInput(maxRaw, 20)
-      };
+      const min = minRaw ? ClimateEditor.#parseTempInput(minRaw, null) : null;
+      const max = maxRaw ? ClimateEditor.#parseTempInput(maxRaw, null) : null;
+      result.temperatures[season] = min == null && max == null ? null : { min, max };
     }
     const seasonOverrides = foundry.utils.deepClone(this.#data.seasonOverrides ?? {});
     for (const season of seasonNames) {
@@ -597,6 +624,26 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     const num = parseFloat(raw);
     return isNaN(num) ? (fallback != null ? fromDisplayUnit(fallback) : null) : fromDisplayUnit(num);
+  }
+
+  /**
+   * Resolve the effective preset chance for a zone-season cell.
+   * @param {number|undefined} baseChance - Season climate chance for this preset
+   * @param {number|string|null|undefined} zoneChance - Zone override value
+   * @returns {number} Effective chance (0 if disabled or unresolvable)
+   */
+  static #resolveEffectiveChance(baseChance, zoneChance) {
+    if (zoneChance == null || zoneChance === '') return baseChance ?? 0;
+    if (typeof zoneChance === 'string' && /[+-]$/.test(zoneChance)) {
+      const suffix = zoneChance.slice(-1);
+      const value = Number(zoneChance.slice(0, -1));
+      if (isNaN(value)) return baseChance ?? 0;
+      const delta = suffix === '+' ? value : -value;
+      return Math.max(0, (baseChance ?? 0) + delta);
+    }
+    const num = Number(zoneChance);
+    if (!Number.isFinite(num)) return baseChance ?? 0;
+    return Math.max(0, num);
   }
 
   /**

@@ -7,15 +7,16 @@
   },
   "months": {
     "values": {
-      "roelir0000000000": {
-        "name": "Roelir",
-        "abbreviation": "Roe",
+      "dayofrebirthmon0": {
+        "name": "Day of Rebirth",
+        "abbreviation": "Reb",
         "ordinal": 1,
-        "days": 32
+        "days": 1,
+        "type": "intercalary"
       },
-      "faniele000000000": {
-        "name": "Faniele",
-        "abbreviation": "Fan",
+      "sarimiere0000000": {
+        "name": "Sarimiere",
+        "abbreviation": "Sar",
         "ordinal": 2,
         "days": 32
       },
@@ -25,103 +26,130 @@
         "ordinal": 3,
         "days": 32
       },
+      "roelir0000000000": {
+        "name": "Roelir",
+        "abbreviation": "Roe",
+        "ordinal": 4,
+        "days": 32
+      },
+      "nightoffiremont0": {
+        "name": "Night of Fire",
+        "abbreviation": "Fir",
+        "ordinal": 5,
+        "days": 1,
+        "type": "intercalary"
+      },
       "haelynir00000000": {
         "name": "Haelynir",
         "abbreviation": "Hae",
-        "ordinal": 4,
-        "days": 33
+        "ordinal": 6,
+        "days": 32
       },
       "anarire000000000": {
         "name": "Anarire",
         "abbreviation": "Ana",
-        "ordinal": 5,
+        "ordinal": 7,
         "days": 32
       },
       "deismir000000000": {
         "name": "Deismir",
         "abbreviation": "Dei",
-        "ordinal": 6,
+        "ordinal": 8,
+        "days": 32
+      },
+      "venerationsleep0": {
+        "name": "Veneration of the Sleeping",
+        "abbreviation": "Vos",
+        "ordinal": 9,
+        "days": 1,
+        "type": "intercalary"
+      },
+      "erntenir00000000": {
+        "name": "Erntenir",
+        "abbreviation": "Ern",
+        "ordinal": 10,
         "days": 32
       },
       "sehnir0000000000": {
         "name": "Sehnir",
         "abbreviation": "Seh",
-        "ordinal": 7,
-        "days": 33
-      },
-      "roesone000000000": {
-        "name": "Roesone",
-        "abbreviation": "Ros",
-        "ordinal": 8,
+        "ordinal": 11,
         "days": 32
-      },
-      "eriantir00000000": {
-        "name": "Eriantir",
-        "abbreviation": "Eri",
-        "ordinal": 9,
-        "days": 32
-      },
-      "cuiraecen0000000": {
-        "name": "Cuiraecen",
-        "abbreviation": "Cui",
-        "ordinal": 10,
-        "days": 33
       },
       "emmanir000000000": {
         "name": "Emmanir",
         "abbreviation": "Emm",
-        "ordinal": 11,
+        "ordinal": 12,
         "days": 32
+      },
+      "eveofthedeadmon0": {
+        "name": "Eve of the Dead",
+        "abbreviation": "Eod",
+        "ordinal": 13,
+        "days": 1,
+        "type": "intercalary"
       },
       "keltier000000000": {
         "name": "Keltier",
         "abbreviation": "Kel",
-        "ordinal": 12,
-        "days": 33
+        "ordinal": 14,
+        "days": 32
+      },
+      "faniele000000000": {
+        "name": "Faniele",
+        "abbreviation": "Fan",
+        "ordinal": 15,
+        "days": 32
+      },
+      "pasiphiel0000000": {
+        "name": "Pasiphiel",
+        "abbreviation": "Pas",
+        "ordinal": 16,
+        "days": 32
       }
     }
   },
   "days": {
     "values": {
       "firstday00000000": {
-        "name": "Firstday",
+        "name": "Firlen",
         "ordinal": 1,
-        "abbreviation": "1st"
+        "abbreviation": "Fir"
       },
       "seconday00000000": {
-        "name": "Seconday",
+        "name": "Renlen",
         "ordinal": 2,
-        "abbreviation": "2nd"
+        "abbreviation": "Ren"
       },
       "thirdday00000000": {
-        "name": "Thirdday",
+        "name": "Dielen",
         "ordinal": 3,
-        "abbreviation": "3rd"
+        "abbreviation": "Die"
       },
       "fourthday0000000": {
-        "name": "Fourthday",
+        "name": "Varilen",
         "ordinal": 4,
-        "abbreviation": "4th"
+        "abbreviation": "Var"
       },
       "fifthday00000000": {
-        "name": "Fifthday",
+        "name": "Branlen",
         "ordinal": 5,
-        "abbreviation": "5th"
+        "abbreviation": "Bra"
       },
       "sixthday00000000": {
-        "name": "Sixthday",
+        "name": "Barlen",
         "ordinal": 6,
-        "abbreviation": "6th"
+        "abbreviation": "Bar"
       },
       "seventhday000000": {
-        "name": "Seventhday",
+        "name": "Mierlen",
         "ordinal": 7,
-        "abbreviation": "7th"
+        "abbreviation": "Mie"
       },
       "eighthday0000000": {
-        "name": "Eighthday",
+        "name": "Taelen",
         "ordinal": 8,
-        "abbreviation": "8th",
+        "abbreviation": "Tae",
         "isRestDay": true
       }
     },
@@ -133,12 +161,12 @@
   "festivals": {
     "dayofrebirth0000": {
       "name": "Day of Rebirth",
-      "month": 2,
+      "month": 0,
       "countsForWeekday": false,
       "icon": "fa-seedling",
       "color": "#32CD32",
       "description": "Vernal equinox marking the new year and the rebirth of spring across Cerilia.",
-      "dayOfMonth": 31,
+      "dayOfMonth": 0,
       "duration": 1,
       "leapYearOnly": false,
       "conditionTree": {
@@ -149,13 +177,13 @@
             "type": "condition",
             "field": "month",
             "op": "==",
-            "value": 3
+            "value": 1
           },
           {
             "type": "condition",
             "field": "day",
             "op": "==",
-            "value": 32
+            "value": 1
           }
         ]
       },
@@ -169,157 +197,13 @@
     },
     "nightoffire00000": {
       "name": "Night of Fire",
-      "month": 5,
+      "month": 4,
       "countsForWeekday": false,
       "icon": "fa-meteor",
       "color": "#FF4500",
       "description": "Summer solstice featuring a spectacular display of falling stars from an annual meteor passage.",
-      "dayOfMonth": 31,
-      "duration": 1,
-      "leapYearOnly": false,
-      "conditionTree": {
-        "type": "group",
-        "mode": "and",
-        "children": [
-          {
-            "type": "condition",
-            "field": "month",
-            "op": "==",
-            "value": 6
-          },
-          {
-            "type": "condition",
-            "field": "day",
-            "op": "==",
-            "value": 32
-          }
-        ]
-      },
-      "allDay": true,
-      "displayStyle": "banner",
-      "visibility": "visible",
-      "silent": true,
-      "hasDuration": false,
-      "reminderType": "none",
-      "reminderOffset": 0
-    },
-    "venerationofthed": {
-      "name": "Veneration of the Dead",
-      "month": 8,
-      "countsForWeekday": false,
-      "icon": "fa-monument",
-      "color": "#696969",
-      "description": "Autumnal equinox honoring ancestors and the departed.",
-      "dayOfMonth": 31,
-      "duration": 1,
-      "leapYearOnly": false,
-      "conditionTree": {
-        "type": "group",
-        "mode": "and",
-        "children": [
-          {
-            "type": "condition",
-            "field": "month",
-            "op": "==",
-            "value": 9
-          },
-          {
-            "type": "condition",
-            "field": "day",
-            "op": "==",
-            "value": 32
-          }
-        ]
-      },
-      "allDay": true,
-      "displayStyle": "banner",
-      "visibility": "visible",
-      "silent": true,
-      "hasDuration": false,
-      "reminderType": "none",
-      "reminderOffset": 0
-    },
-    "nightofsleeping0": {
-      "name": "Night of Sleeping",
-      "month": 11,
-      "countsForWeekday": false,
-      "icon": "fa-moon",
-      "color": "#191970",
-      "description": "Winter solstice observance when the land enters its deepest slumber.",
-      "dayOfMonth": 32,
-      "duration": 1,
-      "leapYearOnly": false,
-      "conditionTree": {
-        "type": "group",
-        "mode": "and",
-        "children": [
-          {
-            "type": "condition",
-            "field": "month",
-            "op": "==",
-            "value": 12
-          },
-          {
-            "type": "condition",
-            "field": "day",
-            "op": "==",
-            "value": 33
-          }
-        ]
-      },
-      "allDay": true,
-      "displayStyle": "banner",
-      "visibility": "visible",
-      "silent": true,
-      "hasDuration": false,
-      "reminderType": "none",
-      "reminderOffset": 0
-    },
-    "haelynsday000000": {
-      "name": "Haelyn's Day",
-      "month": 3,
-      "icon": "fa-crown",
-      "color": "#B8860B",
-      "description": "Festival honoring Haelyn, god of courage, justice, and rightful rulership.",
-      "dayOfMonth": 15,
-      "duration": 1,
-      "countsForWeekday": true,
-      "leapYearOnly": false,
-      "conditionTree": {
-        "type": "group",
-        "mode": "and",
-        "children": [
-          {
-            "type": "condition",
-            "field": "month",
-            "op": "==",
-            "value": 4
-          },
-          {
-            "type": "condition",
-            "field": "day",
-            "op": "==",
-            "value": 16
-          }
-        ]
-      },
-      "allDay": true,
-      "displayStyle": "banner",
-      "visibility": "visible",
-      "silent": true,
-      "hasDuration": false,
-      "reminderType": "none",
-      "reminderOffset": 0
-    },
-    "eriksmoot0000000": {
-      "name": "Erik's Moot",
-      "month": 4,
-      "icon": "fa-tree",
-      "color": "#228B22",
-      "description": "Celebration dedicated to Erik, god of forests, hunting, and wild places.",
       "dayOfMonth": 0,
       "duration": 1,
-      "countsForWeekday": true,
       "leapYearOnly": false,
       "conditionTree": {
         "type": "group",
@@ -346,6 +230,150 @@
       "hasDuration": false,
       "reminderType": "none",
       "reminderOffset": 0
+    },
+    "venerationofthed": {
+      "name": "Veneration of the Sleeping",
+      "month": 8,
+      "countsForWeekday": false,
+      "icon": "fa-monument",
+      "color": "#696969",
+      "description": "Autumnal equinox honoring ancestors and the long-departed who rest beneath the earth.",
+      "dayOfMonth": 0,
+      "duration": 1,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 9
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 1
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "nightofsleeping0": {
+      "name": "Eve of the Dead",
+      "month": 12,
+      "countsForWeekday": false,
+      "icon": "fa-moon",
+      "color": "#191970",
+      "description": "Winter solstice vigil when the veil between the living and dead grows thin and the land enters its deepest slumber.",
+      "dayOfMonth": 0,
+      "duration": 1,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 13
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 1
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "haelynsday000000": {
+      "name": "Haelyn's Day",
+      "month": 5,
+      "icon": "fa-crown",
+      "color": "#B8860B",
+      "description": "Festival honoring Haelyn, god of courage, justice, and rightful rulership.",
+      "dayOfMonth": 15,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 6
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 16
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "eriksmoot0000000": {
+      "name": "Erik's Moot",
+      "month": 3,
+      "icon": "fa-tree",
+      "color": "#228B22",
+      "description": "Rjurik celebration dedicated to Erik, god of forests, hunting, and wild places, observed during Roelir.",
+      "dayOfMonth": 0,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 4
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 1
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     }
   },
   "seasons": {
@@ -355,8 +383,8 @@
         "icon": "fas fa-snowflake",
         "color": "#87ceeb",
         "seasonalType": "winter",
-        "dayStart": 356,
-        "dayEnd": 95,
+        "dayStart": 291,
+        "dayEnd": 387,
         "abbreviation": "Win"
       },
       "spring0000000000": {
@@ -364,8 +392,8 @@
         "icon": "fas fa-seedling",
         "color": "#90ee90",
         "seasonalType": "spring",
-        "dayStart": 96,
-        "dayEnd": 192,
+        "dayStart": 0,
+        "dayEnd": 96,
         "abbreviation": "Spr"
       },
       "summer0000000000": {
@@ -373,8 +401,8 @@
         "icon": "fas fa-sun",
         "color": "#ffd700",
         "seasonalType": "summer",
-        "dayStart": 193,
-        "dayEnd": 290,
+        "dayStart": 97,
+        "dayEnd": 193,
         "abbreviation": "Sum"
       },
       "autumn0000000000": {
@@ -382,8 +410,8 @@
         "icon": "fas fa-leaf",
         "color": "#d2691e",
         "seasonalType": "autumn",
-        "dayStart": 291,
-        "dayEnd": 355,
+        "dayStart": 194,
+        "dayEnd": 290,
         "abbreviation": "Aut"
       }
     }
@@ -405,7 +433,7 @@
   "moons": {
     "themoon000000000": {
       "name": "The Moon",
-      "cycleLength": 28,
+      "cycleLength": 32,
       "color": "#E8E8E8",
       "phases": {
         "newmoon000000000": {
@@ -459,8 +487,8 @@
       },
       "referenceDate": {
         "year": 0,
-        "month": 0,
-        "dayOfMonth": 13
+        "month": 1,
+        "dayOfMonth": 0
       }
     }
   },
@@ -468,8 +496,8 @@
     "enabled": true,
     "shortestDay": 8,
     "longestDay": 16,
-    "winterSolstice": 372,
-    "summerSolstice": 178
+    "winterSolstice": 291,
+    "summerSolstice": 97
   },
   "cycles": {},
   "canonicalHours": {},

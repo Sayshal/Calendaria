@@ -30,6 +30,7 @@ import {
   initializeLogger,
   initializeTheme,
   log,
+  migrateRemovedCalendars,
   overrideChatLogTimestamps,
   registerEnrichers,
   registerKeybindings,
@@ -88,6 +89,7 @@ Hooks.once('dnd5e.setupCalendar', () => {
 
 Hooks.once('ready', async () => {
   CalendariaSettings.registerReadySettings();
+  await migrateRemovedCalendars();
   await CalendarManager.initialize();
   await runAllMigrations();
   await NoteManager.initialize();

@@ -34,7 +34,7 @@ The exported file is named `calendaria-settings-{timestamp}.json` and includes:
 | Chronicle         | Depth mode, view mode, visibility toggles, button visibility, combat mode            |
 | UI Visibility     | Show/force settings for all 7 widgets, toolbar apps, journal footer                  |
 | Permissions       | All role-based permissions                                                           |
-| Categories        | Custom note presets (via custom presets setting)                                     |
+| Categories        | Custom note presets (bundled per-export only when referenced by included notes)      |
 | Custom Time Jumps | HUD, Time Keeper, MiniCal jump configurations                                        |
 | Macro Triggers    | Season and moon phase trigger assignments                                            |
 | Theme             | Theme mode, custom colors, forced theme colors                                       |
@@ -48,6 +48,8 @@ When **Include Calendar Data** is checked, the active calendar's full definition
 ### Notes (optional)
 
 When **Include Notes** is checked, all notes for the active calendar are serialized into the export. On import, notes are recreated and cross-references between notes are re-linked automatically. Scene-specific, macro, and playlist references are cleared since they won't resolve in the target world.
+
+Any custom note presets referenced by the exported notes' categories travel with the export and are restored on import before notes are processed. Presets whose ID already exists in the target world are skipped rather than overwritten.
 
 ---
 

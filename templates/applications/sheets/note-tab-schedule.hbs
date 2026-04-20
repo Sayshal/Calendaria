@@ -71,6 +71,33 @@
           </div>
         </div>
       </fieldset>
+      <fieldset class="duration-fieldset">
+        <legend data-tooltip
+          aria-label="{{#if durationLockedByRange}}{{localize 'CALENDARIA.Note.Duration.LockedByRange'}}{{else}}{{localize 'CALENDARIA.Note.Tooltip.Duration'}}{{/if}}">
+          {{localize "CALENDARIA.Common.Duration"}}
+        </legend>
+        <div class="duration-grid">
+          <div class="duration-cell">
+            <label data-tooltip aria-label="{{localize 'CALENDARIA.Note.Duration.EnableHint'}}">
+              <input type="checkbox" name="system.hasDuration" {{checked system.hasDuration}}
+                {{#if durationLockedByRange}}disabled{{/if}}>
+              {{localize "CALENDARIA.Common.HasDuration"}}
+            </label>
+            <label class="duration-days-label">
+              <input type="number" name="system.duration" value="{{system.duration}}" min="1" step="1"
+                {{#if durationLockedByRange}}disabled{{else}}{{#unless system.hasDuration}}disabled{{/unless}}{{/if}}>
+              {{localize "CALENDARIA.Common.Days"}}
+            </label>
+          </div>
+          <div class="duration-cell">
+            <label data-tooltip aria-label="{{localize 'CALENDARIA.Note.Duration.ShowBookendsHint'}}">
+              <input type="checkbox" name="system.showBookends" {{checked system.showBookends}}
+                {{#unless system.hasDuration}}disabled{{/unless}}>
+              {{localize "CALENDARIA.Note.Duration.ShowBookends"}}
+            </label>
+          </div>
+        </div>
+      </fieldset>
     </div>
     <div class="schedule-row">
       <fieldset class="conditions-fieldset">

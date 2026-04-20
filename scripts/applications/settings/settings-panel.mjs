@@ -7,6 +7,7 @@
 import { BUNDLED_CALENDARS, CalendarManager, CalendarRegistry } from '../../calendar/_module.mjs';
 import { HOOKS, MODULE, SETTINGS, TEMPLATES } from '../../constants.mjs';
 import { FestivalManager } from '../../festivals/_module.mjs';
+import { isLuxonCompatible, isLuxonSyncRequired } from '../../integrations/luxon-sync.mjs';
 import { addDays, getAllPresets } from '../../notes/_module.mjs';
 import { TimeClock, getTimeIncrements } from '../../time/_module.mjs';
 import {
@@ -256,14 +257,15 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#setupDependentFields();
   }
 
-  /** Wire up data-depends-on fields to toggle disabled state based on a parent checkbox. */
+  /** Wire up data-depends-on fields to toggle disabled state based on a parent checkbox or select value (name:value). */
   #setupDependentFields() {
     for (const group of this.element.querySelectorAll('[data-depends-on]')) {
-      const parentName = group.dataset.dependsOn;
+      const dep = group.dataset.dependsOn;
+      const [parentName, expectedValue] = dep.includes(':') ? dep.split(':') : [dep, null];
       const parentInput = this.element.querySelector(`[name="${parentName}"]`);
       if (!parentInput) continue;
       const toggle = () => {
-        const enabled = parentInput.checked;
+        const enabled = expectedValue != null ? parentInput.value === expectedValue : parentInput.checked;
         group.classList.toggle('disabled', !enabled);
         for (const input of group.querySelectorAll('input, select')) {
           input.disabled = !enabled || input.hasAttribute('data-force-disabled');
@@ -648,16 +650,22 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     const activeCalendarId = game.settings.get(MODULE.ID, SETTINGS.ACTIVE_CALENDAR);
     const customCalendars = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CALENDARS) || {};
     context.canChangeCalendar = context.isGM || canChangeActiveCalendar();
+    const luxonRequired = isLuxonSyncRequired();
+    context.luxonSyncRequired = luxonRequired;
+    context.luxonSyncNotice = luxonRequired ? format('CALENDARIA.Settings.ActiveCalendar.LuxonRequiredNotice', { system: game.system.id.toUpperCase() }) : '';
     context.calendarOptions = [];
     for (const id of BUNDLED_CALENDARS) {
       const key = id
         .split('-')
         .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
         .join('');
-      context.calendarOptions.push({ value: id, label: localize(`CALENDARIA.Calendar.${key}.Name`), selected: id === activeCalendarId, isCustom: false });
+      const cal = CalendarRegistry.get(id);
+      const incompatible = luxonRequired && !isLuxonCompatible(cal);
+      context.calendarOptions.push({ value: id, label: localize(`CALENDARIA.Calendar.${key}.Name`), selected: id === activeCalendarId, isCustom: false, incompatible });
     }
     for (const [id, data] of Object.entries(customCalendars)) {
-      context.calendarOptions.push({ value: id, label: localize(data.name) || data.name || id, selected: id === activeCalendarId, isCustom: true });
+      const incompatible = luxonRequired && !isLuxonCompatible(data);
+      context.calendarOptions.push({ value: id, label: localize(data.name) || data.name || id, selected: id === activeCalendarId, isCustom: true, incompatible });
     }
     context.calendarOptions.sort((a, b) => a.label.localeCompare(b.label, game.i18n.lang));
     context.showEquivalentDatesSection = context.isGM;
@@ -677,7 +685,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.ADVANCE_TIME_ON_REST]: { tab: 'time', label: 'CALENDARIA.Settings.AdvanceTimeOnRest.Name' },
     [SETTINGS.SYNC_CLOCK_PAUSE]: { tab: 'time', label: 'CALENDARIA.Settings.SyncClockPause.Name' },
     [SETTINGS.CLOCK_RUN_DURING_COMBAT]: { tab: 'time', label: 'CALENDARIA.Settings.ClockRunDuringCombat.Name' },
-    [SETTINGS.REST_TO_SUNRISE]: { tab: 'time', label: 'CALENDARIA.Settings.RestToSunrise.Name' },
+    [SETTINGS.REST_ADVANCE_MODE]: { tab: 'time', label: 'CALENDARIA.Settings.RestAdvanceMode.Name' },
+    [SETTINGS.REST_FIXED_HOURS]: { tab: 'time', label: 'CALENDARIA.Settings.RestFixedHours.Name' },
+    [SETTINGS.ADVANCE_BASTION_ORDERS]: { tab: 'time', label: 'CALENDARIA.Settings.AdvanceBastionOrders.Name' },
     [SETTINGS.TIME_SPEED_MULTIPLIER]: { tab: 'time', label: 'CALENDARIA.Settings.TimeSpeedMultiplier.Name' },
     [SETTINGS.TIME_SPEED_INCREMENT]: { tab: 'time', label: 'CALENDARIA.Settings.TimeSpeedIncrement.Name' },
     [SETTINGS.TIME_ADVANCE_INTERVAL]: { tab: 'time', label: 'CALENDARIA.Settings.TimeAdvanceInterval.Name' },
@@ -911,7 +921,14 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     'sunDial-display': [SETTINGS.SHOW_SUN_DIAL, SETTINGS.FORCE_SUN_DIAL, SETTINGS.SUN_DIAL_CRANK_MODE, SETTINGS.SUN_DIAL_AUTO_FADE, SETTINGS.SUN_DIAL_IDLE_OPACITY, SETTINGS.SUN_DIAL_COMBAT_MODE],
     'sunDial-sticky': [SETTINGS.SUN_DIAL_STICKY_STATES],
     'time-realtime': [SETTINGS.TIME_SPEED_MULTIPLIER, SETTINGS.TIME_SPEED_INCREMENT, SETTINGS.TIME_ADVANCE_INTERVAL],
-    'time-integration': [SETTINGS.ADVANCE_TIME_ON_REST, SETTINGS.REST_TO_SUNRISE, SETTINGS.SYNC_CLOCK_PAUSE, SETTINGS.CLOCK_RUN_DURING_COMBAT],
+    'time-integration': [
+      SETTINGS.ADVANCE_TIME_ON_REST,
+      SETTINGS.REST_ADVANCE_MODE,
+      SETTINGS.REST_FIXED_HOURS,
+      SETTINGS.ADVANCE_BASTION_ORDERS,
+      SETTINGS.SYNC_CLOCK_PAUSE,
+      SETTINGS.CLOCK_RUN_DURING_COMBAT
+    ],
     'chat-timestamps': [SETTINGS.CHAT_TIMESTAMP_MODE, SETTINGS.CHAT_TIMESTAMP_SHOW_TIME],
     'canvas-sticky-zones': [SETTINGS.HUD_STICKY_ZONES_ENABLED, SETTINGS.ALLOW_SIDEBAR_OVERLAP],
     'canvas-scene-integration': [
@@ -1019,7 +1036,10 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   async #prepareTimeContext(context) {
     context.advanceTimeOnRest = game.settings.get(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST);
-    context.restToSunrise = game.settings.get(MODULE.ID, SETTINGS.REST_TO_SUNRISE);
+    context.restAdvanceMode = game.settings.get(MODULE.ID, SETTINGS.REST_ADVANCE_MODE);
+    context.restFixedHours = game.settings.get(MODULE.ID, SETTINGS.REST_FIXED_HOURS);
+    context.advanceBastionOrders = game.settings.get(MODULE.ID, SETTINGS.ADVANCE_BASTION_ORDERS);
+    context.showBastionSetting = game.system?.id === 'dnd5e';
     context.syncClockPause = game.settings.get(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE);
     context.clockRunDuringCombat = game.settings.get(MODULE.ID, SETTINGS.CLOCK_RUN_DURING_COMBAT);
     context.roundTimeDisabled = CONFIG.time.roundTime === 0;
@@ -1571,6 +1591,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         .map((v) => ({ value: v, label: localize(`CALENDARIA.ThemeEditor.Presets.${v.charAt(0).toUpperCase() + v.slice(1)}`), selected: forceTheme === v }))
         .sort((a, b) => a.label.localeCompare(b.label));
       const forceCustom = Object.entries(themes)
+        .filter(([, entry]) => entry && typeof entry === 'object' && entry.name)
         .map(([key, entry]) => ({ value: key, label: entry.name, selected: forceTheme === key }))
         .sort((a, b) => a.label.localeCompare(b.label));
       context.forceThemeOptions = [{ value: 'none', label: localize('CALENDARIA.Settings.ForceTheme.None'), selected: forceTheme === 'none' }, ...forcePresets, ...forceCustom];
@@ -1581,6 +1602,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       .map((v) => ({ key: v, label: localize(`CALENDARIA.ThemeEditor.Presets.${v.charAt(0).toUpperCase() + v.slice(1)}`), selected: displayMode === v }))
       .sort((a, b) => a.label.localeCompare(b.label));
     context.customThemes = Object.entries(themes)
+      .filter(([, entry]) => entry && typeof entry === 'object' && entry.name)
       .map(([key, entry]) => ({ key, label: entry.name, selected: displayMode === key }))
       .sort((a, b) => a.label.localeCompare(b.label));
     context.isCustomThemeActive = isCustomThemeKey(themeMode);
@@ -1872,7 +1894,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('colorShiftSync' in data) await game.settings.set(MODULE.ID, SETTINGS.COLOR_SHIFT_SYNC, data.colorShiftSync);
     if ('darknessMoonSync' in data) await game.settings.set(MODULE.ID, SETTINGS.DARKNESS_MOON_SYNC, data.darknessMoonSync);
     if ('advanceTimeOnRest' in data) await game.settings.set(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST, data.advanceTimeOnRest);
-    if ('restToSunrise' in data) await game.settings.set(MODULE.ID, SETTINGS.REST_TO_SUNRISE, data.restToSunrise);
+    if ('restAdvanceMode' in data) await game.settings.set(MODULE.ID, SETTINGS.REST_ADVANCE_MODE, data.restAdvanceMode);
+    if ('restFixedHours' in data) await game.settings.set(MODULE.ID, SETTINGS.REST_FIXED_HOURS, data.restFixedHours);
+    if ('advanceBastionOrders' in data) await game.settings.set(MODULE.ID, SETTINGS.ADVANCE_BASTION_ORDERS, data.advanceBastionOrders);
     if ('syncClockPause' in data) await game.settings.set(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE, data.syncClockPause);
     if ('clockRunDuringCombat' in data) await game.settings.set(MODULE.ID, SETTINGS.CLOCK_RUN_DURING_COMBAT, data.clockRunDuringCombat);
     if ('chatTimestampMode' in data) await game.settings.set(MODULE.ID, SETTINGS.CHAT_TIMESTAMP_MODE, data.chatTimestampMode);

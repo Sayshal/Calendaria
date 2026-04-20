@@ -105,12 +105,13 @@
       "yulisen000000000": {
         "name": "Yulisen",
         "ordinal": 6,
-        "abbreviation": "Yul"
+        "abbreviation": "Yul",
+        "isRestDay": true
       },
       "dapsen0000000000": {
-        "name": "Dapsen",
+        "name": "Da'leysen",
         "ordinal": 7,
-        "abbreviation": "Dap",
+        "abbreviation": "Dal",
         "isRestDay": true
       }
     },
@@ -158,7 +159,7 @@
     },
     "hillsgold0000000": {
       "name": "Hillsgold",
-      "month": 1,
+      "month": 0,
       "icon": "fa-wheat-awn",
       "color": "#DAA520",
       "description": "A harvest festival celebrating the bounty of the hills and early spring crops.",
@@ -174,7 +175,7 @@
             "type": "condition",
             "field": "month",
             "op": "==",
-            "value": 2
+            "value": 1
           },
           {
             "type": "condition",
@@ -194,7 +195,7 @@
     },
     "dayofchallenging": {
       "name": "Day of Challenging",
-      "month": 2,
+      "month": 1,
       "icon": "fa-bolt",
       "color": "#4169E1",
       "description": "The Stormlord's holy day where warriors compete in sacred combat and trials of strength.",
@@ -210,7 +211,7 @@
             "type": "condition",
             "field": "month",
             "op": "==",
-            "value": 3
+            "value": 2
           },
           {
             "type": "condition",
@@ -228,13 +229,13 @@
       "reminderType": "none",
       "reminderOffset": 0
     },
-    "dayofrenewal0000": {
-      "name": "Day of Renewal",
+    "renewalfestival0": {
+      "name": "Renewal Festival",
       "month": 2,
       "icon": "fa-seedling",
       "color": "#32CD32",
-      "description": "The official start of spring celebrated with fresh food, music, and games.",
-      "dayOfMonth": 25,
+      "description": "The official start of spring, celebrated with games, music, and just-ripened food.",
+      "dayOfMonth": 12,
       "duration": 1,
       "countsForWeekday": true,
       "leapYearOnly": false,
@@ -252,7 +253,7 @@
             "type": "condition",
             "field": "day",
             "op": "==",
-            "value": 26
+            "value": 13
           }
         ]
       },
@@ -264,13 +265,49 @@
       "reminderType": "none",
       "reminderOffset": 0
     },
-    "wildsmouth000000": {
-      "name": "Wild's Mouth",
-      "month": 3,
+    "wildsgrandeur000": {
+      "name": "Wild's Grandeur",
+      "month": 2,
       "icon": "fa-tree",
       "color": "#228B22",
-      "description": "A celebration honoring the untamed wilds and the power of nature's awakening.",
+      "description": "A holy day marking the first blush of spring as new flowers bloom across Tal'Dorei.",
       "dayOfMonth": 19,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 3
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 20
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "harvestsrise0000": {
+      "name": "Harvest's Rise",
+      "month": 3,
+      "icon": "fa-leaf",
+      "color": "#8B4513",
+      "description": "The celebration of planting season's beginning and preparation for the year's growth.",
+      "dayOfMonth": 10,
       "duration": 1,
       "countsForWeekday": true,
       "leapYearOnly": false,
@@ -288,7 +325,79 @@
             "type": "condition",
             "field": "day",
             "op": "==",
-            "value": 20
+            "value": 11
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "merryfrondsday00": {
+      "name": "Merryfrond's Day",
+      "month": 3,
+      "icon": "fa-heart",
+      "color": "#FF69B4",
+      "description": "A day of celebration and romance, honoring the legendary tale of Merryfrond the jester.",
+      "dayOfMonth": 30,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 4
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 31
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "deepsolace000000": {
+      "name": "Deep Solace",
+      "month": 4,
+      "icon": "fa-water",
+      "color": "#008080",
+      "description": "The Stormlord's holy day, observed with quiet reflection on the sea and its fallen.",
+      "dayOfMonth": 7,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 5
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 8
           }
         ]
       },
@@ -302,11 +411,47 @@
     },
     "zenith0000000000": {
       "name": "Zenith",
-      "month": 5,
+      "month": 4,
       "icon": "fa-fire",
       "color": "#FF8C00",
-      "description": "The official beginning of summer marked at noon on the longest day of the year.",
+      "description": "The summer solstice, observed at noon on the longest day of the year with games and fireworks.",
       "dayOfMonth": 25,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 5
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 26
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "artisansfaire000": {
+      "name": "Artisan's Faire",
+      "month": 5,
+      "icon": "fa-hammer",
+      "color": "#CD853F",
+      "description": "A celebration of craft and trade, when artisans across Tal'Dorei showcase their finest work.",
+      "dayOfMonth": 14,
       "duration": 1,
       "countsForWeekday": true,
       "leapYearOnly": false,
@@ -324,7 +469,7 @@
             "type": "condition",
             "field": "day",
             "op": "==",
-            "value": 26
+            "value": 15
           }
         ]
       },
@@ -336,12 +481,12 @@
       "reminderType": "none",
       "reminderOffset": 0
     },
-    "midsummer0000000": {
-      "name": "Midsummer",
-      "month": 6,
-      "icon": "fa-wand-magic-sparkles",
-      "color": "#9370DB",
-      "description": "A fey celebration of the elves' first emergence from the Feywild with wild revelry.",
+    "elvendawn0000000": {
+      "name": "Elvendawn",
+      "month": 5,
+      "icon": "fa-moon",
+      "color": "#E6E6FA",
+      "description": "Also known as Midsummer, a fey celebration of the elves' first emergence from the Feywild.",
       "dayOfMonth": 19,
       "duration": 1,
       "countsForWeekday": true,
@@ -354,7 +499,7 @@
             "type": "condition",
             "field": "month",
             "op": "==",
-            "value": 7
+            "value": 6
           },
           {
             "type": "condition",
@@ -372,48 +517,12 @@
       "reminderType": "none",
       "reminderOffset": 0
     },
-    "elvendawn0000000": {
-      "name": "Elvendawn",
-      "month": 7,
-      "icon": "fa-moon",
-      "color": "#E6E6FA",
-      "description": "The Arch Heart's holy day honoring the elven people and their connection to the Feywild.",
-      "dayOfMonth": 2,
-      "duration": 1,
-      "countsForWeekday": true,
-      "leapYearOnly": false,
-      "conditionTree": {
-        "type": "group",
-        "mode": "and",
-        "children": [
-          {
-            "type": "condition",
-            "field": "month",
-            "op": "==",
-            "value": 8
-          },
-          {
-            "type": "condition",
-            "field": "day",
-            "op": "==",
-            "value": 3
-          }
-        ]
-      },
-      "allDay": true,
-      "displayStyle": "banner",
-      "visibility": "visible",
-      "silent": true,
-      "hasDuration": false,
-      "reminderType": "none",
-      "reminderOffset": 0
-    },
     "highsummer000000": {
       "name": "Highsummer",
-      "month": 7,
+      "month": 6,
       "icon": "fa-crown",
       "color": "#FFD700",
-      "description": "The Dawnfather's holy day marking summer's peak with a week of feasting and gift-giving.",
+      "description": "The Dawnfather's holy day marking summer's peak with feasting and gift-giving.",
       "dayOfMonth": 6,
       "duration": 1,
       "countsForWeekday": true,
@@ -426,7 +535,7 @@
             "type": "condition",
             "field": "month",
             "op": "==",
-            "value": 8
+            "value": 7
           },
           {
             "type": "condition",
@@ -444,9 +553,45 @@
       "reminderType": "none",
       "reminderOffset": 0
     },
+    "mornoflargesse00": {
+      "name": "Morn of Largesse",
+      "month": 6,
+      "icon": "fa-hand-holding-heart",
+      "color": "#DAA520",
+      "description": "A day of generosity and charitable giving to the poor and unfortunate.",
+      "dayOfMonth": 13,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 7
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 14
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
     "harvestsclose000": {
       "name": "Harvest's Close",
-      "month": 8,
+      "month": 7,
       "icon": "fa-apple-whole",
       "color": "#D2691E",
       "description": "The beginning of autumn marked with feasting in villages and carnivals in the cities.",
@@ -462,7 +607,7 @@
             "type": "condition",
             "field": "month",
             "op": "==",
-            "value": 9
+            "value": 8
           },
           {
             "type": "condition",
@@ -480,13 +625,85 @@
       "reminderType": "none",
       "reminderOffset": 0
     },
-    "harvestsrise0000": {
-      "name": "Harvest's Rise",
-      "month": 9,
-      "icon": "fa-leaf",
+    "hazelfestival000": {
+      "name": "The Hazel Festival",
+      "month": 8,
+      "icon": "fa-tree-city",
       "color": "#8B4513",
-      "description": "The celebration of planting season's beginning and preparation for the year's growth.",
-      "dayOfMonth": 10,
+      "description": "A Tal'Dorei celebration of the hazel harvest and the turning of the leaves.",
+      "dayOfMonth": 9,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 9
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 10
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "civilizationsdaw": {
+      "name": "Civilization's Dawn",
+      "month": 8,
+      "icon": "fa-city",
+      "color": "#B8860B",
+      "description": "A commemoration of the founding of the first cities of Tal'Dorei after the Calamity.",
+      "dayOfMonth": 21,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 9
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 22
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "nightofascension": {
+      "name": "Night of Ascension",
+      "month": 9,
+      "icon": "fa-skull",
+      "color": "#4B0082",
+      "description": "The Raven Queen's holy day, when the veil between life and death grows thin.",
+      "dayOfMonth": 12,
       "duration": 1,
       "countsForWeekday": true,
       "leapYearOnly": false,
@@ -504,7 +721,7 @@
             "type": "condition",
             "field": "day",
             "op": "==",
-            "value": 11
+            "value": 13
           }
         ]
       },
@@ -522,7 +739,7 @@
       "icon": "fa-wine-glass",
       "color": "#CD853F",
       "description": "A Tal'Dorei festival honoring Zan Tal'Dorei with celebration and remembrance.",
-      "dayOfMonth": 25,
+      "dayOfMonth": 20,
       "duration": 1,
       "countsForWeekday": true,
       "leapYearOnly": false,
@@ -540,7 +757,7 @@
             "type": "condition",
             "field": "day",
             "op": "==",
-            "value": 26
+            "value": 21
           }
         ]
       },
@@ -588,12 +805,12 @@
       "reminderType": "none",
       "reminderOffset": 0
     },
-    "embertidestart00": {
-      "name": "Embertide (Start)",
+    "embertide0000000": {
+      "name": "Embertide",
       "month": 10,
       "icon": "fa-dragon",
       "color": "#C0C0C0",
-      "description": "The beginning of Bahamut's holy observance, a time of remembrance for fallen defenders.",
+      "description": "Bahamut's holy observance, a time of remembrance for fallen defenders.",
       "dayOfMonth": 4,
       "duration": 1,
       "countsForWeekday": true,
@@ -624,44 +841,8 @@
       "reminderType": "none",
       "reminderOffset": 0
     },
-    "embertideend0000": {
-      "name": "Embertide (End)",
-      "month": 10,
-      "icon": "fa-shield-halved",
-      "color": "#B0C4DE",
-      "description": "The final day of Embertide, concluding the Platinum Dragon's sacred festival of honor.",
-      "dayOfMonth": 7,
-      "duration": 1,
-      "countsForWeekday": true,
-      "leapYearOnly": false,
-      "conditionTree": {
-        "type": "group",
-        "mode": "and",
-        "children": [
-          {
-            "type": "condition",
-            "field": "month",
-            "op": "==",
-            "value": 11
-          },
-          {
-            "type": "condition",
-            "field": "day",
-            "op": "==",
-            "value": 8
-          }
-        ]
-      },
-      "allDay": true,
-      "displayStyle": "banner",
-      "visibility": "visible",
-      "silent": true,
-      "hasDuration": false,
-      "reminderType": "none",
-      "reminderOffset": 0
-    },
-    "wintersclose0000": {
-      "name": "Winter's Close",
+    "winterscrest0000": {
+      "name": "Winter's Crest",
       "month": 10,
       "icon": "fa-gift",
       "color": "#4682B4",
@@ -704,8 +885,8 @@
         "icon": "fas fa-snowflake",
         "color": "#87ceeb",
         "seasonalType": "winter",
-        "dayStart": 296,
-        "dayEnd": 58,
+        "dayStart": 297,
+        "dayEnd": 70,
         "abbreviation": "Win"
       },
       "spring0000000000": {
@@ -713,8 +894,8 @@
         "icon": "fas fa-seedling",
         "color": "#90ee90",
         "seasonalType": "spring",
-        "dayStart": 59,
-        "dayEnd": 148,
+        "dayStart": 71,
+        "dayEnd": 144,
         "abbreviation": "Spr"
       },
       "summer0000000000": {
@@ -722,8 +903,8 @@
         "icon": "fas fa-sun",
         "color": "#ffd700",
         "seasonalType": "summer",
-        "dayStart": 149,
-        "dayEnd": 237,
+        "dayStart": 145,
+        "dayEnd": 212,
         "abbreviation": "Sum"
       },
       "autumn0000000000": {
@@ -731,8 +912,8 @@
         "icon": "fas fa-leaf",
         "color": "#d2691e",
         "seasonalType": "autumn",
-        "dayStart": 238,
-        "dayEnd": 295,
+        "dayStart": 213,
+        "dayEnd": 296,
         "abbreviation": "Aut"
       }
     }
@@ -741,7 +922,7 @@
     "postdivergence00": {
       "name": "Post-Divergence",
       "abbreviation": "PD",
-      "startYear": 1,
+      "startYear": 0,
       "endYear": null
     }
   },
@@ -808,7 +989,7 @@
     },
     "ruidus0000000000": {
       "name": "Ruidus",
-      "cycleLength": 328,
+      "cycleLength": 164,
       "color": "#8B0000",
       "phases": {
         "newmoon000000000": {
@@ -871,8 +1052,8 @@
     "enabled": true,
     "shortestDay": 9,
     "longestDay": 15,
-    "winterSolstice": 312,
-    "summerSolstice": 148
+    "winterSolstice": 297,
+    "summerSolstice": 145
   },
   "cycles": {},
   "canonicalHours": {},

@@ -652,15 +652,6 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       this.element.querySelector('select[name="system.reminderTargets"]')?.setAttribute('disabled', disabled);
       this.element.querySelector('input[name="system.reminderOffset"]')?.setAttribute('disabled', disabled);
     }
-    if (target?.name === 'system.visibility') {
-      const fieldset = this.element.querySelector('.ownership-fieldset');
-      if (fieldset) {
-        const isVisible = target.value === 'visible';
-        fieldset.disabled = !isVisible;
-        const tooltip = isVisible ? game.i18n.localize('CALENDARIA.Note.Tooltip.Ownership') : game.i18n.localize('CALENDARIA.Note.Ownership.DisabledByVisibility');
-        fieldset.setAttribute('aria-label', tooltip);
-      }
-    }
   }
 
   /**
@@ -952,8 +943,6 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
 
   /**
    * Compare startDate and endDate hidden inputs and auto-lock/unlock duration controls.
-   * When the date range spans multiple days, hasDuration is checked, duration is derived
-   * from the range, and the duration controls are disabled.
    * @param {HTMLFormElement} form - The note sheet form
    */
   static #syncDurationFromDateRange(form) {
@@ -970,8 +959,6 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const hasDurationCheckbox = form.querySelector('[name="system.hasDuration"]');
     const durationInput = form.querySelector('[name="system.duration"]');
     const showBookendsCheckbox = form.querySelector('[name="system.showBookends"]');
-    const limitedRepeatCheckbox = form.querySelector('[name="system.limitedRepeat"]');
-    const limitedRepeatDaysInput = form.querySelector('[name="system.limitedRepeatDays"]');
     if (!hasDurationCheckbox || !durationInput) return;
     if (isRange) {
       const days = daysBetween(start, end) + 1;
@@ -980,14 +967,10 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       durationInput.value = days;
       durationInput.disabled = true;
       if (showBookendsCheckbox) showBookendsCheckbox.disabled = false;
-      if (limitedRepeatCheckbox) limitedRepeatCheckbox.disabled = false;
-      if (limitedRepeatDaysInput) limitedRepeatDaysInput.disabled = !limitedRepeatCheckbox?.checked;
     } else {
       hasDurationCheckbox.disabled = false;
       durationInput.disabled = !hasDurationCheckbox.checked;
       if (showBookendsCheckbox) showBookendsCheckbox.disabled = !hasDurationCheckbox.checked;
-      if (limitedRepeatCheckbox) limitedRepeatCheckbox.disabled = !hasDurationCheckbox.checked;
-      if (limitedRepeatDaysInput) limitedRepeatDaysInput.disabled = !(hasDurationCheckbox.checked && limitedRepeatCheckbox?.checked);
     }
   }
 

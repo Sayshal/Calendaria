@@ -56,16 +56,24 @@ export function onLongRest(actor, config) {
   if (!isLongRest) return;
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return;
-  const targetHour = getTargetHour(calendar);
-  const currentDate = getCurrentDate();
   const minutesPerHour = calendar.days?.minutesPerHour ?? 60;
+  const secondsPerMinute = calendar.days?.secondsPerMinute ?? 60;
+  const mode = game.settings.get(MODULE.ID, SETTINGS.REST_ADVANCE_MODE);
+  config.advanceTime = false;
+  if (mode === 'fixed' && !isGritty) {
+    const fixedHours = game.settings.get(MODULE.ID, SETTINGS.REST_FIXED_HOURS);
+    const seconds = fixedHours * minutesPerHour * secondsPerMinute;
+    CinematicOverlay.gatedAdvance(seconds, { source: 'rest' });
+    log(3, `Long rest advancing ${fixedHours} hours`);
+    return;
+  }
+  const targetHour = getTargetHour(calendar, mode);
+  const currentDate = getCurrentDate();
   const currentMinutes = currentDate.hour * minutesPerHour + currentDate.minute;
   const targetMinutes = targetHour * minutesPerHour;
   const minutesInDay = (calendar.days?.hoursPerDay ?? 24) * minutesPerHour;
   const daysToAdvance = isGritty ? 7 : 1;
   const minutesUntilTarget = daysToAdvance * minutesInDay - currentMinutes + targetMinutes;
-  const secondsPerMinute = calendar.days?.secondsPerMinute ?? 60;
-  config.advanceTime = false;
   CinematicOverlay.gatedAdvance(minutesUntilTarget * secondsPerMinute, { source: 'rest' });
   log(3, `Long rest (${restVariant}) advancing ${minutesUntilTarget} minutes to ${targetHour}:00 (${daysToAdvance} day${daysToAdvance > 1 ? 's' : ''} later)`);
 }
@@ -87,14 +95,22 @@ export function onPF2eRest() {
   if (!advanceTime) return;
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return;
-  const targetHour = getTargetHour(calendar);
-  const currentDate = getCurrentDate();
   const minutesPerHour = calendar.days?.minutesPerHour ?? 60;
+  const secondsPerMinute = calendar.days?.secondsPerMinute ?? 60;
+  const mode = game.settings.get(MODULE.ID, SETTINGS.REST_ADVANCE_MODE);
+  if (mode === 'fixed') {
+    const fixedHours = game.settings.get(MODULE.ID, SETTINGS.REST_FIXED_HOURS);
+    const seconds = fixedHours * minutesPerHour * secondsPerMinute;
+    CinematicOverlay.gatedAdvance(seconds, { source: 'rest' });
+    log(3, `PF2E rest advancing ${fixedHours} hours`);
+    return;
+  }
+  const targetHour = getTargetHour(calendar, mode);
+  const currentDate = getCurrentDate();
   const currentMinutes = currentDate.hour * minutesPerHour + currentDate.minute;
   const targetMinutes = targetHour * minutesPerHour;
   const minutesInDay = (calendar.days?.hoursPerDay ?? 24) * minutesPerHour;
   const minutesUntilTarget = minutesInDay - currentMinutes + targetMinutes;
-  const secondsPerMinute = calendar.days?.secondsPerMinute ?? 60;
   CinematicOverlay.gatedAdvance(minutesUntilTarget * secondsPerMinute, { source: 'rest' });
   log(3, `PF2E rest advancing ${minutesUntilTarget} minutes to ${targetHour}:00`);
 }
@@ -121,7 +137,15 @@ export function onPF1eRest(_actor, options = {}) {
   const secondsPerMinute = calendar.days?.secondsPerMinute ?? 60;
   const advanceTime = game.settings.get(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST);
   if (advanceTime) {
-    const targetHour = getTargetHour(calendar);
+    const mode = game.settings.get(MODULE.ID, SETTINGS.REST_ADVANCE_MODE);
+    if (mode === 'fixed') {
+      const fixedHours = game.settings.get(MODULE.ID, SETTINGS.REST_FIXED_HOURS);
+      const seconds = fixedHours * minutesPerHour * secondsPerMinute;
+      CinematicOverlay.gatedAdvance(seconds, { source: 'rest' });
+      log(3, `PF1E rest advancing ${fixedHours} hours`);
+      return;
+    }
+    const targetHour = getTargetHour(calendar, mode);
     const currentDate = getCurrentDate();
     const currentMinutes = currentDate.hour * minutesPerHour + currentDate.minute;
     const targetMinutes = targetHour * minutesPerHour;
@@ -139,11 +163,11 @@ export function onPF1eRest(_actor, options = {}) {
 /**
  * Determine the target hour for rest completion.
  * @param {object} calendar - The active calendar
+ * @param {string} mode - Rest advance mode ('newDay', 'sunrise', 'fixed')
  * @returns {number} Target hour (decimal)
  */
-function getTargetHour(calendar) {
-  const restToSunrise = game.settings.get(MODULE.ID, SETTINGS.REST_TO_SUNRISE);
-  if (!restToSunrise) return NEW_DAY_HOUR;
+function getTargetHour(calendar, mode) {
+  if (mode !== 'sunrise') return NEW_DAY_HOUR;
   const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
   const sunrise = calendar?.sunrise?.(undefined, zone);
   return sunrise ?? NEW_DAY_HOUR;

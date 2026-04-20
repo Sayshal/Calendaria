@@ -162,8 +162,6 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
       maxOccurrences: 'number',
       silent: 'bool',
       showBookends: 'bool',
-      limitedRepeat: 'bool',
-      limitedRepeatDays: 'number',
       defaultOwnership: 'number',
       macro: 'string'
     };
@@ -214,7 +212,6 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
       { value: 3, label: localize('CALENDARIA.PresetManager.OwnershipOwner') }
     ];
     const hasDur = defaults.hasDuration === true;
-    const hasLimited = defaults.limitedRepeat === true;
     return {
       content: [
         {
@@ -251,7 +248,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
         {
           key: 'hasDuration',
           label: localize('CALENDARIA.Common.HasDuration'),
-          inputHtml: checkboxHtml('hasDuration', defaults.hasDuration, 'data-toggles="cat-def-duration,cat-def-showBookends,cat-def-limitedRepeat,cat-def-limitedRepeatDays"'),
+          inputHtml: checkboxHtml('hasDuration', defaults.hasDuration, 'data-toggles="cat-def-duration,cat-def-showBookends"'),
           hint: localize('CALENDARIA.PresetManager.DefaultHasDurationHint')
         },
         {
@@ -265,18 +262,6 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
           label: localize('CALENDARIA.Note.Duration.ShowBookends'),
           inputHtml: checkboxHtml('showBookends', defaults.showBookends, hasDur ? '' : 'disabled'),
           hint: localize('CALENDARIA.Note.Duration.ShowBookendsHint')
-        },
-        {
-          key: 'limitedRepeat',
-          label: localize('CALENDARIA.Note.Duration.LimitedRepeat'),
-          inputHtml: checkboxHtml('limitedRepeat', defaults.limitedRepeat, `${hasDur ? '' : 'disabled'} data-toggles="cat-def-limitedRepeatDays"`),
-          hint: localize('CALENDARIA.Note.Duration.LimitedRepeatHint')
-        },
-        {
-          key: 'limitedRepeatDays',
-          label: localize('CALENDARIA.Note.Duration.LimitedRepeatDays'),
-          inputHtml: numberHtml('limitedRepeatDays', defaults.limitedRepeatDays, `min="1" ${hasDur && hasLimited ? '' : 'disabled'}`),
-          hint: localize('CALENDARIA.Note.Duration.LimitedRepeatHint')
         },
         {
           key: 'reminderType',
@@ -355,8 +340,6 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
         maxOccurrences: null,
         silent: null,
         showBookends: null,
-        limitedRepeat: null,
-        limitedRepeatDays: null,
         defaultOwnership: null,
         macro: null,
         owners: []
@@ -591,8 +574,6 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
       'maxOccurrences',
       'silent',
       'showBookends',
-      'limitedRepeat',
-      'limitedRepeatDays',
       'defaultOwnership',
       'macro'
     ];
@@ -681,8 +662,6 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
             maxOccurrences: raw.defaults?.maxOccurrences ?? null,
             silent: raw.defaults?.silent ?? null,
             showBookends: raw.defaults?.showBookends ?? null,
-            limitedRepeat: raw.defaults?.limitedRepeat ?? null,
-            limitedRepeatDays: raw.defaults?.limitedRepeatDays ?? null,
             defaultOwnership: raw.defaults?.defaultOwnership ?? null,
             macro: raw.defaults?.macro ?? null,
             owners: raw.defaults?.owners ?? [],
@@ -740,22 +719,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
     });
     if (!confirmed) return;
     const defaults = preset.defaults || {};
-    const syncFields = [
-      'allDay',
-      'displayStyle',
-      'visibility',
-      'reminderType',
-      'reminderOffset',
-      'reminderTargets',
-      'hasDuration',
-      'duration',
-      'showBookends',
-      'limitedRepeat',
-      'limitedRepeatDays',
-      'maxOccurrences',
-      'silent',
-      'macro'
-    ];
+    const syncFields = ['allDay', 'displayStyle', 'visibility', 'reminderType', 'reminderOffset', 'reminderTargets', 'hasDuration', 'duration', 'showBookends', 'maxOccurrences', 'silent', 'macro'];
     const updates = [];
     for (const stub of affected) {
       const noteUpdates = {};

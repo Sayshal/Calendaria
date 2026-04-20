@@ -10,27 +10,37 @@
             class="fa-brands fa-patreon"></i> Now on Patreon!</a></strong>
     </p>
 
-    <h4>Bug Fixes</h4>
+    <h4>New Features</h4>
     <ul>
-      <li>Cinematic not playing on long rest</li>
-      <li>Cycle stages advancing every unit instead of respecting length</li>
-      <li>Darkness flickering on sub-hour time advances</li>
-      <li>Equinox/solstice festival notes on wrong dates</li>
-      <li>Moon phases wrong when yearZero is non-zero</li>
-      <li>Preset manager labels shifting on select/reset/restore</li>
-      <li>Reminders with "Notify Before" of 0 not firing</li>
-      <li>Settings import failing between worlds</li>
-      <li>Weather breaking at extreme temperatures</li>
-      <li>Weather sounds persisting when scene FX disabled</li>
-      <li>Weekday reorder not persisting after save</li>
+      <li><code>[[cal.chronicle D M Y to D M Y]]</code> enricher with locked-range Chronicle</li>
+      <li>Bastion facility orders auto-advance with world time (dnd5e)</li>
+      <li>Calendar exports bundle referenced weather presets</li>
+      <li>Chat <code>/advance</code> triggers cinematic; <code>cinematic=</code> override supported</li>
+      <li>Duplicate button on climate zones</li>
+      <li>PF2E/SF2E WorldClock sync works with every bundled calendar</li>
+      <li>Per-phase Weight values on Randomized moons</li>
+      <li>Per-zone fixed sunrise/sunset hours</li>
+      <li>Rest advance dropdown: 8 AM, Sunrise, or Fixed Hours</li>
     </ul>
 
-    <h4>Improvements</h4>
+    <h4>Bug Fixes</h4>
     <ul>
-      <li>Season temp range is now the authority for weather generation</li>
-      <li>Default preset can sync to imported/uncategorized notes</li>
-      <li>New <code>calendaria.rendered</code> hook fires after all apps are visible</li>
-      <li>Widgets registered during <code>calendaria.ready</code> appear on first render</li>
+      <li>Canonical corrections to 14 prebuilt calendars</li>
+      <li>Climate zone temperature inheritance saving as 0/19 or 0/20</li>
+      <li>Forecast variance escaping season/zone valid presets</li>
+      <li>Multi-million-iteration freeze on recurring notes with stale start dates</li>
+      <li>Per-user note permissions lost when toggling visibility</li>
+      <li>Settings panel crash on legacy custom theme data</li>
+      <li>Slash commands silently failing in Foundry v13+ chat</li>
+      <li>Weather Picker leaving temperature blank after preset selection</li>
+      <li>Week view not rendering recurring notes on every matching day</li>
+    </ul>
+
+    <h4>Changes</h4>
+    <ul>
+      <li>Bundled calendar count reduced to 19 (<code>khorvaire</code>/<code>greyhawk-364</code> consolidated)</li>
+      <li>Duration controls moved to the Schedule tab; limited-repeat removed</li>
+      <li>Golarion, Golarion Imperial, and Pact Standard now use Gregorian leap rules</li>
     </ul>
   </div>
 

@@ -424,6 +424,7 @@ export default class CalendariaSettings {
       noteVisibilityMigrationComplete: { name: 'Note Visibility Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       presetSchemaV2MigrationComplete: { name: 'Preset Schema V2 Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       festivalPresetRemovalComplete: { name: 'Festival Preset Removal Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
+      limitedRepeatRemovalComplete: { name: 'Limited Repeat Removal Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.DARKNESS_SYNC]: {
         name: 'CALENDARIA.Settings.DarknessSync.Name',
         hint: 'CALENDARIA.Settings.DarknessSync.Hint',
@@ -1127,13 +1128,36 @@ export default class CalendariaSettings {
         config: false,
         type: new BooleanField({ initial: false })
       },
-      [SETTINGS.REST_TO_SUNRISE]: {
-        name: 'CALENDARIA.Settings.RestToSunrise.Name',
-        hint: 'CALENDARIA.Settings.RestToSunrise.Hint',
+      [SETTINGS.ADVANCE_BASTION_ORDERS]: {
+        name: 'CALENDARIA.Settings.AdvanceBastionOrders.Name',
+        hint: 'CALENDARIA.Settings.AdvanceBastionOrders.Hint',
         scope: 'world',
         config: false,
-        type: new BooleanField({ initial: false })
+        type: new BooleanField({ initial: true })
       },
+      [SETTINGS.BASTION_LAST_ADVANCE]: {
+        name: 'Bastion Last Advance World Time',
+        scope: 'world',
+        config: false,
+        type: new NumberField({ initial: null, nullable: true })
+      },
+      [SETTINGS.REST_ADVANCE_MODE]: {
+        name: 'CALENDARIA.Settings.RestAdvanceMode.Name',
+        hint: 'CALENDARIA.Settings.RestAdvanceMode.Hint',
+        scope: 'world',
+        config: false,
+        type: new StringField({ initial: 'newDay' })
+      },
+      [SETTINGS.REST_FIXED_HOURS]: {
+        name: 'CALENDARIA.Settings.RestFixedHours.Name',
+        hint: 'CALENDARIA.Settings.RestFixedHours.Hint',
+        scope: 'world',
+        config: false,
+        type: new NumberField({ integer: true, min: 1, initial: 8 })
+      },
+      restAdvanceModeMigrationComplete: { name: 'Rest Advance Mode Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
+      removedCalendarsMigrationComplete: { name: 'Removed Calendars Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
+      zoneTempBlankInheritanceMigrationComplete: { name: 'Zone Temp Blank Inheritance Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.CLOCK_LOCKED]: { name: 'Clock Locked', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.SYNC_CLOCK_PAUSE]: {
         name: 'CALENDARIA.Settings.SyncClockPause.Name',

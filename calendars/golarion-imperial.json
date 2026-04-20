@@ -2024,7 +2024,10 @@
     "id": "golarion-imperial",
     "description": "CALENDARIA.Calendar.GolarionImperial.Description",
     "author": "calendaria",
-    "system": "Pathfinder2e (Golarion — Tian Xia)"
+    "system": "Pathfinder2e (Golarion, Tian Xia)",
+    "luxonSync": {
+      "theme": "IC"
+    }
   },
   "weather": {
     "activeZone": "temperate",
@@ -2429,5 +2432,9 @@
         }
       }
     }
+  },
+  "leapYearConfig": {
+    "rule": "gregorian",
+    "start": 0
   }
 }

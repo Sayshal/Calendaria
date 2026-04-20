@@ -17,7 +17,7 @@ The cinematic plays when both conditions are met:
 1. The cinematic system is **enabled** in settings
 2. The time advance meets or exceeds the configured **threshold** (e.g., 1 week)
 
-Any time jump that meets the threshold triggers the cinematic, including the time jump buttons on the HUD, MiniCal, and Time Keeper, as well as the **Cinematic Advance** button in the Set Date dialog.
+Any time jump that meets the threshold triggers the cinematic, including the time jump buttons on the HUD, MiniCal, and Time Keeper, as well as the **Cinematic Advance** button in the Set Date dialog. Chat commands (`/advance`) also follow the threshold by default.
 
 ### Rest-Time Trigger
 

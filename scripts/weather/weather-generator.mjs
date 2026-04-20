@@ -225,7 +225,36 @@ export function generateWeather({ seasonClimate, zoneConfig, season, seed, custo
     }
   }
   temperature = Math.max(finalTempRange.min, Math.min(finalTempRange.max, temperature));
-  return { preset: resolvedPreset, temperature, wind, precipitation };
+  return { preset: resolvedPreset, temperature, wind, precipitation, probabilities };
+}
+
+/**
+ * Roll a temperature value for a preset using the same range resolution as generateWeather.
+ * @param {object} options - Roll options
+ * @param {string} options.presetId - Preset ID to roll against
+ * @param {object} [options.seasonClimate] - Season's base climate { temperatures, presets }
+ * @param {object} [options.zoneConfig] - Zone config { temperatures, presets, seasonOverrides }
+ * @param {string} [options.season] - Season name for zone overrides / fallbacks
+ * @param {object[]} [options.customPresets] - Custom presets list
+ * @param {Function} [options.randomFn] - Random function (defaults to Math.random)
+ * @returns {number} Rounded temperature value (internal units)
+ */
+export function rollPresetTemperature({ presetId, seasonClimate, zoneConfig, season, customPresets = [], randomFn = Math.random }) {
+  const zoneOverride = season && zoneConfig?.seasonOverrides?.[season];
+  const { tempRange } = mergeClimateConfig(seasonClimate, zoneOverride, zoneConfig, season);
+  const preset = getPreset(presetId, customPresets);
+  let finalTempRange = { ...tempRange };
+  const seasonPresetConfig = zoneOverride?.presets?.[presetId];
+  const zonePresetConfig = Object.values(zoneConfig?.presets ?? {}).find((p) => p.id === presetId && p.enabled !== false);
+  const hasPresetOverride = seasonPresetConfig?.tempMin != null || seasonPresetConfig?.tempMax != null || zonePresetConfig?.tempMin != null || zonePresetConfig?.tempMax != null;
+  if (hasPresetOverride) {
+    const effectiveTempMin = seasonPresetConfig?.tempMin ?? zonePresetConfig?.tempMin ?? preset?.tempMin;
+    const effectiveTempMax = seasonPresetConfig?.tempMax ?? zonePresetConfig?.tempMax ?? preset?.tempMax;
+    if (effectiveTempMin != null) finalTempRange.min = Math.max(finalTempRange.min, applyTempModifier(effectiveTempMin, tempRange.min));
+    if (effectiveTempMax != null) finalTempRange.max = Math.min(finalTempRange.max, applyTempModifier(effectiveTempMax, tempRange.max));
+    if (finalTempRange.min > finalTempRange.max) finalTempRange = { ...tempRange };
+  }
+  return Math.round(finalTempRange.min + randomFn() * (finalTempRange.max - finalTempRange.min));
 }
 
 /**
@@ -308,9 +337,10 @@ export function generateIntradayWeather({
  * @param {number} accuracy - 0-100 accuracy setting
  * @param {Function} randomFn - Random function
  * @param {object[]} customPresets - Custom presets
+ * @param {string[]} [validPresetIds] - Valid preset IDs for the season/zone (restricts variance pool)
  * @returns {object} Potentially modified weather with `isVaried` flag
  */
-export function applyForecastVariance(weather, dayDistance, totalDays, accuracy, randomFn, customPresets) {
+export function applyForecastVariance(weather, dayDistance, totalDays, accuracy, randomFn, customPresets, validPresetIds) {
   if (accuracy >= 100) return { ...weather, isVaried: false };
   const distanceFactor = dayDistance / totalDays;
   const varianceChance = (1 - accuracy / 100) * distanceFactor;
@@ -322,7 +352,8 @@ export function applyForecastVariance(weather, dayDistance, totalDays, accuracy,
   temperature = Math.round(temperature + tempVariance);
   if (Math.abs(tempVariance) > 1) isVaried = true;
   if (randomFn() < varianceChance) {
-    const sameCategory = getAllPresets(customPresets).filter((p) => p.category === preset.category && p.id !== preset.id);
+    const validSet = validPresetIds?.length ? new Set(validPresetIds) : null;
+    const sameCategory = getAllPresets(customPresets).filter((p) => p.category === preset.category && p.id !== preset.id && (!validSet || validSet.has(p.id)));
     if (sameCategory.length > 0) {
       preset = sameCategory[Math.floor(randomFn() * sameCategory.length)];
       isVaried = true;
@@ -397,7 +428,8 @@ export function generateForecast({
       const entry = { year, month, dayOfMonth, ...result.dominant, isVaried: false, periods: result.periods };
       if (accuracy < 100) {
         const seed = dateSeed(year, month, dayOfMonth);
-        const varied = applyForecastVariance(entry, i + 1, days, accuracy, seededRandom(seed + 1), customPresets);
+        const validPresetIds = Object.keys(result.dominant.probabilities ?? {});
+        const varied = applyForecastVariance(entry, i + 1, days, accuracy, seededRandom(seed + 1), customPresets, validPresetIds);
         forecast.push({ ...entry, ...varied, periods: entry.periods });
       } else {
         forecast.push(entry);
@@ -408,7 +440,8 @@ export function generateForecast({
       previousWeatherId = weather.preset.id;
       prevWeather = { temperature: weather.temperature, wind: weather.wind };
       if (accuracy < 100) {
-        const varied = applyForecastVariance(weather, i + 1, days, accuracy, seededRandom(seed + 1), customPresets);
+        const validPresetIds = Object.keys(weather.probabilities ?? {});
+        const varied = applyForecastVariance(weather, i + 1, days, accuracy, seededRandom(seed + 1), customPresets, validPresetIds);
         forecast.push({ year, month, dayOfMonth, ...varied });
       } else {
         forecast.push({ year, month, dayOfMonth, ...weather, isVaried: false });

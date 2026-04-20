@@ -84,39 +84,39 @@
   "days": {
     "values": {
       "gateway000000000": {
-        "name": "Gateway",
+        "name": "Linaras",
         "ordinal": 1,
-        "abbreviation": "Gat"
+        "abbreviation": "Lin"
       },
       "brighteye0000000": {
-        "name": "Bright Eye",
+        "name": "Palast",
         "ordinal": 2,
-        "abbreviation": "BrE"
+        "abbreviation": "Pal"
       },
       "nightseye0000000": {
-        "name": "Night's Eye",
+        "name": "Magetag",
         "ordinal": 3,
-        "abbreviation": "NiE"
+        "abbreviation": "Mag"
       },
       "deadeye000000000": {
-        "name": "Dead Eye",
+        "name": "Kirinor",
         "ordinal": 4,
-        "abbreviation": "DeE"
+        "abbreviation": "Kir"
       },
       "winged0000000000": {
-        "name": "Winged",
+        "name": "Misham",
         "ordinal": 5,
-        "abbreviation": "Win"
+        "abbreviation": "Mis"
       },
       "flowered00000000": {
-        "name": "Flowered",
+        "name": "Bakukal",
         "ordinal": 6,
-        "abbreviation": "Flo"
+        "abbreviation": "Bak"
       },
       "world00000000000": {
-        "name": "World",
+        "name": "Bracha",
         "ordinal": 7,
-        "abbreviation": "Wor",
+        "abbreviation": "Bra",
         "isRestDay": true
       }
     },
@@ -128,10 +128,10 @@
   "festivals": {
     "yule000000000000": {
       "name": "Yule",
-      "month": 0,
+      "month": 11,
       "icon": "fa-holly-berry",
       "color": "#006400",
-      "description": "Winter festival welcoming the cold season with ancient traditions across Ansalon.",
+      "description": "Winter festival welcoming the cold season with ancient traditions across Ansalon. Canonically a 13-day period bridging year-end into the new year; observed here as a single anchor day.",
       "dayOfMonth": 13,
       "duration": 1,
       "countsForWeekday": true,
@@ -144,7 +144,7 @@
             "type": "condition",
             "field": "month",
             "op": "==",
-            "value": 1
+            "value": 12
           },
           {
             "type": "condition",

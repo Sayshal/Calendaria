@@ -131,7 +131,7 @@
       "month": 0,
       "icon": "fa-glass-cheers",
       "color": "#FFD700",
-      "description": "First day of Nuwmont celebrating the new year across the Empire.",
+      "description": "New year festival and the anniversary of Emperor Zendrolion Tatriokanitas's coronation. Celebrated across the Empire with parades and winter festivities; in AC 1000 the Millennium Celebration makes the observance especially grand.",
       "dayOfMonth": 0,
       "duration": 1,
       "countsForWeekday": true,
@@ -162,49 +162,13 @@
       "reminderType": "none",
       "reminderOffset": 0
     },
-    "vaternasfeast000": {
-      "name": "Vaterna's Feast",
-      "month": 1,
-      "icon": "fa-ship",
-      "color": "#4169E1",
-      "description": "Start of shipping season with boat launchings and boating competitions.",
-      "dayOfMonth": 13,
-      "duration": 1,
-      "countsForWeekday": true,
-      "leapYearOnly": false,
-      "conditionTree": {
-        "type": "group",
-        "mode": "and",
-        "children": [
-          {
-            "type": "condition",
-            "field": "month",
-            "op": "==",
-            "value": 2
-          },
-          {
-            "type": "condition",
-            "field": "day",
-            "op": "==",
-            "value": 14
-          }
-        ]
-      },
-      "allDay": true,
-      "displayStyle": "banner",
-      "visibility": "visible",
-      "silent": true,
-      "hasDuration": false,
-      "reminderType": "none",
-      "reminderOffset": 0
-    },
     "springrevel00000": {
-      "name": "Spring Revel",
+      "name": "First Day of Spring",
       "month": 2,
-      "icon": "fa-music",
-      "color": "#FF69B4",
-      "description": "Springtime festival of music, dancing, and merriment.",
-      "dayOfMonth": 27,
+      "icon": "fa-seedling",
+      "color": "#90EE90",
+      "description": "The traditional start of spring and the opening of the shipping season across Thyatis, Karameikos, and the Known World.",
+      "dayOfMonth": 0,
       "duration": 1,
       "countsForWeekday": true,
       "leapYearOnly": false,
@@ -222,7 +186,7 @@
             "type": "condition",
             "field": "day",
             "op": "==",
-            "value": 28
+            "value": 1
           }
         ]
       },
@@ -271,12 +235,12 @@
       "reminderOffset": 0
     },
     "harvestfestival0": {
-      "name": "Harvest Festival",
+      "name": "Autumn's Arrival",
       "month": 8,
       "icon": "fa-wheat-awn",
       "color": "#DAA520",
-      "description": "Autumn gathering to celebrate the harvest and give thanks.",
-      "dayOfMonth": 13,
+      "description": "First day of autumn and the traditional start of the harvest season across Thyatis and Karameikos.",
+      "dayOfMonth": 0,
       "duration": 1,
       "countsForWeekday": true,
       "leapYearOnly": false,
@@ -294,43 +258,7 @@
             "type": "condition",
             "field": "day",
             "op": "==",
-            "value": 14
-          }
-        ]
-      },
-      "allDay": true,
-      "displayStyle": "banner",
-      "visibility": "visible",
-      "silent": true,
-      "hasDuration": false,
-      "reminderType": "none",
-      "reminderOffset": 0
-    },
-    "dayofthedead0000": {
-      "name": "Day of the Dead",
-      "month": 9,
-      "icon": "fa-cross",
-      "color": "#2F4F4F",
-      "description": "Solemn day of remembrance for the departed and honoring ancestral spirits.",
-      "dayOfMonth": 27,
-      "duration": 1,
-      "countsForWeekday": true,
-      "leapYearOnly": false,
-      "conditionTree": {
-        "type": "group",
-        "mode": "and",
-        "children": [
-          {
-            "type": "condition",
-            "field": "month",
-            "op": "==",
-            "value": 10
-          },
-          {
-            "type": "condition",
-            "field": "day",
-            "op": "==",
-            "value": 28
+            "value": 1
           }
         ]
       },
@@ -343,11 +271,11 @@
       "reminderOffset": 0
     },
     "coronationday000": {
-      "name": "Coronation Day",
-      "month": 10,
-      "icon": "fa-crown",
-      "color": "#B8860B",
-      "description": "Anniversary commemorating the crowning of Emperor Zendrolion.",
+      "name": "Beast's Day",
+      "month": 6,
+      "icon": "fa-paw",
+      "color": "#8B4513",
+      "description": "Traladaran holiday commemorating the last battle between King Halav and the Beast-Men. Widely observed across Karameikos with feasting and reenactments.",
       "dayOfMonth": 0,
       "duration": 1,
       "countsForWeekday": true,
@@ -360,7 +288,7 @@
             "type": "condition",
             "field": "month",
             "op": "==",
-            "value": 11
+            "value": 7
           },
           {
             "type": "condition",
@@ -379,12 +307,12 @@
       "reminderOffset": 0
     },
     "wintersolstice00": {
-      "name": "Winter Solstice",
+      "name": "Day of Dread",
       "month": 11,
-      "icon": "fa-snowflake",
-      "color": "#87CEEB",
-      "description": "Longest night marking winter's deepest point with candlelight vigils.",
-      "dayOfMonth": 20,
+      "icon": "fa-skull",
+      "color": "#2F2F2F",
+      "description": "The most ominous day of the Mystaran year. On 28 Kaldmont no spell may be cast successfully anywhere on Mystara; magic simply fails. The origin of the phenomenon is unknown and feared, and most people remain indoors.",
+      "dayOfMonth": 27,
       "duration": 1,
       "countsForWeekday": true,
       "leapYearOnly": false,
@@ -402,7 +330,79 @@
             "type": "condition",
             "field": "day",
             "op": "==",
-            "value": 21
+            "value": 28
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "firstdayofsummer": {
+      "name": "First Day of Summer",
+      "month": 5,
+      "icon": "fa-sun",
+      "color": "#FFD700",
+      "description": "The traditional start of summer across the Known World.",
+      "dayOfMonth": 0,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 6
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 1
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "firstdayofwinter": {
+      "name": "First Day of Winter",
+      "month": 11,
+      "icon": "fa-snowflake",
+      "color": "#B0E0E6",
+      "description": "The traditional start of winter across Thyatis and the Known World.",
+      "dayOfMonth": 0,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 12
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 1
           }
         ]
       },
@@ -422,7 +422,7 @@
         "icon": "fas fa-snowflake",
         "color": "#87ceeb",
         "seasonalType": "winter",
-        "dayStart": 309,
+        "dayStart": 308,
         "dayEnd": 55,
         "abbreviation": "Win"
       },
@@ -450,7 +450,7 @@
         "color": "#d2691e",
         "seasonalType": "autumn",
         "dayStart": 224,
-        "dayEnd": 308,
+        "dayEnd": 307,
         "abbreviation": "Aut"
       }
     }

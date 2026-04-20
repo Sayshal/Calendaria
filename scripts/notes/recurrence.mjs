@@ -297,18 +297,23 @@ function evaluateConditionTree(noteData, targetDate, options = {}) {
  * @returns {number} Number of occurrences
  */
 function countConditionTreeOccurrencesUpTo(noteData, targetDate) {
-  const { startDate, repeatEndDate, conditionTree } = noteData;
+  const { startDate, repeatEndDate, conditionTree, maxOccurrences } = noteData;
+  if (!(maxOccurrences > 0)) return 0;
   const effectiveEnd = repeatEndDate && compareDays(repeatEndDate, targetDate) < 0 ? { ...repeatEndDate } : { ...targetDate };
   let currentDate = { ...startDate };
   let count = 0;
-  const maxIterations = 100000;
+  const searchDistance = getSearchDistanceFromTree(conditionTree);
+  const iterationCap = Math.min(100000, searchDistance * (maxOccurrences + 1) + 366);
   let iterations = 0;
   const cache = new EpochDataCache();
-  while (compareDays(currentDate, effectiveEnd) <= 0 && iterations < maxIterations) {
+  while (compareDays(currentDate, effectiveEnd) <= 0 && iterations < iterationCap) {
     const epochCtx = cache.getContext(currentDate);
     const evalOptions = { startDate, epochCtx };
     const matches = isGroup(conditionTree) ? evaluateConditions([conditionTree], currentDate, evalOptions) : evaluateEntry(conditionTree, currentDate, evalOptions);
-    if (matches) count++;
+    if (matches) {
+      count++;
+      if (count > maxOccurrences) return count;
+    }
     currentDate = addDays(currentDate, 1);
     iterations++;
   }
@@ -327,7 +332,10 @@ function getOccurrencesInRangeForTree(noteData, rangeStart, rangeEnd, max = 100)
   const { startDate, repeatEndDate, conditionTree, maxOccurrences } = noteData;
   if (!canConditionTreeMatchRange(conditionTree, rangeStart, rangeEnd)) return [];
   const occurrences = [];
-  const effectiveStart = compareDays(startDate, rangeStart) >= 0 ? { ...startDate } : { ...rangeStart };
+  const searchDistance = getSearchDistanceFromTree(conditionTree);
+  const windowStart = addDays(rangeEnd, -Math.max(searchDistance * 2, 366));
+  let effectiveStart = compareDays(startDate, rangeStart) >= 0 ? { ...startDate } : { ...rangeStart };
+  if (compareDays(windowStart, effectiveStart) > 0) effectiveStart = { ...windowStart };
   const effectiveEnd = repeatEndDate && compareDays(repeatEndDate, rangeEnd) < 0 ? { ...repeatEndDate } : { ...rangeEnd };
   let currentDate = { ...effectiveStart };
   let totalCount = 0;
@@ -481,11 +489,9 @@ function matchesRandom(randomConfig, targetDate, startDate) {
  */
 export function getOccurrencesInRange(noteData, rangeStart, rangeEnd, maxOccurrences = 100) {
   ensureFieldHandlersRegistered();
-  const { startDate, limitedRepeat, limitedRepeatDays } = noteData;
-  if (limitedRepeat && limitedRepeatDays > 0) {
-    const earliest = addDays(rangeEnd, -limitedRepeatDays);
-    if (compareDays(earliest, rangeStart) > 0) rangeStart = earliest;
-  }
+  const { startDate } = noteData;
+  const earliest = addDays(rangeEnd, -365);
+  if (compareDays(earliest, rangeStart) > 0) rangeStart = earliest;
   if (noteData.conditionTree?.type) return getOccurrencesInRangeForTree(noteData, rangeStart, rangeEnd, maxOccurrences);
   const occurrences = [];
   const afterStart = compareDays(startDate, rangeStart) >= 0;

@@ -5,7 +5,7 @@
  * @author Tyler
  */
 
-import { CalendarRegistry, getLeapYearDescription, intersectsYear, parseInterval, parsePattern } from '../calendar/_module.mjs';
+import { getLeapYearDescription, intersectsYear, parseInterval, parsePattern } from '../calendar/_module.mjs';
 import { DEFAULT_MOON_PHASES } from '../constants.mjs';
 import { format, localize } from '../utils/_module.mjs';
 import { findAnchorPhasePosition, getPhasePositionFromIndex, resolveRandomizedPhase } from './_module.mjs';
@@ -16,88 +16,30 @@ const { ArrayField, BooleanField, NumberField, SchemaField, StringField, TypedOb
  * Calendar data model with extended features for fantasy calendars.
  */
 export default class CalendariaCalendar extends foundry.data.CalendarData {
-  /** @type {number} Epoch offset in seconds */
+  /** @type {number} Epoch offset (seconds) applied during worldTime ↔ components conversion for Luxon sync. */
   static #epochOffset = 0;
 
-  /** @type {Object<string, string[]>} Maps date themes to accepted Calendaria calendar IDs */
-  static #themeCalendarMap = { AR: ['golarion'], IC: ['golarion-imperial', 'golarion'], AG: ['golarion', 'pact-standard'], AD: ['gregorian'], CE: ['gregorian'] };
-
-  /**
-   * Get the active system world clock (PF2E or SF2E).
-   * @returns {object|null} The worldClock object or null
-   */
-  static get #systemWorldClock() {
-    return game.pf2e?.worldClock ?? game.sf2e?.worldClock ?? null;
-  }
-
-  /**
-   * Whether system world clock sync is currently active.
-   * @returns {boolean} True if a compatible worldClock exists and active calendar matches the theme
-   */
-  static get usePF2eSync() {
-    const wc = this.#systemWorldClock;
-    if (!wc) return false;
-    const acceptedCalendars = this.#themeCalendarMap[wc.dateTheme];
-    if (!acceptedCalendars) return false;
-    const activeCalendarId = game.settings.get('calendaria', 'activeCalendar');
-    return acceptedCalendars.includes(activeCalendarId);
-  }
-
-  /**
-   * Initialize epoch offset for system world clock sync (PF2E/SF2E).
-   */
-  static initializeEpochOffset() {
-    this.#epochOffset = 0;
-    if (!this.usePF2eSync) return;
-    const calendar = CalendarRegistry.getActive();
-    if (!calendar) return;
-    const wc = this.#systemWorldClock;
-    const dt = wc.worldCreatedOn.plus({ seconds: game.time.worldTime });
-    const secondsPerMinute = calendar.time?.secondsPerMinute ?? 60;
-    const minutesPerHour = calendar.time?.minutesPerHour ?? 60;
-    const hoursPerDay = calendar.time?.hoursPerDay ?? 24;
-    const secondsPerHour = minutesPerHour * secondsPerMinute;
-    const secondsPerDay = hoursPerDay * secondsPerHour;
-    const internalYear = dt.year;
-    let dayOfYear = dt.day - 1;
-    for (let m = 0; m < dt.month - 1; m++) dayOfYear += calendar.getDaysInMonth?.(m, internalYear) ?? 30;
-    let totalDays = calendar.totalDaysBeforeYear?.(internalYear) ?? 0;
-    totalDays += dayOfYear;
-    const internalTime = totalDays * secondsPerDay + dt.hour * secondsPerHour + dt.minute * secondsPerMinute + dt.second;
-    this.#epochOffset = internalTime - game.time.worldTime;
-    const numWeekdays = calendar?.daysInWeek ?? 7;
-    const components = { year: internalYear, month: dt.month - 1, dayOfMonth: dt.day - 1 };
-    const nonCountingFestivalsInYear = calendar.countNonWeekdayFestivalsBefore?.(components) ?? 0;
-    const nonCountingFestivalsFromPriorYears = calendar.countNonWeekdayFestivalsBeforeYear?.(internalYear) ?? 0;
-    const intercalaryInYear = calendar.countIntercalaryDaysBefore?.(components) ?? 0;
-    const intercalaryFromPriorYears = calendar.countIntercalaryDaysBeforeYear?.(internalYear) ?? 0;
-    const totalNonCounting = nonCountingFestivalsFromPriorYears + nonCountingFestivalsInYear + intercalaryFromPriorYears + intercalaryInYear;
-    const countingDays = totalDays - totalNonCounting;
-    const activeCalendarId = game.settings.get('calendaria', 'activeCalendar');
-    const isoOfFirstWeekday = activeCalendarId === 'gregorian' ? 7 : 1;
-    const expectedWeekday = (((dt.weekday - isoOfFirstWeekday) % numWeekdays) + numWeekdays) % numWeekdays;
-    const correctFirstWeekday = (((expectedWeekday - (countingDays % numWeekdays)) % numWeekdays) + numWeekdays) % numWeekdays;
-    if (calendar.years && calendar.years.firstWeekday !== correctFirstWeekday) calendar.years.firstWeekday = correctFirstWeekday;
-    this.#correctFirstWeekday = correctFirstWeekday;
-  }
-
-  /** @type {number|null} Correct firstWeekday for PF2e sync */
+  /** @type {number|null} firstWeekday override computed during Luxon sync. */
   static #correctFirstWeekday = null;
 
   /**
-   * Get the correct firstWeekday calculated during epoch initialization.
-   * @returns {number|null} Correct first weekday
+   * Set epoch sync state from an external integration.
+   * @param {number} offset - Epoch offset in seconds
+   * @param {number|null} firstWeekday - Computed firstWeekday, or null to clear
    */
-  static get correctFirstWeekday() {
-    return this.#correctFirstWeekday;
+  static setEpochSync(offset, firstWeekday) {
+    this.#epochOffset = offset;
+    this.#correctFirstWeekday = firstWeekday;
   }
 
-  /**
-   * Get the current epoch offset.
-   * @returns {number} Valid epoch offset
-   */
+  /** @returns {number} Current epoch offset */
   static get epochOffset() {
     return this.#epochOffset;
+  }
+
+  /** @returns {number|null} Computed firstWeekday for synced calendars, or null */
+  static get correctFirstWeekday() {
+    return this.#correctFirstWeekday;
   }
 
   /**
@@ -523,7 +465,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
               fading: new StringField({ required: false }),
               icon: new StringField({ required: false }),
               start: new NumberField({ required: true, min: 0, max: 1 }),
-              end: new NumberField({ required: true, min: 0, max: 1 })
+              end: new NumberField({ required: true, min: 0, max: 1 }),
+              weight: new NumberField({ required: false, nullable: false, initial: 1, min: 1 })
             }),
             { initial: DEFAULT_MOON_PHASES }
           ),
@@ -558,7 +501,16 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       ),
       cycleFormat: new StringField({ required: false, initial: '' }),
       metadata: new SchemaField(
-        { id: new StringField({ required: false }), description: new StringField({ required: false }), author: new StringField({ required: false }), system: new StringField({ required: false }) },
+        {
+          id: new StringField({ required: false }),
+          description: new StringField({ required: false }),
+          author: new StringField({ required: false }),
+          system: new StringField({ required: false }),
+          luxonSync: new SchemaField(
+            { theme: new StringField({ required: false, nullable: true, blank: false, choices: ['AR', 'IC', 'AG', 'AD', 'CE'], initial: null }) },
+            { required: false, nullable: true, initial: null }
+          )
+        },
         { required: false }
       ),
       daylight: new SchemaField(
@@ -631,6 +583,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
               latitude: new NumberField({ required: false, nullable: true, initial: null, min: -90, max: 90 }),
               shortestDay: new NumberField({ required: false, nullable: true, initial: null, min: 0 }),
               longestDay: new NumberField({ required: false, nullable: true, initial: null, min: 0 }),
+              sunriseOverride: new NumberField({ required: false, nullable: true, initial: null, min: 0 }),
+              sunsetOverride: new NumberField({ required: false, nullable: true, initial: null, min: 0 }),
               temperatures: new foundry.data.fields.ObjectField({ required: false, initial: {} }),
               presets: new TypedObjectField(
                 new SchemaField({
@@ -934,6 +888,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    * @returns {number} - Sunrise time in hours.
    */
   sunrise(time = game.time.components, zone = null) {
+    const override = this.#resolveSunOverrides(zone);
+    if (override) return override.sunrise;
     const daylightHrs = this._getDaylightHoursForDay(time, zone);
     const midday = this.days.hoursPerDay / 2;
     return midday - daylightHrs / 2;
@@ -946,9 +902,26 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    * @returns {number} - Sunset time in hours.
    */
   sunset(time = game.time.components, zone = null) {
+    const override = this.#resolveSunOverrides(zone);
+    if (override) return override.sunset;
     const daylightHrs = this._getDaylightHoursForDay(time, zone);
     const midday = this.days.hoursPerDay / 2;
     return midday + daylightHrs / 2;
+  }
+
+  /**
+   * Validate and return absolute sunrise/sunset overrides from a zone.
+   * @param {object} [zone] - Zone config
+   * @returns {{sunrise:number, sunset:number}|null} Override pair, or null when not usable
+   * @private
+   */
+  #resolveSunOverrides(zone) {
+    const r = zone?.sunriseOverride;
+    const s = zone?.sunsetOverride;
+    if (r == null || s == null) return null;
+    const hoursPerDay = this.days.hoursPerDay;
+    if (r < 0 || s > hoursPerDay || r >= s) return null;
+    return { sunrise: r, sunset: s };
   }
 
   /**
@@ -981,6 +954,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    * @private
    */
   _getDaylightHoursForDay(time = game.time.components, zone = null) {
+    const override = this.#resolveSunOverrides(zone);
+    if (override) return override.sunset - override.sunrise;
     const components = typeof time === 'number' ? this.timeToComponents(time) : time;
     const hoursPerDay = this.days.hoursPerDay;
     const daysPerYear = this.days.daysPerYear ?? 365;
@@ -1358,27 +1333,26 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     const dateComponents = { year: components.year, month: components.month, dayOfMonth: components.dayOfMonth ?? components.day ?? 0 };
     const normalizedPosition = resolveRandomizedPhase(moon, absoluteDay, dateComponents);
     const dayIndex = Math.floor(normalizedPosition * moon.cycleLength);
-    const hasRanges = phases.length > 0 && phases[0].start !== undefined && phases[0].end !== undefined;
     let phaseArrayIndex = 0;
     let dayWithinPhase = 0;
     let phaseDuration = 1;
-    if (hasRanges) {
+    if (phases.length > 0) {
+      const weights = phases.map((p) => Math.max(1, p.weight ?? 1));
+      const totalWeight = weights.reduce((a, b) => a + b, 0);
+      let cursor = 0;
       for (let i = 0; i < phases.length; i++) {
-        const phase = phases[i];
-        if (normalizedPosition >= (phase.start ?? 0) && normalizedPosition < (phase.end ?? 1)) {
+        const start = cursor / totalWeight;
+        cursor += weights[i];
+        const end = i === phases.length - 1 ? 1 : cursor / totalWeight;
+        if (normalizedPosition >= start && normalizedPosition < end) {
           phaseArrayIndex = i;
-          const startDay = Math.round((phase.start ?? 0) * moon.cycleLength);
-          const endDay = Math.round((phase.end ?? 1) * moon.cycleLength);
+          const startDay = Math.round(start * moon.cycleLength);
+          const endDay = Math.round(end * moon.cycleLength);
           phaseDuration = Math.max(1, endDay - startDay);
           dayWithinPhase = dayIndex - startDay;
           break;
         }
       }
-    } else {
-      const numPhases = phases.length || 8;
-      phaseArrayIndex = Math.min(Math.floor(normalizedPosition * numPhases), numPhases - 1);
-      phaseDuration = Math.max(1, Math.round(moon.cycleLength / numPhases));
-      dayWithinPhase = dayIndex % phaseDuration;
     }
     const matchedPhase = phases[phaseArrayIndex] || phases[0];
     if (!matchedPhase) return null;

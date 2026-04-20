@@ -41,8 +41,6 @@ export function getDefaultNoteData() {
     hasDuration: false,
     duration: 1,
     showBookends: false,
-    limitedRepeat: false,
-    limitedRepeatDays: 365,
     displayStyle: DISPLAY_STYLES.ICON,
     visibility: game.user.isGM ? NOTE_VISIBILITY.HIDDEN : NOTE_VISIBILITY.VISIBLE,
     linkedFestival: null,
@@ -125,8 +123,6 @@ export function validateNoteData(noteData) {
   if (noteData.hasDuration !== undefined && typeof noteData.hasDuration !== 'boolean') errors.push('hasDuration must be a boolean');
   if (noteData.duration !== undefined) if (typeof noteData.duration !== 'number' || noteData.duration < 1) errors.push('duration must be a positive integer');
   if (noteData.showBookends !== undefined && typeof noteData.showBookends !== 'boolean') errors.push('showBookends must be a boolean');
-  if (noteData.limitedRepeat !== undefined && typeof noteData.limitedRepeat !== 'boolean') errors.push('limitedRepeat must be a boolean');
-  if (noteData.limitedRepeatDays !== undefined) if (typeof noteData.limitedRepeatDays !== 'number' || noteData.limitedRepeatDays < 1) errors.push('limitedRepeatDays must be a positive integer');
   if (noteData.displayStyle !== undefined) {
     const validDisplayStyles = Object.values(DISPLAY_STYLES);
     if (!validDisplayStyles.includes(noteData.displayStyle)) errors.push(`displayStyle must be one of: ${validDisplayStyles.join(', ')}`);
@@ -189,8 +185,6 @@ export function sanitizeNoteData(noteData) {
     hasDuration: noteData.hasDuration ?? defaults.hasDuration,
     duration: noteData.duration ?? defaults.duration,
     showBookends: noteData.showBookends ?? defaults.showBookends,
-    limitedRepeat: noteData.limitedRepeat ?? defaults.limitedRepeat,
-    limitedRepeatDays: noteData.limitedRepeatDays ?? defaults.limitedRepeatDays,
     displayStyle: noteData.displayStyle || defaults.displayStyle,
     visibility: noteData.visibility || defaults.visibility,
     ...(noteData.conditionTree ? { conditionTree: noteData.conditionTree } : noteData.conditions?.length ? { conditions: noteData.conditions } : {}),
@@ -259,8 +253,6 @@ function emptyDefaults() {
     maxOccurrences: null,
     silent: null,
     showBookends: null,
-    limitedRepeat: null,
-    limitedRepeatDays: null,
     defaultOwnership: null,
     macro: null,
     owners: [],
@@ -407,6 +399,24 @@ export async function addCustomPreset(label, color = '#868e96', icon = 'fas fa-t
 }
 
 /**
+ * Add a bundled custom preset to world settings by full object, preserving its ID.
+ * @param {object} preset - Full preset definition (id, label, color, icon, sortOrder, playerUsable, defaults, ...)
+ * @returns {Promise<object|null>} The added preset, or null if skipped due to ID collision
+ */
+export async function upsertBundledCustomPreset(preset) {
+  if (!preset?.id || !preset?.label) return null;
+  const raw = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_PRESETS) || [];
+  if (raw.find((c) => c.id === preset.id)) return null;
+  const maxSort = raw.reduce((max, c) => Math.max(max, c.sortOrder ?? 0), -1);
+  const toAdd = { ...preset, builtin: false, sortOrder: preset.sortOrder ?? maxSort + 1, defaults: preset.defaults ?? emptyDefaults() };
+  raw.push(toAdd);
+  invalidatePresetCache();
+  await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_PRESETS, raw);
+  Hooks.callAll(HOOKS.PRESETS_CHANGED, getAllPresets());
+  return toAdd;
+}
+
+/**
  * Delete a preset from world settings.
  * @param {string} presetId  Preset ID to delete
  * @returns {Promise<boolean>}  True if deleted
@@ -530,8 +540,6 @@ export function applyPresetDefaultsToNoteData(noteData, presetIds) {
     hasDuration: 'hasDuration',
     duration: 'duration',
     showBookends: 'showBookends',
-    limitedRepeat: 'limitedRepeat',
-    limitedRepeatDays: 'limitedRepeatDays',
     maxOccurrences: 'maxOccurrences',
     silent: 'silent',
     macro: 'macro'
@@ -624,9 +632,7 @@ export function extractNoteMatchData(page) {
     conditions: page.system.conditions,
     conditionTree: page.system.conditionTree,
     hasDuration: page.system.hasDuration,
-    duration: page.system.duration,
-    limitedRepeat: page.system.limitedRepeat,
-    limitedRepeatDays: page.system.limitedRepeatDays
+    duration: page.system.duration
   };
 }
 

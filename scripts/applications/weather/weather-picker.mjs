@@ -8,7 +8,7 @@ import { CalendarManager } from '../../calendar/_module.mjs';
 import { COMPASS_DIRECTIONS, MODULE, PRECIPITATION_TYPES, SETTINGS, TEMPLATES, WEATHER_PERIODS, WIND_SPEEDS } from '../../constants.mjs';
 import { getAvailableFxPresets, isFXMasterActive } from '../../integrations/_module.mjs';
 import { getAvailableMacros, localize, log } from '../../utils/_module.mjs';
-import { WEATHER_CATEGORIES, WeatherManager, fromDisplayUnit, getPreset, getPresetsByCategory, getTemperatureUnit, toDisplayUnit } from '../../weather/_module.mjs';
+import { WEATHER_CATEGORIES, WeatherManager, fromDisplayUnit, getPreset, getPresetsByCategory, getTemperatureUnit, rollPresetTemperature, toDisplayUnit } from '../../weather/_module.mjs';
 import { CalendarEditor, WeatherProbabilityDialog } from '../_module.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -439,16 +439,25 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
     const sceneZone = WeatherManager.getActiveZone(null, game.scenes?.active);
     const zoneId = sceneZone?.id ?? null;
     this.#customLabel = WeatherManager.resolveDisplayLabel(presetId, preset.label, calendarId, zoneId);
-    this.#customTemp = null;
-    this.#customIcon = preset.icon || 'fa-question';
-    this.#customColor = preset.color || '#888888';
+    const seasonData = calendar?.getCurrentSeason?.(game.time.components);
+    const rolled = rollPresetTemperature({
+      presetId,
+      seasonClimate: seasonData?.climate ?? null,
+      zoneConfig: sceneZone ?? null,
+      season: seasonData?.name ?? null,
+      customPresets: WeatherManager.getCustomPresets()
+    });
+    this.#customTemp = String(toDisplayUnit(rolled));
+    const visualOverrides = (game.settings.get(MODULE.ID, SETTINGS.WEATHER_VISUAL_OVERRIDES) || {})[presetId] || {};
+    this.#customIcon = visualOverrides.icon ?? preset.icon ?? 'fa-question';
+    this.#customColor = visualOverrides.color ?? preset.color ?? '#888888';
     this.#windSpeed = preset.wind?.speed ?? 0;
     this.#windDirection = preset.wind?.direction ?? null;
     this.#precipType = preset.precipitation?.type ?? null;
     this.#precipIntensity = preset.precipitation?.intensity ?? 0;
-    this.#fxPreset = preset.fxPreset || '';
-    this.#soundFx = preset.soundFx || '';
-    this.#fxMacro = preset.fxMacro || '';
+    this.#fxPreset = (visualOverrides.fxPreset !== undefined ? visualOverrides.fxPreset : preset.fxPreset) || '';
+    this.#soundFx = (visualOverrides.soundFx !== undefined ? visualOverrides.soundFx : preset.soundFx) || '';
+    this.#fxMacro = (visualOverrides.fxMacro !== undefined ? visualOverrides.fxMacro : preset.fxMacro) || '';
     this.#fxDensity = preset.fxDensity || '';
     this.#fxSpeed = preset.fxSpeed || '';
     this.#fxColor = preset.fxColor || '';

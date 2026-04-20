@@ -35,7 +35,7 @@ Editable fields for the selected weather:
 | **Name**                    | Display label (populated from preset, editable for custom)                  |
 | **Icon**                    | FontAwesome icon class                                                      |
 | **Color**                   | Color picker                                                                |
-| **Temperature**             | Numeric input (in display unit)                                             |
+| **Temperature**             | Numeric input (in display unit); rolled within the preset's range on select |
 | **Wind Speed**              | Select dropdown (0–5 scale: Calm through Extreme)                           |
 | **Wind Direction**          | 16-point compass select                                                     |
 | **Precipitation Type**      | Select: None, Drizzle, Rain, Snow, Sleet, Hail                              |
@@ -61,7 +61,8 @@ A checkbox near the footer labeled "Save as Preset." When checked, clicking Save
 
 ## Behavior
 
-- Selecting a built-in preset populates all detail fields with that preset's defaults
+- Selecting a built-in preset populates all detail fields with that preset's defaults, honoring any overrides configured in the [Weather Editor](Weather-Editor) (label, icon, color, FXMaster preset, sound, FX macro)
+- Temperature is rolled within the preset's configured range (zone and season overrides applied) each time a preset is selected; edit the field afterward to override
 - Editing detail fields creates a one-time weather override; the original preset is not modified
 - Randomize respects the current zone's enabled presets and chance weights
 - When a GM override is applied and the "GM Override Affects Forecast" setting is enabled, the forecast plan for the current zone is cleared and regenerated

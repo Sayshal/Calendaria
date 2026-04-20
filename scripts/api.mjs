@@ -227,9 +227,11 @@ export const CalendariaAPI = {
   /**
    * Set the current date and time to specific components.
    * @param {object} components - Time components (month: 1-indexed, day: 1-indexed)
+   * @param {object} [options] - Options
+   * @param {boolean} [options.cinematic] - Whether to trigger the cinematic overlay for the resulting jump
    * @returns {Promise<number>} New world time after setting
    */
-  async setDateTime(components) {
+  async setDateTime(components, { cinematic = false } = {}) {
     if (!canChangeDateTime()) {
       ui.notifications.error('CALENDARIA.Permissions.NoAccess', { localize: true });
       return game.time.worldTime;
@@ -251,6 +253,13 @@ export const CalendariaAPI = {
       CalendariaSocket.emit(SOCKET_TYPES.TIME_REQUEST, { action: 'set', components: internalComponents });
       return game.time.worldTime;
     }
+    if (cinematic) {
+      const merged = { ...game.time.components, ...internalComponents };
+      const targetSeconds = calendar.componentsToTime(merged);
+      const delta = targetSeconds - game.time.worldTime;
+      await CinematicOverlay.triggerFromAdvance(delta);
+      return game.time.worldTime;
+    }
     return await game.time.set(internalComponents);
   },
 
@@ -260,9 +269,11 @@ export const CalendariaAPI = {
    * @param {number} [options.year] - Target year
    * @param {number} [options.month] - Target month (1-indexed)
    * @param {number} [options.day] - Target day of month (1-indexed)
+   * @param {object} [advanceOptions] - Advance options
+   * @param {boolean} [advanceOptions.cinematic] - Whether to trigger the cinematic overlay for the resulting jump
    * @returns {Promise<void>}
    */
-  async jumpToDate({ year, month, day }) {
+  async jumpToDate({ year, month, day }, { cinematic = false } = {}) {
     if (!canChangeDateTime()) {
       ui.notifications.error('CALENDARIA.Permissions.NoAccess', { localize: true });
       return;
@@ -277,6 +288,15 @@ export const CalendariaAPI = {
     const monthIdx = month != null ? month - 1 : undefined;
     if (!game.user.isGM) {
       CalendariaSocket.emit(SOCKET_TYPES.TIME_REQUEST, { action: 'jump', date: { year, month: monthIdx, dayOfMonth } });
+      return;
+    }
+    if (cinematic) {
+      const yearZero = calendar.years?.yearZero ?? 0;
+      const current = game.time.components;
+      const targetComponents = { ...current, year: year != null ? year - yearZero : current.year, ...(monthIdx != null ? { month: monthIdx } : {}), ...(dayOfMonth != null ? { dayOfMonth } : {}) };
+      const targetSeconds = calendar.componentsToTime(targetComponents);
+      const delta = targetSeconds - game.time.worldTime;
+      await CinematicOverlay.triggerFromAdvance(delta);
       return;
     }
     await calendar.jumpToDate({ year, month: monthIdx, dayOfMonth });

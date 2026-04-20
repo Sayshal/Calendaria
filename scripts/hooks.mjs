@@ -9,7 +9,7 @@ import { BigCal, Chronicle, HUD, MiniCal, Stopwatch, SunDial, TimeKeeper } from 
 import { CalendarManager } from './calendar/_module.mjs';
 import { HOOKS, SETTINGS } from './constants.mjs';
 import { FestivalManager } from './festivals/_module.mjs';
-import { onLongRest, onPF1eRest, onPF2eRest, onPreRest } from './integrations/_module.mjs';
+import { onDayChangeForBastions, onLongRest, onPF1eRest, onPF2eRest, onPreRest, patchBastionButton } from './integrations/_module.mjs';
 import { NoteManager, clearComputedDateCache } from './notes/_module.mjs';
 import { TimeClock, onMoonPhaseChange, onUpdateScene, onWeatherChange } from './time/_module.mjs';
 import {
@@ -68,6 +68,7 @@ export function registerHooks() {
   Hooks.on('preCreateChatMessage', onPreCreateChatMessage);
   Hooks.on('preDeleteFolder', NoteManager.onPreDeleteFolder.bind(NoteManager));
   Hooks.on('preDeleteJournalEntry', NoteManager.onPreDeleteJournalEntry.bind(NoteManager));
+  Hooks.on('preUpdateJournalEntryPage', NoteManager.onPreUpdateJournalEntryPage.bind(NoteManager));
   Hooks.on('quenchReady', (quench) => registerBatches(quench));
   Hooks.on('renderChatMessageHTML', onRenderAnnouncementMessage);
   Hooks.on('renderChatMessageHTML', onRenderChatMessageHTML);
@@ -78,10 +79,13 @@ export function registerHooks() {
   Hooks.on('updateSetting', CalendarManager.onUpdateSetting.bind(CalendarManager));
   Hooks.on('updateWorldTime', TimeClock.onUpdateWorldTime);
   Hooks.on(HOOKS.DAY_CHANGE, autoRevealCurrentDay);
+  Hooks.on(HOOKS.DAY_CHANGE, onDayChangeForBastions);
   Hooks.on(HOOKS.MOON_PHASE_CHANGE, onMoonPhaseChange);
   Hooks.on(HOOKS.WEATHER_CHANGE, onWeatherChange);
   Hooks.once('ready', () => Stopwatch.restore());
   Hooks.once('ready', patchTooltipActivate);
+  Hooks.once('ready', patchBastionButton);
+  Hooks.once('pf2e.systemReady', () => CalendarManager.reapplyActiveCalendar());
   for (const config of WIDGET_COMBAT_CONFIGS) registerWidgetCombatHooks(config);
   log(3, 'Hooks registered');
 }

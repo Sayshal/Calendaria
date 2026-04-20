@@ -33,6 +33,8 @@ Select which calendar system to use. Changing this requires a world reload.
 
 - Default: `gregorian`
 
+On PF2E and SF2E worlds, the picker tags calendars lacking a `metadata.luxonSync.theme` with a "likely incompatible" suffix and shows a warning banner. The active calendar's date theme syncs to the system World Clock when compatible; when not, the in-system Show Clock button is hidden.
+
 ### Open Calendar Editor
 
 Launch the Calendar Editor for creating/modifying calendars.
@@ -136,11 +138,31 @@ How frequently the time system processes updates (in seconds).
 - Range: `1` to `120`
 - Default: `6`
 
-### Rest to Sunrise
+### Rest Advance Mode
 
-When enabled, long rests advance time to the next sunrise instead of a fixed duration.
+How long rests advance time.
 
-- Default: `false`
+- **8 AM**: Skip to 8 AM the next day (default)
+- **Sunrise**: Skip to the zone's sunrise hour, falling back to 8 AM if not configured
+- **Fixed**: Advance a fixed number of hours (set via **Rest Hours**). Useful for systems like PF2e that specify an 8-hour rest regardless of time of day.
+
+### Rest Hours
+
+Number of hours to advance when Rest Advance Mode is set to **Fixed**.
+
+- Default: `8`
+
+### Advance Bastion Orders (dnd5e only)
+
+Automatically advance dnd5e bastion facility orders as world time passes. When enough days elapse since the last advance (using the duration configured in the dnd5e **Bastion Configuration** menu, default 7), every player character's active facility orders are ticked forward. Large time jumps (e.g. advancing 30 days at once) collapse into a single advance covering the full span.
+
+The dnd5e **Advance Bastion Turn** button is also patched while this setting is on: clicking it now advances the world clock by one turn's duration (with a confirmation prompt) instead of only ticking progress.
+
+- Only visible in dnd5e worlds
+- Requires **Bastion Configuration → Enabled** on the dnd5e side
+- Default: `true`
+- Automatic advances run on the Primary GM only
+- Respects **Clock Locked**. Locked clocks block both automatic and button-triggered advances
 
 ### Sync with Game Pause
 
@@ -500,7 +522,7 @@ Minimum time advance to trigger the cinematic. Smaller advances play without it.
 - Default: `Week`
 
 > [!NOTE]
-> Only the dedicated "Cinematic Advance" button in the Set Date dialog triggers the cinematic. Normal Set Date, API calls, and socket requests do not.
+> The threshold gates advances initiated from the HUD, MiniCal, and Time Keeper jump buttons, the chat `/advance` command, socket time requests, and the "Cinematic Advance" button in the Set Date dialog.
 
 ### Panel Duration
 

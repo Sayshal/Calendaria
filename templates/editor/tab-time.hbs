@@ -54,7 +54,7 @@
       <p class="hint">{{localize "CALENDARIA.Editor.Hint.DaylightZoneOverride"}}</p>
     </div>
 
-    <div class="form-group">
+    <div class="form-group daylight-config" {{#unless calendar.daylight.enabled}}hidden{{/unless}}>
       <label for="editor-winter-solstice-month">{{localize "CALENDARIA.Editor.Field.ShortestDay"}}</label>
       <div class="form-fields">
         <select id="editor-winter-solstice-month" name="daylight.winterSolsticeMonth">
@@ -67,7 +67,7 @@
       </div>
     </div>
 
-    <div class="form-group">
+    <div class="form-group daylight-config" {{#unless calendar.daylight.enabled}}hidden{{/unless}}>
       <label for="editor-shortest-day">{{localize "CALENDARIA.Editor.Field.ShortestDaySunlight"}}</label>
       <div class="form-fields">
         <input type="number" id="editor-shortest-day" name="daylight.shortestDay"
@@ -76,7 +76,7 @@
       <p class="hint">{{localize "CALENDARIA.Editor.Hint.ShortestDay"}}</p>
     </div>
 
-    <div class="form-group">
+    <div class="form-group daylight-config" {{#unless calendar.daylight.enabled}}hidden{{/unless}}>
       <label for="editor-summer-solstice-month">{{localize "CALENDARIA.Editor.Field.LongestDay"}}</label>
       <div class="form-fields">
         <select id="editor-summer-solstice-month" name="daylight.summerSolsticeMonth">
@@ -89,7 +89,7 @@
       </div>
     </div>
 
-    <div class="form-group">
+    <div class="form-group daylight-config" {{#unless calendar.daylight.enabled}}hidden{{/unless}}>
       <label for="editor-longest-day">{{localize "CALENDARIA.Editor.Field.LongestDaySunlight"}}</label>
       <div class="form-fields">
         <input type="number" id="editor-longest-day" name="daylight.longestDay" value="{{calendar.daylight.longestDay}}"

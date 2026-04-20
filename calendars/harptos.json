@@ -15,73 +15,108 @@
         "name": "Hammer",
         "abbreviation": "Ham",
         "ordinal": 1,
-        "days": 31
+        "days": 30
+      },
+      "midwintermonth00": {
+        "name": "Midwinter",
+        "abbreviation": "Midw",
+        "ordinal": 2,
+        "days": 1,
+        "type": "intercalary"
       },
       "alturiak00000000": {
         "name": "Alturiak",
         "abbreviation": "Alt",
-        "ordinal": 2,
+        "ordinal": 3,
         "days": 30
       },
       "ches000000000000": {
         "name": "Ches",
         "abbreviation": "Ches",
-        "ordinal": 3,
+        "ordinal": 4,
         "days": 30
       },
       "tarsakh000000000": {
         "name": "Tarsakh",
         "abbreviation": "Tar",
-        "ordinal": 4,
-        "days": 31
+        "ordinal": 5,
+        "days": 30
+      },
+      "greengrassmonth0": {
+        "name": "Greengrass",
+        "abbreviation": "Gree",
+        "ordinal": 6,
+        "days": 1,
+        "type": "intercalary"
       },
       "mirtul0000000000": {
         "name": "Mirtul",
         "abbreviation": "Mirt",
-        "ordinal": 5,
+        "ordinal": 7,
         "days": 30
       },
       "kythorn000000000": {
         "name": "Kythorn",
         "abbreviation": "Kyth",
-        "ordinal": 6,
+        "ordinal": 8,
         "days": 30
       },
       "flamerule0000000": {
         "name": "Flamerule",
         "abbreviation": "Flam",
-        "ordinal": 7,
-        "days": 31,
-        "leapDays": 32
+        "ordinal": 9,
+        "days": 30
+      },
+      "midsummermonth00": {
+        "name": "Midsummer",
+        "abbreviation": "Mids",
+        "ordinal": 10,
+        "days": 1,
+        "leapDays": 2,
+        "type": "intercalary"
       },
       "eleasis000000000": {
         "name": "Eleasis",
         "abbreviation": "Ele",
-        "ordinal": 8,
+        "ordinal": 11,
         "days": 30
       },
       "eleint0000000000": {
         "name": "Eleint",
         "abbreviation": "Elei",
-        "ordinal": 9,
-        "days": 31
+        "ordinal": 12,
+        "days": 30
+      },
+      "highharvestmonth": {
+        "name": "Highharvestide",
+        "abbreviation": "High",
+        "ordinal": 13,
+        "days": 1,
+        "type": "intercalary"
       },
       "marpenoth0000000": {
         "name": "Marpenoth",
         "abbreviation": "Marp",
-        "ordinal": 10,
+        "ordinal": 14,
         "days": 30
       },
       "uktar00000000000": {
         "name": "Uktar",
         "abbreviation": "Ukt",
-        "ordinal": 11,
-        "days": 31
+        "ordinal": 15,
+        "days": 30
+      },
+      "feastmoonmonth00": {
+        "name": "Feast of the Moon",
+        "abbreviation": "Feas",
+        "ordinal": 16,
+        "days": 1,
+        "type": "intercalary"
       },
       "nightal000000000": {
         "name": "Nightal",
         "abbreviation": "Nigh",
-        "ordinal": 12,
+        "ordinal": 17,
         "days": 30
       }
     }
@@ -147,12 +182,12 @@
   "festivals": {
     "midwinter0000000": {
       "name": "Midwinter",
-      "month": 0,
+      "month": 1,
       "countsForWeekday": false,
       "icon": "fa-snowflake",
       "color": "#B0C4DE",
       "description": "A solemn festival marking winter's midpoint when nobles forge alliances while commoners endure the cold.",
-      "dayOfMonth": 30,
+      "dayOfMonth": 0,
       "duration": 1,
       "leapYearOnly": false,
       "conditionTree": {
@@ -163,13 +198,13 @@
             "type": "condition",
             "field": "month",
             "op": "==",
-            "value": 1
+            "value": 2
           },
           {
             "type": "condition",
             "field": "day",
             "op": "==",
-            "value": 31
+            "value": 1
           }
         ]
       },
@@ -183,7 +218,7 @@
     },
     "springequinox000": {
       "name": "Spring Equinox",
-      "month": 2,
+      "month": 3,
       "countsForWeekday": true,
       "description": "A festival marking when the barriers between the Prime Material plane and the Feywild are weakest, nobles host lavish masquerades wearing costumes of fey beings.",
       "dayOfMonth": 18,
@@ -199,7 +234,7 @@
             "type": "condition",
             "field": "month",
             "op": "==",
-            "value": 3
+            "value": 4
           },
           {
             "type": "condition",
@@ -219,12 +254,12 @@
     },
     "greengrass000000": {
       "name": "Greengrass",
-      "month": 3,
+      "month": 5,
       "countsForWeekday": false,
       "icon": "fa-seedling",
       "color": "#90EE90",
       "description": "The first day of spring when wealthy folk distribute flowers and commoners scatter them as offerings.",
-      "dayOfMonth": 30,
+      "dayOfMonth": 0,
       "duration": 1,
       "leapYearOnly": false,
       "conditionTree": {
@@ -235,13 +270,13 @@
             "type": "condition",
             "field": "month",
             "op": "==",
-            "value": 4
+            "value": 6
           },
           {
             "type": "condition",
             "field": "day",
             "op": "==",
-            "value": 31
+            "value": 1
           }
         ]
       },
@@ -255,7 +290,7 @@
     },
     "summersolstice00": {
       "name": "Summer Solstice",
-      "month": 5,
+      "month": 7,
       "countsForWeekday": true,
       "description": "The middle of summer marks the longest day of the year, seeing up to 16 hours of daylight.",
       "dayOfMonth": 19,
@@ -271,7 +306,7 @@
             "type": "condition",
             "field": "month",
             "op": "==",
-            "value": 6
+            "value": 8
           },
           {
             "type": "condition",
@@ -291,12 +326,12 @@
     },
     "midsummer0000000": {
       "name": "Midsummer",
-      "month": 6,
+      "month": 9,
       "countsForWeekday": false,
       "icon": "fa-sun",
       "color": "#FFD700",
       "description": "A night of feasting, music, and romance at summer's height beneath the stars.",
-      "dayOfMonth": 30,
+      "dayOfMonth": 0,
       "duration": 1,
       "leapYearOnly": false,
       "conditionTree": {
@@ -307,13 +342,13 @@
             "type": "condition",
             "field": "month",
             "op": "==",
-            "value": 7
+            "value": 10
           },
           {
             "type": "condition",
             "field": "day",
             "op": "==",
-            "value": 31
+            "value": 1
           }
         ]
       },
@@ -327,13 +362,13 @@
     },
     "shieldmeet000000": {
       "name": "Shieldmeet",
-      "month": 6,
+      "month": 9,
       "countsForWeekday": false,
       "leapYearOnly": true,
       "icon": "fa-shield",
       "color": "#CD7F32",
-      "description": "A leap year festival of grand tournaments, bazaars, and theatrical performances.",
-      "dayOfMonth": 31,
+      "description": "A leap year festival held the day after Midsummer, featuring grand tournaments, bazaars, and theatrical performances.",
+      "dayOfMonth": 1,
       "duration": 1,
       "conditionTree": {
         "type": "group",
@@ -353,13 +388,13 @@
                 "type": "condition",
                 "field": "month",
                 "op": "==",
-                "value": 7
+                "value": 10
               },
               {
                 "type": "condition",
                 "field": "day",
                 "op": "==",
-                "value": 32
+                "value": 2
               }
             ]
           }
@@ -375,7 +410,7 @@
     },
     "autumnequinox000": {
       "name": "Autumn Equinox",
-      "month": 8,
+      "month": 11,
       "countsForWeekday": true,
       "description": "This day is in perfect balance, seeing 12 hours of daylight and 12 hours of darkness as the sun starts to fade for the cold season.",
       "dayOfMonth": 20,
@@ -391,7 +426,7 @@
             "type": "condition",
             "field": "month",
             "op": "==",
-            "value": 9
+            "value": 12
           },
           {
             "type": "condition",
@@ -411,12 +446,12 @@
     },
     "highharvestide00": {
       "name": "Highharvestide",
-      "month": 8,
+      "month": 12,
       "countsForWeekday": false,
       "icon": "fa-wheat-awn",
       "color": "#D2691E",
       "description": "A great harvest feast celebrating autumn's abundance with food contests and blessings.",
-      "dayOfMonth": 30,
+      "dayOfMonth": 0,
       "duration": 1,
       "leapYearOnly": false,
       "conditionTree": {
@@ -427,13 +462,49 @@
             "type": "condition",
             "field": "month",
             "op": "==",
-            "value": 9
+            "value": 13
           },
           {
             "type": "condition",
             "field": "day",
             "op": "==",
-            "value": 31
+            "value": 1
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "feastofthemoon00": {
+      "name": "Feast of the Moon",
+      "month": 15,
+      "countsForWeekday": false,
+      "icon": "fa-moon",
+      "color": "#4B0082",
+      "description": "The year's final festival honoring ancestors, when families tell stories of the dead until legend and history merge.",
+      "dayOfMonth": 0,
+      "duration": 1,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "month",
+            "op": "==",
+            "value": 16
+          },
+          {
+            "type": "condition",
+            "field": "day",
+            "op": "==",
+            "value": 1
           }
         ]
       },
@@ -447,7 +518,7 @@
     },
     "wintersolstice00": {
       "name": "Winter Solstice",
-      "month": 11,
+      "month": 16,
       "countsForWeekday": true,
       "description": "This day marks the longest night of the year, as the sun starts to make its return to warmer weather.",
       "dayOfMonth": 19,
@@ -463,49 +534,13 @@
             "type": "condition",
             "field": "month",
             "op": "==",
-            "value": 12
+            "value": 17
           },
           {
             "type": "condition",
             "field": "day",
             "op": "==",
             "value": 20
-          }
-        ]
-      },
-      "allDay": true,
-      "displayStyle": "banner",
-      "visibility": "visible",
-      "silent": true,
-      "hasDuration": false,
-      "reminderType": "none",
-      "reminderOffset": 0
-    },
-    "feastofthemoon00": {
-      "name": "Feast of the Moon",
-      "month": 10,
-      "countsForWeekday": false,
-      "icon": "fa-moon",
-      "color": "#4B0082",
-      "description": "The year's final festival honoring ancestors, when families tell stories of the dead until legend and history merge.",
-      "dayOfMonth": 30,
-      "duration": 1,
-      "leapYearOnly": false,
-      "conditionTree": {
-        "type": "group",
-        "mode": "and",
-        "children": [
-          {
-            "type": "condition",
-            "field": "month",
-            "op": "==",
-            "value": 11
-          },
-          {
-            "type": "condition",
-            "field": "day",
-            "op": "==",
-            "value": 31
           }
         ]
       },
@@ -525,8 +560,8 @@
         "icon": "fas fa-seedling",
         "color": "#90ee90",
         "seasonalType": "spring",
-        "dayStart": 79,
-        "dayEnd": 171,
+        "dayStart": 78,
+        "dayEnd": 170,
         "abbreviation": "Spr"
       },
       "summer0000000000": {
@@ -534,8 +569,8 @@
         "icon": "fas fa-sun",
         "color": "#ffd700",
         "seasonalType": "summer",
-        "dayStart": 172,
-        "dayEnd": 263,
+        "dayStart": 171,
+        "dayEnd": 262,
         "abbreviation": "Sum"
       },
       "autumn0000000000": {
@@ -543,7 +578,7 @@
         "icon": "fas fa-leaf",
         "color": "#d2691e",
         "seasonalType": "autumn",
-        "dayStart": 264,
+        "dayStart": 263,
         "dayEnd": 353,
         "abbreviation": "Aut"
       },
@@ -553,7 +588,7 @@
         "color": "#87ceeb",
         "seasonalType": "winter",
         "dayStart": 354,
-        "dayEnd": 78,
+        "dayEnd": 77,
         "abbreviation": "Win"
       }
     }
@@ -632,8 +667,8 @@
     "enabled": true,
     "shortestDay": 8,
     "longestDay": 16,
-    "winterSolstice": 355,
-    "summerSolstice": 172
+    "winterSolstice": 354,
+    "summerSolstice": 171
   },
   "cycles": {},
   "canonicalHours": {},

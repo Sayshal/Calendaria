@@ -8,6 +8,7 @@ import { CalendarManager, CalendarRegistry, isBundledCalendar, preLocalizeCalend
 import { ASSETS, DEFAULT_MOON_PHASES, HOOKS, TEMPLATES } from '../../constants.mjs';
 import { FestivalManager } from '../../festivals/_module.mjs';
 import { createImporter } from '../../importers/_module.mjs';
+import { isLuxonSyncRequired } from '../../integrations/luxon-sync.mjs';
 import { NoteManager, summarizeConditionTree } from '../../notes/_module.mjs';
 import { RangeSlider, format, localize, log, serializeNotes, validateFormatString } from '../../utils/_module.mjs';
 import { CLIMATE_ZONE_TEMPLATES, getBlankZoneConfig, getClimateTemplateOptions, getDefaultZoneConfig, getPresetAlias, setPresetAlias } from '../../weather/_module.mjs';
@@ -74,6 +75,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       deleteCalendar: CalendarEditor.#onDeleteCalendar,
       addZone: CalendarEditor.#onAddZone,
       editZoneClimate: CalendarEditor.#onEditZoneClimate,
+      duplicateZone: CalendarEditor.#onDuplicateZone,
       deleteZone: CalendarEditor.#onDeleteZone,
       createNew: CalendarEditor.#onCreateNew,
       showTokenReference: CalendarEditor.#onShowTokenReference,
@@ -223,7 +225,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       weeks: { enabled: false, type: 'year-based', names: {} },
       amPmNotation: { am: 'AM', pm: 'PM', amAbbr: 'AM', pmAbbr: 'PM' },
       dateFormats: { short: 'D MMM', long: 'D MMMM, YYYY', full: 'MMMM D, YYYY', time: 'HH:mm', time12: 'h:mm a', weekHeader: '[W]', yearHeader: '[YYYY]', yearLabel: '[YYYY] [GGGG]' },
-      metadata: { id: '', description: '', author: game.user?.name ?? '', system: '' },
+      metadata: { id: '', description: '', author: game.user?.name ?? '', system: '', luxonSync: null },
       weather: { activeZone: null, zones: {} }
     };
   }
@@ -340,6 +342,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     context.isEditing = this.#isEditing;
     context.calendarId = this.#calendarId;
     context.isCustom = this.#calendarId ? CalendarManager.isCustomCalendar(this.#calendarId) : true;
+    context.luxonSyncAvailable = isLuxonSyncRequired();
     context.templates = CalendarManager.getCalendarTemplates();
     context.calculatedDaysPerYear = this.#calculateDaysPerYear();
     context.calculatedLeapDaysPerYear = this.#calculateDaysPerYear(true);
@@ -453,7 +456,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
             startPercent: rawStart.toFixed(2),
             endPercent: rawEnd.toFixed(2),
             widthPercent,
-            widthFormatted: widthPercent.toFixed(2)
+            widthFormatted: widthPercent.toFixed(2),
+            weight: Math.max(1, phase.weight ?? 1)
           };
         })
       };
@@ -599,6 +603,13 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     if (this.#navCollapsed) this.element.classList.add('nav-collapsed');
     this.#setupLeapRuleListener();
     this.#setupWeekNumberDuplicateListener();
+    const daylightToggle = this.element.querySelector('input[name="daylight.enabled"]');
+    if (daylightToggle) {
+      const configRows = this.element.querySelectorAll('.daylight-config');
+      daylightToggle.addEventListener('change', () => {
+        configRows.forEach((row) => (row.hidden = !daylightToggle.checked));
+      });
+    }
     for (const colorInput of this.element.querySelectorAll('color-picker[name^="moons."][name$=".color"]')) {
       colorInput.addEventListener('change', (event) => {
         const preview = event.target.closest('.color-input-wrapper')?.querySelector('.moon-color-preview');
@@ -913,6 +924,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#calendarData.name = data.name || '';
     this.#calendarData.metadata.description = data['metadata.description'] || '';
     this.#calendarData.metadata.system = data['metadata.system'] || '';
+    const luxonTheme = data['metadata.luxonSync.theme'] || null;
+    this.#calendarData.metadata.luxonSync = luxonTheme ? { theme: luxonTheme } : null;
     this.#calendarData.years.yearZero = parseInt(data['years.yearZero']) || 0;
     this.#calendarData.years.firstWeekday = parseInt(data['years.firstWeekday']) || 0;
     this.#calendarData.years.resetWeekdays = data['years.resetWeekdays'] ?? false;
@@ -941,8 +954,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#calendarData.secondsPerRound = parseInt(data.secondsPerRound) || 6;
     if (!this.#calendarData.daylight) this.#calendarData.daylight = {};
     this.#calendarData.daylight.enabled = data['daylight.enabled'] ?? false;
-    this.#calendarData.daylight.shortestDay = parseFloat(data['daylight.shortestDay']) || 8;
-    this.#calendarData.daylight.longestDay = parseFloat(data['daylight.longestDay']) || 16;
+    const shortRaw = parseFloat(data['daylight.shortestDay']);
+    const longRaw = parseFloat(data['daylight.longestDay']);
+    this.#calendarData.daylight.shortestDay = Number.isFinite(shortRaw) ? shortRaw : 8;
+    this.#calendarData.daylight.longestDay = Number.isFinite(longRaw) ? longRaw : 16;
     const winterMonth = parseInt(data['daylight.winterSolsticeMonth']) || 0;
     const winterDay = (parseInt(data['daylight.winterSolsticeDay']) || 1) - 1;
     this.#calendarData.daylight.winterSolstice = this.#monthDayToDayOfYear(winterMonth, winterDay);
@@ -1189,6 +1204,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         const phaseIcon = data[`moons.${mKey}.phases.${pKey}.icon`];
         const phaseStartPercent = data[`moons.${mKey}.phases.${pKey}.startPercent`];
         const phaseEndPercent = data[`moons.${mKey}.phases.${pKey}.endPercent`];
+        const phaseWeight = data[`moons.${mKey}.phases.${pKey}.weight`];
         const existingPhase = existingPhases[pKey] ?? existingPhasesArr[pIdx];
         phases[pKey] = {
           name: phaseName ?? existingPhase?.name ?? '',
@@ -1196,7 +1212,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
           fading: phaseFadingName ?? existingPhase?.fading ?? '',
           icon: phaseIcon ?? existingPhase?.icon ?? '',
           start: phaseStartPercent != null ? parseFloat(phaseStartPercent) / 100 : (existingPhase?.start ?? pIdx * 0.125),
-          end: phaseEndPercent != null ? parseFloat(phaseEndPercent) / 100 : (existingPhase?.end ?? (pIdx + 1) * 0.125)
+          end: phaseEndPercent != null ? parseFloat(phaseEndPercent) / 100 : (existingPhase?.end ?? (pIdx + 1) * 0.125),
+          weight: phaseWeight != null ? Math.max(1, parseFloat(phaseWeight) || 1) : (existingPhase?.weight ?? 1)
         };
         pIdx++;
       }
@@ -2258,6 +2275,43 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         editor.render({ parts: ['weather'] });
       }
     });
+  }
+
+  /**
+   * Duplicate a climate zone (copies presets, season overrides, and preset aliases).
+   * @param {Event} _event - Click event
+   * @param {HTMLElement} target - Target element
+   */
+  static #onDuplicateZone(_event, target) {
+    const zoneKey = target.dataset.key;
+    const zonesObj = this.#calendarData.weather?.zones ?? {};
+    const sourceZone = zonesObj[zoneKey];
+    if (!sourceZone) return;
+    const cloned = foundry.utils.deepClone(sourceZone);
+    const baseId = sourceZone.id || 'zone';
+    const existingIds = Object.values(zonesObj).map((z) => z.id);
+    let newId = `${baseId}-copy`;
+    let counter = 2;
+    while (existingIds.includes(newId)) newId = `${baseId}-copy-${counter++}`;
+    cloned.id = newId;
+    const sourceName = localize(sourceZone.name || '') || sourceZone.name || '';
+    cloned.name = format('CALENDARIA.Editor.CopyOfName', { name: sourceName });
+    const newKey = foundry.utils.randomID();
+    this.#calendarData.weather.zones = this.#insertAfterKey(zonesObj, zoneKey, newKey, cloned);
+    const sourcePresetIds = Object.values(sourceZone.presets ?? {})
+      .map((p) => p?.id)
+      .filter(Boolean);
+    const aliasMap = {};
+    for (const presetId of sourcePresetIds) {
+      const alias = this.#pendingPresetAliases?.[sourceZone.id]?.[presetId] ?? (this.#calendarId ? getPresetAlias(presetId, this.#calendarId, sourceZone.id) : null);
+      if (alias) aliasMap[presetId] = alias;
+    }
+    if (Object.keys(aliasMap).length) {
+      this.#pendingPresetAliases ??= {};
+      this.#pendingPresetAliases[newId] = aliasMap;
+    }
+    this.#isDirty = true;
+    this.render();
   }
 
   /**

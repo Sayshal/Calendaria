@@ -6,7 +6,7 @@
 import { CalendarManager } from '../calendar/_module.mjs';
 import { MODULE, SETTINGS } from '../constants.mjs';
 import { FestivalManager } from '../festivals/_module.mjs';
-import { getAllPresets, sanitizeNoteData } from '../notes/_module.mjs';
+import { getAllPresets, sanitizeNoteData, upsertBundledCustomPreset } from '../notes/_module.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import { format, localize } from './localization.mjs';
 import { log } from './logger.mjs';
@@ -153,7 +153,7 @@ const EXPORTABLE_SETTINGS = [
 ];
 
 /** Settings to skip when exporting with calendar data (to avoid duplicating calendar info). */
-const CALENDAR_DATA_SETTINGS = [SETTINGS.CUSTOM_CALENDARS, SETTINGS.DEFAULT_OVERRIDES];
+const CALENDAR_DATA_SETTINGS = [SETTINGS.CUSTOM_CALENDARS, SETTINGS.DEFAULT_OVERRIDES, SETTINGS.CUSTOM_PRESETS];
 
 /**
  * Serialize all calendar notes for a given calendar into a portable array.
@@ -166,13 +166,7 @@ export function serializeNotes(calendarId) {
   return calendarNotes.map((stub) => {
     const page = NoteManager.getFullNote(stub.id);
     const systemData = page?.system?.toObject?.() ?? page?.system ?? stub.flagData;
-    return {
-      id: stub.id,
-      name: stub.name,
-      content: page?.text?.content ?? stub.content ?? '',
-      calendarId: stub.calendarId,
-      system: systemData
-    };
+    return { id: stub.id, name: stub.name, content: page?.text?.content ?? stub.content ?? '', calendarId: stub.calendarId, system: systemData };
   });
 }
 
@@ -180,10 +174,12 @@ export function serializeNotes(calendarId) {
  * Import serialized notes into the world, remapping linked IDs.
  * @param {object[]} notes - Serialized note array from export
  * @param {string} [calendarId] - Override calendar ID for all notes
+ * @param {object[]} [bundledCustomPresets] - Custom presets bundled with the export; restored before import
  * @returns {Promise<number>} Number of notes imported
  */
-async function importNotes(notes, calendarId) {
+async function importNotes(notes, calendarId, bundledCustomPresets = []) {
   if (!notes?.length) return 0;
+  for (const preset of bundledCustomPresets) await upsertBundledCustomPreset(preset);
   const idMap = new Map();
   let imported = 0;
   const existingNotes = NoteManager.getAllNotes();
@@ -282,6 +278,19 @@ export async function exportSettings() {
       if (notes.length) {
         exportData.notes = notes;
         log(3, `Included ${notes.length} calendar notes`);
+      }
+      const referencedPresetIds = new Set();
+      for (const note of notes) {
+        const cats = note.system?.categories;
+        if (Array.isArray(cats)) cats.forEach((id) => referencedPresetIds.add(id));
+      }
+      if (referencedPresetIds.size) {
+        const allCustomPresets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_PRESETS) || [];
+        const bundledPresets = allCustomPresets.filter((p) => !p.builtin && referencedPresetIds.has(p.id));
+        if (bundledPresets.length) {
+          exportData.customPresets = bundledPresets;
+          log(3, `Included ${bundledPresets.length} referenced custom presets`);
+        }
       }
     }
   }
@@ -395,7 +404,7 @@ export async function importSettings(onComplete) {
       if (hasNotes && doImportNotes) {
         try {
           const noteCalendarId = importedCalendarId || CalendarManager.getActiveCalendar()?.metadata?.id;
-          const noteCount = await importNotes(importData.notes, noteCalendarId);
+          const noteCount = await importNotes(importData.notes, noteCalendarId, importData.customPresets || []);
           if (noteCount > 0) ui.notifications.info(format('CALENDARIA.SettingsPanel.ImportSettings.NotesImported', { count: noteCount }));
         } catch (noteError) {
           log(1, 'Note import failed:', noteError);

@@ -6,6 +6,7 @@
 
 import { HOOKS, MODULE, SETTINGS } from '../constants.mjs';
 import { CalendariaCalendar } from '../data/_module.mjs';
+import { getSystemWorldClock, isLuxonSyncRequired, syncWithLuxon } from '../integrations/luxon-sync.mjs';
 import { format, localize, log } from '../utils/_module.mjs';
 import { BUNDLED_CALENDARS, CalendarRegistry, DEFAULT_CALENDAR, isBundledCalendar, loadBundledCalendars } from './_module.mjs';
 
@@ -51,18 +52,70 @@ export default class CalendarManager {
     }
     const activeCalendar = CalendarRegistry.getActive();
     if (activeCalendar) {
-      CalendariaCalendar.initializeEpochOffset();
+      syncWithLuxon(activeCalendar);
       CONFIG.time.worldCalendarConfig = activeCalendar.toObject();
       CONFIG.time.worldCalendarClass = CalendariaCalendar;
       CONFIG.time.roundTime = activeCalendar.secondsPerRound ?? 6;
-      if (CalendariaCalendar.correctFirstWeekday !== null && CONFIG.time.worldCalendarConfig.years) CONFIG.time.worldCalendarConfig.years.firstWeekday = CalendariaCalendar.correctFirstWeekday;
       game.time.initializeCalendar();
       this.#patchFoundryCalendar();
+      await this.#syncLuxonSystemState(activeCalendar);
       log(3, `Synced game.time.calendar to: ${activeCalendar.name} (roundTime: ${CONFIG.time.roundTime}s)`);
     }
     const resolvedId = CalendarRegistry.getActive()?.metadata?.id;
     if (resolvedId) Hooks.callAll(HOOKS.CALENDAR_SWITCHED, resolvedId, CalendarRegistry.get(resolvedId));
     log(3, 'Calendar Manager initialized');
+  }
+
+  /**
+   * Reconcile the system's Luxon WorldClock with the active calendar.
+   * @param {CalendariaCalendar} calendar - The active calendar
+   * @private
+   */
+  static async #syncLuxonSystemState(calendar) {
+    if (!isLuxonSyncRequired()) return;
+    if (!game.user?.isGM) return;
+    const systemId = game.system.id;
+    const current = game.settings.get(systemId, 'worldClock') ?? {};
+    const theme = calendar?.metadata?.luxonSync?.theme;
+    if (theme) {
+      const update = {};
+      if (current.dateTheme !== theme) update.dateTheme = theme;
+      if (current.showClockButton === false) update.showClockButton = true;
+      if (Object.keys(update).length === 0) return;
+      try {
+        await game.settings.set(systemId, 'worldClock', { ...current, ...update });
+        if (update.dateTheme) ui.notifications.info(format('CALENDARIA.Notification.LuxonThemeSynced', { system: systemId.toUpperCase(), theme, calendar: calendar.name }));
+        log(3, `${systemId} WorldClock state synced for ${calendar.name}:`, update);
+      } catch (error) {
+        log(1, `Failed to sync ${systemId} WorldClock state:`, error);
+      }
+      return;
+    }
+    const widget = getSystemWorldClock();
+    if (widget?.rendered) widget.close();
+    if (current.showClockButton === false) return;
+    try {
+      await game.settings.set(systemId, 'worldClock', { ...current, showClockButton: false });
+      ui.notifications.warn(format('CALENDARIA.Notification.LuxonWorldClockDisabled', { system: systemId.toUpperCase(), calendar: calendar?.name ?? '' }), { permanent: true });
+      log(2, `${systemId} WorldClock button hidden; calendar "${calendar?.metadata?.id}" not Luxon-compatible`);
+    } catch (error) {
+      log(1, `Failed to disable ${systemId} WorldClock button:`, error);
+    }
+  }
+
+  /**
+   * Re-apply the active calendar's configuration, re-running Luxon sync.
+   */
+  static reapplyActiveCalendar() {
+    const activeCalendar = CalendarRegistry.getActive();
+    if (!activeCalendar) return;
+    syncWithLuxon(activeCalendar);
+    CONFIG.time.worldCalendarConfig = activeCalendar.toObject();
+    CONFIG.time.worldCalendarClass = CalendariaCalendar;
+    CONFIG.time.roundTime = activeCalendar.secondsPerRound ?? 6;
+    game.time.initializeCalendar();
+    this.#patchFoundryCalendar();
+    this.rerenderCalendarUIs();
   }
 
   /**
@@ -112,7 +165,8 @@ export default class CalendarManager {
         log(3, `Applied delta override for bundled calendar: ${id}`);
       } else if (bundledData) {
         if (CalendarManager.#alignOverrideKeys(data, bundledData)) needsSave = true;
-        const calendar = new CalendariaCalendar(data);
+        const merged = foundry.utils.mergeObject(foundry.utils.deepClone(bundledData), data);
+        const calendar = new CalendariaCalendar(merged);
         CalendarRegistry.register(id, calendar);
         needsSave = true;
         log(3, `Applied legacy override for bundled calendar: ${id}`);
@@ -436,7 +490,8 @@ export default class CalendarManager {
     }
     const calendar = CalendarRegistry.get(id);
     CalendarRegistry.setActive(id);
-    CalendariaCalendar.initializeEpochOffset();
+    await this.#syncLuxonSystemState(calendar);
+    syncWithLuxon(calendar);
     CONFIG.time.worldCalendarConfig = calendar.toObject();
     CONFIG.time.worldCalendarClass = CalendariaCalendar;
     CONFIG.time.roundTime = calendar.secondsPerRound ?? 6;
@@ -479,7 +534,7 @@ export default class CalendarManager {
     log(3, `Handling remote calendar switch to: ${id}`);
     CalendarRegistry.setActive(id);
     const calendar = CalendarRegistry.get(id);
-    CalendariaCalendar.initializeEpochOffset();
+    syncWithLuxon(calendar);
     CONFIG.time.worldCalendarConfig = calendar.toObject();
     CONFIG.time.worldCalendarClass = CalendariaCalendar;
     CONFIG.time.roundTime = calendar.secondsPerRound ?? 6;
@@ -579,7 +634,7 @@ export default class CalendarManager {
       if (newCalendarId && CalendarRegistry.has(newCalendarId)) {
         CalendarRegistry.setActive(newCalendarId);
         const calendar = CalendarRegistry.get(newCalendarId);
-        CalendariaCalendar.initializeEpochOffset();
+        syncWithLuxon(calendar);
         CONFIG.time.worldCalendarConfig = calendar.toObject();
         CONFIG.time.worldCalendarClass = CalendariaCalendar;
         CONFIG.time.roundTime = calendar.secondsPerRound ?? 6;
@@ -690,7 +745,7 @@ export default class CalendarManager {
       await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_CALENDARS, customCalendars);
       CalendarRegistry.register(id, updatedCalendar);
       if (CalendarRegistry.getActiveId() === id) {
-        CalendariaCalendar.initializeEpochOffset();
+        syncWithLuxon(updatedCalendar);
         CONFIG.time.worldCalendarConfig = updatedCalendar.toObject();
         CONFIG.time.roundTime = updatedCalendar.secondsPerRound ?? 6;
         game.time.initializeCalendar();
@@ -828,7 +883,7 @@ export default class CalendarManager {
       await game.settings.set(MODULE.ID, SETTINGS.DEFAULT_OVERRIDES, overrides);
       CalendarRegistry.register(id, calendar);
       if (CalendarRegistry.getActiveId() === id) {
-        CalendariaCalendar.initializeEpochOffset();
+        syncWithLuxon(calendar);
         CONFIG.time.worldCalendarConfig = calendar.toObject();
         CONFIG.time.roundTime = calendar.secondsPerRound ?? 6;
         game.time.initializeCalendar();
@@ -862,7 +917,7 @@ export default class CalendarManager {
         const calendar = new CalendariaCalendar(foundry.utils.deepClone(bundledData));
         CalendarRegistry.register(id, calendar);
         if (CalendarRegistry.getActiveId() === id) {
-          CalendariaCalendar.initializeEpochOffset();
+          syncWithLuxon(calendar);
           CONFIG.time.worldCalendarConfig = calendar.toObject();
           CONFIG.time.roundTime = calendar.secondsPerRound ?? 6;
           game.time.initializeCalendar();

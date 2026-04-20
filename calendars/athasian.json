@@ -31,9 +31,9 @@
         "ordinal": 4,
         "days": 30
       },
-      "zenalia000000000": {
-        "name": "Zenalia",
-        "abbreviation": "Zen",
+      "dessalia00000000": {
+        "name": "Dessalia",
+        "abbreviation": "Des",
         "ordinal": 5,
         "days": 5,
         "type": "intercalary"
@@ -62,9 +62,9 @@
         "ordinal": 9,
         "days": 30
       },
-      "dessalia00000000": {
-        "name": "Dessalia",
-        "abbreviation": "Des",
+      "assalia000000000": {
+        "name": "Assalia",
+        "abbreviation": "Ass",
         "ordinal": 10,
         "days": 5,
         "type": "intercalary"
@@ -93,9 +93,9 @@
         "ordinal": 14,
         "days": 30
       },
-      "assalia000000000": {
-        "name": "Assalia",
-        "abbreviation": "Ass",
+      "zenalia000000000": {
+        "name": "Zenalia",
+        "abbreviation": "Zen",
         "ordinal": 15,
         "days": 5,
         "type": "intercalary"
@@ -104,36 +104,80 @@
   },
   "days": {
     "values": {
-      "oneday0000000000": {
-        "name": "Oneday",
+      "day0100000000000": {
+        "name": "Day 1",
         "ordinal": 1,
-        "abbreviation": "1st"
+        "abbreviation": "1"
       },
-      "twosday000000000": {
-        "name": "Twosday",
+      "day0200000000000": {
+        "name": "Day 2",
         "ordinal": 2,
-        "abbreviation": "2nd"
+        "abbreviation": "2"
       },
-      "threesday0000000": {
-        "name": "Threesday",
+      "day0300000000000": {
+        "name": "Day 3",
         "ordinal": 3,
-        "abbreviation": "3rd"
+        "abbreviation": "3"
       },
-      "foursday00000000": {
-        "name": "Foursday",
+      "day0400000000000": {
+        "name": "Day 4",
         "ordinal": 4,
-        "abbreviation": "4th"
+        "abbreviation": "4"
       },
-      "fiveday000000000": {
-        "name": "Fiveday",
+      "day0500000000000": {
+        "name": "Day 5",
         "ordinal": 5,
-        "abbreviation": "5th"
+        "abbreviation": "5"
       },
-      "sixday0000000000": {
-        "name": "Sixday",
+      "day0600000000000": {
+        "name": "Day 6",
         "ordinal": 6,
-        "abbreviation": "6th",
-        "isRestDay": true
+        "abbreviation": "6"
+      },
+      "day0700000000000": {
+        "name": "Day 7",
+        "ordinal": 7,
+        "abbreviation": "7"
+      },
+      "day0800000000000": {
+        "name": "Day 8",
+        "ordinal": 8,
+        "abbreviation": "8"
+      },
+      "day0900000000000": {
+        "name": "Day 9",
+        "ordinal": 9,
+        "abbreviation": "9"
+      },
+      "day1000000000000": {
+        "name": "Day 10",
+        "ordinal": 10,
+        "abbreviation": "10"
+      },
+      "day1100000000000": {
+        "name": "Day 11",
+        "ordinal": 11,
+        "abbreviation": "11"
+      },
+      "day1200000000000": {
+        "name": "Day 12",
+        "ordinal": 12,
+        "abbreviation": "12"
+      },
+      "day1300000000000": {
+        "name": "Day 13",
+        "ordinal": 13,
+        "abbreviation": "13"
+      },
+      "day1400000000000": {
+        "name": "Day 14",
+        "ordinal": 14,
+        "abbreviation": "14"
+      },
+      "day1500000000000": {
+        "name": "Day 15",
+        "ordinal": 15,
+        "abbreviation": "15"
       }
     },
     "daysPerYear": 375,
@@ -142,15 +186,15 @@
     "secondsPerMinute": 60
   },
   "festivals": {
-    "festivalofzenali": {
-      "name": "Festival of Zenalia",
+    "festivalofdessal": {
+      "name": "Festival of Dessalia",
       "month": 4,
-      "icon": "fa-sun",
-      "color": "#FFD700",
-      "description": "Five-day celebration at the zenith of High Sun, featuring the Starlight Pageants.",
+      "icon": "fa-cloud-sun",
+      "color": "#FF8C00",
+      "description": "Five-day festival marking the midpoint of Sun Descending.",
       "dayOfMonth": 0,
       "duration": 1,
-      "countsForWeekday": true,
+      "countsForWeekday": false,
       "leapYearOnly": false,
       "conditionTree": {
         "type": "group",
@@ -178,15 +222,15 @@
       "reminderType": "none",
       "reminderOffset": 0
     },
-    "festivalofdessal": {
-      "name": "Festival of Dessalia",
+    "festivalofassali": {
+      "name": "Festival of Assalia",
       "month": 9,
-      "icon": "fa-cloud-sun",
-      "color": "#FF8C00",
-      "description": "Five-day festival marking the midpoint of Sun Descending season.",
+      "icon": "fa-sun-plant-wilt",
+      "color": "#FFA500",
+      "description": "Five-day festival celebrating the midpoint of Sun Ascending.",
       "dayOfMonth": 0,
       "duration": 1,
-      "countsForWeekday": true,
+      "countsForWeekday": false,
       "leapYearOnly": false,
       "conditionTree": {
         "type": "group",
@@ -214,15 +258,15 @@
       "reminderType": "none",
       "reminderOffset": 0
     },
-    "festivalofassali": {
-      "name": "Festival of Assalia",
+    "festivalofzenali": {
+      "name": "Festival of Zenalia",
       "month": 14,
-      "icon": "fa-sun-plant-wilt",
-      "color": "#FFA500",
-      "description": "Five-day festival celebrating the midpoint of Sun Ascending season.",
+      "icon": "fa-sun",
+      "color": "#FFD700",
+      "description": "Five-day celebration at the zenith of High Sun at year's end, featuring the Starlight Pageants.",
       "dayOfMonth": 0,
       "duration": 1,
-      "countsForWeekday": true,
+      "countsForWeekday": false,
       "leapYearOnly": false,
       "conditionTree": {
         "type": "group",
@@ -258,8 +302,8 @@
         "icon": "fas fa-fire",
         "color": "#ff0000",
         "seasonalType": "summer",
-        "dayStart": 0,
-        "dayEnd": 124,
+        "dayStart": 310,
+        "dayEnd": 59,
         "abbreviation": "HSu"
       },
       "sundescending000": {
@@ -267,8 +311,8 @@
         "icon": "fas fa-cloud-sun",
         "color": "#ff6600",
         "seasonalType": "autumn",
-        "dayStart": 125,
-        "dayEnd": 249,
+        "dayStart": 60,
+        "dayEnd": 184,
         "abbreviation": "SDe"
       },
       "sunascending0000": {
@@ -276,8 +320,8 @@
         "icon": "fas fa-sun",
         "color": "#ffcc00",
         "seasonalType": "spring",
-        "dayStart": 250,
-        "dayEnd": 374,
+        "dayStart": 185,
+        "dayEnd": 309,
         "abbreviation": "SAs"
       }
     }
@@ -306,8 +350,8 @@
     "enabled": true,
     "shortestDay": 11,
     "longestDay": 14,
-    "winterSolstice": 310,
-    "summerSolstice": 60
+    "winterSolstice": 185,
+    "summerSolstice": 0
   },
   "cycles": {
     "endleancycle0000": {
