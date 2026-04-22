@@ -14,8 +14,9 @@ import { isValidDate } from './_module.mjs';
  */
 export function getDefaultNoteData() {
   const currentDate = game.time.components;
+  const yearZero = game.time.calendar?.years?.yearZero ?? 0;
   return {
-    startDate: { year: currentDate.year, month: currentDate.month, dayOfMonth: currentDate.dayOfMonth, hour: currentDate.hour, minute: currentDate.minute },
+    startDate: { year: (currentDate.year ?? 0) + yearZero, month: currentDate.month, dayOfMonth: currentDate.dayOfMonth, hour: currentDate.hour, minute: currentDate.minute },
     endDate: null,
     allDay: false,
     repeat: 'never',

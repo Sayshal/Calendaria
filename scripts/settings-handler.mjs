@@ -1159,6 +1159,7 @@ export default class CalendariaSettings {
       removedCalendarsMigrationComplete: { name: 'Removed Calendars Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       removedCalendarOverridesMigrationComplete: { name: 'Removed Calendar Overrides Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       zoneTempBlankInheritanceMigrationComplete: { name: 'Zone Temp Blank Inheritance Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
+      festivalNoteYearZeroMigrationComplete: { name: 'Festival Note Year Zero Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.CLOCK_LOCKED]: { name: 'Clock Locked', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.SYNC_CLOCK_PAUSE]: {
         name: 'CALENDARIA.Settings.SyncClockPause.Name',

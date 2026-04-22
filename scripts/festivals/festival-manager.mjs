@@ -259,13 +259,14 @@ export default class FestivalManager {
    * @private
    */
   static #getFestivalStartDate(festival, currentDate, calendar) {
+    const yearZero = calendar?.years?.yearZero ?? 0;
+    const displayedYear = (currentDate.year ?? 0) + yearZero;
     const fromTree = this.deriveDateFromConditionTree(festival.conditionTree);
-    if (fromTree) return { year: currentDate.year, month: fromTree.month, dayOfMonth: fromTree.dayOfMonth, hour: 0, minute: 0 };
+    if (fromTree) return { year: displayedYear, month: fromTree.month, dayOfMonth: fromTree.dayOfMonth, hour: 0, minute: 0 };
     const fromAstro = this.#resolveAstronomicalDate(festival.conditionTree, currentDate, calendar);
-    if (fromAstro) return { year: currentDate.year, month: fromAstro.month, dayOfMonth: fromAstro.dayOfMonth, hour: 0, minute: 0 };
-    if (festival.month != null && festival.dayOfMonth != null) return { year: currentDate.year, month: festival.month, dayOfMonth: festival.dayOfMonth, hour: 0, minute: 0 };
+    if (fromAstro) return { year: displayedYear, month: fromAstro.month, dayOfMonth: fromAstro.dayOfMonth, hour: 0, minute: 0 };
+    if (festival.month != null && festival.dayOfMonth != null) return { year: displayedYear, month: festival.month, dayOfMonth: festival.dayOfMonth, hour: 0, minute: 0 };
     if (festival.dayOfYear != null) {
-      const yearZero = calendar.years?.yearZero ?? 0;
       const months = calendar.monthsArray ?? [];
       let remaining = festival.dayOfYear;
       let month = 0;
@@ -278,9 +279,9 @@ export default class FestivalManager {
         remaining -= daysInMonth;
         month = m + 1;
       }
-      return { year: currentDate.year, month, dayOfMonth: remaining, hour: 0, minute: 0 };
+      return { year: displayedYear, month, dayOfMonth: remaining, hour: 0, minute: 0 };
     }
-    return { year: currentDate.year, month: 0, dayOfMonth: 0, hour: 0, minute: 0 };
+    return { year: displayedYear, month: 0, dayOfMonth: 0, hour: 0, minute: 0 };
   }
 
   /**

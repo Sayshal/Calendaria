@@ -647,6 +647,49 @@ async function migrateZoneTempBlankInheritance() {
 }
 
 /**
+ * Bump startDate/endDate/repeatEndDate years on festival-linked notes that were
+ * created with raw internal years instead of yearZero-offset displayed years.
+ * @since 1.0.8
+ * @deprecated Remove in 1.2.0
+ * @returns {Promise<void>}
+ */
+async function migrateFestivalNoteYearZero() {
+  const KEY = 'festivalNoteYearZeroMigrationComplete';
+  if (!game.user?.isGM) return;
+  if (game.settings.get(MODULE.ID, KEY)) return;
+  const calendar = CalendarManager.getActiveCalendar();
+  const yearZero = calendar?.years?.yearZero ?? 0;
+  if (!yearZero) {
+    await game.settings.set(MODULE.ID, KEY, true);
+    return;
+  }
+  let touched = 0;
+  for (const journal of game.journal) {
+    const pageUpdates = [];
+    for (const page of journal.pages) {
+      if (page.type !== 'calendaria.calendarnote') continue;
+      if (!page.system?.linkedFestival?.festivalKey) continue;
+      const update = { _id: page.id };
+      let dirty = false;
+      for (const field of ['startDate', 'endDate', 'repeatEndDate']) {
+        const value = page.system?.[field];
+        if (!value || typeof value.year !== 'number') continue;
+        if (value.year >= yearZero) continue;
+        update[`system.${field}.year`] = value.year + yearZero;
+        dirty = true;
+      }
+      if (dirty) pageUpdates.push(update);
+    }
+    if (pageUpdates.length) {
+      await JournalEntryPage.updateDocuments(pageUpdates, { parent: journal });
+      touched += pageUpdates.length;
+    }
+  }
+  if (touched) log(3, `Shifted ${touched} festival-linked note years by yearZero (${yearZero})`);
+  await game.settings.set(MODULE.ID, KEY, true);
+}
+
+/**
  * Run all migrations.
  * @returns {Promise<void>}
  */
@@ -661,6 +704,7 @@ export async function runAllMigrations() {
   await migrateRestAdvanceMode();
   await migrateRemovedCalendars();
   await migrateZoneTempBlankInheritance();
+  await migrateFestivalNoteYearZero();
   await recoverOrphanedPresets();
 }
 

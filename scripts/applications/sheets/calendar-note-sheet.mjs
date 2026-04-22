@@ -922,6 +922,15 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const currentDay = dayInput ? parseInt(dayInput.value) + 1 : fallbackDay;
     const result = await CalendarNoteSheet._showDatePickerDialog(calendar, currentYear, currentMonth, currentDay);
     if (!result) return;
+    let syncEndWithStart = false;
+    if (dateField === 'startDate') {
+      const endYear = parseInt(form.querySelector('[name="system.endDate.year"]')?.value);
+      const endMonth = parseInt(form.querySelector('[name="system.endDate.month"]')?.value);
+      const endDay = parseInt(form.querySelector('[name="system.endDate.dayOfMonth"]')?.value);
+      const oldStart = { year: currentYear, month: currentMonth, dayOfMonth: currentDay - 1 };
+      const oldEnd = { year: endYear, month: endMonth, dayOfMonth: endDay };
+      syncEndWithStart = !isNaN(endYear) && isSameDay(oldStart, oldEnd);
+    }
     if (yearInput) yearInput.value = result.year;
     if (monthInput) monthInput.value = result.month;
     if (dayInput) dayInput.value = result.day - 1;
@@ -935,6 +944,16 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
         const monthName = monthData?.name ? localize(monthData.name) : `Month ${result.month + 1}`;
         displaySpan.textContent = `${result.day} ${monthName}, ${result.year}`;
       }
+    }
+    if (syncEndWithStart) {
+      const endYearInput = form.querySelector('input[name="system.endDate.year"]');
+      const endMonthInput = form.querySelector('input[name="system.endDate.month"]');
+      const endDayInput = form.querySelector('input[name="system.endDate.dayOfMonth"]');
+      if (endYearInput) endYearInput.value = result.year;
+      if (endMonthInput) endMonthInput.value = result.month;
+      if (endDayInput) endDayInput.value = result.day - 1;
+      const endDisplaySpan = form.querySelector('[data-date-field="endDate"] .date-display');
+      if (endDisplaySpan && displaySpan) endDisplaySpan.textContent = displaySpan.textContent;
     }
     CalendarNoteSheet.#syncDurationFromDateRange(form);
     const changeEvent = new Event('change', { bubbles: true });
