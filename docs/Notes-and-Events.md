@@ -12,7 +12,7 @@ Notes are stored as journal entries within a folder per calendar. These folders 
 2. Click **Add Note** to open the note editor
 3. A preset selection dialog appears where you can pick a category (or skip)
 4. Configure title, icon, dates, times, and content
-5. Click **Save & Close**
+5. Close the window to save
 
 ## Editing and Deleting
 
@@ -46,20 +46,30 @@ Festival notes display an info banner on each tab, linking to the calendar edito
 
 ### Schedule Tab
 
-- **Start Date / End Date**: Click to open a date picker
-- **Start Time / End Time**: Hour and minute inputs (hidden when All Day is checked)
+The top of the tab has a **Schedule Mode** toggle with two options: **One-time Event** and **Recurring Event**. The controls below change based on the selected mode.
+
+Switching from Recurring to One-time prompts a confirmation because it clears the condition tree.
+
+#### One-time Mode
+
+- **Start Date / End Date**: Click to open a date picker. The two pickers sit side by side and set the event's span directly.
+- **Time**: Hour and minute inputs for start and end time (hidden when All Day is checked)
 - **All Day**: Checkbox to hide time fields. When checked, end date fields are disabled and synced to match the start date.
+
+#### Recurring Mode
+
+- **Anchor Date**: Click to open a date picker for the base date the recurrence pattern is anchored to
+- **Repeats Until**: Optional date picker that caps the recurrence. Click the x button to clear.
+- **Time**: Hour and minute inputs (hidden when All Day is checked)
+- **All Day**: Checkbox to hide time fields.
+- **Duration**: Number of days each occurrence spans (minimum 1)
 - **Condition Presets**: Dropdown with presets that reflect your calendar's weekdays, months, seasons, and moon phases (e.g., "Every Monday", "Monthly on the 15th", "Every Full Moon")
 - **Edit in Builder**: Opens the visual condition builder with the note's current conditions loaded
 - **Condition Summary**: Displays the note's recurrence rules as readable pills. Right-click a pill to delete it.
 - **Max Occurrences**: Limit how many times a recurring note appears (leave blank for unlimited)
-- **Occurrence Preview**: Read-only list of the next upcoming dates for recurring notes
+- **Occurrence Preview**: Read-only list of the next upcoming dates
 
-#### Duration
-
-- **Has Duration**: Toggle to make the note span multiple days
-- **Duration**: Number of days the event spans
-- **Show Bookends**: Start/end markers on the first and last days
+Show Bookends lives on the **Settings** tab under Display Style.
 
 ### Settings Tab
 
@@ -68,6 +78,7 @@ Festival notes display an info banner on each tab, linking to the calendar edito
 - **Visibility**: Visible, Hidden, or Secret (GM only)
 - **Silent**: Suppress reminders and event announcements
 - **Display Style**: Icon, pip, or banner
+- **Show Bookends**: Start/end markers on the first and last days. Enabled only when the event spans more than one day.
 - **Macro**: Select a macro to execute when the event triggers
 
 #### Reminders
@@ -201,9 +212,14 @@ Three visibility levels:
 
 ### Duration
 
-Enable **Has Duration** to make a note span multiple days. Multi-day events render as continuous bars across calendar days in BigCal.
+**Duration** is a number-of-days field. Its visibility on the Schedule tab depends on the Schedule Mode:
 
-- **Show Bookends**: Start/end markers on the first and last days
+- **One-time**: the Start Date / End Date pickers control the span directly. Duration is derived on save from the date range.
+- **Recurring**: Duration is the primary control for per-occurrence length.
+
+Multi-day events render as continuous bars across calendar days in BigCal.
+
+- **Show Bookends**: Start/end markers on the first and last days. Configured on the Settings tab.
 
 ### Display Styles
 

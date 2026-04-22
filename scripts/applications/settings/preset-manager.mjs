@@ -327,7 +327,6 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
         reminderType: null,
         reminderOffset: null,
         reminderTargets: null,
-        hasDuration: null,
         duration: null,
         maxOccurrences: null,
         silent: null,
@@ -561,7 +560,6 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
       'reminderType',
       'reminderOffset',
       'reminderTargets',
-      'hasDuration',
       'duration',
       'maxOccurrences',
       'silent',
@@ -649,7 +647,6 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
             reminderType: raw.defaults?.reminderType ?? null,
             reminderOffset: raw.defaults?.reminderOffset ?? null,
             reminderTargets: raw.defaults?.reminderTargets ?? null,
-            hasDuration: raw.defaults?.hasDuration ?? null,
             duration: raw.defaults?.duration ?? null,
             maxOccurrences: raw.defaults?.maxOccurrences ?? null,
             silent: raw.defaults?.silent ?? null,
@@ -711,7 +708,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
     });
     if (!confirmed) return;
     const defaults = preset.defaults || {};
-    const syncFields = ['allDay', 'displayStyle', 'visibility', 'reminderType', 'reminderOffset', 'reminderTargets', 'hasDuration', 'duration', 'showBookends', 'maxOccurrences', 'silent', 'macro'];
+    const syncFields = ['allDay', 'displayStyle', 'visibility', 'reminderType', 'reminderOffset', 'reminderTargets', 'duration', 'showBookends', 'maxOccurrences', 'silent', 'macro'];
     const updates = [];
     for (const stub of affected) {
       const noteUpdates = {};

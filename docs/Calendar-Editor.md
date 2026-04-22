@@ -314,34 +314,36 @@ Example: If year 1492 falls in both "Dale Reckoning" (era 1) and "Age of Mortals
 
 ## Festivals Tab
 
-Create holidays and special days that appear on the calendar.
+Create holidays and special days that appear on the calendar. The Festivals tab is a read-only list; each festival's metadata lives on its linked journal note.
 
-### Festival Fields
+### Festival Toolbar
 
-| Column            | Description                                                                                                        |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------ |
-| **Icon/Color**    | Click to open icon/color picker dialog (Font Awesome class and hex color; default: `fas fa-star` / gold `#d4af37`) |
-| **Name**          | Festival name (e.g., "Midwinter")                                                                                  |
-| **Month**         | Which month the festival falls in                                                                                  |
-| **Day**           | Day of the month                                                                                                   |
-| **Duration**      | Number of days the festival lasts (default: 1)                                                                     |
-| **Leap Duration** | Duration on leap years (leave blank to use standard duration)                                                      |
-| **Only Leap**     | Checkbox. Festival only occurs in leap years                                                                       |
-| **Non-Weekday**   | Checkbox. This day does NOT count for weekday progression (for intercalary days that exist "outside" normal weeks) |
+- **Add Festival**: Create a new festival note and link it to the calendar
+- **Reset to Bundled**: Restore the festival notes for bundled calendars back to their template set. Not available on custom calendars.
 
-Each festival also has a **Description** field for lore or flavor text that appears in calendar day tooltips colored with the festival's custom color.
+### Festival List
+
+Each entry in the list is a read-only row showing:
+
+| Column               | Description                                                          |
+| -------------------- | -------------------------------------------------------------------- |
+| **Icon**             | The festival's icon rendered in the festival's color                 |
+| **Name**             | Festival name                                                        |
+| **Schedule Summary** | Readable summary of the festival's schedule (e.g., month, day, span) |
+
+Item controls per row:
+
+- **Open** (pencil icon): Open the festival's linked note sheet to edit metadata
+- **Delete** (trash icon): Remove the note and unlink it from the calendar
+
+### Editing a Festival
+
+Festival metadata (name, icon, color, schedule, `countsForWeekday`, `leapYearOnly`, `leapDuration`, description) is stored on the linked journal note. Click **Open** on a festival row to edit its fields in the note sheet.
 
 > [!NOTE]
 > For monthless calendars (like Traveller), festival positioning uses the internal `dayOfYear` field (1-365) instead of Month/Day. This is set programmatically when importing calendars.
 
 Festival colors render throughout the calendar UI: BigCal grid cells, MiniCal day cells, and intercalary day rows all use the festival's custom color for borders, backgrounds, day numbers, and the festival icon.
-
-### Festival Controls
-
-- **Edit** (pencil icon): Open the festival's linked note sheet for editing (calendar must be saved first)
-- **Refresh** (sync icon): Reset the festival's linked journal note back to its template defaults (name, icon, color, dates, visibility, display style, duration). User-set fields like reminders are preserved.
-- **Add** (+): Insert a new festival after this one
-- **Remove** (trash icon): Delete this festival **and** its associated journal note. When a festival is removed from the calendar definition, any linked note is also deleted to prevent orphaned entries.
 
 ---
 

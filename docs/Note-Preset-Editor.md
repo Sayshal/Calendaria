@@ -69,6 +69,7 @@ Optional editor for defining default note content. When a note is created with t
 ## Schedule Section
 
 - **All Day**: Whether new notes default to all-day events
+- **Duration**: Default number of days each occurrence spans (integer, minimum 1)
 - **Max Occurrences**: Default maximum occurrences for recurring notes (0 = unlimited)
 
 ---
@@ -80,16 +81,9 @@ Optional editor for defining default note content. When a note is created with t
 - **Display Style**: How the note renders on the calendar (banner, icon, or pip)
 - **Visibility**: Note visibility level (visible, hidden, or secret)
 - **Silent**: Suppress chat announcements and reminders for this note
+- **Show Bookends**: Show start/end markers on multi-day events
 - **Color**: Default note color
 - **Icon**: Default FontAwesome icon class
-
-#### Duration
-
-- **Has Duration**: Whether the note has a duration by default
-- **Duration**: Default duration in days (minimum 1)
-- **Show Bookends**: Show start/end markers on multi-day events
-
-When **Has Duration** is unchecked, the Duration and Show Bookends fields are disabled.
 
 #### Reminders
 
