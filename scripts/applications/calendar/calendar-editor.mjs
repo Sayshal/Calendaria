@@ -49,7 +49,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       addFestival: CalendarEditor.#onAddFestival,
       removeFestival: CalendarEditor.#onRemoveFestival,
       editFestivalNote: CalendarEditor.#onEditFestivalNote,
-      refreshFestival: CalendarEditor.#onRefreshFestival,
+      resetFestivals: CalendarEditor.#onResetFestivals,
       addMoon: CalendarEditor.#onAddMoon,
       removeMoon: CalendarEditor.#onRemoveMoon,
       addMoonPhase: CalendarEditor.#onAddMoonPhase,
@@ -372,15 +372,24 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       startingWeekdayOptions: startingWeekdayOptions.map((opt) => ({ ...opt, selected: opt.value === month.startingWeekday })),
       typeOptions: monthTypeOptions.map((opt) => ({ ...opt, selected: (opt.value || null) === (month.type || null) }))
     }));
-    const festivalsArr = Object.entries(this.#calendarData.festivals);
+    const festivalStubs = this.#calendarId ? FestivalManager.getFestivalNotes(this.#calendarId) : [];
     context.festivalsCanEditNotes = !!(this.#isEditing && this.#calendarId);
-    context.festivalsWithNav = festivalsArr.map(([key, festival]) => {
-      const noteStub = this.#calendarId ? FestivalManager.getFestivalNoteByKey(this.#calendarId, key) : null;
-      const effectiveTree = noteStub?.flagData?.conditionTree ?? festival.conditionTree;
-      let conditionSummary = effectiveTree ? summarizeConditionTree(effectiveTree, this.#calendarData) : '';
-      const noteDuration = noteStub?.flagData?.duration ?? festival.duration ?? 1;
-      if (conditionSummary && noteDuration > 1) conditionSummary += ` (${noteDuration} ${localize('CALENDARIA.Common.UnitDays')})`;
-      return { ...festival, key, conditionSummary };
+    context.festivalsIsBundled = !!(this.#calendarId && isBundledCalendar(this.#calendarId));
+    context.festivalsWithNav = festivalStubs.map((stub) => {
+      const fd = stub.flagData ?? {};
+      const tree = fd.conditionTree;
+      let conditionSummary = tree ? summarizeConditionTree(tree, this.#calendarData) : '';
+      const duration = fd.duration ?? 1;
+      if (conditionSummary && duration > 1) conditionSummary += ` (${duration} ${localize('CALENDARIA.Common.UnitDays')})`;
+      return {
+        key: fd.linkedFestival?.festivalKey ?? stub.id,
+        noteId: stub.id,
+        name: stub.name,
+        icon: fd.icon || '',
+        color: fd.color || '',
+        countsForWeekday: fd.linkedFestival?.countsForWeekday ?? true,
+        conditionSummary
+      };
     });
     const currentFirstWeekday = this.#calendarData.years.firstWeekday ?? 0;
     context.weekdayOptions = daysArr.map(([, day], idx) => ({ value: idx, label: day.name, selected: idx === currentFirstWeekday }));
@@ -968,7 +977,6 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#updateObjectFromFormData(data, 'weekdays', this.#calendarData.days.values, ['name', 'abbreviation', 'isRestDay']);
     this.#updateSeasonsFromFormData(data);
     this.#updateErasFromFormData(data);
-    this.#updateFestivalsFromFormData(data);
     this.#updateMoonsFromFormData(data);
     this.#updateCyclesFromFormData(data);
     if (!this.#calendarData.amPmNotation) this.#calendarData.amPmNotation = {};
@@ -1027,20 +1035,6 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       }
       delete targetObj[itemKey];
       targetObj[itemKey] = item;
-    }
-  }
-
-  /**
-   * Update festivals from form data.
-   * @param {object} data - Form data
-   * @private
-   */
-  #updateFestivalsFromFormData(data) {
-    for (const [key, festival] of Object.entries(this.#calendarData.festivals)) {
-      const nameKey = `festivals.${key}.name`;
-      if (nameKey in data && data[nameKey]) festival.name = data[nameKey];
-      const formKey = `festivals.${key}.countsForWeekday`;
-      if (formKey in data) festival.countsForWeekday = !data[formKey];
     }
   }
 
@@ -1745,16 +1739,21 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Add a new festival. Saves the calendar, creates the note from template, opens the sheet.
+   * Add a new festival note for the calendar. Opens the note sheet for editing.
    * @param {Event} _event - Click event
-   * @param {HTMLElement} target - Target element
+   * @param {HTMLElement} _target - Target element
    */
-  static async #onAddFestival(_event, target) {
-    const afterKey = target.dataset.key;
-    const totalFestivals = Object.keys(this.#calendarData.festivals ?? {}).length + 1;
+  static async #onAddFestival(_event, _target) {
+    if (!this.#calendarId) {
+      ui.notifications.warn('CALENDARIA.Editor.Festival.SaveFirst', { localize: true });
+      return;
+    }
+    const calendar = CalendarManager.getCalendar(this.#calendarId);
+    if (!calendar) return;
+    const totalFestivals = FestivalManager.getFestivalNotes(this.#calendarId).length + 1;
     const newKey = foundry.utils.randomID();
     const today = game.time?.components ?? { month: 0, dayOfMonth: 0 };
-    const newFestival = {
+    const seed = {
       name: format('CALENDARIA.Editor.Default.FestivalName', { num: totalFestivals }),
       month: today.month ?? 0,
       dayOfMonth: today.dayOfMonth ?? 0,
@@ -1763,32 +1762,20 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       color: '',
       icon: ''
     };
-    if (afterKey) this.#calendarData.festivals = this.#insertAfterKey(this.#calendarData.festivals, afterKey, newKey, newFestival);
-    else this.#calendarData.festivals[newKey] = newFestival;
-    this.#isDirty = true;
-    if (this.#isEditing && this.#calendarId) {
-      this.#calendarData.days.daysPerYear = this.#calculateDaysPerYear();
-      let calendar;
-      if (isBundledCalendar(this.#calendarId) || CalendarManager.hasDefaultOverride(this.#calendarId)) calendar = await CalendarManager.saveDefaultOverride(this.#calendarId, this.#calendarData);
-      else calendar = await CalendarManager.updateCustomCalendar(this.#calendarId, this.#calendarData);
-      if (calendar) {
-        const page = await FestivalManager.createFestivalNote(this.#calendarId, newKey, newFestival, calendar);
-        if (page) page.sheet.render(true, { mode: 'edit', forceMode: 'edit' });
-      }
-    }
+    const page = await FestivalManager.createFestivalNote(this.#calendarId, newKey, seed, calendar);
+    if (page) page.sheet.render(true, { mode: 'edit', forceMode: 'edit' });
     this.render();
   }
 
   /**
-   * Remove a festival. Deletes the note and removes the definition.
+   * Remove a festival note from the calendar.
    * @param {Event} _event - Click event
    * @param {HTMLElement} target - Target element
    */
   static async #onRemoveFestival(_event, target) {
     const key = target.dataset.key;
-    if (this.#calendarId) await FestivalManager.deleteFestivalNote(this.#calendarId, key);
-    delete this.#calendarData.festivals[key];
-    this.#isDirty = true;
+    if (!this.#calendarId || !key) return;
+    await FestivalManager.deleteFestivalNote(this.#calendarId, key);
     this.render();
   }
 
@@ -1810,37 +1797,26 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Refresh a festival note back to its template defaults.
+   * Delete all festival notes for this calendar and re-seed from the bundled template.
    * @param {Event} _event - Click event
-   * @param {HTMLElement} target - Target element
+   * @param {HTMLElement} _target - Target element
    */
-  static async #onRefreshFestival(_event, target) {
-    const key = target.dataset.key;
+  static async #onResetFestivals(_event, _target) {
     if (!this.#calendarId) return;
-    const festival = this.#calendarData.festivals?.[key];
-    if (!festival) return;
+    const confirmed = await foundry.applications.api.DialogV2.confirm({
+      window: { title: localize('CALENDARIA.Editor.Festival.ResetTitle') },
+      content: `<p>${localize('CALENDARIA.Editor.Festival.ResetConfirm')}</p>`,
+      rejectClose: false,
+      modal: true
+    });
+    if (!confirmed) return;
     const calendar = CalendarManager.getCalendar(this.#calendarId);
     if (!calendar) return;
-    const refreshed = await FestivalManager.refreshFestivalNote(this.#calendarId, key, festival, calendar);
-    if (refreshed) ui.notifications.info(localize('CALENDARIA.Editor.Festival.Refreshed'));
-  }
-
-  /**
-   * Sync festival definition names to their linked note titles.
-   * @param {string} calendarId - The calendar ID
-   * @private
-   */
-  async #syncFestivalNamesToNotes(calendarId) {
-    for (const [key, festival] of Object.entries(this.#calendarData.festivals)) {
-      const stub = FestivalManager.getFestivalNoteByKey(calendarId, key);
-      if (!stub || stub.name === festival.name) continue;
-      NoteManager.enableSuppressFestivalNameSync();
-      try {
-        await NoteManager.updateNote(stub.id, { name: festival.name });
-      } finally {
-        NoteManager.disableSuppressFestivalNameSync();
-      }
-    }
+    await FestivalManager.deleteAllFestivalNotes(this.#calendarId);
+    await FestivalManager.clearSeedRecord(this.#calendarId);
+    const created = await FestivalManager.seedFestivalNotes(this.#calendarId, calendar);
+    ui.notifications.info(format('CALENDARIA.Editor.Festival.ResetDone', { count: created }));
+    this.render();
   }
 
   /**
@@ -2432,10 +2408,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       }
       if (calendar) {
         this.#isDirty = false;
-        if (calendarId) {
-          await FestivalManager.ensureFestivalNotes(calendarId, calendar);
-          await this.#syncFestivalNamesToNotes(calendarId);
-        }
+        if (calendarId) await FestivalManager.seedFestivalNotes(calendarId, calendar);
         log(3, `Checking for pending notes: ${this.#pendingNotes?.length || 0}, importerId: ${this.#pendingImporterId}, calendarId: ${calendarId}`);
         if (this.#pendingNotes?.length > 0 && this.#pendingImporterId && calendarId) {
           const importer = createImporter(this.#pendingImporterId);

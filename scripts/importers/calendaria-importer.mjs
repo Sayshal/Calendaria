@@ -5,7 +5,6 @@
  */
 
 import { SETTINGS } from '../constants.mjs';
-import { FestivalManager } from '../festivals/_module.mjs';
 import { NoteManager, getAllPresets, sanitizeNoteData, upsertBundledCustomPreset } from '../notes/_module.mjs';
 import { log } from '../utils/_module.mjs';
 import BaseImporter from './base-importer.mjs';
@@ -98,8 +97,6 @@ export default class CalendariaImporter extends BaseImporter {
     const monthValues = calendarData.months?.values;
     if (!calendarData.name || !monthValues || !Object.values(monthValues).length) throw new Error('Invalid Calendaria export format');
     log(3, `Transforming Calendaria export: ${calendarData.name}`);
-    const bundleNotes = data.notes || calendarData.notes;
-    if (calendarData.festivals && Array.isArray(bundleNotes)) FestivalManager.applyFestivalDatesToCalendarData(calendarData, bundleNotes);
     this.#bundledCustomPresets = data.customPresets || data.settings?.[SETTINGS.CUSTOM_PRESETS] || [];
     const metadata = { ...calendarData.metadata };
     delete metadata.id;

@@ -14,12 +14,14 @@ const ContextMenu = foundry.applications.ux.ContextMenu.implementation;
 
 /**
  * True if the icon value is an image path rather than a font-awesome class.
- * @param icon
+ * @param {string} icon - Icon value from a note flag.
+ * @returns {boolean}
  */
 const isImageIcon = (icon) => typeof icon === 'string' && !icon.startsWith('fa') && (icon.includes('/') || icon.includes('.'));
 /**
  * True if the icon value is an SVG image (tintable via drop-shadow).
- * @param icon
+ * @param {string} icon - Icon value from a note flag.
+ * @returns {boolean}
  */
 const isSvgIcon = (icon) => typeof icon === 'string' && /\.svg(\?.*)?$/i.test(icon);
 

@@ -4,15 +4,12 @@
  * @author Tyler
  */
 
-import { CalendarManager, isBundledCalendar } from '../calendar/_module.mjs';
-import { DISPLAY_STYLES, NOTE_VISIBILITY } from '../constants.mjs';
+import { DISPLAY_STYLES, MODULE, NOTE_VISIBILITY, SETTINGS } from '../constants.mjs';
 import { NoteManager } from '../notes/_module.mjs';
 import { localize, log } from '../utils/_module.mjs';
 import { getMidpoint } from '../utils/calendar-math.mjs';
 
-/**
- * Manages the lifecycle of festival notes — creation, deletion, and template refresh.
- */
+/** Creates and manages festival journal notes. */
 export default class FestivalManager {
   /**
    * Create a single festival note from a template definition.
@@ -45,134 +42,43 @@ export default class FestivalManager {
   }
 
   /**
-   * Refresh a festival note back to its template defaults.
-   * @param {string} calendarId - Calendar ID
-   * @param {string} key - Festival key
-   * @param {object} festival - Festival definition (template)
-   * @param {object} calendar - Calendar instance
-   * @returns {Promise<boolean>} True if refreshed
-   */
-  static async refreshFestivalNote(calendarId, key, festival, calendar) {
-    const stub = this.getFestivalNoteByKey(calendarId, key);
-    if (!stub) return false;
-    const name = festival.name ? localize(festival.name) : 'Festival';
-    const content = festival.description ? `<p>${localize(festival.description)}</p>` : '';
-    const festivalDuration = festival.duration ?? 1;
-    const conditionTree = festival.conditionTree ?? this.#buildFestivalConditionTree(festival, calendar);
-    const startDate = this.#getFestivalStartDate(festival, game.time.components, calendar);
-    const noteData = {
-      color: festival.color || '#f0a500',
-      icon: festival.icon ? `fas ${festival.icon}` : 'fas fa-masks-theater',
-      iconType: 'fontawesome',
-      hasDuration: festivalDuration > 1,
-      duration: festivalDuration,
-      displayStyle: festival.displayStyle || DISPLAY_STYLES.BANNER,
-      conditionTree,
-      allDay: festival.allDay ?? true,
-      startDate,
-      endDate: { ...startDate }
-    };
-    await NoteManager.updateNote(stub.id, { name, content, noteData });
-    log(3, `Refreshed festival note "${key}" to template defaults`);
-    return true;
-  }
-
-  /**
-   * Create missing festival notes for a calendar. Does NOT update or delete existing notes.
+   * Seed missing festival notes for a calendar from its `calendar.festivals` template.
    * @param {string} calendarId - Calendar ID
    * @param {object} calendar - Calendar instance
    * @returns {Promise<number>} Number of notes created
    */
-  static async ensureFestivalNotes(calendarId, calendar) {
-    if (!game.user.isGM || !calendarId || !calendar) return 0;
+  static async seedFestivalNotes(calendarId, calendar) {
+    if (!game.user?.isGM || !calendarId || !calendar) return 0;
+    const seeded = game.settings.get(MODULE.ID, SETTINGS.SEEDED_CALENDARS) ?? new Set();
+    if (seeded.has(calendarId)) return 0;
     const festivals = calendar.festivals ?? {};
     const festivalEntries = Object.entries(festivals);
-    if (!festivalEntries.length) return 0;
-    const existingNotes = this.getFestivalNotes(calendarId);
-    const seenKeys = new Map();
-    for (const stub of existingNotes) {
-      const key = stub.flagData.linkedFestival?.festivalKey;
-      if (!key) continue;
-      if (seenKeys.has(key)) {
-        NoteManager.enableBypassDeleteProtection();
-        await NoteManager.deleteNote(stub.id);
-        NoteManager.disableBypassDeleteProtection();
-        log(3, `Removed duplicate festival note "${key}" (${stub.id})`);
-      } else {
-        seenKeys.set(key, stub);
-      }
-    }
+    const existing = new Set(this.getFestivalNotes(calendarId).map((s) => s.flagData?.linkedFestival?.festivalKey));
     let created = 0;
     for (const [key, festival] of festivalEntries) {
-      if (seenKeys.has(key)) continue;
+      if (existing.has(key)) continue;
       await this.createFestivalNote(calendarId, key, festival, calendar);
       created++;
     }
-    if (created) log(3, `Created ${created} missing festival notes for ${calendarId}`);
+    const next = seeded instanceof Set ? new Set(seeded) : new Set(seeded);
+    next.add(calendarId);
+    await game.settings.set(MODULE.ID, SETTINGS.SEEDED_CALENDARS, next);
+    if (created) log(3, `Seeded ${created} festival notes for ${calendarId}`);
     return created;
   }
 
   /**
-   * Patch a calendar data object's festival definitions in-place.
-   * @param {object} calendarData - Mutable calendarData
-   * @param {object[]} notes - Serialized note array (entries with `system.linkedFestival`)
-   * @returns {number} Number of festival definitions patched
-   */
-  static applyFestivalDatesToCalendarData(calendarData, notes) {
-    if (!calendarData?.festivals || !Array.isArray(notes)) return 0;
-    let patched = 0;
-    for (const note of notes) {
-      const linked = note?.system?.linkedFestival;
-      if (!linked?.festivalKey) continue;
-      const festival = calendarData.festivals[linked.festivalKey];
-      if (!festival) continue;
-      const tree = note.system.conditionTree ?? null;
-      const derived = this.deriveDateFromConditionTree(tree);
-      const nextMonth = derived?.month ?? note.system.startDate?.month ?? festival.month ?? 0;
-      const nextDay = derived?.dayOfMonth ?? note.system.startDate?.dayOfMonth ?? festival.dayOfMonth ?? 0;
-      festival.month = nextMonth;
-      festival.dayOfMonth = nextDay;
-      if (tree) festival.conditionTree = tree;
-      patched++;
-    }
-    return patched;
-  }
-
-  /**
-   * Walk all festival notes for a calendar and write each note's date.
+   * Clear the seed record for a calendar so the next seedFestivalNotes call runs again.
    * @param {string} calendarId - Calendar ID
-   * @returns {Promise<number>} Number of festivals updated
+   * @returns {Promise<void>}
    */
-  static async syncFestivalDefinitionsFromNotes(calendarId) {
-    if (!game.user.isGM) return 0;
-    const calendar = CalendarManager.getCalendar(calendarId);
-    if (!calendar?.festivals) return 0;
-    const data = calendar.toObject();
-    let changed = 0;
-    for (const stub of this.getFestivalNotes(calendarId)) {
-      const key = stub.flagData?.linkedFestival?.festivalKey;
-      const festival = key ? data.festivals[key] : null;
-      if (!festival) continue;
-      const page = NoteManager.getFullNote(stub.id);
-      const pageSystem = page?.system?.toObject?.() ?? page?.system ?? stub.flagData;
-      if (!pageSystem) continue;
-      const newTree = pageSystem.conditionTree ?? null;
-      const derived = newTree ? this.deriveDateFromConditionTree(newTree) : null;
-      const nextMonth = derived?.month ?? pageSystem.startDate?.month ?? festival.month ?? 0;
-      const nextDay = derived?.dayOfMonth ?? pageSystem.startDate?.dayOfMonth ?? festival.dayOfMonth ?? 0;
-      const treeUnchanged = JSON.stringify(festival.conditionTree ?? null) === JSON.stringify(newTree);
-      if (festival.month === nextMonth && festival.dayOfMonth === nextDay && treeUnchanged) continue;
-      festival.month = nextMonth;
-      festival.dayOfMonth = nextDay;
-      festival.conditionTree = newTree;
-      changed++;
-    }
-    if (changed) {
-      if (isBundledCalendar(calendarId)) await CalendarManager.saveDefaultOverride(calendarId, data);
-      else await CalendarManager.updateCustomCalendar(calendarId, data);
-      log(3, `Synced ${changed} festival definitions from notes for ${calendarId}`);
-    }
-    return changed;
+  static async clearSeedRecord(calendarId) {
+    if (!game.user?.isGM || !calendarId) return;
+    const seeded = game.settings.get(MODULE.ID, SETTINGS.SEEDED_CALENDARS) ?? new Set();
+    if (!seeded.has(calendarId)) return;
+    const next = new Set(seeded);
+    next.delete(calendarId);
+    await game.settings.set(MODULE.ID, SETTINGS.SEEDED_CALENDARS, next);
   }
 
   /**
@@ -206,7 +112,7 @@ export default class FestivalManager {
   /**
    * Get a festival note by its festival key.
    * @param {string} calendarId - Calendar ID
-   * @param {string} festivalKey - Festival key in the calendar's festivals object
+   * @param {string} festivalKey - Festival key
    * @returns {object|null} Note stub or null
    */
   static getFestivalNoteByKey(calendarId, festivalKey) {
@@ -214,7 +120,29 @@ export default class FestivalManager {
   }
 
   /**
-   * Map a calendar festival definition to note system data (used for creation).
+   * Extract a fixed { month, dayOfMonth } from a condition tree, unwrapping leap-year guards.
+   * @param {object|null} tree - Condition tree
+   * @returns {{month: number, dayOfMonth: number}|null} 0-indexed date or null
+   */
+  static deriveDateFromConditionTree(tree) {
+    if (!tree || typeof tree !== 'object') return null;
+    const inner = this.#unwrapLeapYearGroup(tree);
+    if (!inner || inner.type !== 'group' || inner.mode !== 'and' || !Array.isArray(inner.children)) return null;
+    let month = null;
+    let day = null;
+    for (const child of inner.children) {
+      if (child?.type !== 'condition' || child.op !== '==') continue;
+      const value = Number(child.value);
+      if (!Number.isFinite(value)) continue;
+      if (child.field === 'month') month = value - 1;
+      else if (child.field === 'day') day = value - 1;
+    }
+    if (month == null || day == null || month < 0 || day < 0) return null;
+    return { month, dayOfMonth: day };
+  }
+
+  /**
+   * Map a calendar festival seed to note system data.
    * @param {string} calendarId - Calendar ID
    * @param {string} festivalKey - Festival key
    * @param {object} festival - Festival definition
@@ -231,7 +159,7 @@ export default class FestivalManager {
       endDate: { ...startDate },
       allDay: festival.allDay ?? true,
       repeat: 'never',
-      conditionTree: festival.conditionTree ?? this.#buildFestivalConditionTree(festival, calendar),
+      conditionTree: festival.conditionTree ?? this.#buildFestivalConditionTree(festival),
       categories: [],
       color: festival.color || '#f0a500',
       icon: festival.icon ? `fas ${festival.icon}` : 'fas fa-masks-theater',
@@ -243,15 +171,12 @@ export default class FestivalManager {
       reminderType: festival.reminderType || 'none',
       reminderOffset: festival.reminderOffset ?? 0,
       silent: festival.silent ?? true,
-      linkedFestival: {
-        calendarId,
-        festivalKey
-      }
+      linkedFestival: { calendarId, festivalKey, countsForWeekday: festival.countsForWeekday ?? true, leapYearOnly: !!festival.leapYearOnly, leapDuration: festival.leapDuration ?? null }
     };
   }
 
   /**
-   * Compute a start date for the festival note (used as the note's anchor date).
+   * Compute a seed-time start date for a festival note.
    * @param {object} festival - Festival definition
    * @param {object} currentDate - Current game time components
    * @param {object} calendar - Calendar instance
@@ -285,31 +210,9 @@ export default class FestivalManager {
   }
 
   /**
-   * Extract a fixed { month, dayOfMonth }.
-   * @param {object|null} tree - Condition tree from a festival or note
-   * @returns {{month: number, dayOfMonth: number}|null} 0-indexed date or null if the tree isn't a fixed-date pattern
-   */
-  static deriveDateFromConditionTree(tree) {
-    if (!tree || typeof tree !== 'object') return null;
-    const inner = this.#unwrapLeapYearGroup(tree);
-    if (!inner || inner.type !== 'group' || inner.mode !== 'and' || !Array.isArray(inner.children)) return null;
-    let month = null;
-    let day = null;
-    for (const child of inner.children) {
-      if (child?.type !== 'condition' || child.op !== '==') continue;
-      const value = Number(child.value);
-      if (!Number.isFinite(value)) continue;
-      if (child.field === 'month') month = value - 1;
-      else if (child.field === 'day') day = value - 1;
-    }
-    if (month == null || day == null || month < 0 || day < 0) return null;
-    return { month, dayOfMonth: day };
-  }
-
-  /**
    * If the tree is `isLeapYear AND <inner>`, return the inner group; otherwise return the tree as-is.
    * @param {object} tree - Condition tree
-   * @returns {object|null} The inner group if leap-year wrapped, the original tree otherwise
+   * @returns {object|null} Inner group or the original tree.
    * @private
    */
   static #unwrapLeapYearGroup(tree) {
@@ -326,7 +229,7 @@ export default class FestivalManager {
    * @param {object|null} tree - Condition tree
    * @param {object} currentDate - Current date components
    * @param {object} calendar - Calendar instance
-   * @returns {{month: number, dayOfMonth: number}|null} 0-indexed date or null
+   * @returns {{month: number, dayOfMonth: number}|null} 0-indexed resolved date or null.
    * @private
    */
   static #resolveAstronomicalDate(tree, currentDate, calendar) {
@@ -399,13 +302,12 @@ export default class FestivalManager {
   }
 
   /**
-   * Build a condition tree for yearly festival recurrence
+   * Build a condition tree for yearly festival recurrence from a seed definition.
    * @param {object} festival - Festival definition
-   * @param {object} _calendar - Calendar instance (reserved for future)
-   * @returns {object} Condition tree
+   * @returns {object} Condition tree representing the recurrence pattern.
    * @private
    */
-  static #buildFestivalConditionTree(festival, _calendar) {
+  static #buildFestivalConditionTree(festival) {
     let dateCondition;
     if (festival.dayOfYear != null) {
       dateCondition = { type: 'condition', field: 'dayOfYear', op: '==', value: festival.dayOfYear + 1 };

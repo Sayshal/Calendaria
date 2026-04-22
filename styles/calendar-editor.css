@@ -172,7 +172,13 @@
     }
 
     .festivals-list {
-      --list-columns: auto 2fr 3fr auto auto;
+      --list-columns: auto 2fr 3fr auto;
+    }
+
+    .festival-toolbar {
+      gap: 0.5rem;
+      display: flex;
+      margin-bottom: 0.5rem;
     }
 
     .festival-icon-display {

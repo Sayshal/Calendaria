@@ -3,6 +3,20 @@
     <legend data-tooltip aria-label="{{localize 'CALENDARIA.Editor.SectionTooltip.Festivals'}}">
       {{localize "CALENDARIA.Common.Festivals"}}
     </legend>
+    <div class="festival-toolbar">
+      <button type="button" data-action="addFestival" {{#unless festivalsCanEditNotes}}disabled{{/unless}} data-tooltip
+        aria-label="{{localize 'CALENDARIA.Editor.Tooltip.AddFestival'}}">
+        <i class="fas fa-plus"></i>
+        {{localize "CALENDARIA.Editor.AddFestival"}}
+      </button>
+      {{#if festivalsIsBundled}}
+        <button type="button" data-action="resetFestivals" {{#unless festivalsCanEditNotes}}disabled{{/unless}}
+          data-tooltip aria-label="{{localize 'CALENDARIA.Editor.Festival.ResetTooltip'}}">
+          <i class="fas fa-rotate-left"></i>
+          {{localize "CALENDARIA.Editor.Festival.ResetLabel"}}
+        </button>
+      {{/if}}
+    </div>
     {{#if festivalsWithNav.length}}
       <div class="items-list festivals-list">
         {{#each festivalsWithNav}}
@@ -12,32 +26,13 @@
                 style="color: {{#if this.color}}{{this.color}}{{else}}#d4af37{{/if}}">
                 <i class="{{#if this.icon}}fas {{this.icon}}{{else}}fas fa-star{{/if}}"></i>
               </span>
-              <input type="text" name="festivals.{{this.key}}.name" value="{{this.name}}"
-                class="col-name festival-name">
+              <span class="col-name festival-name">{{this.name}}</span>
               <span class="col-schedule hint">{{this.conditionSummary}}</span>
-
-              <label class="col-weekday checkbox" data-tooltip
-                aria-label="{{localize 'CALENDARIA.Editor.Tooltip.CountsForWeekday'}}">
-                <input type="checkbox" name="festivals.{{this.key}}.countsForWeekday" {{#if (eq
-            this.countsForWeekday
-            false)}}checked{{/if}}>
-                {{localize "CALENDARIA.Editor.Field.CountsForWeekday"}}
-              </label>
-
               <div class="item-controls col-controls">
                 <button type="button" data-action="editFestivalNote" data-key="{{this.key}}" data-tooltip
                   {{#unless ../festivalsCanEditNotes}}disabled{{/unless}}
                   aria-label="{{#if ../festivalsCanEditNotes}}{{localize 'CALENDARIA.Editor.Tooltip.EditFestival'}}{{else}}{{localize 'CALENDARIA.Editor.Tooltip.EditFestivalDisabled'}}{{/if}}">
                   <i class="fas fa-pen-to-square"></i>
-                </button>
-                <button type="button" data-action="refreshFestival" data-key="{{this.key}}" data-tooltip
-                  {{#unless ../festivalsCanEditNotes}}disabled{{/unless}}
-                  aria-label="{{#if ../festivalsCanEditNotes}}{{localize 'CALENDARIA.Editor.Tooltip.RefreshFestival'}}{{else}}{{localize 'CALENDARIA.Editor.Tooltip.RefreshFestivalDisabled'}}{{/if}}">
-                  <i class="fas fa-sync"></i>
-                </button>
-                <button type="button" data-action="addFestival" data-key="{{this.key}}" data-tooltip
-                  aria-label="{{localize 'CALENDARIA.Editor.Tooltip.AddFestival'}}">
-                  <i class="fas fa-plus"></i>
                 </button>
                 <button type="button" data-action="removeFestival" data-key="{{this.key}}" data-tooltip
                   aria-label="{{localize 'CALENDARIA.Editor.Tooltip.RemoveFestival'}}">
@@ -51,10 +46,6 @@
     {{else}}
       <div class="empty-list">
         <p>{{localize "CALENDARIA.Editor.NoFestivals"}}</p>
-        <button type="button" data-action="addFestival" data-key="">
-          <i class="fas fa-plus"></i>
-          {{localize "CALENDARIA.Editor.AddFestival"}}
-        </button>
       </div>
     {{/if}}
   </fieldset>

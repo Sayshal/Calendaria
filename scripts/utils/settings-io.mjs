@@ -5,7 +5,6 @@
 
 import { CalendarManager } from '../calendar/_module.mjs';
 import { MODULE, SETTINGS } from '../constants.mjs';
-import { FestivalManager } from '../festivals/_module.mjs';
 import { getAllPresets, sanitizeNoteData, upsertBundledCustomPreset } from '../notes/_module.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import { format, localize } from './localization.mjs';
@@ -266,7 +265,6 @@ export async function exportSettings() {
     exportData.settings[key] = game.settings.get(MODULE.ID, key);
   }
   if (includeCalendar && activeCalendar) {
-    if (calendarId) await FestivalManager.syncFestivalDefinitionsFromNotes(calendarId);
     const refreshedCalendar = (calendarId && CalendarManager.getCalendar(calendarId)) || activeCalendar;
     const calendarData = refreshedCalendar.toObject();
     const currentDate = CalendarManager.getCurrentDateTime();
@@ -377,11 +375,6 @@ export async function importSettings(onComplete) {
       if (hasCalendarData && doImportCalendar) {
         try {
           const calendarData = importData.calendarData;
-          try {
-            if (hasNotes && calendarData.festivals) FestivalManager.applyFestivalDatesToCalendarData(calendarData, importData.notes);
-          } catch (festivalError) {
-            log(1, 'Festival date patching failed (continuing import):', festivalError);
-          }
           const calendarId = calendarData.name
             .toLowerCase()
             .replace(/[^\da-z]+/g, '-')

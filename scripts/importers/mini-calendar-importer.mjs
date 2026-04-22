@@ -6,6 +6,7 @@
 
 import { CalendarManager } from '../calendar/_module.mjs';
 import { ASSETS } from '../constants.mjs';
+import { FestivalManager } from '../festivals/_module.mjs';
 import { NoteManager } from '../notes/_module.mjs';
 import { format, localize, log } from '../utils/_module.mjs';
 import BaseImporter from './base-importer.mjs';
@@ -520,28 +521,19 @@ export default class MiniCalendarImporter extends BaseImporter {
     log(3, `Starting festival import: ${festivals.length} festivals to calendar ${calendarId}`);
     const calendar = CalendarManager.getCalendar(calendarId);
     if (!calendar) return { success: false, count: 0, errors: [`Calendar ${calendarId} not found`] };
-    const existingFestivals = calendar.festivals ? { ...calendar.festivals } : {};
-    const newFestivals = [];
+    let created = 0;
     for (const festival of festivals) {
       try {
-        const festivalData = { name: festival.name, month: festival.startDate.month ?? 0, dayOfMonth: festival.startDate.day ?? 0 };
-        newFestivals.push(festivalData);
+        const festivalDef = { name: festival.name, month: festival.startDate.month ?? 0, dayOfMonth: festival.startDate.day ?? 0 };
+        await FestivalManager.createFestivalNote(calendarId, foundry.utils.randomID(), festivalDef, calendar);
+        created++;
       } catch (error) {
         errors.push(`Error processing festival "${festival.name}": ${error.message}`);
         log(1, `Error processing festival "${festival.name}":`, error);
       }
     }
-    if (newFestivals.length > 0) {
-      try {
-        for (const festival of newFestivals) existingFestivals[foundry.utils.randomID()] = festival;
-        await CalendarManager.updateCustomCalendar(calendarId, { festivals: existingFestivals });
-        log(3, `Festival import complete: ${newFestivals.length} festivals added`);
-      } catch (error) {
-        errors.push(`Error saving festivals: ${error.message}`);
-        log(1, 'Error saving festivals:', error);
-      }
-    }
-    return { success: errors.length === 0, count: newFestivals.length, errors };
+    log(3, `Festival import complete: ${created} festival notes created`);
+    return { success: errors.length === 0, count: created, errors };
   }
 
   /**

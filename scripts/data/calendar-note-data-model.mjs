@@ -112,7 +112,10 @@ export class CalendarNoteDataModel extends foundry.abstract.TypeDataModel {
       linkedFestival: new fields.SchemaField(
         {
           calendarId: new fields.StringField({ required: true, blank: false }),
-          festivalKey: new fields.StringField({ required: true, blank: false })
+          festivalKey: new fields.StringField({ required: true, blank: false }),
+          countsForWeekday: new fields.BooleanField({ initial: true }),
+          leapYearOnly: new fields.BooleanField({ initial: false }),
+          leapDuration: new fields.NumberField({ integer: true, min: 1, nullable: true, initial: null })
         },
         { nullable: true, initial: null }
       ),

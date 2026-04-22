@@ -173,6 +173,7 @@ export const SETTINGS = {
   REST_ADVANCE_MODE: 'restAdvanceMode',
   REST_FIXED_HOURS: 'restFixedHours',
   SAVED_TIMEPOINTS: 'savedTimepoints',
+  SEEDED_CALENDARS: 'seededCalendars',
   SHOW_BIG_CAL: 'showBigCal',
   SHOW_CALENDAR_HUD: 'showCalendarHUD',
   SHOW_CHRONICLE: 'showChronicle',

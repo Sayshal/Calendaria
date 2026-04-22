@@ -1161,6 +1161,8 @@ export default class CalendariaSettings {
       zoneTempBlankInheritanceMigrationComplete: { name: 'Zone Temp Blank Inheritance Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       festivalNoteYearZeroMigrationComplete: { name: 'Festival Note Year Zero Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       noteDurationNormalizationMigrationComplete: { name: 'Note Duration Normalization Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
+      festivalNotesSourceOfTruthMigrationComplete: { name: 'Festival Notes Source Of Truth Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
+      [SETTINGS.SEEDED_CALENDARS]: { name: 'Seeded Calendars', scope: 'world', config: false, type: new SetField(new StringField()) },
       [SETTINGS.CLOCK_LOCKED]: { name: 'Clock Locked', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.SYNC_CLOCK_PAUSE]: {
         name: 'CALENDARIA.Settings.SyncClockPause.Name',

@@ -97,7 +97,7 @@ Hooks.once('ready', async () => {
   await NoteManager.initialize();
   if (game.user.isGM) {
     const activeCalendar = CalendarManager.getActiveCalendar();
-    if (activeCalendar?.metadata?.id) await FestivalManager.ensureFestivalNotes(activeCalendar.metadata.id, activeCalendar);
+    if (activeCalendar?.metadata?.id) await FestivalManager.seedFestivalNotes(activeCalendar.metadata.id, activeCalendar);
   }
   TimeTracker.initialize();
   TimeClock.initialize();

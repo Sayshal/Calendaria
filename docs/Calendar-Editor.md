@@ -371,14 +371,14 @@ A known date when the moon was at a specific phase. The moon's phase on any date
 
 Define the phases of the lunar cycle. Each phase covers a percentage range of the cycle.
 
-| Column      | Description                                                           |
-| ----------- | --------------------------------------------------------------------- |
-| **Icon**    | Click to pick a phase icon (SVG or emoji)                                                                                   |
-| **Phase**   | Phase name (e.g., "Full Moon")                                                                                              |
-| **Rising**  | Name for the transitional sub-phase as the moon approaches this phase                                                       |
-| **Fading**  | Name for the transitional sub-phase as the moon leaves this phase                                                           |
-| **Start %** | Percentage through the cycle when this phase begins (fixed mode only)                                                       |
-| **End %**   | Percentage through the cycle when this phase ends (fixed mode only)                                                         |
+| Column      | Description                                                                                                                                                                                                |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Icon**    | Click to pick a phase icon (SVG or emoji)                                                                                                                                                                  |
+| **Phase**   | Phase name (e.g., "Full Moon")                                                                                                                                                                             |
+| **Rising**  | Name for the transitional sub-phase as the moon approaches this phase                                                                                                                                      |
+| **Fading**  | Name for the transitional sub-phase as the moon leaves this phase                                                                                                                                          |
+| **Start %** | Percentage through the cycle when this phase begins (fixed mode only)                                                                                                                                      |
+| **End %**   | Percentage through the cycle when this phase ends (fixed mode only)                                                                                                                                        |
 | **Weight**  | Relative likelihood of this phase in **Randomized** mode (minimum `1`). Replaces Start %/End % columns when mode is set to Randomized. Higher weight means the phase occupies a larger share of the cycle. |
 
 ### Phase Slider

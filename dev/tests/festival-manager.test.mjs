@@ -3,9 +3,6 @@ import { CONDITION_FIELDS, DISPLAY_STYLES, NOTE_VISIBILITY } from '../../scripts
 import FestivalManager from '../../scripts/festivals/festival-manager.mjs';
 import NoteManager from '../../scripts/notes/note-manager.mjs';
 
-vi.mock('../../scripts/calendar/calendar-loader.mjs', () => ({
-  isBundledCalendar: vi.fn(() => false)
-}));
 vi.mock('../../scripts/utils/localization.mjs', () => ({
   localize: (key) => key,
   format: (key, data) => {
@@ -13,19 +10,6 @@ vi.mock('../../scripts/utils/localization.mjs', () => ({
     for (const [k, v] of Object.entries(data || {})) result = result.replace(`{${k}}`, String(v));
     return result;
   }
-}));
-vi.mock('../../scripts/calendar/calendar-manager.mjs', async () => {
-  const { default: CalendarManager } = await import('../__mocks__/calendar-manager.mjs');
-  return { default: CalendarManager };
-});
-vi.mock('../../scripts/weather/weather-manager.mjs', async () => {
-  const { default: WeatherManager } = await import('../__mocks__/weather-manager.mjs');
-  return { default: WeatherManager };
-});
-vi.mock('../../scripts/notes/recurrence.mjs', () => ({
-  resolveComputedDate: vi.fn(() => null),
-  isRecurringMatch: vi.fn(() => false),
-  getOccurrencesInRange: vi.fn(() => [])
 }));
 vi.mock('../../scripts/notes/note-manager.mjs', () => {
   const notes = new Map();
@@ -40,30 +24,38 @@ vi.mock('../../scripts/notes/note-manager.mjs', () => {
         notes.set(id, stub);
         return { id, name, system: noteData };
       }),
-      updateNote: vi.fn(async (pageId, updates) => {
-        const stub = notes.get(pageId);
-        if (stub && updates.noteData) stub.flagData = { ...stub.flagData, ...updates.noteData };
-        if (stub && updates.name) stub.name = updates.name;
-        if (stub && updates.content !== undefined) stub.content = updates.content;
-        return stub;
-      }),
       deleteNote: vi.fn(async (pageId) => {
         notes.delete(pageId);
         return true;
       }),
       enableBypassDeleteProtection: vi.fn(),
       disableBypassDeleteProtection: vi.fn(),
-      _reset: () => { notes.clear(); idCounter = 0; },
+      _reset: () => {
+        notes.clear();
+        idCounter = 0;
+      },
       _getNotes: () => notes
     }
   };
 });
 
-globalThis.game = { user: { isGM: true }, time: { components: { year: 1492, month: 0, dayOfMonth: 0, hour: 12, minute: 0 } } };
+const seededSet = new Set();
+globalThis.game = {
+  user: { isGM: true },
+  time: { components: { year: 1492, month: 0, dayOfMonth: 0, hour: 12, minute: 0 } },
+  settings: {
+    get: vi.fn(() => seededSet),
+    set: vi.fn(async (_module, _key, value) => {
+      seededSet.clear();
+      for (const v of value) seededSet.add(v);
+    })
+  }
+};
 
 describe('FestivalManager', () => {
   beforeEach(() => {
     NoteManager._reset();
+    seededSet.clear();
     vi.clearAllMocks();
   });
 
@@ -74,11 +66,14 @@ describe('FestivalManager', () => {
       const notes = NoteManager.getAllNotes();
       expect(notes).toHaveLength(1);
       const noteData = notes[0].flagData;
-      expect(noteData.linkedFestival).toEqual({ calendarId: 'harptos', festivalKey: 'fest1' });
+      expect(noteData.linkedFestival).toEqual({ calendarId: 'harptos', festivalKey: 'fest1', countsForWeekday: true, leapYearOnly: false, leapDuration: null });
       expect(noteData.conditionTree).toEqual({
         type: 'group',
         mode: 'and',
-        children: [ { type: 'condition', field: CONDITION_FIELDS.MONTH, op: '==', value: 1 }, { type: 'condition', field: CONDITION_FIELDS.DAY, op: '==', value: 15 } ]
+        children: [
+          { type: 'condition', field: CONDITION_FIELDS.MONTH, op: '==', value: 1 },
+          { type: 'condition', field: CONDITION_FIELDS.DAY, op: '==', value: 15 }
+        ]
       });
     });
     it('creates a note with dayOfYear condition tree', async () => {
@@ -100,10 +95,20 @@ describe('FestivalManager', () => {
       expect(tree.children).toHaveLength(2);
       expect(tree.children[0]).toEqual({ type: 'condition', field: CONDITION_FIELDS.IS_LEAP_YEAR, op: '==', value: 1 });
       expect(tree.children[1]).toEqual({ type: 'condition', field: CONDITION_FIELDS.DAY_OF_YEAR, op: '==', value: 214 });
+      expect(notes[0].flagData.linkedFestival.leapYearOnly).toBe(true);
+    });
+    it('carries countsForWeekday and leapDuration onto linkedFestival', async () => {
+      const festival = { name: 'Shield', dayOfYear: 214, duration: 1, leapDuration: 2, countsForWeekday: false };
+      const calendar = { festivals: { fest1: festival }, metadata: { id: 'harptos' }, years: { yearZero: 0 }, monthsArray: [], getDaysInMonth: () => 30 };
+      await FestivalManager.createFestivalNote('harptos', 'fest1', festival, calendar);
+      const noteData = NoteManager.getAllNotes()[0].flagData;
+      expect(noteData.linkedFestival.countsForWeekday).toBe(false);
+      expect(noteData.linkedFestival.leapDuration).toBe(2);
     });
     it('derives startDate from conditionTree when month/dayOfMonth are stale defaults (#628)', async () => {
       const conditionTree = {
-        type: 'group', mode: 'and',
+        type: 'group',
+        mode: 'and',
         children: [
           { type: 'condition', field: 'month', op: '==', value: 8 },
           { type: 'condition', field: 'day', op: '==', value: 12 }
@@ -118,59 +123,34 @@ describe('FestivalManager', () => {
     });
   });
 
-  describe('applyFestivalDatesToCalendarData', () => {
-    it('patches festival month/dayOfMonth from a linked notes condition tree', () => {
-      const calendarData = { festivals: { fest1: { name: 'Stale', month: 0, dayOfMonth: 0, conditionTree: { type: 'group', mode: 'and', children: [{ type: 'condition', field: 'month', op: '==', value: 1 }, { type: 'condition', field: 'day', op: '==', value: 1 }] } } } };
-      const notes = [{
-        system: {
-          linkedFestival: { calendarId: 'old', festivalKey: 'fest1' },
-          startDate: { year: 1, month: 5, dayOfMonth: 17 },
-          conditionTree: { type: 'group', mode: 'and', children: [{ type: 'condition', field: 'month', op: '==', value: 6 }, { type: 'condition', field: 'day', op: '==', value: 18 }] }
-        }
-      }];
-      const patched = FestivalManager.applyFestivalDatesToCalendarData(calendarData, notes);
-      expect(patched).toBe(1);
-      expect(calendarData.festivals.fest1.month).toBe(5);
-      expect(calendarData.festivals.fest1.dayOfMonth).toBe(17);
-      expect(calendarData.festivals.fest1.conditionTree.children[0].value).toBe(6);
-    });
-    it('falls back to startDate when conditionTree is missing', () => {
-      const calendarData = { festivals: { fest1: { name: 'Stale', month: 0, dayOfMonth: 0 } } };
-      const notes = [{
-        system: {
-          linkedFestival: { festivalKey: 'fest1' },
-          startDate: { year: 1, month: 3, dayOfMonth: 7 },
-          conditionTree: null
-        }
-      }];
-      FestivalManager.applyFestivalDatesToCalendarData(calendarData, notes);
-      expect(calendarData.festivals.fest1.month).toBe(3);
-      expect(calendarData.festivals.fest1.dayOfMonth).toBe(7);
-    });
-    it('ignores notes without a linkedFestival pointer', () => {
-      const calendarData = { festivals: { fest1: { name: 'Untouched', month: 4, dayOfMonth: 5 } } };
-      const notes = [{ system: { startDate: { month: 1, dayOfMonth: 1 } } }];
-      expect(FestivalManager.applyFestivalDatesToCalendarData(calendarData, notes)).toBe(0);
-      expect(calendarData.festivals.fest1).toEqual({ name: 'Untouched', month: 4, dayOfMonth: 5 });
-    });
-  });
-
   describe('deriveDateFromConditionTree', () => {
     it('extracts month and day from a simple month/day group', () => {
-      const tree = { type: 'group', mode: 'and', children: [
-        { type: 'condition', field: 'month', op: '==', value: 12 },
-        { type: 'condition', field: 'day', op: '==', value: 13 }
-      ]};
+      const tree = {
+        type: 'group',
+        mode: 'and',
+        children: [
+          { type: 'condition', field: 'month', op: '==', value: 12 },
+          { type: 'condition', field: 'day', op: '==', value: 13 }
+        ]
+      };
       expect(FestivalManager.deriveDateFromConditionTree(tree)).toEqual({ month: 11, dayOfMonth: 12 });
     });
     it('handles isLeapYear wrapper', () => {
-      const tree = { type: 'group', mode: 'and', children: [
-        { type: 'condition', field: 'isLeapYear', op: '==', value: 1 },
-        { type: 'group', mode: 'and', children: [
-          { type: 'condition', field: 'month', op: '==', value: 7 },
-          { type: 'condition', field: 'day', op: '==', value: 30 }
-        ]}
-      ]};
+      const tree = {
+        type: 'group',
+        mode: 'and',
+        children: [
+          { type: 'condition', field: 'isLeapYear', op: '==', value: 1 },
+          {
+            type: 'group',
+            mode: 'and',
+            children: [
+              { type: 'condition', field: 'month', op: '==', value: 7 },
+              { type: 'condition', field: 'day', op: '==', value: 30 }
+            ]
+          }
+        ]
+      };
       expect(FestivalManager.deriveDateFromConditionTree(tree)).toEqual({ month: 6, dayOfMonth: 29 });
     });
     it('returns null for non-fixed-date trees', () => {
@@ -179,10 +159,14 @@ describe('FestivalManager', () => {
       expect(FestivalManager.deriveDateFromConditionTree({ type: 'group', mode: 'or', children: [] })).toBeNull();
     });
     it('coerces string values from legacy condition arrays', () => {
-      const tree = { type: 'group', mode: 'and', children: [
-        { type: 'condition', field: 'month', op: '==', value: '3' },
-        { type: 'condition', field: 'day', op: '==', value: '15' }
-      ]};
+      const tree = {
+        type: 'group',
+        mode: 'and',
+        children: [
+          { type: 'condition', field: 'month', op: '==', value: '3' },
+          { type: 'condition', field: 'day', op: '==', value: '15' }
+        ]
+      };
       expect(FestivalManager.deriveDateFromConditionTree(tree)).toEqual({ month: 2, dayOfMonth: 14 });
     });
   });
@@ -224,42 +208,35 @@ describe('FestivalManager', () => {
     });
   });
 
-  describe('ensureFestivalNotes', () => {
+  describe('seedFestivalNotes', () => {
     it('creates missing notes only (does not duplicate)', async () => {
       const calendar = { festivals: { fest1: { name: 'Festival', month: 0, dayOfMonth: 0, duration: 1 } }, metadata: { id: 'test' }, years: { yearZero: 0 }, monthsArray: [], getDaysInMonth: () => 30 };
-      const created1 = await FestivalManager.ensureFestivalNotes('test', calendar);
+      const created1 = await FestivalManager.seedFestivalNotes('test', calendar);
       expect(created1).toBe(1);
       expect(NoteManager.getAllNotes()).toHaveLength(1);
-      const created2 = await FestivalManager.ensureFestivalNotes('test', calendar);
+      const created2 = await FestivalManager.seedFestivalNotes('test', calendar);
       expect(created2).toBe(0);
       expect(NoteManager.getAllNotes()).toHaveLength(1);
     });
-    it('creates notes for newly added festivals', async () => {
+    it('skips seeding when the calendar is already marked seeded', async () => {
+      seededSet.add('test');
       const calendar = { festivals: { fest1: { name: 'Festival A', month: 0, dayOfMonth: 0, duration: 1 } }, metadata: { id: 'test' }, years: { yearZero: 0 }, monthsArray: [], getDaysInMonth: () => 30 };
-      await FestivalManager.ensureFestivalNotes('test', calendar);
-      expect(NoteManager.getAllNotes()).toHaveLength(1);
-      const updatedCalendar = { ...calendar, festivals: { ...calendar.festivals, fest2: { name: 'Festival B', month: 6, dayOfMonth: 15, duration: 1 } } };
-      await FestivalManager.ensureFestivalNotes('test', updatedCalendar);
-      expect(NoteManager.getAllNotes()).toHaveLength(2);
+      const created = await FestivalManager.seedFestivalNotes('test', calendar);
+      expect(created).toBe(0);
+      expect(NoteManager.getAllNotes()).toHaveLength(0);
     });
-    it('does NOT update existing notes', async () => {
-      const calendar = { festivals: { fest1: { name: 'Festival A', month: 0, dayOfMonth: 0, duration: 1, color: '#ff0000' } }, metadata: { id: 'test' }, years: { yearZero: 0 }, monthsArray: [], getDaysInMonth: () => 30 };
-      await FestivalManager.ensureFestivalNotes('test', calendar);
-      const updatedCalendar = { ...calendar, festivals: { fest1: { name: 'Festival A Renamed', month: 0, dayOfMonth: 0, duration: 1, color: '#00ff00' } } };
-      await FestivalManager.ensureFestivalNotes('test', updatedCalendar);
-      expect(NoteManager.updateNote).not.toHaveBeenCalled();
-      expect(NoteManager.getAllNotes()[0].name).toBe('Festival A');
+    it('records the calendar in the seeded-calendars set', async () => {
+      const calendar = { festivals: { fest1: { name: 'Festival', month: 0, dayOfMonth: 0, duration: 1 } }, metadata: { id: 'test' }, years: { yearZero: 0 }, monthsArray: [], getDaysInMonth: () => 30 };
+      await FestivalManager.seedFestivalNotes('test', calendar);
+      expect(seededSet.has('test')).toBe(true);
     });
-    it('does NOT delete orphaned notes', async () => {
-      const calendar = {
-        festivals: { fest1: { name: 'Festival A', month: 0, dayOfMonth: 0, duration: 1 }, fest2: { name: 'Festival B', month: 5, dayOfMonth: 10, duration: 1 } },
-        metadata: { id: 'test' }, years: { yearZero: 0 }, monthsArray: [], getDaysInMonth: () => 30
-      };
-      await FestivalManager.ensureFestivalNotes('test', calendar);
-      expect(NoteManager.getAllNotes()).toHaveLength(2);
-      const updatedCalendar = { ...calendar, festivals: { fest1: calendar.festivals.fest1 } };
-      await FestivalManager.ensureFestivalNotes('test', updatedCalendar);
-      expect(NoteManager.getAllNotes()).toHaveLength(2);
+  });
+
+  describe('clearSeedRecord', () => {
+    it('removes the calendar from the seeded set', async () => {
+      seededSet.add('test');
+      await FestivalManager.clearSeedRecord('test');
+      expect(seededSet.has('test')).toBe(false);
     });
   });
 
@@ -267,9 +244,12 @@ describe('FestivalManager', () => {
     it('deletes a single festival note by key', async () => {
       const calendar = {
         festivals: { fest1: { name: 'Festival A', month: 0, dayOfMonth: 0, duration: 1 }, fest2: { name: 'Festival B', month: 5, dayOfMonth: 10, duration: 1 } },
-        metadata: { id: 'test' }, years: { yearZero: 0 }, monthsArray: [], getDaysInMonth: () => 30
+        metadata: { id: 'test' },
+        years: { yearZero: 0 },
+        monthsArray: [],
+        getDaysInMonth: () => 30
       };
-      await FestivalManager.ensureFestivalNotes('test', calendar);
+      await FestivalManager.seedFestivalNotes('test', calendar);
       expect(NoteManager.getAllNotes()).toHaveLength(2);
       const deleted = await FestivalManager.deleteFestivalNote('test', 'fest1');
       expect(deleted).toBe(true);
@@ -288,9 +268,12 @@ describe('FestivalManager', () => {
     it('deletes all festival notes for a calendar', async () => {
       const calendar = {
         festivals: { fest1: { name: 'Festival A', month: 0, dayOfMonth: 0, duration: 1 }, fest2: { name: 'Festival B', month: 5, dayOfMonth: 10, duration: 1 } },
-        metadata: { id: 'test' }, years: { yearZero: 0 }, monthsArray: [], getDaysInMonth: () => 30
+        metadata: { id: 'test' },
+        years: { yearZero: 0 },
+        monthsArray: [],
+        getDaysInMonth: () => 30
       };
-      await FestivalManager.ensureFestivalNotes('test', calendar);
+      await FestivalManager.seedFestivalNotes('test', calendar);
       expect(NoteManager.getAllNotes()).toHaveLength(2);
       const count = await FestivalManager.deleteAllFestivalNotes('test');
       expect(count).toBe(2);
@@ -298,52 +281,27 @@ describe('FestivalManager', () => {
     });
   });
 
-  describe('refreshFestivalNote', () => {
-    it('resets template fields to definition defaults', async () => {
-      const festival = { name: 'Midwinter', month: 0, dayOfMonth: 14, duration: 1, color: '#ff0000', icon: 'fa-snowflake', description: 'A cold day.' };
-      const calendar = { festivals: { fest1: festival }, metadata: { id: 'test' }, years: { yearZero: 0 }, monthsArray: [], getDaysInMonth: () => 30 };
-      await FestivalManager.createFestivalNote('test', 'fest1', festival, calendar);
-      // Simulate user edits
-      const stub = NoteManager.getAllNotes()[0];
-      stub.name = 'User Changed Name';
-      stub.flagData.color = '#00ff00';
-      // Refresh back to template
-      const refreshed = await FestivalManager.refreshFestivalNote('test', 'fest1', festival, calendar);
-      expect(refreshed).toBe(true);
-      expect(NoteManager.updateNote).toHaveBeenCalledWith(stub.id, expect.objectContaining({
-        name: 'Midwinter',
-        content: '<p>A cold day.</p>'
-      }));
-    });
-    it('returns false for nonexistent note', async () => {
-      const festival = { name: 'Midwinter', month: 0, dayOfMonth: 14, duration: 1 };
-      const calendar = { festivals: { fest1: festival }, metadata: { id: 'test' }, years: { yearZero: 0 }, monthsArray: [], getDaysInMonth: () => 30 };
-      const refreshed = await FestivalManager.refreshFestivalNote('test', 'fest1', festival, calendar);
-      expect(refreshed).toBe(false);
-    });
-  });
-
   describe('edge cases', () => {
-    it('skips ensure for non-GM users', async () => {
+    it('skips seed for non-GM users', async () => {
       game.user.isGM = false;
       const calendar = { festivals: { fest1: { name: 'Test', month: 0, dayOfMonth: 0 } }, metadata: { id: 'test' } };
-      await FestivalManager.ensureFestivalNotes('test', calendar);
+      await FestivalManager.seedFestivalNotes('test', calendar);
       expect(NoteManager.createNote).not.toHaveBeenCalled();
       game.user.isGM = true;
     });
     it('handles calendar with no festivals', async () => {
       const calendar = { festivals: {}, metadata: { id: 'test' } };
-      const created = await FestivalManager.ensureFestivalNotes('test', calendar);
+      const created = await FestivalManager.seedFestivalNotes('test', calendar);
       expect(created).toBe(0);
       expect(NoteManager.createNote).not.toHaveBeenCalled();
     });
     it('handles null calendar gracefully', async () => {
-      const created = await FestivalManager.ensureFestivalNotes('test', null);
+      const created = await FestivalManager.seedFestivalNotes('test', null);
       expect(created).toBe(0);
       expect(NoteManager.createNote).not.toHaveBeenCalled();
     });
     it('handles missing calendarId gracefully', async () => {
-      const created = await FestivalManager.ensureFestivalNotes(null, {});
+      const created = await FestivalManager.seedFestivalNotes(null, {});
       expect(created).toBe(0);
       expect(NoteManager.createNote).not.toHaveBeenCalled();
     });
@@ -353,8 +311,8 @@ describe('FestivalManager', () => {
     it('returns only festival notes for the given calendar', async () => {
       const calendarA = { festivals: { fest1: { name: 'Fest A', month: 0, dayOfMonth: 0, duration: 1 } }, metadata: { id: 'calA' }, years: { yearZero: 0 }, monthsArray: [], getDaysInMonth: () => 30 };
       const calendarB = { festivals: { fest1: { name: 'Fest B', month: 0, dayOfMonth: 0, duration: 1 } }, metadata: { id: 'calB' }, years: { yearZero: 0 }, monthsArray: [], getDaysInMonth: () => 30 };
-      await FestivalManager.ensureFestivalNotes('calA', calendarA);
-      await FestivalManager.ensureFestivalNotes('calB', calendarB);
+      await FestivalManager.seedFestivalNotes('calA', calendarA);
+      await FestivalManager.seedFestivalNotes('calB', calendarB);
       const notesA = FestivalManager.getFestivalNotes('calA');
       const notesB = FestivalManager.getFestivalNotes('calB');
       expect(notesA).toHaveLength(1);
@@ -368,9 +326,12 @@ describe('FestivalManager', () => {
     it('returns the correct festival note by key', async () => {
       const calendar = {
         festivals: { midwinter: { name: 'Midwinter', month: 0, dayOfMonth: 14, duration: 1 }, greengrass: { name: 'Greengrass', month: 3, dayOfMonth: 0, duration: 1 } },
-        metadata: { id: 'test' }, years: { yearZero: 0 }, monthsArray: [], getDaysInMonth: () => 30
+        metadata: { id: 'test' },
+        years: { yearZero: 0 },
+        monthsArray: [],
+        getDaysInMonth: () => 30
       };
-      await FestivalManager.ensureFestivalNotes('test', calendar);
+      await FestivalManager.seedFestivalNotes('test', calendar);
       const note = FestivalManager.getFestivalNoteByKey('test', 'greengrass');
       expect(note).not.toBeNull();
       expect(note.name).toBe('Greengrass');

@@ -1,6 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { findFestivalDay, formatEraTemplate, formatMonthDay, formatMonthDayYear, getMonthAbbreviation, preLocalizeCalendar } from '../../scripts/calendar/calendar-utils.mjs';
 import { addCalendarGetters } from '../__mocks__/calendar-manager.mjs';
+
+const mockNotesByDate = new Map();
+const makeKey = (y, m, d) => `${y}:${m}:${d}`;
+const setMockNotes = (calendarId, y, m, d, stubs) => mockNotesByDate.set(`${calendarId}|${makeKey(y, m, d)}`, stubs);
+
+vi.mock('../../scripts/notes/_module.mjs', () => ({
+  NoteManager: {
+    getNotesForDate: (year, month, dayOfMonth, calendarId) => mockNotesByDate.get(`${calendarId}|${makeKey(year, month, dayOfMonth)}`) ?? [],
+    getAllNotes: () => []
+  }
+}));
 
 vi.mock('../../scripts/utils/localization.mjs', () => ({
   localize: (key) => key,
@@ -11,11 +21,28 @@ vi.mock('../../scripts/utils/localization.mjs', () => ({
   }
 }));
 
+const { findFestivalDay, formatEraTemplate, formatMonthDay, formatMonthDayYear, getMonthAbbreviation, preLocalizeCalendar } = await import('../../scripts/calendar/calendar-utils.mjs');
+
 const mockCalendar = addCalendarGetters({
+  metadata: { id: 'test-cal' },
   months: { values: [ { name: 'January', abbreviation: 'Jan', days: 31 }, { name: 'February', abbreviation: 'Feb', days: 28 } ] },
   years: { yearZero: 0 },
   festivals: [ { name: 'New Year', month: 0, dayOfMonth: 0 }, { name: 'Festival Day', month: 1, dayOfMonth: 14 } ],
   timeToComponents: vi.fn((_time) => ({ year: 2024, month: 0, dayOfMonth: 0, hour: 0, minute: 0, second: 0 }))
+});
+
+const noteStub = (name, month, dayOfMonth, festivalKey = 'fest') => ({
+  id: `note-${festivalKey}`,
+  name,
+  flagData: {
+    icon: 'fas fa-star',
+    color: '#f0a500',
+    duration: 1,
+    hasDuration: false,
+    conditionTree: { type: 'group', mode: 'and', children: [] },
+    startDate: { month, dayOfMonth },
+    linkedFestival: { calendarId: 'test-cal', festivalKey, countsForWeekday: true }
+  }
 });
 
 describe('preLocalizeCalendar()', () => {
@@ -53,28 +80,30 @@ describe('preLocalizeCalendar()', () => {
 describe('findFestivalDay()', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockNotesByDate.clear();
   });
-  it('returns null for calendar without festivals', () => {
-    const calWithoutFestivals = addCalendarGetters({ ...mockCalendar, festivals: [] });
-    const result = findFestivalDay(calWithoutFestivals, { month: 0, dayOfMonth: 0 });
+  it('returns null when no festival notes match the date', () => {
+    const result = findFestivalDay(mockCalendar, { year: 2024, month: 0, dayOfMonth: 0 });
     expect(result).toBe(null);
   });
-  it('returns null for undefined festivals', () => {
-    const calWithoutFestivals = addCalendarGetters({ ...mockCalendar, festivals: undefined });
-    const result = findFestivalDay(calWithoutFestivals, { month: 0, dayOfMonth: 0 });
+  it('returns null when no calendarId is set', () => {
+    const noIdCalendar = addCalendarGetters({ ...mockCalendar, metadata: {} });
+    const result = findFestivalDay(noIdCalendar, { year: 2024, month: 0, dayOfMonth: 0 });
     expect(result).toBe(null);
   });
-  it('finds matching festival by components', () => {
-    const result = findFestivalDay(mockCalendar, { month: 0, dayOfMonth: 0 });
-    expect(result).toEqual({ name: 'New Year', month: 0, dayOfMonth: 0 });
+  it('finds matching festival note by components', () => {
+    setMockNotes('test-cal', 2024, 0, 0, [noteStub('New Year', 0, 0, 'new-year')]);
+    const result = findFestivalDay(mockCalendar, { year: 2024, month: 0, dayOfMonth: 0 });
+    expect(result).toMatchObject({ name: 'New Year', month: 0, dayOfMonth: 0, festivalKey: 'new-year' });
   });
-  it('returns null when no festival matches', () => {
-    const result = findFestivalDay(mockCalendar, { month: 5, dayOfMonth: 15 });
+  it('returns null when a linked festival note is not on this date', () => {
+    const result = findFestivalDay(mockCalendar, { year: 2024, month: 5, dayOfMonth: 15 });
     expect(result).toBe(null);
   });
   it('finds festival in later month', () => {
-    const result = findFestivalDay(mockCalendar, { month: 1, dayOfMonth: 14 });
-    expect(result).toEqual({ name: 'Festival Day', month: 1, dayOfMonth: 14 });
+    setMockNotes('test-cal', 2024, 1, 14, [noteStub('Festival Day', 1, 14, 'festival-day')]);
+    const result = findFestivalDay(mockCalendar, { year: 2024, month: 1, dayOfMonth: 14 });
+    expect(result).toMatchObject({ name: 'Festival Day', month: 1, dayOfMonth: 14, festivalKey: 'festival-day' });
   });
 });
 
@@ -94,8 +123,12 @@ describe('getMonthAbbreviation()', () => {
 });
 
 describe('formatMonthDay()', () => {
+  beforeEach(() => {
+    mockNotesByDate.clear();
+  });
   it('returns festival name for festival day', () => {
-    const result = formatMonthDay(mockCalendar, { month: 0, dayOfMonth: 0 });
+    setMockNotes('test-cal', 2024, 0, 0, [noteStub('New Year', 0, 0, 'new-year')]);
+    const result = formatMonthDay(mockCalendar, { year: 2024, month: 0, dayOfMonth: 0 });
     expect(result).toBe('New Year');
   });
   it('returns localization key for non-festival day', () => {
@@ -109,7 +142,11 @@ describe('formatMonthDay()', () => {
 });
 
 describe('formatMonthDayYear()', () => {
+  beforeEach(() => {
+    mockNotesByDate.clear();
+  });
   it('returns FestivalDayYear localization key for festival day', () => {
+    setMockNotes('test-cal', 2024, 0, 0, [noteStub('New Year', 0, 0, 'new-year')]);
     const result = formatMonthDayYear(mockCalendar, { year: 2024, month: 0, dayOfMonth: 0 });
     expect(result).toBe('CALENDARIA.Formatters.FestivalDayYear');
   });

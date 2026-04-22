@@ -6,7 +6,6 @@
 
 import { CalendarManager, CalendarRegistry, getEquivalentDates } from '../../calendar/_module.mjs';
 import { HOOKS, MODULE, REPLACEABLE_ELEMENTS, SETTINGS, SOCKET_TYPES, TEMPLATES, WIDGET_POINTS } from '../../constants.mjs';
-import { FestivalManager } from '../../festivals/_module.mjs';
 import {
   NoteManager,
   addDays,
@@ -591,7 +590,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
           moonPhases = processMoonPhases(moonPhases);
         }
         const weekdayData = calendar.weekdaysArray[i % daysInWeek];
-        const festivalNoteId = this._getFestivalNoteId(festivalDay, calendar);
+        const festivalNoteId = this._getFestivalNoteId(festivalDay);
         const dayData = {
           day: dayNum,
           dayOfMonth,
@@ -902,16 +901,10 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
   /**
    * Get the journal page ID for a festival's note.
    * @param {object|null} festivalDay - Festival definition from findFestivalDay
-   * @param {object} calendar - Calendar instance
    * @returns {string} Page ID or empty string
    */
-  _getFestivalNoteId(festivalDay, calendar) {
-    if (!festivalDay || !calendar?.festivals) return '';
-    const calendarId = this._calendarId || CalendarManager.getActiveCalendar()?.metadata?.id;
-    if (!calendarId) return '';
-    const key = Object.entries(calendar.festivals).find(([, f]) => f === festivalDay)?.[0];
-    if (!key) return '';
-    return FestivalManager.getFestivalNoteByKey(calendarId, key)?.id || '';
+  _getFestivalNoteId(festivalDay) {
+    return festivalDay?.noteId || '';
   }
 
   /**

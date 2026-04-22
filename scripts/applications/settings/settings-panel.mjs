@@ -2812,7 +2812,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     const calendarId = CalendarRegistry.getActiveId();
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendarId || !calendar) return;
-    const created = await FestivalManager.ensureFestivalNotes(calendarId, calendar);
+    await FestivalManager.clearSeedRecord(calendarId);
+    const created = await FestivalManager.seedFestivalNotes(calendarId, calendar);
     ui.notifications.info(localize(created ? 'CALENDARIA.Settings.SyncFestivals.Done' : 'CALENDARIA.Settings.SyncFestivals.NoneCreated'));
   }
 

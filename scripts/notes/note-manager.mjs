@@ -6,7 +6,6 @@
 
 import { CalendarManager, isBundledCalendar } from '../calendar/_module.mjs';
 import { HOOKS, MODULE, NOTE_VISIBILITY, SETTINGS, SOCKET_TYPES } from '../constants.mjs';
-import { FestivalManager } from '../festivals/_module.mjs';
 import { CalendariaSocket, canAddNotes, canDeleteNotes, format, localize, log } from '../utils/_module.mjs';
 import {
   DEFAULT_PRESET_ID,
@@ -42,20 +41,11 @@ export default class NoteManager {
   /** @type {boolean} Bypass flag for internal cleanup operations */
   static #bypassDeleteProtection = false;
 
-  /** @type {boolean} Guard flag to prevent festival name sync loops */
-  static #suppressFestivalNameSync = false;
-
-  /** @type {boolean} Guard flag to prevent festival date sync loops */
-  static #suppressFestivalDateSync = false;
-
   /** @type {boolean} Guard flag to prevent ownership rebuild during sheet form submission */
   static #suppressOwnershipRebuild = false;
 
   /** @type {Map<string, string|undefined>} Prior visibility stashed in preUpdate, read in updateJournalEntryPage */
   static #priorVisibilityByPage = new Map();
-
-  /** @type {Map<string, object>} Festival removals captured in preDelete, persisted in deleteJournalEntry */
-  static #pendingFestivalRemovals = new Map();
 
   /** @type {Map<string, Promise<Folder|null>>} In-flight calendar folder lookups, keyed by calendarId */
   static #calendarFolderPromises = new Map();
@@ -174,14 +164,6 @@ export default class NoteManager {
         if (changes.name !== undefined) {
           const journal = page.parent;
           if (journal?.getFlag(MODULE.ID, 'isCalendarNote') && journal.name !== page.name) await journal.update({ name: page.name });
-          if (!NoteManager.#suppressFestivalNameSync) {
-            const linked = page.system?.linkedFestival;
-            if (linked?.calendarId && linked?.festivalKey) await NoteManager.#syncFestivalNameToCalendar(linked, changes.name);
-          }
-        }
-        if (!NoteManager.#suppressFestivalDateSync && (changes.system?.startDate !== undefined || changes.system?.conditionTree !== undefined)) {
-          const linked = page.system?.linkedFestival;
-          if (linked?.calendarId && linked?.festivalKey) await NoteManager.#syncFestivalDateToCalendar(linked, page.system);
         }
         if (changes.system?.visibility !== undefined) {
           if (priorVisibility !== changes.system.visibility) {
@@ -247,11 +229,6 @@ export default class NoteManager {
         }
       }
     }
-    const linked = NoteManager.#pendingFestivalRemovals.get(journal.id);
-    if (linked) {
-      NoteManager.#pendingFestivalRemovals.delete(journal.id);
-      await NoteManager.#removeFestivalFromCalendar(linked);
-    }
   }
 
   /**
@@ -309,10 +286,6 @@ export default class NoteManager {
    */
   static onPreDeleteJournalEntry(journal, _options, _userId) {
     const page = journal.pages.contents[0];
-    if (game.user.isGM && page?.system?.linkedFestival && !this.#bypassDeleteProtection) {
-      NoteManager.#pendingFestivalRemovals.set(journal.id, page.system.linkedFestival);
-      return;
-    }
     if (game.settings.get(MODULE.ID, SETTINGS.DEV_MODE)) return;
     if (this.#bypassDeleteProtection) return;
     const isCalendarJournal = journal.getFlag(MODULE.ID, 'isCalendarJournal');
@@ -735,64 +708,6 @@ export default class NoteManager {
   }
 
   /**
-   * Remove a festival from the calendar definition when its note is deleted.
-   * @param {{ calendarId: string, festivalKey: string }} linkedFestival - Festival link data
-   * @private
-   */
-  static async #removeFestivalFromCalendar({ calendarId, festivalKey }) {
-    const calendar = CalendarManager.getCalendar(calendarId);
-    if (!calendar?.festivals?.[festivalKey]) return;
-    const data = calendar.toObject();
-    delete data.festivals[festivalKey];
-    log(3, `Removed festival "${festivalKey}" from calendar ${calendarId}`);
-    if (isBundledCalendar(calendarId)) await CalendarManager.saveDefaultOverride(calendarId, data);
-    else await CalendarManager.updateCustomCalendar(calendarId, data);
-  }
-
-  /**
-   * Sync a festival note's name to the calendar festival definition.
-   * @param {{ calendarId: string, festivalKey: string }} linkedFestival - Festival link data
-   * @param {string} newName - The new festival name
-   * @private
-   */
-  static async #syncFestivalNameToCalendar({ calendarId, festivalKey }, newName) {
-    const calendar = CalendarManager.getCalendar(calendarId);
-    if (!calendar?.festivals?.[festivalKey]) return;
-    if (calendar.festivals[festivalKey].name === newName) return;
-    const data = calendar.toObject();
-    data.festivals[festivalKey].name = newName;
-    log(3, `Synced festival name "${festivalKey}" → "${newName}" in calendar ${calendarId}`);
-    if (isBundledCalendar(calendarId)) await CalendarManager.saveDefaultOverride(calendarId, data);
-    else await CalendarManager.updateCustomCalendar(calendarId, data);
-  }
-
-  /**
-   * Sync a festival note's date and conditionTree to the calendar festival definition.
-   * @param {{ calendarId: string, festivalKey: string }} linkedFestival - Festival link data
-   * @param {object} pageSystem - Updated page system data (post-update)
-   * @private
-   */
-  static async #syncFestivalDateToCalendar({ calendarId, festivalKey }, pageSystem) {
-    const calendar = CalendarManager.getCalendar(calendarId);
-    const festival = calendar?.festivals?.[festivalKey];
-    if (!festival) return;
-    const newTree = pageSystem?.conditionTree ?? null;
-    const newStart = pageSystem?.startDate ?? null;
-    const derived = newTree ? FestivalManager.deriveDateFromConditionTree(newTree) : null;
-    const nextMonth = derived?.month ?? newStart?.month ?? festival.month ?? 0;
-    const nextDay = derived?.dayOfMonth ?? newStart?.dayOfMonth ?? festival.dayOfMonth ?? 0;
-    const treeUnchanged = JSON.stringify(festival.conditionTree ?? null) === JSON.stringify(newTree);
-    if (festival.month === nextMonth && festival.dayOfMonth === nextDay && treeUnchanged) return;
-    const data = calendar.toObject();
-    data.festivals[festivalKey].month = nextMonth;
-    data.festivals[festivalKey].dayOfMonth = nextDay;
-    data.festivals[festivalKey].conditionTree = newTree;
-    log(3, `Synced festival date for "${festivalKey}" → month=${nextMonth} day=${nextDay} in calendar ${calendarId}`);
-    if (isBundledCalendar(calendarId)) await CalendarManager.saveDefaultOverride(calendarId, data);
-    else await CalendarManager.updateCustomCalendar(calendarId, data);
-  }
-
-  /**
    * Get or create the Calendar Notes folder.
    * @returns {Promise<Folder|null>}  Folder document or null
    */
@@ -992,34 +907,6 @@ export default class NoteManager {
    */
   static disableBypassDeleteProtection() {
     this.#bypassDeleteProtection = false;
-  }
-
-  /**
-   * Enable suppression of festival name sync (prevents loops during editor→note sync).
-   */
-  static enableSuppressFestivalNameSync() {
-    this.#suppressFestivalNameSync = true;
-  }
-
-  /**
-   * Disable suppression of festival name sync.
-   */
-  static disableSuppressFestivalNameSync() {
-    this.#suppressFestivalNameSync = false;
-  }
-
-  /**
-   * Enable suppression of festival date sync (prevents loops during editor→note sync).
-   */
-  static enableSuppressFestivalDateSync() {
-    this.#suppressFestivalDateSync = true;
-  }
-
-  /**
-   * Disable suppression of festival date sync.
-   */
-  static disableSuppressFestivalDateSync() {
-    this.#suppressFestivalDateSync = false;
   }
 
   /**

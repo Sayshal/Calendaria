@@ -4,6 +4,7 @@
  * @author Tyler
  */
 
+import { NoteManager } from '../notes/_module.mjs';
 import { format, localize } from '../utils/_module.mjs';
 
 /**
@@ -164,9 +165,30 @@ export function preLocalizeCalendar(calendarData) {
  * @returns {object|null} Festival object if found, null otherwise
  */
 export function findFestivalDay(calendar, time = game.time.worldTime) {
-  if (!calendar.festivalsArray?.length) return null;
+  if (!calendar) return null;
+  const calendarId = calendar.metadata?.id;
+  if (!calendarId) return null;
   const components = typeof time === 'number' ? calendar.timeToComponents(time) : time;
-  return calendar.festivalsArray.find((f) => f.month === components.month && f.dayOfMonth === components.dayOfMonth) ?? null;
+  const yearZero = calendar.years?.yearZero ?? 0;
+  const displayYear = (components.year ?? 0) + (typeof time === 'number' ? yearZero : 0);
+  const stubs = NoteManager.getNotesForDate(displayYear, components.month, components.dayOfMonth ?? 0, calendarId);
+  const festivalStub = stubs.find((s) => s.flagData?.linkedFestival?.festivalKey);
+  if (!festivalStub) return null;
+  const fd = festivalStub.flagData;
+  const linked = fd.linkedFestival;
+  return {
+    name: festivalStub.name,
+    icon: fd.icon || 'fas fa-star',
+    color: fd.color || '#f0a500',
+    month: fd.startDate?.month ?? components.month,
+    dayOfMonth: fd.startDate?.dayOfMonth ?? components.dayOfMonth ?? 0,
+    conditionTree: fd.conditionTree ?? null,
+    duration: fd.duration ?? 1,
+    hasDuration: !!fd.hasDuration,
+    countsForWeekday: linked.countsForWeekday ?? true,
+    festivalKey: linked.festivalKey,
+    noteId: festivalStub.id
+  };
 }
 
 /**

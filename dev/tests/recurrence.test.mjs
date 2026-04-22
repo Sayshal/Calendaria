@@ -173,18 +173,19 @@ describe('evaluateConditionTree (via isRecurringMatch)', () => {
     expect(isRecurringMatch(noteData, { year: 2024, month: 2, dayOfMonth: 0 })).toBe(true);
     expect(isRecurringMatch(noteData, { year: 2024, month: 3, dayOfMonth: 0 })).toBe(false);
   });
-  it('always matches within start-end duration span', () => {
+  it('ignores endDate span when a condition tree is present', () => {
     const noteData = { startDate: { year: 2024, month: 0, dayOfMonth: 0 }, endDate: { year: 2024, month: 0, dayOfMonth: 4 }, conditionTree: { type: 'group', mode: 'and', children: [{ field: 'day', op: '==', value: 99 }] } };
-    expect(isRecurringMatch(noteData, { year: 2024, month: 0, dayOfMonth: 0 })).toBe(true);
-    expect(isRecurringMatch(noteData, { year: 2024, month: 0, dayOfMonth: 2 })).toBe(true);
-    expect(isRecurringMatch(noteData, { year: 2024, month: 0, dayOfMonth: 4 })).toBe(true);
+    expect(isRecurringMatch(noteData, { year: 2024, month: 0, dayOfMonth: 0 })).toBe(false);
+    expect(isRecurringMatch(noteData, { year: 2024, month: 0, dayOfMonth: 2 })).toBe(false);
+    expect(isRecurringMatch(noteData, { year: 2024, month: 0, dayOfMonth: 4 })).toBe(false);
   });
 });
 
 describe('duration + condition tree', () => {
-  it('multi-day event covers days after tree-match start', () => {
+  it('multi-day event covers days after tree-match start via hasDuration', () => {
     const noteData = {
-      startDate: { year: 2024, month: 0, dayOfMonth: 0 }, endDate: { year: 2024, month: 0, dayOfMonth: 2 },
+      startDate: { year: 2024, month: 0, dayOfMonth: 0 }, endDate: { year: 2024, month: 0, dayOfMonth: 0 },
+      hasDuration: true, duration: 3,
       conditionTree: { type: 'group', mode: 'and', children: [{ field: 'day', op: '==', value: 15 }] }
     };
     expect(isRecurringMatch(noteData, { year: 2024, month: 0, dayOfMonth: 14 })).toBe(true);

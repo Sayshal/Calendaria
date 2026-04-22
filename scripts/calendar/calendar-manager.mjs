@@ -6,6 +6,7 @@
 
 import { HOOKS, MODULE, SETTINGS } from '../constants.mjs';
 import { CalendariaCalendar } from '../data/_module.mjs';
+import { FestivalManager } from '../festivals/_module.mjs';
 import { getSystemWorldClock, isLuxonSyncRequired, syncWithLuxon } from '../integrations/luxon-sync.mjs';
 import { format, localize, log } from '../utils/_module.mjs';
 import { BUNDLED_CALENDARS, CalendarRegistry, DEFAULT_CALENDAR, isBundledCalendar, loadBundledCalendars } from './_module.mjs';
@@ -923,6 +924,9 @@ export default class CalendarManager {
           game.time.initializeCalendar();
           this.#patchFoundryCalendar();
         }
+        await FestivalManager.deleteAllFestivalNotes(id);
+        await FestivalManager.clearSeedRecord(id);
+        await FestivalManager.seedFestivalNotes(id, calendar);
         Hooks.callAll(HOOKS.CALENDAR_UPDATED, id, calendar);
       }
       log(3, `Reset bundled calendar: ${id}`);

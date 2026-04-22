@@ -747,6 +747,48 @@ async function migrateNoteDurationNormalization() {
 }
 
 /**
+ * Backfill `countsForWeekday`, `leapYearOnly`, and `leapDuration` onto existing
+ * `linkedFestival` notes from their calendar's festival definition, and populate
+ * the new seededCalendars setting with every calendar already holding festival notes.
+ * @since 1.0.8
+ * @deprecated Remove in 1.2.0
+ * @returns {Promise<void>}
+ */
+async function migrateFestivalNotesAsSourceOfTruth() {
+  const KEY = 'festivalNotesSourceOfTruthMigrationComplete';
+  if (!game.user?.isGM) return;
+  if (game.settings.get(MODULE.ID, KEY)) return;
+  const seededSet = new Set(game.settings.get(MODULE.ID, SETTINGS.SEEDED_CALENDARS) ?? []);
+  let touchedNotes = 0;
+  for (const journal of game.journal) {
+    const pageUpdates = [];
+    for (const page of journal.pages) {
+      if (page.type !== 'calendaria.calendarnote') continue;
+      const linked = page.system?.linkedFestival;
+      if (!linked?.calendarId || !linked?.festivalKey) continue;
+      seededSet.add(linked.calendarId);
+      const calendar = CalendarManager.getCalendar(linked.calendarId);
+      const seedDef = calendar?.festivals?.[linked.festivalKey];
+      if (!seedDef) continue;
+      const update = { _id: page.id };
+      if (linked.countsForWeekday !== (seedDef.countsForWeekday ?? true)) update['system.linkedFestival.countsForWeekday'] = seedDef.countsForWeekday ?? true;
+      if (linked.leapYearOnly !== !!seedDef.leapYearOnly) update['system.linkedFestival.leapYearOnly'] = !!seedDef.leapYearOnly;
+      const seedLeapDuration = seedDef.leapDuration ?? null;
+      if ((linked.leapDuration ?? null) !== seedLeapDuration) update['system.linkedFestival.leapDuration'] = seedLeapDuration;
+      if (Object.keys(update).length > 1) pageUpdates.push(update);
+    }
+    if (pageUpdates.length) {
+      await JournalEntryPage.updateDocuments(pageUpdates, { parent: journal });
+      touchedNotes += pageUpdates.length;
+    }
+  }
+  await game.settings.set(MODULE.ID, SETTINGS.SEEDED_CALENDARS, seededSet);
+  if (touchedNotes) log(3, `Backfilled linkedFestival metadata on ${touchedNotes} notes`);
+  if (seededSet.size) log(3, `Seeded-calendars marker initialized for ${seededSet.size} calendar(s)`);
+  await game.settings.set(MODULE.ID, KEY, true);
+}
+
+/**
  * Run all migrations.
  * @returns {Promise<void>}
  */
@@ -763,6 +805,7 @@ export async function runAllMigrations() {
   await migrateZoneTempBlankInheritance();
   await migrateFestivalNoteYearZero();
   await migrateNoteDurationNormalization();
+  await migrateFestivalNotesAsSourceOfTruth();
   await recoverOrphanedPresets();
 }
 

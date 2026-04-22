@@ -782,13 +782,8 @@ export function getFestivalNoteForDay(notes, year, month, dayOfMonth) {
   const iconType = iconIsImage ? 'image' : 'fontawesome';
   const iconIsSvg = iconIsImage && /\.svg(\?.*)?$/i.test(icon);
   const position = isStart ? 'starting' : isEnd ? 'ending' : null;
-  let countsForWeekday = true;
   const linked = fn.system?.linkedFestival;
-  if (linked && isStart) {
-    const cal = CalendarManager.getCalendar(linked.calendarId);
-    const festDef = cal?.festivals?.[linked.festivalKey];
-    if (festDef && festDef.countsForWeekday === false) countsForWeekday = false;
-  }
+  const countsForWeekday = linked?.countsForWeekday ?? true;
   const effectiveBookends = countsForWeekday ? showBookends : false;
   const effectiveShowVisuals = !effectiveBookends || !isMiddle;
   return {
