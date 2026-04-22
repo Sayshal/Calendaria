@@ -48,17 +48,24 @@
           data-tooltip-html="<b>{{localize 'CALENDARIA.Common.Icon'}}</b>: {{localize 'CALENDARIA.Note.DisplayStyle.IconHint'}}<br><b>{{localize 'CALENDARIA.Note.DisplayStyle.Pip'}}</b>: {{localize 'CALENDARIA.Note.DisplayStyle.PipHint'}}<br><b>{{localize 'CALENDARIA.Note.DisplayStyle.Banner'}}</b>: {{localize 'CALENDARIA.Note.DisplayStyle.BannerHint'}}">
           {{localize "CALENDARIA.Note.DisplayStyleLabel"}}
         </legend>
-        <select name="system.displayStyle">
-          <option value="icon" {{#if (eq system.displayStyle "icon")}}selected{{/if}}>
-            {{localize "CALENDARIA.Common.Icon"}}
-          </option>
-          <option value="pip" {{#if (eq system.displayStyle "pip")}}selected{{/if}}>
-            {{localize "CALENDARIA.Note.DisplayStyle.Pip"}}
-          </option>
-          <option value="banner" {{#if (eq system.displayStyle "banner")}}selected{{/if}}>
-            {{localize "CALENDARIA.Note.DisplayStyle.Banner"}}
-          </option>
-        </select>
+        <div class="display-style-group">
+          <select name="system.displayStyle">
+            <option value="icon" {{#if (eq system.displayStyle "icon")}}selected{{/if}}>
+              {{localize "CALENDARIA.Common.Icon"}}
+            </option>
+            <option value="pip" {{#if (eq system.displayStyle "pip")}}selected{{/if}}>
+              {{localize "CALENDARIA.Note.DisplayStyle.Pip"}}
+            </option>
+            <option value="banner" {{#if (eq system.displayStyle "banner")}}selected{{/if}}>
+              {{localize "CALENDARIA.Note.DisplayStyle.Banner"}}
+            </option>
+          </select>
+          <label data-tooltip aria-label="{{localize 'CALENDARIA.Note.Duration.ShowBookendsHint'}}">
+            <input type="checkbox" name="system.showBookends" {{checked system.showBookends}}
+              {{#unless isMultiDay}}disabled{{/unless}}>
+            {{localize "CALENDARIA.Note.Duration.ShowBookends"}}
+          </label>
+        </div>
       </fieldset>
       <fieldset class="macro-fieldset">
         <legend data-tooltip aria-label="{{localize 'CALENDARIA.Note.Tooltip.Macro'}}">{{localize

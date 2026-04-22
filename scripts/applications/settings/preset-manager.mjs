@@ -157,7 +157,6 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
       reminderType: 'string',
       reminderOffset: 'number',
       reminderTargets: 'string',
-      hasDuration: 'bool',
       duration: 'number',
       maxOccurrences: 'number',
       silent: 'bool',
@@ -211,7 +210,6 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
       { value: 2, label: localize('CALENDARIA.PresetManager.OwnershipObserver') },
       { value: 3, label: localize('CALENDARIA.PresetManager.OwnershipOwner') }
     ];
-    const hasDur = defaults.hasDuration === true;
     return {
       content: [
         {
@@ -223,6 +221,12 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
       ],
       schedule: [
         { key: 'allDay', label: localize('CALENDARIA.Common.AllDay'), inputHtml: checkboxHtml('allDay', defaults.allDay), hint: localize('CALENDARIA.PresetManager.DefaultAllDayHint') },
+        {
+          key: 'duration',
+          label: localize('CALENDARIA.Common.Duration'),
+          inputHtml: numberHtml('duration', defaults.duration, 'min="1"'),
+          hint: localize('CALENDARIA.PresetManager.DefaultDurationHint')
+        },
         {
           key: 'maxOccurrences',
           label: localize('CALENDARIA.PresetManager.MaxOccurrences'),
@@ -246,21 +250,9 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
         },
         { key: 'macro', label: localize('CALENDARIA.Common.Macro'), inputHtml: selectHtml('macro', defaults.macro, macroOptions), hint: localize('CALENDARIA.PresetManager.DefaultMacroHint') },
         {
-          key: 'hasDuration',
-          label: localize('CALENDARIA.Common.HasDuration'),
-          inputHtml: checkboxHtml('hasDuration', defaults.hasDuration, 'data-toggles="cat-def-duration,cat-def-showBookends"'),
-          hint: localize('CALENDARIA.PresetManager.DefaultHasDurationHint')
-        },
-        {
-          key: 'duration',
-          label: localize('CALENDARIA.Common.Duration'),
-          inputHtml: numberHtml('duration', defaults.duration, `min="1" ${hasDur ? '' : 'disabled'}`),
-          hint: localize('CALENDARIA.PresetManager.DefaultDurationHint')
-        },
-        {
           key: 'showBookends',
           label: localize('CALENDARIA.Note.Duration.ShowBookends'),
-          inputHtml: checkboxHtml('showBookends', defaults.showBookends, hasDur ? '' : 'disabled'),
+          inputHtml: checkboxHtml('showBookends', defaults.showBookends),
           hint: localize('CALENDARIA.Note.Duration.ShowBookendsHint')
         },
         {

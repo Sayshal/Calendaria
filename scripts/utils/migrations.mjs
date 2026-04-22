@@ -5,7 +5,7 @@
 
 import { CalendarManager } from '../calendar/_module.mjs';
 import { MODULE, SETTINGS } from '../constants.mjs';
-import { dayOfWeek, extractEventDependencies, getOccurrencesInRange, invalidatePresetCache, migratePresetSchema } from '../notes/_module.mjs';
+import { addDays, dayOfWeek, daysBetween, extractEventDependencies, getOccurrencesInRange, invalidatePresetCache, migratePresetSchema } from '../notes/_module.mjs';
 import { log } from './logger.mjs';
 import { DEFAULT_COLORS } from './theme-utils.mjs';
 
@@ -690,6 +690,63 @@ async function migrateFestivalNoteYearZero() {
 }
 
 /**
+ * Normalize duration / hasDuration / endDate on existing calendaria notes so the
+ * new schedule UX doesn't silently activate dormant duration values or overwrite
+ * user-set endDate on next save.
+ * @since 1.0.8
+ * @deprecated Remove in 1.2.0
+ * @returns {Promise<void>}
+ */
+async function migrateNoteDurationNormalization() {
+  const KEY = 'noteDurationNormalizationMigrationComplete';
+  if (!game.user?.isGM) return;
+  if (game.settings.get(MODULE.ID, KEY)) return;
+  const sameDay = (a, b) => a?.year === b?.year && a?.month === b?.month && a?.dayOfMonth === b?.dayOfMonth;
+  let touched = 0;
+  for (const journal of game.journal) {
+    const pageUpdates = [];
+    for (const page of journal.pages) {
+      if (page.type !== 'calendaria.calendarnote') continue;
+      const sys = page.system;
+      if (!sys?.startDate) continue;
+      const start = sys.startDate;
+      const end = sys.endDate;
+      const duration = sys.duration ?? 1;
+      const hasDuration = sys.hasDuration ?? false;
+      const update = { _id: page.id };
+      if (sys.conditionTree) {
+        if (!end || !sameDay(start, end)) {
+          update['system.endDate.year'] = start.year;
+          update['system.endDate.month'] = start.month;
+          update['system.endDate.dayOfMonth'] = start.dayOfMonth;
+        }
+        const shouldHave = duration > 1;
+        if (shouldHave !== hasDuration) update['system.hasDuration'] = shouldHave;
+      } else if (end && !sameDay(start, end)) {
+        const span = Math.max(1, daysBetween(start, end) + 1);
+        if (duration !== span) update['system.duration'] = span;
+        if (!hasDuration) update['system.hasDuration'] = true;
+      } else if (hasDuration && duration > 1) {
+        const derived = addDays(start, duration - 1);
+        update['system.endDate.year'] = derived.year;
+        update['system.endDate.month'] = derived.month;
+        update['system.endDate.dayOfMonth'] = derived.dayOfMonth;
+      } else {
+        if (duration !== 1) update['system.duration'] = 1;
+        if (hasDuration) update['system.hasDuration'] = false;
+      }
+      if (Object.keys(update).length > 1) pageUpdates.push(update);
+    }
+    if (pageUpdates.length) {
+      await JournalEntryPage.updateDocuments(pageUpdates, { parent: journal });
+      touched += pageUpdates.length;
+    }
+  }
+  if (touched) log(3, `Normalized duration/endDate on ${touched} notes`);
+  await game.settings.set(MODULE.ID, KEY, true);
+}
+
+/**
  * Run all migrations.
  * @returns {Promise<void>}
  */
@@ -705,6 +762,7 @@ export async function runAllMigrations() {
   await migrateRemovedCalendars();
   await migrateZoneTempBlankInheritance();
   await migrateFestivalNoteYearZero();
+  await migrateNoteDurationNormalization();
   await recoverOrphanedPresets();
 }
 

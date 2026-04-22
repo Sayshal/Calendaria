@@ -302,7 +302,7 @@ export function getBuiltinPresetSeeds() {
     { id: 'birthday', label: localize('CALENDARIA.Preset.Birthday'), color: '#ff6b6b', icon: 'fas fa-cake-candles', defaults: { displayStyle: 'pip', allDay: true } },
     { id: 'deadline', label: localize('CALENDARIA.Preset.Deadline'), color: '#f03e3e', icon: 'fas fa-hourglass-end', defaults: { reminderType: 'toast', reminderOffset: 24 } },
     { id: 'reminder', label: localize('CALENDARIA.Reminder.Label'), color: '#fcc419', icon: 'fas fa-bell', defaults: { reminderType: 'toast', reminderOffset: 1 } },
-    { id: 'downtime', label: localize('CALENDARIA.Preset.Downtime'), color: '#74c0fc', icon: 'fas fa-couch', defaults: { hasDuration: true, duration: 7 } },
+    { id: 'downtime', label: localize('CALENDARIA.Preset.Downtime'), color: '#74c0fc', icon: 'fas fa-couch', defaults: { duration: 7 } },
     { id: 'lore', label: localize('CALENDARIA.Preset.Lore'), color: '#a9845b', icon: 'fas fa-book', defaults: { displayStyle: 'pip', allDay: true } }
   ];
 }
@@ -538,7 +538,6 @@ export function applyPresetDefaultsToNoteData(noteData, presetIds) {
     reminderType: 'reminderType',
     reminderOffset: 'reminderOffset',
     reminderTargets: 'reminderTargets',
-    hasDuration: 'hasDuration',
     duration: 'duration',
     showBookends: 'showBookends',
     maxOccurrences: 'maxOccurrences',

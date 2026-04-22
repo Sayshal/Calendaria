@@ -37,8 +37,9 @@ const _computedDateCache = new Map();
  * @returns {number} Duration in days (0 if no duration)
  */
 export function getEffectiveDuration(noteData) {
-  const { startDate, endDate, hasDuration, duration } = noteData;
+  const { startDate, endDate, hasDuration, duration, conditionTree } = noteData;
   if (hasDuration && duration > 0) return duration - 1;
+  if (conditionTree) return 0;
   if (endDate && !isSameDay(startDate, endDate)) return daysBetween(startDate, endDate);
   return 0;
 }

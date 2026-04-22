@@ -24,7 +24,7 @@ import {
   validateConditions,
   wrapInRootGroup
 } from '../../notes/_module.mjs';
-import { daysBetween, isSameDay } from '../../notes/date-utils.mjs';
+import { daysBetween } from '../../notes/date-utils.mjs';
 import { CalendariaSocket, convertToConditionTree, format, localize, log } from '../../utils/_module.mjs';
 import { CalendarEditor, ConditionBuilderDialog } from '../_module.mjs';
 
@@ -44,10 +44,11 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     actions: {
       selectIcon: this._onSelectIcon,
       selectDate: this._onSelectDate,
-      saveAndClose: this._onSaveAndClose,
       deleteNote: this._onDeleteNote,
       addPreset: this._onAddPreset,
       toggleMode: this._onToggleMode,
+      setScheduleMode: this._onSetScheduleMode,
+      clearRepeatEndDate: this._onClearRepeatEndDate,
       openConditionBuilder: this._onOpenConditionBuilder,
       openFestivalEditor: this._onOpenFestivalEditor
     },
@@ -292,17 +293,10 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       controlsContainer.appendChild(modeBtn);
     }
     if (this.isEditMode) {
-      const divider = document.createElement('span');
-      divider.className = 'header-divider';
-      controlsContainer.appendChild(divider);
-      const saveBtn = document.createElement('button');
-      saveBtn.type = 'button';
-      saveBtn.className = 'header-control icon fas fa-save';
-      saveBtn.dataset.action = 'saveAndClose';
-      saveBtn.dataset.tooltip = 'Save & Close';
-      saveBtn.setAttribute('aria-label', 'Save & Close');
-      controlsContainer.appendChild(saveBtn);
       if ((this.isAuthor || game.user.isGM) && this.document.id) {
+        const divider = document.createElement('span');
+        divider.className = 'header-divider';
+        controlsContainer.appendChild(divider);
         const deleteBtn = document.createElement('button');
         deleteBtn.type = 'button';
         deleteBtn.className = 'header-control icon fas fa-trash';
@@ -343,8 +337,10 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const currentMonth = components.month ?? 0;
     const currentDay = (components.dayOfMonth ?? 0) + 1;
     const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
-    if (context.system.icon && context.system.icon.startsWith('fa')) context.iconType = 'fontawesome';
-    else context.iconType = context.system.iconType || 'image';
+    if (context.system.icon?.startsWith('fa')) context.iconType = 'fontawesome';
+    else if (context.system.icon?.includes('/') || context.system.icon?.includes('.')) context.iconType = 'image';
+    else context.iconType = context.system.iconType || 'fontawesome';
+    context.isSvgIcon = context.iconType === 'image' && /\.svg(\?.*)?$/i.test(context.system.icon ?? '');
     const startYear = this.document.system.startDate.year || currentYear;
     const startMonth = this.document.system.startDate.month ?? currentMonth;
     const startDay = (this.document.system.startDate.dayOfMonth ?? 0) + 1 || currentDay;
@@ -359,10 +355,14 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     context.startMinutePadded = String(this.document.system.startDate.minute ?? 0).padStart(2, '0');
     context.endHourPadded = String(this.document.system.endDate?.hour ?? 0).padStart(2, '0');
     context.endMinutePadded = String(this.document.system.endDate?.minute ?? 0).padStart(2, '0');
-    const startDateObj = this.document.system.startDate;
-    const endDateObj = this.document.system.endDate;
-    context.durationLockedByRange = !!(endDateObj && !isSameDay(startDateObj, endDateObj));
     context.isFestival = !!this.document.system.linkedFestival;
+    const hasTree = !!this.document.system.conditionTree;
+    context.isRecurring = context.isFestival || hasTree || this._scheduleMode === 'recurring';
+    context.isMultiDay = (this.document.system.duration ?? 1) > 1;
+    const repeatEnd = this.document.system.repeatEndDate;
+    if (repeatEnd) {
+      context.repeatEndDateDisplay = this._formatDateDisplay(calendar, repeatEnd.year ?? startYear, repeatEnd.month ?? 0, (repeatEnd.dayOfMonth ?? 0) + 1);
+    }
     const visibility = this.document.system.visibility || 'visible';
     const visibilityConfig = {
       visible: { icon: 'fa-eye', label: 'CALENDARIA.Note.Visibility.Visible', badge: null },
@@ -619,24 +619,6 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       const checked = target.checked;
       const timeInputs = this.element.querySelectorAll('.time-inputs input[type="text"]');
       timeInputs.forEach((input) => (input.disabled = checked));
-      const endDateBtn = this.element.querySelector('[data-date-field="endDate"]');
-      if (endDateBtn) endDateBtn.disabled = checked;
-      if (checked) {
-        const startYear = this.element.querySelector('[name="system.startDate.year"]');
-        const startMonth = this.element.querySelector('[name="system.startDate.month"]');
-        const startDay = this.element.querySelector('[name="system.startDate.dayOfMonth"]');
-        const endYear = this.element.querySelector('[name="system.endDate.year"]');
-        const endMonth = this.element.querySelector('[name="system.endDate.month"]');
-        const endDay = this.element.querySelector('[name="system.endDate.dayOfMonth"]');
-        if (startYear && endYear) endYear.value = startYear.value;
-        if (startMonth && endMonth) endMonth.value = startMonth.value;
-        if (startDay && endDay) endDay.value = startDay.value;
-        if (endDateBtn) {
-          const startLabel = this.element.querySelector('[data-date-field="startDate"] span');
-          const endLabel = endDateBtn.querySelector('span');
-          if (startLabel && endLabel) endLabel.textContent = startLabel.textContent;
-        }
-      }
     }
     if (target?.name === 'system.color') {
       const iconPreview = this.element.querySelector('.icon-picker i.icon-preview');
@@ -752,7 +734,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
 
   /** @override */
   async _processSubmitData(event, form, submitData, options = {}) {
-    CalendarNoteSheet.#enforceDurationFromDateRange(submitData);
+    this.#deriveEndDateInSubmit(submitData);
     const newCategories = submitData.system?.categories || [];
     const oldCategories = this.document.system.categories || [];
     const addedPreset = newCategories.find((id) => !oldCategories.includes(id));
@@ -766,16 +748,51 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
   }
 
   /**
-   * Force hasDuration and duration when start/end date define a multi-day range.
-   * Disabled form fields are excluded from submitData, so we inject them here.
+   * Derive endDate as startDate + duration - 1 days on submit so endDate stays consistent
+   * with the user-controlled duration.
    * @param {object} submitData - The form submit data
    */
-  static #enforceDurationFromDateRange(submitData) {
+  #deriveEndDateInSubmit(submitData) {
     const start = submitData.system?.startDate;
-    const end = submitData.system?.endDate;
-    if (!start || !end || isSameDay(start, end)) return;
-    submitData.system.hasDuration = true;
-    submitData.system.duration = daysBetween(start, end) + 1;
+    if (!start || !submitData.system) return;
+    const isRecurring = !!this.document.system.conditionTree || this._scheduleMode === 'recurring';
+    const endDate = submitData.system.endDate ?? {};
+    if (isRecurring) {
+      const duration = Number(submitData.system.duration) || 1;
+      submitData.system.hasDuration = duration > 1;
+      submitData.system.endDate = { ...endDate, year: start.year, month: start.month, dayOfMonth: start.dayOfMonth };
+      return;
+    }
+    const end = { year: endDate.year ?? start.year, month: endDate.month ?? start.month, dayOfMonth: endDate.dayOfMonth ?? start.dayOfMonth };
+    const sameDay = end.year === start.year && end.month === start.month && end.dayOfMonth === start.dayOfMonth;
+    submitData.system.endDate = { ...endDate, year: end.year, month: end.month, dayOfMonth: end.dayOfMonth };
+    submitData.system.hasDuration = !sameDay;
+    submitData.system.duration = sameDay ? 1 : Math.max(1, daysBetween(start, end) + 1);
+  }
+
+  /**
+   * Toggle between one-time and recurring schedule modes.
+   * @param {Event} _event - The click event
+   * @param {HTMLElement} target - The clicked button
+   */
+  static async _onSetScheduleMode(_event, target) {
+    const mode = target?.dataset?.mode;
+    if (!mode || (mode !== 'once' && mode !== 'recurring')) return;
+    if (this.document.system.linkedFestival) return;
+    if (mode === 'once' && this.document.system.conditionTree) {
+      const confirmed = await foundry.applications.api.DialogV2.confirm({
+        window: { title: localize('CALENDARIA.Note.Schedule.ConfirmSwitchToOnceTitle') },
+        content: `<p>${localize('CALENDARIA.Note.Schedule.ConfirmSwitchToOnce')}</p>`,
+        rejectClose: false,
+        modal: true
+      });
+      if (!confirmed) return;
+      this._scheduleMode = mode;
+      await this.document.update({ 'system.conditionTree': null, 'system.conditions': [], 'system.connectedEvents': [] });
+      return;
+    }
+    this._scheduleMode = mode;
+    this.render();
   }
 
   /**
@@ -822,7 +839,10 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
         const iconElement = target.querySelector('i.icon-preview');
         if (iconElement) iconElement.className = `${newIcon} icon-preview`;
         const hiddenInput = target.querySelector('input[name="system.icon"]');
-        if (hiddenInput) hiddenInput.value = newIcon;
+        if (hiddenInput) {
+          hiddenInput.value = newIcon;
+          hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+        }
       }
     } else {
       const currentPath = target.querySelector('img')?.src;
@@ -833,7 +853,10 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
           const img = target.querySelector('img');
           if (img) img.src = path;
           const hiddenInput = target.querySelector('input[name="system.icon"]');
-          if (hiddenInput) hiddenInput.value = path;
+          if (hiddenInput) {
+            hiddenInput.value = path;
+            hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+          }
         }
       });
       picker.render(true);
@@ -854,6 +877,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const form = target.closest('form');
     const colorInput = form?.querySelector('color-picker[name="system.color"]');
     const color = colorInput?.value || '#4a9eff';
+    const iconInput = target.querySelector('input[name="system.icon"]');
     if (newType === 'fontawesome') {
       const img = target.querySelector('img');
       if (img) {
@@ -862,7 +886,6 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
         icon.style.color = color;
         img.replaceWith(icon);
       }
-      const iconInput = target.querySelector('input[name="system.icon"]');
       if (iconInput) iconInput.value = 'fas fa-calendar';
     } else {
       const icon = target.querySelector('i');
@@ -875,9 +898,9 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
         img.style.transform = 'translateY(-1000px)';
         icon.replaceWith(img);
       }
-      const iconInput = target.querySelector('input[name="system.icon"]');
       if (iconInput) iconInput.value = 'icons/svg/book.svg';
     }
+    if (iconInput) iconInput.dispatchEvent(new Event('change', { bubbles: true }));
   }
 
   /**
@@ -922,19 +945,14 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const currentDay = dayInput ? parseInt(dayInput.value) + 1 : fallbackDay;
     const result = await CalendarNoteSheet._showDatePickerDialog(calendar, currentYear, currentMonth, currentDay);
     if (!result) return;
-    let syncEndWithStart = false;
-    if (dateField === 'startDate') {
-      const endYear = parseInt(form.querySelector('[name="system.endDate.year"]')?.value);
-      const endMonth = parseInt(form.querySelector('[name="system.endDate.month"]')?.value);
-      const endDay = parseInt(form.querySelector('[name="system.endDate.dayOfMonth"]')?.value);
-      const oldStart = { year: currentYear, month: currentMonth, dayOfMonth: currentDay - 1 };
-      const oldEnd = { year: endYear, month: endMonth, dayOfMonth: endDay };
-      syncEndWithStart = !isNaN(endYear) && isSameDay(oldStart, oldEnd);
+    if (dateField === 'repeatEndDate' && !yearInput) {
+      await this.document.update({ 'system.repeatEndDate': { year: result.year, month: result.month, dayOfMonth: result.day - 1 } });
+      return;
     }
     if (yearInput) yearInput.value = result.year;
     if (monthInput) monthInput.value = result.month;
     if (dayInput) dayInput.value = result.day - 1;
-    const displaySpan = target.querySelector('.date-display');
+    const displaySpan = target.querySelector('.date-display') || target.querySelector('span');
     if (displaySpan) {
       const isMonthless = calendar?.isMonthless ?? false;
       if (isMonthless) {
@@ -945,52 +963,17 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
         displaySpan.textContent = `${result.day} ${monthName}, ${result.year}`;
       }
     }
-    if (syncEndWithStart) {
-      const endYearInput = form.querySelector('input[name="system.endDate.year"]');
-      const endMonthInput = form.querySelector('input[name="system.endDate.month"]');
-      const endDayInput = form.querySelector('input[name="system.endDate.dayOfMonth"]');
-      if (endYearInput) endYearInput.value = result.year;
-      if (endMonthInput) endMonthInput.value = result.month;
-      if (endDayInput) endDayInput.value = result.day - 1;
-      const endDisplaySpan = form.querySelector('[data-date-field="endDate"] .date-display');
-      if (endDisplaySpan && displaySpan) endDisplaySpan.textContent = displaySpan.textContent;
-    }
-    CalendarNoteSheet.#syncDurationFromDateRange(form);
     const changeEvent = new Event('change', { bubbles: true });
     form.dispatchEvent(changeEvent);
   }
 
   /**
-   * Compare startDate and endDate hidden inputs and auto-lock/unlock duration controls.
-   * @param {HTMLFormElement} form - The note sheet form
+   * Clear the recurrence end date.
+   * @param {Event} _event - The click event
+   * @param {HTMLElement} _target - The clicked element
    */
-  static #syncDurationFromDateRange(form) {
-    const startYear = parseInt(form.querySelector('[name="system.startDate.year"]')?.value);
-    const startMonth = parseInt(form.querySelector('[name="system.startDate.month"]')?.value);
-    const startDay = parseInt(form.querySelector('[name="system.startDate.dayOfMonth"]')?.value);
-    const endYear = parseInt(form.querySelector('[name="system.endDate.year"]')?.value);
-    const endMonth = parseInt(form.querySelector('[name="system.endDate.month"]')?.value);
-    const endDay = parseInt(form.querySelector('[name="system.endDate.dayOfMonth"]')?.value);
-    if ([startYear, startMonth, startDay, endYear, endMonth, endDay].some((v) => isNaN(v))) return;
-    const start = { year: startYear, month: startMonth, dayOfMonth: startDay };
-    const end = { year: endYear, month: endMonth, dayOfMonth: endDay };
-    const isRange = !isSameDay(start, end);
-    const hasDurationCheckbox = form.querySelector('[name="system.hasDuration"]');
-    const durationInput = form.querySelector('[name="system.duration"]');
-    const showBookendsCheckbox = form.querySelector('[name="system.showBookends"]');
-    if (!hasDurationCheckbox || !durationInput) return;
-    if (isRange) {
-      const days = daysBetween(start, end) + 1;
-      hasDurationCheckbox.checked = true;
-      hasDurationCheckbox.disabled = true;
-      durationInput.value = days;
-      durationInput.disabled = true;
-      if (showBookendsCheckbox) showBookendsCheckbox.disabled = false;
-    } else {
-      hasDurationCheckbox.disabled = false;
-      durationInput.disabled = !hasDurationCheckbox.checked;
-      if (showBookendsCheckbox) showBookendsCheckbox.disabled = !hasDurationCheckbox.checked;
-    }
+  static async _onClearRepeatEndDate(_event, _target) {
+    await this.document.update({ 'system.repeatEndDate': null });
   }
 
   /**
@@ -1037,19 +1020,6 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       },
       rejectClose: false
     });
-  }
-
-  /**
-   * Handle save and close button click.
-   * @param {PointerEvent} _event - The click event
-   * @param {HTMLElement} _target - The clicked element
-   */
-  static async _onSaveAndClose(_event, _target) {
-    const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
-    this.element.dispatchEvent(submitEvent);
-    setTimeout(() => {
-      this.close();
-    }, 100);
   }
 
   /**
