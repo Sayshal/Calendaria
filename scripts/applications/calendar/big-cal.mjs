@@ -1023,7 +1023,18 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       const startPosition = startDayOfMonth + startDayOfWeek;
       const endPosition = endDayOfMonth + startDayOfWeek;
       if (showBookends) {
-        const baseProps = { name: note.name, color: resolved.color, icon: resolved.icon, iconType: resolved.iconType, displayStyle, showBookends, isHidden, isSecret };
+        const baseProps = {
+          name: note.name,
+          color: resolved.color,
+          icon: resolved.icon,
+          iconType: resolved.iconType,
+          iconIsImage: resolved.iconIsImage,
+          iconIsSvg: resolved.iconIsSvg,
+          displayStyle,
+          showBookends,
+          isHidden,
+          isSecret
+        };
         if (!isContinuation) {
           const col = startPosition % daysInWeek;
           events.push({
@@ -1084,6 +1095,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
           color: resolved.color,
           icon: resolved.icon,
           iconType: resolved.iconType,
+          iconIsImage: resolved.iconIsImage,
+          iconIsSvg: resolved.iconIsSvg,
           weekIndex: startWeekIndex,
           left,
           width,
@@ -1115,6 +1128,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
             color: resolved.color,
             icon: resolved.icon,
             iconType: resolved.iconType,
+            iconIsImage: resolved.iconIsImage,
+            iconIsSvg: resolved.iconIsSvg,
             weekIndex: weekIdx,
             left,
             width,
@@ -1194,6 +1209,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
             color: resolved.color,
             icon: resolved.icon,
             iconType: resolved.iconType,
+            iconIsImage: resolved.iconIsImage,
+            iconIsSvg: resolved.iconIsSvg,
             day: start.dayOfMonth + 1,
             dayOfMonth: start.dayOfMonth,
             month: start.month,
@@ -1246,6 +1263,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
               color: resolved.color,
               icon: resolved.icon,
               iconType: resolved.iconType,
+              iconIsImage: resolved.iconIsImage,
+              iconIsSvg: resolved.iconIsSvg,
               day: dayData.day,
               dayOfMonth: dayData.dayOfMonth,
               month: dayData.month,

@@ -9,7 +9,16 @@
             <input type="checkbox" class="note-select-checkbox" {{#if this.selected}}checked{{/if}} />
           {{/if}}
           <div class="note-color" style="background-color: {{this.color}};"></div>
-          <i class="{{this.icon}} note-icon"></i>
+          {{#if this.iconIsImage}}
+            {{#if this.iconIsSvg}}
+              <img src="{{this.icon}}" alt="" class="note-icon"
+                style="filter: drop-shadow(0px 1000px 0 {{this.color}}); transform: translateY(-1000px);">
+            {{else}}
+              <img src="{{this.icon}}" alt="" class="note-icon">
+            {{/if}}
+          {{else}}
+            <i class="{{this.icon}} note-icon" style="color: {{this.color}};"></i>
+          {{/if}}
           <div class="note-info">
             <span class="note-name">{{this.name}}</span>
             <span class="note-date">{{this.dateLabel}}</span>

@@ -621,7 +621,8 @@ export function getDayContextMenuItems({ calendar, onSetDate, onCreateNote, extr
         const isOwner = note.isOwner;
         const noteIcon = note.system?.icon || 'fas fa-sticky-note';
         const noteColor = note.system?.color || '#4a9eff';
-        const iconHtml = note.system?.iconType === 'fontawesome' ? `<i class="${noteIcon}" style="color: ${noteColor}"></i>` : `<i class="fas fa-sticky-note" style="color: ${noteColor}"></i>`;
+        const iconIsImage = typeof noteIcon === 'string' && !noteIcon.startsWith('fa') && (noteIcon.includes('/') || noteIcon.includes('.'));
+        const iconHtml = iconIsImage ? `<img src="${noteIcon}" alt="" style="width: 1rem; height: 1rem; object-fit: contain;">` : `<i class="${noteIcon}" style="color: ${noteColor}"></i>`;
         items.push({ name: note.name, icon: iconHtml, group: 'notes', _noteData: { note, isOwner }, callback: () => note.sheet.render(true, { mode: isOwner ? 'edit' : 'view' }) });
       }
       const remaining = sortedNotes.length - shown.length;
@@ -777,7 +778,9 @@ export function getFestivalNoteForDay(notes, year, month, dayOfMonth) {
   const description = descEl.textContent || '';
   const color = fn.system?.color || '';
   const icon = fn.system?.icon || '';
-  const iconType = fn.system?.iconType || 'fontawesome';
+  const iconIsImage = typeof icon === 'string' && !icon.startsWith('fa') && (icon.includes('/') || icon.includes('.'));
+  const iconType = iconIsImage ? 'image' : 'fontawesome';
+  const iconIsSvg = iconIsImage && /\.svg(\?.*)?$/i.test(icon);
   const position = isStart ? 'starting' : isEnd ? 'ending' : null;
   let countsForWeekday = true;
   const linked = fn.system?.linkedFestival;
@@ -788,7 +791,23 @@ export function getFestivalNoteForDay(notes, year, month, dayOfMonth) {
   }
   const effectiveBookends = countsForWeekday ? showBookends : false;
   const effectiveShowVisuals = !effectiveBookends || !isMiddle;
-  return { note: fn, name, description, color, icon, iconType, isStart, isEnd, isMiddle, showBookends: effectiveBookends, showVisuals: effectiveShowVisuals, position, countsForWeekday };
+  return {
+    note: fn,
+    name,
+    description,
+    color,
+    icon,
+    iconType,
+    iconIsImage,
+    iconIsSvg,
+    isStart,
+    isEnd,
+    isMiddle,
+    showBookends: effectiveBookends,
+    showVisuals: effectiveShowVisuals,
+    position,
+    countsForWeekday
+  };
 }
 
 /**
@@ -854,9 +873,15 @@ export function generateDayTooltip(calendar, year, month, dayOfMonth, festival =
     const festivalNotes = notes.filter((n) => n.isFestival);
     const regularNotes = notes.filter((n) => !n.isFestival);
     const noteRows = [];
-    for (const n of festivalNotes) noteRows.push(`<div class="tooltip-note festival" style="color: ${n.color}"><i class="fas fa-star"></i> ${escapeText(n.name)}</div>`);
+    const noteIconHtml = (n) => {
+      const icon = n.icon ?? '';
+      const iconIsImage = typeof icon === 'string' && !icon.startsWith('fa') && (icon.includes('/') || icon.includes('.'));
+      if (iconIsImage) return `<img class="tooltip-note-icon" src="${icon}" alt="">`;
+      return `<i class="${icon || 'fas fa-sticky-note'} tooltip-note-icon" style="color: ${n.color}"></i>`;
+    };
+    for (const n of festivalNotes) noteRows.push(`<div class="tooltip-note festival" style="color: ${n.color}">${noteIconHtml(n)} ${escapeText(n.name)}</div>`);
     const shown = regularNotes.slice(0, TOOLTIP_MAX_NOTES - festivalNotes.length);
-    for (const n of shown) noteRows.push(`<div class="tooltip-note">${`<span class="tooltip-note-dot" style="background: ${n.color}"></span>`} ${escapeText(n.name)}</div>`);
+    for (const n of shown) noteRows.push(`<div class="tooltip-note">${noteIconHtml(n)} ${escapeText(n.name)}</div>`);
     const remaining = notes.length - festivalNotes.length - shown.length;
     if (remaining > 0) noteRows.push(`<div class="tooltip-note more">+${remaining} ${localize('CALENDARIA.Common.More')}</div>`);
     rows.push(`<div class="tooltip-notes">${noteRows.join('')}</div>`);

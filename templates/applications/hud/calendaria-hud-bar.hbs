@@ -24,7 +24,15 @@
               <div class="event-icon-wrapper" data-action="openEvent" data-event-id="{{this.id}}"
                 data-parent-id="{{this.parentId}}" data-tooltip-html="{{{this.tooltipHtml}}}"
                 style="--event-color: {{this.color}};">
-                <i class="{{this.icon}} event-icon"></i>
+                {{#if this.iconIsImage}}
+                  {{#if this.iconIsSvg}}
+                    <img src="{{this.icon}}" alt="" class="event-icon tinted">
+                  {{else}}
+                    <img src="{{this.icon}}" alt="" class="event-icon">
+                  {{/if}}
+                {{else}}
+                  <i class="{{this.icon}} event-icon"></i>
+                {{/if}}
               </div>
             {{/each}}
           </div>

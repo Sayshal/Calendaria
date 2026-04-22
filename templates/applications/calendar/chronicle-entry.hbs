@@ -37,7 +37,15 @@
             <div class="note-item{{#if isFestival}} note-item--festival{{/if}}" data-action="openNote"
               data-note-id="{{id}}" data-journal-id="{{journalId}}">
               <span class="note-icon" style="color: {{color}}">
-                <i class="{{icon}}"></i>
+                {{#if iconIsImage}}
+                  {{#if iconIsSvg}}
+                    <img src="{{icon}}" alt="" class="tinted">
+                  {{else}}
+                    <img src="{{icon}}" alt="">
+                  {{/if}}
+                {{else}}
+                  <i class="{{icon}}"></i>
+                {{/if}}
               </span>
               <span class="note-name">{{name}}</span>
               {{#if author}}

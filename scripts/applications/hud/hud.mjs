@@ -1266,7 +1266,10 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
         if (snippet) lines.push(`<hr style="margin: 0.25rem 0; border-color: var(--calendaria-border-light)"><span style="font-style: italic">${snippet}</span>`);
       }
       const tooltipHtml = encodeHtmlAttribute(`<div class="calendaria"><div class="day-tooltip">${lines.join('<br>')}</div></div>`);
-      return { id: note.id, parentId: note.parent.id, name: note.name, icon: note.system.icon || 'fas fa-star', color, tooltipHtml };
+      const icon = note.system.icon || 'fas fa-star';
+      const iconIsImage = typeof icon === 'string' && !icon.startsWith('fa') && (icon.includes('/') || icon.includes('.'));
+      const iconIsSvg = iconIsImage && /\.svg(\?.*)?$/i.test(icon);
+      return { id: note.id, parentId: note.parent.id, name: note.name, icon, iconIsImage, iconIsSvg, color, tooltipHtml };
     });
   }
 

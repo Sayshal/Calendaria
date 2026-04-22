@@ -12,6 +12,17 @@ import { canAddNotes, canDeleteNotes, localize } from '../../utils/_module.mjs';
 const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
 const ContextMenu = foundry.applications.ux.ContextMenu.implementation;
 
+/**
+ * True if the icon value is an image path rather than a font-awesome class.
+ * @param icon
+ */
+const isImageIcon = (icon) => typeof icon === 'string' && !icon.startsWith('fa') && (icon.includes('/') || icon.includes('.'));
+/**
+ * True if the icon value is an SVG image (tintable via drop-shadow).
+ * @param icon
+ */
+const isSvgIcon = (icon) => typeof icon === 'string' && /\.svg(\?.*)?$/i.test(icon);
+
 /** @type {number} Debounce delay for search input (ms). */
 const SEARCH_DEBOUNCE = 200;
 /** @type {number} Debounce delay for date range input (ms). */
@@ -247,6 +258,8 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
       dateLabel: formatNoteDate(stub),
       color: flagData.color || '#4a9eff',
       icon: flagData.icon || 'fas fa-calendar',
+      iconIsImage: isImageIcon(flagData.icon),
+      iconIsSvg: isSvgIcon(flagData.icon),
       visibility,
       displayStyle,
       presetId: (flagData.categories || [])[0] || '',

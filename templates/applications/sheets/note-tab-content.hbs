@@ -30,9 +30,11 @@
             aria-label="{{localize 'CALENDARIA.UI.IconPickerTooltip'}}">
             {{#if (eq iconType "fontawesome")}}
               <i class="{{system.icon}} icon-preview" style="color: {{system.color}}"></i>
-            {{else}}
+            {{else if isSvgIcon}}
               <img src="{{system.icon}}" alt="Note Icon" class="icon-preview"
                 style="filter: drop-shadow(0px 1000px 0 {{system.color}}); transform: translateY(-1000px);">
+            {{else}}
+              <img src="{{system.icon}}" alt="Note Icon" class="icon-preview">
             {{/if}}
             <input type="hidden" name="system.icon" value="{{system.icon}}">
             <input type="hidden" name="system.iconType" value="{{iconType}}">

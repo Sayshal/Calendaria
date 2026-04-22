@@ -303,6 +303,13 @@
       color: var(--event-color, rgb(238 136 136));
       font-size: var(--font-size-11, 0.6875rem);
     }
+
+    img.event-icon {
+      object-fit: cover;
+      width: 100%;
+      height: 100%;
+      border-radius: 0.25rem;
+    }
   }
 
   .center {

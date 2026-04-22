@@ -566,12 +566,17 @@ export function resolveNoteDisplayProps(page) {
   const id = page.id;
   if (_displayPropsCache.has(id)) return _displayPropsCache.get(id);
   const sys = page.system;
+  const icon = sys.icon || 'fas fa-calendar';
+  const iconIsImage = typeof icon === 'string' && !icon.startsWith('fa') && (icon.includes('/') || icon.includes('.'));
+  const iconIsSvg = iconIsImage && /\.svg(\?.*)?$/i.test(icon);
   const result = {
     displayStyle: sys.displayStyle || DISPLAY_STYLES.ICON,
     visibility: sys.visibility || NOTE_VISIBILITY.VISIBLE,
     color: sys.color || '#4a9eff',
-    icon: sys.icon || 'fas fa-calendar',
-    iconType: sys.iconType || 'fontawesome',
+    icon,
+    iconType: iconIsImage ? 'image' : 'fontawesome',
+    iconIsImage,
+    iconIsSvg,
     isFestival: !!sys.linkedFestival
   };
   _displayPropsCache.set(id, result);
@@ -594,6 +599,8 @@ export function enrichNoteForDisplay(page) {
     color: props.color,
     icon: props.icon,
     iconType: props.iconType,
+    iconIsImage: props.iconIsImage,
+    iconIsSvg: props.iconIsSvg,
     isFestival: props.isFestival,
     isHidden: props.visibility === NOTE_VISIBILITY.HIDDEN,
     isSecret: props.visibility === NOTE_VISIBILITY.SECRET,

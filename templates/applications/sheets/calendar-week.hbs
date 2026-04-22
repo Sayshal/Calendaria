@@ -20,10 +20,10 @@
             {{#each ../eventBlocks}}
               {{#if (eq ../hour startHour)}}
                 <div
-                  class="week-event-block {{#if allDay}}all-day{{/if}} {{#if (eq hourSpan 1)}}compact{{/if}} {{#if continuationLeft}}cont-left{{/if}} {{#if continuationRight}}cont-right{{/if}}"
-                  style="--hour-span: {{hourSpan}}; background-color: {{color}};" data-tooltip
-                  aria-label="{{name}}: {{startTime}}{{#if endTime}} - {{endTime}}{{/if}}" data-action="editNote"
-                  data-note-id="{{id}}">
+                  class="week-event-block {{#if allDay}}all-day{{/if}} {{#if (eq hourSpan 1)}}compact{{/if}} {{#if continuationLeft}}cont-left{{/if}} {{#if continuationRight}}cont-right{{/if}} {{#if iconIsImage}}has-image-icon{{/if}}"
+                  style="--hour-span: {{hourSpan}}; --event-color: {{color}}; {{#unless iconIsImage}}background-color: {{color}};{{/unless}}"
+                  data-tooltip aria-label="{{name}}: {{startTime}}{{#if endTime}} - {{endTime}}{{/if}}"
+                  data-action="editNote" data-note-id="{{id}}">
                   <div class="event-icon">
                     {{#if (eq iconType "fontawesome")}}
                       <i class="{{icon}}"></i>

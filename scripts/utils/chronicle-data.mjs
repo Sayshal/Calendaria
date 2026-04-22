@@ -161,12 +161,17 @@ export function buildScrollEntries(startDate, endDate, options = {}) {
     const stubs = NoteManager.getNotesForDate(year, month, dayOfMonth, calendarId);
     const notes = stubs.map((stub) => {
       const props = resolveStubDisplayProps(stub);
+      const iconStr = props.icon ?? '';
+      const iconIsImage = typeof iconStr === 'string' && !iconStr.startsWith('fa') && (iconStr.includes('/') || iconStr.includes('.'));
+      const iconIsSvg = iconIsImage && /\.svg(\?.*)?$/i.test(iconStr);
       const note = {
         id: stub.id,
         journalId: stub.journalId,
         name: stub.name,
         color: props.color,
         icon: props.icon,
+        iconIsImage,
+        iconIsSvg,
         isFestival: props.isFestival,
         isOwner: stub.isOwner,
         author: stub.flagData.author?.name || null,

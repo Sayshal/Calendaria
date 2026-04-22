@@ -6,6 +6,8 @@
       <div class="note-icon">
         {{#if (eq iconType "fontawesome")}}
           <i class="{{system.icon}}"></i>
+        {{else if isSvgIcon}}
+          <img src="{{system.icon}}" alt="Note Icon" class="tinted">
         {{else}}
           <img src="{{system.icon}}" alt="Note Icon">
         {{/if}}
