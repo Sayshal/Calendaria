@@ -1,7 +1,30 @@
+## New Features
+
+- Note and festival icons set to image paths (webp, png, svg) render as actual images across the note sheet, viewer list, BigCal indicators, week blocks, chronicle entries, HUD bar, and day-cell tooltips
+- Schedule tab uses an explicit One-time / Recurring mode toggle; One-time uses start and end date pickers, Recurring uses an anchor date with optional Repeats Until, per-occurrence duration, conditions, and max occurrences
+
 ## Bug Fixes
 
-- Date-triggered notes fire within one tick of their scheduled time instead of waiting up to 30 minutes for the next check
-- Event macros scheduled at midnight no longer race with auto-generated weather, so setWeather calls from date-triggered macros stick instead of getting overwritten
-- Silent events now suppress only the chat announcement; their hooks and macros still run
-- Toggling a note's visibility to Hidden no longer triggers Foundry v13 ownership validation errors
-- Wind direction on setWeather accepts compass strings (N, NNE, NE, ...) or degrees, normalized to 0-360
+- Fixed festival duration blowout from yearZero offset mismatch between internal year storage and calendar widget display
+- Migrated existing festival-linked notes with sub-yearZero years to correct the displayed year offset
+- Single-day festival note moves sync endDate with startDate to prevent duration miscalculation
+- Festival definitions no longer get wiped when the note cleanup pass prunes duplicate festival notes
+- Migrated removed-calendar renames in stored overrides and note/folder flags so notes created under khorvaire or greyhawk-364 resolve against galifar or greyhawk after the consolidation
+- Recurring notes no longer inherit an inflated span from endDate via getEffectiveDuration
+
+## Changes
+
+- Added migrateNoteDurationNormalization to reconcile existing note duration, endDate, and hasDuration without silently truncating multi-day events
+- Festival editing moved to the note sheet; Calendar editor Festival tab is read-only with Add, Open, Delete, and Reset to Bundled buttons
+- Festival metadata (name, icon, color, schedule, conditions, duration, countsForWeekday, leapYearOnly, leapDuration) stored on linkedFestival notes; calendar.festivals is seed-only
+- Header control buttons and the emblem color picker restyled to respect theme variables
+- Image icons crop to circles across surfaces (rounded corners on the HUD bar); SVG icons keep color-tinted drop-shadow rendering
+- Importers (Simple Calendar, Mini Calendar) create festival notes directly instead of writing to calendar.festivals
+- Removed leftover hasDuration handling in preset-manager add, reset, import, and sync paths
+- Seeded-calendars setting tracks which calendars have been seeded to prevent duplicate festival notes when switching calendars
+- Show Bookends moved to the Settings tab under Display Style; Duration moved to the Schedule tab
+- Week-mode event blocks with image icons drop the colored background and upscale the icon to fill the cell
+
+## Documentation
+
+- Rewrote Calendar Editor, Notes and Events, and Note Preset Editor docs to reflect the festival-notes refactor and the one-time / recurring schedule toggle
