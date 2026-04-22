@@ -1157,6 +1157,7 @@ export default class CalendariaSettings {
       },
       restAdvanceModeMigrationComplete: { name: 'Rest Advance Mode Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       removedCalendarsMigrationComplete: { name: 'Removed Calendars Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
+      removedCalendarOverridesMigrationComplete: { name: 'Removed Calendar Overrides Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       zoneTempBlankInheritanceMigrationComplete: { name: 'Zone Temp Blank Inheritance Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.CLOCK_LOCKED]: { name: 'Clock Locked', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.SYNC_CLOCK_PAUSE]: {

@@ -522,6 +522,69 @@ export async function migrateRemovedCalendars() {
 }
 
 /**
+ * Complete the 1.0.6 removed-calendar redirect by also rewriting stored overrides,
+ * custom-calendar entries, and note/folder calendarId flags that were left behind.
+ * @since 1.0.8
+ * @deprecated Remove in 1.2.0
+ * @returns {Promise<void>}
+ */
+export async function migrateRemovedCalendarOverrides() {
+  const KEY = 'removedCalendarOverridesMigrationComplete';
+  if (!game.user?.isGM) return;
+  if (game.settings.get(MODULE.ID, KEY)) return;
+  const redirects = { khorvaire: 'galifar', 'greyhawk-364': 'greyhawk' };
+  const renameSettingKeys = async (settingKey, label) => {
+    const data = game.settings.get(MODULE.ID, settingKey);
+    if (!data || typeof data !== 'object') return;
+    const clone = foundry.utils.deepClone(data);
+    let dirty = false;
+    for (const [from, to] of Object.entries(redirects)) {
+      if (!(from in clone)) continue;
+      if (to in clone) log(2, `Migration: ${label} has both "${from}" and "${to}"; using "${from}" data and discarding "${to}"`);
+      clone[to] = clone[from];
+      delete clone[from];
+      dirty = true;
+      log(3, `Migration: renamed ${label}[${from}] → ${label}[${to}]`);
+    }
+    if (dirty) await game.settings.set(MODULE.ID, settingKey, clone);
+  };
+  await renameSettingKeys(SETTINGS.DEFAULT_OVERRIDES, 'defaultOverrides');
+  await renameSettingKeys(SETTINGS.CUSTOM_CALENDARS, 'customCalendars');
+  let folderCount = 0;
+  for (const folder of game.folders) {
+    const cid = folder.getFlag(MODULE.ID, 'calendarId');
+    if (redirects[cid]) {
+      await folder.setFlag(MODULE.ID, 'calendarId', redirects[cid]);
+      folderCount++;
+    }
+  }
+  let journalCount = 0;
+  let pageCount = 0;
+  for (const journal of game.journal) {
+    const jid = journal.getFlag(MODULE.ID, 'calendarId');
+    if (redirects[jid]) {
+      await journal.setFlag(MODULE.ID, 'calendarId', redirects[jid]);
+      journalCount++;
+    }
+    const pageUpdates = [];
+    for (const page of journal.pages) {
+      const pid = page.getFlag(MODULE.ID, 'calendarId');
+      const linkedCid = page.system?.linkedFestival?.calendarId;
+      const update = { _id: page.id };
+      if (redirects[pid]) update[`flags.${MODULE.ID}.calendarId`] = redirects[pid];
+      if (redirects[linkedCid]) update['system.linkedFestival.calendarId'] = redirects[linkedCid];
+      if (Object.keys(update).length > 1) pageUpdates.push(update);
+    }
+    if (pageUpdates.length) {
+      await JournalEntryPage.updateDocuments(pageUpdates, { parent: journal });
+      pageCount += pageUpdates.length;
+    }
+  }
+  if (folderCount || journalCount || pageCount) log(3, `Migrated calendarId flags: ${folderCount} folders, ${journalCount} journals, ${pageCount} pages`);
+  await game.settings.set(MODULE.ID, KEY, true);
+}
+
+/**
  * Null out zone temperature entries that were saved as the buggy {0,19}/{0,20}.
  * @since 1.0.6
  * @deprecated Remove in 1.2.0

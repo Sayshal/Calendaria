@@ -309,7 +309,7 @@ export default class NoteManager {
    */
   static onPreDeleteJournalEntry(journal, _options, _userId) {
     const page = journal.pages.contents[0];
-    if (game.user.isGM && page?.system?.linkedFestival) {
+    if (game.user.isGM && page?.system?.linkedFestival && !this.#bypassDeleteProtection) {
       NoteManager.#pendingFestivalRemovals.set(journal.id, page.system.linkedFestival);
       return;
     }
