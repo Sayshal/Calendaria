@@ -289,7 +289,7 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     let windSpeedMax = null;
     if (isZoneMode) {
       const dirWeights = this.#data.windDirections ?? {};
-      windDirections = Object.entries(COMPASS_DIRECTIONS).map(([id]) => ({ id, weight: dirWeights[id] ?? '' }));
+      windDirections = Object.entries(COMPASS_DIRECTIONS).map(([id]) => ({ id, label: game.i18n.localize(`CALENDARIA.Wind.${id}`), weight: dirWeights[id] ?? '' }));
       windSpeedMin = this.#data.windSpeedRange?.min ?? null;
       windSpeedMax = this.#data.windSpeedRange?.max ?? null;
     }

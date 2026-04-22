@@ -48,7 +48,7 @@
         <div class="form-fields wind-direction-grid">
           {{#each windDirections}}
             <div class="form-group">
-              <label for="wind-{{this.id}}">{{this.id}}</label>
+              <label for="wind-{{this.id}}">{{this.label}}</label>
               <div class="form-fields">
                 <input type="number" id="wind-{{this.id}}" name="wind_{{this.id}}" min="0" max="100" step="1"
                   value="{{this.weight}}" placeholder="0">

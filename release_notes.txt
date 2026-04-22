@@ -5,6 +5,7 @@
 
 ## Bug Fixes
 
+- Cardinal Weights grid in the climate zone editor now localizes the direction initials instead of hard-coding the English keys
 - Fixed festival duration blowout from yearZero offset mismatch between internal year storage and calendar widget display
 - Migrated existing festival-linked notes with sub-yearZero years to correct the displayed year offset
 - Single-day festival note moves sync endDate with startDate to prevent duration miscalculation
