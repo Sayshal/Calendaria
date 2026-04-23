@@ -102,13 +102,23 @@ export function findAnchorPhasePosition(moon, dateComponents) {
 export function getPhasePositionFromIndex(moon, phaseIndex) {
   const phases = moon.phases ? Object.values(moon.phases) : [];
   if (!phases.length) return 0;
-  const phase = phases[Math.min(phaseIndex, phases.length - 1)];
+  const idx = Math.min(phaseIndex, phases.length - 1);
+  if (moon.phaseMode === 'randomized') {
+    const weights = phases.map((p) => Math.max(1, p.weight ?? 1));
+    const totalWeight = weights.reduce((a, b) => a + b, 0);
+    let cursor = 0;
+    for (let i = 0; i < idx; i++) cursor += weights[i];
+    const start = cursor / totalWeight;
+    const end = idx === phases.length - 1 ? 1 : (cursor + weights[idx]) / totalWeight;
+    return (start + end) / 2;
+  }
+  const phase = phases[idx];
   if (phase?.start != null && phase?.end != null) {
     const start = phase.start;
     const end = phase.end > start ? phase.end : phase.end + 1;
     return ((start + end) / 2) % 1;
   }
-  return (phaseIndex + 0.5) / phases.length;
+  return (idx + 0.5) / phases.length;
 }
 
 /**

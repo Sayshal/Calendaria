@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import CalendarManager from '../../scripts/calendar/calendar-manager.mjs';
+import { getPhasePositionFromIndex } from '../../scripts/data/moon-phase-resolver.mjs';
 import { getConvergencesInRange, getMoonPhasePosition, getNextConvergence, getNextFullMoon, isMoonFull } from '../../scripts/utils/formatting/moon-utils.mjs';
 
 vi.mock('../../scripts/calendar/calendar-manager.mjs', async () => {
@@ -151,5 +152,26 @@ describe('getConvergencesInRange()', () => {
       expect(result[0]).toHaveProperty('month');
       expect(result[0]).toHaveProperty('dayOfMonth');
     }
+  });
+});
+
+describe('getPhasePositionFromIndex()', () => {
+  const buildPhases = (weights) => Object.fromEntries(weights.map((weight, i) => [`p${i}`, { name: `p${i}`, start: i / weights.length, end: (i + 1) / weights.length, weight }]));
+  it('returns the static midpoint when weights are uniform in randomized mode', () => {
+    const moon = { phaseMode: 'randomized', phases: buildPhases([1, 1, 1, 1, 1, 1, 1, 1]) };
+    expect(getPhasePositionFromIndex(moon, 4)).toBeCloseTo(0.5625, 4);
+  });
+  it('returns the weighted midpoint in randomized mode so anchors land in the matching slice', () => {
+    const moon = { phaseMode: 'randomized', phases: buildPhases([10, 10, 10, 10, 1, 10, 10, 10]) };
+    const totalWeight = 71;
+    const expectedStart = 40 / totalWeight;
+    const expectedEnd = 41 / totalWeight;
+    const position = getPhasePositionFromIndex(moon, 4);
+    expect(position).toBeGreaterThanOrEqual(expectedStart);
+    expect(position).toBeLessThan(expectedEnd);
+  });
+  it('uses stored start/end in fixed phase mode regardless of weights', () => {
+    const moon = { phaseMode: 'fixed', phases: buildPhases([10, 10, 10, 10, 1, 10, 10, 10]) };
+    expect(getPhasePositionFromIndex(moon, 4)).toBeCloseTo(0.5625, 4);
   });
 });
