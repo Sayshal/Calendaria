@@ -485,8 +485,9 @@ export function formatCustom(calendar, components, formatStr) {
     if (token in customContext) return customContext[token];
     return token;
   };
-  const TOKEN_REGEX = /\[([^\]]+)]|YYYY|YY|Y|MMMM|MMM|MM|Mo|M|EEEEE|EEEE|EEE|EE|E|dddd|ddd|dd|Do|DDD|DD|D|d|e|GGGG|GGG|GG|G|QQQQ|QQQ|QQ|Q|zzzz|z|ww|w|W|HH|H|hh|h|mm|m|ss|s|A|a/g;
-  return formatStr.replace(TOKEN_REGEX, (match, customToken) => {
+  const TOKEN_REGEX = /\[([^\]]+)]|\{([^}]+)\}|YYYY|YY|Y|MMMM|MMM|MM|Mo|M|EEEEE|EEEE|EEE|EE|E|dddd|ddd|dd|Do|DDD|DD|D|d|e|GGGG|GGG|GG|G|QQQQ|QQQ|QQ|Q|zzzz|z|ww|w|W|HH|H|hh|h|mm|m|ss|s|A|a/g;
+  return formatStr.replace(TOKEN_REGEX, (match, bracketToken, curlyToken) => {
+    const customToken = bracketToken ?? curlyToken;
     if (customToken) {
       if (customToken.includes('|')) {
         const [primary, fallback] = customToken.split('|', 2);
@@ -550,6 +551,10 @@ export function validateFormatString(formatStr, calendar, components) {
   const closeBrackets = (formatStr.match(/]/g) || []).length;
   if (openBrackets !== closeBrackets) return { valid: false, error: 'CALENDARIA.Format.Error.UnclosedBracket' };
   if (/\[]/.test(formatStr)) return { valid: false, error: 'CALENDARIA.Format.Error.EmptyBracket' };
+  const openCurly = (formatStr.match(/\{/g) || []).length;
+  const closeCurly = (formatStr.match(/}/g) || []).length;
+  if (openCurly !== closeCurly) return { valid: false, error: 'CALENDARIA.Format.Error.UnclosedBracket' };
+  if (/\{}/.test(formatStr)) return { valid: false, error: 'CALENDARIA.Format.Error.EmptyBracket' };
   if (calendar && components) {
     try {
       const preview = formatCustom(calendar, components, formatStr);

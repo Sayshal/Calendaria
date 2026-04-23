@@ -619,6 +619,8 @@ describe('formatCustom()', () => {
     expect(result).toBe('7 7 0007');
   });
   it('passes through unrecognized bracket tokens as literals', () => { expect(formatCustom(mockCalendar, components, '[hello]')).toBe('hello'); });
+  it('treats curly braces as enricher-safe literal wrappers', () => { expect(formatCustom(mockCalendar, components, 'Y{. év} MMMM{ havának} D{. napja}')).toBe('2024. év January havának 15. napja'); });
+  it('supports custom context tokens inside curly braces', () => { expect(formatCustom(mockCalendar, components, '{era}')).toBe('Common Era'); });
   it('handles approxTime/approxDate custom tokens', () => {
     const result = formatCustom(mockCalendar, components, '[approxTime]');
     expect(result).toMatch(/CALENDARIA\.Format\.ApproxTime\.\w+/);

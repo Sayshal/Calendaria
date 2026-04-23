@@ -27,6 +27,7 @@ Display a date. Clickable: navigates calendar to that date.
 [[cal.date format=dateFull]] → Mercday, 5 Shadowmoon 1499
 [[cal.date approx=true]]     → Late Winter
 [[cal.date time=true]]       → 5 Shadowmoon 1499, 14:30
+[[cal.date format="{the }Do{ day of }MMMM"]] → the 5th day of Shadowmoon
 ```
 
 | Parameter  | Type             | Description                                                |
@@ -35,6 +36,8 @@ Display a date. Clickable: navigates calendar to that date.
 | `format`   | `string`         | Format preset or token string                              |
 | `approx`   | `boolean`        | Approximate date description                               |
 | `time`     | `boolean`        | Include time                                               |
+
+> **Custom format strings inside enrichers** must use `{...}` for literal text, not `[...]`. The `[[...]]` enricher delimiters collide with `[literal]`, so `{literal}` is the enricher-safe form. Both forms work identically in the settings Display Format editor.
 
 ---
 
