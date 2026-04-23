@@ -137,12 +137,14 @@ export default class CalendarManager {
     const ids = Object.keys(customCalendars);
     if (ids.length === 0) return;
     for (const id of ids) {
-      const data = customCalendars[id];
-      const calendar = new CalendariaCalendar(data);
-      CalendarRegistry.register(id, calendar);
-      log(3, `Loaded custom calendar: ${id}`);
+      try {
+        const calendar = new CalendariaCalendar(customCalendars[id]);
+        CalendarRegistry.register(id, calendar);
+        log(3, `Loaded custom calendar: ${id}`);
+      } catch (error) {
+        log(1, `Failed to load custom calendar "${id}":`, error);
+      }
     }
-    log(3, `Loaded ${ids.length} custom calendars`);
   }
 
   /**
@@ -155,26 +157,30 @@ export default class CalendarManager {
     if (ids.length === 0) return;
     let needsSave = false;
     for (const id of ids) {
-      const data = overrides[id];
-      const bundledData = this.#bundledData.get(id);
-      if (data._isDelta && bundledData) {
-        CalendarManager.#stripStaleDefaults(data, bundledData);
-        const calendarData = foundry.utils.mergeObject(foundry.utils.deepClone(bundledData), data, { performDeletions: true });
-        delete calendarData._isDelta;
-        const calendar = new CalendariaCalendar(calendarData);
-        CalendarRegistry.register(id, calendar);
-        log(3, `Applied delta override for bundled calendar: ${id}`);
-      } else if (bundledData) {
-        if (CalendarManager.#alignOverrideKeys(data, bundledData)) needsSave = true;
-        const merged = foundry.utils.mergeObject(foundry.utils.deepClone(bundledData), data);
-        const calendar = new CalendariaCalendar(merged);
-        CalendarRegistry.register(id, calendar);
-        needsSave = true;
-        log(3, `Applied legacy override for bundled calendar: ${id}`);
-      } else {
-        const calendar = new CalendariaCalendar(data);
-        CalendarRegistry.register(id, calendar);
-        log(3, `Applied override for calendar: ${id}`);
+      try {
+        const data = overrides[id];
+        const bundledData = this.#bundledData.get(id);
+        if (data._isDelta && bundledData) {
+          CalendarManager.#stripStaleDefaults(data, bundledData);
+          const calendarData = foundry.utils.mergeObject(foundry.utils.deepClone(bundledData), data, { performDeletions: true });
+          delete calendarData._isDelta;
+          const calendar = new CalendariaCalendar(calendarData);
+          CalendarRegistry.register(id, calendar);
+          log(3, `Applied delta override for bundled calendar: ${id}`);
+        } else if (bundledData) {
+          if (CalendarManager.#alignOverrideKeys(data, bundledData)) needsSave = true;
+          const merged = foundry.utils.mergeObject(foundry.utils.deepClone(bundledData), data);
+          const calendar = new CalendariaCalendar(merged);
+          CalendarRegistry.register(id, calendar);
+          needsSave = true;
+          log(3, `Applied legacy override for bundled calendar: ${id}`);
+        } else {
+          const calendar = new CalendariaCalendar(data);
+          CalendarRegistry.register(id, calendar);
+          log(3, `Applied override for calendar: ${id}`);
+        }
+      } catch (error) {
+        log(1, `Failed to apply override for calendar "${id}":`, error);
       }
     }
     if (needsSave && game.user?.isGM) {
