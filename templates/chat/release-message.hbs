@@ -10,28 +10,11 @@
             class="fa-brands fa-patreon"></i> Now on Patreon!</a></strong>
     </p>
 
-    <h4>New Features</h4>
-    <ul>
-      <li>Image icons (webp, png, svg) render as actual images across note sheets, BigCal, week blocks, chronicle, HUD, and tooltips</li>
-      <li>Schedule tab has an explicit One-time / Recurring mode toggle with per-mode controls</li>
-    </ul>
-
     <h4>Bug Fixes</h4>
     <ul>
-      <li>Cardinal Weights grid in the climate zone editor now localizes direction initials</li>
-      <li>Festival duration blowout from yearZero offset mismatch</li>
-      <li>Festival definitions wiped when the note cleanup pass pruned duplicates</li>
-      <li>Recurring notes inheriting an inflated span from endDate</li>
-      <li>Single-day note moves not syncing endDate with startDate, inflating duration</li>
-      <li>Removed-calendar renames now migrate stored overrides and note/folder flags</li>
-    </ul>
-
-    <h4>Changes</h4>
-    <ul>
-      <li>Festival editing moved to the note sheet; Calendar editor Festival tab is read-only</li>
-      <li>Festival metadata stored on <code>linkedFestival</code> notes; <code>calendar.festivals</code> is seed-only</li>
-      <li>Simple Calendar and Mini Calendar importers create festival notes directly</li>
-      <li>Show Bookends moved to Settings tab; Duration moved to Schedule tab</li>
+      <li>Custom format strings now accept <code>{literal}</code> alongside <code>[literal]</code> to avoid bracket collisions inside <code>[[ ]]</code> enrichers</li>
+      <li>Moon phase anchors on randomized moons with weighted phases land inside the intended phase slice</li>
+      <li>Malformed custom calendars or default overrides no longer halt module startup; broken calendars are skipped and logged</li>
     </ul>
   </div>
 
