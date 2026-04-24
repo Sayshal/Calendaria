@@ -249,6 +249,19 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         this.render({ force: true, parts: ['theme'] });
       });
     }
+    const forceThemeSelect = this.element.querySelector('select[name="forceTheme"]');
+    if (forceThemeSelect && !forceThemeSelect.dataset.listenerAttached) {
+      forceThemeSelect.dataset.listenerAttached = 'true';
+      forceThemeSelect.addEventListener('change', async (e) => {
+        const value = e.target.value;
+        const oldForce = game.settings.get(MODULE.ID, SETTINGS.FORCE_THEME);
+        await game.settings.set(MODULE.ID, SETTINGS.FORCE_THEME, value);
+        if (isCustomThemeKey(value)) await game.settings.set(MODULE.ID, SETTINGS.FORCED_THEME_COLORS, getColorsForTheme(value));
+        else if (value !== 'none') await game.settings.set(MODULE.ID, SETTINGS.FORCED_THEME_COLORS, {});
+        if (oldForce !== value) initializeTheme();
+        this.render({ force: true, parts: ['theme'] });
+      });
+    }
     if (!this.element.dataset.formListenerAttached) {
       this.element.dataset.formListenerAttached = 'true';
       this.element.addEventListener('change', () => this.#setSaveIndicator('saving'));

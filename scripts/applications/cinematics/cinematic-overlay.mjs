@@ -335,6 +335,7 @@ export default class CinematicOverlay {
     if (!label) return;
     label.textContent = kf.dateLabel ?? '';
     label._lastDateKey = `${kf.date?.year}-${kf.date?.month}-${kf.date?.dayOfMonth}`;
+    this.#element?.setAttribute('data-content-ready', 'true');
   }
 
   /**

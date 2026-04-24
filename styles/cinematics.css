@@ -62,6 +62,7 @@
   .cinematic-calendar-page {
     gap: 0.75rem;
     display: flex;
+    opacity: 0;
     flex-direction: column;
     align-items: center;
     padding: 1.875rem 3rem 1.5rem;
@@ -78,7 +79,12 @@
       0 0.25rem 1.5rem rgb(0 0 0 / 40%),
       inset 0 0.0625rem 0 rgb(255 255 255 / 15%),
       inset 0 0 2.5rem color-mix(in srgb, var(--calendaria-border, rgb(140 120 80)) 10%, transparent);
+    transition: opacity 0.25s ease-out;
     animation: cinematic-page-drift 8s ease-in-out infinite;
+  }
+
+  &[data-content-ready='true'] .cinematic-calendar-page {
+    opacity: 1;
   }
 
   .cinematic-fixed-section {
