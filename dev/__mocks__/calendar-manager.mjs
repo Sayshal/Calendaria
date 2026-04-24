@@ -68,10 +68,10 @@ const defaultCalendar = addCalendarGetters({
   ],
   seasons: {
     values: [
-      { name: 'Spring', dayStart: 80, dayEnd: 171 },
-      { name: 'Summer', dayStart: 172, dayEnd: 264 },
-      { name: 'Autumn', dayStart: 265, dayEnd: 354 },
-      { name: 'Winter', dayStart: 355, dayEnd: 79 }
+      { name: 'Spring', seasonalType: 'spring', dayStart: 80, dayEnd: 171 },
+      { name: 'Summer', seasonalType: 'summer', dayStart: 172, dayEnd: 264 },
+      { name: 'Autumn', seasonalType: 'autumn', dayStart: 265, dayEnd: 354 },
+      { name: 'Winter', seasonalType: 'winter', dayStart: 355, dayEnd: 79 }
     ]
   },
   eras: [

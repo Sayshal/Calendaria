@@ -91,13 +91,13 @@ describe('computed events', () => {
     expect(resolveComputedDate(config, 2024)).toEqual({ year: 2024, month: 2, dayOfMonth: 24 });
   });
   it('resolveComputedDate handles springEquinox anchor', () => {
-    CalendarManager._configure({ seasons: { values: [{ name: 'Spring', dayStart: 80, dayEnd: 171 }, { name: 'Summer', dayStart: 172, dayEnd: 264 }, { name: 'Autumn', dayStart: 265, dayEnd: 354 }, { name: 'Winter', dayStart: 355, dayEnd: 79 }] } });
+    CalendarManager._configure({ seasons: { values: [{ name: 'Spring', seasonalType: 'spring', dayStart: 80, dayEnd: 171 }, { name: 'Summer', seasonalType: 'summer', dayStart: 172, dayEnd: 264 }, { name: 'Autumn', seasonalType: 'autumn', dayStart: 265, dayEnd: 354 }, { name: 'Winter', seasonalType: 'winter', dayStart: 355, dayEnd: 79 }] } });
     const result = resolveComputedDate({ chain: [{ type: 'anchor', value: 'springEquinox' }] }, 2024);
     expect(result).not.toBe(null);
     expect(result.year).toBe(2024);
   });
   it('resolveComputedDate handles autumnEquinox anchor', () => {
-    CalendarManager._configure({ seasons: { values: [{ name: 'Spring', dayStart: 80, dayEnd: 171 }, { name: 'Summer', dayStart: 172, dayEnd: 264 }, { name: 'Autumn', dayStart: 265, dayEnd: 354 }, { name: 'Winter', dayStart: 355, dayEnd: 79 }] } });
+    CalendarManager._configure({ seasons: { values: [{ name: 'Spring', seasonalType: 'spring', dayStart: 80, dayEnd: 171 }, { name: 'Summer', seasonalType: 'summer', dayStart: 172, dayEnd: 264 }, { name: 'Autumn', seasonalType: 'autumn', dayStart: 265, dayEnd: 354 }, { name: 'Winter', seasonalType: 'winter', dayStart: 355, dayEnd: 79 }] } });
     const result = resolveComputedDate({ chain: [{ type: 'anchor', value: 'autumnEquinox' }] }, 2024);
     expect(result).not.toBe(null);
     expect(result.year).toBe(2024);
@@ -117,23 +117,27 @@ describe('computed events', () => {
     expect(result.year).toBe(2024);
   });
   it('resolveComputedDate resolves winterSolstice via season midpoint when daylight config is absent', () => {
-    CalendarManager._configure({ daylight: {}, seasons: { values: [{ name: 'Spring', dayStart: 80, dayEnd: 171 }, { name: 'Summer', dayStart: 172, dayEnd: 264 }, { name: 'Autumn', dayStart: 265, dayEnd: 354 }, { name: 'Winter', dayStart: 355, dayEnd: 79 }] } });
+    CalendarManager._configure({ daylight: {}, seasons: { values: [{ name: 'Spring', seasonalType: 'spring', dayStart: 80, dayEnd: 171 }, { name: 'Summer', seasonalType: 'summer', dayStart: 172, dayEnd: 264 }, { name: 'Autumn', seasonalType: 'autumn', dayStart: 265, dayEnd: 354 }, { name: 'Winter', seasonalType: 'winter', dayStart: 355, dayEnd: 79 }] } });
     const result = resolveComputedDate({ chain: [{ type: 'anchor', value: 'winterSolstice' }] }, 2024);
     expect(result).not.toBe(null);
     expect(result.year).toBe(2024);
   });
+  it('resolveComputedDate returns null when no season has matching seasonalType', () => {
+    CalendarManager._configure({ daylight: {}, seasons: { values: [{ name: 'Spring', dayStart: 80, dayEnd: 171 }] } });
+    expect(resolveComputedDate({ chain: [{ type: 'anchor', value: 'springEquinox' }] }, 9998)).toBeNull();
+  });
   it('resolveComputedDate handles daysAfter step', () => {
-    CalendarManager._configure({ seasons: { values: [{ name: 'Spring', dayStart: 80, dayEnd: 171 }] } });
+    CalendarManager._configure({ seasons: { values: [{ name: 'Spring', seasonalType: 'spring', dayStart: 80, dayEnd: 171 }] } });
     const config = { chain: [{ type: 'anchor', value: 'springEquinox' }, { type: 'daysAfter', params: { days: 10 } }] };
     expect(resolveComputedDate(config, 2024)).not.toBe(null);
   });
   it('resolveComputedDate handles weekdayOnOrAfter step', () => {
-    CalendarManager._configure({ seasons: { values: [{ name: 'Spring', dayStart: 80, dayEnd: 171 }] } });
+    CalendarManager._configure({ seasons: { values: [{ name: 'Spring', seasonalType: 'spring', dayStart: 80, dayEnd: 171 }] } });
     const config = { chain: [{ type: 'anchor', value: 'springEquinox' }, { type: 'weekdayOnOrAfter', params: { weekday: 0 } }] };
     expect(resolveComputedDate(config, 2024)).not.toBe(null);
   });
   it('resolveComputedDate handles firstAfter weekday condition', () => {
-    CalendarManager._configure({ seasons: { values: [{ name: 'Spring', dayStart: 80, dayEnd: 171 }] } });
+    CalendarManager._configure({ seasons: { values: [{ name: 'Spring', seasonalType: 'spring', dayStart: 80, dayEnd: 171 }] } });
     const config = { chain: [{ type: 'anchor', value: 'springEquinox' }, { type: 'firstAfter', condition: 'weekday', params: { weekday: 0 } }] };
     expect(resolveComputedDate(config, 2024)).not.toBe(null);
   });

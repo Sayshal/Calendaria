@@ -721,7 +721,7 @@
   "CALENDARIA.Editor.Hint.PhaseSeed": "Seed value for deterministic random phase generation. Same seed always produces the same phases. Use the dice button to randomize.",
   "CALENDARIA.Editor.Hint.ReferenceDate": "A known date and phase used to anchor moon cycle calculations.",
   "CALENDARIA.Editor.Hint.ResetWeekdays": "Start each year on the first weekday, resetting the continuous weekday cycle.",
-  "CALENDARIA.Editor.Hint.SeasonalType": "Maps custom seasons to canonical weather types for integrations.",
+  "CALENDARIA.Editor.Hint.SeasonalType": "Required for equinox and solstice anchors and weather integrations. Without it, astronomical anchors will not resolve for this season.",
   "CALENDARIA.Editor.Hint.SeasonOffset": "Day of year when the first season begins (0 = first day of year).",
   "CALENDARIA.Editor.Hint.Seasons": "Define seasons by day ranges. Optional.",
   "CALENDARIA.Editor.Hint.SeasonsFields": "Each row: name, abbreviation, icon (FontAwesome class), color, and date range (start month/day to end month/day).",

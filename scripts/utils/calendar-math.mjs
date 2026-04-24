@@ -173,6 +173,41 @@ export function getSeasonDay(dayOfYear, seasons, totalDays, idx) {
 }
 
 /**
+ * Find a season by its canonical type using the seasonalType metadata.
+ * @param {object[]} seasons - Seasons array
+ * @param {'spring'|'summer'|'autumn'|'winter'} type - Canonical seasonal type
+ * @returns {number} Season index, or -1 if not found
+ */
+export function findSeasonIndexByType(seasons, type) {
+  if (!Array.isArray(seasons) || !seasons.length || !type) return -1;
+  return seasons.findIndex((s) => s?.seasonalType === type);
+}
+
+/**
+ * Resolve a season's start/end to absolute 0-based day-of-year.
+ * @param {object} season - Season record
+ * @param {object} calendar - Active calendar instance
+ * @param {number} [internalYear] - Year minus yearZero (for leap-aware month sizes)
+ * @returns {{startDoY: number, endDoY: number}|null} Bounds or null if unresolvable
+ */
+export function getSeasonDayOfYearBounds(season, calendar, internalYear = 0) {
+  if (!season || !calendar) return null;
+  const months = calendar.monthsArray ?? [];
+  if (season.monthStart != null && season.monthEnd != null && months.length) {
+    let startDoY = 0;
+    for (let m = 0; m < season.monthStart && m < months.length; m++) startDoY += calendar.getDaysInMonth(m, internalYear);
+    startDoY += season.dayStart ?? 0;
+    let endDoY = 0;
+    for (let m = 0; m < season.monthEnd && m < months.length; m++) endDoY += calendar.getDaysInMonth(m, internalYear);
+    const endMonthDays = calendar.getDaysInMonth(season.monthEnd, internalYear);
+    endDoY += season.dayEnd ?? endMonthDays - 1;
+    return { startDoY, endDoY };
+  }
+  if (season.dayStart == null) return null;
+  return { startDoY: season.dayStart, endDoY: season.dayEnd ?? season.dayStart };
+}
+
+/**
  * Check if date is a solstice or equinox.
  * @param {object} date - Date to check
  * @param {object[]} seasons - Seasons array
@@ -180,36 +215,21 @@ export function getSeasonDay(dayOfYear, seasons, totalDays, idx) {
  * @returns {boolean} True if date matches the solstice or equinox
  */
 export function checkSolsticeOrEquinox(date, seasons, type) {
+  const calendar = CalendarManager.getActiveCalendar();
+  if (!calendar) return false;
   const totalDays = getTotalDaysInYear(date.year);
+  const yearZero = calendar.years?.yearZero ?? 0;
+  const internalYear = date.year - yearZero;
   const doy = getDayOfYear(date);
-  let summerIdx = seasons.findIndex((s) => /summer/i.test(s.name));
-  let winterIdx = seasons.findIndex((s) => /winter/i.test(s.name));
-  let springIdx = seasons.findIndex((s) => /spring/i.test(s.name));
-  let autumnIdx = seasons.findIndex((s) => /autumn|fall/i.test(s.name));
-  if (summerIdx === -1 && seasons.length >= 4) summerIdx = 1;
-  if (winterIdx === -1 && seasons.length >= 4) winterIdx = 3;
-  if (springIdx === -1 && seasons.length >= 4) springIdx = 0;
-  if (autumnIdx === -1 && seasons.length >= 4) autumnIdx = 2;
-  switch (type) {
-    case 'longest': {
-      if (summerIdx === -1) return false;
-      const summer = seasons[summerIdx];
-      return doy === getMidpoint(summer.dayStart ?? 0, summer.dayEnd ?? 0, totalDays);
-    }
-    case 'shortest': {
-      if (winterIdx === -1) return false;
-      const winter = seasons[winterIdx];
-      return doy === getMidpoint(winter.dayStart ?? 0, winter.dayEnd ?? 0, totalDays);
-    }
-    case 'spring':
-      if (springIdx === -1) return false;
-      return doy === (seasons[springIdx].dayStart ?? 0);
-    case 'autumn':
-      if (autumnIdx === -1) return false;
-      return doy === (seasons[autumnIdx].dayStart ?? 0);
-    default:
-      return false;
-  }
+  const typeMap = { longest: 'summer', shortest: 'winter', spring: 'spring', autumn: 'autumn' };
+  const seasonalType = typeMap[type];
+  if (!seasonalType) return false;
+  const idx = findSeasonIndexByType(seasons, seasonalType);
+  if (idx === -1) return false;
+  const bounds = getSeasonDayOfYearBounds(seasons[idx], calendar, internalYear);
+  if (!bounds) return false;
+  if (type === 'longest' || type === 'shortest') return doy === getMidpoint(bounds.startDoY, bounds.endDoY, totalDays);
+  return doy === bounds.startDoY;
 }
 
 /**

@@ -7,7 +7,7 @@
 import { DISPLAY_STYLES, MODULE, NOTE_VISIBILITY, SETTINGS } from '../constants.mjs';
 import { NoteManager } from '../notes/_module.mjs';
 import { localize, log } from '../utils/_module.mjs';
-import { getMidpoint } from '../utils/calendar-math.mjs';
+import { findSeasonIndexByType, getMidpoint, getSeasonDayOfYearBounds } from '../utils/calendar-math.mjs';
 
 /** Creates and manages festival journal notes. */
 export default class FestivalManager {
@@ -239,43 +239,20 @@ export default class FestivalManager {
     const seasons = calendar.seasonsArray ?? [];
     if (!seasons.length) return null;
     const yearZero = calendar.years?.yearZero ?? 0;
-    const totalDays = calendar.getDaysInYear?.(currentDate.year - yearZero) ?? 365;
-    let summerIdx = seasons.findIndex((s) => /summer/i.test(s.name));
-    let winterIdx = seasons.findIndex((s) => /winter/i.test(s.name));
-    let springIdx = seasons.findIndex((s) => /spring/i.test(s.name));
-    let autumnIdx = seasons.findIndex((s) => /autumn|fall/i.test(s.name));
-    if (summerIdx === -1 && seasons.length >= 4) summerIdx = 1;
-    if (winterIdx === -1 && seasons.length >= 4) winterIdx = 3;
-    if (springIdx === -1 && seasons.length >= 4) springIdx = 0;
-    if (autumnIdx === -1 && seasons.length >= 4) autumnIdx = 2;
-    let dayOfYear = null;
-    switch (astroField) {
-      case 'isLongestDay': {
-        if (summerIdx === -1) return null;
-        const s = seasons[summerIdx];
-        dayOfYear = getMidpoint(s.dayStart ?? 0, s.dayEnd ?? 0, totalDays);
-        break;
-      }
-      case 'isShortestDay': {
-        if (winterIdx === -1) return null;
-        const s = seasons[winterIdx];
-        dayOfYear = getMidpoint(s.dayStart ?? 0, s.dayEnd ?? 0, totalDays);
-        break;
-      }
-      case 'isSpringEquinox':
-        if (springIdx === -1) return null;
-        dayOfYear = seasons[springIdx].dayStart ?? 0;
-        break;
-      case 'isAutumnEquinox':
-        if (autumnIdx === -1) return null;
-        dayOfYear = seasons[autumnIdx].dayStart ?? 0;
-        break;
-    }
-    if (dayOfYear == null) return null;
+    const internalYear = currentDate.year - yearZero;
+    const totalDays = calendar.getDaysInYear?.(internalYear) ?? 365;
+    const typeMap = { isLongestDay: 'summer', isShortestDay: 'winter', isSpringEquinox: 'spring', isAutumnEquinox: 'autumn' };
+    const seasonalType = typeMap[astroField];
+    if (!seasonalType) return null;
+    const idx = findSeasonIndexByType(seasons, seasonalType);
+    if (idx === -1) return null;
+    const bounds = getSeasonDayOfYearBounds(seasons[idx], calendar, internalYear);
+    if (!bounds) return null;
+    const dayOfYear = astroField === 'isLongestDay' || astroField === 'isShortestDay' ? getMidpoint(bounds.startDoY, bounds.endDoY, totalDays) : bounds.startDoY;
     const months = calendar.monthsArray ?? [];
     let remaining = dayOfYear;
     for (let m = 0; m < months.length; m++) {
-      const daysInMonth = calendar.getDaysInMonth(m, currentDate.year - yearZero);
+      const daysInMonth = calendar.getDaysInMonth(m, internalYear);
       if (remaining < daysInMonth) return { month: m, dayOfMonth: remaining };
       remaining -= daysInMonth;
     }

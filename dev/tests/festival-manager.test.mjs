@@ -349,4 +349,110 @@ describe('FestivalManager', () => {
       expect(noteData.startDate.dayOfMonth).toBe(0);
     });
   });
+
+  describe('astronomical anchor resolution', () => {
+    const gregorianMonths = [{ days: 31 }, { days: 28 }, { days: 31 }, { days: 30 }, { days: 31 }, { days: 30 }, { days: 31 }, { days: 31 }, { days: 30 }, { days: 31 }, { days: 30 }, { days: 31 }];
+    const daysInGregMonth = (m) => gregorianMonths[m]?.days ?? 30;
+    const buildAstroTree = (field) => ({ type: 'group', mode: 'and', children: [{ type: 'condition', field, op: '==', value: 1 }] });
+    it('resolves isSpringEquinox to the start of the spring season (legacy day-of-year convention)', async () => {
+      const calendar = {
+        festivals: { fest1: { name: 'Vernal', duration: 1, conditionTree: buildAstroTree('isSpringEquinox') } },
+        metadata: { id: 'gregorian' },
+        years: { yearZero: 0 },
+        monthsArray: gregorianMonths,
+        seasonsArray: [
+          { name: 'Spring', seasonalType: 'spring', dayStart: 79, dayEnd: 171 },
+          { name: 'Summer', seasonalType: 'summer', dayStart: 172, dayEnd: 264 },
+          { name: 'Autumn', seasonalType: 'autumn', dayStart: 265, dayEnd: 354 },
+          { name: 'Winter', seasonalType: 'winter', dayStart: 355, dayEnd: 78 }
+        ],
+        getDaysInMonth: daysInGregMonth,
+        getDaysInYear: () => 365
+      };
+      await FestivalManager.createFestivalNote('gregorian', 'fest1', calendar.festivals.fest1, calendar);
+      const { startDate } = NoteManager.getAllNotes()[0].flagData;
+      expect(startDate.month).toBe(2);
+      expect(startDate.dayOfMonth).toBe(20);
+    });
+    it('resolves isAutumnEquinox to the start of autumn for month-anchored seasons (regression for #635)', async () => {
+      const months30 = Array.from({ length: 12 }, () => ({ days: 30 }));
+      const calendar = {
+        festivals: { fest1: { name: 'Autumn Equinox Test', duration: 1, conditionTree: buildAstroTree('isAutumnEquinox') } },
+        metadata: { id: 'symbaroum' },
+        years: { yearZero: 0 },
+        monthsArray: months30,
+        seasonsArray: [
+          { name: 'Autumn', seasonalType: 'autumn', monthStart: 1, monthEnd: 3, dayStart: 0, dayEnd: 29 },
+          { name: 'Winter', seasonalType: 'winter', monthStart: 4, monthEnd: 6, dayStart: 0, dayEnd: 29 },
+          { name: 'Spring', seasonalType: 'spring', monthStart: 7, monthEnd: 9, dayStart: 0, dayEnd: 29 },
+          { name: 'Summer', seasonalType: 'summer', monthStart: 10, monthEnd: 0, dayStart: 0, dayEnd: 29 }
+        ],
+        getDaysInMonth: () => 30,
+        getDaysInYear: () => 360
+      };
+      await FestivalManager.createFestivalNote('symbaroum', 'fest1', calendar.festivals.fest1, calendar);
+      const { startDate } = NoteManager.getAllNotes()[0].flagData;
+      expect(startDate.month).toBe(1);
+      expect(startDate.dayOfMonth).toBe(0);
+    });
+    it('resolves isLongestDay to the midpoint of summer for a wrap-around season', async () => {
+      const months30 = Array.from({ length: 12 }, () => ({ days: 30 }));
+      const calendar = {
+        festivals: { fest1: { name: 'Longest Day', duration: 1, conditionTree: buildAstroTree('isLongestDay') } },
+        metadata: { id: 'symbaroum' },
+        years: { yearZero: 0 },
+        monthsArray: months30,
+        seasonsArray: [
+          { name: 'Autumn', seasonalType: 'autumn', monthStart: 1, monthEnd: 3, dayStart: 0, dayEnd: 29 },
+          { name: 'Winter', seasonalType: 'winter', monthStart: 4, monthEnd: 6, dayStart: 0, dayEnd: 29 },
+          { name: 'Spring', seasonalType: 'spring', monthStart: 7, monthEnd: 9, dayStart: 0, dayEnd: 29 },
+          { name: 'Summer', seasonalType: 'summer', monthStart: 10, monthEnd: 0, dayStart: 0, dayEnd: 29 }
+        ],
+        getDaysInMonth: () => 30,
+        getDaysInYear: () => 360
+      };
+      await FestivalManager.createFestivalNote('symbaroum', 'fest1', calendar.festivals.fest1, calendar);
+      const { startDate } = NoteManager.getAllNotes()[0].flagData;
+      expect(startDate.month).toBe(11);
+      expect(startDate.dayOfMonth).toBe(15);
+    });
+    it('falls through to festival.month/dayOfMonth when no season has matching seasonalType', async () => {
+      const calendar = {
+        festivals: { fest1: { name: 'Unresolvable', month: 4, dayOfMonth: 9, duration: 1, conditionTree: buildAstroTree('isAutumnEquinox') } },
+        metadata: { id: 'test' },
+        years: { yearZero: 0 },
+        monthsArray: gregorianMonths,
+        seasonsArray: [
+          { name: 'Spring', seasonalType: 'spring', dayStart: 79, dayEnd: 171 },
+          { name: 'Summer', seasonalType: 'summer', dayStart: 172, dayEnd: 264 }
+        ],
+        getDaysInMonth: daysInGregMonth,
+        getDaysInYear: () => 365
+      };
+      await FestivalManager.createFestivalNote('test', 'fest1', calendar.festivals.fest1, calendar);
+      const { startDate } = NoteManager.getAllNotes()[0].flagData;
+      expect(startDate.month).toBe(4);
+      expect(startDate.dayOfMonth).toBe(9);
+    });
+    it('does not use season name as a fallback when seasonalType is missing', async () => {
+      const calendar = {
+        festivals: { fest1: { name: 'Spring Fest', month: 5, dayOfMonth: 14, duration: 1, conditionTree: buildAstroTree('isSpringEquinox') } },
+        metadata: { id: 'test' },
+        years: { yearZero: 0 },
+        monthsArray: gregorianMonths,
+        seasonsArray: [
+          { name: 'Spring', dayStart: 79, dayEnd: 171 },
+          { name: 'Summer', dayStart: 172, dayEnd: 264 },
+          { name: 'Autumn', dayStart: 265, dayEnd: 354 },
+          { name: 'Winter', dayStart: 355, dayEnd: 78 }
+        ],
+        getDaysInMonth: daysInGregMonth,
+        getDaysInYear: () => 365
+      };
+      await FestivalManager.createFestivalNote('test', 'fest1', calendar.festivals.fest1, calendar);
+      const { startDate } = NoteManager.getAllNotes()[0].flagData;
+      expect(startDate.month).toBe(5);
+      expect(startDate.dayOfMonth).toBe(14);
+    });
+  });
 });

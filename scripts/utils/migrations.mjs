@@ -6,6 +6,7 @@
 import { CalendarManager } from '../calendar/_module.mjs';
 import { MODULE, SETTINGS } from '../constants.mjs';
 import { addDays, dayOfWeek, daysBetween, extractEventDependencies, getOccurrencesInRange, invalidatePresetCache, migratePresetSchema } from '../notes/_module.mjs';
+import { getSeasonDayOfYearBounds } from './calendar-math.mjs';
 import { log } from './logger.mjs';
 import { DEFAULT_COLORS } from './theme-utils.mjs';
 
@@ -104,8 +105,10 @@ function convertSeasonal(noteData) {
   if (!config) return null;
   const children = [ct('season', '==', (config.seasonIndex ?? 0) + 1)];
   if (config.trigger === 'firstDay' || config.trigger === 'lastDay') {
-    const season = CalendarManager.getActiveCalendar()?.seasonsArray?.[config.seasonIndex];
-    if (season) children.push(ct('dayOfYear', '==', config.trigger === 'firstDay' ? (season.dayStart ?? 0) : (season.dayEnd ?? 0)));
+    const calendar = CalendarManager.getActiveCalendar();
+    const season = calendar?.seasonsArray?.[config.seasonIndex];
+    const bounds = getSeasonDayOfYearBounds(season, calendar);
+    if (bounds) children.push(ct('dayOfYear', '==', config.trigger === 'firstDay' ? bounds.startDoY : bounds.endDoY));
   }
   return buildAndGroup(children);
 }

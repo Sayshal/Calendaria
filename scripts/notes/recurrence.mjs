@@ -6,7 +6,7 @@
 
 import { CalendarManager } from '../calendar/_module.mjs';
 import { CONDITION_FIELDS, CONDITION_OPERATORS } from '../constants.mjs';
-import { getCalendarMoonPhaseIndex, getDayOfYear, getMidpoint, localize, log, seededRandom } from '../utils/_module.mjs';
+import { findSeasonIndexByType, getCalendarMoonPhaseIndex, getDayOfYear, getMidpoint, getSeasonDayOfYearBounds, localize, log, seededRandom } from '../utils/_module.mjs';
 import {
   EpochDataCache,
   NoteManager,
@@ -112,48 +112,39 @@ function resolveAnchor(anchorType, year, calendar) {
   const seasons = calendar?.seasonsArray ?? [];
   const daylight = calendar?.daylight || {};
   const yearZero = calendar?.years?.yearZero ?? 0;
-  const totalDays = calendar.getDaysInYear(year - yearZero);
+  const internalYear = year - yearZero;
+  const totalDays = calendar.getDaysInYear(internalYear);
+  const resolveSeasonAnchor = (seasonalType, useMidpoint) => {
+    const idx = findSeasonIndexByType(seasons, seasonalType);
+    if (idx === -1) return null;
+    const bounds = getSeasonDayOfYearBounds(seasons[idx], calendar, internalYear);
+    if (!bounds) return null;
+    const doy = useMidpoint ? getMidpoint(bounds.startDoY, bounds.endDoY, totalDays) : bounds.startDoY;
+    return dayOfYearToDate(doy, year, calendar);
+  };
   switch (anchorType) {
-    case 'springEquinox': {
-      const springIdx = seasons.findIndex((s) => /spring/i.test(s.name));
-      if (springIdx === -1 && seasons.length >= 4) return dayOfYearToDate(seasons[0]?.dayStart ?? 1, year, calendar);
-      if (springIdx !== -1) return dayOfYearToDate(seasons[springIdx].dayStart ?? 1, year, calendar);
-      return null;
-    }
-    case 'autumnEquinox': {
-      const autumnIdx = seasons.findIndex((s) => /autumn|fall/i.test(s.name));
-      if (autumnIdx === -1 && seasons.length >= 4) return dayOfYearToDate(seasons[2]?.dayStart ?? 1, year, calendar);
-      if (autumnIdx !== -1) return dayOfYearToDate(seasons[autumnIdx].dayStart ?? 1, year, calendar);
-      return null;
-    }
+    case 'springEquinox':
+      return resolveSeasonAnchor('spring', false);
+    case 'autumnEquinox':
+      return resolveSeasonAnchor('autumn', false);
     case 'summerSolstice': {
       if (daylight.summerSolstice) return dayOfYearToDate(daylight.summerSolstice, year, calendar);
-      const summerIdx = seasons.findIndex((s) => /summer/i.test(s.name));
-      if (summerIdx !== -1) {
-        const summer = seasons[summerIdx];
-        const mid = getMidpoint(summer.dayStart ?? 0, summer.dayEnd ?? 0, totalDays);
-        return dayOfYearToDate(mid, year, calendar);
-      }
-      return null;
+      return resolveSeasonAnchor('summer', true);
     }
     case 'winterSolstice': {
       if (daylight.winterSolstice) return dayOfYearToDate(daylight.winterSolstice, year, calendar);
-      const winterIdx = seasons.findIndex((s) => /winter/i.test(s.name));
-      if (winterIdx !== -1) {
-        const winter = seasons[winterIdx];
-        const mid = getMidpoint(winter.dayStart ?? 0, winter.dayEnd ?? 0, totalDays);
-        return dayOfYearToDate(mid, year, calendar);
-      }
-      return null;
+      return resolveSeasonAnchor('winter', true);
     }
     default:
       if (anchorType?.startsWith('seasonStart:')) {
         const idx = parseInt(anchorType.split(':')[1], 10);
-        if (seasons[idx]) return dayOfYearToDate(seasons[idx].dayStart ?? 1, year, calendar);
+        const bounds = getSeasonDayOfYearBounds(seasons[idx], calendar, internalYear);
+        if (bounds) return dayOfYearToDate(bounds.startDoY, year, calendar);
       }
       if (anchorType?.startsWith('seasonEnd:')) {
         const idx = parseInt(anchorType.split(':')[1], 10);
-        if (seasons[idx]) return dayOfYearToDate(seasons[idx].dayEnd ?? 1, year, calendar);
+        const bounds = getSeasonDayOfYearBounds(seasons[idx], calendar, internalYear);
+        if (bounds) return dayOfYearToDate(bounds.endDoY, year, calendar);
       }
       if (anchorType?.startsWith('event:')) {
         const noteId = anchorType.split(':')[1];
