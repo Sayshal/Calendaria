@@ -6,7 +6,13 @@ A fullscreen animated overlay that plays during large time advances. The sky cyc
 
 ## What It Looks Like
 
-The cinematic fills the screen with an animated sky that sweeps through each day in the skipped range. The sun and moons arc across the sky, stars twinkle in and out, and occasional shooting stars streak past at night. A date counter ticks through the days, event title cards appear for days with festivals or notes, and weather conditions update as the seasons shift.
+The cinematic fills the screen with an animated sky that tracks the in-world time of day across the skipped range. The sun and moons sit where they belong for the current hour, so the opening frame matches the hour the skip started and the closing frame matches the hour the skip ended. Stars twinkle in and out, and occasional shooting stars streak past at night. A date counter ticks through the days, event title cards appear for days with festivals or notes, and weather conditions update as the seasons shift.
+
+---
+
+## Theming
+
+The overlay reads the active Calendaria theme. The page card, season pill, moon strip, event cards, festival highlight, and progress bar pick up the theme's background, border, text, and accent colors.
 
 ---
 

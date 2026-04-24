@@ -254,11 +254,12 @@ Define seasonal periods with visual styling.
 
 ### Season Fields
 
-| Field            | Description                                                                  |
-| ---------------- | ---------------------------------------------------------------------------- |
-| **Name**         | Season name (e.g., "Spring")                                                 |
-| **Abbreviation** | Short form                                                                   |
-| **Icon/Color**   | Click the icon button to open an edit dialog for Font Awesome icon and color |
+| Field             | Description                                                                                                                                                                                                  |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Name**          | Season name (e.g., "Spring")                                                                                                                                                                                 |
+| **Abbreviation**  | Short form                                                                                                                                                                                                   |
+| **Icon/Color**    | Click the icon button to open an edit dialog for Font Awesome icon and color                                                                                                                                 |
+| **Seasonal Type** | Canonical season tag (Spring, Summer, Autumn, Winter) used to resolve equinox and solstice anchors and to drive weather integrations. Seasons left unset are skipped when astronomical anchors are resolved. |
 
 #### Dated Season Fields
 
@@ -274,6 +275,10 @@ Define seasonal periods with visual styling.
 - **Add** (+): Insert a new season after this one
 - **Remove** (trash icon): Delete this season
 - **Climate** (edit icon): Open the [ClimateEditor](#climateeditor) to configure per-season temperature ranges and weather chance overrides
+
+### Astronomical Anchors
+
+Equinox and solstice festivals, and computed notes that anchor to an equinox or solstice, find their target day by matching the Seasonal Type on each season. Equinoxes resolve to the first day of their matching season (spring equinox = first day of Spring, autumn equinox = first day of Autumn). Solstices resolve to the midpoint of their matching season (summer solstice = midpoint of Summer, winter solstice = midpoint of Winter). For seasons defined by month and day, the season bounds are computed from the configured start/end month and day; for seasons defined by day of year, the bounds come from the season's start and end day values. A season with no Seasonal Type set is skipped, and anchors that reference a type with no matching season do not resolve.
 
 ---
 

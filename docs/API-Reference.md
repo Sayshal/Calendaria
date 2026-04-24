@@ -797,6 +797,20 @@ const weekday = CALENDARIA.api.getCurrentWeekday();
 
 ---
 
+### getCurrentWeek()
+
+Get the current named week for the active world time. Exposed on the active calendar instance, not on `CALENDARIA.api`.
+
+```javascript
+const calendar = CALENDARIA.managers.CalendarManager.getActiveCalendar();
+const week = calendar?.getCurrentWeek();
+// Returns: { weekName, weekAbbr, weekNumber, index }
+```
+
+**Returns:** `object|null` - Named week data, or null if no named weeks are defined or no entry matches the current date.
+
+---
+
 ### isRestDay()
 
 Check if today is a rest day.

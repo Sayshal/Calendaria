@@ -32,6 +32,12 @@ Select a preset from the dropdown in **Settings Panel > Appearance** tab. Preset
 
 ---
 
+## Force Theme (GM Only)
+
+The GM can pin a theme for all connected clients from the Force Theme dropdown in the **Settings Panel > Theme** tab. Set it to any preset or a saved **Custom** theme to force that palette on every player, or set it to **None** to let each user pick their own theme again. While Force Theme is set to anything other than **None**, the per-user preset dropdown and Customize button are disabled and show the forced palette.
+
+---
+
 ## Customizing Colors
 
 1. Select **Custom** from the preset dropdown
