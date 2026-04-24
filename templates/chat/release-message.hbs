@@ -10,12 +10,28 @@
             class="fa-brands fa-patreon"></i> Now on Patreon!</a></strong>
     </p>
 
+    <h4>New Features</h4>
+    <ul>
+      <li>Cinematic overlay picks up the active theme so pill, progress bar, festival cards, and event highlights recolor to match themed worlds</li>
+      <li>Sun, moon, and sky in the cinematic track the real in-world time between the skip's start and end hours</li>
+    </ul>
+
     <h4>Bug Fixes</h4>
     <ul>
-      <li>Custom format strings now accept <code>{literal}</code> alongside <code>[literal]</code> to avoid bracket collisions inside <code>[[ ]]</code> enrichers</li>
-      <li>Moon phase anchors on randomized moons with weighted phases land inside the intended phase slice</li>
-      <li>Malformed custom calendars or default overrides no longer halt module startup; broken calendars are skipped and logged</li>
+      <li><code>[namedWeek]</code> and <code>[namedWeekAbbr]</code> format tokens resolve against the calendar's named weeks, honoring week type and the Repeat flag</li>
+      <li>Cinematic pill fades in once the starting date is populated, so the first panel no longer flashes blank</li>
+      <li>Computed seasonal notes and legacy migrations resolve astronomical anchors through season-type metadata, so equinox/solstice triggers fire on the right day</li>
+      <li>Custom format tokens that resolve to empty strings render the literal token instead of vanishing</li>
+      <li>Equinox and solstice festivals land on the correct date for month-anchored calendars like Golarion and Pact-Standard</li>
+      <li>First cinematic frame seeds the date label immediately, and a malformed keyframe no longer crashes the animation loop</li>
+      <li>Theme preset dropdown and Customize button unlock the moment Force Theme is set back to None</li>
     </ul>
+
+    <h4>Changes</h4>
+    <ul>
+      <li>Seasons left without a Seasonal Type are skipped by astronomical anchors; the season editor hint calls this out</li>
+    </ul>
+
   </div>
 
   <a class="open-note" href="{{repoUrl}}" target="_blank" rel="noopener">

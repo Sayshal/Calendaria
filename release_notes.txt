@@ -1,5 +1,24 @@
+## New Features
+
+- Cinematic overlay picks up the active theme so the date pill, progress bar, festival cards, and event highlights recolor to match themed worlds while default worlds stay on the warm-paper palette
+- Sun, moon, and sky in the cinematic track the real in-world time between the skip's start and end hours, so opening and closing frames match the actual time of day
+
 ## Bug Fixes
 
-- [#683] Custom format strings now accept `{literal}` in addition to `[literal]`, allowing literal text inside `[[ ]]` enrichers without bracket collisions
-- [#685] Moon phase anchors on randomized moons with weighted phases now land inside the intended phase slice instead of drifting into an adjacent phase
-- A malformed custom calendar or default override no longer halts module startup; the broken calendar is skipped and logged, letting the rest of the module load normally
+- `[namedWeek]` and `[namedWeekAbbr]` format tokens resolve against the calendar's named weeks, honoring year-based vs month-based week type and the Repeat flag for cycling past the defined week count
+- Cinematic pill fades in once the starting date is populated, so the first panel no longer flashes blank during the advance and keyframe-build window
+- Computed seasonal notes and legacy seasonal migrations resolve astronomical anchors through season-type metadata, so recurring equinox/solstice triggers fire on the right day
+- Custom format tokens that resolve to empty strings render the literal token instead of vanishing, matching the built-in token fallback behavior
+- Equinox and solstice festivals land on the correct date for month-anchored calendars like Golarion and Pact-Standard, and for any calendar whose seasons are edited in the in-app season editor
+- First cinematic frame seeds the date label immediately, and a malformed keyframe no longer crashes the animation loop
+- Theme preset dropdown and Customize button unlock the moment Force Theme is set back to None, without requiring a settings reopen
+
+## Changes
+
+- Seasons left without a Seasonal Type are skipped by astronomical anchors; the season editor hint calls this out
+
+## Translations
+
+- Brazilian Portuguese translation updated by @Kharmans
+- Polish translation updated by @Lioheart
+- Russian translation updated by @lvilv
