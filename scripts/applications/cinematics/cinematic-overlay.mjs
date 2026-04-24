@@ -162,6 +162,7 @@ export default class CinematicOverlay {
     this.#totalDuration = Math.max(1000, payload.keyframes.length * panelMs);
     if (!this.#element) this.#buildDOM();
     this.#initPixi();
+    this.#seedFirstFrame(payload.keyframes[0]);
     this.#keydownHandler = this.#onKeydown.bind(this);
     document.addEventListener('keydown', this.#keydownHandler);
     return new Promise((resolve) => {
@@ -193,14 +194,15 @@ export default class CinematicOverlay {
     const keyframes = this.#payload.keyframes;
     const frameIndex = Math.min(keyframes.length - 1, Math.floor(progress * keyframes.length));
     const panelProgress = progress * keyframes.length - frameIndex;
+    const dayFraction = this.#computeDayFraction(progress);
     if (frameIndex !== this.#currentFrame) {
       const prevKf = this.#currentFrame >= 0 ? keyframes[this.#currentFrame] : null;
       this.#currentFrame = frameIndex;
       this.#renderKeyframe(keyframes[frameIndex], prevKf);
       if (this.#pixiApp) this.#emitPageFlipParticles();
     }
-    this.#updateBackground(panelProgress);
-    this.#updateEffects(panelProgress);
+    this.#updateBackground(dayFraction);
+    this.#updateEffects(dayFraction);
     this.#tickDateCounter(frameIndex, panelProgress);
     this.#updateProgressBar(progress);
     if (progress >= 1) {
@@ -208,6 +210,25 @@ export default class CinematicOverlay {
       return;
     }
     this.#animationId = requestAnimationFrame((ts) => this.#animate(ts));
+  }
+
+  /**
+   * Compute the fraction of the current in-world day (0 to 1, where 0 = 00:00 and 1 = end of day).
+   * @param {number} progress - Overall animation progress (0 to 1)
+   * @returns {number} Day fraction (0 to 1)
+   */
+  static #computeDayFraction(progress) {
+    const { startTime, endTime } = this.#payload ?? {};
+    if (startTime == null || endTime == null) return progress;
+    const calendar = CalendarManager.getActiveCalendar();
+    if (!calendar) return progress;
+    const worldTime = startTime + (endTime - startTime) * progress;
+    const components = calendar.timeToComponents(worldTime);
+    const hoursPerDay = calendar.days?.hoursPerDay ?? 24;
+    const minutesPerHour = calendar.days?.minutesPerHour ?? 60;
+    const secondsPerMinute = calendar.days?.secondsPerMinute ?? 60;
+    const hoursInDay = components.hour + components.minute / minutesPerHour + components.second / (minutesPerHour * secondsPerMinute);
+    return Math.max(0, Math.min(1, hoursInDay / hoursPerDay));
   }
 
   /** Complete the cinematic naturally. */
@@ -242,7 +263,7 @@ export default class CinematicOverlay {
   static #buildDOM() {
     const overlay = document.createElement('div');
     overlay.id = 'calendaria-cinematic';
-    overlay.classList.add('calendaria-cinematic');
+    overlay.classList.add('calendaria', 'calendaria-cinematic');
     overlay.style.opacity = '0';
     overlay.innerHTML = `
       <div class="cinematic-bg"></div>
@@ -296,12 +317,24 @@ export default class CinematicOverlay {
    * @param {object|null} prevKf - Previous keyframe data
    */
   static #renderKeyframe(kf, prevKf) {
-    if (!this.#element) return;
+    if (!this.#element || !kf) return;
     this.#updateSeasonDisplay(kf);
     this.#updateWeatherDisplay(kf);
     this.#updateMoonDisplay(kf, prevKf);
     this.#showEventCards(kf);
     this.#currentMoons = kf.moons ?? [];
+  }
+
+  /**
+   * Seed the first keyframe's date label so the overlay never shows an empty pad on the first frame.
+   * @param {object|undefined} kf - First keyframe data
+   */
+  static #seedFirstFrame(kf) {
+    if (!kf) return;
+    const label = this.#element?.querySelector('.cinematic-date-label');
+    if (!label) return;
+    label.textContent = kf.dateLabel ?? '';
+    label._lastDateKey = `${kf.date?.year}-${kf.date?.month}-${kf.date?.dayOfMonth}`;
   }
 
   /**
@@ -383,17 +416,17 @@ export default class CinematicOverlay {
   }
 
   /**
-   * Animate sky gradient through a full day cycle per panel.
-   * @param {number} panelProgress - 0-1 within current keyframe
+   * Animate sky gradient based on the current in-world time of day.
+   * @param {number} dayFraction - 0-1 representing time-of-day (0 = 00:00, 1 = end of day)
    */
-  static #updateBackground(panelProgress) {
+  static #updateBackground(dayFraction) {
     const bg = this.#element?.querySelector('.cinematic-bg');
     if (!bg) return;
     const calendar = CalendarManager.getActiveCalendar();
     let hour = 0;
     for (let i = 0; i < SKY_WAYPOINTS.length - 1; i++) {
-      if (panelProgress >= SKY_WAYPOINTS[i].t && panelProgress <= SKY_WAYPOINTS[i + 1].t) {
-        const segT = (panelProgress - SKY_WAYPOINTS[i].t) / (SKY_WAYPOINTS[i + 1].t - SKY_WAYPOINTS[i].t);
+      if (dayFraction >= SKY_WAYPOINTS[i].t && dayFraction <= SKY_WAYPOINTS[i + 1].t) {
+        const segT = (dayFraction - SKY_WAYPOINTS[i].t) / (SKY_WAYPOINTS[i + 1].t - SKY_WAYPOINTS[i].t);
         hour = SKY_WAYPOINTS[i].hour + segT * (SKY_WAYPOINTS[i + 1].hour - SKY_WAYPOINTS[i].hour);
         break;
       }
@@ -599,37 +632,37 @@ export default class CinematicOverlay {
   }
 
   /**
-   * Update PixiJS effects based on the day cycle.
-   * @param {number} panelProgress - 0-1 within current keyframe
+   * Update PixiJS effects based on the in-world time of day.
+   * @param {number} dayFraction - 0-1 representing time-of-day (0 = 00:00, 1 = end of day)
    */
-  static #updateEffects(panelProgress) {
+  static #updateEffects(dayFraction) {
     if (!this.#pixiApp) return;
     const sw = this.#pixiApp.screen.width;
     const sh = this.#pixiApp.screen.height;
     let daylight = 0;
-    if (panelProgress >= 0.15 && panelProgress <= 0.85) daylight = Math.sin(((panelProgress - 0.15) / 0.7) * Math.PI);
+    if (dayFraction >= 0.15 && dayFraction <= 0.85) daylight = Math.sin(((dayFraction - 0.15) / 0.7) * Math.PI);
     if (this.#stars) {
       this.#stars.alpha = (1 - daylight) * 0.9;
       this.#stars.rotation += 0.0003;
     }
     if (this.#sun) {
       this.#sun.alpha = daylight * 0.9;
-      const t = Math.max(0, Math.min(1, (panelProgress - 0.12) / 0.76));
+      const t = Math.max(0, Math.min(1, (dayFraction - 0.12) / 0.76));
       this.#sun.x = sw * 0.1 + t * sw * 0.8;
       this.#sun.y = sh * 0.45 - Math.sin(t * Math.PI) * sh * 0.35;
     }
-    this.#updatePixiMoons(panelProgress, daylight, sw, sh);
+    this.#updatePixiMoons(dayFraction, daylight, sw, sh);
     if (1 - daylight > 0.5 && Math.random() < 0.008) this.#spawnShootingStar();
   }
 
   /**
    * Update Pixi moon orbs with trailing arc across the night sky.
-   * @param {number} panelProgress - 0-1 within current keyframe
+   * @param {number} dayFraction - 0-1 representing time-of-day (0 = 00:00, 1 = end of day)
    * @param {number} daylight - 0-1 daylight intensity
    * @param {number} sw - Screen width
    * @param {number} sh - Screen height
    */
-  static #updatePixiMoons(panelProgress, daylight, sw, sh) {
+  static #updatePixiMoons(dayFraction, daylight, sw, sh) {
     if (!this.#moonContainer || !this.#moonTexture) return;
     const moons = this.#currentMoons;
     const count = moons.length;
@@ -659,7 +692,7 @@ export default class CinematicOverlay {
       }
       return;
     }
-    const nightProgress = panelProgress <= 0.15 ? 0.5 + panelProgress / 0.3 : panelProgress >= 0.85 ? (panelProgress - 0.85) / 0.3 : null;
+    const nightProgress = dayFraction <= 0.15 ? 0.5 + dayFraction / 0.3 : dayFraction >= 0.85 ? (dayFraction - 0.85) / 0.3 : null;
     if (nightProgress === null) {
       for (const { glow, sprite, shadow } of this.#moonPool) {
         glow.alpha = 0;

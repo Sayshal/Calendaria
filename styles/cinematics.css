@@ -26,7 +26,7 @@
   }
 
   .cinematic-vignette-pulse {
-    --pulse-color: rgb(168 144 96);
+    --pulse-color: var(--calendaria-accent, rgb(168 144 96));
 
     inset: 0;
     opacity: 0;
@@ -65,14 +65,19 @@
     flex-direction: column;
     align-items: center;
     padding: 1.875rem 3rem 1.5rem;
-    border: 0.0625rem solid rgb(140 120 80 / 50%);
+    border: 0.0625rem solid color-mix(in srgb, var(--calendaria-border, rgb(140 120 80)) 50%, transparent);
     border-radius: 0.25rem;
-    color: rgb(40 30 20);
-    background: linear-gradient(170deg, rgb(195 180 145 / 85%) 0%, rgb(180 165 130 / 80%) 40%, rgb(170 155 120 / 75%) 100%);
+    color: var(--calendaria-text, rgb(40 30 20));
+    background: linear-gradient(
+      170deg,
+      color-mix(in srgb, var(--calendaria-bg-lighter, rgb(195 180 145)) 85%, transparent) 0%,
+      color-mix(in srgb, var(--calendaria-bg, rgb(180 165 130)) 80%, transparent) 40%,
+      color-mix(in srgb, var(--calendaria-bg-hover, rgb(170 155 120)) 75%, transparent) 100%
+    );
     box-shadow:
       0 0.25rem 1.5rem rgb(0 0 0 / 40%),
       inset 0 0.0625rem 0 rgb(255 255 255 / 15%),
-      inset 0 0 2.5rem rgb(140 120 80 / 10%);
+      inset 0 0 2.5rem color-mix(in srgb, var(--calendaria-border, rgb(140 120 80)) 10%, transparent);
     animation: cinematic-page-drift 8s ease-in-out infinite;
   }
 
@@ -122,7 +127,7 @@
 
   .cinematic-date-label {
     display: block;
-    color: rgb(50 35 20);
+    color: var(--calendaria-text-heading, rgb(50 35 20));
     font-weight: 700;
     font-size: 3rem;
     text-shadow: 0 0.0625rem 0 rgb(255 255 255 / 20%);
@@ -135,19 +140,19 @@
     align-items: center;
     min-height: 1.875rem;
     padding: 0.25rem 1rem;
-    border: 0.0625rem solid color-mix(in srgb, var(--cinematic-season-color, rgb(120 100 60)) 40%, rgb(100 80 40 / 30%));
+    border: 0.0625rem solid color-mix(in srgb, var(--cinematic-season-color, var(--calendaria-accent, rgb(120 100 60))) 40%, rgb(100 80 40 / 30%));
     border-radius: 0.75rem;
-    color: rgb(60 40 20);
+    color: var(--calendaria-text-heading, rgb(60 40 20));
     font-weight: 600;
     font-size: 1rem;
-    background: color-mix(in srgb, var(--cinematic-season-color, rgb(120 100 60)) 25%, rgb(60 45 25 / 30%));
+    background: color-mix(in srgb, var(--cinematic-season-color, var(--calendaria-accent, rgb(120 100 60))) 25%, rgb(60 45 25 / 30%));
     transition:
       background 0.5s ease,
       border-color 0.5s ease;
   }
 
   .cinematic-season-icon {
-    color: var(--cinematic-season-color, rgb(120 100 60));
+    color: var(--cinematic-season-color, var(--calendaria-accent, rgb(120 100 60)));
     transition: color 0.5s ease;
   }
 
@@ -158,13 +163,13 @@
     align-items: center;
     min-height: 1.75rem;
     padding: 0.25rem 0.75rem;
-    color: rgb(80 60 35);
+    color: var(--calendaria-text-dim, rgb(80 60 35));
     font-size: 0.95rem;
     transition: opacity 0.5s ease;
   }
 
   .cinematic-weather-icon {
-    color: var(--cinematic-weather-color, rgb(100 80 50));
+    color: var(--cinematic-weather-color, var(--calendaria-text-dim, rgb(100 80 50)));
     font-size: 1.2rem;
     transition: color 0.4s ease;
   }
@@ -200,8 +205,9 @@
     flex-direction: column;
     align-items: center;
     padding: 0.375rem 0.625rem;
+    border: 0.0625rem solid color-mix(in srgb, var(--calendaria-border, rgb(255 255 255)) 20%, transparent);
     border-radius: 0.5rem;
-    background: rgb(0 0 0 / 35%);
+    background: color-mix(in srgb, var(--calendaria-bg, rgb(0 0 0)) 75%, transparent);
   }
 
   .cinematic-moon-icon-wrap {
@@ -224,7 +230,7 @@
   }
 
   .cinematic-moon-name {
-    color: rgb(220 215 200);
+    color: var(--calendaria-text, rgb(220 215 200));
     font-weight: 600;
     font-size: 0.8rem;
     text-transform: uppercase;
@@ -233,7 +239,7 @@
   }
 
   .cinematic-moon-phase-name {
-    color: rgb(185 180 165);
+    color: var(--calendaria-text-dim, rgb(185 180 165));
     font-style: italic;
     font-size: 0.7rem;
     text-shadow: 0 0.0625rem 0.25rem rgb(0 0 0 / 80%);
@@ -261,15 +267,15 @@
     padding: 0.625rem 1.5rem;
     border: 0.0625rem solid rgb(255 255 255 / 12%);
     border-radius: 0.5rem;
-    color: rgb(240 235 220);
+    color: var(--calendaria-text, rgb(240 235 220));
     font-size: 1.05rem;
-    background: rgb(20 18 15 / 55%);
+    background: color-mix(in srgb, var(--calendaria-bg, rgb(20 18 15)) 55%, transparent);
     animation: cinematic-card-slide 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 
     i {
-      color: var(--event-color, rgb(168 144 96));
+      color: var(--event-color, var(--calendaria-accent, rgb(168 144 96)));
       font-size: 1.2rem;
-      filter: drop-shadow(0 0 0.25rem var(--event-color, rgb(168 144 96)));
+      filter: drop-shadow(0 0 0.25rem var(--event-color, var(--calendaria-accent, rgb(168 144 96))));
     }
   }
 
@@ -281,17 +287,21 @@
   .cinematic-event--festival {
     backdrop-filter: blur(0.375rem);
     padding: 0.875rem 1.75rem;
-    border: 0.0625rem solid rgb(212 175 55 / 50%);
+    border: 0.0625rem solid color-mix(in srgb, var(--calendaria-festival-border, rgb(212 175 55)) 50%, transparent);
     font-weight: 700;
     font-size: 1.25rem;
-    background: linear-gradient(135deg, rgb(212 175 55 / 10%) 0%, rgb(180 140 20 / 5%) 100%);
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--calendaria-festival-border, rgb(212 175 55)) 10%, transparent) 0%,
+      color-mix(in srgb, var(--calendaria-festival-text, rgb(180 140 20)) 5%, transparent) 100%
+    );
     animation:
       cinematic-card-slide 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards,
       cinematic-festival-shimmer 2.5s ease-in-out infinite 0.5s;
 
     i {
-      color: rgb(212 175 55);
-      filter: drop-shadow(0 0 0.375rem rgb(212 175 55 / 50%));
+      color: var(--calendaria-festival-text, rgb(212 175 55));
+      filter: drop-shadow(0 0 0.375rem color-mix(in srgb, var(--calendaria-festival-border, rgb(212 175 55)) 50%, transparent));
     }
   }
 
@@ -306,8 +316,12 @@
   .cinematic-progress-fill {
     height: 100%;
     border-radius: 0.125rem;
-    background: linear-gradient(90deg, rgb(168 144 96 / 40%) 0%, rgb(168 144 96 / 70%) 100%);
-    box-shadow: 0 0 0.375rem rgb(168 144 96 / 30%);
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--calendaria-accent, rgb(168 144 96)) 40%, transparent) 0%,
+      color-mix(in srgb, var(--calendaria-accent, rgb(168 144 96)) 70%, transparent) 100%
+    );
+    box-shadow: 0 0 0.375rem color-mix(in srgb, var(--calendaria-accent, rgb(168 144 96)) 30%, transparent);
     transition: width 0.15s linear;
   }
 
@@ -323,7 +337,7 @@
     padding: 0.375rem 1.125rem;
     border: 0.0625rem solid rgb(255 255 255 / 12%);
     border-radius: 0.375rem;
-    color: rgb(180 175 165);
+    color: var(--calendaria-text-dim, rgb(180 175 165));
     font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.03em;
@@ -336,7 +350,7 @@
 
     &:hover {
       border-color: rgb(255 255 255 / 22%);
-      color: rgb(230 225 215);
+      color: var(--calendaria-text, rgb(230 225 215));
       background: rgb(255 255 255 / 10%);
     }
 
@@ -400,14 +414,14 @@
 @keyframes cinematic-festival-shimmer {
   0%,
   100% {
-    border-color: rgb(212 175 55 / 35%);
-    box-shadow: 0 0 0.5rem rgb(212 175 55 / 10%);
+    border-color: color-mix(in srgb, var(--calendaria-festival-border, rgb(212 175 55)) 35%, transparent);
+    box-shadow: 0 0 0.5rem color-mix(in srgb, var(--calendaria-festival-border, rgb(212 175 55)) 10%, transparent);
   }
 
   50% {
-    border-color: rgb(212 175 55 / 70%);
+    border-color: color-mix(in srgb, var(--calendaria-festival-border, rgb(212 175 55)) 70%, transparent);
     box-shadow:
-      0 0 1.25rem rgb(212 175 55 / 25%),
-      inset 0 0 0.625rem rgb(212 175 55 / 5%);
+      0 0 1.25rem color-mix(in srgb, var(--calendaria-festival-border, rgb(212 175 55)) 25%, transparent),
+      inset 0 0 0.625rem color-mix(in srgb, var(--calendaria-festival-border, rgb(212 175 55)) 5%, transparent);
   }
 }

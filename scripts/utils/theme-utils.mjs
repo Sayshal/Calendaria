@@ -762,7 +762,8 @@ const THEMED_APPS = [
   '.sun-dial',
   '.stopwatch',
   '.secondary-calendar',
-  '.set-date-dialog'
+  '.set-date-dialog',
+  '.calendaria-cinematic'
 ];
 
 /**
