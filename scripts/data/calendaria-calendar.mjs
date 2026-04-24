@@ -555,8 +555,11 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
         {
           enabled: new BooleanField({ required: false, initial: false }),
           type: new StringField({ required: false, initial: 'year-based', choices: ['month-based', 'year-based'] }),
+          repeat: new BooleanField({ required: false, initial: false }),
           perMonth: new NumberField({ required: false, integer: true, min: 1 }),
-          names: new TypedObjectField(new SchemaField({ name: new StringField({ required: true }), abbreviation: new StringField({ required: false }) }))
+          names: new TypedObjectField(
+            new SchemaField({ name: new StringField({ required: true }), abbreviation: new StringField({ required: false }), weekNumber: new NumberField({ required: false, integer: true, min: 1 }) })
+          )
         },
         { required: false }
       ),
@@ -1523,6 +1526,35 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    */
   getAllSeasons() {
     return this.seasonsArray;
+  }
+
+  /**
+   * Get the current named week for a given time.
+   * @param {number|object} [time] Time to use. Defaults to current world time.
+   * @returns {{weekName: string, weekAbbr: string, weekNumber: number, index: number}|null} Current named week, or null if none is defined for this date.
+   */
+  getCurrentWeek(time = game.time.worldTime) {
+    const weekNames = this.namedWeeksArray;
+    if (!weekNames.length) return null;
+    const components = typeof time === 'number' ? this.timeToComponents(time) : time;
+    const daysPerWeek = this.daysInWeek;
+    if (daysPerWeek <= 0) return null;
+    const type = this.weeks?.type || 'year-based';
+    const dayIndex = type === 'month-based' ? (components.dayOfMonth ?? 0) : this._calculateDayOfYear(components);
+    let weekNumber = Math.floor(dayIndex / daysPerWeek) + 1;
+    let entry = weekNames.find((w) => Number(w.weekNumber) === weekNumber);
+    if (!entry && this.weeks?.repeat) {
+      const maxWeekNumber = weekNames.reduce((max, w) => Math.max(max, Number(w.weekNumber) || 0), 0);
+      if (maxWeekNumber > 0) {
+        const cycled = ((weekNumber - 1) % maxWeekNumber) + 1;
+        entry = weekNames.find((w) => Number(w.weekNumber) === cycled);
+        if (entry) weekNumber = cycled;
+      }
+    }
+    if (!entry) return null;
+    const weekName = localize(entry.name);
+    const weekAbbr = entry.abbreviation ? localize(entry.abbreviation) : weekName.slice(0, 3);
+    return { weekName, weekAbbr, weekNumber, index: weekNumber - 1 };
   }
 
   /**

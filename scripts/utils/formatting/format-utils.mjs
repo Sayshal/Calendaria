@@ -532,7 +532,7 @@ export function formatCustom(calendar, components, formatStr) {
         }
         return getMoonPhaseIcon(calendar, components, moonSelector);
       }
-      return customContext[customToken] ?? customToken;
+      return customContext[customToken] || customToken;
     }
     return tokenMap[match] ?? match;
   });
