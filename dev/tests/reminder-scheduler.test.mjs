@@ -228,3 +228,70 @@ describe('ReminderScheduler — calendar filtering', () => {
     expect(CalendariaSocket.emit).not.toHaveBeenCalled();
   });
 });
+
+describe('ReminderScheduler — multi-day offsets', () => {
+  it('fires timed reminder N days before event (48h offset on 18:41 event)', () => {
+    const note = makeNote('r1', 'Distant Meeting', { year: 1, month: 0, dayOfMonth: 4, hour: 18, minute: 41 }, { reminderOffset: 48 });
+    NoteManager.getAllNotes.mockReturnValue([note]);
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 2, hour: 18, minute: 45 });
+    ReminderScheduler.onUpdateWorldTime(WT(), ReminderScheduler.CHECK_INTERVAL);
+    expect(CalendariaSocket.emit).toHaveBeenCalled();
+  });
+  it('does not fire timed multi-day reminder before reminder moment', () => {
+    const note = makeNote('r1', 'Distant Meeting', { year: 1, month: 0, dayOfMonth: 4, hour: 18, minute: 41 }, { reminderOffset: 48 });
+    NoteManager.getAllNotes.mockReturnValue([note]);
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 2, hour: 17, minute: 0 });
+    ReminderScheduler.onUpdateWorldTime(WT(), ReminderScheduler.CHECK_INTERVAL);
+    expect(CalendariaSocket.emit).not.toHaveBeenCalled();
+  });
+  it('does not fire timed multi-day reminder one day late', () => {
+    const note = makeNote('r1', 'Distant Meeting', { year: 1, month: 0, dayOfMonth: 4, hour: 18, minute: 41 }, { reminderOffset: 48 });
+    NoteManager.getAllNotes.mockReturnValue([note]);
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 3, hour: 18, minute: 45 });
+    ReminderScheduler.onUpdateWorldTime(WT(), ReminderScheduler.CHECK_INTERVAL);
+    expect(CalendariaSocket.emit).not.toHaveBeenCalled();
+  });
+  it('fires all-day reminder N days before event (48h offset)', () => {
+    const note = makeNote('r1', 'Holiday', { year: 1, month: 0, dayOfMonth: 4 }, { allDay: true, reminderOffset: 48, endDate: null });
+    NoteManager.getAllNotes.mockReturnValue([note]);
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 2, hour: 0, minute: 0 });
+    ReminderScheduler.onUpdateWorldTime(WT(), ReminderScheduler.CHECK_INTERVAL);
+    expect(CalendariaSocket.emit).toHaveBeenCalled();
+  });
+  it('fires reminder at exactly 24h boundary on timed event', () => {
+    const note = makeNote('r1', 'Tomorrow Meeting', { year: 1, month: 0, dayOfMonth: 3, hour: 18, minute: 0 }, { reminderOffset: 24 });
+    NoteManager.getAllNotes.mockReturnValue([note]);
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 2, hour: 18, minute: 0 });
+    ReminderScheduler.onUpdateWorldTime(WT(), ReminderScheduler.CHECK_INTERVAL);
+    expect(CalendariaSocket.emit).toHaveBeenCalled();
+  });
+  it('fires recurring weekly reminder 48h before next occurrence', () => {
+    isRecurringMatch.mockImplementation((_flagData, date) => date.dayOfMonth === 4);
+    const note = makeNote('r1', 'Weekly', { year: 1, month: 0, dayOfMonth: 4, hour: 18, minute: 41 }, { repeat: 'weekly', reminderOffset: 48 });
+    NoteManager.getAllNotes.mockReturnValue([note]);
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 2, hour: 18, minute: 45 });
+    ReminderScheduler.onUpdateWorldTime(WT(), ReminderScheduler.CHECK_INTERVAL);
+    expect(CalendariaSocket.emit).toHaveBeenCalled();
+  });
+  it('regression: same-day sub-24h offset still fires correctly', () => {
+    const note = makeNote('r1', 'Meeting', { year: 1, month: 0, dayOfMonth: 0, hour: 18, minute: 41 }, { reminderOffset: 6 });
+    NoteManager.getAllNotes.mockReturnValue([note]);
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 12, minute: 45 });
+    ReminderScheduler.onUpdateWorldTime(WT(), ReminderScheduler.CHECK_INTERVAL);
+    expect(CalendariaSocket.emit).toHaveBeenCalled();
+  });
+});
+
+describe('ReminderScheduler — performance', () => {
+  it('processes 5000 notes within 250ms', () => {
+    const notes = Array.from({ length: 5000 }, (_, i) =>
+      makeNote(`r${i}`, `Note ${i}`, { year: 1, month: 0, dayOfMonth: (i % 28) + 1, hour: 14, minute: 0 }, { reminderOffset: (i % 200) + 1 })
+    );
+    NoteManager.getAllNotes.mockReturnValue(notes);
+    _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 13, minute: 0 });
+    const start = performance.now();
+    ReminderScheduler.onUpdateWorldTime(WT(), ReminderScheduler.CHECK_INTERVAL);
+    const elapsed = performance.now() - start;
+    expect(elapsed).toBeLessThan(250);
+  });
+});

@@ -1146,14 +1146,14 @@ export default class CalendariaSettings {
         hint: 'CALENDARIA.Settings.RestAdvanceMode.Hint',
         scope: 'world',
         config: false,
-        type: new StringField({ initial: 'newDay' })
+        type: new StringField({ initial: 'automatic' })
       },
       [SETTINGS.REST_FIXED_HOURS]: {
         name: 'CALENDARIA.Settings.RestFixedHours.Name',
         hint: 'CALENDARIA.Settings.RestFixedHours.Hint',
         scope: 'world',
         config: false,
-        type: new NumberField({ integer: true, min: 1, initial: 8 })
+        type: new NumberField({ integer: true, min: 0, initial: 8 })
       },
       restAdvanceModeMigrationComplete: { name: 'Rest Advance Mode Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       removedCalendarsMigrationComplete: { name: 'Removed Calendars Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },

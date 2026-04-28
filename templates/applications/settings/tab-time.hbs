@@ -53,6 +53,9 @@
         <label for="restAdvanceMode">{{localize "CALENDARIA.Settings.RestAdvanceMode.Name"}}</label>
         <div class="form-fields">
           <select id="restAdvanceMode" name="restAdvanceMode">
+            <option value="automatic" {{#if (eq restAdvanceMode "automatic")}}selected{{/if}}>
+              {{localize "CALENDARIA.Settings.RestAdvanceMode.Automatic"}}
+            </option>
             <option value="newDay" {{#if (eq restAdvanceMode "newDay")}}selected{{/if}}>
               {{localize "CALENDARIA.Settings.RestAdvanceMode.NewDay"}}
             </option>
@@ -70,7 +73,7 @@
       <div class="form-group" data-depends-on="restAdvanceMode:fixed">
         <label for="restFixedHours">{{localize "CALENDARIA.Settings.RestFixedHours.Name"}}</label>
         <div class="form-fields">
-          <input type="number" id="restFixedHours" name="restFixedHours" value="{{restFixedHours}}" min="1" step="1">
+          <input type="number" id="restFixedHours" name="restFixedHours" value="{{restFixedHours}}" min="0" step="1">
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.RestFixedHours.Hint"}}</p>
       </div>

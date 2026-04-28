@@ -19,8 +19,8 @@ export default class ReminderScheduler {
   /** @type {object | null} Last processed date */
   static #lastDate = null;
 
-  /** @type {number} Minimum interval between checks in game seconds (5 minutes) */
-  static CHECK_INTERVAL = 300;
+  /** @type {number} Minimum interval between checks in game seconds (1 minute) */
+  static CHECK_INTERVAL = 60;
 
   /** @type {number} Last world time when reminders were checked */
   static #lastCheckTime = 0;
@@ -62,13 +62,13 @@ export default class ReminderScheduler {
     if (worldTime < this.#lastCheckTime) {
       this.#firedToday.clear();
       this.#lastCheckTime = worldTime;
-      this.#checkReminders(worldTime, currentDate);
+      this.#checkReminders(currentDate);
       this.#lastDate = { ...currentDate };
       return;
     }
     if (this.#lastDate && this.#hasDateChanged(this.#lastDate, currentDate)) this.#firedToday.clear();
     if (worldTime - this.#lastCheckTime >= this.CHECK_INTERVAL) {
-      this.#checkReminders(worldTime, currentDate);
+      this.#checkReminders(currentDate);
       this.#lastCheckTime = worldTime;
     }
     this.#lastDate = { ...currentDate };
@@ -76,11 +76,10 @@ export default class ReminderScheduler {
 
   /**
    * Check all notes for pending reminders.
-   * @param {number} worldTime - Current world time in seconds
    * @param {object} currentDate - Current date components
    * @private
    */
-  static #checkReminders(worldTime, currentDate) {
+  static #checkReminders(currentDate) {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return;
     const activeCalendarId = calendar.metadata?.id || CalendarRegistry.getActiveId() || 'unknown';
@@ -92,8 +91,8 @@ export default class ReminderScheduler {
       if (note.flagData.silent) continue;
       const reminderKey = `${note.id}:${currentDate.year}-${currentDate.month}-${currentDate.dayOfMonth}`;
       if (this.#firedToday.has(reminderKey)) continue;
-      if (this.#shouldFireReminder(note, worldTime, calendar, currentDate)) {
-        this.#fireReminder(note, currentDate);
+      if (this.#shouldFireReminder(note, calendar, currentDate)) {
+        this.#fireReminder(note);
         this.#firedToday.add(reminderKey);
         fired++;
       }
@@ -104,68 +103,57 @@ export default class ReminderScheduler {
   /**
    * Determine if a reminder should fire based on current time and offset.
    * @param {object} note - The note stub
-   * @param {number} _worldTime - Current world time in seconds
    * @param {object} calendar - Active calendar
    * @param {object} currentDate - Current date components
    * @returns {boolean} - Should reminder fire?
    * @private
    */
-  static #shouldFireReminder(note, _worldTime, calendar, currentDate) {
+  static #shouldFireReminder(note, calendar, currentDate) {
     const startDate = note.flagData.startDate;
     if (!startDate) return false;
     if (!currentDate) return false;
     const minutesPerHour = calendar?.days?.minutesPerHour ?? 60;
+    const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
+    const minutesInDay = hoursPerDay * minutesPerHour;
     const offsetMinutes = (note.flagData.reminderOffset ?? 0) * minutesPerHour;
+    const allDay = !!note.flagData.allDay;
+    const eventMinuteOfDay = allDay ? 0 : (startDate.hour ?? 0) * minutesPerHour + (startDate.minute ?? 0);
+    const shift = offsetMinutes - eventMinuteOfDay;
+    const daysBefore = shift > 0 ? Math.floor((shift - 1) / minutesInDay) + 1 : 0;
+    const reminderMinuteOfDay = eventMinuteOfDay + daysBefore * minutesInDay - offsetMinutes;
+    const currentMinutes = currentDate.hour * minutesPerHour + currentDate.minute;
     const hasRecurrence = note.flagData.repeat && note.flagData.repeat !== 'never';
     const tree = note.flagData.conditionTree;
     const hasConditions = note.flagData.conditions?.length > 0 || (tree && (tree.children?.length > 0 || (tree.type === 'condition' && tree.field)));
     if (hasRecurrence || hasConditions) {
       const occursToday = isRecurringMatch(note.flagData, currentDate);
-      let occursTomorrow = false;
-      if (note.flagData.allDay) {
-        const tomorrow = this.#getNextDay(currentDate, calendar);
-        occursTomorrow = isRecurringMatch(note.flagData, tomorrow);
+      let occursOnReminderDay = false;
+      if (daysBefore > 0) {
+        const reminderDay = this.#getDateNDaysAhead(currentDate, calendar, daysBefore);
+        occursOnReminderDay = isRecurringMatch(note.flagData, reminderDay);
       }
-      if (!occursToday && !occursTomorrow) return false;
-      if (occursTomorrow && note.flagData.allDay && offsetMinutes > 0) {
-        const currentMinutes = currentDate.hour * minutesPerHour + currentDate.minute;
-        const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
-        const minutesInDay = hoursPerDay * minutesPerHour;
-        const reminderMinutes = minutesInDay - offsetMinutes;
-        if (currentMinutes >= reminderMinutes) return true;
-      }
-      if (occursToday && note.flagData.allDay) {
+      if (!occursToday && !occursOnReminderDay) return false;
+      if (occursOnReminderDay && currentMinutes >= reminderMinuteOfDay) return true;
+      if (occursToday && allDay) {
         if (offsetMinutes === 0) return true;
-        const currentMinutes = currentDate.hour * minutesPerHour + currentDate.minute;
         if (currentMinutes <= offsetMinutes) return true;
       }
-      if (occursToday && !note.flagData.allDay) {
-        const currentMinutes = currentDate.hour * minutesPerHour + currentDate.minute;
-        const eventHour = startDate.hour ?? 0;
-        const eventMinute = startDate.minute ?? 0;
-        const eventMinutes = eventHour * minutesPerHour + eventMinute;
-        if (offsetMinutes === 0) return currentMinutes >= eventMinutes;
-        const reminderMinutes = eventMinutes - offsetMinutes;
-        return currentMinutes >= reminderMinutes && currentMinutes < eventMinutes;
+      if (occursToday && !allDay && daysBefore === 0) {
+        if (offsetMinutes === 0) return currentMinutes >= eventMinuteOfDay;
+        return currentMinutes >= reminderMinuteOfDay && currentMinutes < eventMinuteOfDay;
       }
       return false;
     }
-    const endDate = note.flagData.endDate;
-    const tomorrow = this.#getNextDay(currentDate, calendar);
-    const tomorrowInRange = this.#isDateInRange(tomorrow, startDate, endDate);
-    const todayInRange = this.#isDateInRange(currentDate, startDate, endDate);
-    if (note.flagData.allDay && offsetMinutes > 0 && tomorrowInRange) {
-      const currentMinutes = currentDate.hour * minutesPerHour + currentDate.minute;
-      const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
-      const minutesInDay = hoursPerDay * minutesPerHour;
-      const reminderMinutes = minutesInDay - offsetMinutes;
-      return currentMinutes >= reminderMinutes;
+    if (daysBefore > 0) {
+      const reminderDay = this.#getDateNDaysAhead(currentDate, calendar, daysBefore);
+      if (reminderDay.year === startDate.year && reminderDay.month === startDate.month && reminderDay.dayOfMonth === startDate.dayOfMonth) return currentMinutes >= reminderMinuteOfDay;
+      return false;
     }
-    if (todayInRange) {
+    const endDate = note.flagData.endDate;
+    if (this.#isDateInRange(currentDate, startDate, endDate)) {
       const isFirstDay = currentDate.year === startDate.year && currentDate.month === startDate.month && currentDate.dayOfMonth === startDate.dayOfMonth;
-      const currentMinutes = currentDate.hour * minutesPerHour + currentDate.minute;
-      const eventHour = note.flagData.allDay ? 0 : isFirstDay ? (startDate.hour ?? 0) : 0;
-      const eventMinute = note.flagData.allDay ? 0 : isFirstDay ? (startDate.minute ?? 0) : 0;
+      const eventHour = allDay ? 0 : isFirstDay ? (startDate.hour ?? 0) : 0;
+      const eventMinute = allDay ? 0 : isFirstDay ? (startDate.minute ?? 0) : 0;
       const eventMinutes = eventHour * minutesPerHour + eventMinute;
       if (offsetMinutes === 0) return currentMinutes >= eventMinutes;
       const reminderMinutes = eventMinutes - offsetMinutes;
@@ -216,12 +204,25 @@ export default class ReminderScheduler {
   }
 
   /**
-   * Fire a reminder notification.
-   * @param {object} note - The note stub
-   * @param {object} _currentDate - Current date components
+   * Walk forward N days from the given date.
+   * @param {object} currentDate - Starting date components
+   * @param {object} calendar - Active calendar
+   * @param {number} n - Number of days to walk forward
+   * @returns {object} Date components N days ahead
    * @private
    */
-  static #fireReminder(note, _currentDate) {
+  static #getDateNDaysAhead(currentDate, calendar, n) {
+    let date = currentDate;
+    for (let i = 0; i < n; i++) date = this.#getNextDay(date, calendar);
+    return date;
+  }
+
+  /**
+   * Fire a reminder notification.
+   * @param {object} note - The note stub
+   * @private
+   */
+  static #fireReminder(note) {
     const reminderType = note.flagData.reminderType || 'toast';
     const targets = this.#getTargetUsers(note);
     const message = this.#formatReminderMessage(note);

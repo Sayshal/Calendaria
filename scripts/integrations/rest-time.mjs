@@ -60,8 +60,24 @@ export function onLongRest(actor, config) {
   const secondsPerMinute = calendar.days?.secondsPerMinute ?? 60;
   const mode = game.settings.get(MODULE.ID, SETTINGS.REST_ADVANCE_MODE);
   config.advanceTime = false;
+  if (mode === 'automatic') {
+    const systemMinutes = config.duration;
+    if (!systemMinutes || systemMinutes <= 0) {
+      log(3, 'Long rest time advancement skipped (system reported no duration)');
+      return;
+    }
+    const systemHours = systemMinutes / 60;
+    const seconds = systemHours * minutesPerHour * secondsPerMinute;
+    CinematicOverlay.gatedAdvance(seconds, { source: 'rest' });
+    log(3, `Long rest advancing ${systemHours} hours (system default)`);
+    return;
+  }
   if (mode === 'fixed' && !isGritty) {
     const fixedHours = game.settings.get(MODULE.ID, SETTINGS.REST_FIXED_HOURS);
+    if (fixedHours <= 0) {
+      log(3, 'Long rest time advancement suppressed (fixed hours = 0)');
+      return;
+    }
     const seconds = fixedHours * minutesPerHour * secondsPerMinute;
     CinematicOverlay.gatedAdvance(seconds, { source: 'rest' });
     log(3, `Long rest advancing ${fixedHours} hours`);
@@ -98,8 +114,18 @@ export function onPF2eRest() {
   const minutesPerHour = calendar.days?.minutesPerHour ?? 60;
   const secondsPerMinute = calendar.days?.secondsPerMinute ?? 60;
   const mode = game.settings.get(MODULE.ID, SETTINGS.REST_ADVANCE_MODE);
+  if (mode === 'automatic') {
+    const seconds = 8 * minutesPerHour * secondsPerMinute;
+    CinematicOverlay.gatedAdvance(seconds, { source: 'rest' });
+    log(3, 'PF2E rest advancing 8 hours (system default)');
+    return;
+  }
   if (mode === 'fixed') {
     const fixedHours = game.settings.get(MODULE.ID, SETTINGS.REST_FIXED_HOURS);
+    if (fixedHours <= 0) {
+      log(3, 'PF2E rest time advancement suppressed (fixed hours = 0)');
+      return;
+    }
     const seconds = fixedHours * minutesPerHour * secondsPerMinute;
     CinematicOverlay.gatedAdvance(seconds, { source: 'rest' });
     log(3, `PF2E rest advancing ${fixedHours} hours`);
@@ -131,39 +157,44 @@ export function onPF1eRest(_actor, options = {}) {
     log(2, 'PF1E rest time advancement blocked (clock locked)');
     return;
   }
+  const advanceTime = game.settings.get(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST);
+  if (!advanceTime) return;
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return;
   const minutesPerHour = calendar.days?.minutesPerHour ?? 60;
   const secondsPerMinute = calendar.days?.secondsPerMinute ?? 60;
-  const advanceTime = game.settings.get(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST);
-  if (advanceTime) {
-    const mode = game.settings.get(MODULE.ID, SETTINGS.REST_ADVANCE_MODE);
-    if (mode === 'fixed') {
-      const fixedHours = game.settings.get(MODULE.ID, SETTINGS.REST_FIXED_HOURS);
-      const seconds = fixedHours * minutesPerHour * secondsPerMinute;
-      CinematicOverlay.gatedAdvance(seconds, { source: 'rest' });
-      log(3, `PF1E rest advancing ${fixedHours} hours`);
+  const mode = game.settings.get(MODULE.ID, SETTINGS.REST_ADVANCE_MODE);
+  if (mode === 'automatic') {
+    const seconds = options.hours * minutesPerHour * secondsPerMinute;
+    CinematicOverlay.gatedAdvance(seconds, { source: 'rest' });
+    log(3, `PF1E rest advancing ${options.hours} hours (system default)`);
+    return;
+  }
+  if (mode === 'fixed') {
+    const fixedHours = game.settings.get(MODULE.ID, SETTINGS.REST_FIXED_HOURS);
+    if (fixedHours <= 0) {
+      log(3, 'PF1E rest time advancement suppressed (fixed hours = 0)');
       return;
     }
-    const targetHour = getTargetHour(calendar, mode);
-    const currentDate = getCurrentDate();
-    const currentMinutes = currentDate.hour * minutesPerHour + currentDate.minute;
-    const targetMinutes = targetHour * minutesPerHour;
-    const minutesInDay = (calendar.days?.hoursPerDay ?? 24) * minutesPerHour;
-    const minutesUntilTarget = minutesInDay - currentMinutes + targetMinutes;
-    CinematicOverlay.gatedAdvance(minutesUntilTarget * secondsPerMinute, { source: 'rest' });
-    log(3, `PF1E rest advancing ${minutesUntilTarget} minutes to ${targetHour}:00`);
-  } else {
-    const restSeconds = options.hours * minutesPerHour * secondsPerMinute;
-    CinematicOverlay.gatedAdvance(restSeconds, { source: 'rest' });
-    log(3, `PF1E rest advancing ${options.hours} hours`);
+    const seconds = fixedHours * minutesPerHour * secondsPerMinute;
+    CinematicOverlay.gatedAdvance(seconds, { source: 'rest' });
+    log(3, `PF1E rest advancing ${fixedHours} hours`);
+    return;
   }
+  const targetHour = getTargetHour(calendar, mode);
+  const currentDate = getCurrentDate();
+  const currentMinutes = currentDate.hour * minutesPerHour + currentDate.minute;
+  const targetMinutes = targetHour * minutesPerHour;
+  const minutesInDay = (calendar.days?.hoursPerDay ?? 24) * minutesPerHour;
+  const minutesUntilTarget = minutesInDay - currentMinutes + targetMinutes;
+  CinematicOverlay.gatedAdvance(minutesUntilTarget * secondsPerMinute, { source: 'rest' });
+  log(3, `PF1E rest advancing ${minutesUntilTarget} minutes to ${targetHour}:00`);
 }
 
 /**
  * Determine the target hour for rest completion.
  * @param {object} calendar - The active calendar
- * @param {string} mode - Rest advance mode ('newDay', 'sunrise', 'fixed')
+ * @param {string} mode - Rest advance mode ('automatic', 'newDay', 'sunrise', 'fixed')
  * @returns {number} Target hour (decimal)
  */
 function getTargetHour(calendar, mode) {

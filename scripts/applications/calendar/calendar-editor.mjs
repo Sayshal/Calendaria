@@ -1249,7 +1249,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         },
         eclipseMode,
         nodalPeriod: eclipseMode === 'custom' ? (this.#parseOptionalInt(data[`moons.${mKey}.nodalPeriod`]) ?? existingMoon?.nodalPeriod ?? null) : (existingMoon?.nodalPeriod ?? null),
-        apparentSize: parseFloat(data[`moons.${mKey}.apparentSize`]) || (existingMoon?.apparentSize ?? 1.0)
+        apparentSize: parseFloat(data[`moons.${mKey}.apparentSize`]) || (existingMoon?.apparentSize ?? 1.0),
+        moonBrightnessMax: Number.isFinite(parseFloat(data[`moons.${mKey}.moonBrightnessMax`])) ? parseFloat(data[`moons.${mKey}.moonBrightnessMax`]) : (existingMoon?.moonBrightnessMax ?? null)
       };
     }
     this.#calendarData.moons = newMoons;
