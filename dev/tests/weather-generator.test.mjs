@@ -315,6 +315,22 @@ describe('generateWeather()', () => {
     expect(result.temperature).toBeGreaterThanOrEqual(10);
     expect(result.temperature).toBeLessThanOrEqual(20);
   });
+  it('still selects preset when relative tempMin/tempMax resolve outside season range (#694)', () => {
+    const seasonClimate = { presets: { 0: { id: 'clear', chance: 1 } }, temperatures: { min: 18, max: 32 } };
+    const zoneConfig = {
+      presets: { a: { id: 'clear', enabled: true }, b: { id: 'rain', enabled: false } },
+      seasonOverrides: { Summer: { presets: { rain: { id: 'rain', enabled: true, chance: '100+', tempMin: '56+', tempMax: '61+' } } } }
+    };
+    const result = generateWeather({ seasonClimate, zoneConfig, season: 'Summer', seed: 7 });
+    expect(result.preset.id).toBe('rain');
+  });
+  it('relative "+" tempMax extends the upper bound above the season range', () => {
+    const seasonClimate = { presets: { 0: { id: 'clear', chance: 100 } }, temperatures: { min: 18, max: 32 } };
+    const zoneConfig = { presets: { 0: { id: 'clear', enabled: true, tempMin: '10+', tempMax: '20+' } } };
+    const result = generateWeather({ seasonClimate, zoneConfig, seed: 13 });
+    expect(result.temperature).toBeGreaterThanOrEqual(28);
+    expect(result.temperature).toBeLessThanOrEqual(52);
+  });
   it('generates precipitation for rain preset', () => {
     const result = generateWeather({ seasonClimate: { presets: { 0: { id: 'rain', chance: 100 } }, temperatures: { min: 10, max: 20 } }, seed: 42 });
     expect(result.precipitation.type).toBe('rain');

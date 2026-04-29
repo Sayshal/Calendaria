@@ -68,6 +68,15 @@ function weightedSelect(weights, randomFn = Math.random) {
 }
 
 /**
+ * Check whether a stored temperature value is a relative modifier ("N+"/"N-").
+ * @param {number|string|null|undefined} value - Stored temperature value
+ * @returns {boolean} True if value is a relative modifier string
+ */
+export function isRelativeTempModifier(value) {
+  return typeof value === 'string' && /[+-]$/.test(value);
+}
+
+/**
  * Apply a temperature value that may be a relative modifier or absolute.
  * @param {number|string} value - Temperature value or "N+"/"N-" modifier string
  * @param {number} base - Base temperature to apply modifier against
@@ -194,6 +203,7 @@ export function generateWeather({ seasonClimate, zoneConfig, season, seed, custo
     const p = getPreset(id, customPresets);
     const effMin = seasonP?.tempMin ?? zoneP?.tempMin ?? p?.tempMin;
     const effMax = seasonP?.tempMax ?? zoneP?.tempMax ?? p?.tempMax;
+    if (isRelativeTempModifier(effMin) || isRelativeTempModifier(effMax)) continue;
     const resolvedMin = effMin != null ? applyTempModifier(effMin, tempRange.min) : null;
     const resolvedMax = effMax != null ? applyTempModifier(effMax, tempRange.max) : null;
     if (resolvedMin != null && resolvedMax != null && (resolvedMin > tempRange.max || resolvedMax < tempRange.min)) probabilities[id] = 0;
@@ -208,8 +218,14 @@ export function generateWeather({ seasonClimate, zoneConfig, season, seed, custo
   if (hasPresetOverride) {
     const effectiveTempMin = seasonPresetConfig?.tempMin ?? zonePresetConfig?.tempMin ?? preset?.tempMin;
     const effectiveTempMax = seasonPresetConfig?.tempMax ?? zonePresetConfig?.tempMax ?? preset?.tempMax;
-    if (effectiveTempMin != null) finalTempRange.min = Math.max(finalTempRange.min, applyTempModifier(effectiveTempMin, tempRange.min));
-    if (effectiveTempMax != null) finalTempRange.max = Math.min(finalTempRange.max, applyTempModifier(effectiveTempMax, tempRange.max));
+    if (effectiveTempMin != null) {
+      const resolved = applyTempModifier(effectiveTempMin, tempRange.min);
+      finalTempRange.min = isRelativeTempModifier(effectiveTempMin) ? resolved : Math.max(finalTempRange.min, resolved);
+    }
+    if (effectiveTempMax != null) {
+      const resolved = applyTempModifier(effectiveTempMax, tempRange.max);
+      finalTempRange.max = isRelativeTempModifier(effectiveTempMax) ? resolved : Math.min(finalTempRange.max, resolved);
+    }
     if (finalTempRange.min > finalTempRange.max) finalTempRange = { ...tempRange };
   }
   let temperature = Math.round(finalTempRange.min + randomFn() * (finalTempRange.max - finalTempRange.min));
@@ -250,8 +266,14 @@ export function rollPresetTemperature({ presetId, seasonClimate, zoneConfig, sea
   if (hasPresetOverride) {
     const effectiveTempMin = seasonPresetConfig?.tempMin ?? zonePresetConfig?.tempMin ?? preset?.tempMin;
     const effectiveTempMax = seasonPresetConfig?.tempMax ?? zonePresetConfig?.tempMax ?? preset?.tempMax;
-    if (effectiveTempMin != null) finalTempRange.min = Math.max(finalTempRange.min, applyTempModifier(effectiveTempMin, tempRange.min));
-    if (effectiveTempMax != null) finalTempRange.max = Math.min(finalTempRange.max, applyTempModifier(effectiveTempMax, tempRange.max));
+    if (effectiveTempMin != null) {
+      const resolved = applyTempModifier(effectiveTempMin, tempRange.min);
+      finalTempRange.min = isRelativeTempModifier(effectiveTempMin) ? resolved : Math.max(finalTempRange.min, resolved);
+    }
+    if (effectiveTempMax != null) {
+      const resolved = applyTempModifier(effectiveTempMax, tempRange.max);
+      finalTempRange.max = isRelativeTempModifier(effectiveTempMax) ? resolved : Math.min(finalTempRange.max, resolved);
+    }
     if (finalTempRange.min > finalTempRange.max) finalTempRange = { ...tempRange };
   }
   return Math.round(finalTempRange.min + randomFn() * (finalTempRange.max - finalTempRange.min));
