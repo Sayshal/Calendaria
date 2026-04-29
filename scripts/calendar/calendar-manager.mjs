@@ -9,6 +9,7 @@ import { CalendariaCalendar } from '../data/_module.mjs';
 import { FestivalManager } from '../festivals/_module.mjs';
 import { getSystemWorldClock, isLuxonSyncRequired, syncWithLuxon } from '../integrations/luxon-sync.mjs';
 import { format, localize, log } from '../utils/_module.mjs';
+import { FRAMEWORK_INITIAL_DISPLAY_FORMATS, buildDisplayFormatsFromCalendar } from '../utils/formatting/format-utils.mjs';
 import { BUNDLED_CALENDARS, CalendarRegistry, DEFAULT_CALENDAR, isBundledCalendar, loadBundledCalendars } from './_module.mjs';
 
 /**
@@ -64,7 +65,28 @@ export default class CalendarManager {
     }
     const resolvedId = CalendarRegistry.getActive()?.metadata?.id;
     if (resolvedId) Hooks.callAll(HOOKS.CALENDAR_SWITCHED, resolvedId, CalendarRegistry.get(resolvedId));
+    await this.#seedDisplayFormatsForFreshWorld();
     log(3, 'Calendar Manager initialized');
+  }
+
+  /**
+   * On first load, seed the world setting from the active calendar's authored dateFormats.
+   * @private
+   */
+  static async #seedDisplayFormatsForFreshWorld() {
+    if (!game.user?.isGM) return;
+    const activeCalendar = CalendarRegistry.getActive();
+    if (!activeCalendar?.dateFormats) return;
+    const current = game.settings.get(MODULE.ID, SETTINGS.DISPLAY_FORMATS);
+    if (!foundry.utils.objectsEqual(current, FRAMEWORK_INITIAL_DISPLAY_FORMATS)) return;
+    const seeded = buildDisplayFormatsFromCalendar(activeCalendar);
+    if (foundry.utils.objectsEqual(seeded, current)) return;
+    try {
+      await game.settings.set(MODULE.ID, SETTINGS.DISPLAY_FORMATS, seeded);
+      log(3, `Seeded DISPLAY_FORMATS from "${activeCalendar.name}" dateFormats for fresh world`);
+    } catch (error) {
+      log(1, 'Failed to seed DISPLAY_FORMATS from calendar:', error);
+    }
   }
 
   /**

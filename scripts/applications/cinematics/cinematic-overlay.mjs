@@ -7,7 +7,7 @@
 import { CalendarManager } from '../../calendar/_module.mjs';
 import { HOOKS, MODULE, SETTINGS } from '../../constants.mjs';
 import { getTimeIncrements } from '../../time/_module.mjs';
-import { CalendariaSocket, getSkyColorsRgb, log } from '../../utils/_module.mjs';
+import { CalendariaSocket, formatForLocation, getSkyColorsRgb, log } from '../../utils/_module.mjs';
 import CinematicKeyframeBuilder from './cinematic-keyframe-builder.mjs';
 
 /** @type {number} */
@@ -374,9 +374,7 @@ export default class CinematicOverlay {
    * @returns {string} Formatted date string
    */
   static #formatDate(calendar, components) {
-    const monthData = calendar.monthsArray?.[components.month];
-    const monthName = monthData?.name ? game.i18n.localize(monthData.name) : `Month ${components.month + 1}`;
-    return `${components.dayOfMonth + 1} ${monthName} ${components.year}`;
+    return formatForLocation(calendar, { ...components, hour: components.hour ?? 12, minute: components.minute ?? 0, second: components.second ?? 0 }, 'cinematicDate');
   }
 
   /**

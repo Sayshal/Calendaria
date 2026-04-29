@@ -9,6 +9,7 @@ import { MODULE, SETTINGS } from './constants.mjs';
 import { invalidatePresetCache } from './notes/_module.mjs';
 import { hideDebugZones, initializeTheme, localize, log, showDebugZones } from './utils/_module.mjs';
 import { invalidateCache as invalidateFogCache } from './utils/fog-of-war.mjs';
+import { FRAMEWORK_INITIAL_DISPLAY_FORMATS } from './utils/formatting/format-utils.mjs';
 
 const { ArrayField, ObjectField, BooleanField, NumberField, SetField, StringField } = foundry.data.fields;
 const renderMiniCal = () => foundry.applications.instances.get('calendaria-mini-cal')?.render();
@@ -1107,19 +1108,7 @@ export default class CalendariaSettings {
         name: 'Display Formats',
         scope: 'world',
         config: false,
-        type: new ObjectField({
-          initial: {
-            hudDate: { gm: 'ordinal', player: 'ordinal' },
-            hudTime: { gm: 'time24', player: 'time24' },
-            microCalHeader: { gm: 'approxDateTime', player: 'approxDateTime' },
-            miniCalHeader: { gm: 'MMMM GGGG', player: 'MMMM GGGG' },
-            miniCalTime: { gm: 'time24', player: 'time24' },
-            bigCalHeader: { gm: 'MMMM GGGG', player: 'MMMM GGGG' },
-            chatTimestamp: { gm: 'dateShort', player: 'dateShort' },
-            stopwatchRealtime: { gm: 'stopwatchRealtimeFull', player: 'stopwatchRealtimeFull' },
-            stopwatchGametime: { gm: 'stopwatchGametimeFull', player: 'stopwatchGametimeFull' }
-          }
-        })
+        type: new ObjectField({ initial: () => foundry.utils.deepClone(FRAMEWORK_INITIAL_DISPLAY_FORMATS) })
       },
       [SETTINGS.ADVANCE_TIME_ON_REST]: {
         name: 'CALENDARIA.Settings.AdvanceTimeOnRest.Name',

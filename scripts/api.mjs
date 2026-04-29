@@ -87,6 +87,7 @@ import {
   timeSince
 } from './utils/_module.mjs';
 import { clearRanges as fogClearRanges, getRevealedRanges as fogGetRevealedRanges, isRevealed as fogIsRevealed, revealRange as fogRevealRange, isFogEnabled } from './utils/fog-of-war.mjs';
+import { buildDisplayFormatsFromCalendar } from './utils/formatting/format-utils.mjs';
 import * as Permissions from './utils/permissions.mjs';
 import { WeatherManager, playStandaloneSound, stopStandaloneSound } from './weather/_module.mjs';
 
@@ -361,6 +362,31 @@ export const CalendariaAPI = {
       return true;
     }
     return await CalendarManager.switchCalendar(id);
+  },
+
+  /**
+   * Set the active calendar, optionally rewriting DISPLAY_FORMATS to match
+   * the new calendar's authored dateFormats.
+   * @param {string} id - Calendar ID to activate
+   * @param {object} [options]
+   * @param {boolean} [options.useCalendarDefaults] - If true, replace DISPLAY_FORMATS
+   *   with values seeded from the new calendar's dateFormats. Defaults to false.
+   * @returns {Promise<boolean>} True if activation succeeded
+   */
+  async setActiveCalendar(id, { useCalendarDefaults = false } = {}) {
+    const switched = await this.switchCalendar(id);
+    if (!switched) return false;
+    if (!useCalendarDefaults) return true;
+    if (!game.user.isGM) return true;
+    const calendar = CalendarManager.getActiveCalendar();
+    if (!calendar?.dateFormats) return true;
+    try {
+      const formats = buildDisplayFormatsFromCalendar(calendar);
+      await game.settings.set(MODULE.ID, SETTINGS.DISPLAY_FORMATS, formats);
+    } catch (error) {
+      log(1, 'setActiveCalendar: failed to apply calendar display defaults:', error);
+    }
+    return true;
   },
 
   /**

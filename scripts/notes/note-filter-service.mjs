@@ -6,7 +6,7 @@
 
 import { CalendarManager } from '../calendar/_module.mjs';
 import { NOTE_VISIBILITY } from '../constants.mjs';
-import { localize } from '../utils/_module.mjs';
+import { formatForLocation } from '../utils/_module.mjs';
 import { NoteManager, compareDates } from './_module.mjs';
 
 /**
@@ -111,7 +111,5 @@ export function formatNoteDate(note) {
   if (!flagData?.startDate) return '';
   const calendar = CalendarManager.getActiveCalendar();
   const { year, month, dayOfMonth } = flagData.startDate;
-  const monthData = calendar?.monthsArray?.[month];
-  const monthName = monthData ? localize(monthData.name) : `Month ${month + 1}`;
-  return `${(dayOfMonth ?? 0) + 1} ${monthName}, ${year}`;
+  return formatForLocation(calendar, { year, month, dayOfMonth: dayOfMonth ?? 0, hour: 12, minute: 0, second: 0 }, 'noteViewerDate');
 }

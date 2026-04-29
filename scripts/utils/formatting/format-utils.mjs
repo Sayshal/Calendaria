@@ -906,22 +906,22 @@ export const DEFAULT_FORMAT_PRESETS = {
   stopwatchGametimeSecOnly: 'ss'
 };
 
-/**
- * Map location IDs to their corresponding calendar dateFormat key.
- */
-const LOCATION_FORMAT_KEYS = {
-  hudDate: 'dateLong',
-  hudTime: 'time24',
-  timekeeperDate: 'dateLong',
-  timekeeperTime: 'time24',
-  microCalHeader: 'approxDateTime',
-  miniCalHeader: 'dateLong',
-  miniCalTime: 'time24',
-  bigCalHeader: 'dateFull',
+/** Map display locations to the calendar.dateFormats slot they read from. */
+export const LOCATION_FORMAT_KEYS = {
+  hudDate: 'long',
+  hudTime: 'time',
+  timekeeperDate: 'long',
+  timekeeperTime: 'time',
+  miniCalHeader: 'long',
+  miniCalTime: 'time',
+  bigCalHeader: 'full',
   bigCalWeekHeader: 'weekHeader',
   bigCalYearHeader: 'yearHeader',
   bigCalYearLabel: 'yearLabel',
-  chatTimestamp: 'dateLong'
+  chatTimestamp: 'short',
+  noteViewerDate: 'long',
+  cinematicDate: 'long',
+  sundialTime: 'time'
 };
 
 /**
@@ -942,8 +942,38 @@ export const LOCATION_DEFAULTS = {
   bigCalYearLabel: 'yearEra',
   chatTimestamp: 'dateShort',
   stopwatchRealtime: 'stopwatchRealtimeFull',
-  stopwatchGametime: 'stopwatchGametimeFull'
+  stopwatchGametime: 'stopwatchGametimeFull',
+  noteViewerDate: 'dateLong',
+  cinematicDate: 'dateLong'
 };
+
+/** Framework-initial DISPLAY_FORMATS object. */
+export const FRAMEWORK_INITIAL_DISPLAY_FORMATS = {
+  hudDate: { gm: 'ordinal', player: 'ordinal' },
+  hudTime: { gm: 'time24', player: 'time24' },
+  microCalHeader: { gm: 'approxDateTime', player: 'approxDateTime' },
+  miniCalHeader: { gm: 'MMMM GGGG', player: 'MMMM GGGG' },
+  miniCalTime: { gm: 'time24', player: 'time24' },
+  bigCalHeader: { gm: 'MMMM GGGG', player: 'MMMM GGGG' },
+  chatTimestamp: { gm: 'dateShort', player: 'dateShort' },
+  stopwatchRealtime: { gm: 'stopwatchRealtimeFull', player: 'stopwatchRealtimeFull' },
+  stopwatchGametime: { gm: 'stopwatchGametimeFull', player: 'stopwatchGametimeFull' },
+  noteViewerDate: { gm: 'dateLong', player: 'dateLong' },
+  cinematicDate: { gm: 'dateLong', player: 'dateLong' }
+};
+
+/**
+ * Build a DISPLAY_FORMATS object that points each calendar-aware location.
+ * @param {object} calendar - Active calendar (used to verify slot presence)
+ * @returns {object} DISPLAY_FORMATS-shaped object
+ */
+export function buildDisplayFormatsFromCalendar(calendar) {
+  const result = foundry.utils.deepClone(FRAMEWORK_INITIAL_DISPLAY_FORMATS);
+  const dateFormats = calendar?.dateFormats;
+  if (!dateFormats) return result;
+  for (const [locationId, slot] of Object.entries(LOCATION_FORMAT_KEYS)) if (dateFormats[slot]) result[locationId] = { gm: 'calendarDefault', player: 'calendarDefault' };
+  return result;
+}
 
 /**
  * Get the format string/preset for a specific display location.
@@ -972,9 +1002,10 @@ export function getDisplayFormat(locationId) {
  * @returns {string} - Resolved format string or fallback preset name
  */
 function resolveCalendarDefault(calendar, locationId) {
-  const formatKey = LOCATION_FORMAT_KEYS[locationId] || 'dateLong';
-  const calendarFormat = calendar?.dateFormats?.[formatKey];
-  return calendarFormat || DEFAULT_FORMAT_PRESETS[formatKey] || LOCATION_DEFAULTS[locationId] || 'dateLong';
+  const slot = LOCATION_FORMAT_KEYS[locationId];
+  const calendarFormat = slot ? calendar?.dateFormats?.[slot] : null;
+  if (calendarFormat) return calendarFormat;
+  return LOCATION_DEFAULTS[locationId] || 'dateLong';
 }
 
 /**
@@ -1016,7 +1047,9 @@ export function getDisplayLocationDefinitions() {
     { id: 'bigCalWeekHeader', label: 'CALENDARIA.Common.WeekViewHeader', category: 'bigcal' },
     { id: 'bigCalYearHeader', label: 'CALENDARIA.Common.YearViewHeader', category: 'bigcal' },
     { id: 'bigCalYearLabel', label: 'CALENDARIA.Format.Location.BigCalYearLabel', category: 'bigcal' },
-    { id: 'chatTimestamp', label: 'CALENDARIA.Format.Location.ChatTimestamp', category: 'chat' }
+    { id: 'chatTimestamp', label: 'CALENDARIA.Format.Location.ChatTimestamp', category: 'chat' },
+    { id: 'noteViewerDate', label: 'CALENDARIA.Format.Location.NoteViewerDate', category: 'notes' },
+    { id: 'cinematicDate', label: 'CALENDARIA.Format.Location.CinematicDate', category: 'cinematics' }
   ];
 }
 

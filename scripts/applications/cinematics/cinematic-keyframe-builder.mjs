@@ -5,7 +5,7 @@
  */
 
 import { NoteManager } from '../../notes/_module.mjs';
-import { dateFormattingParts, localize } from '../../utils/_module.mjs';
+import { formatForLocation, localize } from '../../utils/_module.mjs';
 import { WeatherManager } from '../../weather/_module.mjs';
 
 /** @type {number} */
@@ -89,8 +89,7 @@ export default class CinematicKeyframeBuilder {
    */
   static #buildKeyframe(date, worldTime, calendar, prevKeyframe, settings) {
     const components = { ...date, hour: 12, minute: 0, second: 0 };
-    const parts = dateFormattingParts(calendar, components);
-    const dateLabel = `${parts.D} ${parts.MMMM} ${parts.y}`;
+    const dateLabel = formatForLocation(calendar, components, 'cinematicDate');
     const season = calendar.getCurrentSeason?.(worldTime);
     const seasonLabel = season ? localize(season.name) : null;
     const seasonColor = season?.color ?? null;

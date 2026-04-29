@@ -25,7 +25,7 @@ import {
   wrapInRootGroup
 } from '../../notes/_module.mjs';
 import { daysBetween } from '../../notes/date-utils.mjs';
-import { CalendariaSocket, convertToConditionTree, format, localize, log } from '../../utils/_module.mjs';
+import { CalendariaSocket, convertToConditionTree, format, formatForLocation, localize, log } from '../../utils/_module.mjs';
 import { CalendarEditor, ConditionBuilderDialog } from '../_module.mjs';
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
@@ -912,12 +912,9 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
    * @returns {string} Formatted date string
    */
   _formatDateDisplay(calendar, year, month, day) {
-    const isMonthless = calendar?.isMonthless ?? false;
-    if (isMonthless) return `${localize('CALENDARIA.Common.Day')} ${day}, ${year}`;
-    if (!calendar?.monthsArray) return `${day} / ${month + 1} / ${year}`;
-    const monthData = calendar.monthsArray[month];
-    const monthName = monthData?.name ? localize(monthData.name) : `Month ${month + 1}`;
-    return `${day} ${monthName}, ${year}`;
+    if (!calendar) return `${day} / ${month + 1} / ${year}`;
+    if (calendar.isMonthless) return `${localize('CALENDARIA.Common.Day')} ${day}, ${year}`;
+    return formatForLocation(calendar, { year, month, dayOfMonth: day - 1, hour: 12, minute: 0, second: 0 }, 'noteViewerDate');
   }
 
   /**
@@ -953,16 +950,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     if (monthInput) monthInput.value = result.month;
     if (dayInput) dayInput.value = result.day - 1;
     const displaySpan = target.querySelector('.date-display') || target.querySelector('span');
-    if (displaySpan) {
-      const isMonthless = calendar?.isMonthless ?? false;
-      if (isMonthless) {
-        displaySpan.textContent = `${localize('CALENDARIA.Common.Day')} ${result.day}, ${result.year}`;
-      } else {
-        const monthData = calendar.monthsArray[result.month];
-        const monthName = monthData?.name ? localize(monthData.name) : `Month ${result.month + 1}`;
-        displaySpan.textContent = `${result.day} ${monthName}, ${result.year}`;
-      }
-    }
+    if (displaySpan) displaySpan.textContent = this._formatDateDisplay(calendar, result.year, result.month, result.day);
     const changeEvent = new Event('change', { bubbles: true });
     form.dispatchEvent(changeEvent);
   }

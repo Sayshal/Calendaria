@@ -16,6 +16,7 @@ import {
   DEFAULT_COLORS,
   DEFAULT_FORMAT_PRESETS,
   LOCATION_DEFAULTS,
+  LOCATION_FORMAT_KEYS,
   THEME_PRESETS,
   applyCustomColors,
   canChangeActiveCalendar,
@@ -1041,6 +1042,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       { value: 'edit', label: localize('CALENDARIA.Settings.NoteOpenMode.Edit'), selected: noteOpenMode === 'edit' },
       { value: 'view', label: localize('CALENDARIA.Settings.NoteOpenMode.View'), selected: noteOpenMode === 'view' }
     ];
+    context.formatLocations = this.#prepareFormatLocationsForCategory('notes');
   }
 
   /**
@@ -1349,6 +1351,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       { id: 'bigCalYearHeader', label: localize('CALENDARIA.Common.YearViewHeader'), category: 'bigcal', contextType: 'date' },
       { id: 'bigCalYearLabel', label: localize('CALENDARIA.Format.Location.BigCalYearLabel'), category: 'bigcal', contextType: 'date' },
       { id: 'chatTimestamp', label: localize('CALENDARIA.Format.Location.ChatTimestamp'), category: 'chat', contextType: 'date' },
+      { id: 'noteViewerDate', label: localize('CALENDARIA.Format.Location.NoteViewerDate'), category: 'notes', contextType: 'date' },
+      { id: 'cinematicDate', label: localize('CALENDARIA.Format.Location.CinematicDate'), category: 'cinematics', contextType: 'date' },
       { id: 'sundialTime', label: localize('CALENDARIA.Common.TimeDisplay'), category: 'sunDial', contextType: 'time' },
       { id: 'stopwatchRealtime', label: localize('CALENDARIA.Format.Location.StopwatchRealtime'), category: 'stopwatch', contextType: 'stopwatch', gmOnly: true },
       { id: 'stopwatchGametime', label: localize('CALENDARIA.Format.Location.StopwatchGametime'), category: 'stopwatch', contextType: 'stopwatch', gmOnly: true }
@@ -1380,6 +1384,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
           'off',
           'calendarDefault',
           'approxDate',
+          'approxDateTime',
           'approxTime',
           'dateShort',
           'dateMedium',
@@ -1395,6 +1400,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
           'ordinalEra',
           'ordinalFull',
           'seasonDate',
+          'weekHeader',
+          'yearOnly',
+          'yearEra',
           'time12',
           'time12Sec',
           'time24',
@@ -1478,6 +1486,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       { value: 'season', label: localize('CALENDARIA.Common.Season'), selected: unit === 'season' },
       { value: 'year', label: localize('CALENDARIA.Common.Year'), selected: unit === 'year' }
     ];
+    context.formatLocations = this.#prepareFormatLocationsForCategory('cinematics');
   }
 
   /**
@@ -3073,7 +3082,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         });
       }
     }
-    const formatParts = ['hud', 'timekeeper', 'miniCal', 'bigcal', 'chat', 'stopwatch'];
+    const formatParts = ['hud', 'timekeeper', 'miniCal', 'bigcal', 'chat', 'stopwatch', 'notes', 'cinematics'];
     if (formatParts.includes(partId)) {
       const presetSelects = htmlElement.querySelectorAll('select[name*="Preset"]');
       presetSelects.forEach((select) => {
@@ -3089,20 +3098,10 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
               const defaultFormat = LOCATION_DEFAULTS[locationId] || 'dateLong';
               let currentFormat = savedFormats[locationId]?.[role] || defaultFormat;
               if (currentFormat === 'calendarDefault') {
-                const locationFormatKeys = {
-                  hudDate: 'dateLong',
-                  hudTime: 'time24',
-                  timekeeperDate: 'dateLong',
-                  timekeeperTime: 'time24',
-                  microCalHeader: 'approxDateTime',
-                  miniCalHeader: 'dateLong',
-                  miniCalTime: 'time24',
-                  bigCalHeader: 'dateFull',
-                  chatTimestamp: 'dateLong'
-                };
-                const formatKey = locationFormatKeys[locationId] || 'dateLong';
+                const slot = LOCATION_FORMAT_KEYS[locationId];
                 const calendar = CalendarManager.getActiveCalendar();
-                currentFormat = calendar?.dateFormats?.[formatKey] || formatKey;
+                const calFormat = slot ? calendar?.dateFormats?.[slot] : null;
+                currentFormat = calFormat || LOCATION_DEFAULTS[locationId] || 'dateLong';
               }
               currentFormat = DEFAULT_FORMAT_PRESETS[currentFormat] || currentFormat;
               customInput.value = currentFormat;
@@ -3156,21 +3155,11 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         return;
       }
     } else if (preset === 'calendarDefault') {
-      const locationFormatKeys = {
-        hudDate: 'dateLong',
-        hudTime: 'time24',
-        timekeeperDate: 'dateLong',
-        timekeeperTime: 'time24',
-        microCalHeader: 'approxDateTime',
-        miniCalHeader: 'dateLong',
-        miniCalTime: 'time24',
-        bigCalHeader: 'dateFull',
-        chatTimestamp: 'dateLong'
-      };
-      const formatKey = locationFormatKeys[locationId] || 'dateLong';
+      const slot = LOCATION_FORMAT_KEYS[locationId];
       const calendar = CalendarManager.getActiveCalendar();
-      const calFormat = calendar?.dateFormats?.[formatKey];
-      formatStr = calFormat || DEFAULT_FORMAT_PRESETS[formatKey] || formatKey;
+      const calFormat = slot ? calendar?.dateFormats?.[slot] : null;
+      const fallback = LOCATION_DEFAULTS[locationId] || 'dateLong';
+      formatStr = calFormat || DEFAULT_FORMAT_PRESETS[fallback] || fallback;
     } else {
       formatStr = DEFAULT_FORMAT_PRESETS[preset] || preset;
     }

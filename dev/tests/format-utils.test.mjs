@@ -813,7 +813,7 @@ describe('formatForLocation()', () => {
   });
   it('handles calendarDefault setting', () => {
     game.settings.get.mockReturnValue({ hudDate: { gm: 'calendarDefault' } });
-    const calWithFormats = addCalendarGetters({ ...mockCalendar, dateFormats: { dateLong: 'YYYY/MM/DD' } });
+    const calWithFormats = addCalendarGetters({ ...mockCalendar, dateFormats: { long: 'YYYY/MM/DD' } });
     const result = formatForLocation(calWithFormats, { year: 2024, month: 0, dayOfMonth: 14, hour: 12 }, 'hudDate');
     expect(result).toBe('2024/01/15');
   });
