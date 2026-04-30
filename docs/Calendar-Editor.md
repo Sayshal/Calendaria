@@ -96,11 +96,11 @@ Configure the days of the week and optional named weeks.
 
 ### Weekdays List
 
-| Column           | Description                                     |
-| ---------------- | ----------------------------------------------- |
-| **Name**         | Full weekday name. May be left blank.           |
-| **Abbreviation** | Short form.                                     |
-| **Rest Day**     | Checkbox. Marks weekends for styling and hooks. |
+| Column           | Description                                    |
+| ---------------- | ---------------------------------------------- |
+| **Name**         | Full weekday name. May be left blank           |
+| **Abbreviation** | Short form                                     |
+| **Rest Day**     | Checkbox. Marks weekends for styling and hooks |
 
 ### Weekday Controls
 
@@ -254,12 +254,12 @@ Define seasonal periods with visual styling.
 
 ### Season Fields
 
-| Field             | Description                                                                                                                                                                                                  |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Name**          | Season name (e.g., "Spring")                                                                                                                                                                                 |
-| **Abbreviation**  | Short form                                                                                                                                                                                                   |
-| **Icon/Color**    | Click the icon button to open an edit dialog for Font Awesome icon and color                                                                                                                                 |
-| **Seasonal Type** | Canonical season tag (Spring, Summer, Autumn, Winter) used to resolve equinox and solstice anchors and to drive weather integrations. Seasons left unset are skipped when astronomical anchors are resolved. |
+| Field             | Description                                                                                                                                                                                                 |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Name**          | Season name (e.g., "Spring")                                                                                                                                                                                |
+| **Abbreviation**  | Short form                                                                                                                                                                                                  |
+| **Icon/Color**    | Click the icon button to open an edit dialog for Font Awesome icon and color                                                                                                                                |
+| **Seasonal Type** | Canonical season tag (Spring, Summer, Autumn, Winter) used to resolve equinox and solstice anchors and to drive weather integrations. Seasons left unset are skipped when astronomical anchors are resolved |
 
 #### Dated Season Fields
 
@@ -358,11 +358,11 @@ Add one or more moons with customizable phases.
 
 ### Moon Fields
 
-| Field            | Description                                                                                                               |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| **Name**         | Moon name (e.g., "Selûne")                                                                                                |
-| **Cycle Length** | Days for a complete lunar cycle (new moon to new moon). Accepts decimal values (e.g., `29.53` for Earth's synodic month). |
-| **Color**        | Tint color for the moon icon                                                                                              |
+| Field            | Description                                                                                                              |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| **Name**         | Moon name (e.g., "Selûne")                                                                                               |
+| **Cycle Length** | Days for a complete lunar cycle (new moon to new moon). Accepts decimal values (e.g., `29.53` for Earth's synodic month) |
+| **Color**        | Tint color for the moon icon                                                                                             |
 
 ### Reference Date
 
@@ -378,15 +378,15 @@ A known date when the moon was at a specific phase. The moon's phase on any date
 
 Define the phases of the lunar cycle. Each phase covers a percentage range of the cycle.
 
-| Column      | Description                                                                                                                                                                                                |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Icon**    | Click to pick a phase icon (SVG or emoji)                                                                                                                                                                  |
-| **Phase**   | Phase name (e.g., "Full Moon")                                                                                                                                                                             |
-| **Rising**  | Name for the transitional sub-phase as the moon approaches this phase                                                                                                                                      |
-| **Fading**  | Name for the transitional sub-phase as the moon leaves this phase                                                                                                                                          |
-| **Start %** | Percentage through the cycle when this phase begins (fixed mode only)                                                                                                                                      |
-| **End %**   | Percentage through the cycle when this phase ends (fixed mode only)                                                                                                                                        |
-| **Weight**  | Relative likelihood of this phase in **Randomized** mode (minimum `1`). Replaces Start %/End % columns when mode is set to Randomized. Higher weight means the phase occupies a larger share of the cycle. |
+| Column      | Description                                                                                                                                                                                               |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Icon**    | Click to pick a phase icon (SVG or emoji)                                                                                                                                                                 |
+| **Phase**   | Phase name (e.g., "Full Moon")                                                                                                                                                                            |
+| **Rising**  | Name for the transitional sub-phase as the moon approaches this phase                                                                                                                                     |
+| **Fading**  | Name for the transitional sub-phase as the moon leaves this phase                                                                                                                                         |
+| **Start %** | Percentage through the cycle when this phase begins (fixed mode only)                                                                                                                                     |
+| **End %**   | Percentage through the cycle when this phase ends (fixed mode only)                                                                                                                                       |
+| **Weight**  | Relative likelihood of this phase in **Randomized** mode (minimum `1`). Replaces Start %/End % columns when mode is set to Randomized. Higher weight means the phase occupies a larger share of the cycle |
 
 ### Phase Slider
 
@@ -430,13 +430,13 @@ When phase mode is set to **Randomized**, additional controls appear:
 
 Guaranteed phase overrides on specific dates. The moon is always at the specified phase on that date regardless of randomization.
 
-| Column          | Description                                                                                                                                       |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Year**        | The year this anchor applies to (leave blank to apply every year)                                                                                 |
-| **Month**       | Which month the anchor falls in                                                                                                                   |
-| **Day**         | Day of the month                                                                                                                                  |
-| **Phase**       | Which phase the moon is forced to on this date (dropdown of the moon's defined phases)                                                            |
-| **Reset Cycle** | Checkbox (fixed-mode moons only). When enabled, restarts the phase cycle from this anchor point instead of just overriding the phase for one day. |
+| Column          | Description                                                                                                                                      |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Year**        | The year this anchor applies to (leave blank to apply every year)                                                                                |
+| **Month**       | Which month the anchor falls in                                                                                                                  |
+| **Day**         | Day of the month                                                                                                                                 |
+| **Phase**       | Which phase the moon is forced to on this date (dropdown of the moon's defined phases)                                                           |
+| **Reset Cycle** | Checkbox (fixed-mode moons only). When enabled, restarts the phase cycle from this anchor point instead of just overriding the phase for one day |
 
 - **Add Anchor.** Add a new anchor phase entry
 - **Remove** (trash icon): Delete an anchor phase

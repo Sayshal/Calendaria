@@ -316,10 +316,10 @@ Set the active calendar. GM only. Accepts an options object that controls whethe
 await CALENDARIA.api.setActiveCalendar('greyhawk', { useCalendarDefaults: true });
 ```
 
-| Parameter                     | Type      | Description                                                                                                                                                       |
-| ----------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`                          | `string`  | Calendar ID to activate                                                                                                                                           |
-| `options.useCalendarDefaults` | `boolean` | When `true`, rewrites the world `DISPLAY_FORMATS` setting from the new calendar's `dateFormats` so every location maps to `calendarDefault`. Defaults to `false`. |
+| Parameter                     | Type      | Description                                                                                                                                                      |
+| ----------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                          | `string`  | Calendar ID to activate                                                                                                                                          |
+| `options.useCalendarDefaults` | `boolean` | When `true`, rewrites the world `DISPLAY_FORMATS` setting from the new calendar's `dateFormats` so every location maps to `calendarDefault`. Defaults to `false` |
 
 **Returns:** `Promise<boolean>` - True if activated successfully.
 
@@ -1454,20 +1454,20 @@ const note = await CALENDARIA.api.createNote({
 });
 ```
 
-| Parameter               | Type                    | Description                                                                                             |
-| ----------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------- |
-| `options.name`          | `string`                | Note title                                                                                              |
-| `options.content`       | `string`                | Note content (HTML). If omitted and categories are set, the preset's content template is used.          |
-| `options.startDate`     | `object`                | Start date `{year, month, day, hour?, minute?}` (1-indexed month/day)                                   |
-| `options.endDate`       | `object`                | End date (optional)                                                                                     |
-| `options.allDay`        | `boolean`               | All-day event (default: `true`)                                                                         |
-| `options.conditionTree` | `object`                | Condition tree for recurrence scheduling (see below)                                                    |
-| `options.categories`    | `string[]`              | Preset IDs                                                                                              |
-| `options.icon`          | `string`                | Icon path or class                                                                                      |
-| `options.color`         | `string`                | Event color (hex)                                                                                       |
-| `options.visibility`    | `string`                | `'visible'`, `'hidden'`, or `'secret'` (default: `'visible'`)                                           |
-| `options.displayStyle`  | `string`                | `'icon'`, `'pip'`, or `'banner'` (default: `'icon'`)                                                    |
-| `options.openSheet`     | `false\|'edit'\|'view'` | Open the note sheet after creation in the given mode (default: `'edit'`). Pass boolean `false` to skip. |
+| Parameter               | Type                    | Description                                                                                            |
+| ----------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------ |
+| `options.name`          | `string`                | Note title                                                                                             |
+| `options.content`       | `string`                | Note content (HTML). If omitted and categories are set, the preset's content template is used          |
+| `options.startDate`     | `object`                | Start date `{year, month, day, hour?, minute?}` (1-indexed month/day)                                  |
+| `options.endDate`       | `object`                | End date (optional)                                                                                    |
+| `options.allDay`        | `boolean`               | All-day event (default: `true`)                                                                        |
+| `options.conditionTree` | `object`                | Condition tree for recurrence scheduling (see below)                                                   |
+| `options.categories`    | `string[]`              | Preset IDs                                                                                             |
+| `options.icon`          | `string`                | Icon path or class                                                                                     |
+| `options.color`         | `string`                | Event color (hex)                                                                                      |
+| `options.visibility`    | `string`                | `'visible'`, `'hidden'`, or `'secret'` (default: `'visible'`)                                          |
+| `options.displayStyle`  | `string`                | `'icon'`, `'pip'`, or `'banner'` (default: `'icon'`)                                                   |
+| `options.openSheet`     | `false\|'edit'\|'view'` | Open the note sheet after creation in the given mode (default: `'edit'`). Pass boolean `false` to skip |
 
 #### Recurrence with `conditionTree`
 
@@ -2378,7 +2378,7 @@ const forecast = CALENDARIA.api.getWeatherForecast({ zoneId: 'desert', accuracy:
 | Parameter          | Type     | Description                                                |
 | ------------------ | -------- | ---------------------------------------------------------- |
 | `options.zoneId`   | `string` | Zone to get forecast for (defaults to active scene's zone) |
-| `options.accuracy` | `number` | Override forecast accuracy (0–100). GMs default to 100.    |
+| `options.accuracy` | `number` | Override forecast accuracy (0–100). GMs default to 100     |
 | `options.days`     | `number` | Number of days (defaults to Forecast Days setting)         |
 
 **Returns:** `object[]` - Array of forecast entries. Each entry includes an `isVaried` flag indicating whether variance was applied. Forecast entries include a `periods` property only for GM users; non-GM users receive entries without period breakdown data.
@@ -2832,7 +2832,7 @@ const zone = await CALENDARIA.api.createClimateZone({
 | Parameter              | Type            | Required | Description                                                                                                              |
 | ---------------------- | --------------- | -------- | ------------------------------------------------------------------------------------------------------------------------ |
 | `name`                 | `string`        | Yes      | Zone display name                                                                                                        |
-| `id`                   | `string`        | No       | Zone ID (auto-generated from name if omitted). Must be unique.                                                           |
+| `id`                   | `string`        | No       | Zone ID (auto-generated from name if omitted). Must be unique                                                            |
 | `description`          | `string`        | No       | Zone description text                                                                                                    |
 | `temperatures`         | `object`        | No       | Temperature ranges keyed by season name (`{ 'Winter': { min, max } }`). Defaults to `{ _default: { min: 10, max: 22 } }` |
 | `presets`              | `Array\|object` | No       | Weather preset configurations                                                                                            |

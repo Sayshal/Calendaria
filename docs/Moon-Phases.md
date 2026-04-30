@@ -50,11 +50,11 @@ The moon follows an erratic, non-cyclical pattern driven by seeded randomness. T
 
 Randomized moons are configured with:
 
-| Setting        | Description                                                                                                                                                                                                              |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Seed           | Integer seed for randomization. The same seed always produces the same sequence. Use the dice button to randomize.                                                                                                       |
-| Cycle Variance | Slider (`0`–`1`) controlling how much the moon deviates from its base cycle length. At `0`, the moon behaves identically to fixed mode. At `1`, phases shift dramatically and unpredictably between days.                |
-| Phase Weight   | Per-phase number (minimum `1`) controlling how likely that phase is relative to the others. A phase with weight `2` occupies twice as much of the cycle as a phase with weight `1`, making it twice as likely to appear. |
+| Setting        | Description                                                                                                                                                                                                             |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Seed           | Integer seed for randomization. The same seed always produces the same sequence. Use the dice button to randomize                                                                                                       |
+| Cycle Variance | Slider (`0`–`1`) controlling how much the moon deviates from its base cycle length. At `0`, the moon behaves identically to fixed mode. At `1`, phases shift dramatically and unpredictably between days                |
+| Phase Weight   | Per-phase number (minimum `1`) controlling how likely that phase is relative to the others. A phase with weight `2` occupies twice as much of the cycle as a phase with weight `1`, making it twice as likely to appear |
 
 Same seed always produces the same results.
 
@@ -64,12 +64,12 @@ Anchor phases are date-specific phase overrides available in **Randomized** mode
 
 Configure anchor phases in **Calendar Editor > Moons tab** by clicking **Add Anchor Phase**. Each anchor defines:
 
-| Field | Description                                                                                 |
-| ----- | ------------------------------------------------------------------------------------------- |
-| Year  | The year to match. Leave blank for **yearly recurrence** (the anchor repeats every year).   |
-| Month | The month the anchor falls on.                                                              |
-| Day   | The day of the month.                                                                       |
-| Phase | Which phase the moon should display on the anchored date (selected from the moon's phases). |
+| Field | Description                                                                                |
+| ----- | ------------------------------------------------------------------------------------------ |
+| Year  | The year to match. Leave blank for **yearly recurrence** (the anchor repeats every year)   |
+| Month | The month the anchor falls on                                                              |
+| Day   | The day of the month                                                                       |
+| Phase | Which phase the moon should display on the anchored date (selected from the moon's phases) |
 
 For example, an anchor with no year, month "Hexenstag", day 1, and phase "Full Moon" ensures the moon is always full on the first day of Hexenstag every year.
 

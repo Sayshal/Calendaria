@@ -183,19 +183,19 @@ When events exist on the current day, the HUD shows a glowing border effect. "Ev
 
 Hover over the bar to reveal time controls:
 
-| Button             | Action                                                                                                                                  |
-| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
-| Sunrise            | Advance to next sunrise                                                                                                                 |
-| Midday             | Advance to solar noon                                                                                                                   |
-| Custom Dec 2       | Jump backward by custom amount (if configured)                                                                                          |
-| Custom Dec 1       | Jump backward by custom amount (if configured)                                                                                          |
-| Reverse            | Step backward by one increment                                                                                                          |
-| Increment dropdown | Set step size (second, round, minute, hour, day, week, month, season, year). Scroll mouse wheel over dropdown to cycle through options. |
-| Forward            | Step forward by one increment                                                                                                           |
-| Custom Inc 1       | Jump forward by custom amount (if configured)                                                                                           |
-| Custom Inc 2       | Jump forward by custom amount (if configured)                                                                                           |
-| Sunset             | Advance to next sunset                                                                                                                  |
-| Midnight           | Advance to next midnight                                                                                                                |
+| Button             | Action                                                                                                                                 |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Sunrise            | Advance to next sunrise                                                                                                                |
+| Midday             | Advance to solar noon                                                                                                                  |
+| Custom Dec 2       | Jump backward by custom amount (if configured)                                                                                         |
+| Custom Dec 1       | Jump backward by custom amount (if configured)                                                                                         |
+| Reverse            | Step backward by one increment                                                                                                         |
+| Increment dropdown | Set step size (second, round, minute, hour, day, week, month, season, year). Scroll mouse wheel over dropdown to cycle through options |
+| Forward            | Step forward by one increment                                                                                                          |
+| Custom Inc 1       | Jump forward by custom amount (if configured)                                                                                          |
+| Custom Inc 2       | Jump forward by custom amount (if configured)                                                                                          |
+| Sunset             | Advance to next sunset                                                                                                                 |
+| Midnight           | Advance to next midnight                                                                                                               |
 
 Configure tray to open upward or downward via Settings > HUD tab > Tray Open Direction.
 

@@ -157,13 +157,13 @@ Double-click anywhere in the calendar area to toggle between MiniCal and BigCal.
 
 Configure which information blocks appear below the navigation row via **Settings > MiniCal**:
 
-| Setting          | Description                                                        |
-| ---------------- | ------------------------------------------------------------------ |
-| Show Weather     | Display weather block. Weather Display Mode controls detail level. |
-| Show Season      | Display season block. Season Display Mode controls detail level.   |
-| Show Era         | Display era block. Era Display Mode controls detail level.         |
-| Show Cycles      | Display cycles block. Cycles Display Mode controls detail level.   |
-| Show Moon Phases | Display moon phase icons in day cells.                             |
+| Setting          | Description                                                       |
+| ---------------- | ----------------------------------------------------------------- |
+| Show Weather     | Display weather block. Weather Display Mode controls detail level |
+| Show Season      | Display season block. Season Display Mode controls detail level   |
+| Show Era         | Display era block. Era Display Mode controls detail level         |
+| Show Cycles      | Display cycles block. Cycles Display Mode controls detail level   |
+| Show Moon Phases | Display moon phase icons in day cells                             |
 
 ---
 

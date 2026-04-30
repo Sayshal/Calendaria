@@ -155,15 +155,15 @@ Click **Import** in the footer and select a `.json` file. On import:
 
 ## Footer Actions
 
-| Action            | Description                                                                                               |
-| ----------------- | --------------------------------------------------------------------------------------------------------- |
-| **Import**        | Import a preset from a JSON file. Always visible.                                                         |
-| **Export**        | Export the selected preset to a JSON file. Requires a selected preset.                                    |
-| **Reset**         | Reset all defaults for the selected preset (reverts built-in, clears custom). Requires a selected preset. |
-| **Sync to Notes** | Batch-update existing notes to match preset defaults. Hidden for Default preset.                          |
-| **Delete**        | Remove the selected preset (soft-delete for built-in). Hidden for Default preset.                         |
-| **Add**           | Create a new custom preset. Always visible.                                                               |
-| **Save**          | Save all changes to settings. Always visible.                                                             |
+| Action            | Description                                                                                              |
+| ----------------- | -------------------------------------------------------------------------------------------------------- |
+| **Import**        | Import a preset from a JSON file. Always visible                                                         |
+| **Export**        | Export the selected preset to a JSON file. Requires a selected preset                                    |
+| **Reset**         | Reset all defaults for the selected preset (reverts built-in, clears custom). Requires a selected preset |
+| **Sync to Notes** | Batch-update existing notes to match preset defaults. Hidden for Default preset                          |
+| **Delete**        | Remove the selected preset (soft-delete for built-in). Hidden for Default preset                         |
+| **Add**           | Create a new custom preset. Always visible                                                               |
+| **Save**          | Save all changes to settings. Always visible                                                             |
 
 ---
 
