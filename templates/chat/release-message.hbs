@@ -12,24 +12,28 @@
 
     <h4>New Features</h4>
     <ul>
-      <li>Cinematic overlay picks up the active theme so pill, progress bar, festival cards, and event highlights recolor to match themed worlds</li>
-      <li>Sun, moon, and sky in the cinematic track the real in-world time between the skip's start and end hours</li>
+      <li>Added <code>CALENDARIA.api.setActiveCalendar(id, { useCalendarDefaults })</code> for switching calendars from scripts</li>
+      <li>Chronicle enricher links accept a <code>categories="a,b"</code> parameter to open the timeline pre-filtered</li>
+      <li>Chronicle Timeline toolbar gains a category filter popover with toggle options, selected count badge, and clear action</li>
+      <li>Climate editor adds an inline pencil-toggle alias editor on each zone temperature row</li>
+      <li>Locked-range chronicle views show the date range below the toolbar buttons</li>
+      <li>New action enrichers for time and weather: <code>advanceToTime</code>, <code>advanceInterval</code>, <code>advanceToPreset</code>, <code>setWeather</code>, <code>setTime</code>, <code>jumpToDate</code>, <code>toggleClock</code></li>
+      <li>New Automatic rest mode (default) advances time using the system-reported duration; old Fixed mode renamed Custom and accepts 0 hours</li>
+      <li>New GM-only Print / Export buttons render the active month or full year as a printable layout</li>
+      <li>New worlds seed display formats from the active calendar's dateFormats</li>
+      <li>Settings show a "&lt;Calendar&gt; Default" preset that follows calendar switches; note viewer/filter/date picker and cinematic keyframes route through configurable format locations</li>
+      <li>Weather zones can define per-zone season aliases applied across HUD, calendar UI, chronicle, cinematics, enrichers, and chat</li>
     </ul>
 
     <h4>Bug Fixes</h4>
     <ul>
-      <li><code>[namedWeek]</code> and <code>[namedWeekAbbr]</code> format tokens resolve against the calendar's named weeks, honoring week type and the Repeat flag</li>
-      <li>Cinematic pill fades in once the starting date is populated, so the first panel no longer flashes blank</li>
-      <li>Computed seasonal notes and legacy migrations resolve astronomical anchors through season-type metadata, so equinox/solstice triggers fire on the right day</li>
-      <li>Custom format tokens that resolve to empty strings render the literal token instead of vanishing</li>
-      <li>Equinox and solstice festivals land on the correct date for month-anchored calendars like Golarion and Pact-Standard</li>
-      <li>First cinematic frame seeds the date label immediately, and a malformed keyframe no longer crashes the animation loop</li>
-      <li>Theme preset dropdown and Customize button unlock the moment Force Theme is set back to None</li>
-    </ul>
-
-    <h4>Changes</h4>
-    <ul>
-      <li>Seasons left without a Seasonal Type are skipped by astronomical anchors; the season editor hint calls this out</li>
+      <li>Chronicle date enrichers no longer crash when a non-numeric token is supplied</li>
+      <li>Custom Weekdays no longer return phantom days on Foundry v14, weekday names may be left blank, and the settings panel renders again</li>
+      <li>Fixed weekday math drifting after intercalary festivals; intercalary-month cells now labeled with the month name (BigCal) or first letter (MiniCal) plus tooltip</li>
+      <li>Moon brightness contribution edits persist when saving the calendar editor</li>
+      <li>Moon phases stay aligned across HUD, sun-dial, enrichers, and darkness lighting by honoring yearZero, referencePhase, cycleDayAdjust, and reset anchors</li>
+      <li>Multi-day reminders fire on the correct day for offsets greater than 24 hours, with check frequency tightened to 1 game-minute</li>
+      <li>Weather presets with relative tempMin/tempMax modifiers (e.g. <code>61+</code>) now fire correctly and extend the temperature range outside season bounds</li>
     </ul>
 
   </div>
