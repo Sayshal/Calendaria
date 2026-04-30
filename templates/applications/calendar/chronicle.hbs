@@ -1,12 +1,6 @@
 <div class="scroll-toolbar">
   <i class="fas fa-scroll toolbar-icon"></i>
-  {{#if lockedRange}}
-    <span class="toolbar-title toolbar-title--locked" data-tooltip="{{lockedRangeText}}">
-      <i class="fas fa-lock"></i> {{lockedRangeText}}
-    </span>
-  {{else}}
-    <span class="toolbar-title">{{localize "CALENDARIA.Chronicle.Title"}}</span>
-  {{/if}}
+  <span class="toolbar-title">{{localize "CALENDARIA.Chronicle.Title"}}</span>
 
   <div class="toolbar-actions">
     <select class="toolbar-select view-mode-select">
@@ -19,6 +13,38 @@
         <option value="{{this.id}}" {{#if this.active}}selected{{/if}}>{{this.label}}</option>
       {{/each}}
     </select>
+    {{#if categoryOptions.length}}
+      <div class="category-filter">
+        <button type="button"
+          class="toolbar-btn category-filter-toggle{{#if hasCategoryFilter}} category-filter-toggle--active{{/if}}"
+          aria-expanded="false" data-tooltip="{{localize 'CALENDARIA.Chronicle.CategoryFilter.Tooltip'}}">
+          <i class="fas fa-filter"></i>
+          {{#if hasCategoryFilter}}<span class="category-filter-badge">{{categorySelectedCount}}</span>{{/if}}
+        </button>
+        <div class="category-filter-menu" hidden>
+          <ul class="category-filter-list">
+            {{#each categoryOptions}}
+              <li class="category-filter-item">
+                <button type="button"
+                  class="category-filter-option{{#if this.active}} category-filter-option--active{{/if}}"
+                  data-category-id="{{this.id}}" aria-pressed="{{#if this.active}}true{{else}}false{{/if}}">
+                  <i class="{{this.icon}}"></i>
+                  <span>{{this.label}}</span>
+                </button>
+              </li>
+            {{/each}}
+          </ul>
+          {{#if hasCategoryFilter}}
+            <div class="category-filter-menu-footer">
+              <button type="button" class="category-filter-clear">
+                <i class="fas fa-filter-circle-xmark"></i>
+                {{localize 'CALENDARIA.Chronicle.CategoryFilter.Clear'}}
+              </button>
+            </div>
+          {{/if}}
+        </div>
+      </div>
+    {{/if}}
     <button type="button" class="toolbar-btn" data-action="toggleEmptyDays"
       data-tooltip="{{#if showEmpty}}{{localize 'CALENDARIA.Chronicle.Mode.EventsOnly'}}{{else}}{{localize 'CALENDARIA.Chronicle.Mode.FullChronicle'}}{{/if}}">
       <i class="fas {{#if showEmpty}}fa-eye{{else}}fa-eye-slash{{/if}}"></i>
@@ -34,4 +60,9 @@
       <i class="fas fa-times"></i>
     </button>
   </div>
+  {{#if lockedRange}}
+    <div class="scroll-locked-range" data-tooltip="{{localize 'CALENDARIA.Chronicle.LockedRange'}}">
+      <i class="fas fa-lock"></i> <span>{{lockedRangeText}}</span>
+    </div>
+  {{/if}}
 </div>

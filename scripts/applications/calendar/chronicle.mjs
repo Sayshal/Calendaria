@@ -6,7 +6,7 @@
 
 import { CalendarManager } from '../../calendar/_module.mjs';
 import { HOOKS, MODULE, SETTINGS, SOCKET_TYPES, TEMPLATES } from '../../constants.mjs';
-import { NoteManager, addDays } from '../../notes/_module.mjs';
+import { NoteManager, addDays, getPresetDefinition } from '../../notes/_module.mjs';
 import {
   CalendariaSocket,
   buildOpenAppsMenuItem,
@@ -43,6 +43,8 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
     this._entryDepth = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_ENTRY_DEPTH) || 'excerpt';
     this._showEmpty = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_SHOW_EMPTY) || false;
     this._viewMode = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_VIEW_MODE) || 'scroll';
+    this._categoryFilterOverride = Array.isArray(options.categoryFilter) ? [...options.categoryFilter] : null;
+    this._categoryFilter = this._categoryFilterOverride ?? Array.from(game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_CATEGORY_FILTER) ?? []);
     this._hooks = [];
     this._entries = [];
     this._loading = false;
@@ -102,6 +104,13 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
     if (options.endDate) instance._endDate = options.endDate;
     if (options.calendarId) instance._calendarId = options.calendarId;
     if ('lockedRange' in options) instance._lockedRange = !!options.lockedRange;
+    if (Array.isArray(options.categoryFilter)) {
+      instance._categoryFilterOverride = [...options.categoryFilter];
+      instance._categoryFilter = [...options.categoryFilter];
+    } else if (options.categoryFilter === null) {
+      instance._categoryFilterOverride = null;
+      instance._categoryFilter = Array.from(game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_CATEGORY_FILTER) ?? []);
+    }
     instance.render({ force: true });
     return instance;
   }
@@ -136,7 +145,8 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
     this._entries = buildScrollEntries(this._startDate, this._endDate, {
       calendarId: this._calendarId,
       showEmpty: this._showEmpty,
-      entryDepth: this._entryDepth
+      entryDepth: this._entryDepth,
+      categoryFilter: this._categoryFilter
     });
     const isGM = game.user.isGM;
     for (const entry of this._entries) {
@@ -158,14 +168,23 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
       { id: 'scroll', label: localize('CALENDARIA.Chronicle.ViewMode.Scroll'), active: this._viewMode === 'scroll' },
       { id: 'timeline', label: localize('CALENDARIA.Chronicle.ViewMode.Timeline'), active: this._viewMode === 'timeline' }
     ];
+    const usedCategoryIds = NoteManager.getAllUsedPresetIds();
+    const selectedSet = new Set(this._categoryFilter);
+    const optionIds = Array.from(new Set([...usedCategoryIds, ...this._categoryFilter]));
+    context.categoryOptions = optionIds
+      .map((id) => {
+        const def = getPresetDefinition(id);
+        return { id, label: def?.label || id, icon: def?.icon || 'fas fa-tag', active: selectedSet.has(id) };
+      })
+      .sort((a, b) => a.label.localeCompare(b.label));
+    context.hasCategoryFilter = this._categoryFilter.length > 0;
+    context.categorySelectedCount = this._categoryFilter.length;
+    context.categoryFilterLocked = !!this._categoryFilterOverride;
     context.lockedRange = this._lockedRange;
     if (this._lockedRange) {
       const calendar = CalendarManager.getActiveCalendar();
-      const yearZero = calendar?.years?.yearZero ?? 0;
-      const startInternal = { year: this._startDate.year - yearZero, month: this._startDate.month, dayOfMonth: this._startDate.dayOfMonth };
-      const endInternal = { year: this._endDate.year - yearZero, month: this._endDate.month, dayOfMonth: this._endDate.dayOfMonth };
-      const startParts = dateFormattingParts(calendar, startInternal);
-      const endParts = dateFormattingParts(calendar, endInternal);
+      const startParts = dateFormattingParts(calendar, this._startDate);
+      const endParts = dateFormattingParts(calendar, this._endDate);
       context.lockedRangeText = `${startParts.D} ${startParts.MMMM} ${startParts.y} - ${endParts.D} ${endParts.MMMM} ${endParts.y}`;
     }
     return context;
@@ -225,7 +244,8 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
       SETTINGS.CHRONICLE_SHOW_WEATHER,
       SETTINGS.CHRONICLE_SHOW_MOON_PHASES,
       SETTINGS.CHRONICLE_SHOW_SEASON_CHANGES,
-      SETTINGS.CHRONICLE_VIEW_MODE
+      SETTINGS.CHRONICLE_VIEW_MODE,
+      SETTINGS.CHRONICLE_CATEGORY_FILTER
     ]);
     this._hooks.push({
       name: 'updateSetting',
@@ -234,6 +254,7 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
           this._entryDepth = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_ENTRY_DEPTH);
           this._showEmpty = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_SHOW_EMPTY);
           this._viewMode = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_VIEW_MODE);
+          if (!this._categoryFilterOverride) this._categoryFilter = Array.from(game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_CATEGORY_FILTER) ?? []);
           refresh();
         }
       })
@@ -289,6 +310,53 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
       this._viewMode = e.target.value;
       this._restoreScrollTop = this.element?.querySelector('.scroll-container')?.scrollTop ?? null;
       await game.settings.set(MODULE.ID, SETTINGS.CHRONICLE_VIEW_MODE, this._viewMode);
+      await this.render();
+    });
+    const toggle = el.querySelector('.category-filter-toggle');
+    const menu = el.querySelector('.category-filter-menu');
+    if (toggle && menu) {
+      const closeMenu = () => {
+        menu.hidden = true;
+        toggle.setAttribute('aria-expanded', 'false');
+        document.removeEventListener('mousedown', this._categoryFilterOutsideHandler, true);
+      };
+      const openMenu = () => {
+        menu.hidden = false;
+        toggle.setAttribute('aria-expanded', 'true');
+        this._categoryFilterOutsideHandler = (ev) => {
+          if (!menu.contains(ev.target) && !toggle.contains(ev.target)) closeMenu();
+        };
+        document.addEventListener('mousedown', this._categoryFilterOutsideHandler, true);
+      };
+      toggle.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (menu.hidden) openMenu();
+        else closeMenu();
+      });
+    }
+    el.querySelectorAll('.category-filter-option').forEach((btn) => {
+      btn.addEventListener('click', async (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const id = btn.dataset.categoryId;
+        if (!id) return;
+        const current = new Set(this._categoryFilter);
+        if (current.has(id)) current.delete(id);
+        else current.add(id);
+        const selected = Array.from(current);
+        this._categoryFilter = selected;
+        this._restoreScrollTop = this.element?.querySelector('.scroll-container')?.scrollTop ?? null;
+        if (!this._categoryFilterOverride) await game.settings.set(MODULE.ID, SETTINGS.CHRONICLE_CATEGORY_FILTER, selected);
+        await this.render();
+      });
+    });
+    el.querySelector('.category-filter-clear')?.addEventListener('click', async (event) => {
+      event.preventDefault();
+      this._categoryFilter = [];
+      this._categoryFilterOverride = null;
+      this._restoreScrollTop = this.element?.querySelector('.scroll-container')?.scrollTop ?? null;
+      await game.settings.set(MODULE.ID, SETTINGS.CHRONICLE_CATEGORY_FILTER, []);
       await this.render();
     });
   }
@@ -401,7 +469,8 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
     const batch = buildScrollEntries(newStart, newEnd, {
       calendarId: this._calendarId,
       showEmpty: this._showEmpty,
-      entryDepth: this._entryDepth
+      entryDepth: this._entryDepth,
+      categoryFilter: this._categoryFilter
     });
     if (batch.length > 0) {
       this._entries = [...batch, ...this._entries];
@@ -430,7 +499,8 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
     const batch = buildScrollEntries(newStart, newEnd, {
       calendarId: this._calendarId,
       showEmpty: this._showEmpty,
-      entryDepth: this._entryDepth
+      entryDepth: this._entryDepth,
+      categoryFilter: this._categoryFilter
     });
     if (batch.length > 0) {
       this._entries = [...this._entries, ...batch];

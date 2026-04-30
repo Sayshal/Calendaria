@@ -106,6 +106,7 @@ export default class CalendariaSettings {
         type: new SetField(new StringField()),
         default: ['weather', 'moon', 'season']
       },
+      [SETTINGS.CHRONICLE_CATEGORY_FILTER]: { name: 'Chronicle Category Filter', scope: 'client', config: false, type: new SetField(new StringField()), default: [] },
       [SETTINGS.CHRONICLE_SHOW_WEATHER]: { name: 'Chronicle Show Weather', scope: 'client', config: false, type: new BooleanField({ initial: true }) },
       [SETTINGS.CHRONICLE_SHOW_MOON_PHASES]: { name: 'Chronicle Show Moon Phases', scope: 'client', config: false, type: new BooleanField({ initial: true }) },
       [SETTINGS.CHRONICLE_SHOW_SEASON_CHANGES]: { name: 'Chronicle Show Season Changes', scope: 'client', config: false, type: new BooleanField({ initial: true }) },

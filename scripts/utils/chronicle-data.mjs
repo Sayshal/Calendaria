@@ -84,10 +84,12 @@ function compassLabel(degrees) {
  * @param {string} [options.calendarId] - Calendar ID (defaults to active)
  * @param {boolean} [options.showEmpty] - Include days with no events
  * @param {string} [options.entryDepth] - Content depth: title, excerpt, full, collapsible
+ * @param {string[]} [options.categoryFilter] - Preset IDs to include; empty/missing = no filter
  * @returns {object[]} Array of day entry objects
  */
 export function buildScrollEntries(startDate, endDate, options = {}) {
-  const { calendarId = null, showEmpty = false, entryDepth = 'excerpt' } = options;
+  const { calendarId = null, showEmpty = false, entryDepth = 'excerpt', categoryFilter = [] } = options;
+  const categoryFilterSet = Array.isArray(categoryFilter) && categoryFilter.length > 0 ? new Set(categoryFilter) : null;
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return [];
   const fogEnabled = isFogEnabled();
@@ -129,7 +131,8 @@ export function buildScrollEntries(startDate, endDate, options = {}) {
     const isPastOrToday = compareDates(current, today) <= 0;
     const internalComponents = { year: year - yearZero, month, dayOfMonth };
     const banners = [];
-    if (showSeasons) {
+    const filterActiveSuppressBanners = !!categoryFilterSet;
+    if (showSeasons && !filterActiveSuppressBanners) {
       const season = calendar.getCurrentSeason?.(internalComponents);
       const seasonName = season?.name ? game.i18n.localize(season.name) : null;
       if (seasonName && prevSeasonName && seasonName !== prevSeasonName) {
@@ -145,7 +148,7 @@ export function buildScrollEntries(startDate, endDate, options = {}) {
       prevSeasonIcon = season?.icon || 'fas fa-leaf';
       prevSeasonColor = season?.color || '#84cc16';
     }
-    if (showMoons) {
+    if (showMoons && !filterActiveSuppressBanners) {
       for (let i = 0; i < moons.length; i++) {
         const phase = calendar.getMoonPhase(i, internalComponents);
         if (!phase || !phase.name) continue;
@@ -158,7 +161,8 @@ export function buildScrollEntries(startDate, endDate, options = {}) {
         }
       }
     }
-    const stubs = NoteManager.getNotesForDate(year, month, dayOfMonth, calendarId);
+    const stubsAll = NoteManager.getNotesForDate(year, month, dayOfMonth, calendarId);
+    const stubs = categoryFilterSet ? stubsAll.filter((stub) => Array.isArray(stub.flagData?.categories) && stub.flagData.categories.some((c) => categoryFilterSet.has(c))) : stubsAll;
     const notes = stubs.map((stub) => {
       const props = resolveStubDisplayProps(stub);
       const iconStr = props.icon ?? '';
@@ -186,7 +190,7 @@ export function buildScrollEntries(startDate, endDate, options = {}) {
       }
       return note;
     });
-    if (showWeather && isPastOrToday) {
+    if (showWeather && isPastOrToday && !filterActiveSuppressBanners) {
       const weatherData = WeatherManager.getWeatherForDate(year - yearZero, month, dayOfMonth);
       const sentence = buildWeatherSentence(weatherData);
       if (sentence) {
@@ -196,8 +200,8 @@ export function buildScrollEntries(startDate, endDate, options = {}) {
     }
     const hasFestival = notes.some((n) => n.isFestival);
     const contentBanners = banners.filter((b) => emptyContentTypes.has(b.type));
-    const isEmpty = notes.length === 0 && contentBanners.length === 0;
-    if (!isEmpty || showEmpty) {
+    const isEmpty = filterActiveSuppressBanners ? notes.length === 0 : notes.length === 0 && contentBanners.length === 0;
+    if (!isEmpty || (showEmpty && !filterActiveSuppressBanners)) {
       entries.push({ date: { year, month, dayOfMonth }, formattedDate: `${parts.D} ${parts.MMMM} ${parts.y}`, weekday: weekdayName, fogged: false, isToday, notes, banners, hasFestival, isEmpty });
     }
     current = addDays(current, 1);

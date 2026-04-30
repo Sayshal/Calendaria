@@ -244,12 +244,16 @@ function parseDateFromValues(values) {
     }
   }
   if (!found) {
+    const nonNumeric = values.some((v) => isNaN(v));
+    if (nonNumeric) return null;
     const nums = values.filter((v) => !isNaN(v)).map(Number);
     if (nums.length >= 3) [day, monthIdx, year] = nums;
     else if (nums.length === 2) [day, monthIdx] = nums;
     else if (nums.length === 1) day = nums[0];
     else return null;
   }
+  const monthCount = months.length;
+  if (monthIdx != null && monthCount > 0 && (monthIdx < 1 || monthIdx > monthCount)) return null;
   const current = getCurrentDateTime();
   return { year: year ?? current.year, month: monthIdx ?? current.month, day: day ?? current.day };
 }
@@ -1575,6 +1579,13 @@ function enrichChronicle(config, label) {
     calChronicleToDay: endPublic.day - 1
   };
   if (config.cal) dataset.calChronicleCalendarId = config.cal;
+  if (config.categories) {
+    const cats = String(config.categories)
+      .split(',')
+      .map((c) => c.trim())
+      .filter((c) => c.length > 0);
+    if (cats.length > 0) dataset.calChronicleCategories = cats.join(',');
+  }
   return createContentLink('chronicle', text, dataset, 'fa-scroll', tooltip);
 }
 
@@ -1868,7 +1879,8 @@ export function registerEnrichers() {
     const ds = link.dataset;
     const startDate = { year: Number(ds.calChronicleFromYear), month: Number(ds.calChronicleFromMonth), dayOfMonth: Number(ds.calChronicleFromDay) };
     const endDate = { year: Number(ds.calChronicleToYear), month: Number(ds.calChronicleToMonth), dayOfMonth: Number(ds.calChronicleToDay) };
-    Chronicle.show({ startDate, endDate, lockedRange: true, calendarId: ds.calChronicleCalendarId || null });
+    const categoryFilter = ds.calChronicleCategories ? ds.calChronicleCategories.split(',').filter((c) => c) : null;
+    Chronicle.show({ startDate, endDate, lockedRange: true, calendarId: ds.calChronicleCalendarId || null, categoryFilter });
   });
   LiveUpdateManager.initialize(refreshElement);
   Hooks.once('calendaria.ready', () => LiveUpdateManager.scheduleRefresh());
