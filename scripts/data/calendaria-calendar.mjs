@@ -352,7 +352,11 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
             type: new StringField({ required: false }),
             startingWeekday: new NumberField({ required: false, integer: true, nullable: true, min: 0 }),
             weekdays: new TypedObjectField(
-              new SchemaField({ name: new StringField({ required: true }), abbreviation: new StringField({ required: false }), isRestDay: new BooleanField({ required: false, initial: false }) }),
+              new SchemaField({
+                name: new StringField({ required: false, blank: true, initial: '' }),
+                abbreviation: new StringField({ required: false }),
+                isRestDay: new BooleanField({ required: false, initial: false })
+              }),
               { required: false, nullable: true }
             )
           })
@@ -394,7 +398,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       {
         values: new TypedObjectField(
           new SchemaField({
-            name: new StringField({ required: true, blank: false }),
+            name: new StringField({ required: false, blank: true, initial: '' }),
             abbreviation: new StringField({ required: false }),
             ordinal: new NumberField({ required: true, nullable: false, min: 1, integer: true }),
             isRestDay: new BooleanField({ required: false, initial: false })

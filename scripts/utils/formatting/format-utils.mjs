@@ -7,6 +7,7 @@
 import { resolveRandomizedPhase } from '../../data/_module.mjs';
 import WeatherManager from '../../weather/weather-manager.mjs';
 import { format, localize } from '../localization.mjs';
+import { log } from '../logger.mjs';
 
 /**
  * Resolve a convenience array getter from a calendar object.
@@ -98,7 +99,7 @@ export function dateFormattingParts(calendar, components) {
   const countingDays = totalDays - nonCountingTotal;
   const weekday = weekdays.length > 0 ? (((countingDays + firstWeekday) % weekdays.length) + weekdays.length) % weekdays.length : 0;
   const weekdayData = weekdays[weekday];
-  const weekdayName = weekdayData ? localize(weekdayData.name) : '';
+  const weekdayName = weekdayData?.name ? localize(weekdayData.name) : '';
   const weekdayAbbr = weekdayData?.abbreviation ? localize(weekdayData.abbreviation) : weekdayName.slice(0, 3);
   const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
   const midday = Math.floor(hoursPerDay / 2);

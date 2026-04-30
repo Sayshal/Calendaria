@@ -186,12 +186,14 @@ export default class CalendarManager {
           CalendarManager.#stripStaleDefaults(data, bundledData);
           const calendarData = foundry.utils.mergeObject(foundry.utils.deepClone(bundledData), data, { performDeletions: true });
           delete calendarData._isDelta;
+          CalendarManager.#applyForcedDeletions(calendarData);
           const calendar = new CalendariaCalendar(calendarData);
           CalendarRegistry.register(id, calendar);
           log(3, `Applied delta override for bundled calendar: ${id}`);
         } else if (bundledData) {
           if (CalendarManager.#alignOverrideKeys(data, bundledData)) needsSave = true;
           const merged = foundry.utils.mergeObject(foundry.utils.deepClone(bundledData), data);
+          CalendarManager.#applyForcedDeletions(merged);
           const calendar = new CalendariaCalendar(merged);
           CalendarRegistry.register(id, calendar);
           needsSave = true;
@@ -459,6 +461,45 @@ export default class CalendarManager {
     CalendarManager.#stripStaleDefaults(delta, bundledData);
     delta._isDelta = true;
     return delta;
+  }
+
+  /**
+   * Recursively strip ForcedDeletion operators and "-=key" markers from a merged calendar object.
+   * Foundry 14's mergeObject converts legacy `-=key` deletion markers into ForcedDeletion class
+   * instances at the original key, but the surrounding DataModel keeps the (now empty-shaped) field.
+   * This sweep removes those keys so override deltas that delete bundled entries actually take effect
+   * on both v13 and v14.
+   * @param {object} obj - Merged calendar object (mutated in place)
+   * @private
+   */
+  static #applyForcedDeletions(obj) {
+    if (!obj || typeof obj !== 'object') return;
+    if (Array.isArray(obj)) {
+      for (const item of obj) CalendarManager.#applyForcedDeletions(item);
+      return;
+    }
+    const ForcedDeletion = foundry.data?.operators?.ForcedDeletion;
+    for (const [key, val] of Object.entries(obj)) {
+      if (key.startsWith('-=')) {
+        delete obj[key];
+        continue;
+      }
+      if (val && typeof val === 'object') {
+        if (ForcedDeletion && val instanceof ForcedDeletion) {
+          delete obj[key];
+          continue;
+        }
+        if (val.constructor?.name === 'ForcedDeletion') {
+          delete obj[key];
+          continue;
+        }
+        if (!Array.isArray(val) && val.__$OPERATOR$__ === 'ForcedDeletion') {
+          delete obj[key];
+          continue;
+        }
+      }
+      CalendarManager.#applyForcedDeletions(val);
+    }
   }
 
   /**

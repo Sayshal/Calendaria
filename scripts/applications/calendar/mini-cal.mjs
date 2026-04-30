@@ -610,7 +610,11 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const headerLocation = compact ? 'microCalHeader' : 'miniCalHeader';
     const rawHeader = formatForLocation(calendar, headerComponents, headerLocation);
     const formattedHeader = hasMoonIconMarkers(rawHeader) ? renderMoonIcons(rawHeader) : rawHeader;
-    const weekdays = monthWeekdays.map((wd) => ({ name: wd.abbreviation ? localize(wd.abbreviation) : localize(wd.name).substring(0, 2), isRestDay: wd.isRestDay || false }));
+    const weekdays = monthWeekdays.map((wd) => {
+      const fullName = wd?.name ? localize(wd.name) : '';
+      const abbr = wd?.abbreviation ? localize(wd.abbreviation) : (fullName || '').substring(0, 2);
+      return { name: abbr, isRestDay: wd?.isRestDay || false };
+    });
     const headerEquivalentTooltip = getEquivalentDateTooltip(headerDate.year, headerDate.month, headerDate.dayOfMonth ?? 0);
     const eqCalendars = game.settings.get(MODULE.ID, SETTINGS.EQUIVALENT_DATE_CALENDARS);
     let equivalentDates = [];
