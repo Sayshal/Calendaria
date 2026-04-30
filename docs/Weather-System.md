@@ -92,11 +92,11 @@ The season temperature range is the authority. Per-preset temperature constraint
 1. **Season preset override.** Per-season temp min/max set in the Climate Editor for a specific preset
 2. **Zone preset override.** Zone-level temp min/max override for the preset
 
-When overrides are set, they are **intersected** with the season range (`Math.max` for min, `Math.min` for max). If no per-preset overrides exist, the season range is used directly. Built-in preset temperature defaults (e.g., Snow's cold range) do not filter or constrain generation.
+Absolute overrides are intersected with the season range. Relative modifiers (`N+`/`N-`) resolve directly and can extend past the season bounds. With no overrides, the season range is used. Built-in preset defaults do not filter or constrain generation.
 
 ### Preset Selection Filtering
 
-Before weather generation, presets with explicit per-zone or per-season temperature overrides that have zero overlap with the current season range are excluded. Presets without explicit overrides are never filtered by temperature.
+Presets with absolute temperature overrides that don't overlap the season range are excluded. Presets using relative modifiers (`N+`/`N-`) bypass this filter. Presets without overrides are never filtered by temperature.
 
 ### Configuring Season Climate
 
@@ -478,6 +478,14 @@ Display names resolve in priority order:
 3. **Built-in localized name**
 
 This resolution applies to the HUD, MiniCal, BigCal day cells, Weather Picker grid, and probability views.
+
+---
+
+## Season Aliases
+
+GMs can override the displayed name, abbreviation, icon, and color of any season on a per-zone basis. Configure aliases in the [Climate Editor](Climate-Editor) > Weather tab on the zone temperature row pencil button.
+
+Aliases are **zone-scoped** and apply only to display surfaces (HUD, calendar UI, chronicle, cinematic keyframes, text enrichers, format tokens, chat commands). The raw season name remains the key for per-season temperature and preset overrides, so renaming a season for a zone does not break its `seasonOverrides` mapping.
 
 ---
 

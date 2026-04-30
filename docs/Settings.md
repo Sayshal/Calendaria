@@ -142,14 +142,16 @@ How frequently the time system processes updates (in seconds).
 
 How long rests advance time.
 
-- **8 AM**: Skip to 8 AM the next day (default)
-- **Sunrise**: Skip to the zone's sunrise hour, falling back to 8 AM if not configured
-- **Fixed**: Advance a fixed number of hours (set via **Rest Hours**). Useful for systems like PF2e that specify an 8-hour rest regardless of time of day.
+- **Automatic** (default): Advance by the duration the active system reports. PF1E uses the rest dialog hours, dnd5e uses the rest variant duration, PF2E uses 8 hours. If the system reports no duration, time does not advance.
+- **8 AM**: Skip to 8 AM the next day.
+- **Sunrise**: Skip to the zone's sunrise hour, falling back to 8 AM if not configured.
+- **Custom**: Advance a fixed number of hours set via **Rest Hours**.
 
 ### Rest Hours
 
-Number of hours to advance when Rest Advance Mode is set to **Fixed**.
+Number of hours to advance when Rest Advance Mode is set to **Custom**. Set to 0 to suppress time advancement entirely while still firing the rest hook.
 
+- Minimum: `0`
 - Default: `8`
 
 ### Advance Bastion Orders (dnd5e only)
@@ -452,6 +454,10 @@ By default, all banner types count as content.
 Controls Chronicle behavior during combat. See [HUD > Combat Behavior](#combat-behavior) for option details.
 
 - Default: `None`
+
+### Category Filter Persistence
+
+The Chronicle toolbar's active category selection is stored per-client in the `chronicleCategoryFilter` setting as a set of preset IDs. The selection persists across sessions.
 
 > [!NOTE]
 > The Chronicle inherits the global theme preset and does not have its own theme selector.
@@ -1349,7 +1355,7 @@ Controls Sun Dial behavior during combat. See [HUD > Combat Behavior](#combat-be
 
 ## Display Formats Reference
 
-Format settings appear across app tabs (HUD, MiniCal, BigCal, Time Keeper, Stop Watch, Chat). Each location supports separate GM and player formats.
+Format settings appear across app tabs, as well as `Notes` and `Cinematics` tabs. Each location supports separate GM and player formats. Fresh worlds seed display formats from the active calendar's authored defaults.
 
 ### Format Preview
 

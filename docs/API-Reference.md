@@ -308,6 +308,23 @@ await CALENDARIA.api.switchCalendar('greyhawk');
 
 ---
 
+### setActiveCalendar(id, options)
+
+Set the active calendar. GM only. Accepts an options object that controls whether the world's `DISPLAY_FORMATS` setting is rewritten from the new calendar's authored `dateFormats`.
+
+```javascript
+await CALENDARIA.api.setActiveCalendar('greyhawk', { useCalendarDefaults: true });
+```
+
+| Parameter                     | Type      | Description                                                                                                                                                       |
+| ----------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                          | `string`  | Calendar ID to activate                                                                                                                                           |
+| `options.useCalendarDefaults` | `boolean` | When `true`, rewrites the world `DISPLAY_FORMATS` setting from the new calendar's `dateFormats` so every location maps to `calendarDefault`. Defaults to `false`. |
+
+**Returns:** `Promise<boolean>` - True if activated successfully.
+
+---
+
 ### convertDate(date, fromCalendarId, toCalendarId)
 
 Convert a date from one calendar to another via shared world time.
@@ -580,7 +597,27 @@ Get the current season.
 const season = CALENDARIA.api.getCurrentSeason();
 ```
 
-**Returns:** `object|null` - Season data with name and properties.
+**Returns:** `object|null` - Season data with name and properties. This call returns the raw calendar season without alias resolution. Callers wanting display values should use `WeatherManager.getAliasedSeason` (or `WeatherManager.applySeasonAlias(season, zone)` for an explicit zone).
+
+---
+
+### getAliasedSeason({ scene, zoneId, time })
+
+Static `WeatherManager` helper that resolves the current season and applies the active zone's alias.
+
+```javascript
+const season = CALENDARIA.managers.WeatherManager.getAliasedSeason({ scene, zoneId, time });
+```
+
+| Parameter | Type     | Description                                                                          |
+| --------- | -------- | ------------------------------------------------------------------------------------ |
+| `scene`   | `Scene`  | Scene used to resolve the active zone when `zoneId` is omitted (optional)            |
+| `zoneId`  | `string` | Explicit zone ID; bypasses scene resolution (optional)                               |
+| `time`    | `number` | World time in seconds used to resolve the season; defaults to the current world time |
+
+**Returns:** `object` - `{ name, abbreviation, icon, color }` with alias overrides merged onto the resolved season.
+
+For an explicit season + zone pair, call `WeatherManager.applySeasonAlias(season, zone)` directly.
 
 ---
 

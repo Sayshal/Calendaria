@@ -42,6 +42,10 @@ Per-season temperature ranges with support for **relative modifier syntax**:
 
 Leave a min or max blank to inherit the matching value from the season climate's temperature range. Clearing both fields for a season falls back fully to the season climate.
 
+#### Season Aliases
+
+Each season row in the temperature table has a pencil button that toggles an inline alias editor. Set the **Name**, **Abbreviation**, **Icon**, or **Color** to override how the season is displayed for this zone. Blank fields fall through to the calendar's season definition. The pencil lights up when the row carries a real override, and the **Clear** button resets every alias field for that season. Aliases affect display surfaces only (HUD, calendar UI, chronicle, cinematics, enrichers, format tokens, chat commands); the raw season name remains the key for per-season temperature and preset overrides.
+
 #### Wind Configuration
 
 | Field                 | Description                                                  |

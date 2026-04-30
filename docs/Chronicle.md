@@ -50,6 +50,8 @@ Banners appear as inline markers within day entries:
 - **Moon Phase.** Shows mid-phase milestones for each moon
 - **Weather.** Summarizes weather for past and current days (label, temperature, wind, precipitation)
 
+Banners are hidden while the Category Filter is active so the chronicle shows only days with matching notes.
+
 ### Fog of War
 
 When [Fog of War](Fog-of-War) is enabled, unrevealed dates display as fogged placeholders. GMs always see full content regardless of fog state.
@@ -76,6 +78,7 @@ The toolbar across the top of the Chronicle provides:
 | --------------- | ----------------------------------------------- |
 | Today           | Reset date range and scroll to today's entry    |
 | Show Empty Days | Toggle display of days with no notes or banners |
+| Category Filter | Toggle visibility by note preset                |
 | Depth Dropdown  | Switch between depth modes                      |
 | View Mode       | Switch between Scroll and Timeline layouts      |
 | Close           | Close the Chronicle                             |

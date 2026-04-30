@@ -519,9 +519,10 @@ Clickable. Opens the Chronicle View locked to the date range — infinite scroll
 [[cal.chronicle 1 1 1500 to 14 1 1500]]{The Founding Week} → The Founding Week
 ```
 
-| Parameter | Type     | Description                                      |
-| --------- | -------- | ------------------------------------------------ |
-| `cal`     | `string` | Calendar ID to scope notes/weather to (optional) |
+| Parameter    | Type     | Description                                                                                                                      |
+| ------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `cal`        | `string` | Calendar ID to scope notes/weather to (optional)                                                                                 |
+| `categories` | `string` | Comma-separated preset IDs applied as a one-shot Chronicle category filter; does not modify the persisted user filter (optional) |
 
 ---
 
