@@ -427,7 +427,7 @@ const moons = CALENDARIA.api.getAllMoonPhases();
 
 ### getMoonPhasePosition(moonIndex, date)
 
-Get the exact phase position (0–1) for a moon on a given date.
+Get the phase position (0–1) for a moon on a given date. Returns `0` when the moon index is out of range or the calendar has no active moons.
 
 ```javascript
 const position = CALENDARIA.api.getMoonPhasePosition(0);

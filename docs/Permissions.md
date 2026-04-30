@@ -93,15 +93,7 @@ Without permission for an action, UI controls are hidden or disabled:
 - Note creation buttons hidden without Manage Notes permission
 - Calendar button visibility gated by `canViewBigCal` or `canViewMiniCal` based on Calendar Button setting
 - Calendar Editor button hidden without Edit Calendars permission
-
-### Socket Relay
-
-Non-GM users with appropriate permissions relay world-state-modifying actions through a socket to the GM for execution.
-
-Socket relay is used for:
-
-- **Time changes**: Non-GM users with "Change Date/Time" permission
-- **Note creation**: Users with "Manage Notes" permission but without Foundry's core `JOURNAL_CREATE` permission
+- Action enrichers (`advancetotime`, `setweather`, etc.) gated by Change Date/Time and Change Weather; non-GM clicks relay to a GM
 
 ---
 
@@ -141,12 +133,6 @@ Note editing is gated exclusively by per-note Foundry document ownership. Each n
 - Controls visibility of intraday period breakdown in weather tooltips and forecast data. Without this permission, players see only the daily aggregate weather, not per-period details.
 - GMs always have access regardless of this setting
 
-### Change Date/Time
-
-- Affects all time controls (HUD, MiniCal, Time Keeper)
-- Includes advancing time, setting specific dates, and real-time clock control
-- Time changes are broadcast to all clients
-
 ### Settings Tab Access
 
 - **Stopwatch** and **Sun Dial** settings tabs expose user-scope settings (fade, opacity, combat behavior) to non-GM users for personal customization
@@ -155,10 +141,4 @@ Note editing is gated exclusively by per-note Foundry document ownership. Each n
 
 ### Change Calendar
 
-- Controls whether users can switch the active calendar
-- Player visibility of the active calendar is controlled separately via "Show Active Calendar to Players" in Settings > Home tab
-
-### Edit Calendars
-
-- Allows modifying calendar structure. Restrict to GM only in most games
-- Changes affect all players in the world
+Player visibility of the active calendar is controlled separately via "Show Active Calendar to Players" in Settings > Home tab.

@@ -96,11 +96,11 @@ Configure the days of the week and optional named weeks.
 
 ### Weekdays List
 
-| Column           | Description                                                                      |
-| ---------------- | -------------------------------------------------------------------------------- |
-| **Name**         | Full weekday name (e.g., "Monday")                                               |
-| **Abbreviation** | Short form (e.g., "Mon")                                                         |
-| **Rest Day**     | Checkbox. Marks weekends for styling (this can be hooked into to trigger events) |
+| Column           | Description                                     |
+| ---------------- | ----------------------------------------------- |
+| **Name**         | Full weekday name. May be left blank.           |
+| **Abbreviation** | Short form.                                     |
+| **Rest Day**     | Checkbox. Marks weekends for styling and hooks. |
 
 ### Weekday Controls
 

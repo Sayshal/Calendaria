@@ -575,6 +575,13 @@ Cross-calendar date display. When enabled, equivalent dates from other loaded ca
 
 See [Secondary Calendar](Secondary-Calendar) for more details on multi-calendar support.
 
+### Print / Export
+
+Opens the browser print dialog. Save as PDF to export.
+
+- **Print Current Month.** Full-page month grid.
+- **Print Current Year.** Every month, one page each.
+
 ---
 
 ## Macros (GM Only)

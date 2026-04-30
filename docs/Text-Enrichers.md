@@ -577,6 +577,113 @@ Clickable. Navigates to result.
 
 ---
 
+## Actions
+
+Clickable buttons that alter the calendar. Time actions are gated by `canChangeDateTime` and weather actions by `canChangeWeather`.
+
+### advancetotime
+
+Advance the clock to the next `HH:MM`.
+
+```text
+[[cal.advancetotime 06:30]]                  → advance forward to 06:30
+[[cal.advancetotime 06:30 direction=nearest]] → snap to the closer side of midnight
+```
+
+| Parameter   | Type     | Description                                      |
+| ----------- | -------- | ------------------------------------------------ |
+| positional  | `string` | Target `HH:MM`                                   |
+| `direction` | `string` | `nearest` to snap to the closer side of midnight |
+
+---
+
+### advanceinterval
+
+Advance time by a composite delta.
+
+```text
+[[cal.advanceinterval hour=2 minute=30]] → +2h 30m
+[[cal.advanceinterval day=1 hour=6]]     → +1d 6h
+```
+
+| Unit     | Suffix |
+| -------- | ------ |
+| `second` | `s`    |
+| `round`  | `r`    |
+| `minute` | `m`    |
+| `hour`   | `h`    |
+| `day`    | `d`    |
+| `week`   | `w`    |
+| `month`  | `mo`   |
+| `season` | `sea`  |
+| `year`   | `y`    |
+
+---
+
+### advancetopreset
+
+Advance to the next named time-of-day.
+
+```text
+[[cal.advancetopreset sunrise]]
+[[cal.advancetopreset sunset]]
+```
+
+**Targets:** `sunrise`, `midday`, `noon`, `sunset`, `midnight`.
+
+---
+
+### settime
+
+Snap the clock to `HH:MM` on the current date without changing the day.
+
+```text
+[[cal.settime 06:00]]
+```
+
+---
+
+### jumptodate
+
+Move the world clock to the given date, preserving the current time of day.
+
+```text
+[[cal.jumptodate 15 Mirtul 1492]]
+[[cal.jumptodate 15 5 1492]]
+```
+
+---
+
+### toggleclock
+
+Toggle the real-time TimeClock on/off.
+
+```text
+[[cal.toggleclock]]
+```
+
+---
+
+### setweather
+
+Apply a weather preset id.
+
+```text
+[[cal.setweather clear]]
+[[cal.setweather rain temperature=12 period=morning]]
+[[cal.setweather snow allPeriods=true]]
+```
+
+| Parameter     | Type      | Description                   |
+| ------------- | --------- | ----------------------------- |
+| positional    | `string`  | Preset id                     |
+| `temperature` | `number`  | Override temperature          |
+| `period`      | `string`  | Intraday period to apply to   |
+| `zoneId`      | `string`  | Climate zone id               |
+| `allPeriods`  | `boolean` | Apply to all intraday periods |
+
+---
+
 ## Cross-Calendar
 
 Any enricher accepts `cal=<id>` to query a non-active calendar.
