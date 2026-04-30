@@ -1132,6 +1132,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     const calendarId = this.metadata?.id;
     if (!calendarId) return [];
     const stubs = NoteManager.getAllNotes();
+    const months = this.monthsArray;
     const result = [];
     for (const stub of stubs) {
       const linked = stub.flagData?.linkedFestival;
@@ -1139,6 +1140,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       if (linked.countsForWeekday !== false) continue;
       const start = stub.flagData?.startDate;
       if (!start || start.month == null || start.dayOfMonth == null) continue;
+      if (months[start.month]?.type === 'intercalary') continue;
       result.push({ month: start.month, dayOfMonth: start.dayOfMonth, duration: stub.flagData?.duration ?? 1, leapYearOnly: !!linked.leapYearOnly, leapDuration: linked.leapDuration ?? null });
     }
     return result;

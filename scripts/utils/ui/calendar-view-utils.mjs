@@ -1019,12 +1019,24 @@ export function getLeadingDays(calendar, year, month, startDayOfWeek) {
   let checkYear = month === 0 ? year - 1 : year;
   let checkDay = calendar.getDaysInMonth(checkMonth, checkYear - yearZero);
   while (remainingSlots > 0 && checkDay > 0) {
+    const monthData = calendar.monthsArray[checkMonth];
+    const isIntercalaryMonth = monthData?.type === 'intercalary';
     const festivalDay = calendar.findFestivalDay({ year: checkYear - yearZero, month: checkMonth, dayOfMonth: checkDay - 1 });
-    if (festivalDay?.countsForWeekday === false) {
+    if (festivalDay?.countsForWeekday === false && !isIntercalaryMonth) {
       checkDay--;
       continue;
     }
-    prevDays.unshift({ day: checkDay, dayOfMonth: checkDay - 1, year: checkYear, month: checkMonth, isFromOtherMonth: true });
+    const monthName = isIntercalaryMonth ? localize(monthData?.name ?? '') : '';
+    prevDays.unshift({
+      day: checkDay,
+      dayOfMonth: checkDay - 1,
+      year: checkYear,
+      month: checkMonth,
+      isFromOtherMonth: true,
+      isIntercalaryMonth,
+      monthName,
+      monthInitial: monthName ? monthName.charAt(0) : ''
+    });
     remainingSlots--;
     checkDay--;
     if (checkDay < 1 && remainingSlots > 0) {

@@ -162,9 +162,11 @@
             {{#if empty}}
               <div class="minical-day empty"></div>
             {{else if isFromOtherMonth}}
-              <div class="minical-day other-month{{#if isToday}} today{{/if}}" data-action="navigateToMonth"
-                data-year="{{year}}" data-month="{{month}}" data-day="{{dayOfMonth}}">
-                <span class="minical-day-num">{{day}}</span>
+              <div
+                class="minical-day other-month{{#if isIntercalaryMonth}} intercalary-month{{/if}}{{#if isToday}} today{{/if}}"
+                data-action="navigateToMonth" data-year="{{year}}" data-month="{{month}}" data-day="{{dayOfMonth}}"
+                {{#if isIntercalaryMonth}}data-tooltip="{{monthName}}" {{/if}}>
+                <span class="minical-day-num">{{#if isIntercalaryMonth}}{{monthInitial}}{{else}}{{day}}{{/if}}</span>
               </div>
             {{else if isFromOtherWeek}}
               <div
@@ -277,6 +279,6 @@
           </button>
         </div>
       </div>
-  {{/if}}
+    {{/if}}
   {{/if}}
 </div>

@@ -83,9 +83,11 @@
               {{#if empty}}
                 <div class="calendar-day empty"></div>
               {{else if isFromOtherMonth}}
-                <div class="calendar-day other-month{{#if isToday}} today{{/if}}" data-action="navigateToMonth"
-                  data-year="{{year}}" data-month="{{month}}" data-day="{{dayOfMonth}}">
-                  <div class="day-number">{{day}}</div>
+                <div
+                  class="calendar-day other-month{{#if isIntercalaryMonth}} intercalary-month{{/if}}{{#if isToday}} today{{/if}}"
+                  data-action="navigateToMonth" data-year="{{year}}" data-month="{{month}}" data-day="{{dayOfMonth}}"
+                  {{#if isIntercalaryMonth}}data-tooltip="{{monthName}}" {{/if}}>
+                  <div class="day-number">{{#if isIntercalaryMonth}}{{monthName}}{{else}}{{day}}{{/if}}</div>
                 </div>
               {{else}}
                 <div
