@@ -16,6 +16,7 @@ export * from './macro-utils.mjs';
 export * from './migrations.mjs';
 export * from './patches.mjs';
 export * from './permissions.mjs';
+export * from './print/calendar-printer.mjs';
 export { default as SearchManager } from './search-manager.mjs';
 export * from './settings-io.mjs';
 export { CalendariaSocket } from './socket.mjs';

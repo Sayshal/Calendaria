@@ -39,6 +39,8 @@ import {
   initializeTheme,
   isCustomThemeKey,
   localize,
+  printCurrentMonth,
+  printCurrentYear,
   validateFormatString
 } from '../../utils/_module.mjs';
 import { WeatherManager } from '../../weather/_module.mjs';
@@ -85,6 +87,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       openCalendarEditor: SettingsPanel.#onOpenCalendarEditor,
       openImporter: SettingsPanel.#onOpenImporter,
       openSetDateDialog: SettingsPanel.#onOpenSetDateDialog,
+      printCurrentMonth: SettingsPanel.#onPrintCurrentMonth,
+      printCurrentYear: SettingsPanel.#onPrintCurrentYear,
       resetPosition: SettingsPanel.#onResetPosition,
       openPresetManager: SettingsPanel.#onOpenPresetManager,
       openEnricherReference: SettingsPanel.#onOpenEnricherReference,
@@ -2326,6 +2330,16 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static #onOpenSetDateDialog() {
     SetDateDialog.open();
+  }
+
+  /** Print the current month grid. */
+  static #onPrintCurrentMonth() {
+    printCurrentMonth();
+  }
+
+  /** Print the current year (3x4 month overview). */
+  static #onPrintCurrentYear() {
+    printCurrentYear();
   }
 
   /**
