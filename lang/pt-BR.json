@@ -723,7 +723,7 @@
   "CALENDARIA.Editor.Hint.ResetWeekdays": "Comece cada ano no primeiro dia útil, reiniciando o ciclo contínuo de dias úteis.",
   "CALENDARIA.Editor.Hint.SeasonOffset": "Dia do ano em que começa a primeira estação (0 = primeiro dia do ano).",
   "CALENDARIA.Editor.Hint.SeasonType": "As estações com data definida têm datas específicas de início e fim. As estações periódicas se repetem com base na duração.",
-  "CALENDARIA.Editor.Hint.SeasonalType": "Mapeia estações personalizadas para tipos de clima canônicos para integrações.",
+  "CALENDARIA.Editor.Hint.SeasonalType": "Necessário para as âncoras de equinócio e solstício e para as integrações de clima. Sem ele, as âncoras astronômicas não serão resolvidas para esta estação.",
   "CALENDARIA.Editor.Hint.Seasons": "Defina as estações do ano por intervalos de dias. Opcional.",
   "CALENDARIA.Editor.Hint.SeasonsFields": "Cada linha: nome, abreviatura, ícone (classe FontAwesome), cor e intervalo de datas (mês/dia inicial a mês/dia final).",
   "CALENDARIA.Editor.Hint.SeasonsFieldsPeriodic": "Cada linha: nome, abreviatura, ícone (classe FontAwesome), cor e duração em dias.",
