@@ -1,9 +1,3 @@
-/**
- * Secondary Calendar Viewer — read-only synced calendar for a non-active calendar.
- * @module Applications/SecondaryCalendar
- * @author Tyler
- */
-
 import { CalendarRegistry, getCurrentDateOn } from '../../calendar/_module.mjs';
 import { HOOKS, TEMPLATES } from '../../constants.mjs';
 import { dayOfWeek } from '../../notes/_module.mjs';

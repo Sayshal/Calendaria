@@ -1,8 +1,3 @@
-/**
- * Calendaria text enricher system.
- * @module Utils/Enrichers
- */
-
 import { BigCal, Chronicle, MiniCal } from '../applications/_module.mjs';
 import { CalendarManager, CalendarRegistry } from '../calendar/_module.mjs';
 import { COMPASS_DIRECTIONS, HOOKS, MODULE, SETTINGS, WIND_SPEEDS } from '../constants.mjs';

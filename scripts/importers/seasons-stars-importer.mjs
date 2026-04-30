@@ -1,9 +1,3 @@
-/**
- * Seasons & Stars Importer
- * @module Importers/SeasonsStarsImporter
- * @author Tyler
- */
-
 import { CalendarManager } from '../calendar/_module.mjs';
 import { ASSETS } from '../constants.mjs';
 import { NoteManager, addCustomPreset, getAllPresets } from '../notes/_module.mjs';

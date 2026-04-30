@@ -1,9 +1,3 @@
-/**
- * Condition Builder Dialog
- * @module Applications/ConditionBuilderDialog
- * @author Tyler
- */
-
 import { CalendarManager } from '../../calendar/_module.mjs';
 import { CONDITION_GROUP_MODES, CONDITION_OPERATORS, MAX_NESTING_DEPTH, TEMPLATES } from '../../constants.mjs';
 import {

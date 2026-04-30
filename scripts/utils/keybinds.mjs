@@ -1,9 +1,3 @@
-/**
- * Keybinding Registration and Handlers
- * @module Utils/Keybinds
- * @author Tyler
- */
-
 import { BigCal, Chronicle, HUD, MiniCal, NoteViewer, Stopwatch, SunDial, TimeKeeper } from '../applications/_module.mjs';
 import { KEYBINDS, MODULE } from '../constants.mjs';
 import { log } from './logger.mjs';

@@ -1,9 +1,3 @@
-/**
- * Weather Editor — Unified editor for built-in and custom weather types.
- * @module Applications/WeatherEditor
- * @author Tyler
- */
-
 import { HOOKS, MODULE, SETTINGS, TEMPLATES } from '../../constants.mjs';
 import { getAvailableFxPresets, isFXMasterActive } from '../../integrations/_module.mjs';
 import { getAvailableMacros, localize, log } from '../../utils/_module.mjs';

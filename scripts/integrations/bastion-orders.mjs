@@ -1,9 +1,3 @@
-/**
- * Bastion Orders Integration (dnd5e)
- * @module Integrations/BastionOrders
- * @author Tyler
- */
-
 import { CalendarManager } from '../calendar/_module.mjs';
 import { MODULE, SETTINGS } from '../constants.mjs';
 import { TimeClock } from '../time/_module.mjs';

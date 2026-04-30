@@ -1,9 +1,3 @@
-/**
- * Calendaria Public API
- * @module API
- * @author Tyler
- */
-
 import { BigCal, CalendarEditor, Chronicle, CinematicOverlay, HUD, MiniCal, NoteViewer, SecondaryCalendar, Stopwatch, SunDial, TimeKeeper, WeatherProbabilityDialog } from './applications/_module.mjs';
 import {
   CalendarManager,

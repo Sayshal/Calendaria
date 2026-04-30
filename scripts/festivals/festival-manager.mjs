@@ -1,9 +1,3 @@
-/**
- * Festival Template Utility
- * @module Festivals/FestivalManager
- * @author Tyler
- */
-
 import { DISPLAY_STYLES, MODULE, NOTE_VISIBILITY, SETTINGS } from '../constants.mjs';
 import { NoteManager } from '../notes/_module.mjs';
 import { localize, log } from '../utils/_module.mjs';

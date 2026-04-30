@@ -1,9 +1,3 @@
-/**
- * Importer Application
- * @module Applications/ImporterApp
- * @author Tyler
- */
-
 import { TEMPLATES } from '../../constants.mjs';
 import { createImporter, getImporterOptions } from '../../importers/_module.mjs';
 import { format, localize, log } from '../../utils/_module.mjs';

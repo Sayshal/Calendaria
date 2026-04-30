@@ -1,9 +1,3 @@
-/**
- * Simple Timekeeping Importer
- * @module Importers/SimpleTimekeepingImporter
- * @author Tyler
- */
-
 import { CalendarManager } from '../calendar/_module.mjs';
 import { DEFAULT_MOON_PHASES } from '../constants.mjs';
 import { NoteManager } from '../notes/_module.mjs';

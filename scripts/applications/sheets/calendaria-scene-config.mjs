@@ -1,9 +1,3 @@
-/**
- * Extended SceneConfig that adds a dedicated Calendaria tab.
- * @module CalendariaSceneConfig
- * @author Tyler
- */
-
 import { MODULE, SCENE_FLAGS, TEMPLATES } from '../../constants.mjs';
 import { WeatherManager } from '../../weather/_module.mjs';
 

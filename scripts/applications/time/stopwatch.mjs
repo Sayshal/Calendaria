@@ -1,11 +1,5 @@
 /* global PIXI */
 
-/**
- * Stopwatch Application - Timer with real-time and game-time modes.
- * @module Applications/Stopwatch
- * @author Tyler
- */
-
 import { HOOKS, MODULE, SETTINGS, SOCKET_TYPES, TEMPLATES } from '../../constants.mjs';
 import { TimeClock } from '../../time/_module.mjs';
 import {

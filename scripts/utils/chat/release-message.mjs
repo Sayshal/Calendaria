@@ -1,8 +1,3 @@
-/**
- * Release announcement chat message for new module versions.
- * @module ReleaseMessage
- */
-
 import { MODULE } from '../../constants.mjs';
 
 /**

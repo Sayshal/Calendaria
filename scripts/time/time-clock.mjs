@@ -1,9 +1,3 @@
-/**
- * TimeClock - Real-time clock controller for Calendaria.
- * @module Time/TimeClock
- * @author Tyler
- */
-
 import { CinematicOverlay } from '../applications/_module.mjs';
 import { HOOKS, MODULE, SETTINGS, SOCKET_TYPES } from '../constants.mjs';
 import { CalendariaSocket, canChangeDateTime, localize, log } from '../utils/_module.mjs';

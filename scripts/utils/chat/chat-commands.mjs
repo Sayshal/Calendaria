@@ -1,9 +1,3 @@
-/**
- * Chat Commands for Calendaria
- * @module Chat/ChatCommands
- * @author Tyler
- */
-
 import { localize } from '../localization.mjs';
 import { canChangeActiveCalendar, canChangeDateTime } from '../permissions.mjs';
 import {

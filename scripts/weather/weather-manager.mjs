@@ -1,9 +1,3 @@
-/**
- * Weather Manager - Core state management and API for the weather system.
- * @module Weather/WeatherManager
- * @author Tyler
- */
-
 import { isBundledCalendar } from '../calendar/calendar-loader.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import { COMPASS_DIRECTIONS, HOOKS, MODULE, SCENE_FLAGS, SETTINGS, WEATHER_PERIODS, WIND_SPEEDS } from '../constants.mjs';

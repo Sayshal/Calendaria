@@ -1,9 +1,3 @@
-/**
- * Core module constants for Calendaria.
- * @module Constants
- * @author Tyler
- */
-
 /** @type {object} Module identification */
 export const MODULE = {
   ID: 'calendaria',

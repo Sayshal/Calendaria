@@ -1,9 +1,3 @@
-/**
- * Journal Calendar Footer
- * @module Utils/JournalButton
- * @author Tyler
- */
-
 import { BigCal, Chronicle, HUD, MiniCal, Stopwatch, SunDial, TimeKeeper } from '../../applications/_module.mjs';
 import { MODULE, SETTINGS } from '../../constants.mjs';
 import { localize } from '../localization.mjs';

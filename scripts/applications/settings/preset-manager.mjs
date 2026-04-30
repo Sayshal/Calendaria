@@ -1,9 +1,3 @@
-/**
- * Preset Manager Application
- * @module Applications/PresetManager
- * @author Tyler
- */
-
 import { DISPLAY_STYLES, MODULE, NOTE_VISIBILITY } from '../../constants.mjs';
 import { DEFAULT_PRESET_ID, NoteManager, getAllPresetsIncludingHidden, getBuiltinPresetSeeds, saveAllPresets } from '../../notes/_module.mjs';
 import { format, localize } from '../../utils/_module.mjs';

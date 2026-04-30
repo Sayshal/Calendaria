@@ -1,9 +1,3 @@
-/**
- * Note Viewer — standalone frameless note browser with filter sidebar.
- * @module Applications/NoteViewer
- * @author Tyler
- */
-
 import { CalendarManager } from '../../calendar/_module.mjs';
 import { DISPLAY_STYLES, HOOKS, MODULE, NOTE_VISIBILITY, SETTINGS, TEMPLATES } from '../../constants.mjs';
 import { NoteManager, filterNotes, formatNoteDate, getAllPresets, getAvailableAuthors } from '../../notes/_module.mjs';

@@ -1,9 +1,3 @@
-/**
- * Date Utility Functions
- * @module Notes/Utils/DateUtils
- * @author Tyler
- */
-
 import { CalendarManager } from '../calendar/_module.mjs';
 import { log } from '../utils/_module.mjs';
 

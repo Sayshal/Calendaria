@@ -1,9 +1,3 @@
-/**
- * Field schema registry for the condition builder UI.
- * @module Notes/ConditionFieldSchema
- * @author Tyler
- */
-
 import { CONDITION_FIELDS, CONDITION_OPERATORS, MOON_PHASE_LABELS } from '../constants.mjs';
 import { localize } from '../utils/localization.mjs';
 import { WeatherManager } from '../weather/_module.mjs';

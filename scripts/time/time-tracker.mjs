@@ -1,9 +1,3 @@
-/**
- * Time Tracker
- * @module Time/TimeTracker
- * @author Tyler
- */
-
 import { CalendarManager } from '../calendar/_module.mjs';
 import { HOOKS, MODULE, SETTINGS } from '../constants.mjs';
 import { executeMacroById, format, localize, log } from '../utils/_module.mjs';

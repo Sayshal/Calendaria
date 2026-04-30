@@ -1,9 +1,3 @@
-/**
- * Note Filter Service
- * @module Notes/NoteFilterService
- * @author Tyler
- */
-
 import { CalendarManager } from '../calendar/_module.mjs';
 import { NOTE_VISIBILITY } from '../constants.mjs';
 import { formatForLocation } from '../utils/_module.mjs';

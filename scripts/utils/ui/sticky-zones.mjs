@@ -1,9 +1,3 @@
-/**
- * Sticky Zones Utility for HUD Docking
- * @module Utils/StickyZones
- * @author Tyler
- */
-
 import { MODULE, SETTINGS } from '../../constants.mjs';
 
 /** @type {number} Snap detection radius in pixels. */

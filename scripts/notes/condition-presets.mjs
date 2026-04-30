@@ -1,8 +1,3 @@
-/**
- * Condition Presets — common recurrence patterns as condition trees.
- * @module Notes/ConditionPresets
- */
-
 import { CalendarManager } from '../calendar/_module.mjs';
 import { MOON_PHASE_LABELS } from '../constants.mjs';
 import { format, getCalendarMoonPhaseIndex, getLastDayOfMonth, getMoonPhaseCountInYear, localize } from '../utils/_module.mjs';

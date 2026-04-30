@@ -1,8 +1,3 @@
-/**
- * Settings Import/Export utilities.
- * @module Utils/SettingsIO
- */
-
 import { CalendarManager } from '../calendar/_module.mjs';
 import { MODULE, SETTINGS } from '../constants.mjs';
 import { getAllPresets, sanitizeNoteData, upsertBundledCustomPreset } from '../notes/_module.mjs';

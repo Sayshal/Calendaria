@@ -1,9 +1,3 @@
-/**
- * Calendar Registry
- * @module Calendar/CalendarRegistry
- * @author Tyler
- */
-
 import { CalendariaCalendar } from '../data/_module.mjs';
 import { log } from '../utils/_module.mjs';
 

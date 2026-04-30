@@ -1,9 +1,3 @@
-/**
- * Calendar Manager
- * @module Calendar/CalendarManager
- * @author Tyler
- */
-
 import { HOOKS, MODULE, SETTINGS } from '../constants.mjs';
 import { CalendariaCalendar } from '../data/_module.mjs';
 import { FestivalManager } from '../festivals/_module.mjs';

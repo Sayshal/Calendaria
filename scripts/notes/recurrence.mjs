@@ -1,9 +1,3 @@
-/**
- * Recurring Event Logic
- * @module Notes/Utils/Recurrence
- * @author Tyler
- */
-
 import { CalendarManager } from '../calendar/_module.mjs';
 import { CONDITION_FIELDS, CONDITION_OPERATORS } from '../constants.mjs';
 import { findSeasonIndexByType, getCalendarMoonPhaseIndex, getDayOfYear, getMidpoint, getSeasonDayOfYearBounds, localize, log, seededRandom } from '../utils/_module.mjs';

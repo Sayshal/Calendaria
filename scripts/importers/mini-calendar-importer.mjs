@@ -1,9 +1,3 @@
-/**
- * Mini Calendar Importer
- * @module Importers/MiniCalendarImporter
- * @author Tyler
- */
-
 import { CalendarManager } from '../calendar/_module.mjs';
 import { ASSETS } from '../constants.mjs';
 import { FestivalManager } from '../festivals/_module.mjs';

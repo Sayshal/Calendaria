@@ -1,9 +1,3 @@
-/**
- * Date Converter — cross-calendar date conversion utilities.
- * @module Calendar/DateConverter
- * @author Tyler
- */
-
 import { formatCustom, log } from '../utils/_module.mjs';
 import { CalendarRegistry } from './_module.mjs';
 

@@ -27,8 +27,8 @@ the Coast LLC. This content is unofficial Fan Content permitted under
 Wizards of the Coast's Fan Content Policy.
 
 
-EBERRON - Galifar & Khorvaire Calendars (galifar.json, khorvaire.json)
-----------------------------------------------------------------------
+EBERRON - Galifar Calendar (galifar.json)
+------------------------------------------
 Eberron, Khorvaire, and all related content are trademarks of Wizards of
 the Coast LLC and Keith Baker. This content is unofficial Fan Content
 permitted under Wizards of the Coast's Fan Content Policy.
@@ -55,19 +55,33 @@ the Coast LLC. This content is unofficial Fan Content permitted under
 Wizards of the Coast's Fan Content Policy.
 
 
-GREYHAWK - Common Year Calendars (greyhawk.json, greyhawk-364.json)
--------------------------------------------------------------------
+GREYHAWK - Common Year Calendar (greyhawk.json)
+------------------------------------------------
 Greyhawk, Oerth, and all related content are trademarks of Wizards of the
 Coast LLC. This content is unofficial Fan Content permitted under Wizards
 of the Coast's Fan Content Policy.
 
 
-GOLARION - Absalom Reckoning (golarion.json)
----------------------------------------------
-Pathfinder, Golarion, and all related content are trademarks of Paizo Inc.
-This content is compatible with the Pathfinder Roleplaying Game and is
-created under the Community Use Policy. For more information, see
-https://paizo.com/community/communityuse
+PAIZO - Pathfinder & Starfinder Calendars (golarion.json, golarion-imperial.json, pact-standard.json)
+------------------------------------------------------------------------------------------------------
+Pathfinder, Starfinder, Golarion, Tian Xia, the Pact Worlds, and all
+related content are trademarks of Paizo Inc. golarion.json is the Absalom
+Reckoning of Golarion; golarion-imperial.json is the Imperial Calendar of
+Tian Xia used in the Pathfinder 2e Season of Ghosts adventure path;
+pact-standard.json is the Pact Standard calendar of the Starfinder
+campaign setting. This content is compatible with the Pathfinder and
+Starfinder Roleplaying Games and is created under the Community Use
+Policy. For more information, see https://paizo.com/community/communityuse
+
+
+WARHAMMER FANTASY - Imperial Calendar (imperial-warhammer.json)
+----------------------------------------------------------------
+Warhammer, Warhammer Fantasy, the Old World, the Empire, and all related
+content are trademarks of Games Workshop Limited. Warhammer Fantasy
+Roleplay is published by Cubicle 7 Entertainment Ltd under license from
+Games Workshop. This content is unofficial fan content created for use
+with virtual tabletop software and is not endorsed by Games Workshop or
+Cubicle 7.
 
 
 EXANDRIA - Exandrian Calendar (exandrian.json)

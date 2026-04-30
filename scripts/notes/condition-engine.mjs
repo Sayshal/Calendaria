@@ -1,9 +1,3 @@
-/**
- * Unified Condition Engine for calendar note scheduling.
- * @module Notes/ConditionEngine
- * @author Tyler
- */
-
 import { CalendarManager } from '../calendar/_module.mjs';
 import { CONDITION_FIELDS, CONDITION_GROUP_MODES, CONDITION_OPERATORS, MAX_NESTING_DEPTH } from '../constants.mjs';
 import {

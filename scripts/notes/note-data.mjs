@@ -1,9 +1,3 @@
-/**
- * Note Data Schema and Validation
- * @module Notes/NoteData
- * @author Tyler
- */
-
 import { DISPLAY_STYLES, HOOKS, MODULE, NOTE_VISIBILITY, SETTINGS } from '../constants.mjs';
 import { localize } from '../utils/localization.mjs';
 import { isValidDate } from './_module.mjs';

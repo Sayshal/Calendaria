@@ -1,10 +1,3 @@
-/**
- * Extended calendar data model with Calendaria-specific features.
- * @extends foundry.data.CalendarData
- * @module Calendar/Data/CalendariaCalendar
- * @author Tyler
- */
-
 import { findFestivalDay as findFestivalDayViaNotes, getLeapYearDescription, intersectsYear, parseInterval, parsePattern } from '../calendar/_module.mjs';
 import { DEFAULT_MOON_PHASES } from '../constants.mjs';
 import { NoteManager } from '../notes/_module.mjs';

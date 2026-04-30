@@ -1,9 +1,3 @@
-/**
- * Fantasy-Calendar.com Importer
- * @module Importers/FantasyCalendarImporter
- * @author Tyler
- */
-
 import { CalendarManager } from '../calendar/_module.mjs';
 import { ASSETS, MOON_PHASE_LABELS } from '../constants.mjs';
 import { NoteManager, addCustomPreset, getAllPresets } from '../notes/_module.mjs';

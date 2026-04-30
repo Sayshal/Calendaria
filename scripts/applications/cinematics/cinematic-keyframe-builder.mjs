@@ -1,9 +1,3 @@
-/**
- * Keyframe builder for the Cinematic Time Skip animation.
- * @module CinematicKeyframeBuilder
- * @author Tyler
- */
-
 import { NoteManager } from '../../notes/_module.mjs';
 import { formatForLocation, localize } from '../../utils/_module.mjs';
 import { WeatherManager } from '../../weather/_module.mjs';

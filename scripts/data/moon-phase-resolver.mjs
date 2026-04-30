@@ -1,9 +1,3 @@
-/**
- * Seeded PRNG moon phase resolver for randomized moon cycles.
- * @module Calendar/Data/MoonPhaseResolver
- * @author Tyler
- */
-
 /** @type {Map<string, {day: number, position: number}>} Per-moon position cache */
 const positionCache = new Map();
 

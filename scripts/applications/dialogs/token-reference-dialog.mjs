@@ -1,9 +1,3 @@
-/**
- * Token Reference Dialog - Modal showing format tokens with contextual highlighting.
- * @module Applications/TokenReferenceDialog
- * @author Tyler
- */
-
 import { TEMPLATES } from '../../constants.mjs';
 import { getAvailableTokens, localize } from '../../utils/_module.mjs';
 

@@ -1,9 +1,3 @@
-/**
- * Climate zone templates for procedural weather generation.
- * @module Weather/ClimateData
- * @author Tyler
- */
-
 import { MODULE, SETTINGS } from '../../constants.mjs';
 import { localize } from '../../utils/_module.mjs';
 import { ALL_PRESETS } from './weather-presets.mjs';

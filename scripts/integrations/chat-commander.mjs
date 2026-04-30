@@ -1,9 +1,3 @@
-/**
- * Chat Commander Integration
- * @module Integrations/ChatCommander
- * @author Tyler
- */
-
 import { CalendarManager } from '../calendar/_module.mjs';
 import { MODULE } from '../constants.mjs';
 import { canAddNotes, canChangeActiveCalendar, canChangeDateTime, format, localize, log } from '../utils/_module.mjs';

@@ -1,9 +1,3 @@
-/**
- * Permission checking utilities for Calendaria.
- * @module Utils/Permissions
- * @author Tyler
- */
-
 import { MODULE, SETTINGS } from '../constants.mjs';
 
 /** @type {Object<string, object>} Default permission settings for each action. */

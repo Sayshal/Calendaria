@@ -1,10 +1,3 @@
-/**
- * Fog of War manager for progressive calendar revelation.
- * Players only see dates within revealed ranges; GMs always see all dates.
- * @module Utils/FogOfWar
- * @author Tyler
- */
-
 import { CalendarManager, CalendarRegistry } from '../calendar/_module.mjs';
 import { HOOKS, MODULE, SETTINGS } from '../constants.mjs';
 import { addDays, compareDays } from '../notes/_module.mjs';

@@ -1,10 +1,4 @@
 /**
- * Foundry core monkey-patches.
- * @module Utils/Patches
- * @author Tyler
- */
-
-/**
  * Patch TooltipManager#activate to work around a Foundry core bug where nested
  * tooltip elements (parent with data-tooltip-html, child with data-tooltip + aria-label)
  * produce blank tooltips on first hover due to a stale activation timeout race condition.

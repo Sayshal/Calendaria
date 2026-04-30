@@ -1,9 +1,3 @@
-/**
- * Calendar Editor Application
- * @module Applications/CalendarEditor
- * @author Tyler
- */
-
 import { CalendarManager, CalendarRegistry, isBundledCalendar, preLocalizeCalendar } from '../../calendar/_module.mjs';
 import { ASSETS, DEFAULT_MOON_PHASES, HOOKS, TEMPLATES } from '../../constants.mjs';
 import { FestivalManager } from '../../festivals/_module.mjs';

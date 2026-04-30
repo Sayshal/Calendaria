@@ -1,8 +1,3 @@
-/**
- * Eclipse Calculator — detects solar and lunar eclipses from moon orbital data.
- * @module Utils/EclipseCalculator
- */
-
 import { CalendarManager } from '../calendar/_module.mjs';
 import { addOneDay, compareDates, dateToDayNumber, isMoonFull, isNewMoon } from './formatting/moon-utils.mjs';
 

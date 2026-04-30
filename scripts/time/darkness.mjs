@@ -1,9 +1,3 @@
-/**
- * Darkness calculation utilities for syncing scene darkness with time of day.
- * @module Darkness
- * @author Tyler
- */
-
 import { MODULE, SCENE_FLAGS, SETTINGS, SOCKET_TYPES } from '../constants.mjs';
 import { CalendariaSocket, getMoonPhasePosition, log } from '../utils/_module.mjs';
 import { WeatherManager } from '../weather/_module.mjs';

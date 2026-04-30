@@ -1,9 +1,3 @@
-/**
- * Set Date Dialog - Dialog for setting world date/time and managing timepoints.
- * @module Applications/SetDateDialog
- * @author Tyler
- */
-
 import { CalendarManager } from '../../calendar/_module.mjs';
 import { MODULE, SETTINGS, SOCKET_TYPES, TEMPLATES } from '../../constants.mjs';
 import { EventScheduler, ReminderScheduler, TimeTracker } from '../../time/_module.mjs';

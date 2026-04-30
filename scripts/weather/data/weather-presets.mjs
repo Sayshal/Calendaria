@@ -1,9 +1,3 @@
-/**
- * Built-in weather presets for the Calendaria weather system.
- * @module Weather/WeatherPresets
- * @author Tyler
- */
-
 import { MODULE, SETTINGS } from '../../constants.mjs';
 
 /**

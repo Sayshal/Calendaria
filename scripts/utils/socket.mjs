@@ -1,9 +1,3 @@
-/**
- * Socket communication manager for Calendaria multiplayer synchronization.
- * @module Socket
- * @author Tyler
- */
-
 import { BigCal, Chronicle, CinematicOverlay, HUD, MiniCal, Stopwatch, SunDial, TimeKeeper } from '../applications/_module.mjs';
 import { CalendarManager } from '../calendar/_module.mjs';
 import { HOOKS, MODULE, SETTINGS, SOCKET_TYPES } from '../constants.mjs';

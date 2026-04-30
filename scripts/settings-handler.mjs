@@ -1,9 +1,3 @@
-/**
- * Calendaria Module Settings Registration
- * @module CalendariaSettings
- * @author Tyler
- */
-
 import { BigCal, CalendarEditor, Chronicle, HUD, ImporterApp, MiniCal, SettingsPanel, Stopwatch, SunDial, TimeKeeper } from './applications/_module.mjs';
 import { MODULE, SETTINGS } from './constants.mjs';
 import { invalidatePresetCache } from './notes/_module.mjs';

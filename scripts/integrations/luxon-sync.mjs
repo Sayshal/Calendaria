@@ -1,9 +1,3 @@
-/**
- * Luxon-based WorldClock sync for Gregorian-compatible calendars.
- * @module Integrations/LuxonSync
- * @author Tyler
- */
-
 import CalendariaCalendar from '../data/calendaria-calendar.mjs';
 
 /**

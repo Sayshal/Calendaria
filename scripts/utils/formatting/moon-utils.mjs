@@ -1,9 +1,3 @@
-/**
- * Moon Utility Functions
- * @module Utils/MoonUtils
- * @author Tyler
- */
-
 import { CalendarManager } from '../../calendar/_module.mjs';
 
 /**

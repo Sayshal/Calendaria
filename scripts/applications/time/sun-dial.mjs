@@ -1,9 +1,3 @@
-/**
- * SunDial - Floating AppV2 circular time rotation dial with PixiJS sky scene.
- * @module Applications/SunDial
- * @author Tyler
- */
-
 import { CalendarManager } from '../../calendar/_module.mjs';
 import { HOOKS, MODULE, REDUCED_FX_DENSITY, SETTINGS, SOCKET_TYPES, TEMPLATES } from '../../constants.mjs';
 import { NoteManager } from '../../notes/_module.mjs';

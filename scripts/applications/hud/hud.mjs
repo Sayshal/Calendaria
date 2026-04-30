@@ -1,9 +1,3 @@
-/**
- * HUD - System-agnostic calendar widget.
- * @module Applications/HUD
- * @author Tyler
- */
-
 import { CalendarManager } from '../../calendar/_module.mjs';
 import { HOOKS, MODULE, REDUCED_FX_DENSITY, REPLACEABLE_ELEMENTS, SCENE_FLAGS, SETTINGS, SOCKET_TYPES, TEMPLATES, WIDGET_POINTS } from '../../constants.mjs';
 import { NoteManager } from '../../notes/_module.mjs';

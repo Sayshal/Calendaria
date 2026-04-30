@@ -1,9 +1,3 @@
-/**
- * Cinematic Time Skip overlay — fullscreen animated transition.
- * @module CinematicOverlay
- * @author Tyler
- */
-
 import { CalendarManager } from '../../calendar/_module.mjs';
 import { HOOKS, MODULE, SETTINGS } from '../../constants.mjs';
 import { getTimeIncrements } from '../../time/_module.mjs';

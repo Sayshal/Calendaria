@@ -1,9 +1,3 @@
-/**
- * Data models for the unified condition engine's polymorphic condition tree.
- * @module Data/ConditionData
- * @author Tyler
- */
-
 import { CONDITION_FIELDS, CONDITION_GROUP_MODES, CONDITION_OPERATORS } from '../constants.mjs';
 
 const fields = foundry.data.fields;

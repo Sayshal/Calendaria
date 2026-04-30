@@ -1,9 +1,3 @@
-/**
- * Calendar Loader
- * @module Calendar/CalendarLoader
- * @author Tyler
- */
-
 import { MODULE } from '../constants.mjs';
 import { log } from '../utils/_module.mjs';
 import { CalendarRegistry, preLocalizeCalendar } from './_module.mjs';

@@ -1,9 +1,3 @@
-/**
- * Computed Event Builder Application
- * @module Applications/ComputedEventBuilder
- * @author Tyler
- */
-
 import { CalendarManager } from '../../calendar/_module.mjs';
 import { TEMPLATES } from '../../constants.mjs';
 import { localize } from '../../utils/_module.mjs';

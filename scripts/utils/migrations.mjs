@@ -1,8 +1,3 @@
-/**
- * Consolidated Migration Utilities
- * @module Utils/Migrations
- */
-
 import { CalendarManager } from '../calendar/_module.mjs';
 import { MODULE, SETTINGS } from '../constants.mjs';
 import { addDays, dayOfWeek, daysBetween, extractEventDependencies, getOccurrencesInRange, invalidatePresetCache, migratePresetSchema } from '../notes/_module.mjs';

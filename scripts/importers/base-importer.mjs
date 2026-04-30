@@ -1,9 +1,3 @@
-/**
- * Base Importer Class
- * @module Importers/BaseImporter
- * @author Tyler
- */
-
 import { CalendarManager } from '../calendar/_module.mjs';
 import { HOOKS } from '../constants.mjs';
 import { format, localize, log } from '../utils/_module.mjs';

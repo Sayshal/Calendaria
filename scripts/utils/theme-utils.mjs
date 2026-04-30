@@ -1,9 +1,3 @@
-/**
- * Theme utilities for Calendaria custom color theming.
- * @module Utils/ThemeUtils
- * @author Tyler
- */
-
 import { MODULE, SETTINGS } from '../constants.mjs';
 
 /** @type {Object<string, string>} Default color values for Calendaria theme (Dark). */

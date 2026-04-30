@@ -1,9 +1,3 @@
-/**
- * Utility functions for condition tree manipulation in the condition builder.
- * @module Notes/ConditionUtils
- * @author Tyler
- */
-
 import { CONDITION_FIELDS, CONDITION_GROUP_MODES, CONDITION_OPERATORS, MAX_NESTING_DEPTH } from '../constants.mjs';
 import { localize } from '../utils/localization.mjs';
 import { isGroup } from './condition-engine.mjs';

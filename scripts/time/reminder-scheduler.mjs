@@ -1,9 +1,3 @@
-/**
- * Reminder Scheduler
- * @module Time/ReminderScheduler
- * @author Tyler
- */
-
 import { CalendarManager, CalendarRegistry } from '../calendar/_module.mjs';
 import { HOOKS, MODULE, SOCKET_TYPES } from '../constants.mjs';
 import { NoteManager, getCurrentDate, isRecurringMatch } from '../notes/_module.mjs';

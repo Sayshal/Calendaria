@@ -1,9 +1,3 @@
-/**
- * Calendaria Module Logger
- * @module Logger
- * @author Tyler
- */
-
 import { MODULE, SETTINGS } from '../constants.mjs';
 
 /**

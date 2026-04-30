@@ -1,9 +1,3 @@
-/**
- * Rest Time Integration
- * @module Integrations/RestTime
- * @author Tyler
- */
-
 import { CinematicOverlay } from '../applications/_module.mjs';
 import { CalendarManager } from '../calendar/_module.mjs';
 import { MODULE, SETTINGS } from '../constants.mjs';

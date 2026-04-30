@@ -1,9 +1,3 @@
-/**
- * Calendaria Importer
- * @module Importers/CalendariaImporter
- * @author Tyler
- */
-
 import { SETTINGS } from '../constants.mjs';
 import { NoteManager, getAllPresets, sanitizeNoteData, upsertBundledCustomPreset } from '../notes/_module.mjs';
 import { log } from '../utils/_module.mjs';

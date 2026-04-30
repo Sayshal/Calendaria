@@ -1,10 +1,3 @@
-/**
- * Calendaria Module
- * System-agnostic calendar and time management for Foundry VTT.
- * @module Calendaria
- * @author Tyler
- */
-
 import { CalendariaAPI, createGlobalNamespace } from './scripts/api.mjs';
 import { BigCal, CalendarNoteSheet, CalendariaSceneConfig, Chronicle, HUD, MiniCal, Stopwatch, SunDial, TimeKeeper } from './scripts/applications/_module.mjs';
 import { CalendarManager } from './scripts/calendar/_module.mjs';

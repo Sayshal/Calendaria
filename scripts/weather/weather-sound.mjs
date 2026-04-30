@@ -1,9 +1,3 @@
-/**
- * Weather Sound Manager
- * @module Weather/WeatherSound
- * @author Tyler
- */
-
 import { HOOKS, MODULE, SCENE_FLAGS, SETTINGS } from '../constants.mjs';
 import { log } from '../utils/logger.mjs';
 import { expandLegacySoundKey } from './data/weather-presets.mjs';

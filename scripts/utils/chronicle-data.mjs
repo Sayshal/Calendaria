@@ -1,9 +1,3 @@
-/**
- * Data assembly for the Chronicle View.
- * @module Utils/ChronicleData
- * @author Tyler
- */
-
 import { CalendarManager } from '../calendar/_module.mjs';
 import { COMPASS_DIRECTIONS, MODULE, SETTINGS, WIND_SPEEDS } from '../constants.mjs';
 import { NoteManager, addDays, compareDates, dayOfWeek } from '../notes/_module.mjs';

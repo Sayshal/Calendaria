@@ -1,9 +1,3 @@
-/**
- * Simple Calendar Importer
- * @module Importers/SimpleCalendarImporter
- * @author Tyler
- */
-
 import { CalendarManager } from '../calendar/_module.mjs';
 import { ASSETS } from '../constants.mjs';
 import { FestivalManager } from '../festivals/_module.mjs';

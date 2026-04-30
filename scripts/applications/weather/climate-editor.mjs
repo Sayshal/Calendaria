@@ -1,9 +1,3 @@
-/**
- * Climate Editor Application — edits season or zone climate settings.
- * @module Applications/ClimateEditor
- * @author Tyler
- */
-
 import { CalendarManager } from '../../calendar/_module.mjs';
 import { COMPASS_DIRECTIONS, MODULE, SETTINGS, TEMPLATES, WIND_SPEEDS } from '../../constants.mjs';
 import { CalendariaCalendar } from '../../data/_module.mjs';

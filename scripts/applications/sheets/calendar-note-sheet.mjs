@@ -1,9 +1,3 @@
-/**
- * Calendar Note Sheet
- * @module Sheets/CalendarNoteSheet
- * @author Tyler
- */
-
 import { CalendarManager, CalendarRegistry, getEquivalentDates } from '../../calendar/_module.mjs';
 import { MODULE, SETTINGS, SOCKET_TYPES, TEMPLATES } from '../../constants.mjs';
 import {

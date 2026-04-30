@@ -1,9 +1,3 @@
-/**
- * Chronicle View — a vertical scrolling chronicle of calendar events.
- * @module Applications/Chronicle
- * @author Tyler
- */
-
 import { CalendarManager } from '../../calendar/_module.mjs';
 import { HOOKS, MODULE, SETTINGS, SOCKET_TYPES, TEMPLATES } from '../../constants.mjs';
 import { NoteManager, addDays, getPresetDefinition } from '../../notes/_module.mjs';

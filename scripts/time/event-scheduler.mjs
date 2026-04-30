@@ -1,9 +1,3 @@
-/**
- * Event Scheduler
- * @module Time/EventScheduler
- * @author Tyler
- */
-
 import { CalendarManager } from '../calendar/_module.mjs';
 import { HOOKS, MODULE, TEMPLATES } from '../constants.mjs';
 import { NoteManager, compareDates, generateRandomOccurrences, getCurrentDate, needsRandomRegeneration } from '../notes/_module.mjs';

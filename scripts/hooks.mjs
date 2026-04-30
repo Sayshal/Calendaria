@@ -1,9 +1,3 @@
-/**
- * Calendaria Hook Registration
- * @module Hooks
- * @author Tyler
- */
-
 import { registerBatches } from '../dev/quench/index.mjs';
 import { BigCal, Chronicle, HUD, MiniCal, Stopwatch, SunDial, TimeKeeper } from './applications/_module.mjs';
 import { CalendarManager } from './calendar/_module.mjs';

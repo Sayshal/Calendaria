@@ -1,9 +1,3 @@
-/**
- * Importer Registry
- * @module Importers/ImporterRegistry
- * @author Tyler
- */
-
 import { log } from '../utils/_module.mjs';
 import BaseImporter from './base-importer.mjs';
 import CalendariaImporter from './calendaria-importer.mjs';

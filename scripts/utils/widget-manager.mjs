@@ -1,9 +1,3 @@
-/**
- * Widget Manager - Handles registration and rendering of external module widgets.
- * @module Utils/WidgetManager
- * @author Tyler
- */
-
 import { HOOKS, REPLACEABLE_ELEMENTS, WIDGET_POINTS } from '../constants.mjs';
 import { log } from './logger.mjs';
 

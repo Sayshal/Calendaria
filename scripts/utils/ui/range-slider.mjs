@@ -1,9 +1,4 @@
 /**
- * Reusable range slider with multiple draggable handles.
- * @module Utils/RangeSlider
- */
-
-/**
  * Range slider with draggable handles for dividing a range into segments.
  */
 export class RangeSlider {

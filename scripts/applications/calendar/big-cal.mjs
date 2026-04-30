@@ -1,9 +1,3 @@
-/**
- * Standalone application for displaying the calendar UI.
- * @module Applications/BigCal
- * @author Tyler
- */
-
 import { CalendarManager, CalendarRegistry, getEquivalentDates } from '../../calendar/_module.mjs';
 import { HOOKS, MODULE, REPLACEABLE_ELEMENTS, SETTINGS, SOCKET_TYPES, TEMPLATES, WIDGET_POINTS } from '../../constants.mjs';
 import {

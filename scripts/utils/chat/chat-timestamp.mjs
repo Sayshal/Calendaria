@@ -1,9 +1,3 @@
-/**
- * Chat Message Timestamp System
- * @module ChatTimestamp
- * @author Tyler
- */
-
 import { CalendarManager } from '../../calendar/_module.mjs';
 import { MODULE, SETTINGS } from '../../constants.mjs';
 import { NoteManager } from '../../notes/_module.mjs';

@@ -1,9 +1,3 @@
-/**
- * Calendarium (Obsidian) Importer
- * @module Importers/CalendariumImporter
- * @author Tyler
- */
-
 import { ASSETS, MOON_PHASE_LABELS } from '../constants.mjs';
 import { NoteManager, addCustomPreset, getAllPresets } from '../notes/_module.mjs';
 import { localize, log } from '../utils/_module.mjs';

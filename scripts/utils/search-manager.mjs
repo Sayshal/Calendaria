@@ -1,9 +1,3 @@
-/**
- * Search Manager
- * @module Search/SearchManager
- * @author Tyler
- */
-
 import { CalendarManager } from '../calendar/_module.mjs';
 import { NoteManager, getAllPresets } from '../notes/_module.mjs';
 import { format, localize } from './localization.mjs';

@@ -1,9 +1,3 @@
-/**
- * Format utilities for Calendaria date/time formatting.
- * @module Utils/FormatUtils
- * @author Tyler
- */
-
 import { resolveRandomizedPhase } from '../../data/_module.mjs';
 import WeatherManager from '../../weather/weather-manager.mjs';
 import { format, localize } from '../localization.mjs';

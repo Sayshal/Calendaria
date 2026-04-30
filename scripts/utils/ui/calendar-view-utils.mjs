@@ -1,9 +1,3 @@
-/**
- * Shared utilities for calendar view applications.
- * @module Applications/CalendarViewUtils
- * @author Tyler
- */
-
 import { BigCal, HUD, MiniCal, NoteViewer, Stopwatch, SunDial, TimeKeeper } from '../../applications/_module.mjs';
 import { CalendarManager, CalendarRegistry, getEquivalentDates } from '../../calendar/_module.mjs';
 import { MODULE, NOTE_VISIBILITY, SETTINGS, SOCKET_TYPES, TEMPLATES } from '../../constants.mjs';

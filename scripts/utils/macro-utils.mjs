@@ -1,10 +1,4 @@
 /**
- * Macro Utility Functions
- * @module Utils/MacroUtils
- * @author Tyler
- */
-
-/**
  * Execute a macro by its ID.
  * @param {string} macroId - The ID of the macro to execute
  * @param {object} [context] - Context data to pass to the macro (available as `scope` in macro)

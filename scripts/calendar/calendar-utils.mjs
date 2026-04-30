@@ -1,9 +1,3 @@
-/**
- * Calendar Utility Functions
- * @module Calendar/CalendarUtils
- * @author Tyler
- */
-
 import { NoteManager } from '../notes/_module.mjs';
 import { format, localize } from '../utils/_module.mjs';
 

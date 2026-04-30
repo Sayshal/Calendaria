@@ -1,9 +1,3 @@
-/**
- * Weather Probability Dialog - Shows probability breakdown for a zone and season.
- * @module Applications/WeatherProbabilityDialog
- * @author Tyler
- */
-
 import { CalendarManager } from '../../calendar/_module.mjs';
 import { TEMPLATES } from '../../constants.mjs';
 import { localize } from '../../utils/_module.mjs';

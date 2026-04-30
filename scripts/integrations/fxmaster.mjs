@@ -1,9 +1,3 @@
-/**
- * FXMaster Integration
- * @module Integrations/FXMaster
- * @author Tyler
- */
-
 import { HOOKS, MODULE, SCENE_FLAGS, SETTINGS } from '../constants.mjs';
 import { CalendariaSocket, localize, log } from '../utils/_module.mjs';
 import { WeatherManager } from '../weather/_module.mjs';

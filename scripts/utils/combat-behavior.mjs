@@ -1,9 +1,3 @@
-/**
- * Shared combat behavior utility for widgets.
- * @module Utils/CombatBehavior
- * @author Tyler
- */
-
 import { MODULE } from '../constants.mjs';
 
 /**

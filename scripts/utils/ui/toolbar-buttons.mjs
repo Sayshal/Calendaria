@@ -1,9 +1,3 @@
-/**
- * Scene Control Toolbar Buttons
- * @module Utils/UI/ToolbarButtons
- * @author Tyler
- */
-
 import { BigCal, Chronicle, HUD, MiniCal, Stopwatch, SunDial, TimeKeeper } from '../../applications/_module.mjs';
 import { MODULE, SETTINGS } from '../../constants.mjs';
 import { localize } from '../localization.mjs';

@@ -1,12 +1,7 @@
 import { DISPLAY_STYLES, NOTE_VISIBILITY } from '../constants.mjs';
 import { BaseConditionData } from './_module.mjs';
 
-/**
- * Data model for calendar note journal entry pages.
- * @module Sheets/CalendarNoteDataModel
- * @extends foundry.abstract.TypeDataModel
- * @author Tyler
- */
+/** Data model for calendar note journal entry pages. */
 export class CalendarNoteDataModel extends foundry.abstract.TypeDataModel {
   /**
    * Define the schema for calendar note data.

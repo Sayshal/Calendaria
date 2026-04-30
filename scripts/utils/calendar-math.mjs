@@ -1,9 +1,3 @@
-/**
- * Shared calendar math helpers used by condition-engine and recurrence.
- * @module Utils/CalendarMath
- * @author Tyler
- */
-
 import { CalendarManager } from '../calendar/_module.mjs';
 
 /**

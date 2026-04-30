@@ -1,9 +1,3 @@
-/**
- * Event dependency resolution: cycle detection and connectedEvents extraction.
- * @module Notes/EventDependencyResolver
- * @author Tyler
- */
-
 import { CONDITION_FIELDS } from '../constants.mjs';
 import { NoteManager } from './_module.mjs';
 

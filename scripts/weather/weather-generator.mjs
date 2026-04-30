@@ -1,9 +1,3 @@
-/**
- * Procedural weather generation based on climate zones and seasons.
- * @module Weather/WeatherGenerator
- * @author Tyler
- */
-
 import { COMPASS_DIRECTIONS, WEATHER_PERIODS, WIND_SPEEDS } from '../constants.mjs';
 import { log } from '../utils/logger.mjs';
 import { getAllPresets, getPreset } from './data/weather-presets.mjs';

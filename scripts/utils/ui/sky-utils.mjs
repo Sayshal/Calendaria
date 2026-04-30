@@ -1,9 +1,3 @@
-/**
- * Shared sky color utilities for HUD dome and Sun Dial.
- * @module Utils/SkyUtils
- * @author Tyler
- */
-
 import { SKY_KEYFRAMES, SKY_OVERRIDES } from '../../applications/_module.mjs';
 import { MODULE, SETTINGS } from '../../constants.mjs';
 import { WeatherManager, getPreset } from '../../weather/_module.mjs';

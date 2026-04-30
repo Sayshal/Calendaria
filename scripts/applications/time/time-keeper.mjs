@@ -1,9 +1,3 @@
-/**
- * TimeKeeper - Compact time control interface.
- * @module Applications/TimeKeeper
- * @author Tyler
- */
-
 import { CalendarManager } from '../../calendar/_module.mjs';
 import { HOOKS, MODULE, SETTINGS, SOCKET_TYPES, TEMPLATES } from '../../constants.mjs';
 import { TimeClock, getTimeIncrements } from '../../time/_module.mjs';

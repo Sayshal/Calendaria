@@ -1,9 +1,3 @@
-/**
- * Unified Settings Panel Application
- * @module Applications/SettingsPanel
- * @author Tyler
- */
-
 import { BUNDLED_CALENDARS, CalendarManager, CalendarRegistry } from '../../calendar/_module.mjs';
 import { HOOKS, MODULE, SETTINGS, TEMPLATES } from '../../constants.mjs';
 import { FestivalManager } from '../../festivals/_module.mjs';

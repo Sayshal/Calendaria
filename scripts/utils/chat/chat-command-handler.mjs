@@ -1,10 +1,3 @@
-/**
- * Shared Chat Command Handlers
- * Core logic for all chat commands, consumed by both native chat and Chat Commander.
- * @module Chat/ChatCommandHandler
- * @author Tyler
- */
-
 import { CalendarManager } from '../../calendar/_module.mjs';
 import { MODULE, SETTINGS, SOCKET_TYPES } from '../../constants.mjs';
 import { NoteManager } from '../../notes/_module.mjs';
