@@ -40,6 +40,8 @@ const noEclipseDate = { year: 0, month: 0, dayOfMonth: 7 };
 
 beforeEach(() => {
   CalendarManager._reset();
+  const cal = CalendarManager.getActiveCalendar();
+  cal.moons = [eclipseMoon, noEclipseMoon, smallMoon, customMoon];
 });
 
 describe('getEclipseAtDate()', () => {

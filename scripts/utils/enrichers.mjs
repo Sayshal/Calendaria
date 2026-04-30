@@ -7,6 +7,7 @@ import { BigCal, Chronicle, MiniCal } from '../applications/_module.mjs';
 import { CalendarManager, CalendarRegistry } from '../calendar/_module.mjs';
 import { COMPASS_DIRECTIONS, HOOKS, MODULE, SETTINGS, WIND_SPEEDS } from '../constants.mjs';
 import { NoteManager, addDays, addMonths, addYears, daysBetween, getNextOccurrences, monthsBetween } from '../notes/_module.mjs';
+import TimeClock, { getTimeIncrements } from '../time/time-clock.mjs';
 import {
   ECLIPSE_TYPES,
   PRESET_FORMATTERS,
@@ -21,7 +22,7 @@ import {
   resolveFormatString,
   timeSince
 } from '../utils/_module.mjs';
-import { WeatherManager } from '../weather/_module.mjs';
+import { WeatherManager, getPreset } from '../weather/_module.mjs';
 
 /** @type {Object<string, Function>} Combined handler map for all enricher types. */
 export const handlers = {
@@ -68,6 +69,13 @@ export const handlers = {
   weathericon: enrichWeatherIcon,
   zone: enrichZone,
   forecast: enrichForecast,
+  advancetotime: enrichAdvanceToTime,
+  advanceinterval: enrichAdvanceInterval,
+  advancetopreset: enrichAdvanceToPreset,
+  settime: enrichSetTime,
+  jumptodate: enrichJumpToDate,
+  toggleclock: enrichToggleClock,
+  setweather: enrichSetWeather,
   event: enrichEvent,
   notes: enrichNotes,
   next: enrichNext,
@@ -89,6 +97,12 @@ const ECLIPSE_TYPE_LABELS = {
   [ECLIPSE_TYPES.PARTIAL_LUNAR]: 'CALENDARIA.Eclipse.PartialLunar',
   [ECLIPSE_TYPES.PENUMBRAL_LUNAR]: 'CALENDARIA.Eclipse.PenumbralLunar'
 };
+
+/** Time-of-day presets accepted by the advanceToPreset enricher. */
+const ADVANCE_PRESETS = ['sunrise', 'midday', 'noon', 'sunset', 'midnight'];
+
+/** Short labels for interval units when assembling the button text. */
+const INTERVAL_UNIT_LABELS = { second: 's', round: 'r', minute: 'm', hour: 'h', day: 'd', week: 'w', month: 'mo', season: 'sea', year: 'y' };
 
 /**
  * Convert public date to internal format.
@@ -1432,6 +1446,160 @@ function enrichForecast(config, label) {
 }
 
 /**
+ * Parse an `HH:MM` token using the active calendar's day/hour/minute lengths.
+ * @param {string} token - Time string
+ * @param {object} calendar - Active calendar
+ * @returns {{ targetSecondsOfDay: number, label: string }|null} Parsed result or null when invalid
+ */
+function parseClockToken(token, calendar) {
+  if (typeof token !== 'string') return null;
+  const match = /^(\d+):(\d+)$/.exec(token);
+  if (!match) return null;
+  const hour = parseInt(match[1], 10);
+  const minute = parseInt(match[2], 10);
+  const hpd = calendar?.days?.hoursPerDay ?? 24;
+  const mph = calendar?.days?.minutesPerHour ?? 60;
+  const spm = calendar?.days?.secondsPerMinute ?? 60;
+  if (!Number.isFinite(hour) || !Number.isFinite(minute)) return null;
+  if (hour < 0 || hour >= hpd || minute < 0 || minute >= mph) return null;
+  return { targetSecondsOfDay: hour * mph * spm + minute * spm, label: `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}` };
+}
+
+/**
+ * Advance time to a clock target (HH:MM).
+ * @param {object} config - Parsed enricher config
+ * @param {string|null} label - Custom label override
+ * @returns {HTMLElement} Enricher element
+ */
+function enrichAdvanceToTime(config, label) {
+  const { calendar } = resolveCalendar(config);
+  if (!calendar) return createErrorElement('CALENDARIA.Error.NoActiveCalendar');
+  const token = config.values?.[0] ?? config.time;
+  const parsed = parseClockToken(token, calendar);
+  if (!parsed) return createErrorElement('CALENDARIA.Enricher.Error.InvalidTime', { value: String(token ?? '') });
+  const direction = config.direction === 'nearest' ? 'nearest' : 'forward';
+  const text = label || game.i18n.format('CALENDARIA.Enricher.Label.AdvanceToTime', { time: parsed.label });
+  const tooltipKey = direction === 'nearest' ? 'CALENDARIA.Enricher.Tooltip.AdvanceToTimeNearest' : 'CALENDARIA.Enricher.Tooltip.AdvanceToTime';
+  const tooltip = game.i18n.format(tooltipKey, { time: parsed.label });
+  return createContentLink('advanceToTime', text, { calAction: 'advanceToTime', calTargetSeconds: String(parsed.targetSecondsOfDay), calDirection: direction }, 'fa-forward', tooltip);
+}
+
+/**
+ * Advance time by a fixed interval composed of calendar-aware units.
+ * @param {object} config - Parsed enricher config
+ * @param {string|null} label - Custom label override
+ * @returns {HTMLElement} Enricher element
+ */
+function enrichAdvanceInterval(config, label) {
+  const { calendar } = resolveCalendar(config);
+  if (!calendar) return createErrorElement('CALENDARIA.Error.NoActiveCalendar');
+  const increments = getTimeIncrements();
+  let totalSeconds = 0;
+  const parts = [];
+  for (const [unit, secs] of Object.entries(increments)) {
+    const raw = config[unit];
+    if (raw == null) continue;
+    const count = Number(raw);
+    if (!Number.isFinite(count) || count === 0) continue;
+    totalSeconds += secs * count;
+    parts.push(`${count}${INTERVAL_UNIT_LABELS[unit] ?? unit}`);
+  }
+  if (totalSeconds === 0) return createErrorElement('CALENDARIA.Enricher.Error.InvalidInterval');
+  const intervalLabel = parts.join(' ');
+  const text = label || game.i18n.format('CALENDARIA.Enricher.Label.AdvanceInterval', { interval: intervalLabel });
+  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.AdvanceInterval', { interval: intervalLabel });
+  return createContentLink('advanceInterval', text, { calAction: 'advanceInterval', calDeltaSeconds: String(totalSeconds) }, 'fa-forward', tooltip);
+}
+
+/**
+ * Advance time to a named preset (sunrise/midday/noon/sunset/midnight).
+ * @param {object} config - Parsed enricher config
+ * @param {string|null} label - Custom label override
+ * @returns {HTMLElement} Enricher element
+ */
+function enrichAdvanceToPreset(config, label) {
+  const preset = String(config.values?.[0] ?? config.preset ?? '').toLowerCase();
+  if (!ADVANCE_PRESETS.includes(preset)) return createErrorElement('CALENDARIA.Enricher.Error.InvalidPreset', { value: preset });
+  const presetLabel = game.i18n.localize(`CALENDARIA.Enricher.Preset.${preset}`);
+  const text = label || game.i18n.format('CALENDARIA.Enricher.Label.AdvanceToPreset', { preset: presetLabel });
+  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.AdvanceToPreset', { preset: presetLabel });
+  return createContentLink('advanceToPreset', text, { calAction: 'advanceToPreset', calPreset: preset }, 'fa-forward', tooltip);
+}
+
+/**
+ * Snap the clock to a specific time of day (HH:MM) without changing the date.
+ * @param {object} config - Parsed enricher config
+ * @param {string|null} label - Custom label override
+ * @returns {HTMLElement} Enricher element
+ */
+function enrichSetTime(config, label) {
+  const { calendar } = resolveCalendar(config);
+  if (!calendar) return createErrorElement('CALENDARIA.Error.NoActiveCalendar');
+  const token = config.values?.[0] ?? config.time;
+  const parsed = parseClockToken(token, calendar);
+  if (!parsed) return createErrorElement('CALENDARIA.Enricher.Error.InvalidTime', { value: String(token ?? '') });
+  const text = label || game.i18n.format('CALENDARIA.Enricher.Label.SetTime', { time: parsed.label });
+  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.SetTime', { time: parsed.label });
+  const mph = calendar?.days?.minutesPerHour ?? 60;
+  const spm = calendar?.days?.secondsPerMinute ?? 60;
+  const hour = Math.floor(parsed.targetSecondsOfDay / (mph * spm));
+  const minute = Math.floor((parsed.targetSecondsOfDay % (mph * spm)) / spm);
+  return createContentLink('setTime', text, { calAction: 'setTime', calHour: String(hour), calMinute: String(minute) }, 'fa-clock', tooltip);
+}
+
+/**
+ * Jump to a specific date, preserving the current time of day.
+ * @param {object} config - Parsed enricher config
+ * @param {string|null} label - Custom label override
+ * @returns {HTMLElement} Enricher element
+ */
+function enrichJumpToDate(config, label) {
+  const { calendar } = resolveCalendar(config);
+  if (!calendar) return createErrorElement('CALENDARIA.Error.NoActiveCalendar');
+  const date = parseDateFromValues(config.values);
+  if (!date) return createErrorElement('CALENDARIA.Enricher.Error.InvalidDate');
+  const dateText = formatDate(date, 'dateLong', calendar);
+  const text = label || game.i18n.format('CALENDARIA.Enricher.Label.JumpToDate', { date: dateText });
+  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.JumpToDate', { date: dateText });
+  return createContentLink('jumpToDate', text, { calAction: 'jumpToDate', calYear: String(date.year), calMonth: String(date.month), calDay: String(date.day) }, 'fa-calendar-day', tooltip);
+}
+
+/**
+ * Toggle the real-time TimeClock on/off.
+ * @param {object} _config - Parsed enricher config (unused)
+ * @param {string|null} label - Custom label override
+ * @returns {HTMLElement} Enricher element
+ */
+function enrichToggleClock(_config, label) {
+  const text = label || game.i18n.localize('CALENDARIA.Enricher.Label.ToggleClock');
+  const tooltip = game.i18n.localize('CALENDARIA.Enricher.Tooltip.ToggleClock');
+  return createContentLink('toggleClock', text, { calAction: 'toggleClock' }, 'fa-play', tooltip);
+}
+
+/**
+ * Set the current weather to a preset, optionally overriding temperature/period/zone.
+ * @param {object} config - Parsed enricher config
+ * @param {string|null} label - Custom label override
+ * @returns {HTMLElement} Enricher element
+ */
+function enrichSetWeather(config, label) {
+  const presetId = config.presetId ?? config.values?.[0];
+  if (!presetId || typeof presetId !== 'string') return createErrorElement('CALENDARIA.Enricher.Error.InvalidPreset', { value: String(presetId ?? '') });
+  const customPresets = WeatherManager.getCustomPresets?.() ?? [];
+  const preset = getPreset(presetId, customPresets);
+  if (!preset) return createErrorElement('CALENDARIA.Enricher.Error.InvalidPreset', { value: presetId });
+  const options = {};
+  if (config.temperature != null) options.temperature = Number(config.temperature);
+  if (config.period != null) options.period = String(config.period);
+  if (config.zoneId != null) options.zoneId = String(config.zoneId);
+  if (config.allPeriods != null) options.allPeriods = config.allPeriods === true || config.allPeriods === 'true';
+  const presetLabel = preset.label ? game.i18n.localize(preset.label) : presetId;
+  const text = label || game.i18n.format('CALENDARIA.Enricher.Label.SetWeather', { preset: presetLabel });
+  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.SetWeather', { preset: presetLabel });
+  return createContentLink('setWeather', text, { calAction: 'setWeather', calPresetId: presetId, calOptions: JSON.stringify(options) }, 'fa-cloud', tooltip);
+}
+
+/**
  * Named note link.
  * @param {object} config - Parsed enricher config
  * @param {string|null} label - Custom label override
@@ -1827,6 +1995,79 @@ function refreshElement(el) {
 }
 
 /**
+ * Dispatch a click on an action enricher button (advance time / set weather).
+ * @param {string} action - Action name from `data-cal-action`
+ * @param {DOMStringMap} dataset - Element dataset carrying action params
+ */
+async function dispatchEnricherAction(action, dataset) {
+  const api = CALENDARIA.api;
+  switch (action) {
+    case 'advanceToTime': {
+      const target = Number(dataset.calTargetSeconds);
+      if (!Number.isFinite(target)) return;
+      const direction = dataset.calDirection || 'forward';
+      const calendar = CalendarManager.getActiveCalendar();
+      const components = game.time.components;
+      const mph = calendar?.days?.minutesPerHour ?? 60;
+      const spm = calendar?.days?.secondsPerMinute ?? 60;
+      const hpd = calendar?.days?.hoursPerDay ?? 24;
+      const secsPerDay = hpd * mph * spm;
+      const currentSecondsOfDay = (components.hour ?? 0) * mph * spm + (components.minute ?? 0) * spm + (components.second ?? 0);
+      let delta = target - currentSecondsOfDay;
+      if (direction === 'nearest') {
+        if (delta > secsPerDay / 2) delta -= secsPerDay;
+        else if (delta < -secsPerDay / 2) delta += secsPerDay;
+      } else if (delta <= 0) delta += secsPerDay;
+      await api.advanceTime(delta);
+      return;
+    }
+    case 'advanceInterval': {
+      const delta = Number(dataset.calDeltaSeconds);
+      if (!Number.isFinite(delta) || delta === 0) return;
+      await api.advanceTime(delta);
+      return;
+    }
+    case 'advanceToPreset': {
+      const preset = dataset.calPreset;
+      if (!preset) return;
+      await api.advanceTimeToPreset(preset);
+      return;
+    }
+    case 'setTime': {
+      const hour = Number(dataset.calHour);
+      const minute = Number(dataset.calMinute);
+      if (!Number.isFinite(hour) || !Number.isFinite(minute)) return;
+      await api.setDateTime({ hour, minute, second: 0 });
+      return;
+    }
+    case 'jumpToDate': {
+      const year = Number(dataset.calYear);
+      const month = Number(dataset.calMonth);
+      const day = Number(dataset.calDay);
+      if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) return;
+      await api.jumpToDate({ year, month, day });
+      return;
+    }
+    case 'toggleClock': {
+      TimeClock.toggle();
+      return;
+    }
+    case 'setWeather': {
+      const presetId = dataset.calPresetId;
+      if (!presetId) return;
+      let options = {};
+      try {
+        options = JSON.parse(dataset.calOptions || '{}');
+      } catch {
+        options = {};
+      }
+      await WeatherManager.setWeather(presetId, options);
+      return;
+    }
+  }
+}
+
+/**
  * Navigate calendar to a date.
  * @param {number} year - Display year
  * @param {number} month - Month (1-indexed)
@@ -1861,6 +2102,11 @@ export function registerEnrichers() {
     const link = e.target.closest('.calendaria-enricher--link');
     if (!link) return;
     e.preventDefault();
+    const action = link.dataset.calAction;
+    if (action) {
+      dispatchEnricherAction(action, link.dataset);
+      return;
+    }
     const pageId = link.dataset.calPageId;
     if (pageId) {
       const page = NoteManager.getFullNote(pageId);

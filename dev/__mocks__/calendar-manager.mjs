@@ -156,25 +156,28 @@ const defaultCalendar = addCalendarGetters({
   isLeapYear: vi.fn((year) => year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0)),
 
   getMoonPhase: vi.fn((moonIndex, components) => {
-    const moon = defaultCalendar.moonsArray[moonIndex];
+    const moon = activeCalendar.moonsArray[moonIndex];
     if (!moon) return null;
-    const refDate = moon.referenceDate || { year: 2000, month: 0, day: 6 };
+    const refDate = moon.referenceDate || { year: 2000, month: 0, dayOfMonth: 5 };
     const days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    const refDayOfMonth = refDate.dayOfMonth ?? (refDate.day != null ? refDate.day - 1 : 0);
     let totalDays = 0;
     totalDays += (components.year - refDate.year) * 365;
     for (let m = 0; m < components.month; m++) totalDays += days[m];
-    totalDays += components.dayOfMonth + 1;
+    totalDays += components.dayOfMonth ?? 0;
     for (let m = 0; m < refDate.month; m++) totalDays -= days[m];
-    totalDays -= refDate.day;
+    totalDays -= refDayOfMonth;
     const cyclePosition = ((totalDays % moon.cycleLength) + moon.cycleLength) % moon.cycleLength;
     const position = cyclePosition / moon.cycleLength;
-    const phaseCount = Object.keys(moon.phases).length;
+    const phases = moon.phases ? Object.values(moon.phases) : [];
+    if (!phases.length) return { position, phase: null, phaseIndex: 0, dayWithinPhase: 0, phaseDuration: moon.cycleLength };
+    const phaseCount = phases.length;
     const phaseIndex = Math.floor(position * phaseCount);
     const phaseFraction = 1 / phaseCount;
     const phaseStartPos = phaseIndex * phaseFraction;
     const phaseDuration = Math.round(moon.cycleLength * phaseFraction);
     const dayWithinPhase = Math.floor((position - phaseStartPos) * moon.cycleLength);
-    return { position, phase: moon.phases[phaseIndex], phaseIndex, dayWithinPhase, phaseDuration };
+    return { position, phase: phases[phaseIndex], phaseIndex, dayWithinPhase, phaseDuration };
   })
 });
 

@@ -5,11 +5,10 @@
  */
 
 import { CalendarManager } from '../../calendar/_module.mjs';
-import { findAnchorPhasePosition, resolveRandomizedPhase } from '../../data/_module.mjs';
 
 /**
  * Get the current phase position (0-1) for a moon at a given date.
- * @param {object} moon - Moon definition with cycleLength and referenceDate
+ * @param {object} moon - Moon definition (must be an entry in `calendar.moonsArray`)
  * @param {object} date - Date to check { year, month, dayOfMonth }
  * @param {object} calendar - Calendar instance (optional, uses active if not provided)
  * @returns {number} Phase position from 0 to 1
@@ -17,15 +16,10 @@ import { findAnchorPhasePosition, resolveRandomizedPhase } from '../../data/_mod
 export function getMoonPhasePosition(moon, date, calendar = null) {
   calendar = calendar || CalendarManager.getActiveCalendar();
   if (!calendar || !moon) return 0;
-  if (moon.phaseMode === 'randomized') {
-    const absoluteDay = dateToDayNumber(date, calendar);
-    return resolveRandomizedPhase(moon, absoluteDay, date);
-  }
-  const anchorPos = findAnchorPhasePosition(moon, date);
-  if (anchorPos !== null) return anchorPos;
-  const daysBetween = calculateDaysBetween(moon.referenceDate, date, calendar);
-  const cyclePosition = ((daysBetween % moon.cycleLength) + moon.cycleLength) % moon.cycleLength;
-  return cyclePosition / moon.cycleLength;
+  const moonIndex = calendar.moonsArray?.indexOf(moon) ?? -1;
+  if (moonIndex < 0) return 0;
+  const phase = calendar.getMoonPhase(moonIndex, date);
+  return Number.isFinite(phase?.position) ? phase.position : 0;
 }
 
 /**
@@ -118,19 +112,6 @@ export function getConvergencesInRange(moons, startDate, endDate, options = {}) 
     }
   }
   return convergences;
-}
-
-/**
- * Calculate days between two dates.
- * @param {object} date1 - First date { year, month, dayOfMonth }
- * @param {object} date2 - Second date { year, month, dayOfMonth }
- * @param {object} calendar - Calendar instance
- * @returns {number} Days between dates (negative if date1 > date2)
- */
-function calculateDaysBetween(date1, date2, calendar) {
-  const days1 = dateToDayNumber(date1, calendar);
-  const days2 = dateToDayNumber(date2, calendar);
-  return days2 - days1;
 }
 
 /**
