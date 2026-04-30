@@ -2245,6 +2245,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         zone.temperatures = result.temperatures;
         zone.presets = result.presets;
         zone.seasonOverrides = result.seasonOverrides;
+        zone.seasonAliases = result.seasonAliases;
         zone.windDirections = result.windDirections;
         zone.windSpeedRange = result.windSpeedRange;
         zone.colorShift = result.colorShift;

@@ -231,7 +231,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const weatherDisplayMode = isCompact ? 'icon' : game.settings.get(MODULE.ID, SETTINGS.HUD_WEATHER_DISPLAY_MODE);
     const seasonDisplayMode = isCompact ? 'icon' : game.settings.get(MODULE.ID, SETTINGS.HUD_SEASON_DISPLAY_MODE);
     context.seasonDisplayMode = seasonDisplayMode;
-    const season = calendar?.getCurrentSeason?.();
+    const season = WeatherManager.applySeasonAlias(calendar?.getCurrentSeason?.(), WeatherManager.getActiveZone(null, game.scenes?.active));
     context.currentSeason = showSeasonBlock && season ? { name: localize(season.name), color: season.color || '#888', icon: season.icon || 'fas fa-sun' } : null;
     context.showSeasonIcon = seasonDisplayMode === 'full' || seasonDisplayMode === 'icon';
     context.showSeasonLabel = seasonDisplayMode === 'full' || seasonDisplayMode === 'text';

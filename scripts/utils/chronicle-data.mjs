@@ -108,8 +108,9 @@ export function buildScrollEntries(startDate, endDate, options = {}) {
   let prevSeasonColor = null;
   const dayBefore = addDays(startDate, -1);
   const dayBeforeInternal = { year: dayBefore.year - yearZero, month: dayBefore.month, dayOfMonth: dayBefore.dayOfMonth };
+  const aliasZone = WeatherManager.getActiveZone(null, game.scenes?.active);
   if (showSeasons) {
-    const prevSeason = calendar.getCurrentSeason?.(dayBeforeInternal);
+    const prevSeason = WeatherManager.applySeasonAlias(calendar.getCurrentSeason?.(dayBeforeInternal), aliasZone);
     prevSeasonName = prevSeason?.name ? game.i18n.localize(prevSeason.name) : null;
     prevSeasonIcon = prevSeason?.icon || 'fas fa-leaf';
     prevSeasonColor = prevSeason?.color || '#84cc16';
@@ -133,7 +134,7 @@ export function buildScrollEntries(startDate, endDate, options = {}) {
     const banners = [];
     const filterActiveSuppressBanners = !!categoryFilterSet;
     if (showSeasons && !filterActiveSuppressBanners) {
-      const season = calendar.getCurrentSeason?.(internalComponents);
+      const season = WeatherManager.applySeasonAlias(calendar.getCurrentSeason?.(internalComponents), aliasZone);
       const seasonName = season?.name ? game.i18n.localize(season.name) : null;
       if (seasonName && prevSeasonName && seasonName !== prevSeasonName) {
         const prevEntry = entries.length > 0 ? entries[entries.length - 1] : null;

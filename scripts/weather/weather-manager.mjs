@@ -1628,6 +1628,40 @@ export default class WeatherManager {
   }
 
   /**
+   * Apply a zone's season-name alias to a resolved season object.
+   * @param {object|null} season - Season object from `getCurrentSeason`
+   * @param {object|null} zone - Zone config (with `seasonAliases`)
+   * @returns {object|null} Season with alias applied, or the original season when no alias is set
+   */
+  static applySeasonAlias(season, zone) {
+    if (!season || !zone?.seasonAliases) return season;
+    const alias = zone.seasonAliases[season.name];
+    if (!alias) return season;
+    const aliasedName = alias.name?.trim() || season.name;
+    const aliasedAbbr = alias.abbreviation?.trim() || season.abbreviation;
+    const aliasedIcon = alias.icon?.trim() || season.icon;
+    const aliasedColor = alias.color?.trim() || season.color;
+    if (aliasedName === season.name && aliasedAbbr === season.abbreviation && aliasedIcon === season.icon && aliasedColor === season.color) return season;
+    return { ...season, name: aliasedName, abbreviation: aliasedAbbr, icon: aliasedIcon, color: aliasedColor };
+  }
+
+  /**
+   * Resolve the season for the current time and apply the active zone's alias if present.
+   * @param {object} [options] - Resolution options
+   * @param {object} [options.scene] - Scene to resolve zone against (defaults to `game.scenes?.active`)
+   * @param {string} [options.zoneId] - Explicit zone ID override
+   * @param {number|object} [options.time] - Time to resolve season for (defaults to current world time)
+   * @returns {object|null} Aliased season object or null
+   */
+  static getAliasedSeason({ scene, zoneId, time } = {}) {
+    const calendar = CalendarManager.getActiveCalendar();
+    if (!calendar?.getCurrentSeason) return null;
+    const season = calendar.getCurrentSeason(time ?? game.time.components);
+    const zone = this.getActiveZone(zoneId, scene ?? game.scenes?.active);
+    return this.applySeasonAlias(season, zone);
+  }
+
+  /**
    * Check if a scene has explicitly opted out of climate zones.
    * @param {object} [scene] - Scene to check (defaults to active scene)
    * @returns {boolean} True if the scene has "No Zone" set

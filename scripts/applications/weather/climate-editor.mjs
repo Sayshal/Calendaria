@@ -146,6 +146,11 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     let temperatureRows = [];
     if (isZoneMode) {
       const seasonNames = this.#seasonNames.length ? this.#seasonNames : ['CALENDARIA.Season.Spring', 'CALENDARIA.Season.Summer', 'CALENDARIA.Season.Autumn', 'CALENDARIA.Season.Winter'];
+      const aliasMap = this.#data.seasonAliases ?? {};
+      const calendarSeasons = this.#calendarData?.seasons?.values ?? CalendarManager.getCalendar(this.#calendarId)?.seasons?.values ?? {};
+      const parentByName = {};
+      for (const s of Object.values(calendarSeasons)) if (s?.name) parentByName[s.name] = s;
+      const DEFAULT_ALIAS_COLOR = '#888888';
       temperatureRows = seasonNames.map((season) => {
         const stored = this.#data.temperatures?.[season];
         const temp = stored !== undefined ? (stored ?? { min: null, max: null }) : (this.#data.temperatures?._default ?? { min: 10, max: 22 });
@@ -153,7 +158,25 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         const isRelativeMax = typeof temp.max === 'string' && /[+-]$/.test(temp.max);
         const formatMin = temp.min == null ? '' : isRelativeMin ? `${toDisplayDelta(Number(temp.min.slice(0, -1)))}${temp.min.slice(-1)}` : toDisplayUnit(temp.min);
         const formatMax = temp.max == null ? '' : isRelativeMax ? `${toDisplayDelta(Number(temp.max.slice(0, -1)))}${temp.max.slice(-1)}` : toDisplayUnit(temp.max);
-        return { seasonName: season, label: localize(season), min: formatMin, max: formatMax, isRelativeMin, isRelativeMax };
+        const alias = aliasMap[season] ?? {};
+        const parent = parentByName[season] ?? {};
+        const parentColor = parent.color || DEFAULT_ALIAS_COLOR;
+        const colorOverridden = !!(alias.color && alias.color !== parentColor);
+        const hasAlias = !!(alias.name || alias.abbreviation || alias.icon || colorOverridden);
+        return {
+          seasonName: season,
+          label: localize(season),
+          min: formatMin,
+          max: formatMax,
+          isRelativeMin,
+          isRelativeMax,
+          aliasName: alias.name ?? '',
+          aliasAbbr: alias.abbreviation ?? '',
+          aliasIcon: alias.icon ?? '',
+          aliasColor: alias.color || parentColor,
+          parentColor,
+          hasAlias
+        };
       });
     }
     const selectedSeason = isZoneMode ? this.#selectedSeason : null;
@@ -407,6 +430,34 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         if (chanceInput) chanceInput.classList.toggle('zero-weight-warning', checkbox.checked && !chanceInput.value.trim());
       });
     }
+    for (const button of this.element.querySelectorAll('.season-alias-toggle')) {
+      button.addEventListener('click', () => {
+        const season = button.dataset.season;
+        const row = this.element.querySelector(`.season-alias-row[data-season="${CSS.escape(season)}"]`);
+        if (row) row.hidden = !row.hidden;
+      });
+    }
+    for (const button of this.element.querySelectorAll('.season-alias-clear')) {
+      button.addEventListener('click', () => {
+        const season = button.dataset.season;
+        const parentColor = button.dataset.parentColor || '#888888';
+        const row = this.element.querySelector(`.season-alias-row[data-season="${CSS.escape(season)}"]`);
+        if (!row) return;
+        for (const field of ['name', 'abbreviation', 'icon']) {
+          const input = row.querySelector(`[name="alias_${season}_${field}"]`);
+          if (input) input.value = '';
+        }
+        const colorEl = row.querySelector(`[name="alias_${season}_color"]`);
+        if (colorEl) {
+          colorEl.value = parentColor;
+          const inner = colorEl.querySelector('input[type="color"], input[type="text"]');
+          if (inner) inner.value = parentColor;
+        }
+        const tempRow = this.element.querySelector(`.season-temp-row[data-season="${CSS.escape(season)}"] .season-alias-toggle`);
+        tempRow?.classList.remove('has-alias');
+        this.element.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+    }
     for (const input of this.element.querySelectorAll('.preset-alias-input')) {
       input.addEventListener('change', async (e) => {
         const presetId = e.target.dataset.presetId;
@@ -524,6 +575,20 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const tmVal = data.colorShiftTransitionMinutes;
     colorShiftResult.transitionMinutes = tmVal !== '' && tmVal != null ? parseFloat(tmVal) : null;
     result.colorShift = colorShiftResult;
+    const seasonAliases = {};
+    const calendarSeasons = this.#calendarData?.seasons?.values ?? CalendarManager.getCalendar(this.#calendarId)?.seasons?.values ?? {};
+    const parentColorByName = {};
+    for (const s of Object.values(calendarSeasons)) if (s?.name) parentColorByName[s.name] = s.color || '#888888';
+    for (const season of seasonNames) {
+      const aliasName = String(data[`alias_${season}_name`] ?? '').trim();
+      const aliasAbbr = String(data[`alias_${season}_abbreviation`] ?? '').trim();
+      const aliasIcon = String(data[`alias_${season}_icon`] ?? '').trim();
+      const rawColor = String(data[`alias_${season}_color`] ?? '').trim();
+      const parentColor = parentColorByName[season] || '#888888';
+      const aliasColor = rawColor && rawColor.toLowerCase() !== parentColor.toLowerCase() ? rawColor : '';
+      if (aliasName || aliasAbbr || aliasIcon || aliasColor) seasonAliases[season] = { name: aliasName, abbreviation: aliasAbbr, icon: aliasIcon, color: aliasColor };
+    }
+    result.seasonAliases = seasonAliases;
     const windDirections = {};
     for (const dir of Object.keys(COMPASS_DIRECTIONS)) {
       const val = parseInt(data[`wind_${dir}`]);

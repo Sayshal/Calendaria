@@ -97,7 +97,8 @@ function getCurrentSeason() {
   if (!calendar?.seasons) return null;
   const components = game.time.components;
   const seasonIndex = components.season ?? 0;
-  return calendar.seasonsArray?.[seasonIndex] ?? null;
+  const raw = calendar.seasonsArray?.[seasonIndex] ?? null;
+  return WeatherManager.applySeasonAlias(raw, WeatherManager.getActiveZone(null, game.scenes?.active));
 }
 
 /**

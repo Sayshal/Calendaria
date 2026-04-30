@@ -283,3 +283,39 @@
     }
   }
 }
+
+.climate-editor {
+  .form-fields.temperature .season-alias-toggle {
+    flex: 0 0 auto;
+    width: auto;
+    margin-left: 0.25rem;
+    padding: 0 0.4rem;
+    border: none;
+    color: var(--calendaria-text-secondary);
+    cursor: pointer;
+    background: transparent;
+    transition: color 0.15s ease;
+  }
+
+  .form-fields.temperature .season-alias-toggle:hover,
+  .form-fields.temperature .season-alias-toggle.has-alias {
+    color: var(--calendaria-accent);
+  }
+
+  fieldset.season-alias-row {
+    margin: 0.25rem 0 0.75rem;
+    border-left: 0.1875rem solid var(--calendaria-accent);
+  }
+
+  fieldset.season-alias-row .form-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 0.5rem;
+  }
+
+  fieldset.season-alias-row .season-alias-clear {
+    width: auto;
+    padding: 0.25rem 0.5rem;
+    background: transparent;
+  }
+}

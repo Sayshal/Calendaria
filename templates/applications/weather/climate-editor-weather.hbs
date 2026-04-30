@@ -1,32 +1,79 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
   <div class="standard-form">
-
-    {{!-- Temperatures --}}
     <fieldset>
       <legend>{{localize "CALENDARIA.Common.TemperatureRange"}}</legend>
       <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.TemperaturesUnitHint" unit=tempLabel}}</p>
       {{#each temperatureRows}}
-        <div class="form-group">
+        <div class="form-group season-temp-row" data-season="{{this.seasonName}}">
           <label>{{this.label}}</label>
           <div class="form-fields temperature">
             <input type="text" name="temp_{{this.seasonName}}_min" value="{{this.min}}"
-              placeholder="{{localize 'CALENDARIA.Common.Low'}}"
-              {{#if this.isRelativeMin}}class="modifier-relative"{{/if}}>
+              placeholder="{{localize 'CALENDARIA.Common.Low'}}" {{#if this.isRelativeMin}}class="modifier-relative"
+              {{/if}}>
             <i class="fa-solid fa-right-long"></i>
             <input type="text" name="temp_{{this.seasonName}}_max" value="{{this.max}}"
-              placeholder="{{localize 'CALENDARIA.Common.High'}}"
-              {{#if this.isRelativeMax}}class="modifier-relative"{{/if}}>
+              placeholder="{{localize 'CALENDARIA.Common.High'}}" {{#if this.isRelativeMax}}class="modifier-relative"
+              {{/if}}>
+            <button type="button" class="season-alias-toggle {{#if this.hasAlias}}has-alias{{/if}}"
+              data-tooltip="{{localize 'CALENDARIA.Editor.Weather.Zone.SeasonAliasEdit'}}"
+              data-season="{{this.seasonName}}">
+              <i class="fa-solid fa-pen-to-square"></i>
+            </button>
           </div>
         </div>
+        <fieldset class="season-alias-row" data-season="{{this.seasonName}}" hidden>
+          <legend>{{localize "CALENDARIA.Editor.Weather.Zone.SeasonAliasFor" season=this.label}}</legend>
+          <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.SeasonAliasesHint"}}</p>
+          <div class="form-group">
+            <label
+              for="alias-{{this.seasonName}}-name">{{localize "CALENDARIA.Editor.Weather.Zone.SeasonAliasName"}}</label>
+            <div class="form-fields">
+              <input type="text" id="alias-{{this.seasonName}}-name" name="alias_{{this.seasonName}}_name"
+                value="{{this.aliasName}}"
+                placeholder="{{localize 'CALENDARIA.Editor.Weather.Zone.SeasonAliasNamePlaceholder'}}">
+            </div>
+          </div>
+          <div class="form-group">
+            <label
+              for="alias-{{this.seasonName}}-abbr">{{localize "CALENDARIA.Editor.Weather.Zone.SeasonAliasAbbr"}}</label>
+            <div class="form-fields">
+              <input type="text" id="alias-{{this.seasonName}}-abbr" name="alias_{{this.seasonName}}_abbreviation"
+                value="{{this.aliasAbbr}}"
+                placeholder="{{localize 'CALENDARIA.Editor.Weather.Zone.SeasonAliasAbbrPlaceholder'}}">
+            </div>
+          </div>
+          <div class="form-group">
+            <label
+              for="alias-{{this.seasonName}}-icon">{{localize "CALENDARIA.Editor.Weather.Zone.SeasonAliasIcon"}}</label>
+            <div class="form-fields">
+              <input type="text" id="alias-{{this.seasonName}}-icon" name="alias_{{this.seasonName}}_icon"
+                value="{{this.aliasIcon}}"
+                placeholder="{{localize 'CALENDARIA.Editor.Weather.Zone.SeasonAliasIconPlaceholder'}}">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>{{localize "CALENDARIA.Editor.Weather.Zone.SeasonAliasColor"}}</label>
+            <div class="form-fields">
+              <color-picker name="alias_{{this.seasonName}}_color" value="{{this.aliasColor}}"
+                data-parent-color="{{this.parentColor}}"></color-picker>
+            </div>
+          </div>
+          <div class="form-footer">
+            <button type="button" class="season-alias-clear" data-season="{{this.seasonName}}"
+              data-parent-color="{{this.parentColor}}">
+              <i class="fa-solid fa-rotate-left"></i>
+              {{localize "CALENDARIA.Common.Clear"}}
+            </button>
+          </div>
+        </fieldset>
       {{/each}}
     </fieldset>
-
-    {{!-- Wind Configuration --}}
     <fieldset>
       <legend>{{localize "CALENDARIA.Common.Wind"}}</legend>
       <p class="hint">{{localize "CALENDARIA.Weather.Wind.ZoneHint"}}</p>
       <div class="form-group">
-        <label data-tooltip="{{localize 'CALENDARIA.Weather.Wind.SpeedHint'}}">{{localize "CALENDARIA.Weather.Wind.SpeedRange"}}</label>
+        <label
+          data-tooltip="{{localize 'CALENDARIA.Weather.Wind.SpeedHint'}}">{{localize "CALENDARIA.Weather.Wind.SpeedRange"}}</label>
         <div class="form-fields range">
           <select name="windSpeedMin">
             <option value="">{{localize "CALENDARIA.Common.Default"}}</option>
@@ -44,7 +91,8 @@
         </div>
       </div>
       <div class="form-group">
-        <label data-tooltip="{{localize 'CALENDARIA.Weather.Wind.DirectionWeightsHint'}}">{{localize "CALENDARIA.Weather.Wind.DirectionWeights"}}</label>
+        <label
+          data-tooltip="{{localize 'CALENDARIA.Weather.Wind.DirectionWeightsHint'}}">{{localize "CALENDARIA.Weather.Wind.DirectionWeights"}}</label>
         <div class="form-fields wind-direction-grid">
           {{#each windDirections}}
             <div class="form-group">
@@ -58,6 +106,5 @@
         </div>
       </div>
     </fieldset>
-
   </div>
 </section>

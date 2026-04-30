@@ -120,12 +120,16 @@ export async function showMoonPicker(anchor, moons, currentMoon, onSelect) {
 /**
  * Enrich season data with icon and color based on season name.
  * @param {object|null} season - Season object with name property
+ * @param {object} [options] - Display options
+ * @param {object} [options.zone] - Climate zone for alias resolution (defaults to the active zone for the active scene)
  * @returns {object|null} Season with icon and color added
  */
-export function enrichSeasonData(season) {
+export function enrichSeasonData(season, { zone } = {}) {
   if (!season) return null;
-  if (season.icon && season.color) return season;
-  const seasonName = localize(season.name).toLowerCase();
+  const aliasZone = zone === undefined ? WeatherManager.getActiveZone(null, game.scenes?.active) : zone;
+  const aliased = WeatherManager.applySeasonAlias(season, aliasZone) ?? season;
+  if (aliased.icon && aliased.color) return aliased;
+  const seasonName = localize(aliased.name).toLowerCase();
   const SEASON_DEFAULTS = {
     autumn: { icon: 'fas fa-leaf', color: '#d2691e' },
     fall: { icon: 'fas fa-leaf', color: '#d2691e' },
@@ -135,7 +139,7 @@ export function enrichSeasonData(season) {
   };
   const match = Object.keys(SEASON_DEFAULTS).find((key) => seasonName.includes(key));
   const defaults = match ? SEASON_DEFAULTS[match] : { icon: 'fas fa-leaf', color: '#666666' };
-  return { ...season, icon: season.icon || defaults.icon, color: season.color || defaults.color };
+  return { ...aliased, icon: aliased.icon || defaults.icon, color: aliased.color || defaults.color };
 }
 
 /**
@@ -655,9 +659,9 @@ export function injectContextMenuInfo(target, calendar) {
   const midday = Math.floor(hoursPerDay / 2);
   const internalComponents = { year: internalYear, month, dayOfMonth, hour: midday, minute: 0, second: 0 };
   const fullDate = formatCustom(calendar, internalComponents, 'Do of MMMM, Y GGGG');
-  const season = calendar.getCurrentSeason?.(internalComponents);
-  const seasonName = season ? localize(season.name) : null;
   const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
+  const season = WeatherManager.applySeasonAlias(calendar.getCurrentSeason?.(internalComponents), zone);
+  const seasonName = season ? localize(season.name) : null;
   const sunriseHour = calendar.sunrise?.(internalComponents, zone) ?? 6;
   const sunsetHour = calendar.sunset?.(internalComponents, zone) ?? 18;
   const minutesPerHour = calendar.days?.minutesPerHour ?? 60;
@@ -825,9 +829,9 @@ export function generateDayTooltip(calendar, year, month, dayOfMonth, festival =
   const displayComponents = { year, month, dayOfMonth, hour: 12, minute: 0, second: 0 };
   const internalComponents = { year: internalYear, month, dayOfMonth, hour: 12, minute: 0, second: 0 };
   const fullDate = formatCustom(calendar, displayComponents, 'Do of MMMM, Y GGGG');
-  const season = calendar.getCurrentSeason?.(internalComponents);
-  const seasonName = season ? localize(season.name) : null;
   const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
+  const season = WeatherManager.applySeasonAlias(calendar.getCurrentSeason?.(internalComponents), zone);
+  const seasonName = season ? localize(season.name) : null;
   const sunriseHour = calendar.sunrise?.(internalComponents, zone) ?? 6;
   const sunsetHour = calendar.sunset?.(internalComponents, zone) ?? 18;
   const formatTime = (hours) => {

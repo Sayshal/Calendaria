@@ -534,7 +534,8 @@ function enrichWeekday(config, label) {
  */
 function enrichSeason(config, label) {
   const { calendar, components } = resolveCalendar(config);
-  const season = calendar?.getCurrentSeason?.(components);
+  const rawSeason = calendar?.getCurrentSeason?.(components);
+  const season = WeatherManager.applySeasonAlias(rawSeason, WeatherManager.getActiveZone?.(null, game.scenes?.active));
   if (!season) return createErrorElement('CALENDARIA.Enricher.Error.NoSeasons');
   const name = game.i18n.localize(season.name);
   const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.Season', { value: name });

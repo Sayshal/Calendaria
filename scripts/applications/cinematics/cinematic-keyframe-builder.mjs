@@ -90,7 +90,8 @@ export default class CinematicKeyframeBuilder {
   static #buildKeyframe(date, worldTime, calendar, prevKeyframe, settings) {
     const components = { ...date, hour: 12, minute: 0, second: 0 };
     const dateLabel = formatForLocation(calendar, components, 'cinematicDate');
-    const season = calendar.getCurrentSeason?.(worldTime);
+    const rawSeason = calendar.getCurrentSeason?.(worldTime);
+    const season = WeatherManager.applySeasonAlias(rawSeason, WeatherManager.getActiveZone(null, game.scenes?.active));
     const seasonLabel = season ? localize(season.name) : null;
     const seasonColor = season?.color ?? null;
     const seasonChanged = prevKeyframe ? seasonLabel !== prevKeyframe.seasonLabel : !!seasonLabel;

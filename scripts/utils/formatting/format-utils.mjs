@@ -5,6 +5,7 @@
  */
 
 import { resolveRandomizedPhase } from '../../data/_module.mjs';
+import WeatherManager from '../../weather/weather-manager.mjs';
 import { format, localize } from '../localization.mjs';
 
 /**
@@ -127,12 +128,14 @@ export function dateFormattingParts(calendar, components) {
   let seasonName = '';
   let seasonAbbr = '';
   let seasonIndex = -1;
-  const currentSeason = calendar?.getCurrentSeason?.({ year, month, dayOfMonth, hour, minute, second });
+  const rawSeason = calendar?.getCurrentSeason?.({ year, month, dayOfMonth, hour, minute, second });
+  const aliasZone = WeatherManager?.getActiveZone?.(null, globalThis.game?.scenes?.active);
+  const currentSeason = WeatherManager?.applySeasonAlias?.(rawSeason, aliasZone) ?? rawSeason;
   if (currentSeason) {
     seasonName = localize(currentSeason.name);
     seasonAbbr = currentSeason.abbreviation ? localize(currentSeason.abbreviation) : seasonName.slice(0, 3);
     const allSeasons = resolveArray(calendar, 'seasonsArray', 'seasons.values');
-    seasonIndex = allSeasons.indexOf(currentSeason);
+    seasonIndex = allSeasons.indexOf(rawSeason);
   }
   const daysPerWeek = weekdays.length || 7;
   const weekOfYear = Math.ceil((dayOfYear + 1) / daysPerWeek);
@@ -353,8 +356,10 @@ export function formatApproximateTime(calendar, components, zone = null) {
  */
 export function formatApproximateDate(calendar, components) {
   const parts = dateFormattingParts(calendar, components);
-  const season = calendar?.getCurrentSeason?.(components);
-  if (!season) return parts.MMMM;
+  const rawSeason = calendar?.getCurrentSeason?.(components);
+  if (!rawSeason) return parts.MMMM;
+  const aliasZone = WeatherManager?.getActiveZone?.(null, globalThis.game?.scenes?.active);
+  const season = WeatherManager?.applySeasonAlias?.(rawSeason, aliasZone) ?? rawSeason;
   const seasonName = localize(season.name);
   const monthsValues = resolveArray(calendar, 'monthsArray', 'months.values');
   let dayOfYear;

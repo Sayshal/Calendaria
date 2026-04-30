@@ -616,6 +616,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
                 { required: false, nullable: true, initial: null }
               ),
               seasonOverrides: new foundry.data.fields.ObjectField({ required: false, initial: {} }),
+              seasonAliases: new foundry.data.fields.ObjectField({ required: false, initial: {} }),
               windDirections: new foundry.data.fields.ObjectField({ required: false, initial: {} }),
               windSpeedRange: new SchemaField(
                 {
