@@ -189,13 +189,18 @@ export default class SimpleCalendarImporter extends BaseImporter {
     });
     const months = this.#transformMonths(calendar.months, weekdayNumericToIndex);
     const daysPerYear = months.reduce((sum, m) => sum + (m.days || 0), 0);
+    const toKeyedObject = (arr) => {
+      const out = {};
+      for (const item of arr) out[foundry.utils.randomID()] = item;
+      return out;
+    };
     return {
       name: calendar.name || 'Imported Calendar',
-      days: { values: weekdays, ...this.#transformTime(calendar.time), daysPerYear },
-      months: { values: months },
+      days: { values: toKeyedObject(weekdays), ...this.#transformTime(calendar.time), daysPerYear },
+      months: { values: toKeyedObject(months) },
       years: this.#transformYears(calendar.year, calendar.leapYear),
       leapYearConfig: this.#transformLeapYearConfig(calendar.leapYear),
-      seasons: { values: this.#transformSeasons(calendar.seasons, calendar.months) },
+      seasons: { values: toKeyedObject(this.#transformSeasons(calendar.seasons, calendar.months)) },
       moons: this.#transformMoons(calendar.moons),
       festivals: this.#extractFestivals(calendar.months),
       eras: this.#transformEras(calendar.year),

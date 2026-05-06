@@ -152,15 +152,65 @@ export default class CalendarManager {
     const customCalendars = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CALENDARS) || {};
     const ids = Object.keys(customCalendars);
     if (ids.length === 0) return;
+    let needsSave = false;
     for (const id of ids) {
       try {
-        const calendar = new CalendariaCalendar(customCalendars[id]);
+        const data = customCalendars[id];
+        if (CalendarManager.#normalizeCollectionKeys(data)) needsSave = true;
+        const calendar = new CalendariaCalendar(data);
         CalendarRegistry.register(id, calendar);
         log(3, `Loaded custom calendar: ${id}`);
       } catch (error) {
         log(1, `Failed to load custom calendar "${id}":`, error);
       }
     }
+    if (needsSave && game.user?.isGM) {
+      try {
+        await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_CALENDARS, customCalendars);
+        log(3, 'Persisted normalized collection keys for custom calendars');
+      } catch (error) {
+        log(1, 'Failed to persist normalized custom calendar keys:', error);
+      }
+    }
+  }
+
+  /**
+   * Re-key keyed collections that have numeric-string keys ("0".."N") with randomIDs.
+   * JS engine iteration order places integer-like keys before string keys, which traps
+   * reorder swaps inside the numeric-key segment. Sort by ordinal first so visual order
+   * is preserved, then assign fresh randomIDs.
+   * @param {object} calendarData - Raw calendar data (mutated in place)
+   * @returns {boolean} True if any collection was re-keyed
+   * @private
+   */
+  static #normalizeCollectionKeys(calendarData) {
+    if (!calendarData || typeof calendarData !== 'object') return false;
+    let changed = false;
+    const collections = [
+      ['months', 'values'],
+      ['days', 'values'],
+      ['seasons', 'values']
+    ];
+    for (const [parent, child] of collections) {
+      const values = calendarData?.[parent]?.[child];
+      if (!values || typeof values !== 'object' || Array.isArray(values)) continue;
+      const keys = Object.keys(values);
+      if (!keys.some((k) => /^\d+$/.test(k))) continue;
+      const sorted = Object.entries(values).sort(([, a], [, b]) => {
+        const aOrd = Number.isFinite(a?.ordinal) ? a.ordinal : Number.MAX_SAFE_INTEGER;
+        const bOrd = Number.isFinite(b?.ordinal) ? b.ordinal : Number.MAX_SAFE_INTEGER;
+        return aOrd - bOrd;
+      });
+      const remapped = {};
+      let idx = 0;
+      for (const [, val] of sorted) {
+        val.ordinal = ++idx;
+        remapped[foundry.utils.randomID()] = val;
+      }
+      calendarData[parent][child] = remapped;
+      changed = true;
+    }
+    return changed;
   }
 
   /**
