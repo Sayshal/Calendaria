@@ -169,6 +169,8 @@ export const SETTINGS = {
   REST_FIXED_HOURS: 'restFixedHours',
   SAVED_TIMEPOINTS: 'savedTimepoints',
   SEEDED_CALENDARS: 'seededCalendars',
+  SHORT_REST_ADVANCE_MODE: 'shortRestAdvanceMode',
+  SHORT_REST_FIXED_MINUTES: 'shortRestFixedMinutes',
   SHOW_BIG_CAL: 'showBigCal',
   SHOW_CALENDAR_HUD: 'showCalendarHUD',
   SHOW_CHRONICLE: 'showChronicle',

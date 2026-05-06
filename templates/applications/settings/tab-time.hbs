@@ -78,6 +78,29 @@
         <p class="hint">{{localize "CALENDARIA.Settings.RestFixedHours.Hint"}}</p>
       </div>
 
+      <div class="form-group" data-depends-on="advanceTimeOnRest">
+        <label for="shortRestAdvanceMode">{{localize "CALENDARIA.Settings.ShortRestAdvanceMode.Name"}}</label>
+        <div class="form-fields">
+          <select id="shortRestAdvanceMode" name="shortRestAdvanceMode">
+            <option value="automatic" {{#if (eq shortRestAdvanceMode "automatic")}}selected{{/if}}>
+              {{localize "CALENDARIA.Settings.RestAdvanceMode.Automatic"}}
+            </option>
+            <option value="fixed" {{#if (eq shortRestAdvanceMode "fixed")}}selected{{/if}}>
+              {{localize "CALENDARIA.Settings.RestAdvanceMode.Fixed"}}
+            </option>
+          </select>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.ShortRestAdvanceMode.Hint"}}</p>
+      </div>
+
+      <div class="form-group" data-depends-on="shortRestAdvanceMode:fixed">
+        <label for="shortRestFixedMinutes">{{localize "CALENDARIA.Settings.ShortRestFixedMinutes.Name"}}</label>
+        <div class="form-fields">
+          <input type="number" id="shortRestFixedMinutes" name="shortRestFixedMinutes" value="{{shortRestFixedMinutes}}" min="0" step="1">
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.ShortRestFixedMinutes.Hint"}}</p>
+      </div>
+
       {{#if showBastionSetting}}
         <div class="form-group">
           <label for="advanceBastionOrders">{{localize "CALENDARIA.Settings.AdvanceBastionOrders.Name"}}</label>

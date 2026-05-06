@@ -89,6 +89,46 @@ export function onLongRest(actor, config) {
 }
 
 /**
+ * Handle short rest after dialog completes.
+ * @param {object} actor - The actor taking the rest
+ * @param {object} config - Rest configuration (with user's dialog choices)
+ * @returns {void}
+ */
+export function onShortRest(actor, config) {
+  if (TimeClock.locked) return;
+  const advanceTime = game.settings.get(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST);
+  if (!advanceTime) return;
+  if (config.advanceTime === false && actor?.type !== 'group') return;
+  const isShortRest = config.type === 'short' || config.longRest === false;
+  if (!isShortRest) return;
+  const calendar = CalendarManager.getActiveCalendar();
+  if (!calendar) return;
+  const minutesPerHour = calendar.days?.minutesPerHour ?? 60;
+  const secondsPerMinute = calendar.days?.secondsPerMinute ?? 60;
+  const mode = game.settings.get(MODULE.ID, SETTINGS.SHORT_REST_ADVANCE_MODE);
+  config.advanceTime = false;
+  if (mode === 'automatic') {
+    const systemMinutes = config.duration;
+    if (!systemMinutes || systemMinutes <= 0) {
+      log(3, 'Short rest time advancement skipped (system reported no duration)');
+      return;
+    }
+    const seconds = systemMinutes * secondsPerMinute;
+    CinematicOverlay.gatedAdvance(seconds, { source: 'rest' });
+    log(3, `Short rest advancing ${systemMinutes} minutes (system default)`);
+    return;
+  }
+  const fixedMinutes = game.settings.get(MODULE.ID, SETTINGS.SHORT_REST_FIXED_MINUTES);
+  if (fixedMinutes <= 0) {
+    log(3, 'Short rest time advancement suppressed (fixed minutes = 0)');
+    return;
+  }
+  const seconds = fixedMinutes * secondsPerMinute;
+  CinematicOverlay.gatedAdvance(seconds, { source: 'rest' });
+  log(3, `Short rest advancing ${fixedMinutes} minutes`);
+}
+
+/**
  * Handle PF2E "Rest for the Night" hook. Debounced since it fires per-character.
  * @returns {void}
  */

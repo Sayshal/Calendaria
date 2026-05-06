@@ -1139,6 +1139,20 @@ export default class CalendariaSettings {
         config: false,
         type: new NumberField({ integer: true, min: 0, initial: 8 })
       },
+      [SETTINGS.SHORT_REST_ADVANCE_MODE]: {
+        name: 'CALENDARIA.Settings.ShortRestAdvanceMode.Name',
+        hint: 'CALENDARIA.Settings.ShortRestAdvanceMode.Hint',
+        scope: 'world',
+        config: false,
+        type: new StringField({ initial: 'fixed', choices: ['automatic', 'fixed'] })
+      },
+      [SETTINGS.SHORT_REST_FIXED_MINUTES]: {
+        name: 'CALENDARIA.Settings.ShortRestFixedMinutes.Name',
+        hint: 'CALENDARIA.Settings.ShortRestFixedMinutes.Hint',
+        scope: 'world',
+        config: false,
+        type: new NumberField({ integer: true, min: 0, initial: 60 })
+      },
       restAdvanceModeMigrationComplete: { name: 'Rest Advance Mode Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       weatherFxFlagMigrationComplete: { name: 'Weather FX Flag Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       removedCalendarsMigrationComplete: { name: 'Removed Calendars Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },

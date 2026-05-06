@@ -699,6 +699,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.CLOCK_RUN_DURING_COMBAT]: { tab: 'time', label: 'CALENDARIA.Settings.ClockRunDuringCombat.Name' },
     [SETTINGS.REST_ADVANCE_MODE]: { tab: 'time', label: 'CALENDARIA.Settings.RestAdvanceMode.Name' },
     [SETTINGS.REST_FIXED_HOURS]: { tab: 'time', label: 'CALENDARIA.Settings.RestFixedHours.Name' },
+    [SETTINGS.SHORT_REST_ADVANCE_MODE]: { tab: 'time', label: 'CALENDARIA.Settings.ShortRestAdvanceMode.Name' },
+    [SETTINGS.SHORT_REST_FIXED_MINUTES]: { tab: 'time', label: 'CALENDARIA.Settings.ShortRestFixedMinutes.Name' },
     [SETTINGS.ADVANCE_BASTION_ORDERS]: { tab: 'time', label: 'CALENDARIA.Settings.AdvanceBastionOrders.Name' },
     [SETTINGS.TIME_SPEED_MULTIPLIER]: { tab: 'time', label: 'CALENDARIA.Settings.TimeSpeedMultiplier.Name' },
     [SETTINGS.TIME_SPEED_INCREMENT]: { tab: 'time', label: 'CALENDARIA.Settings.TimeSpeedIncrement.Name' },
@@ -937,6 +939,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       SETTINGS.ADVANCE_TIME_ON_REST,
       SETTINGS.REST_ADVANCE_MODE,
       SETTINGS.REST_FIXED_HOURS,
+      SETTINGS.SHORT_REST_ADVANCE_MODE,
+      SETTINGS.SHORT_REST_FIXED_MINUTES,
       SETTINGS.ADVANCE_BASTION_ORDERS,
       SETTINGS.SYNC_CLOCK_PAUSE,
       SETTINGS.CLOCK_RUN_DURING_COMBAT
@@ -1051,6 +1055,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.advanceTimeOnRest = game.settings.get(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST);
     context.restAdvanceMode = game.settings.get(MODULE.ID, SETTINGS.REST_ADVANCE_MODE);
     context.restFixedHours = game.settings.get(MODULE.ID, SETTINGS.REST_FIXED_HOURS);
+    context.shortRestAdvanceMode = game.settings.get(MODULE.ID, SETTINGS.SHORT_REST_ADVANCE_MODE);
+    context.shortRestFixedMinutes = game.settings.get(MODULE.ID, SETTINGS.SHORT_REST_FIXED_MINUTES);
     context.advanceBastionOrders = game.settings.get(MODULE.ID, SETTINGS.ADVANCE_BASTION_ORDERS);
     context.showBastionSetting = game.system?.id === 'dnd5e';
     context.syncClockPause = game.settings.get(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE);
@@ -1916,6 +1922,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('advanceTimeOnRest' in data) await game.settings.set(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST, data.advanceTimeOnRest);
     if ('restAdvanceMode' in data) await game.settings.set(MODULE.ID, SETTINGS.REST_ADVANCE_MODE, data.restAdvanceMode);
     if ('restFixedHours' in data) await game.settings.set(MODULE.ID, SETTINGS.REST_FIXED_HOURS, data.restFixedHours);
+    if ('shortRestAdvanceMode' in data) await game.settings.set(MODULE.ID, SETTINGS.SHORT_REST_ADVANCE_MODE, data.shortRestAdvanceMode);
+    if ('shortRestFixedMinutes' in data) await game.settings.set(MODULE.ID, SETTINGS.SHORT_REST_FIXED_MINUTES, data.shortRestFixedMinutes);
     if ('advanceBastionOrders' in data) await game.settings.set(MODULE.ID, SETTINGS.ADVANCE_BASTION_ORDERS, data.advanceBastionOrders);
     if ('syncClockPause' in data) await game.settings.set(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE, data.syncClockPause);
     if ('clockRunDuringCombat' in data) await game.settings.set(MODULE.ID, SETTINGS.CLOCK_RUN_DURING_COMBAT, data.clockRunDuringCombat);

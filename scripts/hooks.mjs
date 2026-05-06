@@ -3,7 +3,7 @@ import { BigCal, Chronicle, HUD, MiniCal, Stopwatch, SunDial, TimeKeeper } from 
 import { CalendarManager } from './calendar/_module.mjs';
 import { HOOKS, SETTINGS } from './constants.mjs';
 import { FestivalManager } from './festivals/_module.mjs';
-import { onDayChangeForBastions, onLongRest, onPF1eRest, onPF2eRest, onPreRest, patchBastionButton } from './integrations/_module.mjs';
+import { onDayChangeForBastions, onLongRest, onPF1eRest, onPF2eRest, onPreRest, onShortRest, patchBastionButton } from './integrations/_module.mjs';
 import { NoteManager, clearComputedDateCache } from './notes/_module.mjs';
 import { TimeClock, onMoonPhaseChange, onUpdateScene, onWeatherChange } from './time/_module.mjs';
 import {
@@ -54,6 +54,7 @@ export function registerHooks() {
   Hooks.on('deleteJournalEntry', NoteManager.onDeleteJournalEntry.bind(NoteManager));
   Hooks.on('deleteJournalEntryPage', NoteManager.onDeleteJournalEntryPage.bind(NoteManager));
   Hooks.on('dnd5e.longRest', onLongRest);
+  Hooks.on('dnd5e.shortRest', onShortRest);
   Hooks.on('dnd5e.preLongRest', onPreRest);
   Hooks.on('dnd5e.preShortRest', onPreRest);
   Hooks.on('pf1ActorRest', onPF1eRest);
