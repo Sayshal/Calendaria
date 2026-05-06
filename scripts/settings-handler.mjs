@@ -29,7 +29,7 @@ export default class CalendariaSettings {
         hint: 'CALENDARIA.Cinematic.Settings.Enabled.Hint',
         scope: 'world',
         config: false,
-        type: new BooleanField({ initial: true })
+        type: new BooleanField({ initial: false })
       },
       [SETTINGS.CINEMATIC_THRESHOLD]: {
         name: 'CALENDARIA.Common.Threshold',
@@ -51,21 +51,21 @@ export default class CalendariaSettings {
         hint: 'CALENDARIA.Cinematic.Settings.ShowWeather.Hint',
         scope: 'world',
         config: false,
-        type: new BooleanField({ initial: true })
+        type: new BooleanField({ initial: false })
       },
       [SETTINGS.CINEMATIC_SHOW_MOONS]: {
         name: 'CALENDARIA.Common.ShowMoonPhases',
         hint: 'CALENDARIA.Cinematic.Settings.ShowMoons.Hint',
         scope: 'world',
         config: false,
-        type: new BooleanField({ initial: true })
+        type: new BooleanField({ initial: false })
       },
       [SETTINGS.CINEMATIC_SHOW_EVENTS]: {
         name: 'CALENDARIA.Cinematic.Settings.ShowEvents.Name',
         hint: 'CALENDARIA.Cinematic.Settings.ShowEvents.Hint',
         scope: 'world',
         config: false,
-        type: new BooleanField({ initial: true })
+        type: new BooleanField({ initial: false })
       },
       [SETTINGS.CINEMATIC_EVENT_WEIGHTING]: {
         name: 'CALENDARIA.Cinematic.Settings.EventWeighting.Name',
@@ -426,7 +426,7 @@ export default class CalendariaSettings {
         hint: 'CALENDARIA.Settings.DarknessSync.Hint',
         scope: 'world',
         config: false,
-        type: new BooleanField({ initial: true })
+        type: new BooleanField({ initial: false })
       },
       [SETTINGS.DARKNESS_SYNC_ALL_SCENES]: {
         name: 'CALENDARIA.Settings.DarknessSyncAllScenes.Name',
@@ -440,21 +440,21 @@ export default class CalendariaSettings {
         hint: 'CALENDARIA.Settings.DarknessWeatherSync.Hint',
         scope: 'world',
         config: false,
-        type: new BooleanField({ initial: true })
+        type: new BooleanField({ initial: false })
       },
       [SETTINGS.AMBIENCE_SYNC]: {
         name: 'CALENDARIA.Settings.AmbienceSync.Name',
         hint: 'CALENDARIA.Settings.AmbienceSync.Hint',
         scope: 'world',
         config: false,
-        type: new BooleanField({ initial: true })
+        type: new BooleanField({ initial: false })
       },
       [SETTINGS.DARKNESS_MOON_SYNC]: {
         name: 'CALENDARIA.Settings.DarknessMoonSync.Name',
         hint: 'CALENDARIA.Settings.DarknessMoonSync.Hint',
         scope: 'world',
         config: false,
-        type: new BooleanField({ initial: true })
+        type: new BooleanField({ initial: false })
       },
       [SETTINGS.COLOR_SHIFT_SYNC]: {
         name: 'CALENDARIA.Settings.ColorShiftSync.Name',
@@ -592,7 +592,7 @@ export default class CalendariaSettings {
         hint: 'CALENDARIA.Settings.ShowCalendarHUD.Hint',
         scope: 'user',
         config: true,
-        type: new BooleanField({ initial: false })
+        type: new BooleanField({ initial: true })
       },
       [SETTINGS.SHOW_MINI_CAL]: { name: 'CALENDARIA.Settings.ShowMiniCal.Name', hint: 'CALENDARIA.Settings.ShowMiniCal.Hint', scope: 'user', config: true, type: new BooleanField({ initial: true }) },
       [SETTINGS.SHOW_TIME_KEEPER]: {
@@ -776,7 +776,7 @@ export default class CalendariaSettings {
         hint: 'CALENDARIA.Settings.HUDWeatherFxMode.Hint',
         scope: 'client',
         config: false,
-        type: new StringField({ initial: 'full', choices: ['full', 'reduced', 'off'] }),
+        type: new StringField({ initial: 'off', choices: ['full', 'reduced', 'off'] }),
         onChange: renderHUD
       },
       [SETTINGS.HUD_BORDER_GLOW]: {
@@ -784,7 +784,7 @@ export default class CalendariaSettings {
         hint: 'CALENDARIA.Settings.HUDBorderGlow.Hint',
         scope: 'world',
         config: false,
-        type: new BooleanField({ initial: true }),
+        type: new BooleanField({ initial: false }),
         onChange: renderHUD
       },
       [SETTINGS.HUD_DOME_BELOW]: {
@@ -1083,7 +1083,7 @@ export default class CalendariaSettings {
         hint: 'CALENDARIA.Settings.ChatTimestampShowTime.Hint',
         scope: 'world',
         config: false,
-        type: new BooleanField({ initial: true })
+        type: new BooleanField({ initial: false })
       },
       [SETTINGS.ENRICHER_CLICK_TARGET]: {
         name: 'CALENDARIA.Settings.EnricherClickTarget.Name',
@@ -1211,7 +1211,7 @@ export default class CalendariaSettings {
         hint: 'CALENDARIA.Settings.AutoGenerate.Hint',
         scope: 'world',
         config: false,
-        type: new BooleanField({ initial: true })
+        type: new BooleanField({ initial: false })
       },
       [SETTINGS.CURRENT_WEATHER]: { name: 'Current Weather', scope: 'world', config: false, type: new ObjectField({ nullable: true, initial: null }) },
       [SETTINGS.TEMPERATURE_UNIT]: {
@@ -1303,7 +1303,7 @@ export default class CalendariaSettings {
         hint: 'CALENDARIA.Settings.FXMaster.Enabled.Hint',
         scope: 'world',
         config: false,
-        type: new BooleanField({ initial: true })
+        type: new BooleanField({ initial: false })
       },
       [SETTINGS.FXMASTER_TOP_DOWN]: {
         name: 'CALENDARIA.Settings.FXMaster.TopDown.Name',
