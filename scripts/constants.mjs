@@ -219,22 +219,6 @@ export const SETTINGS = {
   WIND_SPEED_UNIT: 'windSpeedUnit'
 };
 
-/** @enum {string} Display format location identifiers. */
-export const DISPLAY_LOCATIONS = {
-  BIG_CAL_HEADER: 'bigCalHeader',
-  CHAT_TIMESTAMP: 'chatTimestamp',
-  HUD_DATE: 'hudDate',
-  HUD_TIME: 'hudTime',
-  MICRO_CAL_HEADER: 'microCalHeader',
-  MINI_CAL_HEADER: 'miniCalHeader',
-  MINI_CAL_TIME: 'miniCalTime',
-  STOPWATCH_GAMETIME: 'stopwatchGametime',
-  STOPWATCH_REALTIME: 'stopwatchRealtime',
-  SUNDIAL_TIME: 'sundialTime',
-  TIMEKEEPER_DATE: 'timekeeperDate',
-  TIMEKEEPER_TIME: 'timekeeperTime'
-};
-
 /** @enum {string} Scene flags for scene-specific configuration */
 export const SCENE_FLAGS = {
   BRIGHTNESS_MULTIPLIER: 'brightnessMultiplier',

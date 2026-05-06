@@ -200,19 +200,6 @@ export function getCurrentViewedDate(calendar = null) {
 }
 
 /**
- * Check if a day has any notes.
- * @param {object[]} notes - Notes to check
- * @param {number} year - Year
- * @param {number} month - Month
- * @param {number} dayOfMonth - Day (0-indexed)
- * @returns {boolean} True if at least one note exists on the specified day
- */
-export function hasNotesOnDay(notes, year, month, dayOfMonth) {
-  const targetDate = { year, month, dayOfMonth };
-  return notes.some((page) => isRecurringMatch(extractNoteMatchData(page), targetDate));
-}
-
-/**
  * Build weather pill template data from a getDayWeather result.
  * @param {object|null} wd - Weather data from getDayWeather
  * @returns {object} Template properties for the weather pill
@@ -322,26 +309,6 @@ export function renderCycleIndicator({ cycleData, displayMode, cycleText }) {
   else displayText = cycleData.values.map((v) => v.entryName).join(', ');
   const label = `<span class="cycle-label">${displayText}</span>`;
   return `<span class="cycle-indicator" data-tooltip="${cycleText || displayText}">${icon}${label}</span>`;
-}
-
-/**
- * Get notes that start on a specific day.
- * @param {object[]} notes - Notes to filter
- * @param {number} year - Year
- * @param {number} month - Month
- * @param {number} dayOfMonth - Day (0-indexed)
- * @returns {object[]} Notes that start on the specified day
- */
-export function getNotesForDay(notes, year, month, dayOfMonth) {
-  return notes.filter((page) => {
-    const start = page.system.startDate;
-    const end = page.system.endDate;
-    if (start.year !== year || start.month !== month || start.dayOfMonth !== dayOfMonth) return false;
-    const hasValidEndDate = end && end.year != null && end.month != null && end.dayOfMonth != null;
-    if (!hasValidEndDate) return true;
-    if (end.year !== start.year || end.month !== start.month || end.dayOfMonth !== start.dayOfMonth) return false;
-    return true;
-  });
 }
 
 /**
@@ -635,48 +602,6 @@ export function getDayContextMenuItems({ calendar, onSetDate, onCreateNote, extr
     }
     return items;
   };
-}
-
-/**
- * Inject date info header into context menu.
- * @param {HTMLElement} target - The day cell element
- * @param {object} calendar - The calendar
- */
-export function injectContextMenuInfo(target, calendar) {
-  const menu = document.getElementById('context-menu');
-  if (!menu) return;
-  const year = parseInt(target.dataset.year);
-  const month = parseInt(target.dataset.month);
-  const dayOfMonth = parseInt(target.dataset.day);
-  const internalYear = year - (calendar.years?.yearZero ?? 0);
-  const hoursPerDay = calendar.days?.hoursPerDay ?? 24;
-  const midday = Math.floor(hoursPerDay / 2);
-  const internalComponents = { year: internalYear, month, dayOfMonth, hour: midday, minute: 0, second: 0 };
-  const fullDate = formatCustom(calendar, internalComponents, 'Do of MMMM, Y GGGG');
-  const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
-  const season = WeatherManager.applySeasonAlias(calendar.getCurrentSeason?.(internalComponents), zone);
-  const seasonName = season ? localize(season.name) : null;
-  const sunriseHour = calendar.sunrise?.(internalComponents, zone) ?? 6;
-  const sunsetHour = calendar.sunset?.(internalComponents, zone) ?? 18;
-  const minutesPerHour = calendar.days?.minutesPerHour ?? 60;
-  const formatTime = (hours) => {
-    let h = Math.floor(hours);
-    let m = Math.round((hours - h) * minutesPerHour);
-    if (m >= minutesPerHour) {
-      m = 0;
-      h += 1;
-    }
-    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-  };
-  const infoHeader = document.createElement('div');
-  infoHeader.className = 'context-info-header';
-  infoHeader.innerHTML = `
-    <div class="info-row date"><strong>${fullDate}</strong></div>
-    ${seasonName ? `<div class="info-row season">${seasonName}</div>` : ''}
-    <div class="info-row sun"><i class="fas fa-sun" data-tooltip="${localize('CALENDARIA.Common.Sunrise')}"></i> ${formatTime(sunriseHour)}
-    <i class="fas fa-moon" data-tooltip="${localize('CALENDARIA.Common.Sunset')}"></i> ${formatTime(sunsetHour)}</div>
-  `;
-  menu.insertBefore(infoHeader, menu.firstChild);
 }
 
 /**

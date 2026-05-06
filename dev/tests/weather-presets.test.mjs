@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   ALL_PRESETS,
   ENVIRONMENTAL_WEATHER,
-  expandLegacySoundKey,
+  resolveWeatherSoundPath,
   FANTASY_WEATHER,
   getAllPresets,
   getPreset,
@@ -193,22 +193,22 @@ describe('SOUND_FX_OPTIONS full paths', () => {
   });
 });
 
-describe('expandLegacySoundKey()', () => {
+describe('resolveWeatherSoundPath()', () => {
   it('returns null for null/empty input', () => {
-    expect(expandLegacySoundKey(null)).toBeNull();
-    expect(expandLegacySoundKey('')).toBeNull();
+    expect(resolveWeatherSoundPath(null)).toBeNull();
+    expect(resolveWeatherSoundPath('')).toBeNull();
   });
   it('expands a bare key to a full path', () => {
-    expect(expandLegacySoundKey('thunderstorm')).toBe('modules/calendaria/assets/sound/thunderstorm.ogg');
+    expect(resolveWeatherSoundPath('thunderstorm')).toBe('modules/calendaria/assets/sound/thunderstorm.ogg');
   });
   it('passes through a value already containing a slash', () => {
     const fullPath = 'modules/my-mod/sounds/custom.ogg';
-    expect(expandLegacySoundKey(fullPath)).toBe(fullPath);
+    expect(resolveWeatherSoundPath(fullPath)).toBe(fullPath);
   });
   it('expands all legacy SOUND_FX keys correctly', () => {
     const legacyKeys = ['rain-acid-rain-blood-rain', 'sunshower-drizzle', 'thunderstorm', 'sleet-hail', 'blizzard-ice-storm', 'snow-frost', 'hurricane-monsoon-tornado', 'sandstorm-dust-devil', 'wind'];
     for (const key of legacyKeys) {
-      const result = expandLegacySoundKey(key);
+      const result = resolveWeatherSoundPath(key);
       expect(result).toBe(`modules/calendaria/assets/sound/${key}.ogg`);
       expect(SOUND_FX_OPTIONS).toContain(result);
     }

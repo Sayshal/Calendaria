@@ -90,7 +90,7 @@ See [Permissions](Permissions) for detailed documentation.
 
 ### Manage Presets
 
-Opens the [Note Preset Editor](Note-Preset-Editor) for creating, editing, and deleting note presets.
+Opens the [Note Preset Editor](Note-Preset-Editor) for managing note presets.
 
 ### Re-sync Festival Notes
 

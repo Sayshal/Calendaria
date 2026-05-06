@@ -147,6 +147,8 @@ export function canViewWeatherForecast() {
 
 /**
  * Get all users who have a specific permission.
+ * Exposed at runtime as `CALENDARIA.permissions.getUsersWithPermission` via the
+ * `import * as Permissions` namespace spread in `scripts/api.mjs`.
  * @param {string} permissionKey - The permission key to check
  * @returns {object[]} Array of users with the permission
  */

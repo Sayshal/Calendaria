@@ -20,7 +20,7 @@ vi.mock('../../scripts/weather/weather-generator.mjs', () => ({
 vi.mock('../../scripts/weather/data/climate-data.mjs', () => ({ CLIMATE_ZONE_TEMPLATES: {} }));
 vi.mock('../../scripts/weather/data/weather-presets.mjs', () => ({
   ALL_PRESETS: [],
-  expandLegacySoundKey: vi.fn(),
+  resolveWeatherSoundPath: vi.fn(),
   getAllPresets: () => [],
   getPreset: () => null,
   WEATHER_CATEGORIES: {}

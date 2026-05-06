@@ -2,7 +2,7 @@
 
 A calendar and time tracking module for Foundry VTT.
 
-Track in-game time with animated sky domes, schedule events with complex recurrence patterns, sync scene lighting to sunrise/sunset, and support multiple moons, eras, and custom calendars.
+Animated sky domes, scheduled events with complex recurrence patterns, scene lighting synced to sunrise and sunset, plus support for multiple moons, eras, and custom calendars.
 
 ---
 

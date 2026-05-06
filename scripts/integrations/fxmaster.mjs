@@ -31,14 +31,6 @@ export function isFXMasterActive() {
 }
 
 /**
- * Check if FXMaster+ (premium) is installed and active.
- * @returns {boolean} Whether FXMaster+ is active
- */
-export function isFXMasterPlusActive() {
-  return game.modules.get('fxmaster-plus')?.active ?? false;
-}
-
-/**
  * Get the list of available FXMaster presets for dropdown selection.
  * @returns {{value: string, label: string}[]} Preset options sorted alphabetically
  */

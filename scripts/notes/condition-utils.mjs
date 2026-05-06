@@ -36,16 +36,6 @@ export function getParentAndIndex(rootGroup, path) {
 }
 
 /**
- * Calculate the depth of a node given its path.
- * @param {string} path - Dot-separated path
- * @returns {number} Depth (0 for root children)
- */
-export function getDepthFromPath(path) {
-  if (!path && path !== 0) return 0;
-  return String(path).split('.').length;
-}
-
-/**
  * Create a default condition object.
  * @param {string} [field] - Initial field (defaults to 'year')
  * @returns {object} New condition

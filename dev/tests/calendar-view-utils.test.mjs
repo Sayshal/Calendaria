@@ -57,8 +57,8 @@ describe('getLeadingDays()', () => {
     const cal = mockCalendar({ daysPerMonth: 30 });
     const result = getLeadingDays(cal, 2024, 3, 2);
     expect(result).toHaveLength(2);
-    expect(result[0]).toEqual({ day: 29, dayOfMonth: 28, year: 2024, month: 2, isFromOtherMonth: true });
-    expect(result[1]).toEqual({ day: 30, dayOfMonth: 29, year: 2024, month: 2, isFromOtherMonth: true });
+    expect(result[0]).toEqual({ day: 29, dayOfMonth: 28, year: 2024, month: 2, isFromOtherMonth: true, isIntercalaryMonth: false, monthName: '', monthInitial: '' });
+    expect(result[1]).toEqual({ day: 30, dayOfMonth: 29, year: 2024, month: 2, isFromOtherMonth: true, isIntercalaryMonth: false, monthName: '', monthInitial: '' });
   });
   it('wraps to last month of previous year when month is 0', () => {
     const cal = mockCalendar({ months: 12, daysPerMonth: 30 });
@@ -73,8 +73,8 @@ describe('getLeadingDays()', () => {
     const cal = mockCalendar({ daysPerMonth: 30, festivalDays });
     const result = getLeadingDays(cal, 2024, 3, 2);
     expect(result).toHaveLength(2);
-    expect(result[0]).toEqual({ day: 28, dayOfMonth: 27, year: 2024, month: 2, isFromOtherMonth: true });
-    expect(result[1]).toEqual({ day: 29, dayOfMonth: 28, year: 2024, month: 2, isFromOtherMonth: true });
+    expect(result[0]).toEqual({ day: 28, dayOfMonth: 27, year: 2024, month: 2, isFromOtherMonth: true, isIntercalaryMonth: false, monthName: '', monthInitial: '' });
+    expect(result[1]).toEqual({ day: 29, dayOfMonth: 28, year: 2024, month: 2, isFromOtherMonth: true, isIntercalaryMonth: false, monthName: '', monthInitial: '' });
   });
   it('does not skip festival days that count for weekday', () => {
     const festivalDays = { '2024:2:29': { countsForWeekday: true } };

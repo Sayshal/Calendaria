@@ -69,24 +69,6 @@ export async function revealRange(start, end, calendarId = null) {
 }
 
 /**
- * Remove a revealed range by index. GM only.
- * @param {number} index - Range index to remove
- * @param {string} [calendarId] - Calendar ID (defaults to active)
- */
-export async function removeRange(index, calendarId = null) {
-  if (!game.user.isGM) return;
-  calendarId = calendarId || CalendarRegistry.getActiveId();
-  if (!calendarId) return;
-  const allRanges = foundry.utils.deepClone(game.settings.get(MODULE.ID, SETTINGS.FOG_OF_WAR_RANGES));
-  const calRanges = allRanges[calendarId] || [];
-  if (index < 0 || index >= calRanges.length) return;
-  calRanges.splice(index, 1);
-  allRanges[calendarId] = calRanges;
-  await game.settings.set(MODULE.ID, SETTINGS.FOG_OF_WAR_RANGES, allRanges);
-  Hooks.callAll(HOOKS.FOG_RANGE_CHANGED, { calendarId, ranges: allRanges[calendarId] });
-}
-
-/**
  * Clear all revealed ranges for a calendar. GM only.
  * @param {string} [calendarId] - Calendar ID (defaults to active)
  */

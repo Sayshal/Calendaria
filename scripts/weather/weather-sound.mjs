@@ -1,6 +1,6 @@
 import { HOOKS, MODULE, SCENE_FLAGS, SETTINGS } from '../constants.mjs';
 import { log } from '../utils/logger.mjs';
-import { expandLegacySoundKey } from './data/weather-presets.mjs';
+import { resolveWeatherSoundPath } from './data/weather-presets.mjs';
 import WeatherManager from './weather-manager.mjs';
 
 /** Crossfade duration in milliseconds. */
@@ -126,7 +126,7 @@ async function playSound(weather) {
     return;
   }
   const soundKey = weather?.soundFx || null;
-  const src = expandLegacySoundKey(soundKey);
+  const src = resolveWeatherSoundPath(soundKey);
   if (src === activeSoundKey && activeSound?.playing) return;
   const oldSound = activeSound;
   activeSound = null;

@@ -7,7 +7,7 @@ import { executeMacroById } from '../utils/macro-utils.mjs';
 import { canChangeWeather } from '../utils/permissions.mjs';
 import { CalendariaSocket } from '../utils/socket.mjs';
 import { CLIMATE_ZONE_TEMPLATES } from './data/climate-data.mjs';
-import { ALL_PRESETS, expandLegacySoundKey, getAllPresets, getPreset, WEATHER_CATEGORIES } from './data/weather-presets.mjs';
+import { ALL_PRESETS, resolveWeatherSoundPath, getAllPresets, getPreset, WEATHER_CATEGORIES } from './data/weather-presets.mjs';
 import { applyForecastVariance, applyTempModifier, dateSeed, generateForecast, generateIntradayWeather, generateWeather, mergeClimateConfig, seededRandom } from './weather-generator.mjs';
 
 /**
@@ -47,8 +47,8 @@ export default class WeatherManager {
    */
   static #resolveSoundFx(preset) {
     const overrides = (game.settings.get(MODULE.ID, SETTINGS.WEATHER_VISUAL_OVERRIDES) || {})[preset.id];
-    if (overrides?.soundFx !== undefined) return expandLegacySoundKey(overrides.soundFx);
-    return expandLegacySoundKey(preset.soundFx);
+    if (overrides?.soundFx !== undefined) return resolveWeatherSoundPath(overrides.soundFx);
+    return resolveWeatherSoundPath(preset.soundFx);
   }
 
   /**
@@ -1185,7 +1185,7 @@ export default class WeatherManager {
     const customPresets = this.getCustomPresets();
     for (const preset of customPresets) {
       if (preset.soundFx && !preset.soundFx.includes('/')) {
-        preset.soundFx = expandLegacySoundKey(preset.soundFx);
+        preset.soundFx = resolveWeatherSoundPath(preset.soundFx);
         changed = true;
       }
     }
@@ -1196,7 +1196,7 @@ export default class WeatherManager {
     let weatherChanged = false;
     for (const weather of Object.values(this.#currentWeatherByZone)) {
       if (weather?.soundFx && !weather.soundFx.includes('/')) {
-        weather.soundFx = expandLegacySoundKey(weather.soundFx);
+        weather.soundFx = resolveWeatherSoundPath(weather.soundFx);
         weatherChanged = true;
       }
     }

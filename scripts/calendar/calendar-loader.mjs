@@ -69,21 +69,6 @@ export async function loadBundledCalendars() {
 }
 
 /**
- * Load a specific calendar by ID if not already registered.
- * @param {string} id  Calendar ID
- * @returns {Promise<boolean>}  True if calendar was loaded or already exists
- */
-export async function loadCalendar(id) {
-  if (CalendarRegistry.has(id)) return true;
-  const data = await loadCalendarFile(id);
-  if (data) {
-    CalendarRegistry.register(id, data);
-    return true;
-  }
-  return false;
-}
-
-/**
  * Check if a calendar ID is a bundled calendar.
  * @param {string} id  Calendar ID
  * @returns {boolean} - If calendar is module-provided

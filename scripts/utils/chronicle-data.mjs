@@ -57,7 +57,6 @@ export function buildExcerpt(html, maxLength = 150) {
  * @returns {string} Compass direction label
  */
 function compassLabel(degrees) {
-  if (degrees == null) return '';
   let closest = 'N';
   let minDiff = 360;
   for (const [label, deg] of Object.entries(COMPASS_DIRECTIONS)) {

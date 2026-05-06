@@ -135,10 +135,3 @@ function calculateRandomizedPosition(moon, absoluteDay) {
   const offset = (combinedNoise - 0.5) * variance * 4;
   return (((basePosition + offset) % 1) + 1) % 1;
 }
-
-/**
- * Clear the position cache (call when calendar data changes).
- */
-export function clearPhaseCache() {
-  positionCache.clear();
-}

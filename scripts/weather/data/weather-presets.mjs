@@ -65,11 +65,13 @@ export const SOUND_FX_OPTIONS = [
 ];
 
 /**
- * Expand a legacy sound key to a full Foundry-resolvable path.
- * @param {string|null} key - Legacy sound key or full path
+ * Resolve a sound identifier to a full Foundry-loadable path. Bare identifiers
+ * (e.g. `'thunderstorm'`) are expanded against the built-in sound directory; values
+ * containing a `/` are treated as already-resolved paths and returned unchanged.
+ * @param {string|null} key - Bare sound identifier or full path
  * @returns {string|null} Full sound path or null
  */
-export function expandLegacySoundKey(key) {
+export function resolveWeatherSoundPath(key) {
   if (!key) return null;
   if (key.includes('/')) return key;
   return `${SOUND_BASE}/${key}.ogg`;

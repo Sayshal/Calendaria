@@ -274,23 +274,6 @@ export function rollPresetTemperature({ presetId, seasonClimate, zoneConfig, sea
 }
 
 /**
- * Generate weather for a specific date using zone config.
- * @param {object} options - Generation options
- * @param {object} [options.seasonClimate] - Season's base climate
- * @param {object} options.zoneConfig - Climate zone config
- * @param {string} [options.season] - Season name
- * @param {number} options.year - Year
- * @param {number} options.month - Month (0-indexed)
- * @param {number} options.dayOfMonth - Day of month (0-indexed)
- * @param {object[]} [options.customPresets] - Custom weather presets
- * @returns {object} Generated weather
- */
-export function generateWeatherForDate({ seasonClimate, zoneConfig, season, year, month, dayOfMonth, customPresets = [] }) {
-  const seed = dateSeed(year, month, dayOfMonth);
-  return generateWeather({ seasonClimate, zoneConfig, season, seed, customPresets });
-}
-
-/**
  * Generate weather for all 4 intraday periods with chained inertia.
  * Period order: night → morning → afternoon → evening.
  * @param {object} options - Generation options

@@ -26,28 +26,11 @@ export function registerImporter(ImporterClass) {
 }
 
 /**
- * Get an importer class by ID.
- * @param {string} id - Importer ID
- * @returns {object|undefined} - Importer object
- */
-export function getImporter(id) {
-  return IMPORTERS.get(id);
-}
-
-/**
  * Get all registered importers.
  * @returns {Array<object>} - All importer objects
  */
 export function getAvailableImporters() {
   return [...IMPORTERS.values()];
-}
-
-/**
- * Get importers that have detected their source module as installed.
- * @returns {Array<object>} - Active importers
- */
-export function getDetectedImporters() {
-  return getAvailableImporters().filter((importer) => importer.supportsLiveImport && importer.detect());
 }
 
 /**

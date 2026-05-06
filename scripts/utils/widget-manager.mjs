@@ -91,15 +91,6 @@ export function getWidgetByReplacement(elementId) {
 }
 
 /**
- * Check if an element has been replaced.
- * @param {string} elementId - Element ID
- * @returns {boolean} True if replaced
- */
-export function isElementReplaced(elementId) {
-  return replacements.has(elementId);
-}
-
-/**
  * Trigger refresh of all widget displays.
  */
 export function refreshWidgets() {
@@ -243,28 +234,6 @@ export function attachWidgetListeners(container) {
     }
     if (widget?.onAttach) widget.onAttach(el);
   }
-}
-
-/**
- * Detach widgets and call cleanup callbacks.
- * @param {HTMLElement} container - Container element
- */
-export function detachWidgetListeners(container) {
-  if (!container) return;
-  const widgetEls = container.querySelectorAll('[data-widget-id]');
-  for (const el of widgetEls) {
-    const widgetId = el.dataset.widgetId;
-    const widget = widgets.get(widgetId);
-    if (widget?.onDetach) widget.onDetach(el);
-  }
-}
-
-/**
- * Check if any widgets are registered.
- * @returns {boolean} True if widgets exist
- */
-export function hasWidgets() {
-  return widgets.size > 0;
 }
 
 /**

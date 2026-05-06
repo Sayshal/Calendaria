@@ -510,14 +510,6 @@ export const COLOR_CATEGORIES = {
   effects: 'CALENDARIA.ThemeEditor.Category.Effects'
 };
 
-/** @type {Object<string, string>} HUD component categories with labels. */
-export const COMPONENT_CATEGORIES = {
-  common: 'CALENDARIA.ThemeEditor.Component.Common',
-  domeHud: 'CALENDARIA.ThemeEditor.Component.DomeHud',
-  timeKeeper: 'CALENDARIA.Common.TimeKeeper',
-  miniCal: 'CALENDARIA.Common.MiniCal'
-};
-
 /** @type {Array<{key: string, label: string, category: string, component: string}>} Color variable definitions with display names and categories. */
 export const COLOR_DEFINITIONS = [
   { key: 'bg', label: 'CALENDARIA.ThemeEditor.Colors.Background', category: 'backgrounds', component: 'common' },
@@ -549,28 +541,6 @@ export const COLOR_DEFINITIONS = [
   { key: 'shadow', label: 'CALENDARIA.ThemeEditor.Colors.Shadow', category: 'effects', component: 'common' },
   { key: 'overlay', label: 'CALENDARIA.ThemeEditor.Colors.Overlay', category: 'effects', component: 'common' }
 ];
-
-/**
- * Get color definitions grouped by category.
- * @returns {Object<string, Array>} - Colors grouped by category
- */
-export function getColorsByCategory() {
-  const grouped = {};
-  for (const cat of Object.keys(COLOR_CATEGORIES)) grouped[cat] = [];
-  for (const def of COLOR_DEFINITIONS) if (grouped[def.category]) grouped[def.category].push(def);
-  return grouped;
-}
-
-/**
- * Get color definitions grouped by component.
- * @returns {Object<string, Array>} - Colors grouped by component
- */
-export function getColorsByComponent() {
-  const grouped = {};
-  for (const comp of Object.keys(COMPONENT_CATEGORIES)) grouped[comp] = [];
-  for (const def of COLOR_DEFINITIONS) if (grouped[def.component]) grouped[def.component].push(def);
-  return grouped;
-}
 
 /**
  * Theme preset for import/export functionality.
@@ -667,18 +637,6 @@ export function lightenColor(hex, percent) {
   const { r, g, b } = hexToRgb(hex);
   const factor = percent / 100;
   return rgbToHex(r + (255 - r) * factor, g + (255 - g) * factor, b + (255 - b) * factor);
-}
-
-/**
- * Darken a hex color by a percentage.
- * @param {string} hex - Hex color
- * @param {number} percent - Percentage to darken (0-100)
- * @returns {string} - Darkened hex color
- */
-export function darkenColor(hex, percent) {
-  const { r, g, b } = hexToRgb(hex);
-  const factor = 1 - percent / 100;
-  return rgbToHex(r * factor, g * factor, b * factor);
 }
 
 /**
@@ -855,48 +813,12 @@ export async function deleteCustomTheme(key) {
 }
 
 /**
- * Save color overrides for a custom theme.
- * @param {string} themeKey - Custom theme key
- * @param {object} overrides - Color overrides (only keys that differ from base)
- */
-export async function saveCustomThemeColors(themeKey, overrides) {
-  const themes = getCustomThemes();
-  if (!themes[themeKey]) return;
-  themes[themeKey].colors = overrides;
-  await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS, themes);
-}
-
-/**
  * Apply a preset theme by name (visual only, no save).
  * @param {string} presetName - Preset name
  */
 export function applyPreset(presetName) {
   const colors = getColorsForTheme(presetName);
   applyCustomColors(colors);
-}
-
-/**
- * Get current theme colors.
- * @returns {Object<string, string>} Full resolved colors
- */
-export function getCurrentColors() {
-  const themeMode = game.settings.get(MODULE.ID, SETTINGS.THEME_MODE) || 'dark';
-  return getColorsForTheme(themeMode);
-}
-
-/**
- * Reset the active custom theme's overrides, or re-apply a built-in preset.
- */
-export async function resetTheme() {
-  const themeMode = game.settings.get(MODULE.ID, SETTINGS.THEME_MODE) || 'dark';
-  if (isCustomThemeKey(themeMode)) {
-    const themes = getCustomThemes();
-    if (themes[themeMode]) {
-      themes[themeMode].colors = {};
-      await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS, themes);
-    }
-  }
-  applyCustomColors(getColorsForTheme(themeMode));
 }
 
 /**

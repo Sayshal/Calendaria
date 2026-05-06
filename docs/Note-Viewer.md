@@ -1,6 +1,6 @@
 # Note Viewer
 
-Standalone app for browsing, filtering, and managing calendar notes.
+Standalone app for filtering and managing calendar notes.
 
 ---
 
@@ -18,7 +18,7 @@ Four areas:
 
 | Area           | Description                                                           |
 | -------------- | --------------------------------------------------------------------- |
-| Search bar     | Text search input and close button; also serves as the drag handle    |
+| Search bar     | Text search input and close button; doubles as the drag handle        |
 | Filter sidebar | Dropdowns and checkboxes for narrowing results                        |
 | Results list   | Scrollable list of matching notes with batch-loaded rendering         |
 | Footer         | Note count, selection mode toggle, and bulk action controls (GM only) |

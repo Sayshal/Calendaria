@@ -219,16 +219,6 @@ export function createNoteStub(page) {
 }
 
 /**
- * Get repeat options from the data model with localized labels.
- * @param {string} [selected]  Currently selected repeat value
- * @returns {object[]}  Array of { value, label, selected }
- */
-export function getRepeatOptions(selected = 'never') {
-  const choices = CONFIG.JournalEntryPage.dataModels['calendaria.calendarnote']._schema.fields.repeat.choices;
-  return choices.map((value) => ({ value, label: localize(`CALENDARIA.Notes.Repeat.${value[0].toUpperCase()}${value.slice(1)}`), selected: value === selected }));
-}
-
-/**
  * Default preset defaults shape — all null means "don't override".
  * @returns {object} Empty defaults with all null values
  */
@@ -444,22 +434,6 @@ export async function updatePreset(presetId, updates) {
   await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_PRESETS, raw);
   Hooks.callAll(HOOKS.PRESETS_CHANGED, getAllPresets());
   return cat;
-}
-
-/**
- * Reorder presets by providing an ordered array of IDs.
- * @param {string[]} orderedIds  Preset IDs in desired order
- * @returns {Promise<void>}
- */
-export async function reorderPresets(orderedIds) {
-  const raw = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_PRESETS) || [];
-  for (let i = 0; i < orderedIds.length; i++) {
-    const cat = raw.find((c) => c.id === orderedIds[i]);
-    if (cat) cat.sortOrder = i;
-  }
-  invalidatePresetCache();
-  await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_PRESETS, raw);
-  Hooks.callAll(HOOKS.PRESETS_CHANGED, getAllPresets());
 }
 
 /**
