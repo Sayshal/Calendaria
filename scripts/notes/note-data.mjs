@@ -47,17 +47,18 @@ export function getDefaultNoteData() {
 /**
  * Validate note data structure.
  * @param {object} noteData  Note data to validate
+ * @param {string} [calendarId]  Optional calendar id to validate dates against; defaults to active
  * @returns {object}  { valid: boolean, errors: string[] }
  */
-export function validateNoteData(noteData) {
+export function validateNoteData(noteData, calendarId) {
   const errors = [];
   if (!noteData) {
     errors.push('Note data is required');
     return { valid: false, errors };
   }
   if (!noteData.startDate) errors.push('Start date is required');
-  else if (!isValidDate(noteData.startDate)) errors.push('Start date is invalid');
-  if (noteData.endDate && !isValidDate(noteData.endDate)) errors.push('End date is invalid');
+  else if (!isValidDate(noteData.startDate, calendarId)) errors.push('Start date is invalid');
+  if (noteData.endDate && !isValidDate(noteData.endDate, calendarId)) errors.push('End date is invalid');
   if (noteData.allDay !== undefined && typeof noteData.allDay !== 'boolean') errors.push('allDay must be a boolean');
   const validRepeatValues = CONFIG.JournalEntryPage.dataModels['calendaria.calendarnote']._schema.fields.repeat.choices;
   if (noteData.repeat && !validRepeatValues.includes(noteData.repeat)) errors.push(`repeat must be one of: ${validRepeatValues.join(', ')}`);

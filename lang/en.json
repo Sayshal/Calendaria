@@ -678,7 +678,7 @@
   "CALENDARIA.Editor.Field.WeekdayName": "Weekday Name",
   "CALENDARIA.Editor.Field.WeekName": "Week Name",
   "CALENDARIA.Editor.Field.WeekStart": "Week Starts On",
-  "CALENDARIA.Editor.Field.WeekStartDefault": "Default (first weekday)",
+  "CALENDARIA.Editor.Field.WeekStartDefault": "First Weekday",
   "CALENDARIA.Editor.Field.WeeksPerMonth": "Weeks Per Month",
   "CALENDARIA.Editor.Field.WeeksRepeat": "Repeat",
   "CALENDARIA.Editor.Field.WeeksType": "Progression Mode",

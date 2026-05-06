@@ -339,7 +339,7 @@ export default class NoteManager {
       ui.notifications.warn('CALENDARIA.Permissions.NoAccess', { localize: true });
       return null;
     }
-    const validation = validateNoteData(noteData);
+    const validation = validateNoteData(noteData, calendarId);
     if (!validation.valid) log(1, `Invalid note data: ${validation.errors.join(', ')}`);
     const sanitized = sanitizeNoteData(noteData);
     if (source === 'ui' && !sanitized.categories?.length && !sanitized.linkedFestival) {

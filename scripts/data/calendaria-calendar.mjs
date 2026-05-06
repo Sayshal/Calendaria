@@ -1160,9 +1160,10 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     const components = typeof time === 'number' ? this.timeToComponents(time) : time;
     const isLeap = this.isLeapYear(components.year);
     let count = 0;
-    for (let i = 0; i < components.month; i++) {
+    const upTo = Math.min(components.month, months.length);
+    for (let i = 0; i < upTo; i++) {
       const month = months[i];
-      if (month.type !== 'intercalary') continue;
+      if (!month || month.type !== 'intercalary') continue;
       const days = isLeap && month.leapDays != null ? month.leapDays : month.days;
       count += days;
     }

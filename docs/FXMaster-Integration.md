@@ -40,7 +40,7 @@ All 35 built-in presets include tuned density and speed defaults. Saved custom p
 
 ## Global Disable
 
-The **Enable Weather FX** world setting (Settings Panel > Weather tab > Weather Generation fieldset) is a global toggle. When disabled, all FXMaster particle effects and weather sounds are stopped. The per-scene "Disable Weather FX" flag still overrides independently.
+The **Enable Weather FX** world setting (Settings Panel > Weather tab > Weather Generation fieldset) is a global toggle. When disabled, all FXMaster particle effects and weather sounds are stopped unless a scene's Weather FX Override is set to On.
 
 ---
 
@@ -54,9 +54,15 @@ Individual scenes can override the global Top-Down Mode setting via **Scene Conf
 
 ---
 
-## Per-Scene Disable
+## Per-Scene Override
 
-Individual scenes can disable weather FX via a checkbox in the **Scene Configuration > Calendaria tab > Disable Weather FX**. When enabled:
+Individual scenes can override the global Enable Weather FX setting via the **Scene Configuration > Calendaria tab > Weather FX Override** select:
+
+- **Inherit (Global Setting)**: Follow the module-level Enable Weather FX toggle
+- **On**: Force FXMaster weather effects active on this scene even when the global setting is off
+- **Off**: Force FXMaster weather effects off on this scene even when the global setting is on
+
+When the resolved state is off:
 
 - FXMaster weather effects are not sent to this scene
 - Ambient weather sounds are silenced on this scene
@@ -77,6 +83,6 @@ When weather changes, the old sound fades out over 2 seconds while the new sound
 
 - **Sound Effects** setting (Settings Panel > Weather tab > Weather Generation) enables/disables ambient sound globally
 - **Sound Volume** slider (Settings Panel > Weather tab) controls weather sound volume
-- Per-scene **Disable Weather Sound** flag suppresses sound on a specific scene without affecting visual effects
+- Per-scene **Disable Weather Sound** flag suppresses sound on a specific scene without affecting visual effects; sounds are also silenced when the resolved Weather FX Override is Off
 - Sounds play through Foundry's environment audio channel
 - Sound assignments can be customized per-preset via the [Weather Editor](Weather-Editor)

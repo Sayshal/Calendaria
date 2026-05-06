@@ -118,17 +118,69 @@ export default class SimpleCalendarImporter extends BaseImporter {
    * @returns {{year: number, month: number, dayOfMonth: number}|null} Current date
    */
   extractCurrentDate(data, calendarIndex = 0) {
-    if (data.currentDate) return data.currentDate;
     const calendars = data.calendars || data;
     const calendar = Array.isArray(calendars) ? calendars[calendarIndex] : calendars;
-    if (calendar?.currentDate) {
-      const cd = calendar.currentDate;
-      const secondsPerHour = (calendar.time?.minutesInHour ?? 60) * (calendar.time?.secondsInMinute ?? 60);
-      const hour = Math.floor((cd.seconds ?? 0) / secondsPerHour);
-      const minute = Math.floor(((cd.seconds ?? 0) % secondsPerHour) / (calendar.time?.secondsInMinute ?? 60));
-      return { year: cd.year, month: cd.month, dayOfMonth: cd.day ?? 0, hour, minute };
+    const sourceCd = data.currentDate || calendar?.currentDate;
+    if (!sourceCd) return null;
+    const monthMap = this.#buildMonthMap(calendar?.months);
+    const remapped = this.#remapMonthDay(sourceCd.month ?? 0, sourceCd.day ?? 0, monthMap);
+    if (data.currentDate && !calendar?.time) return { year: sourceCd.year, month: remapped.month, dayOfMonth: remapped.dayOfMonth, hour: sourceCd.hour ?? 0, minute: sourceCd.minute ?? 0 };
+    const secondsPerHour = (calendar?.time?.minutesInHour ?? 60) * (calendar?.time?.secondsInMinute ?? 60);
+    const hour = Math.floor((sourceCd.seconds ?? 0) / secondsPerHour);
+    const minute = Math.floor(((sourceCd.seconds ?? 0) % secondsPerHour) / (calendar?.time?.secondsInMinute ?? 60));
+    return { year: sourceCd.year, month: remapped.month, dayOfMonth: remapped.dayOfMonth, hour, minute };
+  }
+
+  /**
+   * Build a remap from SC month index (incl. intercalaries) to Calendaria month index (regular only).
+   * @param {object[]} scMonths - Source SC months array
+   * @returns {{regularIndex: Map<number, number>, lastRegularBefore: Map<number, number>, lastRegularDays: Map<number, number>, intercalary: Set<number>, regularCount: number}} Index maps and intercalary set
+   * @private
+   */
+  #buildMonthMap(scMonths = []) {
+    const regularIndex = new Map();
+    const lastRegularBefore = new Map();
+    const lastRegularDays = new Map();
+    const intercalary = new Set();
+    let regIdx = 0;
+    let lastReg = 0;
+    let lastRegDays = 0;
+    let hasSeenRegular = false;
+    for (let i = 0; i < scMonths.length; i++) {
+      if (scMonths[i]?.intercalary) {
+        intercalary.add(i);
+        lastRegularBefore.set(i, hasSeenRegular ? lastReg : 0);
+        lastRegularDays.set(i, lastRegDays);
+      } else {
+        regularIndex.set(i, regIdx);
+        lastReg = regIdx;
+        lastRegDays = scMonths[i]?.numberOfDays || 0;
+        hasSeenRegular = true;
+        regIdx++;
+      }
     }
-    return null;
+    return { regularIndex, lastRegularBefore, lastRegularDays, intercalary, regularCount: regIdx };
+  }
+
+  /**
+   * Remap an SC (month, day) pair to a Calendaria (month, dayOfMonth) pair.
+   * @param {number} scMonth - Source month index
+   * @param {number} scDay - Source day index (0-based)
+   * @param {object} monthMap - From {@link #buildMonthMap}
+   * @returns {{month: number, dayOfMonth: number, wasIntercalary: boolean}} Remapped position and origin flag
+   * @private
+   */
+  #remapMonthDay(scMonth, scDay, monthMap) {
+    if (monthMap.intercalary.has(scMonth)) {
+      const month = monthMap.lastRegularBefore.get(scMonth) ?? 0;
+      const lastDays = monthMap.lastRegularDays.get(scMonth) ?? 0;
+      const dayOfMonth = lastDays > 0 ? lastDays - 1 : 0;
+      return { month, dayOfMonth, wasIntercalary: true };
+    }
+    if (monthMap.regularIndex.has(scMonth)) return { month: monthMap.regularIndex.get(scMonth), dayOfMonth: scDay, wasIntercalary: false };
+    const fallback = monthMap.regularCount > 0 ? monthMap.regularCount - 1 : 0;
+    log(2, `Simple Calendar import: SC month ${scMonth} out of bounds (regularCount=${monthMap.regularCount}); clamped to ${fallback}`);
+    return { month: fallback, dayOfMonth: scDay, wasIntercalary: false };
   }
 
   /**
@@ -189,6 +241,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
     });
     const months = this.#transformMonths(calendar.months, weekdayNumericToIndex);
     const daysPerYear = months.reduce((sum, m) => sum + (m.days || 0), 0);
+    const festivals = this.#extractFestivals(calendar.months);
     const toKeyedObject = (arr) => {
       const out = {};
       for (const item of arr) out[foundry.utils.randomID()] = item;
@@ -202,7 +255,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
       leapYearConfig: this.#transformLeapYearConfig(calendar.leapYear),
       seasons: { values: toKeyedObject(this.#transformSeasons(calendar.seasons, calendar.months)) },
       moons: this.#transformMoons(calendar.moons),
-      festivals: this.#extractFestivals(calendar.months),
+      festivals,
       eras: this.#transformEras(calendar.year),
       daylight: this.#transformDaylight(calendar.seasons),
       metadata: {
@@ -490,24 +543,25 @@ export default class SimpleCalendarImporter extends BaseImporter {
    */
   async extractNotes(data) {
     const notes = data.notes || {};
-    log(3, `extractNotes - Available note calendars in data:`, Object.keys(notes));
+    const calendars = data.calendars || (data.months ? [data] : []);
+    const monthMaps = new Map();
+    for (const cal of calendars) monthMaps.set(cal.id || 'default', this.#buildMonthMap(cal.months));
+    const fallbackMap = monthMaps.values().next().value || this.#buildMonthMap([]);
     const allNotes = [];
     for (const [calId, calendarNotes] of Object.entries(notes)) {
-      log(3, `Processing notes from SC calendar: ${calId} (${calendarNotes?.length || 0} notes)`);
+      const monthMap = monthMaps.get(calId) || fallbackMap;
       for (const note of calendarNotes) {
         const noteData = SimpleCalendarImporter.#getFlag(note, 'noteData');
-        if (!noteData) {
-          log(3, `Skipping note without noteData flag: ${note.name}`);
-          continue;
-        }
+        if (!noteData) continue;
         const content = note.pages?.[0]?.text?.content || '';
-        const hasContent = content && content.trim().length > 0;
-        const suggestedType = hasContent ? 'note' : 'festival';
+        const startTransformed = this.#transformNoteDate(noteData.startDate, monthMap);
+        const endTransformed = this.#transformNoteDate(noteData.endDate, monthMap);
+        const suggestedType = SimpleCalendarImporter.#classifyNote({ repeats: noteData.repeats, wasIntercalary: startTransformed.wasIntercalary });
         allNotes.push({
           name: note.name,
           content,
-          startDate: this.#transformNoteDate(noteData.startDate),
-          endDate: this.#transformNoteDate(noteData.endDate),
+          startDate: startTransformed.date,
+          endDate: endTransformed.date,
           allDay: noteData.allDay ?? true,
           repeat: this.#transformRepeatRule(noteData.repeats),
           categories: noteData.categories || [],
@@ -518,6 +572,18 @@ export default class SimpleCalendarImporter extends BaseImporter {
     }
     log(3, `Extracted ${allNotes.length} notes from Simple Calendar data`);
     return allNotes;
+  }
+
+  /**
+   * Choose `note` vs `festival` for an SC entry.
+   * @param {{repeats: number, wasIntercalary: boolean}} info - SC repeat code and intercalary-anchor flag
+   * @returns {'note'|'festival'} Suggested type
+   * @private
+   */
+  static #classifyNote({ wasIntercalary, repeats }) {
+    if (wasIntercalary) return 'festival';
+    if (repeats === 3) return 'festival';
+    return 'note';
   }
 
   /**
@@ -534,7 +600,6 @@ export default class SimpleCalendarImporter extends BaseImporter {
     const categoryMap = this.#scNoteCategories.length ? await this.#importNoteCategories(this.#scNoteCategories) : new Map();
     const calendar = CalendarManager.getCalendar(calendarId);
     const yearZero = calendar?.years?.yearZero ?? 0;
-    log(3, `Calendar yearZero: ${yearZero}`);
     for (const note of notes) {
       try {
         const startDate = { ...note.startDate, year: note.startDate.year + yearZero };
@@ -598,12 +663,18 @@ export default class SimpleCalendarImporter extends BaseImporter {
   }
 
   /**
-   * Transform SC note date to Calendaria format.
+   * Transform SC note date to Calendaria format with month-index remap.
    * @param {object} date - SC date object
-   * @returns {object} Calendaria date object
+   * @param {object} monthMap - From {@link #buildMonthMap}
+   * @returns {{date: {year:number, month:number, dayOfMonth:number, hour:number, minute:number, second:number}, wasIntercalary: boolean}} Calendaria-format date plus intercalary-origin flag
    */
-  #transformNoteDate(date = {}) {
-    return { year: date.year ?? 0, month: date.month ?? 0, dayOfMonth: date.day ?? 0, hour: date.hour ?? 0, minute: date.minute ?? 0, second: date.seconds ?? 0 };
+  #transformNoteDate(date = {}, monthMap = null) {
+    const safeMap = monthMap || this.#buildMonthMap([]);
+    const remapped = this.#remapMonthDay(date.month ?? 0, date.day ?? 0, safeMap);
+    return {
+      date: { year: date.year ?? 0, month: remapped.month, dayOfMonth: remapped.dayOfMonth, hour: date.hour ?? 0, minute: date.minute ?? 0, second: date.seconds ?? 0 },
+      wasIntercalary: remapped.wasIntercalary
+    };
   }
 
   /**

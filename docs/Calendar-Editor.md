@@ -139,6 +139,7 @@ Configure year settings, leap year rules, and named years.
 
 - **Year Zero.** The reference year (year 0 in your calendar's internal numbering)
 - **Year Zero Weekday.** Which weekday falls on day 1 of year zero (determines weekday calculations)
+- **Week Starts On.** Rotates the calendar grid so the chosen weekday appears in the first column of MiniCal and BigCal. Display only. Defaults to the first weekday in the Weekdays tab when unset. The underlying weekday cycle order is unchanged.
 
 ### Leap Year Configuration
 

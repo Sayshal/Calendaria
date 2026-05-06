@@ -1,7 +1,20 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
   <fieldset>
     <legend data-tooltip aria-label="{{localize 'CALENDARIA.Editor.SectionTooltip.Weekdays'}}">
-      {{localize "CALENDARIA.Common.Weekdays"}}</legend>
+      {{localize "CALENDARIA.Common.Weekdays"}}
+    </legend>
+
+    <div class="form-group">
+      <label for="editor-week-start">{{localize "CALENDARIA.Editor.Field.WeekStart"}}</label>
+      <div class="form-fields">
+        <select id="editor-week-start" name="years.weekStartWeekdayId">
+          {{#each weekStartOptions}}
+            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{localize this.label}}</option>
+          {{/each}}
+        </select>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Editor.Hint.WeekStart"}}</p>
+    </div>
 
     <div class="items-list weekdays-list">
       <div class="list-header flexrow">

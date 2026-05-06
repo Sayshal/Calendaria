@@ -113,7 +113,7 @@ When set to Edit or View, notes always open in that mode. New notes always open 
 
 ### Advance Time on Rest
 
-Advance world time when players take short/long rests.
+Advance world time when players take short or long rests. Long rests use the Rest Advance Mode and Rest Hours settings; short rests use the Short Rest Advance Mode and Short Rest Minutes settings.
 
 - Default: `false`
 
@@ -140,7 +140,7 @@ How frequently the time system processes updates (in seconds).
 
 ### Rest Advance Mode
 
-How long rests advance time.
+How long rests advance time. Short rests are governed by Short Rest Advance Mode below.
 
 - **Automatic** (default): Advance by the duration the active system reports. PF1E uses the rest dialog hours, dnd5e uses the rest variant duration, PF2E uses 8 hours. If the system reports no duration, time does not advance.
 - **8 AM**: Skip to 8 AM the next day.
@@ -149,10 +149,24 @@ How long rests advance time.
 
 ### Rest Hours
 
-Number of hours to advance when Rest Advance Mode is set to **Custom**. Set to 0 to suppress time advancement entirely while still firing the rest hook.
+Number of hours to advance on a long rest when Rest Advance Mode is set to **Custom**. Set to 0 to suppress time advancement entirely while still firing the rest hook.
 
 - Minimum: `0`
 - Default: `8`
+
+### Short Rest Advance Mode
+
+How short rests advance time.
+
+- **Automatic**: Advance by the duration the active system reports for the short rest. If the system reports no duration, time does not advance.
+- **Custom** (default): Advance a fixed number of minutes set via Short Rest Minutes.
+
+### Short Rest Minutes
+
+Number of minutes to advance on a short rest when Short Rest Advance Mode is set to Custom. Set to 0 to suppress time advancement entirely while still firing the rest hook.
+
+- Minimum: `0`
+- Default: `60`
 
 ### Advance Bastion Orders (dnd5e only)
 
@@ -191,7 +205,7 @@ When enabled, the real-time clock continues running during active combat. Foundr
 
 Generate weather on day change based on climate zone and season configuration.
 
-- Default: `true`
+- Default: `false`
 
 #### Weather Inertia
 
@@ -209,9 +223,9 @@ Maximum number of days of weather history to retain.
 
 #### Enable Weather FX
 
-Global toggle for FXMaster particle effects and weather sounds. When disabled, stops all FXMaster weather effects and ambient sounds. Per-scene flags still override independently.
+Global toggle for FXMaster particle effects and weather sounds. When disabled, stops all FXMaster weather effects and ambient sounds unless a scene's Weather FX Override is set to On.
 
-- Default: `true`
+- Default: `false`
 
 #### Sound Effects
 
@@ -334,7 +348,7 @@ Button to open the [Weather Probability dialog](Weather-System#probability-guide
 
 Adjust scene darkness based on time of day.
 
-- Default: `true`
+- Default: `false`
 
 #### Sync All Scenes
 
@@ -346,13 +360,13 @@ Sync darkness across all scenes, not just the active one.
 
 Adjust scene darkness based on current weather conditions.
 
-- Default: `true`
+- Default: `false`
 
 #### Sync Scene Ambience with Weather
 
 Update scene environment lighting (hue/saturation) based on weather and climate zone.
 
-- Default: `true`
+- Default: `false`
 
 #### Sync Scene Ambience with Time of Day
 
@@ -364,7 +378,7 @@ Shift scene ambient color based on time of day (warm tones at dawn/dusk, cool bl
 
 Allow moon phases to reduce nighttime darkness. Per-moon brightness is configured in Calendar Editor.
 
-- Default: `true`
+- Default: `false`
 
 #### Default Brightness Multiplier
 
@@ -518,7 +532,7 @@ Clears all revealed ranges and re-creates the initial range from the campaign st
 
 Master toggle for cinematic time skip overlay.
 
-- Default: `true`
+- Default: `false`
 
 ### Threshold
 
@@ -548,6 +562,7 @@ Toggle individual animation elements on/off:
 - **Moon Orbs**: Moon phase orbs with trailing arcs
 - **Weather Transitions**: Weather and season visual transitions
 - **Event Cards**: Note title cards displayed during the animation
+- Default: All on except Moon Orbs, Weather Transitions, and Event Cards (off)
 
 ### Event Weighting
 
@@ -561,7 +576,7 @@ When enabled, rest-based time advances trigger the cinematic regardless of the t
 
 - Default: `false`
 
-Rest integration supports D&D 5e, Pathfinder 2e, and Pathfinder 1e long rests.
+Rest integration supports D&D 5e long and short rests, Pathfinder 2e rests, and Pathfinder 1e long rests.
 
 ---
 
@@ -621,7 +636,7 @@ How to display in-game time on chat messages.
 
 Include hours/minutes in chat timestamps.
 
-- Default: `true`
+- Default: `false`
 
 ---
 
@@ -700,7 +715,7 @@ Loads settings from a previously exported JSON file.
 
 Show HUD on world load.
 
-- Default: `false`
+- Default: `true`
 
 > [!NOTE]
 > This setting is also accessible from **Settings > Module Settings > Calendaria** in Foundry's native settings menu.
@@ -840,13 +855,13 @@ Controls weather particle effects in the HUD dome and Sun Dial. Sky, sun, moon, 
 - `Full`: All weather particle effects at normal density
 - `Reduced`: Lower particle density for better performance
 - `Off`: No weather particle effects
-- Default: `Full`
+- Default: `Off`
 
 #### Event Border Glow
 
 Glow effect around the HUD border when events exist on the current day. Disabling removes only the glow; event icons, tooltips, and note actions remain.
 
-- Default: `true`
+- Default: `false`
 
 #### Dome Below Bar
 
@@ -1554,11 +1569,14 @@ Override the calendar's default climate zone for this specific scene. Affects we
 
 - Default: Uses calendar's default zone
 
-### Disable Weather FX
+### Weather FX Override
 
-Disable FXMaster weather particle effects on this specific scene. Takes effect immediately.
+Force FXMaster weather particle effects on or off for this specific scene, or inherit the global Enable Weather FX setting. Takes effect immediately.
 
-- Default: `false`
+- `Inherit (Global Setting)`: Follow the global Enable Weather FX toggle
+- `On`: Force weather FX active on this scene
+- `Off`: Force weather FX off on this scene
+- Default: `Inherit (Global Setting)`
 
 ### FXMaster Top-Down Override
 
@@ -1571,6 +1589,6 @@ Override the global Top-Down Mode setting for FXMaster effects on this specific 
 
 ### Disable Weather Sound
 
-Suppress weather ambient sounds on this specific scene without affecting visual effects. Independent of the "Disable Weather FX" flag.
+Suppress weather ambient sounds on this specific scene without affecting visual effects. Independent of the Weather FX Override; sounds are also silenced when the resolved override is Off.
 
 - Default: `false`

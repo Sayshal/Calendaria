@@ -27,7 +27,7 @@ Any time jump that meets the threshold triggers the cinematic, including the tim
 
 ### Rest-Time Trigger
 
-When the **Trigger on Rest** setting is enabled, rest-initiated time advances (long rests) trigger the cinematic regardless of threshold. Any forward advance during rest plays the overlay.
+When the **Trigger on Rest** setting is enabled, rest-initiated time advances trigger the cinematic regardless of threshold. Any forward advance during rest plays the overlay. Rest integration supports D&D 5e long and short rests, Pathfinder 2e rests, and Pathfinder 1e long rests.
 
 The "Trigger on Rest" setting requires **Advance Time on Rest** (in the Time tab) to be enabled. When that setting is off, "Trigger on Rest" is disabled with a tooltip explaining the dependency.
 

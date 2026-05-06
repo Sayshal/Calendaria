@@ -286,16 +286,17 @@ export function getCurrentDate() {
 }
 
 /**
- * Check if a date is valid for the current calendar.
+ * Check if a date is valid for a calendar.
  * @param {object} date  Date to validate
+ * @param {string} [calendarId]  Optional calendar id to validate against; defaults to active
  * @returns {boolean}  True if valid
  */
-export function isValidDate(date) {
+export function isValidDate(date, calendarId) {
   if (!date || typeof date !== 'object') return false;
   if (typeof date.year !== 'number') return false;
   if (typeof date.month !== 'number') return false;
   if (typeof date.dayOfMonth !== 'number') return false;
-  const calendar = CalendarManager.getActiveCalendar();
+  const calendar = calendarId ? CalendarManager.getCalendar(calendarId) : CalendarManager.getActiveCalendar();
   if (!calendar) return true;
   const yearZero = calendar.years?.yearZero ?? 0;
   const internalYear = date.year - yearZero;

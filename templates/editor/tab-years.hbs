@@ -1,7 +1,8 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
   <fieldset>
     <legend data-tooltip aria-label="{{localize 'CALENDARIA.Editor.SectionTooltip.YearSettings'}}">
-      {{localize "CALENDARIA.Editor.Section.YearSettings"}}</legend>
+      {{localize "CALENDARIA.Editor.Section.YearSettings"}}
+    </legend>
 
     <div class="form-group">
       <label for="editor-year-zero">{{localize "CALENDARIA.Editor.Field.YearZero"}}</label>
@@ -21,18 +22,6 @@
         </select>
       </div>
       <p class="hint">{{localize "CALENDARIA.Editor.Hint.YearZeroWeekday"}}</p>
-    </div>
-
-    <div class="form-group">
-      <label for="editor-week-start">{{localize "CALENDARIA.Editor.Field.WeekStart"}}</label>
-      <div class="form-fields">
-        <select id="editor-week-start" name="years.weekStartWeekdayId">
-          {{#each weekStartOptions}}
-            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{localize this.label}}</option>
-          {{/each}}
-        </select>
-      </div>
-      <p class="hint">{{localize "CALENDARIA.Editor.Hint.WeekStart"}}</p>
     </div>
 
     <div class="form-group">
@@ -56,7 +45,8 @@
 
   <fieldset>
     <legend data-tooltip aria-label="{{localize 'CALENDARIA.Editor.SectionTooltip.LeapYear'}}">
-      {{localize "CALENDARIA.Editor.Section.LeapYear"}}</legend>
+      {{localize "CALENDARIA.Editor.Section.LeapYear"}}
+    </legend>
 
     <div class="form-group">
       <label for="editor-leap-rule">{{localize "CALENDARIA.Editor.Field.LeapRule"}}</label>

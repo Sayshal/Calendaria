@@ -31,9 +31,9 @@ import {
   getDayWeather,
   getFestivalNoteForDay,
   getLeadingDays,
-  getWeekStartIndex,
   getVisibleMoons,
   getVisibleNotes,
+  getWeekStartIndex,
   hasFogRevealedMonthInDirection,
   hasMoonIconMarkers,
   hasWidgetsForPoint,
@@ -723,7 +723,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       const weekDayFogged = fogEnabled && !isRevealed(currentYear, currentMonth, currentDayOfMonth);
       const dayNotes = weekDayFogged ? [] : this._getNotesForDay(notes, currentYear, currentMonth, currentDayOfMonth);
       const monthWeekdays = calendar.getWeekdaysForMonth?.(currentMonth) ?? calendar.weekdaysArray ?? [];
-      const weekdayData = monthWeekdays[weekdayIndex];
+      const weekdayData = monthWeekdays.length ? monthWeekdays[(weekdayIndex + weekStartIdx) % monthWeekdays.length] : null;
       const dayName = weekdayData?.name ? localize(weekdayData.name) : '';
       const monthName = calendar.monthsArray[currentMonth]?.name ? localize(calendar.monthsArray[currentMonth].name) : '';
       const isToday = this._isToday(currentYear, currentMonth, currentDayOfMonth);
