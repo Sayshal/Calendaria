@@ -1140,6 +1140,7 @@ export default class CalendariaSettings {
         type: new NumberField({ integer: true, min: 0, initial: 8 })
       },
       restAdvanceModeMigrationComplete: { name: 'Rest Advance Mode Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
+      weatherFxFlagMigrationComplete: { name: 'Weather FX Flag Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       removedCalendarsMigrationComplete: { name: 'Removed Calendars Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       removedCalendarOverridesMigrationComplete: { name: 'Removed Calendar Overrides Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       zoneTempBlankInheritanceMigrationComplete: { name: 'Zone Temp Blank Inheritance Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },

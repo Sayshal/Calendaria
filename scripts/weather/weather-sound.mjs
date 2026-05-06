@@ -109,7 +109,7 @@ async function fadeOutAndStop(sound) {
  */
 function isSoundDisabledForScene(scene) {
   if (!scene) return false;
-  return scene.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_SOUND_DISABLED) || scene.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_DISABLED);
+  return scene.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_SOUND_DISABLED) || scene.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_OVERRIDE) === 'off';
 }
 
 /**

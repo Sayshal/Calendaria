@@ -787,6 +787,33 @@ async function migrateFestivalNotesAsSourceOfTruth() {
 }
 
 /**
+ * Migrate per-scene `weatherFxDisabled: true` flags to `weatherFxOverride: 'off'`.
+ * @since 1.0.12
+ * @deprecated Remove in 1.2.0
+ * @returns {Promise<void>}
+ */
+async function migrateWeatherFxFlag() {
+  const KEY = 'weatherFxFlagMigrationComplete';
+  if (!game.user?.isGM) return;
+  if (game.settings.get(MODULE.ID, KEY)) return;
+  const scenes = game.scenes ?? [];
+  let migrated = 0;
+  for (const scene of scenes) {
+    const flags = scene.flags?.[MODULE.ID] ?? {};
+    if (flags.weatherFxOverride !== undefined) continue;
+    if (flags.weatherFxDisabled === true) {
+      await scene.setFlag(MODULE.ID, 'weatherFxOverride', 'off');
+      await scene.unsetFlag(MODULE.ID, 'weatherFxDisabled');
+      migrated++;
+    } else if (flags.weatherFxDisabled === false) {
+      await scene.unsetFlag(MODULE.ID, 'weatherFxDisabled');
+    }
+  }
+  if (migrated > 0) log(3, `Migrated weatherFxDisabled flag on ${migrated} scene(s) to weatherFxOverride='off'`);
+  await game.settings.set(MODULE.ID, KEY, true);
+}
+
+/**
  * Run all migrations.
  * @returns {Promise<void>}
  */
@@ -804,6 +831,7 @@ export async function runAllMigrations() {
   await migrateFestivalNoteYearZero();
   await migrateNoteDurationNormalization();
   await migrateFestivalNotesAsSourceOfTruth();
+  await migrateWeatherFxFlag();
   await recoverOrphanedPresets();
 }
 

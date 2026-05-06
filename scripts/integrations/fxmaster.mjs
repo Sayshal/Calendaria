@@ -23,6 +23,20 @@ function getFxApi() {
 }
 
 /**
+ * Resolve whether FX should play on a given scene.
+ * Per-scene `WEATHER_FX_OVERRIDE` flag takes precedence: 'on' forces enabled, 'off' forces disabled,
+ * 'inherit' (or missing) falls back to the global `FXMASTER_ENABLED` setting.
+ * @param {object} [scene] - Scene document (defaults to canvas scene)
+ * @returns {boolean} True if FX should be active on this scene
+ */
+export function isFxEnabledForScene(scene) {
+  const override = scene?.getFlag?.(MODULE.ID, SCENE_FLAGS.WEATHER_FX_OVERRIDE);
+  if (override === 'on') return true;
+  if (override === 'off') return false;
+  return !!game.settings.get(MODULE.ID, SETTINGS.FXMASTER_ENABLED);
+}
+
+/**
  * Check if the FXMaster module is installed and active.
  * @returns {boolean} Whether FXMaster is active
  */
@@ -92,9 +106,9 @@ function onSceneUpdate(scene, change) {
   }
   if (scene !== canvas?.scene) return;
   const flat = foundry.utils.flattenObject(change);
-  const fxDisabledKey = `flags.${MODULE.ID}.${SCENE_FLAGS.WEATHER_FX_DISABLED}`;
+  const fxOverrideKey = `flags.${MODULE.ID}.${SCENE_FLAGS.WEATHER_FX_OVERRIDE}`;
   const topDownKey = `flags.${MODULE.ID}.${SCENE_FLAGS.FXMASTER_TOP_DOWN_OVERRIDE}`;
-  if (!(fxDisabledKey in flat) && !(topDownKey in flat)) return;
+  if (!(fxOverrideKey in flat) && !(topDownKey in flat)) return;
   syncWeatherToScene();
 }
 
@@ -106,7 +120,7 @@ function syncWeatherToScene(sceneOverride) {
   if (!CalendariaSocket.isPrimaryGM()) return;
   const scene = sceneOverride ?? canvas?.scene;
   if (!scene) return;
-  if (!game.settings.get(MODULE.ID, SETTINGS.FXMASTER_ENABLED) || scene.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_DISABLED)) {
+  if (!isFxEnabledForScene(scene)) {
     stopAllFX();
     return;
   }
@@ -127,7 +141,7 @@ function onWeatherChange({ current, zoneId: _zoneId, bulk, visualOnly } = {}) {
   if (!CalendariaSocket.isPrimaryGM()) return;
   if (bulk) {
     const scene = game.scenes?.active;
-    if (!game.settings.get(MODULE.ID, SETTINGS.FXMASTER_ENABLED) || scene?.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_DISABLED)) {
+    if (!isFxEnabledForScene(scene)) {
       stopAllFX();
       return;
     }
@@ -135,12 +149,8 @@ function onWeatherChange({ current, zoneId: _zoneId, bulk, visualOnly } = {}) {
     playWeather(weather || null);
     return;
   }
-  if (!game.settings.get(MODULE.ID, SETTINGS.FXMASTER_ENABLED)) {
-    stopAllFX();
-    return;
-  }
   const scene = game.scenes?.active;
-  if (scene?.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_DISABLED)) {
+  if (!isFxEnabledForScene(scene)) {
     stopAllFX();
     return;
   }
@@ -257,12 +267,8 @@ export async function playStandaloneFX(presetName, options = {}) {
   }
   const fxApi = getFxApi();
   if (!fxApi) return false;
-  if (!game.settings.get(MODULE.ID, SETTINGS.FXMASTER_ENABLED)) {
-    log(2, localize('CALENDARIA.Weather.Error.FXDisabled'));
-    return false;
-  }
   const scene = canvas?.scene;
-  if (scene?.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_DISABLED)) {
+  if (!isFxEnabledForScene(scene)) {
     log(2, localize('CALENDARIA.Weather.Error.FXDisabled'));
     return false;
   }

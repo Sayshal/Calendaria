@@ -47,9 +47,13 @@
     {{/if}}
   </div>
   <div class="form-group slim">
-    <label>{{localize "CALENDARIA.Scene.WeatherFxDisabled.Name"}}</label>
-    <input type="checkbox" name="flags.{{moduleId}}.weatherFxDisabled" {{#if weatherFxDisabled}}checked{{/if}}>
-    <p class="hint">{{localize "CALENDARIA.Scene.WeatherFxDisabled.Hint"}}</p>
+    <label>{{localize "CALENDARIA.SceneConfig.WeatherFxOverride.Name"}}</label>
+    <select name="flags.{{moduleId}}.weatherFxOverride">
+      {{#each weatherFxOverrideOptions}}
+        <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{localize this.label}}</option>
+      {{/each}}
+    </select>
+    <p class="hint">{{localize "CALENDARIA.SceneConfig.WeatherFxOverride.Hint"}}</p>
   </div>
   <div class="form-group slim">
     <label>{{localize "CALENDARIA.Scene.FxTopDownOverride.Name"}}</label>

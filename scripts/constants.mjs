@@ -226,7 +226,7 @@ export const SCENE_FLAGS = {
   DARKNESS_SYNC: 'darknessSync',
   FXMASTER_TOP_DOWN_OVERRIDE: 'fxmasterTopDownOverride',
   HUD_HIDE_FOR_PLAYERS: 'hudHideForPlayers',
-  WEATHER_FX_DISABLED: 'weatherFxDisabled',
+  WEATHER_FX_OVERRIDE: 'weatherFxOverride',
   WEATHER_SOUND_DISABLED: 'weatherSoundDisabled'
 };
 

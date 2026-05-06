@@ -45,7 +45,13 @@ export class CalendariaSceneConfig extends foundry.applications.sheets.SceneConf
         context.hudHideForPlayers = doc.getFlag(MODULE.ID, SCENE_FLAGS.HUD_HIDE_FOR_PLAYERS) ?? false;
         context.climateZoneOverride = doc.getFlag(MODULE.ID, SCENE_FLAGS.CLIMATE_ZONE_OVERRIDE) ?? '';
         context.climateZones = WeatherManager.getCalendarZones?.() ?? [];
-        context.weatherFxDisabled = doc.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_DISABLED) ?? false;
+        const weatherFxOverride = doc.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_OVERRIDE) ?? 'inherit';
+        context.weatherFxOverride = weatherFxOverride;
+        context.weatherFxOverrideOptions = [
+          { value: 'inherit', label: 'CALENDARIA.SceneConfig.WeatherFxOverride.Inherit', selected: weatherFxOverride === 'inherit' },
+          { value: 'on', label: 'CALENDARIA.SceneConfig.WeatherFxOverride.On', selected: weatherFxOverride === 'on' },
+          { value: 'off', label: 'CALENDARIA.SceneConfig.WeatherFxOverride.Off', selected: weatherFxOverride === 'off' }
+        ];
         context.fxTopDownOverride = doc.getFlag(MODULE.ID, SCENE_FLAGS.FXMASTER_TOP_DOWN_OVERRIDE) ?? 'default';
         context.weatherSoundDisabled = doc.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_SOUND_DISABLED) ?? false;
       }
