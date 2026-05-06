@@ -1102,6 +1102,10 @@ export const CalendariaAPI = {
    * @returns {BigCal} The BigCal instance
    */
   showBigCal() {
+    if (!Permissions.canViewBigCal()) {
+      ui.notifications.warn('CALENDARIA.Permissions.NoAccess', { localize: true });
+      return null;
+    }
     return BigCal.show();
   },
 
