@@ -384,7 +384,7 @@ export function getMoonPhaseCountSinceEpoch(date, moonIndex) {
  * @returns {number} Cycle entry index
  */
 export function getCycleValue(date, cycle) {
-  if (!cycle?.length || !cycle?.entries?.length) return 0;
+  if (!cycle?.length || !Object.keys(cycle?.stages ?? {}).length) return 0;
   let value;
   switch (cycle.basedOn) {
     case 'year':

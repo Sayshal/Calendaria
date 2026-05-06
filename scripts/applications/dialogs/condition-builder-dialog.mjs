@@ -1,5 +1,5 @@
-import { CalendarManager } from '../../calendar/_module.mjs';
-import { CONDITION_GROUP_MODES, CONDITION_OPERATORS, MAX_NESTING_DEPTH, TEMPLATES } from '../../constants.mjs';
+import { CalendarManager, CalendarRegistry } from '../../calendar/_module.mjs';
+import { CONDITION_GROUP_MODES, CONDITION_OPERATORS, MAX_NESTING_DEPTH, MODULE, TEMPLATES } from '../../constants.mjs';
 import {
   annotateForRender,
   createDefaultCondition,
@@ -26,15 +26,29 @@ export class ConditionBuilderDialog extends HandlebarsApplicationMixin(Applicati
   /** @type {Function} Callback when tree changes */
   #onChange = null;
 
+  /** @type {object|null} Note document the conditions belong to */
+  #document = null;
+
   /**
    * @param {object} options - Application options
    * @param {Array} [options.conditions] - Initial flat conditions array
    * @param {Function} [options.onChange] - Callback when conditions change
+   * @param {object} [options.document] - Source note document (used to resolve its calendar)
    */
   constructor(options = {}) {
     super(options);
     if (options.conditions?.length) this.#tree = wrapInRootGroup(options.conditions);
     if (options.onChange) this.#onChange = options.onChange;
+    if (options.document) this.#document = options.document;
+  }
+
+  /**
+   * Resolve the calendar this dialog should operate against — note's calendarId flag if present, active otherwise.
+   * @returns {object|null}
+   */
+  #resolveCalendar() {
+    const noteCalendarId = this.#document?.parent?.getFlag?.(MODULE.ID, 'calendarId') ?? CalendarRegistry.getActiveId();
+    return CalendarManager.getCalendar(noteCalendarId) ?? CalendarManager.getActiveCalendar();
   }
 
   /** @override */
@@ -57,7 +71,7 @@ export class ConditionBuilderDialog extends HandlebarsApplicationMixin(Applicati
 
   /** @override */
   async _prepareContext() {
-    const calendar = CalendarManager.getActiveCalendar();
+    const calendar = this.#resolveCalendar();
     const tree = annotateForRender(this.#tree, calendar, '', 0);
     const buttons = [{ type: 'button', action: 'close', icon: 'fas fa-check', label: 'Close', cssClass: 'primary' }];
     return { tree, maxDepth: MAX_NESTING_DEPTH, buttons };
@@ -152,7 +166,7 @@ export class ConditionBuilderDialog extends HandlebarsApplicationMixin(Applicati
     switch (property) {
       case 'field': {
         const newField = target.value;
-        const defaults = getDefaultsForField(newField, CalendarManager.getActiveCalendar());
+        const defaults = getDefaultsForField(newField, this.#resolveCalendar());
         node.field = newField;
         node.op = defaults.op;
         node.value = defaults.value;
@@ -193,7 +207,7 @@ export class ConditionBuilderDialog extends HandlebarsApplicationMixin(Applicati
           node.value.year = parseInt(target.value) || 0;
         } else if (property === 'dateMonth') {
           node.value.month = parseInt(target.value) || 0;
-          const calendar = CalendarManager.getActiveCalendar();
+          const calendar = this.#resolveCalendar();
           const months = calendar?.monthsArray ?? [];
           const maxDay = months[node.value.month]?.days ?? 30;
           const dayInput = target.closest('.cb-date-inputs')?.querySelector('.cb-date-day');

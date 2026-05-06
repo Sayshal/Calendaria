@@ -251,10 +251,17 @@ export function getFieldValue(field, date, value2 = null, epochCtx = null) {
       return getMoonPhaseCountSinceEpoch(date, moonIndex);
     }
     case CONDITION_FIELDS.CYCLE: {
-      const cycles = calendar?.cyclesArray ?? [];
-      const cycleIndex = value2 ?? 0;
-      if (cycleIndex >= cycles.length) return null;
-      return getCycleValue(date, cycles[cycleIndex]);
+      const cyclesObj = calendar?.cycles ?? {};
+      const cyclesArr = calendar?.cyclesArray ?? [];
+      let cycle = null;
+      if (typeof value2 === 'string' && cyclesObj[value2]) cycle = cyclesObj[value2];
+      else if (typeof value2 === 'number') cycle = cyclesArr[value2] ?? null;
+      else cycle = cyclesArr[0] ?? null;
+      if (!cycle) return null;
+      const stageKeys = Object.keys(cycle.stages ?? {});
+      if (!stageKeys.length) return null;
+      const position = getCycleValue(date, cycle);
+      return stageKeys[position % stageKeys.length];
     }
     case CONDITION_FIELDS.ERA: {
       const eras = calendar?.erasArray ?? [];
@@ -342,6 +349,17 @@ export function evaluateCondition(condition, date, options = {}) {
   if (fieldValue === null || fieldValue === undefined) return false;
   let compareValue = value;
   if (field === CONDITION_FIELDS.DATE && typeof value === 'object' && value !== null) compareValue = dateToTotalDays(value);
+  if (field === CONDITION_FIELDS.CYCLE && typeof compareValue === 'number') {
+    const calendar = CalendarManager.getActiveCalendar();
+    const cyclesObj = calendar?.cycles ?? {};
+    const cyclesArr = calendar?.cyclesArray ?? [];
+    let cycle = null;
+    if (typeof value2 === 'string' && cyclesObj[value2]) cycle = cyclesObj[value2];
+    else if (typeof value2 === 'number') cycle = cyclesArr[value2] ?? null;
+    else cycle = cyclesArr[0] ?? null;
+    const stageKeys = cycle ? Object.keys(cycle.stages ?? {}) : [];
+    if (stageKeys.length) compareValue = stageKeys[compareValue % stageKeys.length] ?? compareValue;
+  }
   switch (op) {
     case CONDITION_OPERATORS.EQUAL:
       return fieldValue === compareValue;

@@ -212,9 +212,13 @@ describe('getFieldValue()', () => {
   });
 
   describe('cycle', () => {
-    it('returns cycle entry index', () => {
+    it('returns stage id (string) for legacy numeric cycle index', () => {
       const result = getFieldValue(CONDITION_FIELDS.CYCLE, { year: 2024, month: 0, dayOfMonth: 0 }, 0);
-      expect(typeof result).toBe('number');
+      expect(typeof result).toBe('string');
+    });
+    it('returns stage id (string) for cycle id', () => {
+      const result = getFieldValue(CONDITION_FIELDS.CYCLE, { year: 2024, month: 0, dayOfMonth: 0 }, 'cycle1');
+      expect(typeof result).toBe('string');
     });
     it('returns null for invalid cycle index', () => {
       expect(getFieldValue(CONDITION_FIELDS.CYCLE, { year: 2024, month: 0, dayOfMonth: 0 }, 99)).toBeNull();

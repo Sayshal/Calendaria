@@ -188,20 +188,22 @@ describe('getMoonPhaseCountInMonth()', () => {
 });
 
 describe('getCycleValue()', () => {
+  const stages7 = { s0: { name: 'A' }, s1: { name: 'B' }, s2: { name: 'C' }, s3: { name: 'D' }, s4: { name: 'E' }, s5: { name: 'F' }, s6: { name: 'G' } };
+  const stages4 = { s0: { name: 'A' }, s1: { name: 'B' }, s2: { name: 'C' }, s3: { name: 'D' } };
   it('returns correct day-based cycle value', () => {
-    const cycle = { length: 7, basedOn: 'day', offset: 0, entries: ['A', 'B', 'C', 'D', 'E', 'F', 'G'] };
+    const cycle = { length: 7, basedOn: 'day', offset: 0, stages: stages7 };
     const val = getCycleValue({ year: 0, month: 0, dayOfMonth: 0 }, cycle);
     expect(val).toBeGreaterThanOrEqual(0);
     expect(val).toBeLessThan(7);
   });
   it('returns correct year-based cycle value', () => {
-    const cycle = { length: 4, basedOn: 'year', offset: 0, entries: ['A', 'B', 'C', 'D'] };
+    const cycle = { length: 4, basedOn: 'year', offset: 0, stages: stages4 };
     expect(getCycleValue({ year: 0, month: 0, dayOfMonth: 0 }, cycle)).toBe(0);
     expect(getCycleValue({ year: 1, month: 0, dayOfMonth: 0 }, cycle)).toBe(1);
     expect(getCycleValue({ year: 4, month: 0, dayOfMonth: 0 }, cycle)).toBe(0);
   });
   it('applies offset correctly', () => {
-    const cycle = { length: 4, basedOn: 'year', offset: 1, entries: ['A', 'B', 'C', 'D'] };
+    const cycle = { length: 4, basedOn: 'year', offset: 1, stages: stages4 };
     expect(getCycleValue({ year: 1, month: 0, dayOfMonth: 0 }, cycle)).toBe(0);
     expect(getCycleValue({ year: 2, month: 0, dayOfMonth: 0 }, cycle)).toBe(1);
   });

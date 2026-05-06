@@ -79,9 +79,23 @@ const defaultCalendar = addCalendarGetters({
     { name: 'Second Age', abbreviation: 'SA', startYear: 1000, endYear: 1999 },
     { name: 'Third Age', abbreviation: 'TA', startYear: 2000 }
   ],
-  cycles: [
-    { name: 'Weekday Cycle', length: 7, basedOn: 'day', offset: 0, entries: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] }
-  ],
+  cycles: {
+    cycle1: {
+      name: 'Weekday Cycle',
+      length: 7,
+      basedOn: 'day',
+      offset: 0,
+      stages: {
+        s0: { name: 'Sun' },
+        s1: { name: 'Mon' },
+        s2: { name: 'Tue' },
+        s3: { name: 'Wed' },
+        s4: { name: 'Thu' },
+        s5: { name: 'Fri' },
+        s6: { name: 'Sat' }
+      }
+    }
+  },
   daylight: { summerSolstice: 172, winterSolstice: 355 },
 
   getDaysInMonth: vi.fn((month, year) => {

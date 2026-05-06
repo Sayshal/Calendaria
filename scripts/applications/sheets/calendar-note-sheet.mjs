@@ -1064,6 +1064,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const conditions = tree?.children?.length ? tree.children : this.document.system.conditions || [];
     new ConditionBuilderDialog({
       conditions,
+      document: this.document,
       onChange: async (updated) => {
         const validation = validateConditions(updated);
         if (!validation.valid) {

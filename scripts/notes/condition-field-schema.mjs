@@ -290,14 +290,18 @@ const FIELD_REGISTRY = {
     needsValue2: true,
     value2Label: 'CALENDARIA.Common.Cycle',
     value2Hint: 'CALENDARIA.Condition.Builder.Tooltip.CycleSelect',
-    value2Type: 'number',
-    value2Semantic: 'cycleIndex',
+    value2Type: 'string',
+    value2Semantic: 'cycleId',
     getOptions: (cal, value2) => {
-      const cycles = cal?.cyclesArray ?? [];
-      const cycle = cycles[value2 ?? 0];
-      return (cycle?.entries ?? []).map((e, i) => ({ value: i, label: localize(e.name ?? `Entry ${i}`) }));
+      const cycles = cal?.cycles ?? {};
+      const cyclesArr = cal?.cyclesArray ?? [];
+      let cycle = null;
+      if (typeof value2 === 'string' && cycles[value2]) cycle = cycles[value2];
+      else if (typeof value2 === 'number') cycle = cyclesArr[value2] ?? null;
+      else cycle = cyclesArr[0] ?? null;
+      return Object.entries(cycle?.stages ?? {}).map(([id, s]) => ({ value: id, label: localize(s.name ?? id) }));
     },
-    getValue2Options: (cal) => (cal?.cyclesArray ?? []).map((c, i) => ({ value: i, label: localize(c.name) })),
+    getValue2Options: (cal) => Object.entries(cal?.cycles ?? {}).map(([id, c]) => ({ value: id, label: localize(c.name) })),
     available: (cal) => (cal?.cyclesArray?.length ?? 0) > 0
   },
   [CONDITION_FIELDS.ERA]: {
