@@ -12,28 +12,44 @@
 
     <h4>New Features</h4>
     <ul>
-      <li>Added <code>CALENDARIA.api.setActiveCalendar(id, { useCalendarDefaults })</code> for switching calendars from scripts</li>
-      <li>Chronicle enricher links accept a <code>categories="a,b"</code> parameter to open the timeline pre-filtered</li>
-      <li>Chronicle Timeline toolbar gains a category filter popover with toggle options, selected count badge, and clear action</li>
-      <li>Climate editor adds an inline pencil-toggle alias editor on each zone temperature row</li>
-      <li>Locked-range chronicle views show the date range below the toolbar buttons</li>
-      <li>New action enrichers for time and weather: <code>advanceToTime</code>, <code>advanceInterval</code>, <code>advanceToPreset</code>, <code>setWeather</code>, <code>setTime</code>, <code>jumpToDate</code>, <code>toggleClock</code></li>
-      <li>New Automatic rest mode (default) advances time using the system-reported duration; old Fixed mode renamed Custom and accepts 0 hours</li>
-      <li>New GM-only Print / Export buttons render the active month or full year as a printable layout</li>
-      <li>New worlds seed display formats from the active calendar's dateFormats</li>
-      <li>Settings show a "&lt;Calendar&gt; Default" preset that follows calendar switches; note viewer/filter/date picker and cinematic keyframes route through configurable format locations</li>
-      <li>Weather zones can define per-zone season aliases applied across HUD, calendar UI, chronicle, cinematics, enrichers, and chat</li>
+      <li>Each calendar can now define its own Cross-Calendar display format in the editor's Display tab, controlling
+        how its dates appear when shown as equivalents on other calendars</li>
+      <li>New "Week Starts On" option in the calendar editor's Weeks tab rotates the mini and big calendar grids so a
+        chosen weekday appears in the first column, without altering the underlying weekday cycle</li>
+      <li>On PF2e and SF2e worlds, calendars without a Luxon sync theme now auto-align their displayed time-of-day with
+        the system world clock's starting time, so the Calendaria clock matches the core Foundry clock without affecting
+        calendar math</li>
+      <li>Short rests on dnd5e now advance world time independently of long rests, with a new Time-tab setting to choose
+        Automatic (system-reported duration) or Fixed minutes (default 60)</li>
     </ul>
 
     <h4>Bug Fixes</h4>
     <ul>
-      <li>Chronicle date enrichers no longer crash when a non-numeric token is supplied</li>
-      <li>Custom Weekdays no longer return phantom days on Foundry v14, weekday names may be left blank, and the settings panel renders again</li>
-      <li>Fixed weekday math drifting after intercalary festivals; intercalary-month cells now labeled with the month name (BigCal) or first letter (MiniCal) plus tooltip</li>
-      <li>Moon brightness contribution edits persist when saving the calendar editor</li>
-      <li>Moon phases stay aligned across HUD, sun-dial, enrichers, and darkness lighting by honoring yearZero, referencePhase, cycleDayAdjust, and reset anchors</li>
-      <li>Multi-day reminders fire on the correct day for offsets greater than 24 hours, with check frequency tightened to 1 game-minute</li>
-      <li>Weather presets with relative tempMin/tempMax modifiers (e.g. <code>61+</code>) now fire correctly and extend the temperature range outside season bounds</li>
+      <li>Custom HUD format tokens with empty values (such as a missing canonical hour) now render as blank instead of
+        leaking the literal token text</li>
+      <li>Reordering months, weekdays, or seasons on older calendars no longer gets stuck swapping within the same
+        group; existing calendars are migrated to stable random keys on load</li>
+      <li>Cycle conditions on notes now show the correct stage list and stop breaking when cycles or stages are
+        reordered, with old saved values still matching</li>
+      <li>The condition builder on a note now uses that note's calendar instead of always defaulting to the active one
+      </li>
+      <li>Players without Big Calendar access now see a permission warning toast instead of a momentary dialog flash
+        when triggering the show-calendar macro</li>
+      <li>BigCal week view weekday labels now rotate with the Week Starts On setting so each column header matches its
+        actual weekday</li>
+      <li>Simple Calendar importer no longer misclassifies one-off dated notes as recurring festivals; festivals are
+        only created for yearly-recurring or intercalary-anchored entries</li>
+      <li>Simple Calendar imports now correctly remap month indices when intercalary months are stripped, so imported
+        current dates and note dates land on the right Calendaria month</li>
+    </ul>
+
+    <h4>Changes</h4>
+    <ul>
+      <li>Fresh installs now boot with cinematic mode, weather/moon/event overlays, scene syncing, HUD weather FX, chat
+        timestamp clock, weather auto-generation, and FXMaster integration off so a new world stays quiet until you opt
+        in; the in-HUD calendar widget is now shown by default</li>
+      <li>The per-scene "Disable Weather FX" checkbox is now a "Weather FX Override" dropdown with Inherit, On, and Off;
+        existing disabled scenes are migrated automatically</li>
     </ul>
 
   </div>

@@ -1,32 +1,27 @@
 ## New Features
 
-- Added CALENDARIA.api.setActiveCalendar(id, { useCalendarDefaults }) for switching calendars from scripts
-- Chronicle enricher links accept a categories="a,b" parameter to open the timeline pre-filtered without altering the saved filter
-- Chronicle Timeline toolbar gains a category filter popover with toggle options, selected count badge, and clear action; selection persists per client
-- Climate editor adds an inline pencil-toggle alias editor on each zone temperature row, with the indicator only lighting for real overrides
-- Locked-range chronicle views now show the date range below the toolbar buttons so actions stay on a single row
-- New Automatic rest mode (default) advances time using the system-reported duration; the old Fixed mode is now called Custom and accepts 0 hours to skip advancement
-- New action enrichers for time and weather: advanceToTime, advanceInterval, advanceToPreset, setWeather, setTime, jumpToDate, and toggleClock, all permission-gated and socket-routed for non-GMs
-- New GM-only Print / Export buttons in Settings -> Module render the active month or full year as a printable (PDF-saveable) layout with festivals and moon phases
-- New worlds seed display formats from the active calendar's dateFormats, so dates use the calendar's defaults by default
-- Settings show a "<Calendar> Default" preset that follows calendar switches, and note viewer/filter/date picker plus cinematic keyframes and overlay now route through configurable format locations
-- Weather zones can define per-zone season aliases (name, abbreviation, icon, color) applied across HUD, calendar UI, chronicle, cinematics, enrichers, and chat
+- On PF2E and SF2E worlds, calendars without a Luxon sync theme now auto-align their displayed time-of-day with the system world clock's starting time, so the Calendaria clock matches the core Foundry clock without affecting calendar math
+- Each calendar can now define its own Cross-Calendar display format in the editor's Display tab, controlling how its dates appear when shown as equivalents on other calendars
+- New "Week Starts On" option in the calendar editor's Weeks tab rotates the mini and big calendar grids so a chosen weekday appears in the first column, without altering the underlying weekday cycle
+- Short rests on dnd5e now advance world time independently of long rests, with a new Time-tab setting to choose Automatic (use the system's reported short rest duration) or Fixed minutes (default 60)
 
 ## Bug Fixes
 
-- Chronicle date enrichers no longer crash when a non-numeric token (such as a month name from a different calendar) is supplied
-- Custom Weekdays no longer return phantom days on Foundry v14, weekday names may be left blank, and the settings panel renders again
-- Fixed weekday math drifting after intercalary festivals and labeled intercalary-month cells in calendar grids with the month name (BigCal) or first letter (MiniCal) plus tooltip
-- Moon brightness contribution edits now persist when saving the calendar editor
-- Moon phases now stay aligned across HUD, sun-dial, enrichers, and darkness lighting by honoring yearZero, referencePhase, cycleDayAdjust, and reset anchors consistently with the mini and big calendars
-- Multi-day reminders now fire on the correct day for offsets greater than 24 hours, with the offset cap removed and check frequency tightened to 1 game-minute
-- Weather presets with relative tempMin/tempMax modifiers (e.g. "61+") now fire correctly and extend the temperature range outside the season bounds instead of being clamped back
+- BigCal week view weekday labels now rotate with the Week Starts On setting so each column header matches its actual weekday
+- Custom HUD format tokens with empty values (such as a missing canonical hour) now render as blank instead of leaking the literal token text
+- Cycle conditions on notes now show the correct stage list and stop breaking when cycles or stages are reordered, with old saved values automatically still matching
+- Players without Big Calendar access now see a permission warning toast instead of a momentary dialog flash when triggering the show-calendar macro
+- Reordering months, weekdays, or seasons on older calendars no longer gets stuck swapping within the same group; existing calendars are migrated to stable random keys on load and Simple Calendar imports use them from the start
+- Simple Calendar importer no longer misclassifies one-off dated notes as recurring festivals; festivals are only created for yearly-recurring or intercalary-anchored entries
+- Simple Calendar imports now correctly remap month indices when intercalary months are stripped, so imported current dates and note dates land on the right Calendaria month instead of shifting
+- The condition builder on a note now uses that note's calendar instead of always defaulting to the active one
 
-## Translations
+## Changes
 
-- Brazilian Portuguese translation updated by @Kharmans
-- Russian translation updated by @lvilv
+- "Week Starts On" setting moved from the Years tab to the Weeks tab in the calendar editor, with a clearer "First Weekday" label when left unset
+- Fresh installs now boot with cinematic mode, weather/moon/event overlays, darkness and ambience scene syncing, HUD weather FX and border glow, chat timestamp clock, weather auto-generation, and FXMaster integration all turned off, so a new world stays quiet until you opt in; the in-HUD calendar widget is now shown by default
+- The per-scene "Disable Weather FX" checkbox is now a "Weather FX Override" dropdown with Inherit, On, and Off, letting a scene force weather effects on even when the global setting is off, or off when the global is on; existing disabled scenes are migrated automatically
 
 ## Documentation
 
-- Documentation refreshed for 1.0.11: API reference covers setActiveCalendar and getAliasedSeason, Chronicle/Settings note the category filter, Climate Editor and Weather System describe season aliases, and Weather System clarifies relative tempMin/tempMax modifier behavior
+- Documentation polish in README and Home/Settings/Note-Viewer pages for clearer wording
