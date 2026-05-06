@@ -45,7 +45,7 @@ export function syncWithLuxon(calendar) {
   const wc = getSystemWorldClock();
   if (!wc) return false;
   const theme = calendar.metadata?.luxonSync?.theme ?? null;
-  if (!theme) return false;
+  if (!theme) return applyLuxonDisplayOffset(calendar, wc);
   const worldCreatedOn = wc.worldCreatedOn;
   if (!worldCreatedOn?.isValid) return false;
   const luxonNow = worldCreatedOn.plus({ seconds: game.time.worldTime });
@@ -58,6 +58,24 @@ export function syncWithLuxon(calendar) {
   const firstWeekday = computeFirstWeekday(calendar, luxonNow, internalTime, components);
   CalendariaCalendar.setEpochSync(epochOffset, firstWeekday);
   if (calendar.years) calendar.years.firstWeekday = firstWeekday;
+  return true;
+}
+
+/**
+ * Apply a display-only time-of-day offset for Luxon-system calendars that lack a sync theme.
+ * Aligns Calendaria's displayed clock with the system world-clock starting time-of-day.
+ * Calendar math (date arithmetic, triggers) is unchanged.
+ * @param {CalendariaCalendar} calendar - Active calendar
+ * @param {object} wc - System world clock (exposes `worldCreatedOn` Luxon DateTime)
+ * @returns {boolean} True if offset was applied
+ */
+function applyLuxonDisplayOffset(calendar, wc) {
+  const worldCreatedOn = wc.worldCreatedOn;
+  if (!worldCreatedOn?.isValid) return false;
+  const offset = worldCreatedOn.hour * 3600 + worldCreatedOn.minute * 60 + worldCreatedOn.second;
+  if (offset === 0) return false;
+  CalendariaCalendar.setEpochSync(offset, null);
+  if (calendar.metadata) calendar.metadata.luxonSyncOffset = offset;
   return true;
 }
 

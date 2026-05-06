@@ -508,7 +508,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
           luxonSync: new SchemaField(
             { theme: new StringField({ required: false, nullable: true, blank: false, choices: ['AR', 'IC', 'AG', 'AD', 'CE'], initial: null }) },
             { required: false, nullable: true, initial: null }
-          )
+          ),
+          luxonSyncOffset: new NumberField({ required: false, initial: 0 })
         },
         { required: false }
       ),
