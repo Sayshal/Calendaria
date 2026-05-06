@@ -569,7 +569,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
           time12: new StringField({ required: false, initial: 'h:mm a' }),
           weekHeader: new StringField({ required: false, initial: '[W]' }),
           yearHeader: new StringField({ required: false, initial: '[YYYY]' }),
-          yearLabel: new StringField({ required: false, initial: '[YYYY] [GGGG]' })
+          yearLabel: new StringField({ required: false, initial: '[YYYY] [GGGG]' }),
+          crossCalendar: new StringField({ required: false, initial: 'D MMMM, YYYY' })
         },
         { required: false }
       ),

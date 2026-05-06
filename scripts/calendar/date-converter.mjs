@@ -54,7 +54,7 @@ export function getEquivalentDates(date, calendarId, filterIds = null) {
     const converted = convertDate(date, calendarId, targetId);
     if (!converted) continue;
     const targetCal = CalendarRegistry.get(targetId);
-    const formatted = formatCustom(targetCal, converted, 'D MMMM, YYYY');
+    const formatted = formatCustom(targetCal, converted, targetCal.dateFormats?.crossCalendar || 'D MMMM, YYYY');
     const calendarName = targetCal.name ?? targetId;
     results.push({ calendarId: targetId, calendarName, date: converted, formatted });
   }

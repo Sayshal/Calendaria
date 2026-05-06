@@ -218,7 +218,17 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       canonicalHours: {},
       weeks: { enabled: false, type: 'year-based', names: {} },
       amPmNotation: { am: 'AM', pm: 'PM', amAbbr: 'AM', pmAbbr: 'PM' },
-      dateFormats: { short: 'D MMM', long: 'D MMMM, YYYY', full: 'MMMM D, YYYY', time: 'HH:mm', time12: 'h:mm a', weekHeader: '[W]', yearHeader: '[YYYY]', yearLabel: '[YYYY] [GGGG]' },
+      dateFormats: {
+        short: 'D MMM',
+        long: 'D MMMM, YYYY',
+        full: 'MMMM D, YYYY',
+        time: 'HH:mm',
+        time12: 'h:mm a',
+        weekHeader: '[W]',
+        yearHeader: '[YYYY]',
+        yearLabel: '[YYYY] [GGGG]',
+        crossCalendar: 'D MMMM, YYYY'
+      },
       metadata: { id: '', description: '', author: game.user?.name ?? '', system: '', luxonSync: null },
       weather: { activeZone: null, zones: {} }
     };
@@ -987,6 +997,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     if (data['dateFormats.weekHeader'] != null) this.#calendarData.dateFormats.weekHeader = data['dateFormats.weekHeader'];
     if (data['dateFormats.yearHeader'] != null) this.#calendarData.dateFormats.yearHeader = data['dateFormats.yearHeader'];
     if (data['dateFormats.yearLabel'] != null) this.#calendarData.dateFormats.yearLabel = data['dateFormats.yearLabel'];
+    if (data['dateFormats.crossCalendar'] != null) this.#calendarData.dateFormats.crossCalendar = data['dateFormats.crossCalendar'];
     this.#updateCanonicalHoursFromFormData(data);
     this.#updateNamedWeeksFromFormData(data);
     this.#updateNamedYearsFromFormData(data);

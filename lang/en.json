@@ -630,6 +630,8 @@
   "CALENDARIA.Editor.Field.CycleFormat": "Display Format",
   "CALENDARIA.Editor.Field.CycleLength": "Cycle Length",
   "CALENDARIA.Editor.Field.CycleVariance": "Cycle Variance",
+  "CALENDARIA.Editor.Field.DateFormatCrossCalendar": "Cross-Calendar Format",
+  "CALENDARIA.Editor.Field.DateFormatCrossCalendarHint": "Format used when this calendar appears as a cross-calendar entry on another calendar.",
   "CALENDARIA.Editor.Field.DateFormatFull": "Full Format",
   "CALENDARIA.Editor.Field.DateFormatLong": "Long Format",
   "CALENDARIA.Editor.Field.DateFormatShort": "Short Format",
