@@ -327,6 +327,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     const extendedYearsSchema = new SchemaField({
       yearZero: new NumberField({ required: true, nullable: false, integer: true, initial: 0 }),
       firstWeekday: new NumberField({ required: true, nullable: false, min: 0, integer: true }),
+      weekStartWeekdayId: new StringField({ required: false }),
       leapYear: new SchemaField(
         { leapStart: new NumberField({ required: true, nullable: false, integer: true }), leapInterval: new NumberField({ required: true, nullable: false, min: 2, integer: true }) },
         { required: true, nullable: true, initial: null }

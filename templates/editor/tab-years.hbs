@@ -24,6 +24,18 @@
     </div>
 
     <div class="form-group">
+      <label for="editor-week-start">{{localize "CALENDARIA.Editor.Field.WeekStart"}}</label>
+      <div class="form-fields">
+        <select id="editor-week-start" name="years.weekStartWeekdayId">
+          {{#each weekStartOptions}}
+            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{localize this.label}}</option>
+          {{/each}}
+        </select>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Editor.Hint.WeekStart"}}</p>
+    </div>
+
+    <div class="form-group">
       <label for="editor-reset-weekdays">{{localize "CALENDARIA.Editor.Field.ResetWeekdays"}}</label>
       <div class="form-fields">
         <input type="checkbox" id="editor-reset-weekdays" name="years.resetWeekdays"

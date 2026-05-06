@@ -927,6 +927,21 @@ export function buildOpenAppsMenuItem() {
 }
 
 /**
+ * Resolve the column-0 weekday index (display rotation) for the calendar grid.
+ * Returns the index within `weekdaysArray` of the weekday whose keyed-object id matches
+ * `years.weekStartWeekdayId`. Returns 0 when unset or unmatched (no rotation).
+ * @param {object} calendar - Calendar instance
+ * @returns {number} Weekday index in 0..daysInWeek-1
+ */
+export function getWeekStartIndex(calendar) {
+  const id = calendar?.years?.weekStartWeekdayId;
+  if (!id) return 0;
+  const keys = Object.keys(calendar?.days?.values ?? {});
+  const idx = keys.indexOf(id);
+  return idx >= 0 ? idx : 0;
+}
+
+/**
  * Compute leading days from the previous month to fill the first week row of a calendar grid.
  * @param {object} calendar - Calendar instance
  * @param {number} year - Display year (with yearZero applied)

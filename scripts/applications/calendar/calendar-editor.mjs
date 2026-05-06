@@ -397,6 +397,11 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     });
     const currentFirstWeekday = this.#calendarData.years.firstWeekday ?? 0;
     context.weekdayOptions = daysArr.map(([, day], idx) => ({ value: idx, label: day.name, selected: idx === currentFirstWeekday }));
+    const currentWeekStartId = this.#calendarData.years.weekStartWeekdayId ?? '';
+    context.weekStartOptions = [
+      { value: '', label: 'CALENDARIA.Editor.Field.WeekStartDefault', selected: !currentWeekStartId },
+      ...daysArr.map(([key, day]) => ({ value: key, label: day.name, selected: key === currentWeekStartId }))
+    ];
     const weekdayCount = daysArr.length;
     context.weekdaysWithNav = daysArr.map(([key, day], idx) => ({ ...day, key, index: idx, isFirst: idx === 0, isLast: idx === weekdayCount - 1 }));
     const leapYearConfig = this.#calendarData.leapYearConfig;
@@ -941,6 +946,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#calendarData.metadata.luxonSync = luxonTheme ? { theme: luxonTheme } : null;
     this.#calendarData.years.yearZero = parseInt(data['years.yearZero']) || 0;
     this.#calendarData.years.firstWeekday = parseInt(data['years.firstWeekday']) || 0;
+    this.#calendarData.years.weekStartWeekdayId = data['years.weekStartWeekdayId'] || '';
     this.#calendarData.years.resetWeekdays = data['years.resetWeekdays'] ?? false;
     this.#calendarData.years.allowNegativeYears = data['years.allowNegativeYears'] ?? true;
     const leapRule = data['leapYearConfig.rule'] || 'none';

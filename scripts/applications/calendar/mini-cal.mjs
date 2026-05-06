@@ -40,6 +40,7 @@ import {
   getFestivalNoteForDay,
   getFirstMoonPhase,
   getLeadingDays,
+  getWeekStartIndex,
   getRestorePosition,
   getSelectedMoon,
   getSidebarBuffer,
@@ -453,7 +454,9 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     let currentWeek = [];
     const showMoons = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_MOON_PHASES) && calendar.moonsArray.length;
     const hasFixedStart = monthData?.startingWeekday != null;
-    const startDayOfWeek = hasFixedStart ? monthData.startingWeekday : dayOfWeek({ year, month, dayOfMonth: 0 });
+    const rawStartDayOfWeek = hasFixedStart ? monthData.startingWeekday : dayOfWeek({ year, month, dayOfMonth: 0 });
+    const weekStartIdx = getWeekStartIndex(calendar);
+    const startDayOfWeek = (((rawStartDayOfWeek - weekStartIdx) % daysInWeek) + daysInWeek) % daysInWeek;
     if (startDayOfWeek > 0) {
       const prevDays = getLeadingDays(calendar, year, month, startDayOfWeek);
       for (const pd of prevDays) currentWeek.push({ ...pd, isToday: isToday(pd.year, pd.month, pd.dayOfMonth, calendar) });
@@ -589,7 +592,8 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const viewedComponents = { month, dayOfMonth: Math.floor(daysInMonth / 2) };
     const currentSeason = enrichSeasonData(calendar.getCurrentSeason?.(viewedComponents));
     const currentEra = calendar.getCurrentEra?.();
-    const monthWeekdays = calendar.getWeekdaysForMonth?.(month) ?? calendar.weekdaysArray ?? [];
+    const monthWeekdaysRaw = calendar.getWeekdaysForMonth?.(month) ?? calendar.weekdaysArray ?? [];
+    const monthWeekdays = monthWeekdaysRaw.length ? Array.from({ length: monthWeekdaysRaw.length }, (_, i) => monthWeekdaysRaw[(i + weekStartIdx) % monthWeekdaysRaw.length]) : monthWeekdaysRaw;
     const showSelectedInHeader = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_HEADER_SHOW_SELECTED);
     const headerDate = showSelectedInHeader && this._selectedDate ? this._selectedDate : { year, month, dayOfMonth: date.dayOfMonth ?? 0 };
     const compact = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_COMPACT_MODE);

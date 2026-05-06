@@ -31,6 +31,7 @@ import {
   getDayWeather,
   getFestivalNoteForDay,
   getLeadingDays,
+  getWeekStartIndex,
   getVisibleMoons,
   getVisibleNotes,
   hasFogRevealedMonthInDirection,
@@ -376,7 +377,9 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     let currentWeek = [];
     const showMoons = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SHOW_MOON_PHASES) && calendar.moonsArray.length;
     const hasFixedStart = monthData?.startingWeekday != null;
-    const startDayOfWeek = hasFixedStart ? monthData.startingWeekday : dayOfWeek({ year, month, dayOfMonth: 0 });
+    const rawStartDayOfWeek = hasFixedStart ? monthData.startingWeekday : dayOfWeek({ year, month, dayOfMonth: 0 });
+    const weekStartIdx = getWeekStartIndex(calendar);
+    const startDayOfWeek = (((rawStartDayOfWeek - weekStartIdx) % daysInWeek) + daysInWeek) % daysInWeek;
     if (startDayOfWeek > 0) {
       const prevDays = getLeadingDays(calendar, year, month, startDayOfWeek);
       for (const pd of prevDays) currentWeek.push({ ...pd, isToday: this._isToday(pd.year, pd.month, pd.dayOfMonth) });
@@ -431,7 +434,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
           ...buildWeatherPillData(isFogged ? null : wd)
         });
       } else {
-        const weekdayData = calendar.weekdaysArray[currentWeek.length];
+        const weekdayData = calendar.weekdaysArray[(currentWeek.length + weekStartIdx) % calendar.weekdaysArray.length];
         const wd = !isFogged && weatherLookup ? getDayWeather(year, month, dayOfMonth, weatherLookup, weatherLookup.lookup) : null;
         currentWeek.push({
           day: displayDay,
@@ -520,7 +523,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const seasonDay = this._selectedDate ?? date;
     const currentSeason = enrichSeasonData(calendar.getCurrentSeason?.(seasonDay));
     const currentEra = calendar.getCurrentEra?.();
-    const monthWeekdays = calendar.getWeekdaysForMonth?.(month) ?? calendar.weekdaysArray ?? [];
+    const monthWeekdaysRaw = calendar.getWeekdaysForMonth?.(month) ?? calendar.weekdaysArray ?? [];
+    const monthWeekdays = monthWeekdaysRaw.length ? Array.from({ length: monthWeekdaysRaw.length }, (_, i) => monthWeekdaysRaw[(i + weekStartIdx) % monthWeekdaysRaw.length]) : monthWeekdaysRaw;
     const weekdaysData = monthWeekdays.map((wd) => ({ name: localize(wd.name), isRestDay: wd.isRestDay || false }));
     const showSelectedInHeader = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_HEADER_SHOW_SELECTED);
     const headerDate = showSelectedInHeader && this._selectedDate ? this._selectedDate : { year, month, dayOfMonth: date.dayOfMonth };
@@ -656,8 +660,11 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const { year, month } = date;
     const viewedDayOfMonth = date.dayOfMonth ?? 0;
     const yearZero = calendar.years?.yearZero ?? 0;
+    const daysInWeekRaw = calendar.daysInWeek;
+    const weekStartIdx = getWeekStartIndex(calendar);
     const currentDayOfWeek = dayOfWeek({ year, month, dayOfMonth: viewedDayOfMonth });
-    let weekStartDayOfMonth = viewedDayOfMonth - currentDayOfWeek;
+    const offsetInWeek = (((currentDayOfWeek - weekStartIdx) % daysInWeekRaw) + daysInWeekRaw) % daysInWeekRaw;
+    let weekStartDayOfMonth = viewedDayOfMonth - offsetInWeek;
     let weekStartMonth = month;
     let weekStartYear = year;
     const monthsInYear = calendar.monthsArray.length ?? 12;
@@ -760,7 +767,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const seasonDay = this._selectedDate ?? date;
     const currentSeason = enrichSeasonData(calendar.getCurrentSeason?.(seasonDay));
     const currentEra = calendar.getCurrentEra?.();
-    const weekWeekdays = calendar.getWeekdaysForMonth?.(weekStartMonth) ?? calendar.weekdaysArray ?? [];
+    const weekWeekdaysRaw = calendar.getWeekdaysForMonth?.(weekStartMonth) ?? calendar.weekdaysArray ?? [];
+    const weekWeekdays = weekWeekdaysRaw.length ? Array.from({ length: weekWeekdaysRaw.length }, (_, i) => weekWeekdaysRaw[(i + weekStartIdx) % weekWeekdaysRaw.length]) : weekWeekdaysRaw;
     const showSelectedInHeader = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_HEADER_SHOW_SELECTED);
     const weekHeaderDate = showSelectedInHeader && this._selectedDate ? this._selectedDate : { year: weekStartYear, month: weekStartMonth, dayOfMonth: weekStartDayOfMonth };
     const weekHeaderComponents = { year: weekHeaderDate.year, month: weekHeaderDate.month, dayOfMonth: weekHeaderDate.dayOfMonth ?? 0 };
