@@ -6,8 +6,10 @@ import CinematicKeyframeBuilder from './cinematic-keyframe-builder.mjs';
 
 /** @type {number} */
 const FADE_MS = 300;
+
 /** @type {number} */
 const MAX_PARTICLES = 30;
+
 /** @type {object[]} */
 const SKY_WAYPOINTS = [
   { t: 0.0, hour: 0 },
@@ -42,6 +44,8 @@ export default class CinematicOverlay {
   static #moonTexture = null;
   static #currentMoons = [];
   static #shootingStars = [];
+  static #activeEventCards = [];
+  static #lastVisualDayKey = null;
 
   /** @returns {boolean} Whether a cinematic is currently playing. */
   static get active() {
@@ -195,6 +199,7 @@ export default class CinematicOverlay {
       this.#renderKeyframe(keyframes[frameIndex], prevKf);
       if (this.#pixiApp) this.#emitPageFlipParticles();
     }
+    this.#syncEventCardsToVisualDay(progress);
     this.#updateBackground(dayFraction);
     this.#updateEffects(dayFraction);
     this.#tickDateCounter(frameIndex, panelProgress);
@@ -244,6 +249,8 @@ export default class CinematicOverlay {
     }
     this.#destroyPixi();
     this.#destroyDOM();
+    this.#clearEventStage();
+    this.#lastVisualDayKey = null;
     this.#active = false;
     this.#payload = null;
     this.#currentFrame = -1;
@@ -315,7 +322,6 @@ export default class CinematicOverlay {
     this.#updateSeasonDisplay(kf);
     this.#updateWeatherDisplay(kf);
     this.#updateMoonDisplay(kf, prevKf);
-    this.#showEventCards(kf);
     this.#currentMoons = kf.moons ?? [];
   }
 
@@ -510,10 +516,27 @@ export default class CinematicOverlay {
   }
 
   /**
-   * Display event title cards and pulse the vignette.
-   * @param {object} kf - Current keyframe data
+   * Swap event cards when the interpolated visual day changes so cards always match the day being shown on the clock.
+   * @param {number} progress - Overall cinematic progress (0-1)
    */
-  static #showEventCards(kf) {
+  static #syncEventCardsToVisualDay(progress) {
+    const { startTime, endTime, keyframes } = this.#payload ?? {};
+    const calendar = CalendarManager.getActiveCalendar();
+    if (startTime == null || !keyframes?.length || !calendar) return;
+    const components = calendar.timeToComponents(startTime + (endTime - startTime) * progress);
+    const dayKey = `${components.year + (calendar.years?.yearZero ?? 0)}-${components.month}-${components.dayOfMonth}`;
+    if (dayKey === this.#lastVisualDayKey) return;
+    this.#lastVisualDayKey = dayKey;
+    this.#clearEventStage();
+    const kf = keyframes.find((k) => `${k.date.year}-${k.date.month}-${k.date.dayOfMonth}` === dayKey);
+    if (kf) this.#spawnEventCards(kf);
+  }
+
+  /**
+   * Render cards for a keyframe's events; cards persist until the visual day changes or the cinematic ends.
+   * @param {object} kf - Current keyframe
+   */
+  static #spawnEventCards(kf) {
     const stage = this.#element?.querySelector('.cinematic-event-stage');
     if (!stage || !kf.events?.length) return;
     const events = this.#filterVisibleEvents(kf.events);
@@ -526,8 +549,14 @@ export default class CinematicOverlay {
       if (event.color) card.style.setProperty('--event-color', event.color);
       card.innerHTML = `<i class="${event.icon}"></i><span class="cinematic-event-name">${event.name}</span>`;
       stage.appendChild(card);
-      setTimeout(() => card.remove(), event.isFestival ? 2500 : 1800);
+      this.#activeEventCards.push(card);
     }
+  }
+
+  /** Remove all active event cards from the stage. */
+  static #clearEventStage() {
+    for (const card of this.#activeEventCards) card.remove();
+    this.#activeEventCards.length = 0;
   }
 
   /**
