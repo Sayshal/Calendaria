@@ -495,14 +495,31 @@ export default class CinematicOverlay {
   }
 
   /**
+   * Drop events the current user cannot observe so hidden notes never display in the overlay.
+   * GM passes through; players check each event's source page permission.
+   * @param {object[]} events - Raw events from keyframe
+   * @returns {object[]} Filtered events
+   */
+  static #filterVisibleEvents(events) {
+    if (game.user.isGM) return events;
+    return events.filter((e) => {
+      if (!e.uuid) return false;
+      const page = fromUuidSync(e.uuid);
+      return !!page?.testUserPermission(game.user, 'OBSERVER');
+    });
+  }
+
+  /**
    * Display event title cards and pulse the vignette.
    * @param {object} kf - Current keyframe data
    */
   static #showEventCards(kf) {
     const stage = this.#element?.querySelector('.cinematic-event-stage');
     if (!stage || !kf.events?.length) return;
-    this.#pulseVignette(kf.events.some((e) => e.isFestival));
-    for (const event of kf.events) {
+    const events = this.#filterVisibleEvents(kf.events);
+    if (!events.length) return;
+    this.#pulseVignette(events.some((e) => e.isFestival));
+    for (const event of events) {
       const card = document.createElement('div');
       card.classList.add('cinematic-event-card');
       if (event.isFestival) card.classList.add('cinematic-event--festival');

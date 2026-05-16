@@ -208,6 +208,7 @@ export function createNoteStub(page) {
   const isOwner = parentJournal?.isOwner ?? page.isOwner;
   return {
     id: page.id,
+    uuid: page.uuid,
     name: page.name,
     content: page.text?.content ?? '',
     flagData: enrichedFlagData,
