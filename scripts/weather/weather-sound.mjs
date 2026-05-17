@@ -12,6 +12,15 @@ let activeSound = null;
 /** @type {string|null} Full path of the currently playing sound (for dedup). */
 let activeSoundKey = null;
 
+/** @type {boolean} Whether the current client is inside a core SuppressWeather region, muting Calendaria's audio. */
+let suppressedByRegion = false;
+
+/** @type {Set<RegionDocument>} Cached scene regions with an active `suppressWeather` behavior. */
+let suppressRegions = new Set();
+
+/** @type {Set<Token>} Cached tokens whose actor the current user owns, used when nothing is actively controlled. */
+let ownedTokens = new Set();
+
 /**
  * Initialize weather sound hooks.
  */
@@ -19,11 +28,85 @@ export function initializeWeatherSound() {
   Hooks.on(HOOKS.WEATHER_CHANGE, onWeatherChange);
   Hooks.on('canvasReady', onCanvasReady);
   Hooks.on('updateScene', onSceneUpdate);
+  for (const hook of ['createRegion', 'updateRegion', 'deleteRegion', 'createRegionBehavior', 'updateRegionBehavior', 'deleteRegionBehavior']) {
+    Hooks.on(hook, () => {
+      rebuildSuppressRegions();
+      applyRegionSuppression();
+    });
+  }
+  for (const hook of ['createToken', 'deleteToken', 'updateToken']) {
+    Hooks.on(hook, () => {
+      rebuildOwnedTokens();
+      applyRegionSuppression();
+    });
+  }
+  Hooks.on('controlToken', applyRegionSuppression);
+  Hooks.on('refreshToken', onRefreshToken);
+  rebuildSuppressRegions();
+  rebuildOwnedTokens();
   if (!isSoundDisabledForScene(canvas?.scene)) {
     const weather = WeatherManager.getCurrentWeather();
     playSound(weather || null);
   }
   log(3, 'WeatherSound initialized');
+}
+
+/** Rebuild the cached set of regions whose `suppressWeather` behavior is active on the current scene. */
+function rebuildSuppressRegions() {
+  suppressRegions = new Set();
+  const scene = canvas?.scene;
+  if (!scene) return;
+  for (const region of scene.regions) if (region.behaviors.some((b) => b.type === 'suppressWeather' && !b.disabled)) suppressRegions.add(region);
+}
+
+/** Rebuild the cached set of placed tokens whose actor the current user owns. */
+function rebuildOwnedTokens() {
+  ownedTokens = new Set();
+  if (!canvas?.tokens) return;
+  for (const t of canvas.tokens.placeables) if (t.actor?.isOwner) ownedTokens.add(t);
+}
+
+/**
+ * Return true when any of the current user's relevant tokens is inside a cached suppress-weather region.
+ * @returns {boolean}
+ */
+function isInsideSuppressWeatherRegion() {
+  if (!suppressRegions.size) return false;
+  const controlled = canvas.tokens.controlled;
+  const tokens = controlled.length ? controlled : ownedTokens;
+  if ((tokens.size ?? tokens.length) === 0) return false;
+  for (const region of suppressRegions) {
+    for (const token of tokens) {
+      const c = token.center;
+      if (!c) continue;
+      if (region.testPoint({ x: c.x, y: c.y, elevation: token.document?.elevation ?? 0 })) return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Refresh suppression state and fade the active sound to/from silence when it changes.
+ */
+function applyRegionSuppression() {
+  if (!activeSound) return;
+  const next = isInsideSuppressWeatherRegion();
+  if (next === suppressedByRegion) return;
+  suppressedByRegion = next;
+  const baseVolume = game.settings.get(MODULE.ID, SETTINGS.WEATHER_SOUND_VOLUME) ?? 0.5;
+  activeSound.fade(next ? 0 : baseVolume, { duration: FADE_MS });
+}
+
+/**
+ * Per-frame token refresh handler — only triggers suppression checks for tokens the user actually cares about.
+ * @param {Token} token - The refreshing token placeable
+ */
+function onRefreshToken(token) {
+  if (!activeSound || !suppressRegions.size) return;
+  const controlled = canvas.tokens.controlled;
+  const relevant = controlled.length ? controlled.includes(token) : ownedTokens.has(token);
+  if (!relevant) return;
+  applyRegionSuppression();
 }
 
 /**
@@ -58,6 +141,9 @@ function onSceneUpdate(scene, change) {
  * Handle canvas ready — sync sound to the new scene's weather.
  */
 function onCanvasReady() {
+  rebuildSuppressRegions();
+  rebuildOwnedTokens();
+  suppressedByRegion = false;
   const scene = canvas?.scene;
   if (!scene) return;
   if (isSoundDisabledForScene(scene)) {
@@ -135,11 +221,12 @@ async function playSound(weather) {
   if (!src) return;
   try {
     const sound = await game.audio.play(src, { loop: true, volume: 0, context: game.audio.environment });
-    const volume = game.settings.get(MODULE.ID, SETTINGS.WEATHER_SOUND_VOLUME) ?? 0.5;
-    sound.fade(volume, { duration: FADE_MS });
+    const baseVolume = game.settings.get(MODULE.ID, SETTINGS.WEATHER_SOUND_VOLUME) ?? 0.5;
+    suppressedByRegion = isInsideSuppressWeatherRegion();
+    sound.fade(suppressedByRegion ? 0 : baseVolume, { duration: FADE_MS });
     activeSound = sound;
     activeSoundKey = src;
-    log(3, `Playing "${src}"`);
+    log(3, `Playing "${src}"${suppressedByRegion ? ' (suppressed by region)' : ''}`);
   } catch (error) {
     log(1, 'Weather sound playback failed:', error);
   }
