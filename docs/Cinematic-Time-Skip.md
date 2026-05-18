@@ -37,6 +37,8 @@ The "Trigger on Rest" setting requires **Advance Time on Rest** (in the Time tab
 
 The animation plays on all connected clients at once. Any player can skip their own view with Escape or the skip button. If the GM aborts, all clients stop.
 
+Players only see cards for notes whose source page grants them OBSERVER permission or higher.
+
 ---
 
 ## Abort Controls

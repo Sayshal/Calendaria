@@ -19,16 +19,17 @@ export default class CinematicKeyframeBuilder {
     const secondsPerDay = this.#getSecondsPerDay(calendar);
     const totalDays = Math.ceil((endTime - startTime) / secondsPerDay);
     const interval = this.#getSampleInterval(totalDays, calendar);
-    const startComponents = calendar.timeToComponents(startTime);
-    const endComponents = calendar.timeToComponents(endTime);
+    const yearZero = calendar?.years?.yearZero ?? 0;
+    const toAbsolute = (c) => ({ year: c.year + yearZero, month: c.month, dayOfMonth: c.dayOfMonth });
+    const startComponents = toAbsolute(calendar.timeToComponents(startTime));
+    const endComponents = toAbsolute(calendar.timeToComponents(endTime));
     const festivalDates = this.#getFestivalDates(startComponents, endComponents, calendar, settings);
     const keyframes = [];
     let prevKeyframe = null;
     for (let day = 1; day <= totalDays && keyframes.length < MAX_KEYFRAMES; day += interval) {
       const worldTime = startTime + day * secondsPerDay;
       if (worldTime > endTime) break;
-      const components = calendar.timeToComponents(worldTime);
-      const date = { year: components.year, month: components.month, dayOfMonth: components.dayOfMonth };
+      const date = toAbsolute(calendar.timeToComponents(worldTime));
       const kf = this.#buildKeyframe(date, worldTime, calendar, prevKeyframe, settings);
       keyframes.push(kf);
       prevKeyframe = kf;
@@ -41,8 +42,7 @@ export default class CinematicKeyframeBuilder {
       keyframes.push(this.#buildKeyframe(fDate, fWorldTime, calendar, null, settings));
     }
     const lastKf = keyframes[keyframes.length - 1];
-    const endDate = { year: endComponents.year, month: endComponents.month, dayOfMonth: endComponents.dayOfMonth };
-    if (!lastKf || lastKf.worldTime !== endTime) keyframes.push(this.#buildKeyframe(endDate, endTime, calendar, lastKf, settings));
+    if (!lastKf || lastKf.worldTime !== endTime) keyframes.push(this.#buildKeyframe(endComponents, endTime, calendar, lastKf, settings));
     keyframes.sort((a, b) => a.worldTime - b.worldTime);
     for (let i = 1; i < keyframes.length; i++) {
       if (keyframes[i].seasonLabel === keyframes[i - 1].seasonLabel) {
@@ -149,6 +149,7 @@ export default class CinematicKeyframeBuilder {
     if (!notes?.length) return [];
     const mapped = notes.map((note) => ({
       id: note.id,
+      uuid: note.uuid,
       name: note.name,
       icon: note.flagData?.icon ?? 'fas fa-bookmark',
       color: note.flagData?.color ?? null,

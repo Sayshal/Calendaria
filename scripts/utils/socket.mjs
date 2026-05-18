@@ -482,7 +482,7 @@ export class CalendariaSocket {
     if (game.user.isGM) return;
     const { visible } = data;
     log(3, `Handling HUD visibility: ${visible}`);
-    if (visible && canViewHUD()) HUD.show();
+    if (visible && canViewHUD() && game.settings.get(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD)) HUD.show();
     else if (!visible) HUD.hide();
   }
 

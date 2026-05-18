@@ -274,15 +274,28 @@
         z-index: 1;
         position: relative;
         border-color: var(--calendaria-today);
+        background: color-mix(in srgb, var(--calendaria-today) 18%, var(--calendaria-bg));
         box-shadow: 0 0 0.375rem var(--calendaria-today);
+
+        .day-number {
+          color: var(--calendaria-today);
+          font-weight: 700;
+        }
       }
 
       &.selected {
         z-index: 1;
         position: relative;
         border-color: var(--calendaria-primary);
+        background: color-mix(in srgb, var(--calendaria-primary) 10%, var(--calendaria-bg));
         cursor: pointer;
         box-shadow: 0 0 0.375rem var(--calendaria-primary);
+      }
+
+      &.today.selected {
+        box-shadow:
+          0 0 0.375rem var(--calendaria-primary),
+          inset 0 0 0 0.125rem var(--calendaria-today);
       }
 
       &.has-notes {

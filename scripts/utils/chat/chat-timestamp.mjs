@@ -6,6 +6,31 @@ import { formatForLocation, hasMoonIconMarkers, renderMoonIcons } from '../forma
 const ChatLog = foundry.applications.sidebar.tabs.ChatLog;
 
 /**
+ * Get the calendar timestamp banner for a chat message, creating it if missing.
+ * @param {HTMLElement} li - The chat message <li> element
+ * @returns {HTMLElement} The banner element
+ */
+function getOrCreateBanner(li) {
+  let banner = li.querySelector('.cal-timestamp-banner');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.className = 'cal-timestamp-banner';
+    li.append(banner);
+  }
+  return banner;
+}
+
+/**
+ * Write a formatted date into a banner element, rendering moon icons when present.
+ * @param {HTMLElement} banner - The banner element
+ * @param {string} formattedDate - Pre-formatted date string, possibly containing moon icon markers
+ */
+function setBannerContent(banner, formattedDate) {
+  if (hasMoonIconMarkers(formattedDate)) banner.innerHTML = renderMoonIcons(formattedDate);
+  else banner.textContent = formattedDate;
+}
+
+/**
  * Hook handler for preCreateChatMessage.
  * @param {ChatMessage} message - The chat message being created
  * @param {object} _data - The creation data
@@ -38,18 +63,7 @@ export function onRenderChatMessageHTML(message, html, _context) {
     if (hasMoonIconMarkers(formattedDate)) timestampEl.innerHTML = renderMoonIcons(formattedDate);
     else timestampEl.textContent = formattedDate;
   } else if (mode === 'augment') {
-    const wrapper = document.createElement('span');
-    wrapper.className = 'cal-timestamp';
-    const gameDate = document.createElement('span');
-    gameDate.className = 'cal-date';
-    if (hasMoonIconMarkers(formattedDate)) gameDate.innerHTML = `${renderMoonIcons(formattedDate)} `;
-    else gameDate.textContent = `${formattedDate} `;
-    const realDate = document.createElement('span');
-    realDate.className = 'cal-real';
-    realDate.textContent = timestampEl.textContent;
-    wrapper.appendChild(gameDate);
-    wrapper.appendChild(realDate);
-    timestampEl.replaceChildren(wrapper);
+    setBannerContent(getOrCreateBanner(html), formattedDate);
   }
 }
 
@@ -75,13 +89,8 @@ export function overrideChatLogTimestamps() {
             else stamp.textContent = formattedDate;
             stamp.dataset.tooltip = foundry.utils.timeSince(message.timestamp);
           } else if (mode === 'augment') {
-            const gameDate = stamp.querySelector('.cal-date');
-            if (gameDate) {
-              if (hasMoonIconMarkers(formattedDate)) gameDate.innerHTML = `${renderMoonIcons(formattedDate)} `;
-              else gameDate.textContent = `${formattedDate} `;
-            }
-            const realDate = stamp.querySelector('.cal-real');
-            if (realDate) realDate.textContent = foundry.utils.timeSince(message.timestamp);
+            stamp.textContent = foundry.utils.timeSince(message.timestamp);
+            setBannerContent(getOrCreateBanner(li), formattedDate);
           }
         }
       } else {

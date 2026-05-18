@@ -81,6 +81,16 @@
       "lang": "pl",
       "name": "Polish",
       "path": "lang/pl.json"
+    },
+    {
+      "lang": "fr",
+      "name": "Français",
+      "path": "lang/fr.json"
+    },
+    {
+      "lang": "es",
+      "name": "Español",
+      "path": "lang/es.json"
     }
   ],
   "license": "https://github.com/Sayshal/calendaria?tab=MIT-1-ov-file",

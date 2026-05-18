@@ -1545,8 +1545,27 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static _onToday(_event, _target) {
     this._viewedDate = null;
-    this._selectedDate = null;
+    this._selectedDate = getCurrentViewedDate(this.calendar);
+    this.#applyAutoOpenForDay(this._selectedDate);
     this.render();
+  }
+
+  /**
+   * Open or close the notes panel based on whether `date` has notes, honoring the auto-open setting.
+   * @param {object|null} date - Date to check, or null to close the panel
+   */
+  #applyAutoOpenForDay(date) {
+    if (!game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_AUTO_OPEN_NOTES)) return;
+    if (!date) {
+      this.#notesPanelVisible = false;
+      return;
+    }
+    const { count } = this._getNotesOnDay(getVisibleNotes(getCalendarNotes()), date.year, date.month, date.dayOfMonth);
+    if (count > 0) {
+      this.#notesPanelVisible = true;
+      this.#sidebarLocked = true;
+      this.#sidebarVisible = true;
+    } else this.#notesPanelVisible = false;
   }
 
   /**
@@ -1560,22 +1579,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const year = parseInt(target.dataset.year);
     if (this._selectedDate?.year === year && this._selectedDate?.month === month && this._selectedDate?.dayOfMonth === dayOfMonth) this._selectedDate = null;
     else this._selectedDate = { year, month, dayOfMonth };
-    if (game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_AUTO_OPEN_NOTES)) {
-      if (this._selectedDate) {
-        const allNotes = getCalendarNotes();
-        const visibleNotes = getVisibleNotes(allNotes);
-        const { count } = this._getNotesOnDay(visibleNotes, year, month, dayOfMonth);
-        if (count > 0) {
-          this.#notesPanelVisible = true;
-          this.#sidebarLocked = true;
-          this.#sidebarVisible = true;
-        } else {
-          this.#notesPanelVisible = false;
-        }
-      } else {
-        this.#notesPanelVisible = false;
-      }
-    }
+    this.#applyAutoOpenForDay(this._selectedDate);
     this.render();
   }
 
@@ -2019,7 +2023,13 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       return null;
     }
     if (isCombatBlocked(SETTINGS.MINI_CAL_COMBAT_MODE)) return null;
-    const instance = this.instance ?? new MiniCal();
+    const existing = this.instance;
+    const instance = existing ?? new MiniCal();
+    if (!existing?.rendered) {
+      const today = getCurrentViewedDate(instance.calendar);
+      instance.#applyAutoOpenForDay(today);
+      if (instance.#notesPanelVisible) instance._selectedDate = today;
+    }
     instance.render({ force: true });
     return instance;
   }

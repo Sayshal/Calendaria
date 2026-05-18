@@ -123,7 +123,7 @@ Days until a target date. Clickable: navigates to target.
 
 ### countup / elapsed
 
-Days since a target date. Clickable: navigates to target.
+Days since a target date, or days until when `to=` points to a future date. Clickable: navigates to target. Tooltip shows "X days until <target>" for future static targets and "X days since <date>" otherwise.
 
 ```text
 [[cal.countup 1 Mirtul 1490]]                                               → 730 days
@@ -131,14 +131,16 @@ Days since a target date. Clickable: navigates to target.
 [[cal.countup 1 Mirtul 1490 relative=true simple=true]]                     → 2
 [[cal.countup 1 Mirtul 1490 to="1 Mirtul 1492"]]                           → 730 days
 [[cal.countup 1 Mirtul 1490 to="1 Mirtul 1492" relative=true simple=true]]  → 2
+[[cal.countup 1 Mirtul 1490 to="event"]]                                    → 730 days (resolves to the host calendar note's start date)
+[[cal.countup 1 Mirtul 1490 to="High Harvestide"]]                          → 730 days (resolves to a calendar note matched by name)
 [[cal.elapsed 1 Mirtul 1490]]                                               → 730 days
 ```
 
-| Parameter  | Type      | Description                                                       |
-| ---------- | --------- | ----------------------------------------------------------------- |
-| `relative` | `boolean` | Human-readable relative text (years/months/weeks)                 |
-| `simple`   | `boolean` | Return only the numeric count (e.g. `42` not `42 years ago`)      |
-| `to`       | `string`  | End date to count to instead of today (e.g. `to="1 Mirtul 1492"`) |
+| Parameter  | Type      | Description                                                                                                           |
+| ---------- | --------- | --------------------------------------------------------------------------------------------------------------------- |
+| `relative` | `boolean` | Human-readable relative text (years/months/weeks)                                                                     |
+| `simple`   | `boolean` | Return only the numeric count (e.g. `42` not `42 years ago`)                                                          |
+| `to`       | `string`  | End date (`to="1 Mirtul 1492"`), `to="event"` for the host note's start date, or a note name (`to="High Harvestide"`) |
 
 ---
 

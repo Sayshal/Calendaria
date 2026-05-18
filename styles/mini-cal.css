@@ -621,7 +621,8 @@
       }
 
       &.today {
-        box-shadow: inset 0 0 0 0.05rem var(--calendaria-today);
+        background: color-mix(in srgb, var(--calendaria-today) 18%, var(--calendaria-bg));
+        box-shadow: inset 0 0 0 0.075rem var(--calendaria-today);
 
         .minical-day-num {
           color: var(--calendaria-today);
@@ -630,7 +631,14 @@
       }
 
       &.selected {
-        box-shadow: inset 0 0 0 0.05rem var(--calendaria-primary);
+        background: color-mix(in srgb, var(--calendaria-primary) 10%, var(--calendaria-bg));
+        box-shadow: inset 0 0 0 0.075rem var(--calendaria-primary);
+      }
+
+      &.today.selected {
+        box-shadow:
+          inset 0 0 0 0.075rem var(--calendaria-primary),
+          inset 0 0 0 0.15rem var(--calendaria-today);
       }
 
       &.festival {

@@ -643,6 +643,19 @@ function enrichCountdown(config, label) {
 }
 
 /**
+ * Find a calendar note's startDate by name (case-insensitive; exact match preferred).
+ * @param {string} name - Note name to look up
+ * @returns {object|null} startDate {year, month, dayOfMonth} (0-indexed) or null
+ */
+function findNoteStartByName(name) {
+  const needle = name?.trim().toLowerCase();
+  if (!needle) return null;
+  const notes = NoteManager.getAllNotes().filter((n) => n.visible && n.flagData?.startDate);
+  const match = notes.find((n) => n.name?.toLowerCase() === needle) || notes.find((n) => n.name?.toLowerCase().includes(needle));
+  return match?.flagData?.startDate || null;
+}
+
+/**
  * Count up from a date.
  * @param {object} config - Parsed enricher config
  * @param {string|null} label - Custom label override
@@ -655,28 +668,40 @@ function enrichCountup(config, label) {
   let endDate, endComponents;
   const isStatic = config.to != null;
   if (isStatic) {
-    const toValues = String(config.to).split(/\s+/);
-    endDate = parseDateFromValues(toValues);
+    if (config.to === 'event') {
+      const start = config._options?.relativeTo?.system?.startDate;
+      if (!start) return createErrorElement('CALENDARIA.Enricher.Error.NoEventContext');
+      endDate = { year: start.year, month: start.month + 1, day: start.dayOfMonth + 1 };
+    } else {
+      const toStr = String(config.to);
+      endDate = parseDateFromValues(toStr.split(/\s+/));
+      if (!endDate) {
+        const start = findNoteStartByName(toStr);
+        if (start) endDate = { year: start.year, month: start.month + 1, day: start.dayOfMonth + 1 };
+      }
+    }
     if (!endDate) return createErrorElement('CALENDARIA.Enricher.Error.InvalidDate');
     endComponents = toInternal(endDate);
   } else {
     endDate = getCurrentDateTime(calendar, components);
     endComponents = components;
   }
+  const totalDays = daysBetween(toInternal(target), toInternal(endDate));
+  const absDays = Math.abs(totalDays);
+  const isUntil = isStatic && totalDays > 0;
+  const tooltipDate = formatDate(isStatic ? endDate : target, 'dateLong', calendar);
+  const formatTooltip = (value) =>
+    isUntil ? game.i18n.format('CALENDARIA.Enricher.Tooltip.TimeUntil', { target: tooltipDate, value }) : game.i18n.format('CALENDARIA.Enricher.Tooltip.TimeSince', { date: tooltipDate, value });
+  const unit = absDays === 1 ? game.i18n.localize('CALENDARIA.Common.UnitDay') : game.i18n.localize('CALENDARIA.Common.UnitDays');
+  const dataset = { calYear: target.year, calMonth: target.month, calDay: target.day };
+  const liveConfig = isStatic ? null : config.raw;
   if (config.relative) {
     const yearZero = calendar?.years?.yearZero ?? 0;
     const text = timeSince({ year: target.year - yearZero, month: target.month - 1, dayOfMonth: target.day - 1 }, endComponents, !!config.simple);
-    const sinceDays = Math.abs(daysBetween(toInternal(target), toInternal(endDate)));
-    const sinceUnit = sinceDays === 1 ? game.i18n.localize('CALENDARIA.Common.UnitDay') : game.i18n.localize('CALENDARIA.Common.UnitDays');
-    const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.TimeSince', { date: formatDate(target, 'dateLong', calendar), value: `${sinceDays} ${sinceUnit}` });
-    return createContentLink('countup', label || text, { calYear: target.year, calMonth: target.month, calDay: target.day }, 'fa-hourglass-half', tooltip, isStatic ? null : config.raw);
+    return createContentLink('countup', label || text, dataset, 'fa-hourglass-half', formatTooltip(`${absDays} ${unit}`), liveConfig);
   }
-  const days = daysBetween(toInternal(target), toInternal(endDate));
-  const abs = Math.abs(days);
-  const unit = abs === 1 ? game.i18n.localize('CALENDARIA.Common.UnitDay') : game.i18n.localize('CALENDARIA.Common.UnitDays');
-  const text = label || (config.simple ? String(abs) : `${abs} ${unit}`);
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.TimeSince', { date: formatDate(target, 'dateLong', calendar), value: `${abs} ${unit}` });
-  return createContentLink('countup', text, { calYear: target.year, calMonth: target.month, calDay: target.day }, 'fa-hourglass-half', tooltip, isStatic ? null : config.raw);
+  const text = label || (config.simple ? String(absDays) : `${absDays} ${unit}`);
+  return createContentLink('countup', text, dataset, 'fa-hourglass-half', formatTooltip(`${absDays} ${unit}`), liveConfig);
 }
 
 /**
@@ -1939,10 +1964,10 @@ class LiveUpdateManager {
 /**
  * Enricher dispatcher.
  * @param {object} match - Regex match result
- * @param {object} _options - Enrichment options from Foundry (unused)
+ * @param {object} options - Enrichment options from Foundry; `options.relativeTo` is the source document when available
  * @returns {Promise<HTMLElement|null>} Element to insert, or null to leave raw text
  */
-async function enrichCalendaria(match, _options) {
+async function enrichCalendaria(match, options) {
   const { type, config: configStr, label } = match.groups;
   const typeLower = type.toLowerCase();
   const handler = handlers[typeLower];
@@ -1952,6 +1977,7 @@ async function enrichCalendaria(match, _options) {
   }
   if (!CalendarManager.getActiveCalendar()) return createElement(typeLower, label || '', configStr?.trim() || '', true, 'fa-spinner fa-spin');
   const config = parseConfig(configStr);
+  config._options = options;
   const result = await handler(config, label);
   return label ? applyLabel(result, label) : result;
 }

@@ -1021,8 +1021,18 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const CONDENSED_HEIGHT = 0.375;
     const CONDENSED_GAP = 0.125;
     const BAR_OFFSET = 1.625;
-    multiDayEvents.forEach(({ note, end, startDayOfMonth, endDayOfMonth, isContinuation }) => {
+    const cal = CalendarManager.getActiveCalendar();
+    const hoursPerDay = cal?.days?.hoursPerDay ?? 24;
+    const minutesPerHour = cal?.days?.minutesPerHour ?? 60;
+    const dayFraction = (hour, minute) => Math.max(0, Math.min(1, (hour * minutesPerHour + (minute ?? 0)) / (hoursPerDay * minutesPerHour)));
+    multiDayEvents.forEach(({ note, start, end, startDayOfMonth, endDayOfMonth, isContinuation }) => {
       const endsInMonth = end.month === month && end.year === year;
+      const isAllDay = start.hour == null || note.system.allDay;
+      const rawEnd = note.system.endDate;
+      const endHour = rawEnd?.hour ?? end.hour;
+      const endMinute = rawEnd?.minute ?? end.minute;
+      const startFrac = !isAllDay && !isContinuation && start.hour != null ? dayFraction(start.hour, start.minute) : 0;
+      const endFrac = !isAllDay && endsInMonth && endHour != null ? dayFraction(endHour, endMinute) : 1;
       const resolved = resolveNoteDisplayProps(note);
       const displayStyle = resolved.displayStyle;
       const isHidden = resolved.visibility === 'hidden';
@@ -1095,8 +1105,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       if (startWeekIndex === endWeekIndex) {
         const startColumn = startPosition % daysInWeek;
         const endColumn = endPosition % daysInWeek;
-        const left = (startColumn / daysInWeek) * 100;
-        const width = ((endColumn - startColumn + 1) / daysInWeek) * 100;
+        const left = (startColumn / daysInWeek) * 100 + startFrac * singleDayWidth;
+        const width = ((endColumn - startColumn + 1) / daysInWeek) * 100 - startFrac * singleDayWidth - (1 - endFrac) * singleDayWidth;
         events.push({
           id: note.id,
           name: note.name,
@@ -1127,8 +1137,12 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
           const segmentEnd = Math.min(endPosition, weekEnd);
           const startColumn = segmentStart % daysInWeek;
           const endColumn = segmentEnd % daysInWeek;
-          const left = (startColumn / daysInWeek) * 100;
-          const width = ((endColumn - startColumn + 1) / daysInWeek) * 100;
+          const isFirstSegment = weekIdx === startWeekIndex;
+          const isLastSegment = weekIdx === endWeekIndex;
+          const leftTrim = isFirstSegment ? startFrac * singleDayWidth : 0;
+          const rightTrim = isLastSegment ? (1 - endFrac) * singleDayWidth : 0;
+          const left = (startColumn / daysInWeek) * 100 + leftTrim;
+          const width = ((endColumn - startColumn + 1) / daysInWeek) * 100 - leftTrim - rightTrim;
           const showContinuationIcon = isContinuation && weekIdx === startWeekIndex;
           events.push({
             id: `${note.id}-week-${weekIdx}`,
