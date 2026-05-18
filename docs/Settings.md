@@ -629,7 +629,7 @@ How to display in-game time on chat messages.
 
 - `disabled`: No in-game timestamps
 - `replace`: Replace real-world time with in-game time
-- `augment`: Show both real and in-game time
+- `augment`: Add the in-game date as a banner below the message
 - Default: `disabled`
 
 ### Show Time in Timestamps
@@ -1589,6 +1589,6 @@ Override the global Top-Down Mode setting for FXMaster effects on this specific 
 
 ### Disable Weather Sound
 
-Suppress weather ambient sounds on this specific scene without affecting visual effects. Independent of the Weather FX Override; sounds are also silenced when the resolved override is Off.
+Suppress weather ambient sounds on this specific scene without affecting visual effects. Independent of the Weather FX Override; sounds are also silenced when the resolved override is Off. Sounds also fade out while the user's controlled or owned token is inside a Foundry scene region carrying the core Suppress Weather behavior.
 
 - Default: `false`

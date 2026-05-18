@@ -435,6 +435,7 @@ Nine sound categories covering all weather types with sound. See [Weather Preset
 - Controlled by the **Sound Effects** setting (Settings Panel > Weather tab)
 - Volume is controlled by the **Sound Volume** slider (Settings Panel > Weather tab)
 - Per-scene **Disable Weather Sound** flag suppresses sound on a specific scene without affecting visual effects
+- Core **Suppress Weather** region behaviors mute the ambient sound while the user's controlled or owned token is inside the region, restoring on exit
 - The global **Enable Weather FX** toggle stops all sounds when disabled
 - Sound assignments can be customized per-preset via the [Weather Editor](Weather-Editor)
 - Independent of FXMaster. Works without any external modules

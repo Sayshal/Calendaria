@@ -84,5 +84,6 @@ When weather changes, the old sound fades out over 2 seconds while the new sound
 - **Sound Effects** setting (Settings Panel > Weather tab > Weather Generation) enables/disables ambient sound globally
 - **Sound Volume** slider (Settings Panel > Weather tab) controls weather sound volume
 - Per-scene **Disable Weather Sound** flag suppresses sound on a specific scene without affecting visual effects; sounds are also silenced when the resolved Weather FX Override is Off
+- Foundry scene regions with the **Suppress Weather** behavior also mute Calendaria's ambient sound while the user's controlled or owned token is inside the region
 - Sounds play through Foundry's environment audio channel
 - Sound assignments can be customized per-preset via the [Weather Editor](Weather-Editor)

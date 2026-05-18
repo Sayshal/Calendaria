@@ -93,7 +93,7 @@ Each day cell in month view shows:
 
 | Element         | Description                                                                                            |
 | --------------- | ------------------------------------------------------------------------------------------------------ |
-| Day number      | Date, with today highlighted                                                                           |
+| Day number      | Date, with today and the selected day each shown by a tinted cell background                           |
 | Festival star   | Indicates a festival day                                                                               |
 | Moon icons      | Up to 3 visible, hover "+N" badge for additional moons; clickable for radial moon picker when >3 moons |
 | Note indicators | Custom icons and colors for each note                                                                  |
@@ -140,6 +140,7 @@ Events with duration span multiple days, rendered as horizontal bars across the 
 - When multiple events overlap, bars condense to thin lines. On hover, they expand to full height showing icon and title with a smooth CSS transition.
 - Click any bar to open the note
 - Optional bookend markers indicate the start and end days of the event
+- Bars for timed multi-day events trim to the start hour on the first day and end hour on the last day, scaled against the active calendar's hours and minutes per day. All-day notes and interior weeks of multi-week spans fill their cells edge-to-edge
 
 ### Display Styles
 
