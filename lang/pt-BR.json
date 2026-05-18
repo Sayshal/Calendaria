@@ -1026,6 +1026,7 @@
   "CALENDARIA.Enricher.Error.NoCycles": "Nenhum ciclo",
   "CALENDARIA.Enricher.Error.NoEclipseFound": "Nenhum eclipse encontrado",
   "CALENDARIA.Enricher.Error.NoEras": "Nenhuma era",
+  "CALENDARIA.Enricher.Error.NoEventContext": "to=\"event\" requer um contexto de nota de calendário",
   "CALENDARIA.Enricher.Error.NoMoons": "Nenhuma lua",
   "CALENDARIA.Enricher.Error.NoSeasons": "Nenhuma estação",
   "CALENDARIA.Enricher.Error.NoSunData": "Nenhum dado do sol",
