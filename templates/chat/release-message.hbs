@@ -12,44 +12,20 @@
 
     <h4>New Features</h4>
     <ul>
-      <li>Each calendar can now define its own Cross-Calendar display format in the editor's Display tab, controlling
-        how its dates appear when shown as equivalents on other calendars</li>
-      <li>New "Week Starts On" option in the calendar editor's Weeks tab rotates the mini and big calendar grids so a
-        chosen weekday appears in the first column, without altering the underlying weekday cycle</li>
-      <li>On PF2e and SF2e worlds, calendars without a Luxon sync theme now auto-align their displayed time-of-day with
-        the system world clock's starting time, so the Calendaria clock matches the core Foundry clock without affecting
-        calendar math</li>
-      <li>Short rests on dnd5e now advance world time independently of long rests, with a new Time-tab setting to choose
-        Automatic (system-reported duration) or Fixed minutes (default 60)</li>
+      <li>French (Français) and Spanish (Español) translations are now available in Foundry's language picker, so you
+        can run Calendaria in those locales</li>
+      <li>The countup enricher can now point at a calendar note by name, or auto-resolve to its own event's date when
+        embedded on a note page, so you no longer have to hardcode the target date</li>
+      <li>Today's date is now visibly highlighted in MiniCal and BigCal with a distinct background tint and day-number
+        colour, and the bundled theme presets were recoloured so the today accent stays readable when also selected</li>
     </ul>
 
     <h4>Bug Fixes</h4>
     <ul>
-      <li>Custom HUD format tokens with empty values (such as a missing canonical hour) now render as blank instead of
-        leaking the literal token text</li>
-      <li>Reordering months, weekdays, or seasons on older calendars no longer gets stuck swapping within the same
-        group; existing calendars are migrated to stable random keys on load</li>
-      <li>Cycle conditions on notes now show the correct stage list and stop breaking when cycles or stages are
-        reordered, with old saved values still matching</li>
-      <li>The condition builder on a note now uses that note's calendar instead of always defaulting to the active one
-      </li>
-      <li>Players without Big Calendar access now see a permission warning toast instead of a momentary dialog flash
-        when triggering the show-calendar macro</li>
-      <li>BigCal week view weekday labels now rotate with the Week Starts On setting so each column header matches its
-        actual weekday</li>
-      <li>Simple Calendar importer no longer misclassifies one-off dated notes as recurring festivals; festivals are
-        only created for yearly-recurring or intercalary-anchored entries</li>
-      <li>Simple Calendar imports now correctly remap month indices when intercalary months are stripped, so imported
-        current dates and note dates land on the right Calendaria month</li>
-    </ul>
-
-    <h4>Changes</h4>
-    <ul>
-      <li>Fresh installs now boot with cinematic mode, weather/moon/event overlays, scene syncing, HUD weather FX, chat
-        timestamp clock, weather auto-generation, and FXMaster integration off so a new world stays quiet until you opt
-        in; the in-HUD calendar widget is now shown by default</li>
-      <li>The per-scene "Disable Weather FX" checkbox is now a "Weather FX Override" dropdown with Inherit, On, and Off;
-        existing disabled scenes are migrated automatically</li>
+      <li>Ambient weather audio now fades out when your token enters a Foundry region with the core Suppress Weather
+        behavior, and restores when you leave, so indoor and sheltered areas stay quiet without manual muting</li>
+      <li>Cinematic event cards now stay in sync with the day shown on the clock and respect note permissions, so cards
+        no longer bleed into the following day and players no longer glimpse hidden GM notes</li>
     </ul>
 
   </div>
