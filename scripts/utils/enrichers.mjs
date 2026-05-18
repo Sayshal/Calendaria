@@ -643,6 +643,19 @@ function enrichCountdown(config, label) {
 }
 
 /**
+ * Find a calendar note's startDate by name (case-insensitive; exact match preferred).
+ * @param {string} name - Note name to look up
+ * @returns {object|null} startDate {year, month, dayOfMonth} (0-indexed) or null
+ */
+function findNoteStartByName(name) {
+  const needle = name?.trim().toLowerCase();
+  if (!needle) return null;
+  const notes = NoteManager.getAllNotes().filter((n) => n.visible && n.flagData?.startDate);
+  const match = notes.find((n) => n.name?.toLowerCase() === needle) || notes.find((n) => n.name?.toLowerCase().includes(needle));
+  return match?.flagData?.startDate || null;
+}
+
+/**
  * Count up from a date.
  * @param {object} config - Parsed enricher config
  * @param {string|null} label - Custom label override
@@ -660,8 +673,12 @@ function enrichCountup(config, label) {
       if (!start) return createErrorElement('CALENDARIA.Enricher.Error.NoEventContext');
       endDate = { year: start.year, month: start.month + 1, day: start.dayOfMonth + 1 };
     } else {
-      const toValues = String(config.to).split(/\s+/);
-      endDate = parseDateFromValues(toValues);
+      const toStr = String(config.to);
+      endDate = parseDateFromValues(toStr.split(/\s+/));
+      if (!endDate) {
+        const start = findNoteStartByName(toStr);
+        if (start) endDate = { year: start.year, month: start.month + 1, day: start.dayOfMonth + 1 };
+      }
     }
     if (!endDate) return createErrorElement('CALENDARIA.Enricher.Error.InvalidDate');
     endComponents = toInternal(endDate);
