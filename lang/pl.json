@@ -1024,6 +1024,7 @@
   "CALENDARIA.Enricher.Error.NoCycles": "Brak cykli",
   "CALENDARIA.Enricher.Error.NoEclipseFound": "Nie znaleziono żadnego zaćmienia",
   "CALENDARIA.Enricher.Error.NoEras": "Brak epok",
+  "CALENDARIA.Enricher.Error.NoEventContext": "Atrybut „to=’event’” wymaga kontekstu notatki kalendarzowej",
   "CALENDARIA.Enricher.Error.NoMoons": "Brak księżyców",
   "CALENDARIA.Enricher.Error.NoSeasons": "Brak pór roku",
   "CALENDARIA.Enricher.Error.NoSunData": "Brak danych dotyczących słońca",
