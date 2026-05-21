@@ -1026,6 +1026,7 @@
   "CALENDARIA.Enricher.Error.NoCycles": "Циклы отсутствуют",
   "CALENDARIA.Enricher.Error.NoEclipseFound": "Не найдено затмение",
   "CALENDARIA.Enricher.Error.NoEras": "Эпохи отсутствуют",
+  "CALENDARIA.Enricher.Error.NoEventContext": "атрибут to=\"event\" требует контекст календарной заметки",
   "CALENDARIA.Enricher.Error.NoMoons": "Луны отсутствуют",
   "CALENDARIA.Enricher.Error.NoSeasons": "Сезоны отсутствуют",
   "CALENDARIA.Enricher.Error.NoSunData": "Данные о солнце отсутствуют",
