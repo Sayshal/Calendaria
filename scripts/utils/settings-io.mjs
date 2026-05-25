@@ -1,5 +1,6 @@
 import { CalendarManager } from '../calendar/_module.mjs';
 import { MODULE, SETTINGS } from '../constants.mjs';
+import { FestivalManager } from '../festivals/_module.mjs';
 import { getAllPresets, sanitizeNoteData, upsertBundledCustomPreset } from '../notes/_module.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import { format, localize } from './localization.mjs';
@@ -267,6 +268,12 @@ export async function exportSettings() {
     exportData.calendarData = calendarData;
     log(3, `Included active calendar data: ${calendarData.name}`);
     if (calendarId) {
+      const festivalSeeds = FestivalManager.buildFestivalSeedsFromNotes(calendarId);
+      const festivalCount = Object.keys(festivalSeeds).length;
+      if (festivalCount) {
+        calendarData.festivals = { ...(calendarData.festivals ?? {}), ...festivalSeeds };
+        log(3, `Included ${festivalCount} festival seed${festivalCount === 1 ? '' : 's'}`);
+      }
       const notes = serializeNotes(calendarId);
       if (notes.length) {
         exportData.notes = notes;

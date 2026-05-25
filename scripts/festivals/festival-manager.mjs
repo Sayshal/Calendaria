@@ -114,6 +114,37 @@ export default class FestivalManager {
   }
 
   /**
+   * Reconstruct calendar.festivals seed entries from existing festival notes.
+   * Use at export time to round-trip user-created festivals back into the calendar payload.
+   * @param {string} calendarId - Calendar ID
+   * @returns {Object<string, object>} Seed dict keyed by festivalKey
+   */
+  static buildFestivalSeedsFromNotes(calendarId) {
+    const seeds = {};
+    const seen = new Set();
+    for (const stub of this.getFestivalNotes(calendarId)) {
+      const link = stub.flagData?.linkedFestival;
+      if (!link?.festivalKey) continue;
+      if (seen.has(link.festivalKey)) log(2, `Duplicate festivalKey ${link.festivalKey} in calendar ${calendarId}; last write wins`);
+      seen.add(link.festivalKey);
+      seeds[link.festivalKey] = {
+        name: stub.name,
+        description: stub.content || '',
+        color: stub.flagData.color || '',
+        icon: stub.flagData.icon?.replace(/^fas\s+/, '') || '',
+        month: stub.flagData.startDate?.month ?? null,
+        dayOfMonth: stub.flagData.startDate?.dayOfMonth ?? null,
+        duration: stub.flagData.duration ?? 1,
+        leapDuration: link.leapDuration ?? null,
+        leapYearOnly: !!link.leapYearOnly,
+        countsForWeekday: link.countsForWeekday ?? true,
+        conditionTree: stub.flagData.conditionTree ?? null
+      };
+    }
+    return seeds;
+  }
+
+  /**
    * Extract a fixed { month, dayOfMonth } from a condition tree, unwrapping leap-year guards.
    * @param {object|null} tree - Condition tree
    * @returns {{month: number, dayOfMonth: number}|null} 0-indexed date or null

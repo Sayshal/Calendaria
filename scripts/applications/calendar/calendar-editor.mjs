@@ -2544,6 +2544,12 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         exportData.notes = notes;
         log(3, `Included ${notes.length} calendar notes in export`);
       }
+      const festivalSeeds = FestivalManager.buildFestivalSeedsFromNotes(this.#calendarId);
+      const festivalCount = Object.keys(festivalSeeds).length;
+      if (festivalCount) {
+        exportData.festivals = { ...(exportData.festivals ?? {}), ...festivalSeeds };
+        log(3, `Included ${festivalCount} festival seed${festivalCount === 1 ? '' : 's'} in export`);
+      }
     }
     const filename = this.#calendarData.name
       .toLowerCase()

@@ -45,40 +45,57 @@ export default class CalendariaImporter extends BaseImporter {
   }
 
   /**
-   * Extract notes from Calendaria export data.
+   * Extract notes and festival seeds from Calendaria export data.
    * @param {object} data - Raw Calendaria export data
-   * @returns {Promise<object[]>} Array of note data objects
+   * @returns {Promise<object[]>} Array of preview row objects
    */
   async extractNotes(data) {
-    const notes = data.notes || this.#extractCalendarData(data).notes;
-    if (!notes?.length) return [];
-    return notes.map((note) => {
-      if (note.system) {
-        const linked = note.system.linkedFestival;
-        return {
-          name: note.name,
-          content: note.content || '',
-          calendarId: note.calendarId,
-          system: note.system,
-          startDate: note.system.startDate,
-          originalId: note.id,
-          festivalKey: linked?.festivalKey ?? null,
-          suggestedType: linked ? 'festival' : 'note'
-        };
+    const calendarData = this.#extractCalendarData(data);
+    const rows = [];
+    if (calendarData.festivals && typeof calendarData.festivals === 'object') {
+      for (const [festivalKey, festival] of Object.entries(calendarData.festivals)) {
+        if (!festival || typeof festival !== 'object') continue;
+        rows.push({
+          name: festival.name,
+          content: festival.description || '',
+          startDate: { month: festival.month ?? 0, dayOfMonth: festival.dayOfMonth ?? 0 },
+          festivalKey,
+          suggestedType: 'festival'
+        });
       }
-      return {
-        name: note.name,
-        content: note.content || '',
-        startDate: note.startDate,
-        endDate: note.endDate,
-        allDay: note.allDay ?? true,
-        repeat: note.repeat || 'never',
-        categories: note.categories || [],
-        originalId: note.id,
-        festivalKey: null,
-        suggestedType: 'note'
-      };
-    });
+    }
+    const notes = data.notes || calendarData.notes;
+    if (notes?.length) {
+      for (const note of notes) {
+        if (note.system) {
+          const linked = note.system.linkedFestival;
+          rows.push({
+            name: note.name,
+            content: note.content || '',
+            calendarId: note.calendarId,
+            system: note.system,
+            startDate: note.system.startDate,
+            originalId: note.id,
+            festivalKey: linked?.festivalKey ?? null,
+            suggestedType: linked ? 'festival' : 'note'
+          });
+        } else {
+          rows.push({
+            name: note.name,
+            content: note.content || '',
+            startDate: note.startDate,
+            endDate: note.endDate,
+            allDay: note.allDay ?? true,
+            repeat: note.repeat || 'never',
+            categories: note.categories || [],
+            originalId: note.id,
+            festivalKey: null,
+            suggestedType: 'note'
+          });
+        }
+      }
+    }
+    return rows;
   }
 
   /**
