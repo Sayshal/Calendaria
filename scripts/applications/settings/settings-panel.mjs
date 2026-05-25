@@ -1667,6 +1667,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.colorShiftSync = game.settings.get(MODULE.ID, SETTINGS.COLOR_SHIFT_SYNC);
     context.darknessMoonSync = game.settings.get(MODULE.ID, SETTINGS.DARKNESS_MOON_SYNC);
     context.defaultBrightnessMultiplier = game.settings.get(MODULE.ID, SETTINGS.DEFAULT_BRIGHTNESS_MULTIPLIER) ?? 1.0;
+    context.ambienceIntensity = game.settings.get(MODULE.ID, SETTINGS.AMBIENCE_INTENSITY) ?? 1.0;
+    context.weatherAmbienceIntensity = game.settings.get(MODULE.ID, SETTINGS.WEATHER_AMBIENCE_INTENSITY) ?? 1.0;
   }
 
   /**
@@ -2183,6 +2185,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('defaultNotePreset' in data) await game.settings.set(MODULE.ID, SETTINGS.DEFAULT_NOTE_PRESET, data.defaultNotePreset || null);
     if ('noteOpenMode' in data) await game.settings.set(MODULE.ID, SETTINGS.NOTE_OPEN_MODE, data.noteOpenMode);
     if (data.defaultBrightnessMultiplier != null) await game.settings.set(MODULE.ID, SETTINGS.DEFAULT_BRIGHTNESS_MULTIPLIER, Number(data.defaultBrightnessMultiplier));
+    if (data.ambienceIntensity != null) await game.settings.set(MODULE.ID, SETTINGS.AMBIENCE_INTENSITY, Number(data.ambienceIntensity));
+    if (data.weatherAmbienceIntensity != null) await game.settings.set(MODULE.ID, SETTINGS.WEATHER_AMBIENCE_INTENSITY, Number(data.weatherAmbienceIntensity));
     if (data.macroTriggers) {
       const globalTriggerKeys = ['dawn', 'dusk', 'midday', 'midnight', 'newDay'];
       const config = { global: {}, season: [], moonPhase: [] };
@@ -3080,6 +3084,20 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       if (rangeInput && rangeValue) {
         rangeInput.addEventListener('input', (e) => {
           rangeValue.textContent = `${e.target.value}x`;
+        });
+      }
+      const ambienceInput = htmlElement.querySelector('input[name="ambienceIntensity"]');
+      const ambienceValue = ambienceInput?.closest('.form-group')?.querySelector('.range-value');
+      if (ambienceInput && ambienceValue) {
+        ambienceInput.addEventListener('input', (e) => {
+          ambienceValue.textContent = `${e.target.value}x`;
+        });
+      }
+      const weatherInput = htmlElement.querySelector('input[name="weatherAmbienceIntensity"]');
+      const weatherValue = weatherInput?.closest('.form-group')?.querySelector('.range-value');
+      if (weatherInput && weatherValue) {
+        weatherInput.addEventListener('input', (e) => {
+          weatherValue.textContent = e.target.value;
         });
       }
     }

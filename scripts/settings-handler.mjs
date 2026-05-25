@@ -1,6 +1,7 @@
 import { BigCal, CalendarEditor, Chronicle, HUD, ImporterApp, MiniCal, SettingsPanel, Stopwatch, SunDial, TimeKeeper } from './applications/_module.mjs';
 import { MODULE, SETTINGS } from './constants.mjs';
 import { invalidatePresetCache } from './notes/_module.mjs';
+import { refreshEnvironmentLighting } from './time/darkness.mjs';
 import { hideDebugZones, initializeTheme, localize, log, showDebugZones } from './utils/_module.mjs';
 import { invalidateCache as invalidateFogCache } from './utils/fog-of-war.mjs';
 import { FRAMEWORK_INITIAL_DISPLAY_FORMATS } from './utils/formatting/format-utils.mjs';
@@ -462,6 +463,22 @@ export default class CalendariaSettings {
         scope: 'world',
         config: false,
         type: new BooleanField({ initial: false })
+      },
+      [SETTINGS.AMBIENCE_INTENSITY]: {
+        name: 'CALENDARIA.Settings.AmbienceIntensity.Name',
+        hint: 'CALENDARIA.Settings.AmbienceIntensity.Hint',
+        scope: 'world',
+        config: false,
+        type: new NumberField({ initial: 1.0, min: 0, max: 6, step: 0.25 }),
+        onChange: () => refreshEnvironmentLighting()
+      },
+      [SETTINGS.WEATHER_AMBIENCE_INTENSITY]: {
+        name: 'CALENDARIA.Settings.WeatherAmbienceIntensity.Name',
+        hint: 'CALENDARIA.Settings.WeatherAmbienceIntensity.Hint',
+        scope: 'world',
+        config: false,
+        type: new NumberField({ initial: 1.0, min: 0, max: 1, step: 0.1 }),
+        onChange: () => refreshEnvironmentLighting()
       },
       [SETTINGS.ALLOW_SIDEBAR_OVERLAP]: {
         name: 'CALENDARIA.Settings.AllowSidebarOverlap.Name',

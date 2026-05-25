@@ -213,8 +213,10 @@ export function calculateEnvironmentLighting(scene) {
     const sunset = calendar?.sunset?.(components, activeZone) ?? null;
     const colorShift = activeZone?.colorShift ?? null;
     const timeColor = calculateTimeOfDayColor(currentHour, hoursPerDay, sunrise, sunset, colorShift, minutesPerHour);
-    base = { hue: timeColor.hue, intensity: timeColor.intensity, saturation: null, luminosity: timeColor.luminosity, shadows: null };
-    dark = { hue: timeColor.hue, intensity: timeColor.intensity, saturation: null, luminosity: timeColor.luminosity, shadows: null };
+    const ambienceIntensity = game.settings.get(MODULE.ID, SETTINGS.AMBIENCE_INTENSITY) ?? 1;
+    const scaledIntensity = timeColor.intensity * ambienceIntensity;
+    base = { hue: timeColor.hue, intensity: scaledIntensity, saturation: null, luminosity: timeColor.luminosity, shadows: null };
+    dark = { hue: timeColor.hue, intensity: scaledIntensity, saturation: null, luminosity: timeColor.luminosity, shadows: null };
   }
   const moonSync = game.settings.get(MODULE.ID, SETTINGS.DARKNESS_MOON_SYNC);
   if (moonSync) {
@@ -228,18 +230,22 @@ export function calculateEnvironmentLighting(scene) {
       if (moonResult.luminosity > 0) dark.luminosity = Math.max(dark.luminosity ?? -0.1, (dark.luminosity ?? -0.1) + moonResult.luminosity);
     }
   }
-  const applyOverrides = (target, source) => {
+  const applyOverrides = (target, source, hueBlend = 1) => {
     if (!source) return;
-    if (source.hue != null) target.hue = source.hue;
+    if (source.hue != null) {
+      if (hueBlend < 1 && target.hue != null) target.hue = lerpHue(target.hue, source.hue, hueBlend);
+      else target.hue = source.hue;
+    }
     if (source.saturation != null) target.intensity = source.saturation;
     if (source.colorSaturation != null) target.saturation = source.colorSaturation;
     if (source.luminosity != null) target.luminosity = source.luminosity;
     if (source.shadows != null) target.shadows = source.shadows;
   };
+  const weatherHueBlend = game.settings.get(MODULE.ID, SETTINGS.WEATHER_AMBIENCE_INTENSITY) ?? 1;
   applyOverrides(base, activeZone?.environmentBase);
   applyOverrides(dark, activeZone?.environmentDark);
-  applyOverrides(base, currentWeather?.environmentBase);
-  applyOverrides(dark, currentWeather?.environmentDark);
+  applyOverrides(base, currentWeather?.environmentBase, weatherHueBlend);
+  applyOverrides(dark, currentWeather?.environmentDark, weatherHueBlend);
   let cycle = null;
   if (activeZone?.environmentCycle != null) cycle = activeZone.environmentCycle;
   if (currentWeather?.environmentCycle != null) cycle = currentWeather.environmentCycle;
@@ -348,6 +354,17 @@ function getDarknessScenes() {
  * Handle moon phase change to recalculate darkness across synced scenes.
  */
 export async function onMoonPhaseChange() {
+  if (!CalendariaSocket.isPrimaryGM()) return;
+  lastHour = null;
+  lastMinute = null;
+  await updateDarknessFromWorldTime(game.time.worldTime, 0);
+}
+
+/**
+ * Force a recompute of environment lighting for synced scenes without waiting for a time tick.
+ * Resets the hour/minute cache so settings changes take effect immediately.
+ */
+export async function refreshEnvironmentLighting() {
   if (!CalendariaSocket.isPrimaryGM()) return;
   lastHour = null;
   lastMinute = null;

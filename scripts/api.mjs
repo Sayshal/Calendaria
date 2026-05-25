@@ -50,7 +50,7 @@ import {
   secondsBetween,
   updatePreset
 } from './notes/_module.mjs';
-import { TimeClock, TimeTracker } from './time/_module.mjs';
+import { TimeClock, TimeTracker, refreshEnvironmentLighting } from './time/_module.mjs';
 import {
   CalendariaSocket,
   DEFAULT_FORMAT_PRESETS,
@@ -189,6 +189,15 @@ export const CalendariaAPI = {
     const yearZero = calendar?.years?.yearZero ?? 0;
     const { dayOfMonth: _dom, ...rest } = components;
     return { ...rest, year: components.year + yearZero, month: components.month + 1, day: _dom + 1 };
+  },
+
+  /**
+   * Force a recompute of scene environment lighting (time-of-day hue, weather blend, etc.) for synced scenes.
+   * Useful for testing ambience settings without waiting for the next time tick.
+   * @returns {Promise<void>}
+   */
+  async refreshEnvironment() {
+    return refreshEnvironmentLighting();
   },
 
   /**

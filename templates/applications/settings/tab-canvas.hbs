@@ -106,6 +106,48 @@
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.DefaultBrightnessMultiplier.Hint"}}</p>
       </div>
+
+      <div class="form-group">
+        <label for="ambienceIntensity">{{localize "CALENDARIA.Settings.AmbienceIntensity.Name"}}</label>
+        <div class="form-fields range-field">
+          <div class="slider-with-ticks">
+            <input type="range" id="ambienceIntensity" name="ambienceIntensity" min="0" max="6" step="0.25"
+              value="{{ambienceIntensity}}" list="ambience-intensity-ticks">
+            <datalist id="ambience-intensity-ticks">
+              <option value="0"></option>
+              <option value="1"></option>
+              <option value="3"></option>
+              <option value="6"></option>
+            </datalist>
+            <div class="slider-ticks">
+              <span></span><span></span><span></span><span></span>
+            </div>
+          </div>
+          <span class="range-value">{{ambienceIntensity}}x</span>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.AmbienceIntensity.Hint"}}</p>
+      </div>
+
+      <div class="form-group">
+        <label
+          for="weatherAmbienceIntensity">{{localize "CALENDARIA.Settings.WeatherAmbienceIntensity.Name"}}</label>
+        <div class="form-fields range-field">
+          <div class="slider-with-ticks">
+            <input type="range" id="weatherAmbienceIntensity" name="weatherAmbienceIntensity" min="0" max="1" step="0.1"
+              value="{{weatherAmbienceIntensity}}" list="weather-ambience-ticks">
+            <datalist id="weather-ambience-ticks">
+              <option value="0"></option>
+              <option value="0.5"></option>
+              <option value="1"></option>
+            </datalist>
+            <div class="slider-ticks">
+              <span></span><span></span><span></span>
+            </div>
+          </div>
+          <span class="range-value">{{weatherAmbienceIntensity}}</span>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.WeatherAmbienceIntensity.Hint"}}</p>
+      </div>
     </fieldset>
   {{/if}}
 
