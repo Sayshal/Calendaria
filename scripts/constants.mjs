@@ -503,6 +503,7 @@ export const HOOKS = {
   STOPWATCH_PAUSE: 'calendaria.stopwatchPause',
   STOPWATCH_RESET: 'calendaria.stopwatchReset',
   STOPWATCH_START: 'calendaria.stopwatchStart',
+  THEME_CHANGED: 'calendaria.themeChanged',
   SUNRISE: 'calendaria.sunrise',
   SUNSET: 'calendaria.sunset',
   VISUAL_TICK: 'calendaria.visualTick',

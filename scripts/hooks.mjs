@@ -1,7 +1,7 @@
 import { registerBatches } from '../dev/quench/index.mjs';
 import { BigCal, Chronicle, HUD, MiniCal, Stopwatch, SunDial, TimeKeeper } from './applications/_module.mjs';
 import { CalendarManager } from './calendar/_module.mjs';
-import { HOOKS, SETTINGS } from './constants.mjs';
+import { HOOKS, MODULE, SCENE_FLAGS, SETTINGS } from './constants.mjs';
 import { FestivalManager } from './festivals/_module.mjs';
 import { onDayChangeForBastions, onLongRest, onPF1eRest, onPF2eRest, onPreRest, onShortRest, patchBastionButton } from './integrations/_module.mjs';
 import { NoteManager, clearComputedDateCache } from './notes/_module.mjs';
@@ -34,6 +34,14 @@ const WIDGET_COMBAT_CONFIGS = [
   { settingKey: SETTINGS.BIG_CAL_COMBAT_MODE, showSettingKey: SETTINGS.SHOW_BIG_CAL, getInstance: () => BigCal.instance, showWidget: () => BigCal.show({ silent: true }) },
   { settingKey: SETTINGS.CHRONICLE_COMBAT_MODE, showSettingKey: SETTINGS.SHOW_CHRONICLE, getInstance: () => Chronicle.instance, showWidget: () => Chronicle.show() }
 ];
+
+/** Re-evaluate HUD visibility for the current player against the active scene's hide flag. */
+function onCanvasReadyForHUD() {
+  if (game.user.isGM) return;
+  const hideForPlayers = canvas?.scene?.getFlag(MODULE.ID, SCENE_FLAGS.HUD_HIDE_FOR_PLAYERS);
+  if (hideForPlayers) HUD.hide();
+  else if (game.settings.get(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD)) HUD.show({ silent: true });
+}
 
 /**
  * Register all hooks for the Calendaria module.
@@ -71,6 +79,7 @@ export function registerHooks() {
   Hooks.on('updateJournalEntry', NoteManager.onUpdateJournalEntry.bind(NoteManager));
   Hooks.on('updateJournalEntryPage', NoteManager.onUpdateJournalEntryPage.bind(NoteManager));
   Hooks.on('updateScene', onUpdateScene);
+  Hooks.on('canvasReady', onCanvasReadyForHUD);
   Hooks.on('updateSetting', CalendarManager.onUpdateSetting.bind(CalendarManager));
   Hooks.on('updateWorldTime', TimeClock.onUpdateWorldTime);
   Hooks.on(HOOKS.DAY_CHANGE, autoRevealCurrentDay);

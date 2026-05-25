@@ -737,6 +737,7 @@ export function applyCustomColors(colors) {
   styleEl.textContent = `${selector} {\n  ${cssVars.join('\n  ')}\n}`;
   const ids = ['calendaria-hud', 'calendaria-timekeeper', 'calendaria-mini-cal', 'calendaria-big-cal', 'calendaria-stopwatch'];
   for (const id of ids) foundry.applications.instances.get(id)?.render();
+  Hooks.callAll('calendaria.themeChanged', { colors });
 }
 
 /**
