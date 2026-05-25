@@ -3,8 +3,26 @@ import { MODULE, SETTINGS } from '../constants.mjs';
 import { FestivalManager } from '../festivals/_module.mjs';
 import { getAllPresets, sanitizeNoteData, upsertBundledCustomPreset } from '../notes/_module.mjs';
 import NoteManager from '../notes/note-manager.mjs';
+import { FRAMEWORK_INITIAL_DISPLAY_FORMATS } from './formatting/format-utils.mjs';
 import { format, localize } from './localization.mjs';
 import { log } from './logger.mjs';
+
+/**
+ * Overlay a deep-cloned defaults object with valid entries from `value`.
+ * @param {*} value - Imported displayFormats payload
+ * @returns {object} Canonical displayFormats object safe to persist
+ */
+function sanitizeDisplayFormats(value) {
+  const defaults = foundry.utils.deepClone(FRAMEWORK_INITIAL_DISPLAY_FORMATS);
+  if (!value || typeof value !== 'object') return defaults;
+  const droppedKeys = [];
+  for (const [locationId, locationValue] of Object.entries(value)) {
+    if (locationValue && typeof locationValue === 'object' && typeof locationValue.gm === 'string' && typeof locationValue.player === 'string') defaults[locationId] = locationValue;
+    else droppedKeys.push(locationId);
+  }
+  if (droppedKeys.length) log(2, `Dropped malformed displayFormats entries during import: ${droppedKeys.join(', ')}`);
+  return defaults;
+}
 
 /** @type {string[]} List of settings keys to export. */
 const EXPORTABLE_SETTINGS = [
@@ -365,7 +383,8 @@ export async function importSettings(onComplete) {
       for (const [key, value] of Object.entries(importData.settings)) {
         if (EXPORTABLE_SETTINGS.includes(key)) {
           try {
-            await game.settings.set(MODULE.ID, key, value);
+            const finalValue = key === SETTINGS.DISPLAY_FORMATS ? sanitizeDisplayFormats(value) : value;
+            await game.settings.set(MODULE.ID, key, finalValue);
             imported++;
           } catch (err) {
             log(1, `Skipped setting ${key}: ${err.message}`);
