@@ -103,7 +103,6 @@ export function onShortRest(actor, config) {
   if (!isShortRest) return;
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return;
-  const minutesPerHour = calendar.days?.minutesPerHour ?? 60;
   const secondsPerMinute = calendar.days?.secondsPerMinute ?? 60;
   const mode = game.settings.get(MODULE.ID, SETTINGS.SHORT_REST_ADVANCE_MODE);
   config.advanceTime = false;

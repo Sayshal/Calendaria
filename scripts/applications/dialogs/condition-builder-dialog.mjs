@@ -44,7 +44,7 @@ export class ConditionBuilderDialog extends HandlebarsApplicationMixin(Applicati
 
   /**
    * Resolve the calendar this dialog should operate against — note's calendarId flag if present, active otherwise.
-   * @returns {object|null}
+   * @returns {object|null} Calendar instance bound to the document, or the active calendar, or null
    */
   #resolveCalendar() {
     const noteCalendarId = this.#document?.parent?.getFlag?.(MODULE.ID, 'calendarId') ?? CalendarRegistry.getActiveId();

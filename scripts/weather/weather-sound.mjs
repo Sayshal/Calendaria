@@ -15,10 +15,10 @@ let activeSoundKey = null;
 /** @type {boolean} Whether the current client is inside a core SuppressWeather region, muting Calendaria's audio. */
 let suppressedByRegion = false;
 
-/** @type {Set<RegionDocument>} Cached scene regions with an active `suppressWeather` behavior. */
+/** @type {Set<object>} Cached scene regions with an active `suppressWeather` behavior. */
 let suppressRegions = new Set();
 
-/** @type {Set<Token>} Cached tokens whose actor the current user owns, used when nothing is actively controlled. */
+/** @type {Set<object>} Cached tokens whose actor the current user owns, used when nothing is actively controlled. */
 let ownedTokens = new Set();
 
 /**
@@ -68,7 +68,7 @@ function rebuildOwnedTokens() {
 
 /**
  * Return true when any of the current user's relevant tokens is inside a cached suppress-weather region.
- * @returns {boolean}
+ * @returns {boolean} True when a relevant token is inside any cached suppress-weather region
  */
 function isInsideSuppressWeatherRegion() {
   if (!suppressRegions.size) return false;
@@ -99,7 +99,7 @@ function applyRegionSuppression() {
 
 /**
  * Per-frame token refresh handler — only triggers suppression checks for tokens the user actually cares about.
- * @param {Token} token - The refreshing token placeable
+ * @param {object} token - The refreshing token placeable
  */
 function onRefreshToken(token) {
   if (!activeSound || !suppressRegions.size) return;

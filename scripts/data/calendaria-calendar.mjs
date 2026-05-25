@@ -2,7 +2,7 @@ import { findFestivalDay as findFestivalDayViaNotes, getLeapYearDescription, int
 import { DEFAULT_MOON_PHASES } from '../constants.mjs';
 import { NoteManager } from '../notes/_module.mjs';
 import { format, localize } from '../utils/_module.mjs';
-import { findAnchorPhasePosition, getPhasePositionFromIndex, resolveRandomizedPhase } from './_module.mjs';
+import { resolveRandomizedPhase } from './_module.mjs';
 
 const { ArrayField, BooleanField, NumberField, SchemaField, StringField, TypedObjectField } = foundry.data.fields;
 
@@ -1237,19 +1237,23 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     }
     if (moon.phaseMode === 'randomized') return this.#resolveRandomizedMoonPhase(moon, phases, currentDays, components);
     const dateComp = { year: components.year, month: components.month, dayOfMonth: components.dayOfMonth ?? 0 };
-    const anchorPos = findAnchorPhasePosition(moon, dateComp);
+    const exactAnchor = this.#findExactAnchor(moon, dateComp, yearZero);
     let normalizedPosition;
     let dayIndex;
-    if (anchorPos !== null) {
-      normalizedPosition = anchorPos;
-      dayIndex = Math.floor(anchorPos * moon.cycleLength);
+    if (exactAnchor) {
+      const anchorPhase = phases[exactAnchor.phaseIndex] ?? phases[0];
+      const anchorPhaseStart = anchorPhase?.start ?? (exactAnchor.phaseIndex ?? 0) / Math.max(1, phases.length);
+      dayIndex = Math.floor(anchorPhaseStart * moon.cycleLength);
+      normalizedPosition = anchorPhaseStart;
     } else {
-      const resetAnchor = this.#findMostRecentResetAnchor(moon, dateComp, currentDays);
-      if (resetAnchor) {
-        const anchorDays = this._componentsToDays({ year: resetAnchor.year ?? dateComp.year, month: resetAnchor.month, dayOfMonth: resetAnchor.dayOfMonth });
+      const calibrationAnchor = this.#findMostRecentResetAnchor(moon, dateComp, currentDays, yearZero) ?? this.#findSoftAnchor(moon);
+      if (calibrationAnchor) {
+        const anchorInternalYear = calibrationAnchor.year != null ? calibrationAnchor.year - yearZero : dateComp.year;
+        const anchorDays = this._componentsToDays({ year: anchorInternalYear, month: calibrationAnchor.month, dayOfMonth: calibrationAnchor.dayOfMonth });
         const daysSinceAnchor = currentDays - anchorDays;
-        const anchorPhasePos = getPhasePositionFromIndex(moon, resetAnchor.phaseIndex);
-        const anchorCycleDay = anchorPhasePos * moon.cycleLength;
+        const anchorPhase = phases[calibrationAnchor.phaseIndex] ?? phases[0];
+        const anchorPhaseStart = anchorPhase?.start ?? (calibrationAnchor.phaseIndex ?? 0) / Math.max(1, phases.length);
+        const anchorCycleDay = anchorPhaseStart * moon.cycleLength;
         const daysIntoCycle = (((daysSinceAnchor + anchorCycleDay) % moon.cycleLength) + moon.cycleLength) % moon.cycleLength;
         normalizedPosition = daysIntoCycle / moon.cycleLength;
         dayIndex = Math.floor(daysIntoCycle);
@@ -1269,15 +1273,18 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     let phaseDuration = 1;
     if (hasRanges) {
       const totalCycleDays = Math.round(moon.cycleLength);
+      const dayFrac = (dayIndex + 0.5) / moon.cycleLength;
       for (let i = 0; i < phases.length; i++) {
         const phase = phases[i];
-        const startDay = Math.round((phase.start ?? 0) * moon.cycleLength);
-        const endDay = Math.round((phase.end ?? 1) * moon.cycleLength);
-        const inRange = endDay > startDay ? dayIndex >= startDay && dayIndex < endDay : dayIndex >= startDay || dayIndex < endDay;
+        const ps = phase.start ?? 0;
+        const pe = phase.end ?? 1;
+        const inRange = pe > ps ? dayFrac >= ps && dayFrac < pe : dayFrac >= ps || dayFrac < pe;
         if (inRange) {
           phaseArrayIndex = i;
-          phaseDuration = Math.max(1, endDay > startDay ? endDay - startDay : totalCycleDays - startDay + endDay);
-          dayWithinPhase = dayIndex >= startDay ? dayIndex - startDay : dayIndex + totalCycleDays - startDay;
+          const spanFrac = pe > ps ? pe - ps : 1 - ps + pe;
+          phaseDuration = Math.max(1, Math.round(spanFrac * moon.cycleLength));
+          const firstDay = Math.ceil(ps * moon.cycleLength - 0.5);
+          dayWithinPhase = (((dayIndex - firstDay) % totalCycleDays) + totalCycleDays) % totalCycleDays;
           break;
         }
       }
@@ -1306,19 +1313,20 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    * @param {object} moon - Moon definition
    * @param {object} dateComp - Current date {year, month, dayOfMonth}
    * @param {number} currentDays - Current absolute day number
+   * @param {number} [yearZero] - Calendar yearZero offset, used to convert anchor display-year to internal-year
    * @returns {object|null} The most recent reset anchor or null
    */
-  #findMostRecentResetAnchor(moon, dateComp, currentDays) {
+  #findMostRecentResetAnchor(moon, dateComp, currentDays, yearZero = 0) {
     if (!moon.anchorPhases) return null;
     const anchors = Object.values(moon.anchorPhases).filter((a) => a.resetCycle);
     if (!anchors.length) return null;
     let best = null;
     let bestDays = -Infinity;
     for (const anchor of anchors) {
-      const year = anchor.year ?? dateComp.year;
-      const anchorDays = this._componentsToDays({ year, month: anchor.month, dayOfMonth: anchor.dayOfMonth });
+      const internalYear = anchor.year != null ? anchor.year - yearZero : dateComp.year;
+      const anchorDays = this._componentsToDays({ year: internalYear, month: anchor.month, dayOfMonth: anchor.dayOfMonth });
       if (anchorDays <= currentDays && anchorDays > bestDays) {
-        best = { ...anchor, year };
+        best = { ...anchor, year: internalYear };
         bestDays = anchorDays;
       }
       if (anchor.year == null) {
@@ -1330,6 +1338,35 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       }
     }
     return best;
+  }
+
+  /**
+   * Find a non-resetting anchor to use as soft calibration when no reset anchor is set.
+   * @param {object} moon - Moon definition
+   * @returns {object|null} The first soft anchor or null
+   */
+  #findSoftAnchor(moon) {
+    if (!moon.anchorPhases) return null;
+    for (const anchor of Object.values(moon.anchorPhases)) if (!anchor.resetCycle) return anchor;
+    return null;
+  }
+
+  /**
+   * Find an anchor whose year/month/dayOfMonth matches the current date.
+   * @param {object} moon - Moon definition
+   * @param {object} dateComp - Current date {year, month, dayOfMonth}
+   * @param {number} [yearZero] - Calendar yearZero offset, used to convert anchor display-year to internal-year
+   * @returns {object|null} The matching anchor or null
+   */
+  #findExactAnchor(moon, dateComp, yearZero = 0) {
+    if (!moon.anchorPhases) return null;
+    for (const anchor of Object.values(moon.anchorPhases)) {
+      if (anchor.year != null && anchor.year - yearZero !== dateComp.year) continue;
+      if (anchor.month !== dateComp.month) continue;
+      if (anchor.dayOfMonth !== dateComp.dayOfMonth) continue;
+      return anchor;
+    }
+    return null;
   }
 
   /**
