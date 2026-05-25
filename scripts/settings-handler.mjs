@@ -1,5 +1,6 @@
 import { BigCal, CalendarEditor, Chronicle, HUD, ImporterApp, MiniCal, SettingsPanel, Stopwatch, SunDial, TimeKeeper } from './applications/_module.mjs';
 import { MODULE, SETTINGS } from './constants.mjs';
+import { syncWeatherToScene } from './integrations/fxmaster.mjs';
 import { invalidatePresetCache } from './notes/_module.mjs';
 import { refreshEnvironmentLighting } from './time/darkness.mjs';
 import { hideDebugZones, initializeTheme, localize, log, showDebugZones } from './utils/_module.mjs';
@@ -1364,6 +1365,14 @@ export default class CalendariaSettings {
         scope: 'world',
         config: false,
         type: new BooleanField({ initial: false })
+      },
+      [SETTINGS.FXMASTER_SPEED_MULTIPLIER]: {
+        name: 'CALENDARIA.Settings.FXMaster.SpeedMultiplier.Name',
+        hint: 'CALENDARIA.Settings.FXMaster.SpeedMultiplier.Hint',
+        scope: 'world',
+        config: false,
+        type: new NumberField({ initial: 1.0, min: 0, max: 3, step: 0.1 }),
+        onChange: () => syncWeatherToScene()
       },
       [SETTINGS.WEATHER_SOUND_FX]: {
         name: 'CALENDARIA.Settings.Weather.SoundFx.Name',

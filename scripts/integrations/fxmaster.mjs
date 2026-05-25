@@ -2,6 +2,9 @@ import { HOOKS, MODULE, SCENE_FLAGS, SETTINGS } from '../constants.mjs';
 import { CalendariaSocket, localize, log } from '../utils/_module.mjs';
 import { WeatherManager } from '../weather/_module.mjs';
 
+/** FXMaster relative-level labels mapped to their numeric multipliers, matching FXMaster's RELATIVE_LEVEL_SCALE. */
+const FXMASTER_SPEED_LABEL_TO_NUMBER = { 'very-low': 0, low: 0.5, medium: 1, high: 1.5, 'very-high': 2 };
+
 /** 8-point cardinal directions accepted by FXMaster, keyed by compass degrees. */
 const FXMASTER_CARDINALS = [
   [0, 'n'],
@@ -116,7 +119,7 @@ function onSceneUpdate(scene, change) {
  * Sync current weather to a scene's FXMaster state.
  * @param {object} [sceneOverride] - Scene to sync for (defaults to canvas scene)
  */
-function syncWeatherToScene(sceneOverride) {
+export function syncWeatherToScene(sceneOverride) {
   if (!CalendariaSocket.isPrimaryGM()) return;
   const scene = sceneOverride ?? canvas?.scene;
   if (!scene) return;
@@ -242,7 +245,11 @@ function buildPresetOptions(weather) {
   if (useTopDown) options.topDown = true;
   if (game.settings.get(MODULE.ID, SETTINGS.FXMASTER_BELOW_TOKENS)) options.belowTokens = true;
   if (weather.fxDensity) options.density = weather.fxDensity;
-  if (weather.fxSpeed) options.speed = weather.fxSpeed;
+  const speedMult = game.settings.get(MODULE.ID, SETTINGS.FXMASTER_SPEED_MULTIPLIER) ?? 1;
+  if (speedMult !== 1) {
+    const baseMult = typeof weather.fxSpeed === 'number' ? weather.fxSpeed : (FXMASTER_SPEED_LABEL_TO_NUMBER[String(weather.fxSpeed ?? 'medium').toLowerCase()] ?? 1);
+    options.speed = baseMult * speedMult;
+  } else if (weather.fxSpeed) options.speed = weather.fxSpeed;
   if (weather.fxColor) options.color = weather.fxColor;
   if (game.settings.get(MODULE.ID, SETTINGS.FXMASTER_SOUND_FX)) options.soundFx = true;
   return options;

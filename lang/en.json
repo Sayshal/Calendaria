@@ -2118,6 +2118,8 @@
   "CALENDARIA.Settings.FXMaster.SectionTitle": "FXMaster Integration",
   "CALENDARIA.Settings.FXMaster.soundFX.Hint": "Enable FXMaster Sound Effects.",
   "CALENDARIA.Settings.FXMaster.soundFX.Name": "FXMaster Sound Effects",
+  "CALENDARIA.Settings.FXMaster.SpeedMultiplier.Hint": "Scale FXMaster particle speed for all Calendaria weather. 1 preserves preset speeds; 0 freezes, 2 doubles.",
+  "CALENDARIA.Settings.FXMaster.SpeedMultiplier.Name": "Weather Effect Speed",
   "CALENDARIA.Settings.FXMaster.TopDown.Hint": "Use top-down particle view instead of side view.",
   "CALENDARIA.Settings.FXMaster.TopDown.Name": "Top-Down Mode",
   "CALENDARIA.Settings.GMOverrideClearsForecast.Hint": "Manual weather changes regenerate the forecast. If disabled, only today is affected.",

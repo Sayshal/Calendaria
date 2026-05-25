@@ -1599,6 +1599,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.fxmasterForceDownward = game.settings.get(MODULE.ID, SETTINGS.FXMASTER_FORCE_DOWNWARD);
     context.fxmasterBelowTokens = game.settings.get(MODULE.ID, SETTINGS.FXMASTER_BELOW_TOKENS);
     context.fxmasterSoundFx = game.settings.get(MODULE.ID, SETTINGS.FXMASTER_SOUND_FX);
+    context.fxmasterSpeedMultiplier = game.settings.get(MODULE.ID, SETTINGS.FXMASTER_SPEED_MULTIPLIER) ?? 1.0;
     context.weatherSoundFx = game.settings.get(MODULE.ID, SETTINGS.WEATHER_SOUND_FX);
     context.weatherSoundVolume = game.settings.get(MODULE.ID, SETTINGS.WEATHER_SOUND_VOLUME) ?? 0.5;
   }
@@ -1984,6 +1985,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('fxmasterForceDownward' in data) await game.settings.set(MODULE.ID, SETTINGS.FXMASTER_FORCE_DOWNWARD, !!data.fxmasterForceDownward);
     if ('fxmasterBelowTokens' in data) await game.settings.set(MODULE.ID, SETTINGS.FXMASTER_BELOW_TOKENS, !!data.fxmasterBelowTokens);
     if ('fxmasterSoundFx' in data) await game.settings.set(MODULE.ID, SETTINGS.FXMASTER_SOUND_FX, !!data.fxmasterSoundFx);
+    if ('fxmasterSpeedMultiplier' in data) await game.settings.set(MODULE.ID, SETTINGS.FXMASTER_SPEED_MULTIPLIER, Number(data.fxmasterSpeedMultiplier));
     if ('weatherSoundFx' in data) await game.settings.set(MODULE.ID, SETTINGS.WEATHER_SOUND_FX, !!data.weatherSoundFx);
     if ('weatherSoundVolume' in data) await game.settings.set(MODULE.ID, SETTINGS.WEATHER_SOUND_VOLUME, parseFloat(data.weatherSoundVolume));
     if ('climateZone' in data) await WeatherManager.setActiveZone(data.climateZone);
@@ -3098,6 +3100,15 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       if (weatherInput && weatherValue) {
         weatherInput.addEventListener('input', (e) => {
           weatherValue.textContent = e.target.value;
+        });
+      }
+    }
+    if (partId === 'weather') {
+      const speedInput = htmlElement.querySelector('input[name="fxmasterSpeedMultiplier"]');
+      const speedValue = speedInput?.closest('.form-group')?.querySelector('.range-value');
+      if (speedInput && speedValue) {
+        speedInput.addEventListener('input', (e) => {
+          speedValue.textContent = `${e.target.value}x`;
         });
       }
     }

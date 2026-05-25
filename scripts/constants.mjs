@@ -112,6 +112,7 @@ export const SETTINGS = {
   FXMASTER_ENABLED: 'fxmasterEnabled',
   FXMASTER_FORCE_DOWNWARD: 'fxmasterForceDownward',
   FXMASTER_SOUND_FX: 'fxMasterSoundFx',
+  FXMASTER_SPEED_MULTIPLIER: 'fxmasterSpeedMultiplier',
   FXMASTER_TOP_DOWN: 'fxmasterTopDown',
   GM_OVERRIDE_CLEARS_FORECAST: 'gmOverrideClearsForecast',
   HUD_AUTO_FADE: 'hudAutoFade',

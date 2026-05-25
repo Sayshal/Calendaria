@@ -217,6 +217,26 @@
           <p class="hint">{{localize "CALENDARIA.Settings.FXMaster.soundFX.Hint"}}</p>
         </div>
 
+        <div class="form-group">
+          <label for="fxmasterSpeedMultiplier">{{localize "CALENDARIA.Settings.FXMaster.SpeedMultiplier.Name"}}</label>
+          <div class="form-fields range-field">
+            <div class="slider-with-ticks">
+              <input type="range" id="fxmasterSpeedMultiplier" name="fxmasterSpeedMultiplier" min="0" max="3" step="0.1"
+                value="{{fxmasterSpeedMultiplier}}" list="fxmaster-speed-ticks">
+              <datalist id="fxmaster-speed-ticks">
+                <option value="0"></option>
+                <option value="1"></option>
+                <option value="3"></option>
+              </datalist>
+              <div class="slider-ticks">
+                <span></span><span></span><span></span>
+              </div>
+            </div>
+            <span class="range-value">{{fxmasterSpeedMultiplier}}x</span>
+          </div>
+          <p class="hint">{{localize "CALENDARIA.Settings.FXMaster.SpeedMultiplier.Hint"}}</p>
+        </div>
+
       {{/if}}
     </fieldset>
   {{/if}}
