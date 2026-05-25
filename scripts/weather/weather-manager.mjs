@@ -549,7 +549,7 @@ export default class WeatherManager {
       return this.getCurrentWeather(zoneId);
     }
     if (!options.fromSocket && !game.user.isGM && canChangeWeather()) {
-      CalendariaSocket.emit('weatherRequest', { action: 'generate', options: { zoneId, season: options.season } });
+      CalendariaSocket.emit('weatherRequest', { action: 'generate', options: { zoneId, season: options.season, randomize: options.randomize } });
       return this.getCurrentWeather(zoneId);
     }
     const zoneConfig = this.getActiveZone(zoneId);
