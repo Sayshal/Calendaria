@@ -1,27 +1,32 @@
 ## New Features
 
-- Added `to="event"` keyword to the `cal.countup` enricher so countup expressions embedded in a calendar note page automatically resolve against that event's date, no hardcoded target required. Tooltips now correctly say "X days until" for future static dates and "X days since" for past or live dates.
-- French (Français) and Spanish (Español) translations are now available in Foundry's language picker, so users can run Calendaria in those locales.
-- Multi-day note bars in BigCal now scale to the note's start and end times of day, so a note ending at 1pm visually stops mid-afternoon on its last day instead of filling the full square, with all-day notes and interior weeks still spanning their days fully.
-- The `cal.countup` enricher's `to=` parameter now accepts a calendar note name (case-insensitive, exact match preferred over substring), so you can write `[[cal.countup 1 Mirtul 1490 to="High Harvestide"]]` to count to a named event instead of hardcoding its date. Only notes you can observe are matched.
-- Today's date is now visibly highlighted in MiniCal and BigCal with a distinct background tint and day-number colour, and stays readable when also selected. Theme presets (Arcane, Frost, Minimalist, Sakura, Slate, Neon, Parchment, Solarized, Steampunk, Verdant) were recoloured so the primary and "today" accents no longer clash or share hues.
+- Added a `calendaria.themeChanged` hook that fires whenever custom theme colors are applied, letting other modules react to live theme updates.
+- Added a Time of Day Hue Intensity slider (0-6) in the Canvas settings tab so dawn, dusk, and night hue strength can be pushed beyond the default subtle peaks.
+- Added a Weather Hue Override blend slider (0-1) that mixes weather hue with the time-of-day hue instead of always replacing it.
+- Added FXMaster particle speed multiplier setting (0-3, default 1) to scale weather effect speed across all Calendaria-driven presets, with active scenes resyncing on change.
+- Exposed `CALENDARIA.api.refreshEnvironment()` so hue and ambience changes apply immediately without waiting for the next time tick.
+- Secondary Calendar widget header, MiniCal/BigCal cross-calendar subheaders, day-cell tooltips, and note-sheet equivalent dates now show the live current time and refresh as time advances.
 
 ## Bug Fixes
 
-- Calendaria's ambient weather audio now fades out when your token enters a Foundry region with the core Suppress Weather behavior, and restores when you leave, so indoor and sheltered areas stay quiet without manual muting.
-- Cinematic event cards now respect note permissions, so players no longer see hidden GM notes flash by during the cinematic preview.
-- Cinematic event cards now stay in sync with the day shown on the clock, no longer bleeding into the following day or vanishing after a short timeout.
-- Fixed events disappearing from cinematics on calendars with a non-zero year offset (e.g. Gregorian), so festival and note cards now appear on the correct days.
-- In augment chat-timestamp mode, the in-game date now appears as a small italic banner at the bottom-right of each chat message instead of replacing Foundry's "Xs ago" timestamp, so the delete and context icons are no longer squashed.
-- Players who have hidden the calendar HUD no longer have it reappear when the GM switches scenes.
-- Pressing Today in MiniCal now populates the notes pane for today, and opening MiniCal from BigCal auto-opens today's notes when the auto-open setting is enabled.
+- Bulk calendar imports no longer open a note sheet for each imported note, preventing UI freezes on large imports.
+- Calendar exports now include user-created festivals, rebuilt from their journal pages, so they survive a round trip through export and import.
+- Importing settings now sanitizes the date display formats payload, dropping malformed entries and overlaying defaults so widgets render dates correctly without manual cleanup.
+- Legacy notes using `daily`, `weekly`, `monthly`, or `yearly` repeat values are now auto-migrated to equivalent condition trees on load, so imported notes resume recurring without manual editing.
+- Moon anchors with Reset Cycle disabled are now honored as soft calibration instead of being ignored.
+- Moons with odd cycle lengths (such as a 33-day cycle) now show all phases correctly instead of one phase swallowing the whole cycle.
+- Player HUD now hides or shows immediately when switching to a scene with a different "hide HUD for players" flag, instead of requiring a reload.
+- Player-triggered weather randomization now produces varied results instead of always returning the same preset.
+- Randomized moon phase anchors with a year set now resolve correctly on calendars using a non-zero yearZero, matching the fixed-mode anchor behavior.
 
-## Translations
+## Changes
 
-- Polish (99.5%) by @Lioheart
-- Portuguese (Brazil) (100%) by @Kharmans
-- Russian (100%) by @lvilv
+- Bumped the default `crossCalendar` date format to `D MMMM, YYYY (HH:mm)` for new and blank calendars so cross-calendar displays include time by default.
+- Moon anchor years are now interpreted in display-year space, matching the year shown in the calendar UI.
+- Settings imports no longer double-sanitize note data, halving legacy deprecation warnings in the console during import.
+- The Calendaria importer preview now lists incoming festival seeds alongside notes.
+- Updated translations.
 
 ## Documentation
 
-- Updated user-facing documentation (BigCal, Cinematic Time-Skip, FXMaster Integration, Settings, Weather System) to describe the 1.0.13 changes: observer-permission filtering for cinematic event cards, BigCal today/selected tinting, time-of-day-trimmed multi-day bars, augment-mode chat timestamp banner, and Suppress Weather region audio muting.
+- Documentation now lives at wiki.3deathsaves.com; in-app Documentation buttons, chat command references, and the README all point to the new wiki host.

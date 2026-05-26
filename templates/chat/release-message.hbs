@@ -12,20 +12,27 @@
 
     <h4>New Features</h4>
     <ul>
-      <li>French (Français) and Spanish (Español) translations are now available in Foundry's language picker, so you
-        can run Calendaria in those locales</li>
-      <li>The countup enricher can now point at a calendar note by name, or auto-resolve to its own event's date when
-        embedded on a note page, so you no longer have to hardcode the target date</li>
-      <li>Today's date is now visibly highlighted in MiniCal and BigCal with a distinct background tint and day-number
-        colour, and the bundled theme presets were recoloured so the today accent stays readable when also selected</li>
+      <li>Added Time of Day Hue Intensity and Weather Hue Override sliders so dawn, dusk, night, and weather tints can
+        be tuned past the default subtle blend</li>
+      <li>Added an FXMaster particle speed multiplier so weather effects can be sped up or slowed down across all
+        Calendaria presets, with active scenes resyncing on change</li>
+      <li>Added new module-developer hooks and API methods for theme and ambience integration</li>
+      <li>Secondary calendar headers, cross-calendar subheaders, day-cell tooltips, and note-sheet equivalent dates now
+        show the live current time and refresh as time advances</li>
     </ul>
 
     <h4>Bug Fixes</h4>
     <ul>
-      <li>Ambient weather audio now fades out when your token enters a Foundry region with the core Suppress Weather
-        behavior, and restores when you leave, so indoor and sheltered areas stay quiet without manual muting</li>
-      <li>Cinematic event cards now stay in sync with the day shown on the clock and respect note permissions, so cards
-        no longer bleed into the following day and players no longer glimpse hidden GM notes</li>
+      <li>Bulk calendar imports no longer open a note sheet for each imported note, preventing UI freezes on large
+        imports</li>
+      <li>Calendar exports now include user-created festivals, so they survive a round trip through export and import
+      </li>
+      <li>Moons with odd cycle lengths now show all phases correctly instead of one phase swallowing the whole cycle,
+        and moon anchors with Reset Cycle disabled are honored as soft calibration</li>
+      <li>Player HUD now hides or shows immediately when switching to a scene with a different player-visibility flag,
+        instead of requiring a reload</li>
+      <li>Player-triggered weather randomization now produces varied results instead of always returning the same preset
+      </li>
     </ul>
 
   </div>
