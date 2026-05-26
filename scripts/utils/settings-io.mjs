@@ -1,7 +1,7 @@
 import { CalendarManager } from '../calendar/_module.mjs';
 import { MODULE, SETTINGS } from '../constants.mjs';
 import { FestivalManager } from '../festivals/_module.mjs';
-import { getAllPresets, sanitizeNoteData, upsertBundledCustomPreset } from '../notes/_module.mjs';
+import { getAllPresets, upsertBundledCustomPreset } from '../notes/_module.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import { FRAMEWORK_INITIAL_DISPLAY_FORMATS } from './formatting/format-utils.mjs';
 import { format, localize } from './localization.mjs';
@@ -206,7 +206,7 @@ async function importNotes(notes, calendarId, bundledCustomPresets = []) {
   for (const note of notes) {
     if (note.system?.linkedFestival) continue;
     const targetCalendarId = calendarId || note.calendarId;
-    const noteData = sanitizeNoteData(note.system || {});
+    const noteData = { ...(note.system || {}) };
     noteData.macro = null;
     noteData.sceneId = null;
     noteData.playlistId = null;
