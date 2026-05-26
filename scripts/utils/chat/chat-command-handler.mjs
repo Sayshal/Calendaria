@@ -600,7 +600,7 @@ export async function cmdEnrichers() {
       });
     return `<h2>${localize(cat.label)}</h2><table><thead><tr><th>${syntaxHeader}</th><th>${outputHeader}</th></tr></thead><tbody>${rows.join('')}</tbody></table>`;
   });
-  const wikiLink = `<p><a href="https://github.com/Sayshal/calendaria/wiki/Text-Enrichers">${localize('CALENDARIA.Enricher.Reference.WikiLink')}</a></p>`;
+  const wikiLink = `<p><a href="https://wiki.3deathsaves.com/calendaria/text-enrichers/">${localize('CALENDARIA.Enricher.Reference.WikiLink')}</a></p>`;
   const content = `${wikiLink}${sections.join('')}`;
   const journalName = localize('CALENDARIA.Enricher.Reference.Title');
   const journal = await JournalEntry.create({ name: journalName, pages: [{ name: journalName, type: 'text', text: { content } }], flags: { [MODULE.ID]: { [ENRICHER_JOURNAL_FLAG]: true } } });

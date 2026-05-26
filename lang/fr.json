@@ -109,7 +109,7 @@
   "CALENDARIA.ChatCommander.ForecastDay": "{count} jour",
   "CALENDARIA.ChatCommander.ForecastDays": "{count} jours",
   "CALENDARIA.ChatCommander.ForecastDesc": "Afficher les prévisions météo pour les jours à venir",
-  "CALENDARIA.ChatCommander.FormatTokensHint": "Jetons personnalisés : voir https://github.com/Sayshal/Calendaria/wiki/Format-Tokens",
+  "CALENDARIA.ChatCommander.FormatTokensHint": "Jetons personnalisés : voir https://wiki.3deathsaves.com/calendaria/format-tokens/",
   "CALENDARIA.ChatCommander.MoonDesc": "Afficher les phases lunaires",
   "CALENDARIA.ChatCommander.NoteDesc": "Créer une note de calendrier rapide",
   "CALENDARIA.ChatCommander.SeasonDesc": "Afficher la saison actuelle",

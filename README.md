@@ -12,7 +12,7 @@ Your campaign's time deserves more than a number in the corner.
 
 [![Translation status](https://hosted.weblate.org/widget/calendaria/calendaria/287x66-white.png)](https://hosted.weblate.org/engage/calendaria/)
 
-**[Read the Wiki](https://github.com/Sayshal/calendaria/wiki)** for guides, API docs, and tips.
+**[Read the Wiki](https://wiki.3deathsaves.com/calendaria/)** for guides, API docs, and tips.
 
 ### Video Walkthrough
 
@@ -112,4 +112,4 @@ Find **Calendaria** in Foundry's Module Browser, or paste this manifest URL:
 https://github.com/Sayshal/calendaria/releases/latest/download/module.json
 ```
 
-Questions? Ideas? Join us on [Discord](https://discord.gg/PzzUwU9gdz) or check the [Wiki](https://github.com/Sayshal/calendaria/wiki).
+Questions? Ideas? Join us on [Discord](https://discord.gg/PzzUwU9gdz) or check the [Wiki](https://wiki.3deathsaves.com/calendaria/).
