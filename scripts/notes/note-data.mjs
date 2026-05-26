@@ -145,6 +145,45 @@ export function validateNoteData(noteData, calendarId) {
 /** Legacy `repeat` values that are superseded by conditionTree. `'computed'` is still functional via computedConfig. */
 const DEPRECATED_REPEAT_VALUES = new Set(['daily', 'weekly', 'monthly', 'yearly', 'moon', 'random', 'linked', 'seasonal', 'weekOfMonth', 'range']);
 
+/** Legacy `repeat` values that can be auto-migrated to an equivalent conditionTree. */
+const AUTO_MIGRATABLE_REPEAT_VALUES = new Set(['daily', 'weekly', 'monthly', 'yearly']);
+
+/**
+ * Build an equivalent conditionTree for a legacy `repeat` value when possible.
+ * @param {object} noteData  Raw note data with a legacy `repeat` field
+ * @returns {object|null}  Condition tree, or null if migration isn't possible
+ */
+function buildConditionTreeFromLegacyRepeat(noteData) {
+  const repeat = noteData?.repeat;
+  if (!AUTO_MIGRATABLE_REPEAT_VALUES.has(repeat)) return null;
+  const startDate = noteData.startDate ?? {};
+  if (repeat === 'daily') return { type: 'group', mode: 'and', children: [] };
+  if (repeat === 'weekly') {
+    const weekday = noteData.weekday;
+    if (weekday == null) return null;
+    return { type: 'group', mode: 'and', children: [{ type: 'condition', field: 'weekday', op: '==', value: weekday + 1 }] };
+  }
+  if (repeat === 'monthly') {
+    const dayOfMonth = startDate.dayOfMonth;
+    if (dayOfMonth == null) return null;
+    return { type: 'group', mode: 'and', children: [{ type: 'condition', field: 'day', op: '==', value: dayOfMonth + 1 }] };
+  }
+  if (repeat === 'yearly') {
+    const month = startDate.month;
+    const dayOfMonth = startDate.dayOfMonth;
+    if (month == null || dayOfMonth == null) return null;
+    return {
+      type: 'group',
+      mode: 'and',
+      children: [
+        { type: 'condition', field: 'month', op: '==', value: month + 1 },
+        { type: 'condition', field: 'day', op: '==', value: dayOfMonth + 1 }
+      ]
+    };
+  }
+  return null;
+}
+
 /**
  * Sanitize and normalize note data.
  * @param {object} noteData  Raw note data
@@ -152,7 +191,9 @@ const DEPRECATED_REPEAT_VALUES = new Set(['daily', 'weekly', 'monthly', 'yearly'
  */
 export function sanitizeNoteData(noteData) {
   if (noteData?.repeat && DEPRECATED_REPEAT_VALUES.has(noteData.repeat)) {
-    foundry.utils.logCompatibilityWarning(`Calendaria: noteData.repeat ('${noteData.repeat}') is deprecated. Use noteData.conditionTree instead.`, { since: '1.0.0', until: '1.2.0', once: true });
+    const migrated = !noteData.conditionTree && AUTO_MIGRATABLE_REPEAT_VALUES.has(noteData.repeat) ? buildConditionTreeFromLegacyRepeat(noteData) : null;
+    if (migrated) noteData = { ...noteData, conditionTree: migrated, repeat: 'never' };
+    else foundry.utils.logCompatibilityWarning(`Calendaria: noteData.repeat ('${noteData.repeat}') is deprecated. Use noteData.conditionTree instead.`, { since: '1.0.0', until: '1.2.0', once: true });
   }
   const defaults = getDefaultNoteData();
   return {
