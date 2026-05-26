@@ -48,13 +48,14 @@ function smoothNoise(seed, x) {
  * @param {object} moon - Moon definition with phaseMode, phaseSeed, cycleVariance, anchorPhases, cycleLength
  * @param {number} absoluteDay - Absolute day number from calendar._componentsToDays()
  * @param {object} [dateComponents] - {year, month, dayOfMonth} for anchor matching
+ * @param {number} [yearZero] - Calendar yearZero offset, used to convert anchor display-year to internal-year
  * @returns {number} Phase position 0-1
  */
-export function resolveRandomizedPhase(moon, absoluteDay, dateComponents = null) {
+export function resolveRandomizedPhase(moon, absoluteDay, dateComponents = null, yearZero = 0) {
   const cacheKey = `${moon.phaseSeed ?? 0}_${absoluteDay}`;
   const cached = positionCache.get(cacheKey);
   if (cached?.day === absoluteDay) return cached.position;
-  const anchorPosition = findAnchorPhasePosition(moon, dateComponents);
+  const anchorPosition = findAnchorPhasePosition(moon, dateComponents, yearZero);
   if (anchorPosition !== null) {
     positionCache.set(cacheKey, { day: absoluteDay, position: anchorPosition });
     return anchorPosition;
@@ -71,15 +72,16 @@ export function resolveRandomizedPhase(moon, absoluteDay, dateComponents = null)
 /**
  * Check if a date matches an anchor phase and return its position.
  * @param {object} moon - Moon definition with anchorPhases
- * @param {object} dateComponents - {year, month, dayOfMonth}
+ * @param {object} dateComponents - {year, month, dayOfMonth} in internal-year space
+ * @param {number} [yearZero] - Calendar yearZero offset, used to convert anchor display-year to internal-year
  * @returns {number|null} Phase position if anchored, null otherwise
  */
-export function findAnchorPhasePosition(moon, dateComponents) {
+export function findAnchorPhasePosition(moon, dateComponents, yearZero = 0) {
   if (!dateComponents || !moon.anchorPhases) return null;
   const anchors = Object.values(moon.anchorPhases);
   if (!anchors.length) return null;
   for (const anchor of anchors) {
-    if (anchor.year != null && anchor.year !== dateComponents.year) continue;
+    if (anchor.year != null && anchor.year - yearZero !== dateComponents.year) continue;
     if (anchor.month !== dateComponents.month) continue;
     if (anchor.dayOfMonth !== dateComponents.dayOfMonth) continue;
     return getPhasePositionFromIndex(moon, anchor.phaseIndex);

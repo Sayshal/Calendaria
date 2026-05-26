@@ -1380,7 +1380,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    */
   #resolveRandomizedMoonPhase(moon, phases, absoluteDay, components) {
     const dateComponents = { year: components.year, month: components.month, dayOfMonth: components.dayOfMonth ?? components.day ?? 0 };
-    const normalizedPosition = resolveRandomizedPhase(moon, absoluteDay, dateComponents);
+    const yearZero = this.years?.yearZero ?? 0;
+    const normalizedPosition = resolveRandomizedPhase(moon, absoluteDay, dateComponents, yearZero);
     const dayIndex = Math.floor(normalizedPosition * moon.cycleLength);
     let phaseArrayIndex = 0;
     let dayWithinPhase = 0;
