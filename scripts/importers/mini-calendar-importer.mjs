@@ -492,7 +492,7 @@ export default class MiniCalendarImporter extends BaseImporter {
         const startDate = { ...note.startDate, year: note.startDate.year + yearZero };
         const endDate = note.endDate ? { ...note.endDate, year: note.endDate.year + yearZero } : null;
         const noteData = { startDate, endDate, allDay: note.allDay, repeat: note.repeat, categories: note.categories, visibility: note.visibility || 'visible' };
-        const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData, calendarId });
+        const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData, calendarId, openSheet: false });
         if (page) count++;
         else errors.push(`Failed to create note: ${note.name}`);
       } catch (error) {

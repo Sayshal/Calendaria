@@ -606,7 +606,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
         const endDate = note.endDate ? { ...note.endDate, year: note.endDate.year + yearZero } : null;
         const mappedCategories = (note.categories || []).map((id) => categoryMap.get(id) ?? id);
         const noteData = { startDate, endDate, allDay: note.allDay, repeat: note.repeat, categories: mappedCategories };
-        const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData, calendarId });
+        const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData, calendarId, openSheet: false });
         if (page) count++;
         else errors.push(`Failed to create note: ${note.name}`);
       } catch (error) {

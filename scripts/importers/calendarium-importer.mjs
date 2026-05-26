@@ -463,7 +463,7 @@ export default class CalendariumImporter extends BaseImporter {
           rangePattern: note.rangePattern || null,
           visibility: note.visibility || 'visible'
         };
-        const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData, calendarId });
+        const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData, calendarId, openSheet: false });
         if (page) count++;
         else errors.push(`Failed to create note: ${note.name}`);
       } catch (error) {
