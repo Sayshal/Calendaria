@@ -435,7 +435,13 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       const eqCalendars = game.settings.get(MODULE.ID, SETTINGS.EQUIVALENT_DATE_CALENDARS);
       if (eqCalendars.size) {
         const noteCalendarId = this.document.parent?.getFlag?.(MODULE.ID, 'calendarId') ?? CalendarRegistry.getActiveId();
-        const startDateInternal = { year: startYear, month: startMonth, dayOfMonth: startDay - 1 };
+        const startDateInternal = {
+          year: startYear,
+          month: startMonth,
+          dayOfMonth: startDay - 1,
+          hour: this.document.system.startDate?.hour ?? 0,
+          minute: this.document.system.startDate?.minute ?? 0
+        };
         context.equivalentDates = getEquivalentDates(startDateInternal, noteCalendarId, [...eqCalendars]);
       }
     }

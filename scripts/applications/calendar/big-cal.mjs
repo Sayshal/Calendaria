@@ -275,7 +275,11 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const eqCalendars = game.settings.get(MODULE.ID, SETTINGS.EQUIVALENT_DATE_CALENDARS);
     if (eqCalendars.size) {
       const activeId = CalendarRegistry.getActiveId();
-      const equivalents = getEquivalentDates({ year: viewedDate.year, month: viewedDate.month, dayOfMonth: viewedDate.dayOfMonth ?? 0 }, activeId, [...eqCalendars]);
+      const equivalents = getEquivalentDates(
+        { year: viewedDate.year, month: viewedDate.month, dayOfMonth: viewedDate.dayOfMonth ?? 0, hour: today.hour, minute: today.minute, second: today.second },
+        activeId,
+        [...eqCalendars]
+      );
       if (equivalents.length) context.equivalentDates = equivalents.map((eq) => ({ label: eq.formatted, tooltip: eq.calendarName, calendarId: eq.calendarId }));
     }
     context.widgets = this._prepareWidgetContext(context);

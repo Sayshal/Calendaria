@@ -40,11 +40,11 @@ import {
   getFestivalNoteForDay,
   getFirstMoonPhase,
   getLeadingDays,
-  getWeekStartIndex,
   getRestorePosition,
   getSelectedMoon,
   getSidebarBuffer,
   getVisibleNotes,
+  getWeekStartIndex,
   hasFogRevealedMonthInDirection,
   hasMoonIconMarkers,
   hasWidgetsForPoint,
@@ -618,11 +618,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     let equivalentDates = [];
     if (eqCalendars.size) {
       const activeId = CalendarRegistry.getActiveId();
-      equivalentDates = getEquivalentDates({ year: headerDate.year, month: headerDate.month, dayOfMonth: headerDate.dayOfMonth ?? 0 }, activeId, [...eqCalendars]).map((eq) => ({
-        label: eq.formatted,
-        calendarName: eq.calendarName,
-        calendarId: eq.calendarId
-      }));
+      equivalentDates = getEquivalentDates(headerComponents, activeId, [...eqCalendars]).map((eq) => ({ label: eq.formatted, calendarName: eq.calendarName, calendarId: eq.calendarId }));
     }
     return {
       year,

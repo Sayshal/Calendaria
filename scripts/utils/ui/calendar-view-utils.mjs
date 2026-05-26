@@ -781,7 +781,8 @@ export function generateDayTooltip(calendar, year, month, dayOfMonth, festival =
   const eqCalendars = game.settings.get(MODULE.ID, SETTINGS.EQUIVALENT_DATE_CALENDARS);
   if (eqCalendars.size) {
     const activeId = CalendarRegistry.getActiveId();
-    const equivalents = getEquivalentDates({ year, month, dayOfMonth }, activeId, [...eqCalendars]);
+    const now = game.time.components;
+    const equivalents = getEquivalentDates({ year, month, dayOfMonth, hour: now.hour, minute: now.minute, second: now.second }, activeId, [...eqCalendars]);
     if (equivalents.length) {
       const eqRows = equivalents.map((eq) => `<div class="equivalent-date"><i class="fas fa-calendar-alt"></i> ${escapeText(eq.calendarName)}: ${escapeText(eq.formatted)}</div>`);
       rows.push(`<div class="equivalent-dates">${eqRows.join('')}</div>`);
@@ -819,7 +820,8 @@ export function getEquivalentDateTooltip(year, month, dayOfMonth) {
   const eqCalendars = game.settings.get(MODULE.ID, SETTINGS.EQUIVALENT_DATE_CALENDARS);
   if (!eqCalendars.size) return '';
   const activeId = CalendarRegistry.getActiveId();
-  const equivalents = getEquivalentDates({ year, month, dayOfMonth }, activeId, [...eqCalendars]);
+  const now = game.time.components;
+  const equivalents = getEquivalentDates({ year, month, dayOfMonth, hour: now.hour, minute: now.minute, second: now.second }, activeId, [...eqCalendars]);
   if (!equivalents.length) return '';
   const eqRows = equivalents.map((eq) => `<div class="equivalent-date"><i class="fas fa-calendar-alt"></i> ${escapeText(eq.calendarName)}: ${escapeText(eq.formatted)}</div>`);
   return encodeHtmlAttribute(`<div class="calendaria"><div class="day-tooltip"><div class="equivalent-dates">${eqRows.join('')}</div></div></div>`);

@@ -227,7 +227,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         weekHeader: '[W]',
         yearHeader: '[YYYY]',
         yearLabel: '[YYYY] [GGGG]',
-        crossCalendar: 'D MMMM, YYYY'
+        crossCalendar: 'D MMMM, YYYY (HH:mm)'
       },
       metadata: { id: '', description: '', author: game.user?.name ?? '', system: '', luxonSync: null },
       weather: { activeZone: null, zones: {} }

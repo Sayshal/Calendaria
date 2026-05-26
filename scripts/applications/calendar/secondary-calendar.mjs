@@ -85,8 +85,9 @@ export class SecondaryCalendar extends HandlebarsApplicationMixin(ApplicationV2)
       context.calendarData = this.#generateWeekViewData(calendar, viewedDate);
       context.formattedHeader = context.calendarData?.formattedHeader ?? '';
     } else {
-      const displayComponents = { year: viewedDate.year, month: viewedDate.month, dayOfMonth: 0 };
-      context.formattedHeader = formatCustom(calendar, displayComponents, 'MMMM YYYY');
+      const currentDate = getCurrentDateOn(this.#calendarId);
+      const displayComponents = currentDate ?? { year: viewedDate.year, month: viewedDate.month, dayOfMonth: 0 };
+      context.formattedHeader = formatCustom(calendar, displayComponents, calendar.dateFormats?.crossCalendar || 'D MMMM, YYYY (HH:mm)');
       context.calendarData = this.#generateGridData(calendar, viewedDate);
     }
     context.calendarOptions = this.#getCalendarOptions();
@@ -181,7 +182,8 @@ export class SecondaryCalendar extends HandlebarsApplicationMixin(ApplicationV2)
       weeks.push(currentWeek);
     }
     const displayWeek = weekNumber + 1;
-    const formattedHeader = `${localize('CALENDARIA.Common.Week')} ${displayWeek}, ${year}`;
+    const timeOfDay = formatCustom(calendar, currentDate ?? { year, month: 0, dayOfMonth: viewedDay }, 'HH:mm');
+    const formattedHeader = `${localize('CALENDARIA.Common.Week')} ${displayWeek}, ${year} (${timeOfDay})`;
     return { weekdays, weeks, intercalaryDays: [], formattedHeader, isMonthless: true, weekNumber: displayWeek };
   }
 
