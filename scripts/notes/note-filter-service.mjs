@@ -4,6 +4,15 @@ import { formatForLocation } from '../utils/_module.mjs';
 import { NoteManager, compareDates } from './_module.mjs';
 
 /**
+ * Strip HTML tags from note body content for plain-text search matching.
+ * @param {string} html - HTML content
+ * @returns {string} Plain text with tags removed
+ */
+function stripHtml(html) {
+  return (html || '').replace(/<[^>]*>/g, ' ');
+}
+
+/**
  * Filter and sort an array of note stubs based on filter state.
  * @param {object[]} notes - Note stubs from NoteManager.getAllNotes()
  * @param {object} state - Flat filter state object
@@ -35,7 +44,7 @@ export function filterNotes(notes, state, options = {}) {
   if (!result.length) return result;
   if (state.search && state.search.length >= 2) {
     const term = state.search.toLowerCase();
-    result = result.filter((n) => n.name?.toLowerCase().includes(term));
+    result = result.filter((n) => n.name?.toLowerCase().includes(term) || stripHtml(n.content).toLowerCase().includes(term));
   }
   if (!result.length) return result;
   if (state.presets?.size > 0) {

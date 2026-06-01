@@ -229,6 +229,15 @@
         flex-direction: column;
       }
 
+      .note-group-header {
+        padding: 0.4rem 0.75rem 0.2rem;
+        color: var(--calendaria-text-muted);
+        font-size: var(--font-size-12);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+      }
+
       .note-row {
         gap: 0.5rem;
         display: flex;

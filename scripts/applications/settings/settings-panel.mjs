@@ -848,7 +848,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.WEATHER_INERTIA]: { tab: 'weather', label: 'CALENDARIA.Settings.WeatherInertia.Name' },
     [SETTINGS.WEATHER_HISTORY_DAYS]: { tab: 'weather', label: 'CALENDARIA.Settings.WeatherHistoryDays.Name' },
     [SETTINGS.WEATHER_SOUND_FX]: { tab: 'weather', label: 'CALENDARIA.Settings.Weather.SoundFx.Name' },
-    [SETTINGS.WEATHER_SOUND_VOLUME]: { tab: 'weather', label: 'CALENDARIA.Settings.Weather.SoundVolume.Name' }
+    [SETTINGS.WEATHER_SOUND_VOLUME]: { tab: 'weather', label: 'CALENDARIA.Settings.Weather.SoundVolume.Name' },
+    [SETTINGS.WEATHER_SUPPRESS_MUFFLE]: { tab: 'weather', label: 'CALENDARIA.Settings.Weather.SuppressMuffle.Name' }
   };
 
   /**
@@ -956,7 +957,14 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       SETTINGS.DEFAULT_BRIGHTNESS_MULTIPLIER
     ],
     'weather-units': [SETTINGS.TEMPERATURE_UNIT, SETTINGS.TEMPERATURE_SHOW_BOTH, SETTINGS.PRECIPITATION_UNIT],
-    'weather-generation': [SETTINGS.AUTO_GENERATE_WEATHER, SETTINGS.WEATHER_INERTIA, SETTINGS.WEATHER_HISTORY_DAYS, SETTINGS.WEATHER_SOUND_FX, SETTINGS.WEATHER_SOUND_VOLUME],
+    'weather-generation': [
+      SETTINGS.AUTO_GENERATE_WEATHER,
+      SETTINGS.WEATHER_INERTIA,
+      SETTINGS.WEATHER_HISTORY_DAYS,
+      SETTINGS.WEATHER_SOUND_FX,
+      SETTINGS.WEATHER_SOUND_VOLUME,
+      SETTINGS.WEATHER_SUPPRESS_MUFFLE
+    ],
     fxmaster: [SETTINGS.FXMASTER_ENABLED, SETTINGS.FXMASTER_TOP_DOWN, SETTINGS.FXMASTER_FORCE_DOWNWARD, SETTINGS.FXMASTER_BELOW_TOKENS, SETTINGS.FXMASTER_SOUND_FX],
     'module-sync': [SETTINGS.PRIMARY_GM],
     'module-integration': [SETTINGS.SHOW_TOOLBAR_BUTTON, SETTINGS.TOOLBAR_APPS, SETTINGS.SHOW_JOURNAL_FOOTER],
@@ -1550,6 +1558,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.timeKeeperCombatMode = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_COMBAT_MODE);
     const timeKeeperSticky = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_STICKY_STATES);
     context.timeKeeperStickyPosition = timeKeeperSticky?.position ?? false;
+    context.timeKeeperStickyTray = timeKeeperSticky?.tray ?? false;
     context.formatLocations = this.#prepareFormatLocationsForCategory('timekeeper');
     const timeKeeperJumps = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_TIME_JUMPS) || {};
     const { labels: incrementLabels, keys: incrementKeys } = SettingsPanel.#getIncrementLabels();
@@ -1602,6 +1611,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.fxmasterSpeedMultiplier = game.settings.get(MODULE.ID, SETTINGS.FXMASTER_SPEED_MULTIPLIER) ?? 1.0;
     context.weatherSoundFx = game.settings.get(MODULE.ID, SETTINGS.WEATHER_SOUND_FX);
     context.weatherSoundVolume = game.settings.get(MODULE.ID, SETTINGS.WEATHER_SOUND_VOLUME) ?? 0.5;
+    context.weatherSuppressMuffle = game.settings.get(MODULE.ID, SETTINGS.WEATHER_SUPPRESS_MUFFLE) ?? 0;
   }
 
   /**
@@ -1988,6 +1998,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('fxmasterSpeedMultiplier' in data) await game.settings.set(MODULE.ID, SETTINGS.FXMASTER_SPEED_MULTIPLIER, Number(data.fxmasterSpeedMultiplier));
     if ('weatherSoundFx' in data) await game.settings.set(MODULE.ID, SETTINGS.WEATHER_SOUND_FX, !!data.weatherSoundFx);
     if ('weatherSoundVolume' in data) await game.settings.set(MODULE.ID, SETTINGS.WEATHER_SOUND_VOLUME, parseFloat(data.weatherSoundVolume));
+    if ('weatherSuppressMuffle' in data) await game.settings.set(MODULE.ID, SETTINGS.WEATHER_SUPPRESS_MUFFLE, parseFloat(data.weatherSuppressMuffle));
     if ('climateZone' in data) await WeatherManager.setActiveZone(data.climateZone);
     if ('miniCalStickySection' in data) {
       const current = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_STICKY_STATES) || {};
@@ -1999,7 +2010,10 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       });
       MiniCal.refreshStickyStates();
     }
-    if ('timeKeeperStickySection' in data) await game.settings.set(MODULE.ID, SETTINGS.TIMEKEEPER_STICKY_STATES, { position: !!data.timeKeeperStickyPosition });
+    if ('timeKeeperStickySection' in data) {
+      const current = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_STICKY_STATES) || {};
+      await game.settings.set(MODULE.ID, SETTINGS.TIMEKEEPER_STICKY_STATES, { ...current, position: !!data.timeKeeperStickyPosition, tray: !!data.timeKeeperStickyTray });
+    }
     if ('stopwatchStickySection' in data) await game.settings.set(MODULE.ID, SETTINGS.STOPWATCH_STICKY_STATES, { position: !!data.stopwatchStickyPosition });
     if ('showSunDial' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_SUN_DIAL, !!data.showSunDial);
     if ('forceSunDial' in data) await game.settings.set(MODULE.ID, SETTINGS.FORCE_SUN_DIAL, data.forceSunDial);
@@ -2246,7 +2260,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       const settingsPanel = foundry.applications.instances.get('calendaria-settings-panel');
       if (settingsPanel?.rendered && affectedParts.size > 0) settingsPanel.render({ parts: [...affectedParts] });
     }
-    const timekeeperKeys = ['timeKeeperAutoFade', 'timeKeeperIdleOpacity', 'timeKeeperStickyPosition'];
+    const timekeeperKeys = ['timeKeeperAutoFade', 'timeKeeperIdleOpacity', 'timeKeeperStickyPosition', 'timeKeeperStickyTray'];
     if (timekeeperKeys.some((k) => k in data)) foundry.applications.instances.get('calendaria-timekeeper')?.render();
     const hudKeys = [
       'hudDialStyle',

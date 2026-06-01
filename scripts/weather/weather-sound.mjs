@@ -94,7 +94,8 @@ function applyRegionSuppression() {
   if (next === suppressedByRegion) return;
   suppressedByRegion = next;
   const baseVolume = game.settings.get(MODULE.ID, SETTINGS.WEATHER_SOUND_VOLUME) ?? 0.5;
-  activeSound.fade(next ? 0 : baseVolume, { duration: FADE_MS });
+  const muffle = game.settings.get(MODULE.ID, SETTINGS.WEATHER_SUPPRESS_MUFFLE) ?? 0;
+  activeSound.fade(next ? baseVolume * muffle : baseVolume, { duration: FADE_MS });
 }
 
 /**
@@ -222,8 +223,9 @@ async function playSound(weather) {
   try {
     const sound = await game.audio.play(src, { loop: true, volume: 0, context: game.audio.environment });
     const baseVolume = game.settings.get(MODULE.ID, SETTINGS.WEATHER_SOUND_VOLUME) ?? 0.5;
+    const muffle = game.settings.get(MODULE.ID, SETTINGS.WEATHER_SUPPRESS_MUFFLE) ?? 0;
     suppressedByRegion = isInsideSuppressWeatherRegion();
-    sound.fade(suppressedByRegion ? 0 : baseVolume, { duration: FADE_MS });
+    sound.fade(suppressedByRegion ? baseVolume * muffle : baseVolume, { duration: FADE_MS });
     activeSound = sound;
     activeSoundKey = src;
     log(3, `Playing "${src}"${suppressedByRegion ? ' (suppressed by region)' : ''}`);

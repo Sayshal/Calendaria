@@ -219,6 +219,7 @@ export const SETTINGS = {
   WEATHER_PRESET_ALIASES: 'weatherPresetAliases',
   WEATHER_SOUND_FX: 'weatherSoundFx',
   WEATHER_SOUND_VOLUME: 'weatherSoundVolume',
+  WEATHER_SUPPRESS_MUFFLE: 'weatherSuppressMuffle',
   WEATHER_VISUAL_OVERRIDES: 'weatherVisualOverrides',
   WEATHER_YEAR_KEY_MIGRATED: 'weatherYearKeyMigrated',
   WIND_SPEED_UNIT: 'windSpeedUnit'

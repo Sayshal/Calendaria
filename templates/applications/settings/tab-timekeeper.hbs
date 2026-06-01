@@ -185,6 +185,15 @@
     <p class="hint section-hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickyStates"}}</p>
 
     <div class="form-group">
+      <label for="timeKeeperStickyTray">{{localize "CALENDARIA.SettingsPanel.Sticky.Tray"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="timeKeeperStickyTray" name="timeKeeperStickyTray"
+          {{#if timeKeeperStickyTray}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.SettingsPanel.Hint.StickyTimeControls"}}</p>
+    </div>
+
+    <div class="form-group">
       <label for="timeKeeperStickyPosition">{{localize "CALENDARIA.Common.LockPosition"}}</label>
       <div class="form-fields">
         <input type="checkbox" id="timeKeeperStickyPosition" name="timeKeeperStickyPosition"

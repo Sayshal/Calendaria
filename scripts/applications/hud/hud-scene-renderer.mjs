@@ -1130,7 +1130,7 @@ export class HudSceneRenderer {
     const hoursPerPixel = nightHours / arcPixels;
     const trailHours = trailSpacing * hoursPerPixel;
     for (let i = 0; i < count; i++) {
-      const { phase: moonPhase, color } = moons[i];
+      const { phase: moonPhase, color, isFull, isNew } = moons[i];
       const { glow, sprite, shadow } = this.#moonPool[i];
       glow.alpha = moonAlpha;
       sprite.alpha = moonAlpha;
@@ -1167,7 +1167,9 @@ export class HudSceneRenderer {
       sprite.scale.set(moonSize / 24);
       sprite.tint = 0xffffff;
       const rad = moonSize / 2;
-      const illumination = 1 - Math.abs(moonPhase * 2 - 1);
+      let illumination = 1 - Math.abs(moonPhase * 2 - 1);
+      if (!isFull) illumination = Math.min(illumination, 0.7);
+      if (!isNew) illumination = Math.max(illumination, 0.3);
       const isWaxing = moonPhase < 0.5;
       glow.clear();
       if (color) {

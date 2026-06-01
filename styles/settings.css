@@ -1080,6 +1080,11 @@
 
   .calendaria {
     &.settings-panel {
+      .settings-footer {
+        border-top-color: var(--calendaria-border-light);
+        background: var(--calendaria-bg-lighter);
+      }
+
       .settings-footer .save-indicator {
         color: rgb(21 128 61);
       }

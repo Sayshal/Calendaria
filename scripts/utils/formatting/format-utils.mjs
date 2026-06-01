@@ -137,7 +137,22 @@ export function dateFormattingParts(calendar, components) {
   const weekOfMonth = Math.ceil((dayOfMonth + 1) / daysPerWeek);
   let namedWeek = '';
   let namedWeekAbbr = '';
-  const currentWeek = calendar?.getCurrentWeek?.({ year: internalYear, month, dayOfMonth });
+  let currentWeek = null;
+  if (typeof calendar?.getCurrentWeek === 'function') {
+    currentWeek = calendar.getCurrentWeek({ year: internalYear, month, dayOfMonth });
+  } else {
+    const weekNames = resolveArray(calendar, 'namedWeeksArray', 'weeks.names');
+    if (weekNames.length && daysPerWeek > 0) {
+      const weekIndex = (calendar?.weeks?.type || 'year-based') === 'month-based' ? dayOfMonth : dayOfYear;
+      let weekNumber = Math.floor(weekIndex / daysPerWeek) + 1;
+      let entry = weekNames.find((w) => Number(w.weekNumber) === weekNumber);
+      if (!entry && calendar?.weeks?.repeat) {
+        const maxWeekNumber = weekNames.reduce((max, w) => Math.max(max, Number(w.weekNumber) || 0), 0);
+        if (maxWeekNumber > 0) entry = weekNames.find((w) => Number(w.weekNumber) === ((weekNumber - 1) % maxWeekNumber) + 1);
+      }
+      if (entry) currentWeek = { weekName: localize(entry.name), weekAbbr: entry.abbreviation ? localize(entry.abbreviation) : localize(entry.name).slice(0, 3) };
+    }
+  }
   if (currentWeek) {
     namedWeek = currentWeek.weekName || '';
     namedWeekAbbr = currentWeek.weekAbbr || namedWeek.slice(0, 3);

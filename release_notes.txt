@@ -1,32 +1,16 @@
 ## New Features
 
-- Added a `calendaria.themeChanged` hook that fires whenever custom theme colors are applied, letting other modules react to live theme updates.
-- Added a Time of Day Hue Intensity slider (0-6) in the Canvas settings tab so dawn, dusk, and night hue strength can be pushed beyond the default subtle peaks.
-- Added a Weather Hue Override blend slider (0-1) that mixes weather hue with the time-of-day hue instead of always replacing it.
-- Added FXMaster particle speed multiplier setting (0-3, default 1) to scale weather effect speed across all Calendaria-driven presets, with active scenes resyncing on change.
-- Exposed `CALENDARIA.api.refreshEnvironment()` so hue and ambience changes apply immediately without waiting for the next time tick.
-- Secondary Calendar widget header, MiniCal/BigCal cross-calendar subheaders, day-cell tooltips, and note-sheet equivalent dates now show the live current time and refresh as time advances.
+- Added a Sticky Tray option to the Time Keeper, via a Pin Controls toggle in the context menu and a matching checkbox on the Time Keeper settings tab, that keeps the hover-revealed controls tray open. The pinned state persists and survives increment changes and settings saves.
+- Added a Suppression Muffle slider on the Weather settings tab that keeps a fraction of weather sound volume inside Suppress Weather regions instead of fully silencing them, defaulting to 0 so existing regions stay silent.
+- Note Viewer search now matches note body text (HTML stripped) in addition to titles, grouping hits into Direct Matches for title matches and Mentioned for body-only matches.
 
 ## Bug Fixes
 
-- Bulk calendar imports no longer open a note sheet for each imported note, preventing UI freezes on large imports.
-- Calendar exports now include user-created festivals, rebuilt from their journal pages, so they survive a round trip through export and import.
-- Importing settings now sanitizes the date display formats payload, dropping malformed entries and overlaying defaults so widgets render dates correctly without manual cleanup.
-- Legacy notes using `daily`, `weekly`, `monthly`, or `yearly` repeat values are now auto-migrated to equivalent condition trees on load, so imported notes resume recurring without manual editing.
-- Moon anchors with Reset Cycle disabled are now honored as soft calibration instead of being ignored.
-- Moons with odd cycle lengths (such as a 33-day cycle) now show all phases correctly instead of one phase swallowing the whole cycle.
-- Player HUD now hides or shows immediately when switching to a scene with a different "hide HUD for players" flag, instead of requiring a reload.
-- Player-triggered weather randomization now produces varied results instead of always returning the same preset.
-- Randomized moon phase anchors with a year set now resolve correctly on calendars using a non-zero yearZero, matching the fixed-mode anchor behavior.
-
-## Changes
-
-- Bumped the default `crossCalendar` date format to `D MMMM, YYYY (HH:mm)` for new and blank calendars so cross-calendar displays include time by default.
-- Moon anchor years are now interpreted in display-year space, matching the year shown in the calendar UI.
-- Settings imports no longer double-sanitize note data, halving legacy deprecation warnings in the console during import.
-- The Calendaria importer preview now lists incoming festival seeds alongside notes.
-- Updated translations.
-
-## Documentation
-
-- Documentation now lives at wiki.3deathsaves.com; in-app Documentation buttons, chat command references, and the README all point to the new wiki host.
+- Clicking a cal.date enricher link now opens the calendar on the displayed year, fixing month notes not appearing on calendars with a non-zero yearZero (e.g. SWADE).
+- Duration-based seasons now cycle correctly across year boundaries, so seasons longer than a year or whose durations do not sum to the year length carry over instead of resetting each year.
+- Manual sunrise and sunset overrides in a climate zone now persist after saving and reopening, and the Shortest/Longest Day readout updates immediately.
+- Multiple moons in the HUD and sun dial now sort by name to match the calendar moon panel, so labels line up with their discs, and fully lit and fully dark rendering is reserved for true Full and New phases so gibbous and crescent moons keep a visible terminator.
+- Season conditions in the note condition builder now match correctly. A newly selected dropdown field defaults to its first option instead of silently filtering out every date, and Day in Season and Season Progress resolve against leap-aware season bounds for month-based and periodic calendars.
+- The Calendar Editor date-format preview now resolves [namedWeek] and [namedWeekAbbr] tokens from raw calendar data instead of leaving an empty gap.
+- The cinematic overlay date label now shows the full calendar display year instead of the internal year, fixing a mismatch in the keyframe date comparison.
+- The settings panel footer now uses the correct light-theme background and border, matching the calendar editor footer instead of showing dark-theme styling.
