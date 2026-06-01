@@ -53,6 +53,9 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {boolean} Whether position dragging is locked */
   #stickyPosition = false;
 
+  /** @type {boolean} Whether the controls tray is pinned open */
+  #stickyTray = false;
+
   /** @type {Function|null} Debounced viewport resize handler */
   #resizeHandler = null;
 
@@ -116,6 +119,8 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
     super._onRender(context, options);
     const stickyStates = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_STICKY_STATES) || {};
     this.#stickyPosition = stickyStates.position ?? false;
+    this.#stickyTray = stickyStates.tray ?? false;
+    this.element.classList.toggle('sticky-tray', this.#stickyTray);
     if (options.isFirstRender) {
       this.#restorePosition();
       this.#resizeHandler = foundry.utils.debounce(() => requestAnimationFrame(() => this.#onViewportResize()), 200);
@@ -126,7 +131,7 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
     incrementSelect?.addEventListener('change', (e) => {
       TimeClock.setAppIncrement('time-keeper', e.target.value);
       TimeClock.setIncrement(e.target.value);
-      game.settings.set(MODULE.ID, SETTINGS.TIMEKEEPER_STICKY_STATES, { position: this.#stickyPosition, increment: e.target.value });
+      this.#saveStickyStates({ increment: e.target.value });
       this.render();
     });
     if (incrementSelect && canChangeDateTime()) {
@@ -144,7 +149,7 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
           const newKey = incrementKeys[newIndex];
           TimeClock.setAppIncrement('time-keeper', newKey);
           TimeClock.setIncrement(newKey);
-          game.settings.set(MODULE.ID, SETTINGS.TIMEKEEPER_STICKY_STATES, { position: this.#stickyPosition, increment: newKey });
+          this.#saveStickyStates({ increment: newKey });
           this.render();
         },
         { passive: false }
@@ -364,6 +369,12 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
       icon: `<i class="fas fa-${isLocked ? 'unlock' : 'lock'}"></i>`,
       callback: () => this._toggleStickyPosition()
     });
+    const isPinned = stickyStates.tray ?? false;
+    items.push({
+      name: isPinned ? 'CALENDARIA.TimeKeeper.ContextMenu.UnpinTray' : 'CALENDARIA.TimeKeeper.ContextMenu.PinTray',
+      icon: `<i class="fas fa-thumbtack${isPinned ? '-slash' : ''}"></i>`,
+      callback: () => this._toggleStickyTray()
+    });
     items.push(buildOpenAppsMenuItem());
     items.push({ name: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', callback: () => this.close() });
     return items;
@@ -387,6 +398,15 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#stickyPosition = newLocked;
     await this.#saveStickyStates({ position: newLocked });
     ui.notifications.info(newLocked ? 'CALENDARIA.TimeKeeper.ContextMenu.PositionLocked' : 'CALENDARIA.TimeKeeper.ContextMenu.PositionUnlocked', { localize: true });
+  }
+
+  /**
+   * Toggle whether the controls tray stays pinned open.
+   */
+  async _toggleStickyTray() {
+    this.#stickyTray = !this.#stickyTray;
+    this.element.classList.toggle('sticky-tray', this.#stickyTray);
+    await this.#saveStickyStates({ tray: this.#stickyTray });
   }
 
   /**

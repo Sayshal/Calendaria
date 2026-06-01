@@ -1558,6 +1558,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.timeKeeperCombatMode = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_COMBAT_MODE);
     const timeKeeperSticky = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_STICKY_STATES);
     context.timeKeeperStickyPosition = timeKeeperSticky?.position ?? false;
+    context.timeKeeperStickyTray = timeKeeperSticky?.tray ?? false;
     context.formatLocations = this.#prepareFormatLocationsForCategory('timekeeper');
     const timeKeeperJumps = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_TIME_JUMPS) || {};
     const { labels: incrementLabels, keys: incrementKeys } = SettingsPanel.#getIncrementLabels();
@@ -2009,7 +2010,10 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       });
       MiniCal.refreshStickyStates();
     }
-    if ('timeKeeperStickySection' in data) await game.settings.set(MODULE.ID, SETTINGS.TIMEKEEPER_STICKY_STATES, { position: !!data.timeKeeperStickyPosition });
+    if ('timeKeeperStickySection' in data) {
+      const current = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_STICKY_STATES) || {};
+      await game.settings.set(MODULE.ID, SETTINGS.TIMEKEEPER_STICKY_STATES, { ...current, position: !!data.timeKeeperStickyPosition, tray: !!data.timeKeeperStickyTray });
+    }
     if ('stopwatchStickySection' in data) await game.settings.set(MODULE.ID, SETTINGS.STOPWATCH_STICKY_STATES, { position: !!data.stopwatchStickyPosition });
     if ('showSunDial' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_SUN_DIAL, !!data.showSunDial);
     if ('forceSunDial' in data) await game.settings.set(MODULE.ID, SETTINGS.FORCE_SUN_DIAL, data.forceSunDial);
@@ -2256,7 +2260,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       const settingsPanel = foundry.applications.instances.get('calendaria-settings-panel');
       if (settingsPanel?.rendered && affectedParts.size > 0) settingsPanel.render({ parts: [...affectedParts] });
     }
-    const timekeeperKeys = ['timeKeeperAutoFade', 'timeKeeperIdleOpacity', 'timeKeeperStickyPosition'];
+    const timekeeperKeys = ['timeKeeperAutoFade', 'timeKeeperIdleOpacity', 'timeKeeperStickyPosition', 'timeKeeperStickyTray'];
     if (timekeeperKeys.some((k) => k in data)) foundry.applications.instances.get('calendaria-timekeeper')?.render();
     const hudKeys = [
       'hudDialStyle',

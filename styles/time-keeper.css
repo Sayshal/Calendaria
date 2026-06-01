@@ -29,6 +29,23 @@
       }
     }
 
+    &.sticky-tray {
+      opacity: 1;
+
+      .controls {
+        opacity: 1;
+        max-height: 1.875rem;
+        margin-top: 0.375rem;
+      }
+
+      .readonly {
+        opacity: 1;
+        max-height: 1.875rem;
+        margin-top: 0.375rem;
+        padding: 0.25rem 0;
+      }
+    }
+
     .time-display.near-snap {
       border-color: var(--calendaria-primary);
       box-shadow:
