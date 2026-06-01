@@ -1388,6 +1388,13 @@ export default class CalendariaSettings {
         config: false,
         type: new NumberField({ initial: 0.5, min: 0, max: 1, step: 0.05 })
       },
+      [SETTINGS.WEATHER_SUPPRESS_MUFFLE]: {
+        name: 'CALENDARIA.Settings.Weather.SuppressMuffle.Name',
+        hint: 'CALENDARIA.Settings.Weather.SuppressMuffle.Hint',
+        scope: 'world',
+        config: false,
+        type: new NumberField({ initial: 0, min: 0, max: 1, step: 0.05 })
+      },
       [SETTINGS.SAVED_TIMEPOINTS]: { name: 'Saved Timepoints', scope: 'world', config: false, type: new ArrayField(new ObjectField()) },
       [SETTINGS.MACRO_TRIGGERS]: {
         name: 'Macro Triggers',

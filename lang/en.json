@@ -2278,6 +2278,8 @@
   "CALENDARIA.Settings.Weather.SoundFx.Name": "Sound Effects",
   "CALENDARIA.Settings.Weather.SoundVolume.Hint": "Volume level for weather ambient sounds.",
   "CALENDARIA.Settings.Weather.SoundVolume.Name": "Sound Volume",
+  "CALENDARIA.Settings.Weather.SuppressMuffle.Hint": "Volume kept for weather sounds inside no-weather regions; 0 silences them completely.",
+  "CALENDARIA.Settings.Weather.SuppressMuffle.Name": "Suppression Muffle",
   "CALENDARIA.Settings.WeatherAmbienceIntensity.Hint": "How strongly weather hue overrides time of day hue. 1 lets weather fully replace it, 0 keeps dawn and dusk visible.",
   "CALENDARIA.Settings.WeatherAmbienceIntensity.Name": "Weather Hue Override",
   "CALENDARIA.Settings.WeatherHistoryDays.Hint": "Maximum number of days to retain in weather history. Set to 0 to disable history recording entirely.",
