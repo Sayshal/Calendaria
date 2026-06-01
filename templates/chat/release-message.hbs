@@ -12,27 +12,22 @@
 
     <h4>New Features</h4>
     <ul>
-      <li>Added Time of Day Hue Intensity and Weather Hue Override sliders so dawn, dusk, night, and weather tints can
-        be tuned past the default subtle blend</li>
-      <li>Added an FXMaster particle speed multiplier so weather effects can be sped up or slowed down across all
-        Calendaria presets, with active scenes resyncing on change</li>
-      <li>Added new module-developer hooks and API methods for theme and ambience integration</li>
-      <li>Secondary calendar headers, cross-calendar subheaders, day-cell tooltips, and note-sheet equivalent dates now
-        show the live current time and refresh as time advances</li>
+      <li>Added a Sticky Tray option to the Time Keeper that keeps the controls tray pinned open instead of auto-hiding,
+        toggled from the context menu or its settings tab</li>
+      <li>Note search now looks inside note text as well as titles, grouping results into direct title matches and
+        mentions</li>
+      <li>Added a weather Suppression Muffle slider so weather sound can stay faintly audible inside suppression regions
+        instead of going fully silent</li>
     </ul>
 
     <h4>Bug Fixes</h4>
     <ul>
-      <li>Bulk calendar imports no longer open a note sheet for each imported note, preventing UI freezes on large
-        imports</li>
-      <li>Calendar exports now include user-created festivals, so they survive a round trip through export and import
-      </li>
-      <li>Moons with odd cycle lengths now show all phases correctly instead of one phase swallowing the whole cycle,
-        and moon anchors with Reset Cycle disabled are honored as soft calibration</li>
-      <li>Player HUD now hides or shows immediately when switching to a scene with a different player-visibility flag,
-        instead of requiring a reload</li>
-      <li>Player-triggered weather randomization now produces varied results instead of always returning the same preset
-      </li>
+      <li>Multiple moons in the HUD and sun dial now line up with their calendar order, and gibbous and crescent moons
+        keep a visible terminator instead of rendering fully lit or dark</li>
+      <li>Seasons set by duration now carry across year boundaries instead of resetting each year</li>
+      <li>Season conditions in note recurrence now match correctly instead of filtering out every date</li>
+      <li>Clicking an in-text calendar date link now opens the calendar on the correct year</li>
+      <li>Manual sunrise and sunset overrides in a climate zone now stay saved after reopening the editor</li>
     </ul>
 
   </div>
