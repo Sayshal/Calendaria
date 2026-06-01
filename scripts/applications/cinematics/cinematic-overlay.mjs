@@ -359,6 +359,7 @@ export default class CinematicOverlay {
       return;
     }
     const components = calendar.timeToComponents(interpWt);
+    components.year += calendar.years?.yearZero ?? 0;
     const dateKey = `${components.year}-${components.month}-${components.dayOfMonth}`;
     if (label._lastDateKey === dateKey) return;
     label._lastDateKey = dateKey;
