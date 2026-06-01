@@ -555,6 +555,8 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     result.seasonOverrides = seasonOverrides;
     this.#data.seasonOverrides = seasonOverrides;
+    this.#data.sunriseOverride = result.sunriseOverride;
+    this.#data.sunsetOverride = result.sunsetOverride;
     for (const preset of allPresets) {
       const existing = this.#data.presets?.[preset.id] ?? Object.values(this.#data.presets ?? {}).find((p) => p.id === preset.id);
       result.presets[preset.id] = existing ? { ...existing } : { id: preset.id, enabled: false };
