@@ -1527,8 +1527,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       const { cycleLength } = this._calculatePeriodicSeasonBounds(0, totalDays);
       if (cycleLength <= 0) return null;
       const offset = this.seasons?.offset ?? 0;
-      const leapDayOfYear = this._calculateDayOfYear(components);
-      const dayInCycle = (((leapDayOfYear - offset) % totalDays) + totalDays) % totalDays;
+      const elapsedDays = this._componentsToDays(components);
+      const dayInCycle = (((elapsedDays - offset) % cycleLength) + cycleLength) % cycleLength;
       let cumulative = 0;
       for (let i = 0; i < seasons.length; i++) {
         const duration = seasons[i].duration ?? Math.floor(totalDays / seasons.length);
