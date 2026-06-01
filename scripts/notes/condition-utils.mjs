@@ -232,7 +232,7 @@ export function getDefaultsForField(newField, calendar = null) {
   const op = schema?.operators?.[0] ?? CONDITION_OPERATORS.EQUAL;
   let value = 0;
   if (schema?.inputType === 'boolean') value = true;
-  else if (schema?.inputType === 'select') value = 0;
+  else if (schema?.inputType === 'select') value = schema.getOptions?.(calendar)?.[0]?.value ?? 0;
   else if (schema?.inputType === 'date') value = { year: 0, month: 0, dayOfMonth: 0 };
   let value2 = null;
   if (schema?.needsValue2) {

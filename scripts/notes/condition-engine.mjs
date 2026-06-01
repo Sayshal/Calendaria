@@ -181,7 +181,8 @@ export function getFieldValue(field, date, value2 = null, epochCtx = null) {
         doy,
         seasons,
         cache('totalDaysInYear', () => getTotalDaysInYear(date.year)),
-        idx
+        idx,
+        date.year - (calendar?.years?.yearZero ?? 0)
       );
     }
     case CONDITION_FIELDS.SEASON_DAY: {
@@ -194,7 +195,8 @@ export function getFieldValue(field, date, value2 = null, epochCtx = null) {
         doy,
         seasons,
         cache('totalDaysInYear', () => getTotalDaysInYear(date.year)),
-        idx
+        idx,
+        date.year - (calendar?.years?.yearZero ?? 0)
       );
     }
     case CONDITION_FIELDS.IS_LONGEST_DAY: {

@@ -129,17 +129,39 @@ export function isInSeasonRange(dayOfYear, start, end) {
 }
 
 /**
+ * Resolve a season's day-of-year bounds across periodic, month-based, and day-based season types.
+ * @param {object[]} seasons - Seasons array
+ * @param {number} idx - Season index
+ * @param {number} totalDays - Total days in year
+ * @param {number} [internalYear] - Year minus yearZero (for leap-aware month sizes)
+ * @returns {{start: number, end: number}} Bounds aligned with getDayOfYear
+ */
+function resolveSeasonDayBounds(seasons, idx, totalDays, internalYear = 0) {
+  const calendar = CalendarManager.getActiveCalendar();
+  const season = seasons[idx];
+  if (calendar?.seasons?.type === 'periodic') {
+    const { dayStart, dayEnd } = calendar._calculatePeriodicSeasonBounds(idx, totalDays);
+    return { start: dayStart, end: dayEnd };
+  }
+  if (season.monthStart != null && season.monthEnd != null && calendar) {
+    const bounds = getSeasonDayOfYearBounds(season, calendar, internalYear);
+    if (bounds) return { start: bounds.startDoY, end: bounds.endDoY };
+  }
+  const start = season.dayStart ?? 0;
+  return { start, end: season.dayEnd ?? start };
+}
+
+/**
  * Get percentage progress through current season (0-100).
  * @param {number} dayOfYear - Day of year
  * @param {object[]} seasons - Seasons array
  * @param {number} totalDays - Total days in year
  * @param {number} idx - Season index
+ * @param {number} [internalYear] - Year minus yearZero (for leap-aware month sizes)
  * @returns {number} Percentage 0-100
  */
-export function getSeasonPercent(dayOfYear, seasons, totalDays, idx) {
-  const season = seasons[idx];
-  const start = season.dayStart ?? 0;
-  const end = season.dayEnd ?? start;
+export function getSeasonPercent(dayOfYear, seasons, totalDays, idx, internalYear = 0) {
+  const { start, end } = resolveSeasonDayBounds(seasons, idx, totalDays, internalYear);
   let seasonLength, dayInSeason;
   if (start <= end) {
     seasonLength = end - start + 1;
@@ -157,11 +179,11 @@ export function getSeasonPercent(dayOfYear, seasons, totalDays, idx) {
  * @param {object[]} seasons - Seasons array
  * @param {number} totalDays - Total days in year
  * @param {number} idx - Season index
+ * @param {number} [internalYear] - Year minus yearZero (for leap-aware month sizes)
  * @returns {number} Day in season
  */
-export function getSeasonDay(dayOfYear, seasons, totalDays, idx) {
-  const season = seasons[idx];
-  const start = season.dayStart ?? 0;
+export function getSeasonDay(dayOfYear, seasons, totalDays, idx, internalYear = 0) {
+  const { start } = resolveSeasonDayBounds(seasons, idx, totalDays, internalYear);
   if (dayOfYear >= start) return dayOfYear - start + 1;
   return totalDays - start + dayOfYear + 1;
 }
