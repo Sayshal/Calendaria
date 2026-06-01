@@ -2,6 +2,7 @@
   {{#if notes.length}}
     <div class="note-list">
       {{#each notes}}
+        {{#if this.groupHeaderLabel}}<div class="note-group-header">{{this.groupHeaderLabel}}</div>{{/if}}
         <div class="note-row{{#if this.selected}} selected{{/if}}" data-note-id="{{this.id}}"
           data-preset="{{this.presetId}}" data-visibility="{{this.visibility}}"
           data-display-style="{{this.displayStyle}}" style="--note-color: {{this.color}}">

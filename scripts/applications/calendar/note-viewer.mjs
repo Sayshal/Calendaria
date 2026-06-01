@@ -155,6 +155,17 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
     const calendarIds = activeId ? [activeId, ...eqCalendars] : [];
     const filteredNotes = filterNotes(allNotes, this._filterState, { isGM, calendarId: calendarIds.length ? calendarIds : undefined });
     this._allFilteredNotes = filteredNotes.map((stub) => this.#enrichNoteRow(stub));
+    const searchTerm = this._filterState.search?.toLowerCase();
+    if (searchTerm && searchTerm.length >= 2) {
+      const direct = [];
+      const mentioned = [];
+      for (const row of this._allFilteredNotes) (row.name?.toLowerCase().includes(searchTerm) ? direct : mentioned).push(row);
+      if (mentioned.length) {
+        if (direct.length) direct[0].groupHeaderLabel = localize('CALENDARIA.NoteViewer.DirectMatches');
+        mentioned[0].groupHeaderLabel = localize('CALENDARIA.NoteViewer.Mentioned');
+      }
+      this._allFilteredNotes = [...direct, ...mentioned];
+    }
     this._renderedCount = Math.min(BATCH_SIZE, this._allFilteredNotes.length);
     const calendarIdSet = new Set(calendarIds);
     context.notes = this._allFilteredNotes.slice(0, this._renderedCount);
