@@ -2095,9 +2095,7 @@ async function dispatchEnricherAction(action, dataset) {
  * @param {number} day - Day (1-indexed)
  */
 async function navigateToDate(year, month, day) {
-  const calendar = CalendarManager.getActiveCalendar();
-  const yearZero = calendar?.years?.yearZero ?? 0;
-  const dateObj = { year: year - yearZero, month: month - 1, dayOfMonth: day - 1 };
+  const dateObj = { year, month: month - 1, dayOfMonth: day - 1 };
   const pref = game.settings.get(MODULE.ID, SETTINGS.ENRICHER_CLICK_TARGET);
   const useMiniCal = pref === 'minical' || (pref === 'auto' && MiniCal.instance?.rendered && !BigCal.instance?.rendered);
   if (useMiniCal) {
