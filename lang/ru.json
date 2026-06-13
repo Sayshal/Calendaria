@@ -2278,6 +2278,8 @@
   "CALENDARIA.Settings.Weather.SoundFx.Name": "Звуковые эффекты",
   "CALENDARIA.Settings.Weather.SoundVolume.Hint": "Уровень громкости для фоновых звуков погоды.",
   "CALENDARIA.Settings.Weather.SoundVolume.Name": "Громкость звука",
+  "CALENDARIA.Settings.Weather.SuppressMuffle.Hint": "Уровень громкости для звуков погоды в зонах, где погода нет; значение 0 полностью их заглушает.",
+  "CALENDARIA.Settings.Weather.SuppressMuffle.Name": "Подавление звука",
   "CALENDARIA.Settings.WeatherAmbienceIntensity.Hint": "Как сильно оттенок погоды преобладает над оттенком времени суток. Значение 1 позволит погоде полностью заменить оттенок времени суток, значение 0 сохранит видимость рассвета и заката.",
   "CALENDARIA.Settings.WeatherAmbienceIntensity.Name": "Переопределение оттенка погоды",
   "CALENDARIA.Settings.WeatherHistoryDays.Hint": "Максимальное количество дней, в течение которых сохраняется история погоды. Установите значение 0, чтобы полностью отключить запись истории.",
