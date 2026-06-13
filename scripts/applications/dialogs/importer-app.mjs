@@ -400,7 +400,8 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
           }
           return;
         }
-        if (noteType === 'festival') newFestivals.push({ name: note.name, month: note.startDate?.month ?? 0, dayOfMonth: note.startDate?.dayOfMonth ?? 0, countsForWeekday: false });
+        if (noteType === 'festival')
+          newFestivals.push({ name: note.name, month: note.startDate?.month ?? 0, dayOfMonth: note.startDate?.dayOfMonth ?? 0, duration: note.duration ?? 1, countsForWeekday: true });
       });
       if (newFestivals.length > 0) {
         if (!this.#transformedData.festivals) this.#transformedData.festivals = [];
