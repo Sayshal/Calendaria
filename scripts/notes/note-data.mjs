@@ -1,5 +1,4 @@
 import { DISPLAY_STYLES, HOOKS, MODULE, NOTE_VISIBILITY, SETTINGS } from '../constants.mjs';
-import { localize } from '../utils/localization.mjs';
 import { isValidDate } from './_module.mjs';
 
 /**
@@ -60,7 +59,7 @@ export function validateNoteData(noteData, calendarId) {
   else if (!isValidDate(noteData.startDate, calendarId)) errors.push('Start date is invalid');
   if (noteData.endDate && !isValidDate(noteData.endDate, calendarId)) errors.push('End date is invalid');
   if (noteData.allDay !== undefined && typeof noteData.allDay !== 'boolean') errors.push('allDay must be a boolean');
-  const validRepeatValues = CONFIG.JournalEntryPage.dataModels['calendaria.calendarnote']._schema.fields.repeat.choices;
+  const validRepeatValues = CONFIG.JournalEntryPage.dataModels['calendaria.calendarnote'].schema.fields.repeat.choices;
   if (noteData.repeat && !validRepeatValues.includes(noteData.repeat)) errors.push(`repeat must be one of: ${validRepeatValues.join(', ')}`);
   if (noteData.weekday !== undefined && noteData.weekday !== null) {
     if (typeof noteData.weekday !== 'number' || noteData.weekday < 0) errors.push('weekday must be a non-negative number (0-indexed day of week)');
@@ -300,11 +299,11 @@ export function getBuiltinPresetSeeds() {
   return [
     {
       id: DEFAULT_PRESET_ID,
-      label: localize('CALENDARIA.Preset.Default'),
+      label: _loc('CALENDARIA.Preset.Default'),
       color: '#4a9eff',
       icon: 'fas fa-calendar',
       defaults: {
-        name: localize('CALENDARIA.Note.NewNote'),
+        name: _loc('CALENDARIA.Note.NewNote'),
         visibility: 'visible',
         displayStyle: 'banner',
         reminderType: 'chat',
@@ -313,24 +312,24 @@ export function getBuiltinPresetSeeds() {
         defaultOwnership: 2
       }
     },
-    { id: 'quest', label: localize('CALENDARIA.Preset.Quest'), color: '#4a9eff', icon: 'fas fa-scroll', defaults: { displayStyle: 'icon' } },
+    { id: 'quest', label: _loc('CALENDARIA.Preset.Quest'), color: '#4a9eff', icon: 'fas fa-scroll', defaults: { displayStyle: 'icon' } },
     {
       id: 'session',
-      label: localize('CALENDARIA.Preset.Session'),
+      label: _loc('CALENDARIA.Preset.Session'),
       color: '#51cf66',
       icon: 'fas fa-users',
       defaults: {
         displayStyle: 'icon',
         allDay: true,
-        content: `<p><strong>${localize('CALENDARIA.Preset.SessionContent.Recap')}</strong></p><p></p><p><strong>${localize('CALENDARIA.Preset.SessionContent.KeyEvents')}</strong></p><p></p><p><strong>${localize('CALENDARIA.Preset.SessionContent.NPCsMet')}</strong></p><p></p><p><strong>${localize('CALENDARIA.Preset.SessionContent.LootRewards')}</strong></p><p></p><p><strong>${localize('CALENDARIA.Preset.SessionContent.NextSession')}</strong></p><p></p>`
+        content: `<p><strong>${_loc('CALENDARIA.Preset.SessionContent.Recap')}</strong></p><p></p><p><strong>${_loc('CALENDARIA.Preset.SessionContent.KeyEvents')}</strong></p><p></p><p><strong>${_loc('CALENDARIA.Preset.SessionContent.NPCsMet')}</strong></p><p></p><p><strong>${_loc('CALENDARIA.Preset.SessionContent.LootRewards')}</strong></p><p></p><p><strong>${_loc('CALENDARIA.Preset.SessionContent.NextSession')}</strong></p><p></p>`
       }
     },
-    { id: 'meeting', label: localize('CALENDARIA.Preset.Meeting'), color: '#845ef7', icon: 'fas fa-handshake', defaults: { reminderType: 'toast', reminderOffset: 1 } },
-    { id: 'birthday', label: localize('CALENDARIA.Preset.Birthday'), color: '#ff6b6b', icon: 'fas fa-cake-candles', defaults: { displayStyle: 'pip', allDay: true } },
-    { id: 'deadline', label: localize('CALENDARIA.Preset.Deadline'), color: '#f03e3e', icon: 'fas fa-hourglass-end', defaults: { reminderType: 'toast', reminderOffset: 24 } },
-    { id: 'reminder', label: localize('CALENDARIA.Reminder.Label'), color: '#fcc419', icon: 'fas fa-bell', defaults: { reminderType: 'toast', reminderOffset: 1 } },
-    { id: 'downtime', label: localize('CALENDARIA.Preset.Downtime'), color: '#74c0fc', icon: 'fas fa-couch', defaults: { duration: 7 } },
-    { id: 'lore', label: localize('CALENDARIA.Preset.Lore'), color: '#a9845b', icon: 'fas fa-book', defaults: { displayStyle: 'pip', allDay: true } }
+    { id: 'meeting', label: _loc('CALENDARIA.Preset.Meeting'), color: '#845ef7', icon: 'fas fa-handshake', defaults: { reminderType: 'toast', reminderOffset: 1 } },
+    { id: 'birthday', label: _loc('CALENDARIA.Preset.Birthday'), color: '#ff6b6b', icon: 'fas fa-cake-candles', defaults: { displayStyle: 'pip', allDay: true } },
+    { id: 'deadline', label: _loc('CALENDARIA.Preset.Deadline'), color: '#f03e3e', icon: 'fas fa-hourglass-end', defaults: { reminderType: 'toast', reminderOffset: 24 } },
+    { id: 'reminder', label: _loc('CALENDARIA.Reminder.Label'), color: '#fcc419', icon: 'fas fa-bell', defaults: { reminderType: 'toast', reminderOffset: 1 } },
+    { id: 'downtime', label: _loc('CALENDARIA.Preset.Downtime'), color: '#74c0fc', icon: 'fas fa-couch', defaults: { duration: 7 } },
+    { id: 'lore', label: _loc('CALENDARIA.Preset.Lore'), color: '#a9845b', icon: 'fas fa-book', defaults: { displayStyle: 'pip', allDay: true } }
   ];
 }
 

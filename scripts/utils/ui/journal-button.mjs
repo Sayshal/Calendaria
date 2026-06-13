@@ -1,6 +1,5 @@
 import { BigCal, Chronicle, HUD, MiniCal, Stopwatch, SunDial, TimeKeeper } from '../../applications/_module.mjs';
 import { MODULE, SETTINGS } from '../../constants.mjs';
-import { localize } from '../localization.mjs';
 import { canViewBigCal, canViewChronicle, canViewHUD, canViewMiniCal, canViewStopwatch, canViewSunDial, canViewTimeKeeper } from '../permissions.mjs';
 
 /**
@@ -41,7 +40,7 @@ function replaceFooter({ element }) {
     btn.type = 'button';
     btn.className = 'calendaria-footer-btn';
     btn.dataset.app = app.id;
-    btn.dataset.tooltip = localize(app.tooltip);
+    btn.dataset.tooltip = _loc(app.tooltip);
     btn.dataset.tooltipDirection = 'UP';
     btn.innerHTML = `<i class="fas ${app.icon}"></i>`;
     btn.addEventListener('click', app.toggle);

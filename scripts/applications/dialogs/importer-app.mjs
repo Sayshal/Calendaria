@@ -1,6 +1,6 @@
 import { TEMPLATES } from '../../constants.mjs';
 import { createImporter, getImporterOptions } from '../../importers/_module.mjs';
-import { format, localize, log } from '../../utils/_module.mjs';
+import { log } from '../../utils/_module.mjs';
 import { CalendarEditor } from '../_module.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -91,11 +91,11 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
         const steps = [];
         for (let i = 1; i <= 8; i++) {
           const key = `${base}.Step${i}`;
-          const text = localize(key);
+          const text = _loc(key);
           if (text && text !== key) steps.push(text);
         }
         context.importerInstructions = {
-          title: localize(`${base}.Title`),
+          title: _loc(`${base}.Title`),
           steps,
           macro: context.selectedImporter.exportMacro
         };
@@ -288,7 +288,7 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
       await this.#processData(data);
     } catch (error) {
       log(1, 'Error parsing file:', error);
-      this.#errorMessage = format('CALENDARIA.Importer.ParseError', { error: error.message });
+      this.#errorMessage = _loc('CALENDARIA.Importer.ParseError', { error: error.message });
       this.render();
     }
   }

@@ -1,7 +1,7 @@
 import { CalendarManager } from '../../calendar/_module.mjs';
 import { MODULE, SETTINGS, SOCKET_TYPES, TEMPLATES } from '../../constants.mjs';
 import { EventScheduler, ReminderScheduler, TimeTracker } from '../../time/_module.mjs';
-import { CalendariaSocket, formatForLocation, localize, log } from '../../utils/_module.mjs';
+import { CalendariaSocket, formatForLocation, log } from '../../utils/_module.mjs';
 import { CinematicOverlay } from '../_module.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -55,17 +55,17 @@ export class SetDateDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     const isMonthless = calendar?.isMonthless ?? false;
     context.year = displayYear;
     context.isMonthless = isMonthless;
-    context.months = isMonthless ? [] : (calendar?.monthsArray ?? []).map((m, i) => ({ index: i, name: localize(m.name), selected: i === components.month }));
+    context.months = isMonthless ? [] : (calendar?.monthsArray ?? []).map((m, i) => ({ index: i, name: _loc(m.name), selected: i === components.month }));
     if (isMonthless) {
       const daysInYear = calendar?.getDaysInYear?.(displayYear) ?? 365;
       context.days = Array.from({ length: daysInYear }, (_, i) => i + 1);
       context.currentDay = (components.dayOfMonth ?? 0) + 1;
-      context.dayLabel = localize('CALENDARIA.Condition.Field.dayOfYear');
+      context.dayLabel = _loc('CALENDARIA.Condition.Field.dayOfYear');
     } else {
       const daysInMonth = calendar?.getDaysInMonth?.(components.month, displayYear) ?? 30;
       context.days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
       context.currentDay = (components.dayOfMonth ?? 0) + 1;
-      context.dayLabel = localize('CALENDARIA.Common.Day');
+      context.dayLabel = _loc('CALENDARIA.Common.Day');
     }
     context.hour = components.hour ?? 0;
     context.minute = components.minute ?? 0;
@@ -200,7 +200,7 @@ export class SetDateDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     const components = game.time.components;
     const yearZero = calendar?.years?.yearZero ?? 0;
     const monthName = calendar?.monthsArray?.[components.month]?.name;
-    const defaultName = `${localize(monthName || 'Month')} ${(components.dayOfMonth ?? 0) + 1}, ${components.year + yearZero}`;
+    const defaultName = `${_loc(monthName || 'Month')} ${(components.dayOfMonth ?? 0) + 1}, ${components.year + yearZero}`;
     const newTimepoint = { id: foundry.utils.randomID(), name: defaultName, worldTime: game.time.worldTime, createdAt: Date.now() };
     timepoints.push(newTimepoint);
     await game.settings.set(MODULE.ID, SETTINGS.SAVED_TIMEPOINTS, timepoints);

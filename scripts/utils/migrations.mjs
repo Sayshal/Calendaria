@@ -392,7 +392,7 @@ async function migrateNoteVisibility() {
       if (source.visibility) continue;
       if (source.gmOnly === undefined) continue;
       const visibility = source.gmOnly ? 'hidden' : 'visible';
-      await page.update({ 'system.visibility': visibility, 'system.-=gmOnly': null });
+      await page.update({ 'system.visibility': visibility, 'system.gmOnly': _del });
       migrated++;
     }
   }
@@ -472,7 +472,7 @@ async function migrateLimitedRepeatRemoval() {
       if (page.type !== 'calendaria.calendarnote') continue;
       const source = page.toObject().system;
       if (source.limitedRepeat === undefined && source.limitedRepeatDays === undefined) continue;
-      await page.update({ 'system.-=limitedRepeat': null, 'system.-=limitedRepeatDays': null });
+      await page.update({ 'system.limitedRepeat': _del, 'system.limitedRepeatDays': _del });
       migrated++;
     }
   }

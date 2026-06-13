@@ -2,7 +2,7 @@ import { CalendarManager } from '../calendar/_module.mjs';
 import { ASSETS } from '../constants.mjs';
 import { FestivalManager } from '../festivals/_module.mjs';
 import { NoteManager, addCustomPreset, getAllPresets } from '../notes/_module.mjs';
-import { localize, log } from '../utils/_module.mjs';
+import { log } from '../utils/_module.mjs';
 import BaseImporter from './base-importer.mjs';
 
 /** Both module IDs to support original SC and SC Reborn. */
@@ -74,9 +74,9 @@ export default class SimpleCalendarImporter extends BaseImporter {
    * @returns {Promise<object>} Raw SC calendar data
    */
   async loadFromModule() {
-    if (!this.constructor.detect()) throw new Error(localize('CALENDARIA.Importer.SimpleCalendar.NotInstalled'));
+    if (!this.constructor.detect()) throw new Error(_loc('CALENDARIA.Importer.SimpleCalendar.NotInstalled'));
     const calendars = SimpleCalendarImporter.#getSetting('calendar-configuration') || [];
-    if (!calendars.length) throw new Error(localize('CALENDARIA.Importer.SimpleCalendar.NoCalendars'));
+    if (!calendars.length) throw new Error(_loc('CALENDARIA.Importer.SimpleCalendar.NoCalendars'));
     const notesFolder = game.folders.find((f) => {
       for (const id of SC_MODULE_IDS) {
         if (f.getFlag(id, 'root') === true) return true;
@@ -259,8 +259,8 @@ export default class SimpleCalendarImporter extends BaseImporter {
       eras: this.#transformEras(calendar.year),
       daylight: this.#transformDaylight(calendar.seasons),
       metadata: {
-        description: localize('CALENDARIA.Importer.ImportedFrom.SimpleCalendar'),
-        system: calendar.name || localize('CALENDARIA.Common.Unknown'),
+        description: _loc('CALENDARIA.Importer.ImportedFrom.SimpleCalendar'),
+        system: calendar.name || _loc('CALENDARIA.Common.Unknown'),
         importedFrom: 'simple-calendar',
         originalId: calendar.id
       }

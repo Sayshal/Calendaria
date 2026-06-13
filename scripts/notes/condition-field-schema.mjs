@@ -1,5 +1,4 @@
 import { CONDITION_FIELDS, CONDITION_OPERATORS, MOON_PHASE_LABELS } from '../constants.mjs';
-import { localize } from '../utils/localization.mjs';
 import { WeatherManager } from '../weather/_module.mjs';
 import { NoteManager } from './_module.mjs';
 
@@ -79,7 +78,7 @@ const FIELD_REGISTRY = {
     operators: COMPARE_OPS,
     category: 'date',
     label: 'CALENDARIA.Common.Month',
-    getOptions: (cal) => (cal?.monthsArray ?? []).map((m, i) => ({ value: i + 1, label: localize(m.name) }))
+    getOptions: (cal) => (cal?.monthsArray ?? []).map((m, i) => ({ value: i + 1, label: _loc(m.name) }))
   },
   [CONDITION_FIELDS.DAY]: {
     inputType: 'number',
@@ -104,7 +103,7 @@ const FIELD_REGISTRY = {
     operators: COMPARE_OPS,
     category: 'weekday',
     label: 'CALENDARIA.Common.Weekday',
-    getOptions: (cal) => (cal?.weekdaysArray ?? []).map((d, i) => ({ value: i + 1, label: localize(d.name) }))
+    getOptions: (cal) => (cal?.weekdaysArray ?? []).map((d, i) => ({ value: i + 1, label: _loc(d.name) }))
   },
   [CONDITION_FIELDS.WEEK_NUMBER_IN_MONTH]: {
     inputType: 'number',
@@ -153,7 +152,7 @@ const FIELD_REGISTRY = {
     operators: EQUALITY_OPS,
     category: 'season',
     label: 'CALENDARIA.Common.Season',
-    getOptions: (cal) => (cal?.seasonsArray ?? []).map((s, i) => ({ value: i + 1, label: localize(s.name) })),
+    getOptions: (cal) => (cal?.seasonsArray ?? []).map((s, i) => ({ value: i + 1, label: _loc(s.name) })),
     available: (cal) => (cal?.seasonsArray?.length ?? 0) > 0
   },
   [CONDITION_FIELDS.SEASON_PERCENT]: {
@@ -208,8 +207,8 @@ const FIELD_REGISTRY = {
     value2Hint: 'CALENDARIA.Condition.Builder.Tooltip.MoonSelect',
     value2Type: 'number',
     value2Semantic: 'moonIndex',
-    getOptions: () => MOON_PHASE_LABELS.map((name, i) => ({ value: i, label: localize(name) })),
-    getValue2Options: (cal) => (cal?.moonsArray ?? []).map((m, i) => ({ value: i, label: localize(m.name) })),
+    getOptions: () => MOON_PHASE_LABELS.map((name, i) => ({ value: i, label: _loc(name) })),
+    getValue2Options: (cal) => (cal?.moonsArray ?? []).map((m, i) => ({ value: i, label: _loc(m.name) })),
     available: (cal) => (cal?.moonsArray?.length ?? 0) > 0
   },
   [CONDITION_FIELDS.MOON_PHASE]: {
@@ -222,7 +221,7 @@ const FIELD_REGISTRY = {
     value2Hint: 'CALENDARIA.Condition.Builder.Tooltip.MoonSelect',
     value2Type: 'number',
     value2Semantic: 'moonIndex',
-    getValue2Options: (cal) => (cal?.moonsArray ?? []).map((m, i) => ({ value: i, label: localize(m.name) })),
+    getValue2Options: (cal) => (cal?.moonsArray ?? []).map((m, i) => ({ value: i, label: _loc(m.name) })),
     available: (cal) => (cal?.moonsArray?.length ?? 0) > 0
   },
   [CONDITION_FIELDS.MOON_PHASE_COUNT_MONTH]: {
@@ -235,7 +234,7 @@ const FIELD_REGISTRY = {
     value2Hint: 'CALENDARIA.Condition.Builder.Tooltip.MoonSelect',
     value2Type: 'number',
     value2Semantic: 'moonIndex',
-    getValue2Options: (cal) => (cal?.moonsArray ?? []).map((m, i) => ({ value: i, label: localize(m.name) })),
+    getValue2Options: (cal) => (cal?.moonsArray ?? []).map((m, i) => ({ value: i, label: _loc(m.name) })),
     available: (cal) => (cal?.moonsArray?.length ?? 0) > 0
   },
   [CONDITION_FIELDS.MOON_PHASE_COUNT_YEAR]: {
@@ -248,7 +247,7 @@ const FIELD_REGISTRY = {
     value2Hint: 'CALENDARIA.Condition.Builder.Tooltip.MoonSelect',
     value2Type: 'number',
     value2Semantic: 'moonIndex',
-    getValue2Options: (cal) => (cal?.moonsArray ?? []).map((m, i) => ({ value: i, label: localize(m.name) })),
+    getValue2Options: (cal) => (cal?.moonsArray ?? []).map((m, i) => ({ value: i, label: _loc(m.name) })),
     available: (cal) => (cal?.moonsArray?.length ?? 0) > 0
   },
   [CONDITION_FIELDS.MOON_PHASE_COUNT_EPOCH]: {
@@ -261,7 +260,7 @@ const FIELD_REGISTRY = {
     value2Hint: 'CALENDARIA.Condition.Builder.Tooltip.MoonSelect',
     value2Type: 'number',
     value2Semantic: 'moonIndex',
-    getValue2Options: (cal) => (cal?.moonsArray ?? []).map((m, i) => ({ value: i, label: localize(m.name) })),
+    getValue2Options: (cal) => (cal?.moonsArray ?? []).map((m, i) => ({ value: i, label: _loc(m.name) })),
     available: (cal) => (cal?.moonsArray?.length ?? 0) > 0
   },
   [CONDITION_FIELDS.MOON_SUB_PHASE]: {
@@ -275,11 +274,11 @@ const FIELD_REGISTRY = {
     value2Type: 'number',
     value2Semantic: 'moonIndex',
     getOptions: () => [
-      { value: 1, label: localize('CALENDARIA.Common.Rising') },
-      { value: 2, label: localize('CALENDARIA.Condition.MoonSubPhase.True') },
-      { value: 3, label: localize('CALENDARIA.Common.Fading') }
+      { value: 1, label: _loc('CALENDARIA.Common.Rising') },
+      { value: 2, label: _loc('CALENDARIA.Condition.MoonSubPhase.True') },
+      { value: 3, label: _loc('CALENDARIA.Common.Fading') }
     ],
-    getValue2Options: (cal) => (cal?.moonsArray ?? []).map((m, i) => ({ value: i, label: localize(m.name) })),
+    getValue2Options: (cal) => (cal?.moonsArray ?? []).map((m, i) => ({ value: i, label: _loc(m.name) })),
     available: (cal) => (cal?.moonsArray?.length ?? 0) > 0
   },
   [CONDITION_FIELDS.CYCLE]: {
@@ -299,9 +298,9 @@ const FIELD_REGISTRY = {
       if (typeof value2 === 'string' && cycles[value2]) cycle = cycles[value2];
       else if (typeof value2 === 'number') cycle = cyclesArr[value2] ?? null;
       else cycle = cyclesArr[0] ?? null;
-      return Object.entries(cycle?.stages ?? {}).map(([id, s]) => ({ value: id, label: localize(s.name ?? id) }));
+      return Object.entries(cycle?.stages ?? {}).map(([id, s]) => ({ value: id, label: _loc(s.name ?? id) }));
     },
-    getValue2Options: (cal) => Object.entries(cal?.cycles ?? {}).map(([id, c]) => ({ value: id, label: localize(c.name) })),
+    getValue2Options: (cal) => Object.entries(cal?.cycles ?? {}).map(([id, c]) => ({ value: id, label: _loc(c.name) })),
     available: (cal) => (cal?.cyclesArray?.length ?? 0) > 0
   },
   [CONDITION_FIELDS.ERA]: {
@@ -309,7 +308,7 @@ const FIELD_REGISTRY = {
     operators: EQUALITY_OPS,
     category: 'era',
     label: 'CALENDARIA.Common.Era',
-    getOptions: (cal) => (cal?.erasArray ?? []).map((e, i) => ({ value: i + 1, label: localize(e.name) })),
+    getOptions: (cal) => (cal?.erasArray ?? []).map((e, i) => ({ value: i + 1, label: _loc(e.name) })),
     available: (cal) => (cal?.erasArray?.length ?? 0) > 0
   },
   [CONDITION_FIELDS.ERA_YEAR]: {
@@ -337,19 +336,19 @@ const FIELD_REGISTRY = {
     category: 'other',
     label: 'CALENDARIA.Condition.Field.eclipse',
     getOptions: () => [
-      { value: 'totalSolar', label: localize('CALENDARIA.Eclipse.TotalSolar') },
-      { value: 'partialSolar', label: localize('CALENDARIA.Eclipse.PartialSolar') },
-      { value: 'annularSolar', label: localize('CALENDARIA.Eclipse.AnnularSolar') },
-      { value: 'totalLunar', label: localize('CALENDARIA.Eclipse.TotalLunar') },
-      { value: 'partialLunar', label: localize('CALENDARIA.Eclipse.PartialLunar') },
-      { value: 'penumbralLunar', label: localize('CALENDARIA.Eclipse.PenumbralLunar') }
+      { value: 'totalSolar', label: _loc('CALENDARIA.Eclipse.TotalSolar') },
+      { value: 'partialSolar', label: _loc('CALENDARIA.Eclipse.PartialSolar') },
+      { value: 'annularSolar', label: _loc('CALENDARIA.Eclipse.AnnularSolar') },
+      { value: 'totalLunar', label: _loc('CALENDARIA.Eclipse.TotalLunar') },
+      { value: 'partialLunar', label: _loc('CALENDARIA.Eclipse.PartialLunar') },
+      { value: 'penumbralLunar', label: _loc('CALENDARIA.Eclipse.PenumbralLunar') }
     ],
     needsValue2: true,
     value2Label: 'CALENDARIA.Common.Moon',
     value2Hint: 'CALENDARIA.Condition.Builder.Tooltip.MoonSelect',
     value2Type: 'number',
     value2Semantic: 'moonIndex',
-    getValue2Options: (cal) => (cal?.moonsArray ?? []).map((m, i) => ({ value: i, label: localize(m.name) })),
+    getValue2Options: (cal) => (cal?.moonsArray ?? []).map((m, i) => ({ value: i, label: _loc(m.name) })),
     available: (cal) => (cal?.moonsArray ?? []).some((m) => m.eclipseMode && m.eclipseMode !== 'never')
   },
   [CONDITION_FIELDS.IS_ECLIPSE]: {
@@ -414,7 +413,7 @@ const FIELD_REGISTRY = {
     getValue2Options: () => {
       const zones = WeatherManager.getCalendarZones();
       if (zones.length <= 1) return [];
-      return zones.map((z) => ({ value: z.id, label: localize(z.name ?? z.id) }));
+      return zones.map((z) => ({ value: z.id, label: _loc(z.name ?? z.id) }));
     },
     available: () => {
       const presets = game.settings?.get?.('calendaria', 'customWeatherPresets') ?? {};
@@ -466,9 +465,9 @@ export function getGroupedFieldOptions(calendar) {
       if (schema.category !== category) continue;
       if (schema.inputType === 'special') continue;
       if (schema.available && !schema.available(calendar)) continue;
-      options.push({ value: fieldId, label: localize(schema.label) });
+      options.push({ value: fieldId, label: _loc(schema.label) });
     }
-    if (options.length) groups.push({ label: localize(CATEGORY_LABELS[category]), options });
+    if (options.length) groups.push({ label: _loc(CATEGORY_LABELS[category]), options });
   }
   return groups;
 }
@@ -481,7 +480,7 @@ export function getGroupedFieldOptions(calendar) {
 export function getOperatorOptions(fieldId) {
   const schema = FIELD_REGISTRY[fieldId];
   if (!schema) return [];
-  return schema.operators.map((op) => ({ value: op, label: localize(OPERATOR_LABELS[op] ?? op) }));
+  return schema.operators.map((op) => ({ value: op, label: _loc(OPERATOR_LABELS[op] ?? op) }));
 }
 
 /**

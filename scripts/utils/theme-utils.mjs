@@ -790,7 +790,7 @@ export function getColorsForTheme(key) {
  */
 export function createCustomTheme(basePresetKey) {
   const themes = getCustomThemes();
-  const presetName = THEME_PRESETS[basePresetKey] ? game.i18n.localize(THEME_PRESETS[basePresetKey].name) : basePresetKey;
+  const presetName = THEME_PRESETS[basePresetKey] ? _loc(THEME_PRESETS[basePresetKey].name) : basePresetKey;
   let n = 1;
   const prefix = `custom_${basePresetKey}_`;
   while (themes[`${prefix}${n}`]) n++;

@@ -3,7 +3,7 @@ import { MODULE, SETTINGS } from './constants.mjs';
 import { syncWeatherToScene } from './integrations/fxmaster.mjs';
 import { invalidatePresetCache } from './notes/_module.mjs';
 import { refreshEnvironmentLighting } from './time/darkness.mjs';
-import { hideDebugZones, initializeTheme, localize, log, showDebugZones } from './utils/_module.mjs';
+import { hideDebugZones, initializeTheme, log, showDebugZones } from './utils/_module.mjs';
 import { invalidateCache as invalidateFogCache } from './utils/fog-of-war.mjs';
 import { FRAMEWORK_INITIAL_DISPLAY_FORMATS } from './utils/formatting/format-utils.mjs';
 
@@ -1560,7 +1560,7 @@ export default class CalendariaSettings {
               acc[user.id] = user.name;
               return acc;
             },
-            { '': localize('CALENDARIA.Settings.PrimaryGM.Auto') }
+            { '': _loc('CALENDARIA.Settings.PrimaryGM.Auto') }
           ),
         initial: ''
       })

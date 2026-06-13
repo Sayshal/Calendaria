@@ -296,7 +296,7 @@ export default class CinematicOverlay {
           <div class="cinematic-progress-bar"><div class="cinematic-progress-fill"></div></div>
           <div class="cinematic-controls">
             <button class="cinematic-skip" type="button">
-              <i class="fas fa-forward"></i> ${game.i18n.localize('CALENDARIA.Common.Skip')}
+              <i class="fas fa-forward"></i> ${_loc('CALENDARIA.Common.Skip')}
             </button>
           </div>
         </div>

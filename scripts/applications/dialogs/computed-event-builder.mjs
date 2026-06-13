@@ -1,6 +1,5 @@
 import { CalendarManager } from '../../calendar/_module.mjs';
 import { TEMPLATES } from '../../constants.mjs';
-import { localize } from '../../utils/_module.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -52,24 +51,24 @@ export class ComputedEventBuilder extends HandlebarsApplicationMixin(Application
     const weekdays = calendar?.weekdaysArray ?? [];
     const seasons = calendar?.seasonsArray ?? [];
     const anchorTypes = [
-      { value: 'springEquinox', label: localize('CALENDARIA.Recurrence.SpringEquinox') },
-      { value: 'summerSolstice', label: localize('CALENDARIA.Recurrence.SummerSolstice') },
-      { value: 'autumnEquinox', label: localize('CALENDARIA.Recurrence.AutumnEquinox') },
-      { value: 'winterSolstice', label: localize('CALENDARIA.Recurrence.WinterSolstice') }
+      { value: 'springEquinox', label: _loc('CALENDARIA.Recurrence.SpringEquinox') },
+      { value: 'summerSolstice', label: _loc('CALENDARIA.Recurrence.SummerSolstice') },
+      { value: 'autumnEquinox', label: _loc('CALENDARIA.Recurrence.AutumnEquinox') },
+      { value: 'winterSolstice', label: _loc('CALENDARIA.Recurrence.WinterSolstice') }
     ];
     seasons.forEach((s, i) => {
-      anchorTypes.push({ value: `seasonStart:${i}`, label: `${localize(s.name)} Start` });
-      anchorTypes.push({ value: `seasonEnd:${i}`, label: `${localize(s.name)} End` });
+      anchorTypes.push({ value: `seasonStart:${i}`, label: `${_loc(s.name)} Start` });
+      anchorTypes.push({ value: `seasonEnd:${i}`, label: `${_loc(s.name)} End` });
     });
     const stepTypes = [
-      { value: 'anchor', label: localize('CALENDARIA.Note.ComputedAnchor') },
-      { value: 'firstAfter', label: localize('CALENDARIA.Note.ComputedFirstAfter') },
-      { value: 'daysAfter', label: localize('CALENDARIA.Note.ComputedDaysAfter') },
-      { value: 'weekdayOnOrAfter', label: localize('CALENDARIA.Note.ComputedWeekdayOnOrAfter') }
+      { value: 'anchor', label: _loc('CALENDARIA.Note.ComputedAnchor') },
+      { value: 'firstAfter', label: _loc('CALENDARIA.Note.ComputedFirstAfter') },
+      { value: 'daysAfter', label: _loc('CALENDARIA.Note.ComputedDaysAfter') },
+      { value: 'weekdayOnOrAfter', label: _loc('CALENDARIA.Note.ComputedWeekdayOnOrAfter') }
     ];
     const conditionTypes = [
-      { value: 'moonPhase', label: localize('CALENDARIA.Common.MoonPhase') },
-      { value: 'weekday', label: localize('CALENDARIA.Common.Weekday') }
+      { value: 'moonPhase', label: _loc('CALENDARIA.Common.MoonPhase') },
+      { value: 'weekday', label: _loc('CALENDARIA.Common.Weekday') }
     ];
     const moonPhases = ['new', 'waxingCrescent', 'firstQuarter', 'waxingGibbous', 'full', 'waningGibbous', 'lastQuarter', 'waningCrescent'];
     const chain = this.#config.chain.map((step, idx) => ({
@@ -91,12 +90,12 @@ export class ComputedEventBuilder extends HandlebarsApplicationMixin(Application
       stepTypes,
       conditionTypes,
       moonPhases,
-      moons: moons.map((m, i) => ({ index: i, name: localize(m.name) })),
-      weekdays: weekdays.map((d, i) => ({ index: i, name: localize(d.name) })),
-      months: (calendar?.monthsArray ?? []).map((m, i) => ({ index: i, name: localize(m.name) })),
+      moons: moons.map((m, i) => ({ index: i, name: _loc(m.name) })),
+      weekdays: weekdays.map((d, i) => ({ index: i, name: _loc(d.name) })),
+      months: (calendar?.monthsArray ?? []).map((m, i) => ({ index: i, name: _loc(m.name) })),
       hasChain: chain.length > 0,
       hasOverrides: overrides.length > 0,
-      helpText: localize('CALENDARIA.Note.ComputedHelp')
+      helpText: _loc('CALENDARIA.Note.ComputedHelp')
     };
   }
 

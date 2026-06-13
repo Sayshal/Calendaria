@@ -1,7 +1,6 @@
 import { findFestivalDay as findFestivalDayViaNotes, getLeapYearDescription, intersectsYear, parseInterval, parsePattern } from '../calendar/_module.mjs';
 import { DEFAULT_MOON_PHASES } from '../constants.mjs';
 import { NoteManager } from '../notes/_module.mjs';
-import { format, localize } from '../utils/_module.mjs';
 import { resolveRandomizedPhase } from './_module.mjs';
 
 const { ArrayField, BooleanField, NumberField, SchemaField, StringField, TypedObjectField } = foundry.data.fields;
@@ -1452,16 +1451,16 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    */
   static #getSubPhaseName(phase, dayWithinPhase, phaseDuration) {
     const phaseName = phase.name;
-    if (phaseDuration <= 1) return localize(phaseName);
+    if (phaseDuration <= 1) return _loc(phaseName);
     const third = phaseDuration / 3;
     if (dayWithinPhase < third) {
-      if (phase.rising) return localize(phase.rising);
-      return format('CALENDARIA.MoonPhase.SubPhase.Rising', { phase: localize(phaseName) });
+      if (phase.rising) return _loc(phase.rising);
+      return _loc('CALENDARIA.MoonPhase.SubPhase.Rising', { phase: _loc(phaseName) });
     } else if (dayWithinPhase >= phaseDuration - third) {
-      if (phase.fading) return localize(phase.fading);
-      return format('CALENDARIA.MoonPhase.SubPhase.Fading', { phase: localize(phaseName) });
+      if (phase.fading) return _loc(phase.fading);
+      return _loc('CALENDARIA.MoonPhase.SubPhase.Fading', { phase: _loc(phaseName) });
     }
-    return localize(phaseName);
+    return _loc(phaseName);
   }
 
   /**
@@ -1594,8 +1593,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       }
     }
     if (!entry) return null;
-    const weekName = localize(entry.name);
-    const weekAbbr = entry.abbreviation ? localize(entry.abbreviation) : weekName.slice(0, 3);
+    const weekName = _loc(entry.name);
+    const weekAbbr = entry.abbreviation ? _loc(entry.abbreviation) : weekName.slice(0, 3);
     return { weekName, weekAbbr, weekNumber, index: weekNumber - 1 };
   }
 
@@ -1676,7 +1675,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       if (stageIndex < 0) stageIndex += stages.length;
       const stage = stages[stageIndex];
       values.push({ cycleName: cycle.name, entryName: stage?.name ?? '', index: stageIndex });
-      textReplacements[(i + 1).toString()] = localize(stage?.name ?? '');
+      textReplacements[(i + 1).toString()] = _loc(stage?.name ?? '');
     }
     let text = this.cycleFormat || '';
     for (const [key, value] of Object.entries(textReplacements)) text = text.replace(new RegExp(`\\[${key}\\]`, 'g'), value);

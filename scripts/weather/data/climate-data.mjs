@@ -1,5 +1,4 @@
 import { MODULE, SETTINGS } from '../../constants.mjs';
-import { localize } from '../../utils/_module.mjs';
 import { ALL_PRESETS } from './weather-presets.mjs';
 
 /**
@@ -278,7 +277,7 @@ export function getDefaultZoneConfig(templateId, seasonNames = ['CALENDARIA.Seas
   return {
     id: template.id,
     name: template.name,
-    description: localize(template.description) ?? '',
+    description: _loc(template.description) ?? '',
     brightnessMultiplier: template.brightnessMultiplier ?? 1.0,
     environmentBase: template.environmentBase ?? null,
     environmentDark: template.environmentDark ?? null,
@@ -318,7 +317,7 @@ export function getClimateTemplateOptions() {
   const templates = Object.values(CLIMATE_ZONE_TEMPLATES)
     .map((t) => ({ value: t.id, label: t.name }))
     .sort((a, b) => a.label.localeCompare(b.label));
-  return [{ value: 'custom', label: localize('CALENDARIA.Weather.Climate.Custom') }, ...templates];
+  return [{ value: 'custom', label: _loc('CALENDARIA.Weather.Climate.Custom') }, ...templates];
 }
 
 /**
@@ -334,7 +333,7 @@ export function getBlankZoneConfig(seasonNames = []) {
   }
   return {
     id: 'custom',
-    name: localize('CALENDARIA.Weather.Climate.Custom'),
+    name: _loc('CALENDARIA.Weather.Climate.Custom'),
     description: '',
     brightnessMultiplier: 1.0,
     environmentBase: null,

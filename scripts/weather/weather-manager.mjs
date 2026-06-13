@@ -1,7 +1,6 @@
 import { isBundledCalendar } from '../calendar/calendar-loader.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import { COMPASS_DIRECTIONS, HOOKS, MODULE, SCENE_FLAGS, SETTINGS, WEATHER_PERIODS, WIND_SPEEDS } from '../constants.mjs';
-import { format, localize } from '../utils/localization.mjs';
 import { log } from '../utils/logger.mjs';
 import { executeMacroById } from '../utils/macro-utils.mjs';
 import { canChangeWeather } from '../utils/permissions.mjs';
@@ -232,7 +231,7 @@ export default class WeatherManager {
     }
     const overrides = (game.settings.get(MODULE.ID, SETTINGS.WEATHER_VISUAL_OVERRIDES) || {})[presetId];
     if (overrides?.label) return overrides.label;
-    return localize(fallbackLabel);
+    return _loc(fallbackLabel);
   }
 
   /**
@@ -343,7 +342,7 @@ export default class WeatherManager {
     const preset = getPreset(presetId, customPresets);
     if (!preset) {
       log(2, `Weather preset not found: ${presetId}`);
-      ui.notifications.warn(format('CALENDARIA.Weather.Error.PresetNotFound', { id: presetId }));
+      ui.notifications.warn(_loc('CALENDARIA.Weather.Error.PresetNotFound', { id: presetId }));
       return this.getCurrentWeather(zoneId);
     }
     const temperature = options.temperature ?? this.#generateTemperatureForPreset(presetId);
@@ -984,7 +983,7 @@ export default class WeatherManager {
         const planEntry = zonePlan[f.year]?.[f.month]?.[f.dayOfMonth];
         const entry = planEntry ?? {
           id: f.preset.id,
-          label: localize(f.preset.label),
+          label: _loc(f.preset.label),
           icon: f.preset.icon,
           color: f.preset.color,
           category: f.preset.category,
@@ -997,7 +996,7 @@ export default class WeatherManager {
         history[f.year][f.month][f.dayOfMonth] ??= {};
         history[f.year][f.month][f.dayOfMonth][zone.id] = {
           id: entry.id,
-          label: planEntry ? entry.label : localize(f.preset.label),
+          label: planEntry ? entry.label : _loc(f.preset.label),
           icon: entry.icon,
           color: entry.color,
           category: entry.category,
@@ -1081,7 +1080,7 @@ export default class WeatherManager {
     history[year][month][dayOfMonth] ??= {};
     history[year][month][dayOfMonth][zoneId] = {
       id: weather.id,
-      label: localize(weather.label),
+      label: _loc(weather.label),
       icon: weather.icon,
       color: weather.color,
       category: weather.category,
@@ -1113,7 +1112,7 @@ export default class WeatherManager {
     history[year][month][dayOfMonth] ??= {};
     history[year][month][dayOfMonth][resolvedZoneId] = {
       id: weather.id,
-      label: localize(weather.label),
+      label: _loc(weather.label),
       icon: weather.icon,
       color: weather.color,
       category: weather.category,
@@ -1814,7 +1813,7 @@ export default class WeatherManager {
     const customPresets = this.getCustomPresets();
     if (customPresets.some((p) => p.id === preset.id) || ALL_PRESETS.some((p) => p.id === preset.id)) {
       log(2, `Weather preset ID already exists: ${preset.id}`);
-      ui.notifications.warn(format('CALENDARIA.Weather.Error.DuplicateId', { id: preset.id }));
+      ui.notifications.warn(_loc('CALENDARIA.Weather.Error.DuplicateId', { id: preset.id }));
       return null;
     }
     const newPreset = {
@@ -1936,8 +1935,8 @@ export default class WeatherManager {
   static formatWindSpeed(kph) {
     if (kph == null) return '';
     const unit = game.settings.get(MODULE.ID, SETTINGS.WIND_SPEED_UNIT);
-    if (unit === 'mph') return `${Math.round(kph * 0.621371)} ${localize('CALENDARIA.Settings.WindSpeedUnit.MphAbbr')}`;
-    return `${Math.round(kph)} ${localize('CALENDARIA.Settings.WindSpeedUnit.KphAbbr')}`;
+    if (unit === 'mph') return `${Math.round(kph * 0.621371)} ${_loc('CALENDARIA.Settings.WindSpeedUnit.MphAbbr')}`;
+    return `${Math.round(kph)} ${_loc('CALENDARIA.Settings.WindSpeedUnit.KphAbbr')}`;
   }
 
   /**
@@ -1948,8 +1947,8 @@ export default class WeatherManager {
   static formatPrecipitation(mmhr) {
     if (mmhr == null || mmhr === 0) return '';
     const unit = game.settings.get(MODULE.ID, SETTINGS.PRECIPITATION_UNIT);
-    if (unit === 'imperial') return `${(mmhr * 0.03937).toFixed(2)} ${localize('CALENDARIA.Settings.PrecipitationUnit.ImperialAbbr')}`;
-    return `${mmhr.toFixed(1)} ${localize('CALENDARIA.Settings.PrecipitationUnit.MetricAbbr')}`;
+    if (unit === 'imperial') return `${(mmhr * 0.03937).toFixed(2)} ${_loc('CALENDARIA.Settings.PrecipitationUnit.ImperialAbbr')}`;
+    return `${mmhr.toFixed(1)} ${_loc('CALENDARIA.Settings.PrecipitationUnit.MetricAbbr')}`;
   }
 
   /**
@@ -1960,7 +1959,7 @@ export default class WeatherManager {
   static getWindSpeedLabel(speed) {
     if (speed == null) return '';
     const entry = Object.values(WIND_SPEEDS).find((w) => w.value === speed);
-    return entry ? localize(entry.label) : '';
+    return entry ? _loc(entry.label) : '';
   }
 
   /**
@@ -2001,7 +2000,7 @@ export default class WeatherManager {
         closest = [id, deg];
       }
     }
-    return localize(`CALENDARIA.Wind.${closest[0]}`);
+    return _loc(`CALENDARIA.Wind.${closest[0]}`);
   }
 
   /**
@@ -2037,12 +2036,12 @@ export default class WeatherManager {
       const ch = zoneOverridePreset.chance;
       zoneVal = typeof ch === 'string' && /[+-]$/.test(ch) ? ch : (ch ?? 0);
     }
-    const sLabel = localize('CALENDARIA.WeatherProbability.SeasonBase');
-    const zLabel = localize('CALENDARIA.WeatherProbability.ZoneOverride');
-    const eLabel = localize('CALENDARIA.WeatherProbability.Effective');
+    const sLabel = _loc('CALENDARIA.WeatherProbability.SeasonBase');
+    const zLabel = _loc('CALENDARIA.WeatherProbability.ZoneOverride');
+    const eLabel = _loc('CALENDARIA.WeatherProbability.Effective');
     const weightTooltip = `<p>${sLabel}: <strong>${seasonVal}</strong></p>` + `<p>${zLabel}: <strong>${zoneVal}</strong></p>` + `<p>${eLabel}: <strong>${weight}</strong></p>`;
     const percent = totalWeight > 0 ? Math.round((weight / totalWeight) * 1000) / 10 : 0;
-    const percentTooltip = `<p>${weight} / ${totalWeight}</p>` + `<p><strong>${percent}%</strong> ${localize('CALENDARIA.WeatherProbability.Likely')}</p>`;
+    const percentTooltip = `<p>${weight} / ${totalWeight}</p>` + `<p><strong>${percent}%</strong> ${_loc('CALENDARIA.WeatherProbability.Likely')}</p>`;
     return { weightTooltip, percentTooltip };
   }
 
@@ -2061,7 +2060,7 @@ export default class WeatherManager {
     const seasons = calendar?.seasonsArray ?? [];
     let resolvedSeason = season;
     if (resolvedSeason) {
-      const match = seasons.find((s) => localize(s.name).toLowerCase() === resolvedSeason.toLowerCase());
+      const match = seasons.find((s) => _loc(s.name).toLowerCase() === resolvedSeason.toLowerCase());
       if (match) resolvedSeason = match.name;
       else resolvedSeason = seasonData?.name ?? null;
     } else {
@@ -2089,8 +2088,8 @@ export default class WeatherManager {
       })
       .sort((a, b) => b.percent - a.percent);
     return {
-      zone: isNoZone ? { id: 'none', name: localize('CALENDARIA.Weather.Picker.NoZone') } : { id: zone.id, name: zone.name ? localize(zone.name) : zone.id },
-      season: resolvedSeason ? localize(resolvedSeason) : null,
+      zone: isNoZone ? { id: 'none', name: _loc('CALENDARIA.Weather.Picker.NoZone') } : { id: zone.id, name: zone.name ? _loc(zone.name) : zone.id },
+      season: resolvedSeason ? _loc(resolvedSeason) : null,
       entries,
       tempRange
     };
@@ -2155,7 +2154,7 @@ export default class WeatherManager {
       rows.push(`<div class="row"><i class="fas fa-wind"></i> ${esc(windLabel)}${dirLabel ? ` ${esc(dirLabel)}` : ''} · ${esc(windFormatted)}</div>`);
     }
     if (precipType) {
-      const precipLabel = localize(`CALENDARIA.Weather.Precipitation.${precipType.charAt(0).toUpperCase() + precipType.slice(1)}`);
+      const precipLabel = _loc(`CALENDARIA.Weather.Precipitation.${precipType.charAt(0).toUpperCase() + precipType.slice(1)}`);
       const rate = this.formatPrecipitation((precipIntensity ?? 0) * 10);
       rows.push(`<div class="row"><i class="fas fa-droplet"></i> ${esc(precipLabel)}${rate ? ` · ${esc(rate)}` : ''}</div>`);
     }
@@ -2185,7 +2184,7 @@ export default class WeatherManager {
       rows.push(`<div class="row"><i class="fas fa-wind"></i> ${esc(windLabel)}${dirLabel ? ` ${esc(dirLabel)}` : ''} · ${esc(windFormatted)}</div>`);
     }
     if (mainTooltipArgs.precipType) {
-      const precipLabel = localize(`CALENDARIA.Weather.Precipitation.${mainTooltipArgs.precipType.charAt(0).toUpperCase() + mainTooltipArgs.precipType.slice(1)}`);
+      const precipLabel = _loc(`CALENDARIA.Weather.Precipitation.${mainTooltipArgs.precipType.charAt(0).toUpperCase() + mainTooltipArgs.precipType.slice(1)}`);
       const rate = this.formatPrecipitation((mainTooltipArgs.precipIntensity ?? 0) * 10);
       rows.push(`<div class="row"><i class="fas fa-droplet"></i> ${esc(precipLabel)}${rate ? ` · ${esc(rate)}` : ''}</div>`);
     }
@@ -2193,10 +2192,10 @@ export default class WeatherManager {
     for (const period of Object.values(WEATHER_PERIODS)) {
       const pw = periods[period.id];
       if (!pw) continue;
-      const pLabel = localize(pw.preset?.label ?? pw.label ?? pw.id);
+      const pLabel = _loc(pw.preset?.label ?? pw.label ?? pw.id);
       const pTemp = this.formatTemperature(pw.temperature);
       const isActive = activePeriod === period.id;
-      const periodLabel = localize(period.label);
+      const periodLabel = _loc(period.label);
       const marker = isActive ? ' ●' : '';
       rows.push(`<div class="row period-row"><i class="fas ${period.icon}"></i> <strong>${esc(periodLabel)}${marker}</strong>: ${esc(pLabel)} · ${esc(pTemp)}</div>`);
     }

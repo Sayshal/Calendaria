@@ -2,7 +2,7 @@ import { HOOKS, MODULE, SETTINGS } from '../constants.mjs';
 import { CalendariaCalendar } from '../data/_module.mjs';
 import { FestivalManager } from '../festivals/_module.mjs';
 import { getSystemWorldClock, isLuxonSyncRequired, syncWithLuxon } from '../integrations/luxon-sync.mjs';
-import { format, localize, log } from '../utils/_module.mjs';
+import { log } from '../utils/_module.mjs';
 import { FRAMEWORK_INITIAL_DISPLAY_FORMATS, buildDisplayFormatsFromCalendar } from '../utils/formatting/format-utils.mjs';
 import { BUNDLED_CALENDARS, CalendarRegistry, DEFAULT_CALENDAR, isBundledCalendar, loadBundledCalendars } from './_module.mjs';
 
@@ -72,9 +72,9 @@ export default class CalendarManager {
     const activeCalendar = CalendarRegistry.getActive();
     if (!activeCalendar?.dateFormats) return;
     const current = game.settings.get(MODULE.ID, SETTINGS.DISPLAY_FORMATS);
-    if (!foundry.utils.objectsEqual(current, FRAMEWORK_INITIAL_DISPLAY_FORMATS)) return;
+    if (!foundry.utils.equals(current, FRAMEWORK_INITIAL_DISPLAY_FORMATS)) return;
     const seeded = buildDisplayFormatsFromCalendar(activeCalendar);
-    if (foundry.utils.objectsEqual(seeded, current)) return;
+    if (foundry.utils.equals(seeded, current)) return;
     try {
       await game.settings.set(MODULE.ID, SETTINGS.DISPLAY_FORMATS, seeded);
       log(3, `Seeded DISPLAY_FORMATS from "${activeCalendar.name}" dateFormats for fresh world`);
@@ -101,7 +101,7 @@ export default class CalendarManager {
       if (Object.keys(update).length === 0) return;
       try {
         await game.settings.set(systemId, 'worldClock', { ...current, ...update });
-        if (update.dateTheme) ui.notifications.info(format('CALENDARIA.Notification.LuxonThemeSynced', { system: systemId.toUpperCase(), theme, calendar: calendar.name }));
+        if (update.dateTheme) ui.notifications.info(_loc('CALENDARIA.Notification.LuxonThemeSynced', { system: systemId.toUpperCase(), theme, calendar: calendar.name }));
         log(3, `${systemId} WorldClock state synced for ${calendar.name}:`, update);
       } catch (error) {
         log(1, `Failed to sync ${systemId} WorldClock state:`, error);
@@ -113,7 +113,7 @@ export default class CalendarManager {
     if (current.showClockButton === false) return;
     try {
       await game.settings.set(systemId, 'worldClock', { ...current, showClockButton: false });
-      ui.notifications.warn(format('CALENDARIA.Notification.LuxonWorldClockDisabled', { system: systemId.toUpperCase(), calendar: calendar?.name ?? '' }), { permanent: true });
+      ui.notifications.warn(_loc('CALENDARIA.Notification.LuxonWorldClockDisabled', { system: systemId.toUpperCase(), calendar: calendar?.name ?? '' }), { permanent: true });
       log(2, `${systemId} WorldClock button hidden; calendar "${calendar?.metadata?.id}" not Luxon-compatible`);
     } catch (error) {
       log(1, `Failed to disable ${systemId} WorldClock button:`, error);
@@ -228,16 +228,16 @@ export default class CalendarManager {
         const bundledData = this.#bundledData.get(id);
         if (data._isDelta && bundledData) {
           CalendarManager.#stripStaleDefaults(data, bundledData);
-          const calendarData = foundry.utils.mergeObject(foundry.utils.deepClone(bundledData), data, { performDeletions: true });
+          CalendarManager.#reconstructOperators(data);
+          const calendarData = foundry.utils.mergeObject(foundry.utils.deepClone(bundledData), data, { applyOperators: true });
           delete calendarData._isDelta;
-          CalendarManager.#applyForcedDeletions(calendarData);
           const calendar = new CalendariaCalendar(calendarData);
           CalendarRegistry.register(id, calendar);
           log(3, `Applied delta override for bundled calendar: ${id}`);
         } else if (bundledData) {
           if (CalendarManager.#alignOverrideKeys(data, bundledData)) needsSave = true;
-          const merged = foundry.utils.mergeObject(foundry.utils.deepClone(bundledData), data);
-          CalendarManager.#applyForcedDeletions(merged);
+          CalendarManager.#reconstructOperators(data);
+          const merged = foundry.utils.mergeObject(foundry.utils.deepClone(bundledData), data, { applyOperators: true });
           const calendar = new CalendariaCalendar(merged);
           CalendarRegistry.register(id, calendar);
           needsSave = true;
@@ -403,16 +403,16 @@ export default class CalendarManager {
         for (const entryKey of Object.keys(bundledData[key])) {
           if (!overrideData[key]?.[entryKey]) {
             if (!delta[key]) delta[key] = {};
-            delta[key][`-=${entryKey}`] = null;
+            delta[key][entryKey] = _del;
           }
         }
       }
       if (previousDelta?.[key]) {
         for (const entryKey of Object.keys(previousDelta[key])) {
-          if (entryKey.startsWith('-=')) continue;
+          if (CalendarManager.#isDeletionMarker(entryKey, previousDelta[key][entryKey])) continue;
           if (!overrideData[key]?.[entryKey]) {
             if (!delta[key]) delta[key] = {};
-            delta[key][`-=${entryKey}`] = null;
+            delta[key][entryKey] = _del;
           }
         }
       }
@@ -431,18 +431,18 @@ export default class CalendarManager {
           if (!(entryKey in oCol)) {
             if (!delta[parent]) delta[parent] = {};
             if (!delta[parent][child]) delta[parent][child] = {};
-            delta[parent][child][`-=${entryKey}`] = null;
+            delta[parent][child][entryKey] = _del;
           }
         }
       }
       const pCol = previousDelta?.[parent]?.[child];
       if (pCol) {
         for (const entryKey of Object.keys(pCol)) {
-          if (entryKey.startsWith('-=')) continue;
+          if (CalendarManager.#isDeletionMarker(entryKey, pCol[entryKey])) continue;
           if (!overrideData[parent]?.[child]?.[entryKey]) {
             if (!delta[parent]) delta[parent] = {};
             if (!delta[parent][child]) delta[parent][child] = {};
-            delta[parent][child][`-=${entryKey}`] = null;
+            delta[parent][child][entryKey] = _del;
           }
         }
       }
@@ -455,7 +455,7 @@ export default class CalendarManager {
           if (!(cKey in oParent[pKey][childKey])) {
             if (!deltaRef[pKey]) deltaRef[pKey] = {};
             if (!deltaRef[pKey][childKey]) deltaRef[pKey][childKey] = {};
-            deltaRef[pKey][childKey][`-=${cKey}`] = null;
+            deltaRef[pKey][childKey][cKey] = _del;
           }
         }
       }
@@ -508,41 +508,42 @@ export default class CalendarManager {
   }
 
   /**
-   * Recursively strip ForcedDeletion operators and "-=key" markers from a merged calendar object.
-   * Foundry 14's mergeObject converts legacy `-=key` deletion markers into ForcedDeletion class
-   * instances at the original key, but the surrounding DataModel keeps the (now empty-shaped) field.
-   * This sweep removes those keys so override deltas that delete bundled entries actually take effect
-   * on both v13 and v14.
-   * @param {object} obj - Merged calendar object (mutated in place)
+   * Determine whether a previous-delta entry represents a deletion marker.
+   * Recognizes live ForcedDeletion operators, their serialized form, and legacy `-=key` markers.
+   * @param {string} key - Entry key from a previously stored delta
+   * @param {*} value - Entry value from a previously stored delta
+   * @returns {boolean} True when the entry marks a deletion
    * @private
    */
-  static #applyForcedDeletions(obj) {
+  static #isDeletionMarker(key, value) {
+    if (key.startsWith('-=')) return true;
+    const ForcedDeletion = foundry.data?.operators?.ForcedDeletion;
+    if (ForcedDeletion && value instanceof ForcedDeletion) return true;
+    if (value?.constructor?.name === 'ForcedDeletion') return true;
+    if (value && typeof value === 'object' && value.__$OPERATOR$__ === 'ForcedDeletion') return true;
+    return false;
+  }
+
+  /**
+   * Rehydrate serialized ForcedDeletion markers in a stored delta into live operator instances.
+   * Settings JSON round-trips a ForcedDeletion into a plain `{__$OPERATOR$__}` object; reconstructing it
+   * lets mergeObject's `applyOperators` enact the deletion. Legacy `-=key` markers are handled by mergeObject.
+   * @param {object} obj - Stored delta object (mutated in place)
+   * @private
+   */
+  static #reconstructOperators(obj) {
     if (!obj || typeof obj !== 'object') return;
     if (Array.isArray(obj)) {
-      for (const item of obj) CalendarManager.#applyForcedDeletions(item);
+      for (const item of obj) CalendarManager.#reconstructOperators(item);
       return;
     }
-    const ForcedDeletion = foundry.data?.operators?.ForcedDeletion;
+    const { OPERATOR_IDENTIFIER, reconstructOperator } = foundry.data.operators;
     for (const [key, val] of Object.entries(obj)) {
-      if (key.startsWith('-=')) {
-        delete obj[key];
+      if (val && typeof val === 'object' && !Array.isArray(val) && val[OPERATOR_IDENTIFIER]) {
+        obj[key] = reconstructOperator(val);
         continue;
       }
-      if (val && typeof val === 'object') {
-        if (ForcedDeletion && val instanceof ForcedDeletion) {
-          delete obj[key];
-          continue;
-        }
-        if (val.constructor?.name === 'ForcedDeletion') {
-          delete obj[key];
-          continue;
-        }
-        if (!Array.isArray(val) && val.__$OPERATOR$__ === 'ForcedDeletion') {
-          delete obj[key];
-          continue;
-        }
-      }
-      CalendarManager.#applyForcedDeletions(val);
+      CalendarManager.#reconstructOperators(val);
     }
   }
 
@@ -599,7 +600,7 @@ export default class CalendarManager {
   static async switchCalendar(id) {
     if (!CalendarRegistry.has(id)) {
       log(1, `Cannot switch to calendar: ${id} not found`);
-      ui.notifications.error(format('CALENDARIA.Error.CalendarNotFound', { id }));
+      ui.notifications.error(_loc('CALENDARIA.Error.CalendarNotFound', { id }));
       return false;
     }
     const calendar = CalendarRegistry.get(id);
@@ -655,7 +656,7 @@ export default class CalendarManager {
     game.time.initializeCalendar();
     this.#patchFoundryCalendar();
     const calendarName = calendar?.name || id;
-    ui.notifications.info(format('CALENDARIA.Info.CalendarSwitched', { name: calendarName }));
+    ui.notifications.info(_loc('CALENDARIA.Info.CalendarSwitched', { name: calendarName }));
     Hooks.callAll(HOOKS.REMOTE_CALENDAR_SWITCH, id, calendar);
     this.rerenderCalendarUIs();
   }
@@ -669,7 +670,7 @@ export default class CalendarManager {
   static async addCalendar(id, definition) {
     if (CalendarRegistry.has(id)) {
       log(2, `Cannot add calendar: ${id} already exists`);
-      ui.notifications.error(format('CALENDARIA.Error.CalendarAlreadyExists', { id }));
+      ui.notifications.error(_loc('CALENDARIA.Error.CalendarAlreadyExists', { id }));
       return null;
     }
     try {
@@ -679,7 +680,7 @@ export default class CalendarManager {
       return calendar;
     } catch (error) {
       log(1, `Error adding calendar ${id}:`, error);
-      ui.notifications.error(format('CALENDARIA.Error.CalendarAddFailed', { message: error.message }));
+      ui.notifications.error(_loc('CALENDARIA.Error.CalendarAddFailed', { message: error.message }));
       return null;
     }
   }
@@ -717,7 +718,7 @@ export default class CalendarManager {
     if (!calendar) return null;
     return {
       id: calendar.metadata?.id ?? id,
-      name: calendar.name ? localize(calendar.name) : id,
+      name: calendar.name ? _loc(calendar.name) : id,
       description: calendar.metadata?.description ?? '',
       system: calendar.metadata?.system ?? '',
       author: calendar.metadata?.author ?? '',
@@ -845,7 +846,7 @@ export default class CalendarManager {
     const calendar = CalendarRegistry.get(id);
     if (!calendar) {
       log(1, `Cannot update calendar: ${id} not found`);
-      ui.notifications.error(format('CALENDARIA.Error.CalendarNotFound', { id }));
+      ui.notifications.error(_loc('CALENDARIA.Error.CalendarNotFound', { id }));
       return null;
     }
     const customCalendars = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CALENDARS) || {};
@@ -870,7 +871,7 @@ export default class CalendarManager {
       return updatedCalendar;
     } catch (error) {
       log(1, 'Calendar update failed:', error);
-      ui.notifications.error(format('CALENDARIA.Error.CalendarUpdateFailed', { message: error.message }));
+      ui.notifications.error(_loc('CALENDARIA.Error.CalendarUpdateFailed', { message: error.message }));
       return null;
     }
   }
@@ -916,9 +917,9 @@ export default class CalendarManager {
           .split('-')
           .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
           .join('');
-        name = localize(`CALENDARIA.Calendar.${key}.Name`);
+        name = _loc(`CALENDARIA.Calendar.${key}.Name`);
       } else {
-        name = calendar.name ? localize(calendar.name) : id;
+        name = calendar.name ? _loc(calendar.name) : id;
       }
       templates.push({ id, name, description: calendar.metadata?.description || '', isCustom: calendar.metadata?.isCustom || false });
     }

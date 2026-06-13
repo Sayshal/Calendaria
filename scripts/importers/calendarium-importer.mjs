@@ -1,6 +1,6 @@
 import { ASSETS, MOON_PHASE_LABELS } from '../constants.mjs';
 import { NoteManager, addCustomPreset, getAllPresets } from '../notes/_module.mjs';
-import { localize, log } from '../utils/_module.mjs';
+import { log } from '../utils/_module.mjs';
 import BaseImporter from './base-importer.mjs';
 
 /**
@@ -49,7 +49,7 @@ export default class CalendariumImporter extends BaseImporter {
    * @returns {Promise<object>} CalendariaCalendar-compatible data
    */
   async transform(data) {
-    if (!CalendariumImporter.isCalendariumExport(data)) throw new Error(localize('CALENDARIA.Importer.Calendarium.InvalidFormat'));
+    if (!CalendariumImporter.isCalendariumExport(data)) throw new Error(_loc('CALENDARIA.Importer.Calendarium.InvalidFormat'));
     const normalizedData = CalendariumImporter.normalizeData(data);
     const calendar = normalizedData.calendars[0];
     log(3, 'Transforming Calendarium data:', calendar.name);
@@ -63,7 +63,7 @@ export default class CalendariumImporter extends BaseImporter {
     const eras = this.#transformEras(calendar.static.eras);
     const { cycles, cycleFormat } = this.#transformCustomYears(calendar.static);
     return {
-      name: calendar.name || localize('CALENDARIA.Importer.Fallback.CalendarName'),
+      name: calendar.name || _loc('CALENDARIA.Importer.Fallback.CalendarName'),
       days: { values: weekdays, hoursPerDay: 24, minutesPerHour: 60, secondsPerMinute: 60, daysPerYear },
       months: { values: months },
       years: { yearZero: 0, firstWeekday: calendar.static.firstWeekDay || 0, leapYear: null },
@@ -76,8 +76,8 @@ export default class CalendariumImporter extends BaseImporter {
       cycleFormat,
       metadata: {
         id: calendar.id || 'imported-calendarium',
-        description: calendar.description || localize('CALENDARIA.Importer.ImportedFrom.Calendarium'),
-        system: calendar.name || localize('CALENDARIA.Common.Unknown'),
+        description: calendar.description || _loc('CALENDARIA.Importer.ImportedFrom.Calendarium'),
+        system: calendar.name || _loc('CALENDARIA.Common.Unknown'),
         importedFrom: 'calendarium'
       },
       currentDate: this.#transformCurrentDate(calendar.current)
@@ -285,7 +285,7 @@ export default class CalendariumImporter extends BaseImporter {
    * @returns {object[]} - Transformed eras array
    */
   #transformEras(eras = []) {
-    return eras.map((era) => ({ name: era.name || localize('CALENDARIA.Common.Era'), abbreviation: era.name?.substring(0, 3) || 'E', startYear: era.date?.year ?? 0, endYear: era.end?.year ?? null }));
+    return eras.map((era) => ({ name: era.name || _loc('CALENDARIA.Common.Era'), abbreviation: era.name?.substring(0, 3) || 'E', startYear: era.date?.year ?? 0, endYear: era.end?.year ?? null }));
   }
 
   /**
@@ -297,9 +297,9 @@ export default class CalendariumImporter extends BaseImporter {
     if (!staticData.useCustomYears || !staticData.years?.length) return { cycles: [], cycleFormat: null };
     return {
       cycles: [
-        { name: localize('CALENDARIA.Importer.CustomYears'), length: staticData.years.length, offset: 0, basedOn: 'year', stages: staticData.years.map((year) => ({ name: year.name || year.id })) }
+        { name: _loc('CALENDARIA.Importer.CustomYears'), length: staticData.years.length, offset: 0, basedOn: 'year', stages: staticData.years.map((year) => ({ name: year.name || year.id })) }
       ],
-      cycleFormat: localize('CALENDARIA.Importer.CycleFormatYear')
+      cycleFormat: _loc('CALENDARIA.Importer.CycleFormatYear')
     };
   }
 
