@@ -227,9 +227,13 @@ export const SETTINGS = {
 
 /** @enum {string} Scene flags for scene-specific configuration */
 export const SCENE_FLAGS = {
+  AMBIENCE_SYNC: 'ambienceSync',
   BRIGHTNESS_MULTIPLIER: 'brightnessMultiplier',
   CLIMATE_ZONE_OVERRIDE: 'climateZoneOverride',
+  COLOR_SHIFT_SYNC: 'colorShiftSync',
+  DARKNESS_MOON_SYNC: 'darknessMoonSync',
   DARKNESS_SYNC: 'darknessSync',
+  DARKNESS_WEATHER_SYNC: 'darknessWeatherSync',
   FXMASTER_TOP_DOWN_OVERRIDE: 'fxmasterTopDownOverride',
   HUD_HIDE_FOR_PLAYERS: 'hudHideForPlayers',
   WEATHER_FX_OVERRIDE: 'weatherFxOverride',

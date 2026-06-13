@@ -48,6 +48,7 @@ import './styles/importer.css';
 import './styles/mini-cal.css';
 import './styles/note-sheet.css';
 import './styles/note-viewer.css';
+import './styles/scene-config.css';
 import './styles/secondary-calendar.css';
 import './styles/settings.css';
 import './styles/sun-dial.css';

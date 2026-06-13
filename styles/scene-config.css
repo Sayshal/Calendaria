@@ -1,0 +1,36 @@
+.scene-config nav.tabs {
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  row-gap: 0.25rem;
+}
+
+/* Keep tabs at content width so the strip wraps instead of clipping when many tabs are present. */
+.scene-config nav.tabs > * {
+  flex-shrink: 0;
+}
+
+.calendaria-scene-config {
+  max-height: 60vh;
+  overflow: hidden auto;
+  padding-right: 0.5rem;
+}
+
+.calendaria-scene-config fieldset {
+  margin-block: 0.25rem 0.5rem;
+  padding: 0.5rem 0.75rem 0.25rem;
+  border: 0.0625rem solid var(--color-border-light-tertiary, rgb(0 0 0 / 25%));
+  border-radius: 0.25rem;
+}
+
+.calendaria-scene-config fieldset > legend {
+  padding: 0 0.4rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: var(--font-size-12, 0.75rem);
+  letter-spacing: 0.05em;
+}
+
+.calendaria-scene-config .form-group.slim:last-child {
+  margin-bottom: 0;
+}
