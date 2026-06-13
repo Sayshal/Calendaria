@@ -613,6 +613,11 @@
           color: var(--calendaria-text);
           background: var(--calendaria-bg-lighter);
 
+          /* Content auto-saves on tab/mode change and close, so the editor's own save button is redundant. */
+          li:has(> button[data-action='save']) {
+            display: none;
+          }
+
           button {
             color: var(--calendaria-text-dim);
 

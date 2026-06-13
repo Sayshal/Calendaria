@@ -114,8 +114,24 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     super._configureRenderOptions(options);
   }
 
+  /**
+   * Flush the note content editor into the document before a re-render or close.
+   * The content prose-mirror only commits on its own save button, so leaving edit
+   * mode or closing would otherwise drop unsaved text.
+   * @returns {Promise<void>}
+   * @private
+   */
+  async #flushContent() {
+    if (!this.isEditMode || !this.document?.isOwner) return;
+    const editor = this.element?.querySelector('prose-mirror[name="text.content"]');
+    if (!editor) return;
+    const content = editor.value;
+    if (content != null && content !== (this.document.text?.content ?? '')) await this.document.update({ 'text.content': content }, { render: false });
+  }
+
   /** @override */
   async _onClose(options) {
+    await this.#flushContent();
     if (this._isNewNote && this.document) {
       const journal = this.document.parent;
       if (!journal || !game.journal.has(journal.id)) return super._onClose(options);
@@ -738,6 +754,8 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const newCategories = submitData.system?.categories || [];
     const oldCategories = this.document.system.categories || [];
     const addedPreset = newCategories.find((id) => !oldCategories.includes(id));
+    // Keep the active content editor (and its focus) alive across auto-submits; previews update in _onChangeForm.
+    if (!('render' in options)) options.render = false;
     NoteManager.enableSuppressOwnershipRebuild();
     try {
       await super._processSubmitData(event, form, submitData, options);
@@ -1054,6 +1072,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
    */
   static async _onToggleMode(_event, _target) {
     if (!this.document.isOwner) return;
+    await this.#flushContent();
     this._mode = this._mode === CalendarNoteSheet.MODES.VIEW ? CalendarNoteSheet.MODES.EDIT : CalendarNoteSheet.MODES.VIEW;
     const windowContent = this.element.querySelector('.window-content');
     if (windowContent) windowContent.innerHTML = '';
