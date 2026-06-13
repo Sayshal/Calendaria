@@ -10,8 +10,8 @@
   "bugs": "https://github.com/Sayshal/calendaria/issues",
   "changelog": "https://github.com/Sayshal/calendaria/releases",
   "compatibility": {
-    "minimum": "13.351",
-    "verified": "14.361"
+    "minimum": "14",
+    "verified": "14.364"
   },
   "description": "A FVTT Module to handle calendar operations, passage of real time, and automated effect expiry.",
   "documentTypes": {
