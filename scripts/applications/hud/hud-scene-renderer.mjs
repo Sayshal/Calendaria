@@ -1130,7 +1130,7 @@ export class HudSceneRenderer {
     const hoursPerPixel = nightHours / arcPixels;
     const trailHours = trailSpacing * hoursPerPixel;
     for (let i = 0; i < count; i++) {
-      const { phase: moonPhase, color, isFull, isNew } = moons[i];
+      const { phase: moonPhase, color } = moons[i];
       const { glow, sprite, shadow } = this.#moonPool[i];
       glow.alpha = moonAlpha;
       sprite.alpha = moonAlpha;
@@ -1167,9 +1167,7 @@ export class HudSceneRenderer {
       sprite.scale.set(moonSize / 24);
       sprite.tint = 0xffffff;
       const rad = moonSize / 2;
-      let illumination = 1 - Math.abs(moonPhase * 2 - 1);
-      if (!isFull) illumination = Math.min(illumination, 0.7);
-      if (!isNew) illumination = Math.max(illumination, 0.3);
+      const lit = 0.08 + 0.84 * (1 - Math.abs(moonPhase * 2 - 1));
       const isWaxing = moonPhase < 0.5;
       glow.clear();
       if (color) {
@@ -1185,22 +1183,7 @@ export class HudSceneRenderer {
       glow.lineStyle(1, 0xffffff, 0.12);
       glow.drawCircle(moonX, moonY, rad + 1);
       shadow.clear();
-      if (illumination < 0.02) {
-        sprite.alpha = 0;
-        glow.alpha = 0;
-        shadow.alpha = 0;
-        continue;
-      }
-      if (illumination > 0.98) {
-        sprite.mask = null;
-        glow.mask = null;
-        if (shadow._prevMask && shadow._prevMask !== shadow) {
-          shadow._prevMask.destroy();
-          shadow._prevMask = null;
-        }
-        continue;
-      }
-      const terminatorRx = rad * Math.cos(illumination * Math.PI);
+      const terminatorRx = rad * (1 - 2 * lit);
       const k = 0.5522847498;
       shadow.beginFill(0xffffff);
       if (isWaxing) {
