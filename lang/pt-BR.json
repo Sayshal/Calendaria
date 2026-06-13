@@ -612,6 +612,7 @@
   "CALENDARIA.Editor.Error.MinOneWeekday": "O calendário deve ter pelo menos um dia de semana.",
   "CALENDARIA.Editor.Error.NameRequired": "O calendário deve ter um nome.",
   "CALENDARIA.Editor.ExportSuccess": "\"{name}\" exportado com sucesso.",
+  "CALENDARIA.Editor.Festival.PendingImport": "{count} festivais importados serão criados quando você salvar este calendário. Revise as outras abas e, em seguida, reabra o calendário para editá-los.",
   "CALENDARIA.Editor.Festival.ResetConfirm": "Excluir todas as notas de festivais deste calendário e recriá-las a partir do modelo incluído?",
   "CALENDARIA.Editor.Festival.ResetDone": "Reinicialização concluída. {count} notas de festival foram inseridas a partir do modelo incluído.",
   "CALENDARIA.Editor.Festival.ResetLabel": "Redefinir para o Padrão",
