@@ -1,16 +1,8 @@
-## New Features
-
-- Added a Sticky Tray option to the Time Keeper, via a Pin Controls toggle in the context menu and a matching checkbox on the Time Keeper settings tab, that keeps the hover-revealed controls tray open. The pinned state persists and survives increment changes and settings saves.
-- Added a Suppression Muffle slider on the Weather settings tab that keeps a fraction of weather sound volume inside Suppress Weather regions instead of fully silencing them, defaulting to 0 so existing regions stay silent.
-- Note Viewer search now matches note body text (HTML stripped) in addition to titles, grouping hits into Direct Matches for title matches and Mentioned for body-only matches.
-
 ## Bug Fixes
 
-- Clicking a cal.date enricher link now opens the calendar on the displayed year, fixing month notes not appearing on calendars with a non-zero yearZero (e.g. SWADE).
-- Duration-based seasons now cycle correctly across year boundaries, so seasons longer than a year or whose durations do not sum to the year length carry over instead of resetting each year.
-- Manual sunrise and sunset overrides in a climate zone now persist after saving and reopening, and the Shortest/Longest Day readout updates immediately.
-- Multiple moons in the HUD and sun dial now sort by name to match the calendar moon panel, so labels line up with their discs, and fully lit and fully dark rendering is reserved for true Full and New phases so gibbous and crescent moons keep a visible terminator.
-- Season conditions in the note condition builder now match correctly. A newly selected dropdown field defaults to its first option instead of silently filtering out every date, and Day in Season and Season Progress resolve against leap-aware season bounds for month-based and periodic calendars.
-- The Calendar Editor date-format preview now resolves [namedWeek] and [namedWeekAbbr] tokens from raw calendar data instead of leaving an empty gap.
-- The cinematic overlay date label now shows the full calendar display year instead of the internal year, fixing a mismatch in the keyframe date comparison.
-- The settings panel footer now uses the correct light-theme background and border, matching the calendar editor footer instead of showing dark-theme styling.
+- Fantasy-Calendar imports place festivals on the correct days, keep multi-day festival durations, and import whole-month festivals. The Festivals tab shows a notice that imported festivals are created when you save the calendar.
+- Fixed a delay before the clock widgets updated on time changes in worlds with many darkness-synced scenes.
+- Note content saves automatically when you switch tabs, return to view mode, or close the note editor. The redundant save button on the content editor has been removed.
+- Players taking a short or long rest with Advance Time on Rest enabled no longer receive a permission error. The GM drives rest time advancement.
+- The HUD and sun dial moon waxes and wanes smoothly across the cycle and stays visible near the new moon, instead of freezing for several days and vanishing.
+- The time increment dropdown in the HUD, mini calendar, and time keeper keeps your chosen step size instead of reverting to minutes.
