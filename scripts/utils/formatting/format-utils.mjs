@@ -953,7 +953,8 @@ export const LOCATION_DEFAULTS = {
   stopwatchRealtime: 'stopwatchRealtimeFull',
   stopwatchGametime: 'stopwatchGametimeFull',
   noteViewerDate: 'dateLong',
-  cinematicDate: 'dateLong'
+  cinematicDate: 'dateLong',
+  cinematicTime: 'time24'
 };
 
 /** Framework-initial DISPLAY_FORMATS object. */
@@ -968,7 +969,8 @@ export const FRAMEWORK_INITIAL_DISPLAY_FORMATS = {
   stopwatchRealtime: { gm: 'stopwatchRealtimeFull', player: 'stopwatchRealtimeFull' },
   stopwatchGametime: { gm: 'stopwatchGametimeFull', player: 'stopwatchGametimeFull' },
   noteViewerDate: { gm: 'dateLong', player: 'dateLong' },
-  cinematicDate: { gm: 'dateLong', player: 'dateLong' }
+  cinematicDate: { gm: 'dateLong', player: 'dateLong' },
+  cinematicTime: { gm: 'time24', player: 'time24' }
 };
 
 /**

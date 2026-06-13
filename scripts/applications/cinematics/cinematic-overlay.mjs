@@ -202,7 +202,7 @@ export default class CinematicOverlay {
     this.#syncEventCardsToVisualDay(progress);
     this.#updateBackground(dayFraction);
     this.#updateEffects(dayFraction);
-    this.#tickDateCounter(frameIndex, panelProgress);
+    this.#tickDateCounter(frameIndex, panelProgress, progress);
     this.#updateProgressBar(progress);
     if (progress >= 1) {
       this.#complete();
@@ -275,6 +275,7 @@ export default class CinematicOverlay {
           <div class="cinematic-calendar-page">
             <div class="cinematic-date-counter">
               <span class="cinematic-date-label"></span>
+              <span class="cinematic-time-label"></span>
             </div>
             <div class="cinematic-season-badge">
               <i class="cinematic-season-icon fas fa-leaf"></i>
@@ -335,6 +336,9 @@ export default class CinematicOverlay {
     if (!label) return;
     label.textContent = kf.dateLabel ?? '';
     label._lastDateKey = `${kf.date?.year}-${kf.date?.month}-${kf.date?.dayOfMonth}`;
+    const timeEl = this.#element?.querySelector('.cinematic-time-label');
+    const calendar = CalendarManager.getActiveCalendar();
+    if (timeEl && calendar) timeEl.textContent = this.#formatTime(calendar, calendar.timeToComponents(this.#payload.startTime));
     this.#element?.setAttribute('data-content-ready', 'true');
   }
 
@@ -342,8 +346,9 @@ export default class CinematicOverlay {
    * Tick the date counter by interpolating worldTime between keyframes.
    * @param {number} frameIndex - Current keyframe index
    * @param {number} panelProgress - 0-1 within current panel
+   * @param {number} progress - 0-1 across the whole cinematic
    */
-  static #tickDateCounter(frameIndex, panelProgress) {
+  static #tickDateCounter(frameIndex, panelProgress, progress) {
     const label = this.#element?.querySelector('.cinematic-date-label');
     if (!label) return;
     const keyframes = this.#payload.keyframes;
@@ -357,6 +362,16 @@ export default class CinematicOverlay {
     if (!calendar) {
       label.textContent = current.dateLabel;
       return;
+    }
+    const timeEl = this.#element?.querySelector('.cinematic-time-label');
+    if (timeEl) {
+      const globalWt = Math.floor(this.#payload.startTime + this.#payload.deltaSeconds * progress);
+      const tc = calendar.timeToComponents(globalWt);
+      const timeKey = `${tc.hour}:${tc.minute}:${tc.second}`;
+      if (timeEl._lastTimeKey !== timeKey) {
+        timeEl._lastTimeKey = timeKey;
+        timeEl.textContent = this.#formatTime(calendar, tc);
+      }
     }
     const components = calendar.timeToComponents(interpWt);
     components.year += calendar.years?.yearZero ?? 0;
@@ -376,6 +391,16 @@ export default class CinematicOverlay {
    */
   static #formatDate(calendar, components) {
     return formatForLocation(calendar, { ...components, hour: components.hour ?? 12, minute: components.minute ?? 0, second: components.second ?? 0 }, 'cinematicDate');
+  }
+
+  /**
+   * Format the time of day from interpolated components.
+   * @param {object} calendar - Calendar instance
+   * @param {object} components - Time components
+   * @returns {string} Formatted time string
+   */
+  static #formatTime(calendar, components) {
+    return formatForLocation(calendar, { ...components, hour: components.hour ?? 0, minute: components.minute ?? 0, second: components.second ?? 0 }, 'cinematicTime');
   }
 
   /**
