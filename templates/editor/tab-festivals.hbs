@@ -17,6 +17,11 @@
         </button>
       {{/if}}
     </div>
+    {{#if festivalPendingImport}}
+      <div class="notification info">
+        {{localize "CALENDARIA.Editor.Festival.PendingImport" count=festivalPendingImport}}
+      </div>
+    {{/if}}
     {{#if festivalsWithNav.length}}
       <div class="items-list festivals-list">
         {{#each festivalsWithNav}}

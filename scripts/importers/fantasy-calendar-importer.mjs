@@ -434,6 +434,15 @@ export default class FantasyCalendarImporter extends BaseImporter {
     const isOneTimeEvent = Array.isArray(event.data?.date) && event.data.date.length >= 3;
     const isRandomEvent = eventType.repeat === 'random';
     const suggestedType = isOneTimeEvent || isRandomEvent ? 'note' : 'festival';
+    // A Month condition with no Day means the event spans that whole month in FC.
+    const conditionTypes = new Set(
+      this.#flattenConditions(conditions)
+        .map((c) => c[0])
+        .filter(Boolean)
+    );
+    const isWholeMonth = !hasDate && conditionTypes.has('Month') && !conditionTypes.has('Day') && !conditionTypes.has('Date');
+    const monthLength = data?.static_data?.year_data?.timespans?.[date.month]?.length;
+    const duration = isWholeMonth && monthLength ? monthLength : (event.data?.duration ?? 1);
     const noteData = {
       name: event.name,
       content: event.description || '',
@@ -443,7 +452,7 @@ export default class FantasyCalendarImporter extends BaseImporter {
       visibility: isHidden ? 'hidden' : 'visible',
       category: category?.name || 'default',
       color: FC_COLORS[event.settings?.color] || category?.color || '#2196f3',
-      duration: event.data?.duration || 1,
+      duration,
       originalId: event.id,
       suggestedType
     };

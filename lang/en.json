@@ -612,6 +612,7 @@
   "CALENDARIA.Editor.Error.MinOneWeekday": "Calendar must have at least one weekday.",
   "CALENDARIA.Editor.Error.NameRequired": "Calendar must have a name.",
   "CALENDARIA.Editor.ExportSuccess": "Exported \"{name}\" successfully.",
+  "CALENDARIA.Editor.Festival.PendingImport": "{count} imported festivals will be created when you save this calendar. Review the other tabs, then reopen the calendar to edit them.",
   "CALENDARIA.Editor.Festival.ResetConfirm": "Delete all festival notes for this calendar and re-create them from the bundled template?",
   "CALENDARIA.Editor.Festival.ResetDone": "Reset complete. Seeded {count} festival notes from the bundled template.",
   "CALENDARIA.Editor.Festival.ResetLabel": "Reset to Bundled",

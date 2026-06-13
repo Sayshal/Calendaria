@@ -30,6 +30,18 @@ export function getTimeIncrements() {
 }
 
 /**
+ * Resolve an increment value to a valid string key, coercing a numeric index to its key.
+ * @param {Object<string, number>} increments - Increment map from getTimeIncrements()
+ * @param {string|number} key - Increment key or numeric index
+ * @returns {string|number} Resolved string key, or the original value if it cannot be resolved
+ */
+function resolveIncrementKey(increments, key) {
+  if (increments[key] != null) return key;
+  if (/^\d+$/.test(String(key))) return Object.keys(increments)[Number(key)] ?? key;
+  return key;
+}
+
+/**
  * Real-time clock controller for advancing game time automatically.
  */
 export default class TimeClock {
@@ -304,6 +316,7 @@ export default class TimeClock {
    */
   static setIncrement(key) {
     const increments = getTimeIncrements();
+    key = resolveIncrementKey(increments, key);
     if (!increments[key]) return;
     this.#incrementKey = key;
     this.#increment = increments[key];
@@ -327,6 +340,7 @@ export default class TimeClock {
    */
   static setAppIncrement(appId, key) {
     const increments = getTimeIncrements();
+    key = resolveIncrementKey(increments, key);
     if (!increments[key]) {
       log(2, `Invalid increment key: ${key}`);
       return;
@@ -618,10 +632,10 @@ export default class TimeClock {
    * @param {number} dt - The delta time in seconds
    */
   static async onUpdateWorldTime(worldTime, dt) {
-    await updateDarknessFromWorldTime(worldTime, dt);
     ReminderScheduler.onUpdateWorldTime(worldTime, dt);
     TimeTracker.onUpdateWorldTime(worldTime, dt);
     Hooks.callAll(HOOKS.WORLD_TIME_UPDATED, worldTime, dt);
+    updateDarknessFromWorldTime(worldTime, dt);
     await EventScheduler.onUpdateWorldTime(worldTime, dt);
   }
 }

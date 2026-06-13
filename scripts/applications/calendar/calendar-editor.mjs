@@ -377,6 +377,9 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       typeOptions: monthTypeOptions.map((opt) => ({ ...opt, selected: (opt.value || null) === (month.type || null) }))
     }));
     const festivalStubs = this.#calendarId ? FestivalManager.getFestivalNotes(this.#calendarId) : [];
+    const festivalDefs = this.#calendarData.festivals;
+    const festivalDefCount = Array.isArray(festivalDefs) ? festivalDefs.length : Object.keys(festivalDefs ?? {}).length;
+    context.festivalPendingImport = !this.#calendarId && festivalDefCount > 0 ? festivalDefCount : 0;
     context.festivalsCanEditNotes = !!(this.#isEditing && this.#calendarId);
     context.festivalsIsBundled = !!(this.#calendarId && isBundledCalendar(this.#calendarId));
     context.festivalsWithNav = festivalStubs.map((stub) => {

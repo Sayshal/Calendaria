@@ -318,12 +318,9 @@ export async function updateDarknessFromWorldTime(worldTime, dt) {
     const darkness = calculateAdjustedDarkness(baseDarkness, scene);
     const lighting = calculateEnvironmentLighting(scene);
     const envData = buildEnvironmentUpdateData(scene, lighting);
-    const updateData = { 'environment.darknessLevel': darkness, ...envData };
-    return scene.update(updateData, { animateDarkness }).catch((error) => {
-      log(1, `Darkness update failed for scene ${scene.name}:`, error);
-    });
+    return { _id: scene.id, 'environment.darknessLevel': darkness, ...envData };
   });
-  await Promise.all(updates);
+  if (updates.length) await Scene.updateDocuments(updates, { animateDarkness }).catch((error) => log(1, 'Darkness batch update failed:', error));
 }
 
 /**
@@ -390,12 +387,9 @@ export async function onWeatherChange() {
     const darkness = calculateAdjustedDarkness(baseDarkness, scene);
     const lighting = calculateEnvironmentLighting(scene);
     const envData = buildEnvironmentUpdateData(scene, lighting);
-    const updateData = { 'environment.darknessLevel': darkness, ...envData };
-    return scene.update(updateData).catch((error) => {
-      log(1, `Weather darkness update failed for scene ${scene.name}:`, error);
-    });
+    return { _id: scene.id, 'environment.darknessLevel': darkness, ...envData };
   });
-  await Promise.all(updates);
+  if (updates.length) await Scene.updateDocuments(updates).catch((error) => log(1, 'Weather darkness batch update failed:', error));
 }
 
 /**
