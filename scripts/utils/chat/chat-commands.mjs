@@ -1,4 +1,3 @@
-import { localize } from '../localization.mjs';
 import { canChangeActiveCalendar, canChangeDateTime } from '../permissions.mjs';
 import {
   cmdAdvance,
@@ -80,19 +79,19 @@ export function onChatMessage(_chatLog, message, _chatData) {
  */
 async function handleCommand(cmd, match) {
   const arg = match[1]?.trim() || '';
-  const noCalMsg = () => ui.notifications.warn(localize('CALENDARIA.ChatCommand.NoCalendar'));
+  const noCalMsg = () => ui.notifications.warn(_loc('CALENDARIA.ChatCommand.NoCalendar'));
   const handlers = {
     date: () => sendResult(cmdDate(arg), noCalMsg),
     time: () => sendResult(cmdTime(arg), noCalMsg),
     datetime: () => sendResult(cmdDateTime(arg), noCalMsg),
     note: async () => {
-      if (!arg) return ui.notifications.warn(localize('CALENDARIA.ChatCommand.NoteTitleRequired'));
+      if (!arg) return ui.notifications.warn(_loc('CALENDARIA.ChatCommand.NoteTitleRequired'));
       try {
         const result = await cmdNote(arg);
         if (!result) return noCalMsg();
-        ui.notifications.info(localize('CALENDARIA.ChatCommand.NoteCreated'));
+        ui.notifications.info(_loc('CALENDARIA.ChatCommand.NoteCreated'));
       } catch {
-        ui.notifications.error(localize('CALENDARIA.ChatCommand.NoteError'));
+        ui.notifications.error(_loc('CALENDARIA.ChatCommand.NoteError'));
       }
     },
     weather: () => {
@@ -107,50 +106,50 @@ async function handleCommand(cmd, match) {
     sunrise: () => sendResult(cmdSunrise(arg), noCalMsg),
     sunset: () => sendResult(cmdSunset(arg), noCalMsg),
     advance: async () => {
-      if (!canChangeDateTime()) return ui.notifications.warn(localize('CALENDARIA.ChatCommand.NoPermission'));
+      if (!canChangeDateTime()) return ui.notifications.warn(_loc('CALENDARIA.ChatCommand.NoPermission'));
       try {
         const result = await cmdAdvance(match[1]);
         if (!result) return noCalMsg();
         if (result.error) return ui.notifications.warn(result.content);
         if (result.content) ui.notifications.info(result.content);
       } catch {
-        ui.notifications.error(localize('CALENDARIA.ChatCommand.AdvanceError'));
+        ui.notifications.error(_loc('CALENDARIA.ChatCommand.AdvanceError'));
       }
     },
     setdate: async () => {
-      if (!canChangeDateTime()) return ui.notifications.warn(localize('CALENDARIA.ChatCommand.NoPermission'));
+      if (!canChangeDateTime()) return ui.notifications.warn(_loc('CALENDARIA.ChatCommand.NoPermission'));
       try {
         const result = await cmdSetDate(match[1]);
         if (!result) return noCalMsg();
         if (result.error) return ui.notifications.warn(result.content);
         if (result.content) ui.notifications.info(result.content);
       } catch {
-        ui.notifications.error(localize('CALENDARIA.ChatCommand.SetDateError'));
+        ui.notifications.error(_loc('CALENDARIA.ChatCommand.SetDateError'));
       }
     },
     settime: async () => {
-      if (!canChangeDateTime()) return ui.notifications.warn(localize('CALENDARIA.ChatCommand.NoPermission'));
+      if (!canChangeDateTime()) return ui.notifications.warn(_loc('CALENDARIA.ChatCommand.NoPermission'));
       try {
         const result = await cmdSetTime(match[1]);
         if (!result) return noCalMsg();
         if (result.error) return ui.notifications.warn(result.content);
         if (result.content) ui.notifications.info(result.content);
       } catch {
-        ui.notifications.error(localize('CALENDARIA.ChatCommand.SetTimeError'));
+        ui.notifications.error(_loc('CALENDARIA.ChatCommand.SetTimeError'));
       }
     },
     calendar: () => sendResult(cmdCalendar(), noCalMsg),
     calendars: () => sendResult(cmdCalendars()),
     switchcal: async () => {
-      if (!canChangeActiveCalendar()) return ui.notifications.warn(localize('CALENDARIA.ChatCommand.NoPermission'));
+      if (!canChangeActiveCalendar()) return ui.notifications.warn(_loc('CALENDARIA.ChatCommand.NoPermission'));
       const calendarId = match[1]?.trim();
-      if (!calendarId) return ui.notifications.warn(localize('CALENDARIA.ChatCommand.CalendarIdRequired'));
+      if (!calendarId) return ui.notifications.warn(_loc('CALENDARIA.ChatCommand.CalendarIdRequired'));
       try {
         const result = await cmdSwitchCal(calendarId);
-        if (!result) return ui.notifications.warn(localize('CALENDARIA.ChatCommand.CalendarNotFound'));
+        if (!result) return ui.notifications.warn(_loc('CALENDARIA.ChatCommand.CalendarNotFound'));
         if (result.content) ui.notifications.info(result.content);
       } catch {
-        ui.notifications.error(localize('CALENDARIA.ChatCommand.SwitchCalError'));
+        ui.notifications.error(_loc('CALENDARIA.ChatCommand.SwitchCalError'));
       }
     },
     festival: () => sendResult(cmdFestival(), noCalMsg),

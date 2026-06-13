@@ -1,6 +1,6 @@
 import { CalendarManager } from '../calendar/_module.mjs';
 import { HOOKS, MODULE, SETTINGS } from '../constants.mjs';
-import { executeMacroById, format, localize, log } from '../utils/_module.mjs';
+import { executeMacroById, log } from '../utils/_module.mjs';
 import { WeatherManager } from '../weather/_module.mjs';
 
 /**
@@ -331,11 +331,11 @@ export default class TimeTracker {
         const currentPhase = phasesArr[currentPhaseIndex];
         changedMoons.push({
           moonIndex,
-          moonName: moon.name ? localize(moon.name) : format('CALENDARIA.Calendar.MoonFallback', { num: moonIndex + 1 }),
+          moonName: moon.name ? _loc(moon.name) : _loc('CALENDARIA.Calendar.MoonFallback', { num: moonIndex + 1 }),
           previousPhaseIndex: lastPhaseIndex,
-          previousPhaseName: previousPhase?.name ? localize(previousPhase.name) : null,
+          previousPhaseName: previousPhase?.name ? _loc(previousPhase.name) : null,
           currentPhaseIndex,
-          currentPhaseName: currentPhase?.name ? localize(currentPhase.name) : null
+          currentPhaseName: currentPhase?.name ? _loc(currentPhase.name) : null
         });
       }
     }

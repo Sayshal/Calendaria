@@ -1,6 +1,5 @@
 import { CalendarManager } from '../calendar/_module.mjs';
 import { NoteManager, getAllPresets } from '../notes/_module.mjs';
-import { format, localize } from './localization.mjs';
 import { stripSecrets } from './ui/calendar-view-utils.mjs';
 
 /**
@@ -108,7 +107,7 @@ export default class SearchManager {
     const result = { icon: flagData.icon || null, color: flagData.color || '#4a9eff', visibility: flagData.visibility || 'visible', repeatIcon: null, repeatTooltip: null, presetIcons: [] };
     if (flagData.conditionTree) {
       result.repeatIcon = 'fas fa-rotate';
-      result.repeatTooltip = localize('CALENDARIA.Note.HasConditions');
+      result.repeatTooltip = _loc('CALENDARIA.Note.HasConditions');
     }
     if (Array.isArray(flagData.categories) && flagData.categories.length > 0) {
       const allPresets = getAllPresets();
@@ -133,7 +132,7 @@ export default class SearchManager {
     const calendar = CalendarManager.getActiveCalendar();
     const { year, month, dayOfMonth } = flagData.startDate;
     const monthData = calendar?.monthsArray?.[month];
-    const monthName = monthData ? localize(monthData.name) : format('CALENDARIA.Common.MonthFallback', { num: month + 1 });
+    const monthName = monthData ? _loc(monthData.name) : _loc('CALENDARIA.Common.MonthFallback', { num: month + 1 });
     return `${(dayOfMonth ?? 0) + 1} ${monthName}, ${year}`;
   }
 

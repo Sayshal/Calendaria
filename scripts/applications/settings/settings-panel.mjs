@@ -24,7 +24,6 @@ import {
   createCustomTheme,
   deleteCustomTheme,
   exportSettings,
-  format,
   getColorsForTheme,
   getCustomTheme,
   getCustomThemes,
@@ -32,7 +31,6 @@ import {
   importSettings,
   initializeTheme,
   isCustomThemeKey,
-  localize,
   printCurrentMonth,
   printCurrentYear,
   validateFormatString
@@ -331,10 +329,10 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     const text = indicator.childNodes[indicator.childNodes.length - 1];
     if (state === 'saving') {
       if (icon) icon.className = 'fas fa-sync fa-spin';
-      if (text?.nodeType === Node.TEXT_NODE) text.textContent = localize('CALENDARIA.SettingsPanel.Footer.Saving');
+      if (text?.nodeType === Node.TEXT_NODE) text.textContent = _loc('CALENDARIA.SettingsPanel.Footer.Saving');
     } else {
       if (icon) icon.className = 'fas fa-check';
-      if (text?.nodeType === Node.TEXT_NODE) text.textContent = localize('CALENDARIA.SettingsPanel.Footer.Saved');
+      if (text?.nodeType === Node.TEXT_NODE) text.textContent = _loc('CALENDARIA.SettingsPanel.Footer.Saved');
     }
   }
 
@@ -350,11 +348,11 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     const index = [];
     const settingLabels = new Set();
     for (const [key, meta] of Object.entries(SettingsPanel.SETTING_METADATA)) {
-      const label = localize(meta.label);
+      const label = _loc(meta.label);
       const hintKey = meta.label.replace('.Name', '.Hint');
-      const hint = game.i18n.has(hintKey) ? localize(hintKey) : '';
+      const hint = game.i18n.has(hintKey) ? _loc(hintKey) : '';
       const tabDef = SettingsPanel.TABS.primary.tabs.find((t) => t.id === meta.tab);
-      const tabLabel = tabDef ? localize(tabDef.label) : meta.tab;
+      const tabLabel = tabDef ? _loc(tabDef.label) : meta.tab;
       index.push({ type: 'setting', key, tab: meta.tab, tabLabel, label, searchText: `${label} ${hint}`.toLowerCase() });
       settingLabels.add(`${meta.tab}:${label.toLowerCase()}`);
     }
@@ -368,7 +366,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       const tab = tabEl.dataset.tab;
       if (settingLabels.has(`${tab}:${label.toLowerCase()}`)) return;
       const tabDef = SettingsPanel.TABS.primary.tabs.find((t) => t.id === tab);
-      const tabLabel = tabDef ? localize(tabDef.label) : tab;
+      const tabLabel = tabDef ? _loc(tabDef.label) : tab;
       const fieldsetId = fieldset.dataset.section;
       index.push({ type: 'fieldset', key: `${tab}:${fieldsetId}`, tab, tabLabel, label, searchText: label.toLowerCase() });
     });
@@ -459,7 +457,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     const index = this.#buildSearchIndex();
     const results = index.filter((item) => item.searchText.includes(query)).slice(0, 10);
     if (results.length === 0) {
-      container.innerHTML = `<div class="no-results">${localize('CALENDARIA.SettingsPanel.Search.NoResults')}</div>`;
+      container.innerHTML = `<div class="no-results">${_loc('CALENDARIA.SettingsPanel.Search.NoResults')}</div>`;
       this.#positionSearchResults(container, searchInput);
       return;
     }
@@ -570,15 +568,15 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static #getIncrementLabels() {
     const labels = {
-      second: localize('CALENDARIA.Common.Second'),
-      round: localize('CALENDARIA.Common.Round'),
-      minute: localize('CALENDARIA.Common.Minute'),
-      hour: localize('CALENDARIA.Common.Hour'),
-      day: localize('CALENDARIA.Common.Day'),
-      week: localize('CALENDARIA.Common.Week'),
-      month: localize('CALENDARIA.Common.Month'),
-      season: localize('CALENDARIA.Common.Season'),
-      year: localize('CALENDARIA.Common.Year')
+      second: _loc('CALENDARIA.Common.Second'),
+      round: _loc('CALENDARIA.Common.Round'),
+      minute: _loc('CALENDARIA.Common.Minute'),
+      hour: _loc('CALENDARIA.Common.Hour'),
+      day: _loc('CALENDARIA.Common.Day'),
+      week: _loc('CALENDARIA.Common.Week'),
+      month: _loc('CALENDARIA.Common.Month'),
+      season: _loc('CALENDARIA.Common.Season'),
+      year: _loc('CALENDARIA.Common.Year')
     };
     const isMonthless = CalendarManager.getActiveCalendar()?.isMonthless ?? false;
     const keys = Object.keys(getTimeIncrements()).filter((key) => !isMonthless || key !== 'month');
@@ -664,7 +662,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.canChangeCalendar = context.isGM || canChangeActiveCalendar();
     const luxonRequired = isLuxonSyncRequired();
     context.luxonSyncRequired = luxonRequired;
-    context.luxonSyncNotice = luxonRequired ? format('CALENDARIA.Settings.ActiveCalendar.LuxonRequiredNotice', { system: game.system.id.toUpperCase() }) : '';
+    context.luxonSyncNotice = luxonRequired ? _loc('CALENDARIA.Settings.ActiveCalendar.LuxonRequiredNotice', { system: game.system.id.toUpperCase() }) : '';
     context.calendarOptions = [];
     for (const id of BUNDLED_CALENDARS) {
       const key = id
@@ -673,11 +671,11 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         .join('');
       const cal = CalendarRegistry.get(id);
       const incompatible = luxonRequired && !isLuxonCompatible(cal);
-      context.calendarOptions.push({ value: id, label: localize(`CALENDARIA.Calendar.${key}.Name`), selected: id === activeCalendarId, isCustom: false, incompatible });
+      context.calendarOptions.push({ value: id, label: _loc(`CALENDARIA.Calendar.${key}.Name`), selected: id === activeCalendarId, isCustom: false, incompatible });
     }
     for (const [id, data] of Object.entries(customCalendars)) {
       const incompatible = luxonRequired && !isLuxonCompatible(data);
-      context.calendarOptions.push({ value: id, label: localize(data.name) || data.name || id, selected: id === activeCalendarId, isCustom: true, incompatible });
+      context.calendarOptions.push({ value: id, label: _loc(data.name) || data.name || id, selected: id === activeCalendarId, isCustom: true, incompatible });
     }
     context.calendarOptions.sort((a, b) => a.label.localeCompare(b.label, game.i18n.lang));
     context.showEquivalentDatesSection = context.isGM;
@@ -1017,7 +1015,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         if (!metadata) continue;
         const idx = recentData.findIndex((s) => s.settingKey === key);
         if (idx !== -1) recentData.splice(idx, 1);
-        recentData.unshift({ settingKey: key, tab: metadata.tab, label: localize(metadata.label), timestamp: now });
+        recentData.unshift({ settingKey: key, tab: metadata.tab, label: _loc(metadata.label), timestamp: now });
         changed = true;
       }
     }
@@ -1043,14 +1041,14 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     const currentDefault = game.settings.get(MODULE.ID, SETTINGS.DEFAULT_NOTE_PRESET);
     const presets = getAllPresets();
     context.defaultNotePresetOptions = [
-      { value: '', label: localize('CALENDARIA.Settings.DefaultNotePreset.AskEveryTime'), selected: !currentDefault },
+      { value: '', label: _loc('CALENDARIA.Settings.DefaultNotePreset.AskEveryTime'), selected: !currentDefault },
       ...presets.map((p) => ({ value: p.id, label: p.label, selected: currentDefault === p.id }))
     ];
     const noteOpenMode = game.settings.get(MODULE.ID, SETTINGS.NOTE_OPEN_MODE);
     context.noteOpenModeOptions = [
-      { value: 'default', label: localize('CALENDARIA.Settings.NoteOpenMode.Default'), selected: noteOpenMode === 'default' },
-      { value: 'edit', label: localize('CALENDARIA.Settings.NoteOpenMode.Edit'), selected: noteOpenMode === 'edit' },
-      { value: 'view', label: localize('CALENDARIA.Settings.NoteOpenMode.View'), selected: noteOpenMode === 'view' }
+      { value: 'default', label: _loc('CALENDARIA.Settings.NoteOpenMode.Default'), selected: noteOpenMode === 'default' },
+      { value: 'edit', label: _loc('CALENDARIA.Settings.NoteOpenMode.Edit'), selected: noteOpenMode === 'edit' },
+      { value: 'view', label: _loc('CALENDARIA.Settings.NoteOpenMode.View'), selected: noteOpenMode === 'view' }
     ];
     context.formatLocations = this.#prepareFormatLocationsForCategory('notes');
   }
@@ -1084,9 +1082,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   async #prepareChatContext(context) {
     const chatMode = game.settings.get(MODULE.ID, SETTINGS.CHAT_TIMESTAMP_MODE);
     context.chatTimestampModeOptions = [
-      { value: 'disabled', label: localize('CALENDARIA.Common.Disabled'), selected: chatMode === 'disabled' },
-      { value: 'replace', label: localize('CALENDARIA.Settings.ChatTimestampMode.Replace'), selected: chatMode === 'replace' },
-      { value: 'augment', label: localize('CALENDARIA.Settings.ChatTimestampMode.Augment'), selected: chatMode === 'augment' }
+      { value: 'disabled', label: _loc('CALENDARIA.Common.Disabled'), selected: chatMode === 'disabled' },
+      { value: 'replace', label: _loc('CALENDARIA.Settings.ChatTimestampMode.Replace'), selected: chatMode === 'replace' },
+      { value: 'augment', label: _loc('CALENDARIA.Settings.ChatTimestampMode.Augment'), selected: chatMode === 'augment' }
     ];
     context.chatTimestampShowTime = game.settings.get(MODULE.ID, SETTINGS.CHAT_TIMESTAMP_SHOW_TIME);
     context.formatLocations = this.#prepareFormatLocationsForCategory('chat');
@@ -1111,7 +1109,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.miniCalCombatMode = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_COMBAT_MODE);
     context.forceMiniCal = game.settings.get(MODULE.ID, SETTINGS.FORCE_MINI_CAL);
     context.formatLocations = this.#prepareFormatLocationsForCategory('miniCal');
-    context.openHint = format('CALENDARIA.SettingsPanel.AppTab.OpenHint', { appName: 'MiniCal' });
+    context.openHint = _loc('CALENDARIA.SettingsPanel.AppTab.OpenHint', { appName: 'MiniCal' });
     context.miniCalShowTime = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_TIME);
     context.miniCalShowWeather = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_WEATHER);
     context.miniCalShowSeason = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_SEASON);
@@ -1121,30 +1119,30 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.miniCalHeaderShowSelected = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_HEADER_SHOW_SELECTED);
     const miniCalWeatherDisplayMode = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_WEATHER_DISPLAY_MODE);
     context.miniCalWeatherDisplayModeOptions = [
-      { value: 'full', label: localize('CALENDARIA.Settings.HUDWeatherDisplayMode.Full'), selected: miniCalWeatherDisplayMode === 'full' },
-      { value: 'iconTemp', label: localize('CALENDARIA.Settings.HUDWeatherDisplayMode.IconTemp'), selected: miniCalWeatherDisplayMode === 'iconTemp' },
-      { value: 'icon', label: localize('CALENDARIA.Common.DisplayIconOnly'), selected: miniCalWeatherDisplayMode === 'icon' },
-      { value: 'temp', label: localize('CALENDARIA.Settings.HUDWeatherDisplayMode.TempOnly'), selected: miniCalWeatherDisplayMode === 'temp' }
+      { value: 'full', label: _loc('CALENDARIA.Settings.HUDWeatherDisplayMode.Full'), selected: miniCalWeatherDisplayMode === 'full' },
+      { value: 'iconTemp', label: _loc('CALENDARIA.Settings.HUDWeatherDisplayMode.IconTemp'), selected: miniCalWeatherDisplayMode === 'iconTemp' },
+      { value: 'icon', label: _loc('CALENDARIA.Common.DisplayIconOnly'), selected: miniCalWeatherDisplayMode === 'icon' },
+      { value: 'temp', label: _loc('CALENDARIA.Settings.HUDWeatherDisplayMode.TempOnly'), selected: miniCalWeatherDisplayMode === 'temp' }
     ];
     const miniCalSeasonDisplayMode = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SEASON_DISPLAY_MODE);
     context.miniCalSeasonDisplayModeOptions = [
-      { value: 'full', label: localize('CALENDARIA.Common.DisplayIconText'), selected: miniCalSeasonDisplayMode === 'full' },
-      { value: 'icon', label: localize('CALENDARIA.Common.DisplayIconOnly'), selected: miniCalSeasonDisplayMode === 'icon' },
-      { value: 'text', label: localize('CALENDARIA.Common.DisplayTextOnly'), selected: miniCalSeasonDisplayMode === 'text' }
+      { value: 'full', label: _loc('CALENDARIA.Common.DisplayIconText'), selected: miniCalSeasonDisplayMode === 'full' },
+      { value: 'icon', label: _loc('CALENDARIA.Common.DisplayIconOnly'), selected: miniCalSeasonDisplayMode === 'icon' },
+      { value: 'text', label: _loc('CALENDARIA.Common.DisplayTextOnly'), selected: miniCalSeasonDisplayMode === 'text' }
     ];
     const miniCalEraDisplayMode = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_ERA_DISPLAY_MODE);
     context.miniCalEraDisplayModeOptions = [
-      { value: 'full', label: localize('CALENDARIA.Common.DisplayIconText'), selected: miniCalEraDisplayMode === 'full' },
-      { value: 'icon', label: localize('CALENDARIA.Common.DisplayIconOnly'), selected: miniCalEraDisplayMode === 'icon' },
-      { value: 'text', label: localize('CALENDARIA.Common.DisplayTextOnly'), selected: miniCalEraDisplayMode === 'text' },
-      { value: 'abbr', label: localize('CALENDARIA.Settings.HUDEraDisplayMode.Abbreviation'), selected: miniCalEraDisplayMode === 'abbr' }
+      { value: 'full', label: _loc('CALENDARIA.Common.DisplayIconText'), selected: miniCalEraDisplayMode === 'full' },
+      { value: 'icon', label: _loc('CALENDARIA.Common.DisplayIconOnly'), selected: miniCalEraDisplayMode === 'icon' },
+      { value: 'text', label: _loc('CALENDARIA.Common.DisplayTextOnly'), selected: miniCalEraDisplayMode === 'text' },
+      { value: 'abbr', label: _loc('CALENDARIA.Settings.HUDEraDisplayMode.Abbreviation'), selected: miniCalEraDisplayMode === 'abbr' }
     ];
     const miniCalCyclesDisplayMode = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_CYCLES_DISPLAY_MODE);
     context.miniCalCyclesDisplayModeOptions = [
-      { value: 'name', label: localize('CALENDARIA.Common.Name'), selected: miniCalCyclesDisplayMode === 'name' },
-      { value: 'icon', label: localize('CALENDARIA.Common.DisplayIconOnly'), selected: miniCalCyclesDisplayMode === 'icon' },
-      { value: 'number', label: localize('CALENDARIA.Settings.HUDCyclesDisplayMode.Number'), selected: miniCalCyclesDisplayMode === 'number' },
-      { value: 'roman', label: localize('CALENDARIA.Settings.HUDCyclesDisplayMode.Roman'), selected: miniCalCyclesDisplayMode === 'roman' }
+      { value: 'name', label: _loc('CALENDARIA.Common.Name'), selected: miniCalCyclesDisplayMode === 'name' },
+      { value: 'icon', label: _loc('CALENDARIA.Common.DisplayIconOnly'), selected: miniCalCyclesDisplayMode === 'icon' },
+      { value: 'number', label: _loc('CALENDARIA.Settings.HUDCyclesDisplayMode.Number'), selected: miniCalCyclesDisplayMode === 'number' },
+      { value: 'roman', label: _loc('CALENDARIA.Settings.HUDCyclesDisplayMode.Roman'), selected: miniCalCyclesDisplayMode === 'roman' }
     ];
     const miniCalJumps = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_TIME_JUMPS) || {};
     const { labels: incrementLabels, keys: incrementKeys } = SettingsPanel.#getIncrementLabels();
@@ -1164,32 +1162,32 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.forceHUD = game.settings.get(MODULE.ID, SETTINGS.FORCE_HUD);
     const hudMode = game.settings.get(MODULE.ID, SETTINGS.CALENDAR_HUD_MODE);
     context.hudModeOptions = [
-      { value: 'fullsize', label: localize('CALENDARIA.Settings.CalendarHUDMode.Fullsize'), selected: hudMode === 'fullsize' },
-      { value: 'compact', label: localize('CALENDARIA.Settings.CalendarHUDMode.Compact'), selected: hudMode === 'compact' }
+      { value: 'fullsize', label: _loc('CALENDARIA.Settings.CalendarHUDMode.Fullsize'), selected: hudMode === 'fullsize' },
+      { value: 'compact', label: _loc('CALENDARIA.Settings.CalendarHUDMode.Compact'), selected: hudMode === 'compact' }
     ];
     context.isCompactMode = hudMode === 'compact';
     const hudCalendarButton = game.settings.get(MODULE.ID, SETTINGS.HUD_CALENDAR_BUTTON);
     context.hudCalendarButtonOptions = [
-      { value: 'bigcal', label: localize('CALENDARIA.Common.BigCal'), selected: hudCalendarButton === 'bigcal' },
-      { value: 'minical', label: localize('CALENDARIA.Common.MiniCal'), selected: hudCalendarButton === 'minical' }
+      { value: 'bigcal', label: _loc('CALENDARIA.Common.BigCal'), selected: hudCalendarButton === 'bigcal' },
+      { value: 'minical', label: _loc('CALENDARIA.Common.MiniCal'), selected: hudCalendarButton === 'minical' }
     ];
     const dialStyle = game.settings.get(MODULE.ID, SETTINGS.HUD_DIAL_STYLE);
     context.dialStyleOptions = [
-      { value: 'dome', label: localize('CALENDARIA.Settings.HUDDialStyle.Dome'), selected: dialStyle === 'dome' },
-      { value: 'slice', label: localize('CALENDARIA.Settings.HUDDialStyle.Slice'), selected: dialStyle === 'slice' }
+      { value: 'dome', label: _loc('CALENDARIA.Settings.HUDDialStyle.Dome'), selected: dialStyle === 'dome' },
+      { value: 'slice', label: _loc('CALENDARIA.Settings.HUDDialStyle.Slice'), selected: dialStyle === 'slice' }
     ];
     const trayDirection = game.settings.get(MODULE.ID, SETTINGS.HUD_TRAY_DIRECTION);
     context.trayDirectionOptions = [
-      { value: 'down', label: localize('CALENDARIA.Settings.HUDTrayDirection.Down'), selected: trayDirection === 'down' },
-      { value: 'up', label: localize('CALENDARIA.Settings.HUDTrayDirection.Up'), selected: trayDirection === 'up' }
+      { value: 'down', label: _loc('CALENDARIA.Settings.HUDTrayDirection.Down'), selected: trayDirection === 'down' },
+      { value: 'up', label: _loc('CALENDARIA.Settings.HUDTrayDirection.Up'), selected: trayDirection === 'up' }
     ];
     context.hudCombatMode = game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_MODE);
     const weatherFxMode = game.settings.get(MODULE.ID, SETTINGS.HUD_WEATHER_FX_MODE);
     context.hudWeatherFxMode = weatherFxMode;
     context.weatherFxModeOptions = [
-      { value: 'full', label: localize('CALENDARIA.Common.Full'), selected: weatherFxMode === 'full' },
-      { value: 'reduced', label: localize('CALENDARIA.Settings.HUDWeatherFxMode.Reduced'), selected: weatherFxMode === 'reduced' },
-      { value: 'off', label: localize('CALENDARIA.Common.Off'), selected: weatherFxMode === 'off' }
+      { value: 'full', label: _loc('CALENDARIA.Common.Full'), selected: weatherFxMode === 'full' },
+      { value: 'reduced', label: _loc('CALENDARIA.Settings.HUDWeatherFxMode.Reduced'), selected: weatherFxMode === 'reduced' },
+      { value: 'off', label: _loc('CALENDARIA.Common.Off'), selected: weatherFxMode === 'off' }
     ];
     context.hudBorderGlow = game.settings.get(MODULE.ID, SETTINGS.HUD_BORDER_GLOW);
     context.hudDomeBelow = game.settings.get(MODULE.ID, SETTINGS.HUD_DOME_BELOW);
@@ -1204,37 +1202,37 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.hudShowEra = game.settings.get(MODULE.ID, SETTINGS.HUD_SHOW_ERA);
     const weatherDisplayMode = game.settings.get(MODULE.ID, SETTINGS.HUD_WEATHER_DISPLAY_MODE);
     context.weatherDisplayModeOptions = [
-      { value: 'full', label: localize('CALENDARIA.Settings.HUDWeatherDisplayMode.Full'), selected: weatherDisplayMode === 'full' },
-      { value: 'iconTemp', label: localize('CALENDARIA.Settings.HUDWeatherDisplayMode.IconTemp'), selected: weatherDisplayMode === 'iconTemp' },
-      { value: 'icon', label: localize('CALENDARIA.Common.DisplayIconOnly'), selected: weatherDisplayMode === 'icon' },
-      { value: 'temp', label: localize('CALENDARIA.Settings.HUDWeatherDisplayMode.TempOnly'), selected: weatherDisplayMode === 'temp' }
+      { value: 'full', label: _loc('CALENDARIA.Settings.HUDWeatherDisplayMode.Full'), selected: weatherDisplayMode === 'full' },
+      { value: 'iconTemp', label: _loc('CALENDARIA.Settings.HUDWeatherDisplayMode.IconTemp'), selected: weatherDisplayMode === 'iconTemp' },
+      { value: 'icon', label: _loc('CALENDARIA.Common.DisplayIconOnly'), selected: weatherDisplayMode === 'icon' },
+      { value: 'temp', label: _loc('CALENDARIA.Settings.HUDWeatherDisplayMode.TempOnly'), selected: weatherDisplayMode === 'temp' }
     ];
     const seasonDisplayMode = game.settings.get(MODULE.ID, SETTINGS.HUD_SEASON_DISPLAY_MODE);
     context.seasonDisplayModeOptions = [
-      { value: 'full', label: localize('CALENDARIA.Common.DisplayIconText'), selected: seasonDisplayMode === 'full' },
-      { value: 'icon', label: localize('CALENDARIA.Common.DisplayIconOnly'), selected: seasonDisplayMode === 'icon' },
-      { value: 'text', label: localize('CALENDARIA.Common.DisplayTextOnly'), selected: seasonDisplayMode === 'text' }
+      { value: 'full', label: _loc('CALENDARIA.Common.DisplayIconText'), selected: seasonDisplayMode === 'full' },
+      { value: 'icon', label: _loc('CALENDARIA.Common.DisplayIconOnly'), selected: seasonDisplayMode === 'icon' },
+      { value: 'text', label: _loc('CALENDARIA.Common.DisplayTextOnly'), selected: seasonDisplayMode === 'text' }
     ];
     const eraDisplayMode = game.settings.get(MODULE.ID, SETTINGS.HUD_ERA_DISPLAY_MODE);
     context.eraDisplayModeOptions = [
-      { value: 'full', label: localize('CALENDARIA.Common.DisplayIconText'), selected: eraDisplayMode === 'full' },
-      { value: 'icon', label: localize('CALENDARIA.Common.DisplayIconOnly'), selected: eraDisplayMode === 'icon' },
-      { value: 'text', label: localize('CALENDARIA.Common.DisplayTextOnly'), selected: eraDisplayMode === 'text' },
-      { value: 'abbr', label: localize('CALENDARIA.Settings.HUDEraDisplayMode.Abbreviation'), selected: eraDisplayMode === 'abbr' }
+      { value: 'full', label: _loc('CALENDARIA.Common.DisplayIconText'), selected: eraDisplayMode === 'full' },
+      { value: 'icon', label: _loc('CALENDARIA.Common.DisplayIconOnly'), selected: eraDisplayMode === 'icon' },
+      { value: 'text', label: _loc('CALENDARIA.Common.DisplayTextOnly'), selected: eraDisplayMode === 'text' },
+      { value: 'abbr', label: _loc('CALENDARIA.Settings.HUDEraDisplayMode.Abbreviation'), selected: eraDisplayMode === 'abbr' }
     ];
     context.hudShowCycles = game.settings.get(MODULE.ID, SETTINGS.HUD_SHOW_CYCLES);
     const cyclesDisplayMode = game.settings.get(MODULE.ID, SETTINGS.HUD_CYCLES_DISPLAY_MODE);
     context.cyclesDisplayModeOptions = [
-      { value: 'name', label: localize('CALENDARIA.Common.Name'), selected: cyclesDisplayMode === 'name' },
-      { value: 'icon', label: localize('CALENDARIA.Common.DisplayIconOnly'), selected: cyclesDisplayMode === 'icon' },
-      { value: 'number', label: localize('CALENDARIA.Settings.HUDCyclesDisplayMode.Number'), selected: cyclesDisplayMode === 'number' },
-      { value: 'roman', label: localize('CALENDARIA.Settings.HUDCyclesDisplayMode.Roman'), selected: cyclesDisplayMode === 'roman' }
+      { value: 'name', label: _loc('CALENDARIA.Common.Name'), selected: cyclesDisplayMode === 'name' },
+      { value: 'icon', label: _loc('CALENDARIA.Common.DisplayIconOnly'), selected: cyclesDisplayMode === 'icon' },
+      { value: 'number', label: _loc('CALENDARIA.Settings.HUDCyclesDisplayMode.Number'), selected: cyclesDisplayMode === 'number' },
+      { value: 'roman', label: _loc('CALENDARIA.Settings.HUDCyclesDisplayMode.Roman'), selected: cyclesDisplayMode === 'roman' }
     ];
     const customJumps = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_TIME_JUMPS) || {};
     const { labels: incrementLabels, keys: incrementKeys } = SettingsPanel.#getIncrementLabels();
     context.customTimeJumps = incrementKeys.map((key) => ({ key, label: incrementLabels[key] || key, jumps: customJumps[key] || { dec2: null, dec1: null, inc1: null, inc2: null } }));
     context.formatLocations = this.#prepareFormatLocationsForCategory('hud');
-    context.openHint = format('CALENDARIA.SettingsPanel.AppTab.OpenHint', { appName: 'HUD' });
+    context.openHint = _loc('CALENDARIA.SettingsPanel.AppTab.OpenHint', { appName: 'HUD' });
   }
 
   /**
@@ -1243,7 +1241,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   async #prepareBigCalContext(context) {
     context.formatLocations = this.#prepareFormatLocationsForCategory('bigcal');
-    context.openHint = format('CALENDARIA.SettingsPanel.AppTab.OpenHint', { appName: 'BigCal' });
+    context.openHint = _loc('CALENDARIA.SettingsPanel.AppTab.OpenHint', { appName: 'BigCal' });
     context.showBigCal = game.settings.get(MODULE.ID, SETTINGS.SHOW_BIG_CAL);
     context.forceBigCal = game.settings.get(MODULE.ID, SETTINGS.FORCE_BIG_CAL);
     context.bigCalAutoFade = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_AUTO_FADE);
@@ -1257,30 +1255,30 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.bigCalHeaderShowSelected = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_HEADER_SHOW_SELECTED);
     const bigCalWeatherDisplayMode = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_WEATHER_DISPLAY_MODE);
     context.bigCalWeatherDisplayModeOptions = [
-      { value: 'full', label: localize('CALENDARIA.Settings.HUDWeatherDisplayMode.Full'), selected: bigCalWeatherDisplayMode === 'full' },
-      { value: 'iconTemp', label: localize('CALENDARIA.Settings.HUDWeatherDisplayMode.IconTemp'), selected: bigCalWeatherDisplayMode === 'iconTemp' },
-      { value: 'icon', label: localize('CALENDARIA.Common.DisplayIconOnly'), selected: bigCalWeatherDisplayMode === 'icon' },
-      { value: 'temp', label: localize('CALENDARIA.Settings.HUDWeatherDisplayMode.TempOnly'), selected: bigCalWeatherDisplayMode === 'temp' }
+      { value: 'full', label: _loc('CALENDARIA.Settings.HUDWeatherDisplayMode.Full'), selected: bigCalWeatherDisplayMode === 'full' },
+      { value: 'iconTemp', label: _loc('CALENDARIA.Settings.HUDWeatherDisplayMode.IconTemp'), selected: bigCalWeatherDisplayMode === 'iconTemp' },
+      { value: 'icon', label: _loc('CALENDARIA.Common.DisplayIconOnly'), selected: bigCalWeatherDisplayMode === 'icon' },
+      { value: 'temp', label: _loc('CALENDARIA.Settings.HUDWeatherDisplayMode.TempOnly'), selected: bigCalWeatherDisplayMode === 'temp' }
     ];
     const bigCalSeasonDisplayMode = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SEASON_DISPLAY_MODE);
     context.bigCalSeasonDisplayModeOptions = [
-      { value: 'full', label: localize('CALENDARIA.Common.DisplayIconText'), selected: bigCalSeasonDisplayMode === 'full' },
-      { value: 'icon', label: localize('CALENDARIA.Common.DisplayIconOnly'), selected: bigCalSeasonDisplayMode === 'icon' },
-      { value: 'text', label: localize('CALENDARIA.Common.DisplayTextOnly'), selected: bigCalSeasonDisplayMode === 'text' }
+      { value: 'full', label: _loc('CALENDARIA.Common.DisplayIconText'), selected: bigCalSeasonDisplayMode === 'full' },
+      { value: 'icon', label: _loc('CALENDARIA.Common.DisplayIconOnly'), selected: bigCalSeasonDisplayMode === 'icon' },
+      { value: 'text', label: _loc('CALENDARIA.Common.DisplayTextOnly'), selected: bigCalSeasonDisplayMode === 'text' }
     ];
     const bigCalEraDisplayMode = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_ERA_DISPLAY_MODE);
     context.bigCalEraDisplayModeOptions = [
-      { value: 'full', label: localize('CALENDARIA.Common.DisplayIconText'), selected: bigCalEraDisplayMode === 'full' },
-      { value: 'icon', label: localize('CALENDARIA.Common.DisplayIconOnly'), selected: bigCalEraDisplayMode === 'icon' },
-      { value: 'text', label: localize('CALENDARIA.Common.DisplayTextOnly'), selected: bigCalEraDisplayMode === 'text' },
-      { value: 'abbr', label: localize('CALENDARIA.Settings.BigCalEraDisplayMode.Abbreviation'), selected: bigCalEraDisplayMode === 'abbr' }
+      { value: 'full', label: _loc('CALENDARIA.Common.DisplayIconText'), selected: bigCalEraDisplayMode === 'full' },
+      { value: 'icon', label: _loc('CALENDARIA.Common.DisplayIconOnly'), selected: bigCalEraDisplayMode === 'icon' },
+      { value: 'text', label: _loc('CALENDARIA.Common.DisplayTextOnly'), selected: bigCalEraDisplayMode === 'text' },
+      { value: 'abbr', label: _loc('CALENDARIA.Settings.BigCalEraDisplayMode.Abbreviation'), selected: bigCalEraDisplayMode === 'abbr' }
     ];
     const bigCalCyclesDisplayMode = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_CYCLES_DISPLAY_MODE);
     context.bigCalCyclesDisplayModeOptions = [
-      { value: 'name', label: localize('CALENDARIA.Common.Name'), selected: bigCalCyclesDisplayMode === 'name' },
-      { value: 'icon', label: localize('CALENDARIA.Common.DisplayIconOnly'), selected: bigCalCyclesDisplayMode === 'icon' },
-      { value: 'number', label: localize('CALENDARIA.Settings.BigCalCyclesDisplayMode.Number'), selected: bigCalCyclesDisplayMode === 'number' },
-      { value: 'roman', label: localize('CALENDARIA.Settings.BigCalCyclesDisplayMode.Roman'), selected: bigCalCyclesDisplayMode === 'roman' }
+      { value: 'name', label: _loc('CALENDARIA.Common.Name'), selected: bigCalCyclesDisplayMode === 'name' },
+      { value: 'icon', label: _loc('CALENDARIA.Common.DisplayIconOnly'), selected: bigCalCyclesDisplayMode === 'icon' },
+      { value: 'number', label: _loc('CALENDARIA.Settings.BigCalCyclesDisplayMode.Number'), selected: bigCalCyclesDisplayMode === 'number' },
+      { value: 'roman', label: _loc('CALENDARIA.Settings.BigCalCyclesDisplayMode.Roman'), selected: bigCalCyclesDisplayMode === 'roman' }
     ];
   }
 
@@ -1292,82 +1290,82 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   #prepareFormatLocationsForCategory(category) {
     const displayFormats = game.settings.get(MODULE.ID, SETTINGS.DISPLAY_FORMATS);
     const calendar = CalendarManager.getActiveCalendar();
-    let calendarName = localize('CALENDARIA.Common.Calendar');
+    let calendarName = _loc('CALENDARIA.Common.Calendar');
     if (calendar?.metadata?.id) {
       const locKey = `CALENDARIA.Calendar.${calendar.metadata.id
         .split('-')
         .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
         .join('')}.Name`;
-      const localized = localize(locKey);
-      calendarName = localized !== locKey ? localized : calendar.name || localize('CALENDARIA.Common.Calendar');
+      const localized = _loc(locKey);
+      calendarName = localized !== locKey ? localized : calendar.name || _loc('CALENDARIA.Common.Calendar');
     }
-    const calendarDefaultLabel = format('CALENDARIA.Format.Preset.CalendarDefault', { calendar: calendarName });
+    const calendarDefaultLabel = _loc('CALENDARIA.Format.Preset.CalendarDefault', { calendar: calendarName });
     const presetOptions = [
       { value: 'calendarDefault', label: calendarDefaultLabel },
-      { value: 'custom', label: localize('CALENDARIA.Common.Custom') },
-      { value: 'approxDate', label: localize('CALENDARIA.Format.Preset.ApproxDate') },
-      { value: 'approxDateTime', label: localize('CALENDARIA.Format.Preset.ApproxDateTime') },
-      { value: 'approxTime', label: localize('CALENDARIA.Format.Preset.ApproxTime') },
-      { value: 'dateShort', label: localize('CALENDARIA.Format.Preset.DateShort') },
-      { value: 'dateMedium', label: localize('CALENDARIA.Format.Preset.DateMedium') },
-      { value: 'dateLong', label: localize('CALENDARIA.Format.Preset.DateLong') },
-      { value: 'dateFull', label: localize('CALENDARIA.Format.Preset.DateFull') },
-      { value: 'dateUS', label: localize('CALENDARIA.Format.Preset.DateUS') },
-      { value: 'dateUSFull', label: localize('CALENDARIA.Format.Preset.DateUSFull') },
-      { value: 'dateISO', label: localize('CALENDARIA.Format.Preset.DateISO') },
-      { value: 'dateNumericUS', label: localize('CALENDARIA.Format.Preset.DateNumericUS') },
-      { value: 'dateNumericEU', label: localize('CALENDARIA.Format.Preset.DateNumericEU') },
-      { value: 'ordinal', label: localize('CALENDARIA.Format.Preset.Ordinal') },
-      { value: 'ordinalLong', label: localize('CALENDARIA.Format.Preset.OrdinalLong') },
-      { value: 'ordinalEra', label: localize('CALENDARIA.Format.Preset.OrdinalEra') },
-      { value: 'ordinalFull', label: localize('CALENDARIA.Format.Preset.OrdinalFull') },
-      { value: 'seasonDate', label: localize('CALENDARIA.Format.Preset.SeasonDate') },
-      { value: 'weekHeader', label: localize('CALENDARIA.Format.Preset.WeekHeader') },
-      { value: 'yearOnly', label: localize('CALENDARIA.Format.Preset.YearOnly') },
-      { value: 'yearEra', label: localize('CALENDARIA.Format.Preset.YearEra') },
-      { value: 'time12', label: localize('CALENDARIA.Format.Preset.Time12') },
-      { value: 'time12Sec', label: localize('CALENDARIA.Format.Preset.Time12Sec') },
-      { value: 'time24', label: localize('CALENDARIA.Format.Preset.Time24') },
-      { value: 'time24Sec', label: localize('CALENDARIA.Format.Preset.Time24Sec') },
-      { value: 'datetimeShort12', label: localize('CALENDARIA.Format.Preset.DatetimeShort12') },
-      { value: 'datetimeShort24', label: localize('CALENDARIA.Format.Preset.DatetimeShort24') },
-      { value: 'datetime12', label: localize('CALENDARIA.Format.Preset.Datetime12') },
-      { value: 'datetime24', label: localize('CALENDARIA.Format.Preset.Datetime24') }
+      { value: 'custom', label: _loc('CALENDARIA.Common.Custom') },
+      { value: 'approxDate', label: _loc('CALENDARIA.Format.Preset.ApproxDate') },
+      { value: 'approxDateTime', label: _loc('CALENDARIA.Format.Preset.ApproxDateTime') },
+      { value: 'approxTime', label: _loc('CALENDARIA.Format.Preset.ApproxTime') },
+      { value: 'dateShort', label: _loc('CALENDARIA.Format.Preset.DateShort') },
+      { value: 'dateMedium', label: _loc('CALENDARIA.Format.Preset.DateMedium') },
+      { value: 'dateLong', label: _loc('CALENDARIA.Format.Preset.DateLong') },
+      { value: 'dateFull', label: _loc('CALENDARIA.Format.Preset.DateFull') },
+      { value: 'dateUS', label: _loc('CALENDARIA.Format.Preset.DateUS') },
+      { value: 'dateUSFull', label: _loc('CALENDARIA.Format.Preset.DateUSFull') },
+      { value: 'dateISO', label: _loc('CALENDARIA.Format.Preset.DateISO') },
+      { value: 'dateNumericUS', label: _loc('CALENDARIA.Format.Preset.DateNumericUS') },
+      { value: 'dateNumericEU', label: _loc('CALENDARIA.Format.Preset.DateNumericEU') },
+      { value: 'ordinal', label: _loc('CALENDARIA.Format.Preset.Ordinal') },
+      { value: 'ordinalLong', label: _loc('CALENDARIA.Format.Preset.OrdinalLong') },
+      { value: 'ordinalEra', label: _loc('CALENDARIA.Format.Preset.OrdinalEra') },
+      { value: 'ordinalFull', label: _loc('CALENDARIA.Format.Preset.OrdinalFull') },
+      { value: 'seasonDate', label: _loc('CALENDARIA.Format.Preset.SeasonDate') },
+      { value: 'weekHeader', label: _loc('CALENDARIA.Format.Preset.WeekHeader') },
+      { value: 'yearOnly', label: _loc('CALENDARIA.Format.Preset.YearOnly') },
+      { value: 'yearEra', label: _loc('CALENDARIA.Format.Preset.YearEra') },
+      { value: 'time12', label: _loc('CALENDARIA.Format.Preset.Time12') },
+      { value: 'time12Sec', label: _loc('CALENDARIA.Format.Preset.Time12Sec') },
+      { value: 'time24', label: _loc('CALENDARIA.Format.Preset.Time24') },
+      { value: 'time24Sec', label: _loc('CALENDARIA.Format.Preset.Time24Sec') },
+      { value: 'datetimeShort12', label: _loc('CALENDARIA.Format.Preset.DatetimeShort12') },
+      { value: 'datetimeShort24', label: _loc('CALENDARIA.Format.Preset.DatetimeShort24') },
+      { value: 'datetime12', label: _loc('CALENDARIA.Format.Preset.Datetime12') },
+      { value: 'datetime24', label: _loc('CALENDARIA.Format.Preset.Datetime24') }
     ];
     const supportsOff = ['hudDate', 'timekeeperDate'];
     const stopwatchRealtimePresets = [
-      { value: 'stopwatchRealtimeFull', label: localize('CALENDARIA.Common.Full') },
-      { value: 'stopwatchRealtimeNoMs', label: localize('CALENDARIA.Format.Preset.StopwatchNoMs') },
-      { value: 'stopwatchRealtimeMinSec', label: localize('CALENDARIA.Format.Preset.StopwatchMinSec') },
-      { value: 'stopwatchRealtimeSecOnly', label: localize('CALENDARIA.Format.Preset.StopwatchSecOnly') },
-      { value: 'custom', label: localize('CALENDARIA.Common.Custom') }
+      { value: 'stopwatchRealtimeFull', label: _loc('CALENDARIA.Common.Full') },
+      { value: 'stopwatchRealtimeNoMs', label: _loc('CALENDARIA.Format.Preset.StopwatchNoMs') },
+      { value: 'stopwatchRealtimeMinSec', label: _loc('CALENDARIA.Format.Preset.StopwatchMinSec') },
+      { value: 'stopwatchRealtimeSecOnly', label: _loc('CALENDARIA.Format.Preset.StopwatchSecOnly') },
+      { value: 'custom', label: _loc('CALENDARIA.Common.Custom') }
     ];
     const stopwatchGametimePresets = [
-      { value: 'stopwatchGametimeFull', label: localize('CALENDARIA.Common.Full') },
-      { value: 'stopwatchGametimeMinSec', label: localize('CALENDARIA.Format.Preset.StopwatchMinSec') },
-      { value: 'stopwatchGametimeSecOnly', label: localize('CALENDARIA.Format.Preset.StopwatchSecOnly') },
-      { value: 'custom', label: localize('CALENDARIA.Common.Custom') }
+      { value: 'stopwatchGametimeFull', label: _loc('CALENDARIA.Common.Full') },
+      { value: 'stopwatchGametimeMinSec', label: _loc('CALENDARIA.Format.Preset.StopwatchMinSec') },
+      { value: 'stopwatchGametimeSecOnly', label: _loc('CALENDARIA.Format.Preset.StopwatchSecOnly') },
+      { value: 'custom', label: _loc('CALENDARIA.Common.Custom') }
     ];
     const stopwatchRealtimeKnown = ['stopwatchRealtimeFull', 'stopwatchRealtimeNoMs', 'stopwatchRealtimeMinSec', 'stopwatchRealtimeSecOnly'];
     const stopwatchGametimeKnown = ['stopwatchGametimeFull', 'stopwatchGametimeMinSec', 'stopwatchGametimeSecOnly'];
     const allLocations = [
-      { id: 'hudDate', label: localize('CALENDARIA.Common.DateDisplay'), category: 'hud', contextType: 'date' },
-      { id: 'hudTime', label: localize('CALENDARIA.Common.TimeDisplay'), category: 'hud', contextType: 'time' },
-      { id: 'timekeeperDate', label: localize('CALENDARIA.Common.DateDisplay'), category: 'timekeeper', contextType: 'date' },
-      { id: 'timekeeperTime', label: localize('CALENDARIA.Common.TimeDisplay'), category: 'timekeeper', contextType: 'time' },
-      { id: 'microCalHeader', label: localize('CALENDARIA.Format.Location.MicroCalHeader'), category: 'miniCal', contextType: 'date' },
-      { id: 'miniCalHeader', label: localize('CALENDARIA.Format.Location.MiniCalHeader'), category: 'miniCal', contextType: 'date' },
-      { id: 'miniCalTime', label: localize('CALENDARIA.Common.TimeDisplay'), category: 'miniCal', contextType: 'time' },
-      { id: 'bigCalHeader', label: localize('CALENDARIA.Format.Location.BigCalHeader'), category: 'bigcal', contextType: 'date' },
-      { id: 'bigCalWeekHeader', label: localize('CALENDARIA.Common.WeekViewHeader'), category: 'bigcal', contextType: 'date' },
-      { id: 'bigCalYearHeader', label: localize('CALENDARIA.Common.YearViewHeader'), category: 'bigcal', contextType: 'date' },
-      { id: 'bigCalYearLabel', label: localize('CALENDARIA.Format.Location.BigCalYearLabel'), category: 'bigcal', contextType: 'date' },
-      { id: 'chatTimestamp', label: localize('CALENDARIA.Format.Location.ChatTimestamp'), category: 'chat', contextType: 'date' },
-      { id: 'noteViewerDate', label: localize('CALENDARIA.Format.Location.NoteViewerDate'), category: 'notes', contextType: 'date' },
-      { id: 'cinematicDate', label: localize('CALENDARIA.Format.Location.CinematicDate'), category: 'cinematics', contextType: 'date' },
-      { id: 'sundialTime', label: localize('CALENDARIA.Common.TimeDisplay'), category: 'sunDial', contextType: 'time' },
-      { id: 'stopwatchRealtime', label: localize('CALENDARIA.Format.Location.StopwatchRealtime'), category: 'stopwatch', contextType: 'stopwatch', gmOnly: true },
-      { id: 'stopwatchGametime', label: localize('CALENDARIA.Format.Location.StopwatchGametime'), category: 'stopwatch', contextType: 'stopwatch', gmOnly: true }
+      { id: 'hudDate', label: _loc('CALENDARIA.Common.DateDisplay'), category: 'hud', contextType: 'date' },
+      { id: 'hudTime', label: _loc('CALENDARIA.Common.TimeDisplay'), category: 'hud', contextType: 'time' },
+      { id: 'timekeeperDate', label: _loc('CALENDARIA.Common.DateDisplay'), category: 'timekeeper', contextType: 'date' },
+      { id: 'timekeeperTime', label: _loc('CALENDARIA.Common.TimeDisplay'), category: 'timekeeper', contextType: 'time' },
+      { id: 'microCalHeader', label: _loc('CALENDARIA.Format.Location.MicroCalHeader'), category: 'miniCal', contextType: 'date' },
+      { id: 'miniCalHeader', label: _loc('CALENDARIA.Format.Location.MiniCalHeader'), category: 'miniCal', contextType: 'date' },
+      { id: 'miniCalTime', label: _loc('CALENDARIA.Common.TimeDisplay'), category: 'miniCal', contextType: 'time' },
+      { id: 'bigCalHeader', label: _loc('CALENDARIA.Format.Location.BigCalHeader'), category: 'bigcal', contextType: 'date' },
+      { id: 'bigCalWeekHeader', label: _loc('CALENDARIA.Common.WeekViewHeader'), category: 'bigcal', contextType: 'date' },
+      { id: 'bigCalYearHeader', label: _loc('CALENDARIA.Common.YearViewHeader'), category: 'bigcal', contextType: 'date' },
+      { id: 'bigCalYearLabel', label: _loc('CALENDARIA.Format.Location.BigCalYearLabel'), category: 'bigcal', contextType: 'date' },
+      { id: 'chatTimestamp', label: _loc('CALENDARIA.Format.Location.ChatTimestamp'), category: 'chat', contextType: 'date' },
+      { id: 'noteViewerDate', label: _loc('CALENDARIA.Format.Location.NoteViewerDate'), category: 'notes', contextType: 'date' },
+      { id: 'cinematicDate', label: _loc('CALENDARIA.Format.Location.CinematicDate'), category: 'cinematics', contextType: 'date' },
+      { id: 'sundialTime', label: _loc('CALENDARIA.Common.TimeDisplay'), category: 'sunDial', contextType: 'time' },
+      { id: 'stopwatchRealtime', label: _loc('CALENDARIA.Format.Location.StopwatchRealtime'), category: 'stopwatch', contextType: 'stopwatch', gmOnly: true },
+      { id: 'stopwatchGametime', label: _loc('CALENDARIA.Format.Location.StopwatchGametime'), category: 'stopwatch', contextType: 'stopwatch', gmOnly: true }
     ];
     const locations = allLocations.filter((loc) => loc.category === category);
     return locations.map((loc) => {
@@ -1384,11 +1382,11 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         knownPresets = ['calendarDefault', 'time12', 'time12Sec', 'time24', 'time24Sec', 'custom'];
         locationPresets = [
           { value: 'calendarDefault', label: calendarDefaultLabel },
-          { value: 'time12', label: localize('CALENDARIA.Format.Preset.Time12') },
-          { value: 'time12Sec', label: localize('CALENDARIA.Format.Preset.Time12Sec') },
-          { value: 'time24', label: localize('CALENDARIA.Format.Preset.Time24') },
-          { value: 'time24Sec', label: localize('CALENDARIA.Format.Preset.Time24Sec') },
-          { value: 'custom', label: localize('CALENDARIA.Common.Custom') }
+          { value: 'time12', label: _loc('CALENDARIA.Format.Preset.Time12') },
+          { value: 'time12Sec', label: _loc('CALENDARIA.Format.Preset.Time12Sec') },
+          { value: 'time24', label: _loc('CALENDARIA.Format.Preset.Time24') },
+          { value: 'time24Sec', label: _loc('CALENDARIA.Format.Preset.Time24Sec') },
+          { value: 'custom', label: _loc('CALENDARIA.Common.Custom') }
         ];
         defaultFormat = 'time24';
       } else {
@@ -1426,7 +1424,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         ];
         locationPresets = [...presetOptions];
         defaultFormat = 'dateLong';
-        if (supportsOff.includes(loc.id)) locationPresets = [{ value: 'off', label: localize('CALENDARIA.Common.Hidden') }, ...locationPresets];
+        if (supportsOff.includes(loc.id)) locationPresets = [{ value: 'off', label: _loc('CALENDARIA.Common.Hidden') }, ...locationPresets];
       }
       const formats = displayFormats[loc.id] || { gm: defaultFormat, player: defaultFormat };
       const isCustomGM = !knownPresets.includes(formats.gm);
@@ -1455,9 +1453,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.chronicleShowEmpty = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_SHOW_EMPTY);
     const emptyContentTypes = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_EMPTY_CONTENT_TYPES);
     context.chronicleEmptyContentOptions = [
-      { value: 'weather', label: localize('CALENDARIA.Common.Weather'), checked: emptyContentTypes.has('weather') },
-      { value: 'moon', label: localize('CALENDARIA.Common.MoonPhase'), checked: emptyContentTypes.has('moon') },
-      { value: 'season', label: localize('CALENDARIA.Common.Seasons'), checked: emptyContentTypes.has('season') }
+      { value: 'weather', label: _loc('CALENDARIA.Common.Weather'), checked: emptyContentTypes.has('weather') },
+      { value: 'moon', label: _loc('CALENDARIA.Common.MoonPhase'), checked: emptyContentTypes.has('moon') },
+      { value: 'season', label: _loc('CALENDARIA.Common.Seasons'), checked: emptyContentTypes.has('season') }
     ];
     context.chronicleShowWeather = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_SHOW_WEATHER);
     context.chronicleShowMoonPhases = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_SHOW_MOON_PHASES);
@@ -1465,13 +1463,13 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.chronicleBigCalButton = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_BIG_CAL_BUTTON);
     context.chronicleHudButton = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_HUD_BUTTON);
     context.chronicleMiniCalButton = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_MINI_CAL_BUTTON);
-    context.openHint = format('CALENDARIA.SettingsPanel.AppTab.OpenHint', { appName: 'Chronicle' });
+    context.openHint = _loc('CALENDARIA.SettingsPanel.AppTab.OpenHint', { appName: 'Chronicle' });
     const depth = context.chronicleEntryDepth;
     context.depthOptions = [
-      { value: 'title', label: localize('CALENDARIA.Chronicle.Depth.Title'), selected: depth === 'title' },
-      { value: 'excerpt', label: localize('CALENDARIA.Chronicle.Depth.Excerpt'), selected: depth === 'excerpt' },
-      { value: 'full', label: localize('CALENDARIA.Common.Full'), selected: depth === 'full' },
-      { value: 'collapsible', label: localize('CALENDARIA.Chronicle.Depth.Collapsible'), selected: depth === 'collapsible' }
+      { value: 'title', label: _loc('CALENDARIA.Chronicle.Depth.Title'), selected: depth === 'title' },
+      { value: 'excerpt', label: _loc('CALENDARIA.Chronicle.Depth.Excerpt'), selected: depth === 'excerpt' },
+      { value: 'full', label: _loc('CALENDARIA.Common.Full'), selected: depth === 'full' },
+      { value: 'collapsible', label: _loc('CALENDARIA.Chronicle.Depth.Collapsible'), selected: depth === 'collapsible' }
     ];
   }
 
@@ -1492,11 +1490,11 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.cinematicOnRestDisabled = !game.settings.get(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST);
     const unit = game.settings.get(MODULE.ID, SETTINGS.CINEMATIC_THRESHOLD_UNIT);
     context.thresholdUnits = [
-      { value: 'day', label: localize('CALENDARIA.Common.Day'), selected: unit === 'day' },
-      { value: 'week', label: localize('CALENDARIA.Common.Week'), selected: unit === 'week' },
-      { value: 'month', label: localize('CALENDARIA.Common.Month'), selected: unit === 'month' },
-      { value: 'season', label: localize('CALENDARIA.Common.Season'), selected: unit === 'season' },
-      { value: 'year', label: localize('CALENDARIA.Common.Year'), selected: unit === 'year' }
+      { value: 'day', label: _loc('CALENDARIA.Common.Day'), selected: unit === 'day' },
+      { value: 'week', label: _loc('CALENDARIA.Common.Week'), selected: unit === 'week' },
+      { value: 'month', label: _loc('CALENDARIA.Common.Month'), selected: unit === 'month' },
+      { value: 'season', label: _loc('CALENDARIA.Common.Season'), selected: unit === 'season' },
+      { value: 'year', label: _loc('CALENDARIA.Common.Year'), selected: unit === 'year' }
     ];
     context.formatLocations = this.#prepareFormatLocationsForCategory('cinematics');
   }
@@ -1515,7 +1513,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     const stopwatchSticky = game.settings.get(MODULE.ID, SETTINGS.STOPWATCH_STICKY_STATES);
     context.stopwatchStickyPosition = stopwatchSticky?.position ?? false;
     context.formatLocations = this.#prepareFormatLocationsForCategory('stopwatch');
-    context.openHint = format('CALENDARIA.SettingsPanel.AppTab.OpenHint', { appName: 'Stop Watch' });
+    context.openHint = _loc('CALENDARIA.SettingsPanel.AppTab.OpenHint', { appName: 'Stop Watch' });
   }
 
   /**
@@ -1532,7 +1530,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     const sunDialSticky = game.settings.get(MODULE.ID, SETTINGS.SUN_DIAL_STICKY_STATES);
     context.sunDialStickyPosition = sunDialSticky?.position ?? false;
     context.formatLocations = this.#prepareFormatLocationsForCategory('sunDial');
-    context.openHint = format('CALENDARIA.SettingsPanel.AppTab.OpenHint', { appName: 'Sun Dial' });
+    context.openHint = _loc('CALENDARIA.SettingsPanel.AppTab.OpenHint', { appName: 'Sun Dial' });
   }
 
   /**
@@ -1542,7 +1540,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   async #prepareFooterContext(context) {
     context.moduleVersion = game.modules.get(MODULE.ID)?.version ?? 'Unknown';
     context.saveState = this.#saveState;
-    context.saveLabel = this.#saveState === 'saving' ? localize('CALENDARIA.SettingsPanel.Footer.Saving') : localize('CALENDARIA.SettingsPanel.Footer.Saved');
+    context.saveLabel = this.#saveState === 'saving' ? _loc('CALENDARIA.SettingsPanel.Footer.Saving') : _loc('CALENDARIA.SettingsPanel.Footer.Saved');
     context.saveIcon = this.#saveState === 'saving' ? 'fa-sync fa-spin' : 'fa-check';
   }
 
@@ -1563,7 +1561,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     const timeKeeperJumps = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_TIME_JUMPS) || {};
     const { labels: incrementLabels, keys: incrementKeys } = SettingsPanel.#getIncrementLabels();
     context.timeKeeperTimeJumps = incrementKeys.map((key) => ({ key, label: incrementLabels[key] || key, jumps: timeKeeperJumps[key] || { dec2: null, dec1: null, inc1: null, inc2: null } }));
-    context.openHint = format('CALENDARIA.SettingsPanel.AppTab.OpenHint', { appName: 'Time Keeper' });
+    context.openHint = _loc('CALENDARIA.SettingsPanel.AppTab.OpenHint', { appName: 'Time Keeper' });
   }
 
   /**
@@ -1574,25 +1572,25 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.autoGenerateWeather = game.settings.get(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER);
     const tempUnit = game.settings.get(MODULE.ID, SETTINGS.TEMPERATURE_UNIT);
     context.temperatureUnitOptions = [
-      { value: 'celsius', label: localize('CALENDARIA.Settings.TemperatureUnit.Celsius'), selected: tempUnit === 'celsius' },
-      { value: 'fahrenheit', label: localize('CALENDARIA.Settings.TemperatureUnit.Fahrenheit'), selected: tempUnit === 'fahrenheit' }
+      { value: 'celsius', label: _loc('CALENDARIA.Settings.TemperatureUnit.Celsius'), selected: tempUnit === 'celsius' },
+      { value: 'fahrenheit', label: _loc('CALENDARIA.Settings.TemperatureUnit.Fahrenheit'), selected: tempUnit === 'fahrenheit' }
     ];
     context.temperatureUnitSymbol = tempUnit === 'fahrenheit' ? '°F' : '°C';
     context.temperatureShowBoth = game.settings.get(MODULE.ID, SETTINGS.TEMPERATURE_SHOW_BOTH);
     const precipUnit = game.settings.get(MODULE.ID, SETTINGS.PRECIPITATION_UNIT);
     context.precipitationUnitOptions = [
-      { value: 'metric', label: localize('CALENDARIA.Settings.PrecipitationUnit.Metric'), selected: precipUnit === 'metric' },
-      { value: 'imperial', label: localize('CALENDARIA.Settings.PrecipitationUnit.Imperial'), selected: precipUnit === 'imperial' }
+      { value: 'metric', label: _loc('CALENDARIA.Settings.PrecipitationUnit.Metric'), selected: precipUnit === 'metric' },
+      { value: 'imperial', label: _loc('CALENDARIA.Settings.PrecipitationUnit.Imperial'), selected: precipUnit === 'imperial' }
     ];
     const windUnit = game.settings.get(MODULE.ID, SETTINGS.WIND_SPEED_UNIT);
     context.windSpeedUnitOptions = [
-      { value: 'kph', label: localize('CALENDARIA.Settings.WindSpeedUnit.Kph'), selected: windUnit === 'kph' },
-      { value: 'mph', label: localize('CALENDARIA.Settings.WindSpeedUnit.Mph'), selected: windUnit === 'mph' }
+      { value: 'kph', label: _loc('CALENDARIA.Settings.WindSpeedUnit.Kph'), selected: windUnit === 'kph' },
+      { value: 'mph', label: _loc('CALENDARIA.Settings.WindSpeedUnit.Mph'), selected: windUnit === 'mph' }
     ];
     const zones = WeatherManager.getCalendarZones() || [];
     const activeZone = WeatherManager.getActiveZone();
     context.hasZones = zones.length > 0;
-    context.zoneOptions = zones.map((z) => ({ value: z.id, label: localize(z.name), selected: z.id === activeZone?.id }));
+    context.zoneOptions = zones.map((z) => ({ value: z.id, label: _loc(z.name), selected: z.id === activeZone?.id }));
     context.zoneOptions.sort((a, b) => a.label.localeCompare(b.label, game.i18n.lang));
     context.weatherInertia = game.settings.get(MODULE.ID, SETTINGS.WEATHER_INERTIA) ?? 0.3;
     context.intradayWeather = game.settings.get(MODULE.ID, SETTINGS.INTRADAY_WEATHER) ?? false;
@@ -1625,18 +1623,18 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if (context.isGM) {
       const forceTheme = game.settings.get(MODULE.ID, SETTINGS.FORCE_THEME) || 'none';
       const forcePresets = Object.keys(THEME_PRESETS)
-        .map((v) => ({ value: v, label: localize(`CALENDARIA.ThemeEditor.Presets.${v.charAt(0).toUpperCase() + v.slice(1)}`), selected: forceTheme === v }))
+        .map((v) => ({ value: v, label: _loc(`CALENDARIA.ThemeEditor.Presets.${v.charAt(0).toUpperCase() + v.slice(1)}`), selected: forceTheme === v }))
         .sort((a, b) => a.label.localeCompare(b.label));
       const forceCustom = Object.entries(themes)
         .filter(([, entry]) => entry && typeof entry === 'object' && entry.name)
         .map(([key, entry]) => ({ value: key, label: entry.name, selected: forceTheme === key }))
         .sort((a, b) => a.label.localeCompare(b.label));
-      context.forceThemeOptions = [{ value: 'none', label: localize('CALENDARIA.Settings.ForceTheme.None'), selected: forceTheme === 'none' }, ...forcePresets, ...forceCustom];
+      context.forceThemeOptions = [{ value: 'none', label: _loc('CALENDARIA.Settings.ForceTheme.None'), selected: forceTheme === 'none' }, ...forcePresets, ...forceCustom];
     }
     context.themeForced = !!forcedTheme;
     const displayMode = forcedTheme || themeMode;
     context.builtInThemes = Object.keys(THEME_PRESETS)
-      .map((v) => ({ key: v, label: localize(`CALENDARIA.ThemeEditor.Presets.${v.charAt(0).toUpperCase() + v.slice(1)}`), selected: displayMode === v }))
+      .map((v) => ({ key: v, label: _loc(`CALENDARIA.ThemeEditor.Presets.${v.charAt(0).toUpperCase() + v.slice(1)}`), selected: displayMode === v }))
       .sort((a, b) => a.label.localeCompare(b.label));
     context.customThemes = Object.entries(themes)
       .filter(([, entry]) => entry && typeof entry === 'object' && entry.name)
@@ -1697,28 +1695,28 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       { key: 'midnight', label: 'CALENDARIA.Common.Midnight' },
       { key: 'newDay', label: 'CALENDARIA.Common.NewDay' }
     ];
-    context.globalTriggers = globalTriggers.map((trigger) => ({ ...trigger, label: localize(trigger.label), macroId: config.global?.[trigger.key] || '' }));
+    context.globalTriggers = globalTriggers.map((trigger) => ({ ...trigger, label: _loc(trigger.label), macroId: config.global?.[trigger.key] || '' }));
     const calendar = CalendarManager.getActiveCalendar();
     context.hasSeasons = calendar?.seasonsArray?.length > 0;
     if (context.hasSeasons) {
-      context.seasons = calendar.seasonsArray.map((season, index) => ({ index, name: localize(season.name) }));
+      context.seasons = calendar.seasonsArray.map((season, index) => ({ index, name: _loc(season.name) }));
       context.seasonTriggers = (config.season || []).map((trigger, index) => {
         const isAll = trigger.seasonIndex === -1;
         const season = isAll ? null : calendar.seasonsArray[trigger.seasonIndex];
         return {
           index,
           seasonIndex: trigger.seasonIndex,
-          seasonName: isAll ? localize('CALENDARIA.MacroTrigger.AllSeasons') : season ? localize(season.name) : `Season ${trigger.seasonIndex}`,
+          seasonName: isAll ? _loc('CALENDARIA.MacroTrigger.AllSeasons') : season ? _loc(season.name) : `Season ${trigger.seasonIndex}`,
           macroId: trigger.macroId
         };
       });
     }
     context.hasMoons = calendar?.moonsArray?.length > 0;
     if (context.hasMoons) {
-      context.moons = calendar.moonsArray.map((moon, index) => ({ index, name: localize(moon.name) }));
+      context.moons = calendar.moonsArray.map((moon, index) => ({ index, name: _loc(moon.name) }));
       context.moonPhases = {};
       calendar.moonsArray.forEach((moon, moonIndex) => {
-        context.moonPhases[moonIndex] = Object.values(moon.phases ?? {}).map((phase, phaseIndex) => ({ index: phaseIndex, name: localize(phase.name) }));
+        context.moonPhases[moonIndex] = Object.values(moon.phases ?? {}).map((phase, phaseIndex) => ({ index: phaseIndex, name: _loc(phase.name) }));
       });
       context.moonTriggers = (config.moonPhase || []).map((trigger, index) => {
         const isAllMoons = trigger.moonIndex === -1;
@@ -1728,9 +1726,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         return {
           index,
           moonIndex: trigger.moonIndex,
-          moonName: isAllMoons ? localize('CALENDARIA.MacroTrigger.AllMoons') : moon ? localize(moon.name) : `Moon ${trigger.moonIndex}`,
+          moonName: isAllMoons ? _loc('CALENDARIA.MacroTrigger.AllMoons') : moon ? _loc(moon.name) : `Moon ${trigger.moonIndex}`,
           phaseIndex: trigger.phaseIndex,
-          phaseName: isAllPhases ? localize('CALENDARIA.MacroTrigger.AllPhases') : phase ? localize(phase.name) : `Phase ${trigger.phaseIndex}`,
+          phaseName: isAllPhases ? _loc('CALENDARIA.MacroTrigger.AllPhases') : phase ? _loc(phase.name) : `Phase ${trigger.phaseIndex}`,
           macroId: trigger.macroId
         };
       });
@@ -1743,7 +1741,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   async #prepareModuleContext(context) {
     const primaryGM = game.settings.get(MODULE.ID, SETTINGS.PRIMARY_GM);
-    context.primaryGMOptions = [{ value: '', label: localize('CALENDARIA.Settings.PrimaryGM.Auto'), selected: !primaryGM }];
+    context.primaryGMOptions = [{ value: '', label: _loc('CALENDARIA.Settings.PrimaryGM.Auto'), selected: !primaryGM }];
     for (const user of game.users.filter((u) => u.isGM)) context.primaryGMOptions.push({ value: user.id, label: user.name, selected: user.id === primaryGM });
     context.primaryGMOptions.sort((a, b) => {
       if (a.value === '') return -1;
@@ -1752,10 +1750,10 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     });
     const logLevel = game.settings.get(MODULE.ID, SETTINGS.LOGGING_LEVEL);
     context.loggingLevelOptions = [
-      { value: '0', label: localize('CALENDARIA.Common.Off'), selected: logLevel === '0' || logLevel === 0 },
-      { value: '1', label: localize('CALENDARIA.Settings.Logger.Choices.Errors'), selected: logLevel === '1' || logLevel === 1 },
-      { value: '2', label: localize('CALENDARIA.Settings.Logger.Choices.Warnings'), selected: logLevel === '2' || logLevel === 2 },
-      { value: '3', label: localize('CALENDARIA.Settings.Logger.Choices.Verbose'), selected: logLevel === '3' || logLevel === 3 }
+      { value: '0', label: _loc('CALENDARIA.Common.Off'), selected: logLevel === '0' || logLevel === 0 },
+      { value: '1', label: _loc('CALENDARIA.Settings.Logger.Choices.Errors'), selected: logLevel === '1' || logLevel === 1 },
+      { value: '2', label: _loc('CALENDARIA.Settings.Logger.Choices.Warnings'), selected: logLevel === '2' || logLevel === 2 },
+      { value: '3', label: _loc('CALENDARIA.Settings.Logger.Choices.Verbose'), selected: logLevel === '3' || logLevel === 3 }
     ];
     context.devMode = game.settings.get(MODULE.ID, SETTINGS.DEV_MODE);
     context.moduleVersion = game.modules.get(MODULE.ID)?.version ?? 'Unknown';
@@ -1764,20 +1762,20 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.showToolbarButton = game.settings.get(MODULE.ID, SETTINGS.SHOW_TOOLBAR_BUTTON);
     const toolbarApps = game.settings.get(MODULE.ID, SETTINGS.TOOLBAR_APPS);
     context.toolbarAppOptions = [
-      { id: 'bigcal', icon: 'fa-calendar-days', label: localize('CALENDARIA.Common.BigCal'), checked: toolbarApps.has('bigcal') },
-      { id: 'minical', icon: 'fa-compress', label: localize('CALENDARIA.Common.MiniCal'), checked: toolbarApps.has('minical') },
-      { id: 'hud', icon: 'fa-landmark-dome', label: localize('CALENDARIA.SettingsPanel.Tab.HUD'), checked: toolbarApps.has('hud') },
-      { id: 'timekeeper', icon: 'fa-gauge', label: localize('CALENDARIA.Common.TimeKeeper'), checked: toolbarApps.has('timekeeper') },
-      { id: 'sundial', icon: 'fa-sun', label: localize('CALENDARIA.SettingsPanel.Tab.SunDial'), checked: toolbarApps.has('sundial') },
-      { id: 'stopwatch', icon: 'fa-stopwatch', label: localize('CALENDARIA.Common.StopWatch'), checked: toolbarApps.has('stopwatch') },
-      { id: 'chronicle', icon: 'fa-scroll', label: localize('CALENDARIA.Chronicle.Title'), checked: toolbarApps.has('chronicle') }
+      { id: 'bigcal', icon: 'fa-calendar-days', label: _loc('CALENDARIA.Common.BigCal'), checked: toolbarApps.has('bigcal') },
+      { id: 'minical', icon: 'fa-compress', label: _loc('CALENDARIA.Common.MiniCal'), checked: toolbarApps.has('minical') },
+      { id: 'hud', icon: 'fa-landmark-dome', label: _loc('CALENDARIA.SettingsPanel.Tab.HUD'), checked: toolbarApps.has('hud') },
+      { id: 'timekeeper', icon: 'fa-gauge', label: _loc('CALENDARIA.Common.TimeKeeper'), checked: toolbarApps.has('timekeeper') },
+      { id: 'sundial', icon: 'fa-sun', label: _loc('CALENDARIA.SettingsPanel.Tab.SunDial'), checked: toolbarApps.has('sundial') },
+      { id: 'stopwatch', icon: 'fa-stopwatch', label: _loc('CALENDARIA.Common.StopWatch'), checked: toolbarApps.has('stopwatch') },
+      { id: 'chronicle', icon: 'fa-scroll', label: _loc('CALENDARIA.Chronicle.Title'), checked: toolbarApps.has('chronicle') }
     ];
     context.showJournalFooter = game.settings.get(MODULE.ID, SETTINGS.SHOW_JOURNAL_FOOTER);
     const enricherTarget = game.settings.get(MODULE.ID, SETTINGS.ENRICHER_CLICK_TARGET);
     context.enricherClickTargetOptions = [
-      { value: 'auto', label: localize('CALENDARIA.Settings.EnricherClickTarget.Auto'), selected: enricherTarget === 'auto' },
-      { value: 'minical', label: localize('CALENDARIA.Settings.EnricherClickTarget.MiniCal'), selected: enricherTarget === 'minical' },
-      { value: 'bigcal', label: localize('CALENDARIA.Settings.EnricherClickTarget.BigCal'), selected: enricherTarget === 'bigcal' }
+      { value: 'auto', label: _loc('CALENDARIA.Settings.EnricherClickTarget.Auto'), selected: enricherTarget === 'auto' },
+      { value: 'minical', label: _loc('CALENDARIA.Settings.EnricherClickTarget.MiniCal'), selected: enricherTarget === 'minical' },
+      { value: 'bigcal', label: _loc('CALENDARIA.Settings.EnricherClickTarget.BigCal'), selected: enricherTarget === 'bigcal' }
     ];
   }
 
@@ -1825,7 +1823,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.fogStartYear = startDate?.year ?? '';
     const calendar = CalendarManager.getActiveCalendar();
     const yearZero = calendar?.years?.yearZero ?? 0;
-    context.fogStartMonths = calendar?.isMonthless ? [] : (calendar?.monthsArray || []).map((m, idx) => ({ value: idx + 1, label: localize(m.name), selected: selectedMonth === idx }));
+    context.fogStartMonths = calendar?.isMonthless ? [] : (calendar?.monthsArray || []).map((m, idx) => ({ value: idx + 1, label: _loc(m.name), selected: selectedMonth === idx }));
     const startYear = startDate?.year ?? 0;
     const daysInMonth = selectedMonth != null && calendar ? calendar.getDaysInMonth(selectedMonth, startYear - yearZero) : 0;
     context.fogStartDays = [];
@@ -1958,10 +1956,10 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         }
         await game.settings.set(MODULE.ID, SETTINGS.ACTIVE_CALENDAR, data.activeCalendar);
         const confirmed = await foundry.applications.api.DialogV2.confirm({
-          window: { title: localize('CALENDARIA.SettingsPanel.ReloadRequired.Title') },
-          content: `<p>${localize('CALENDARIA.SettingsPanel.ReloadRequired.Content')}</p>`,
-          yes: { label: localize('CALENDARIA.SettingsPanel.ReloadRequired.Reload') },
-          no: { label: localize('CALENDARIA.SettingsPanel.ReloadRequired.Later') },
+          window: { title: _loc('CALENDARIA.SettingsPanel.ReloadRequired.Title') },
+          content: `<p>${_loc('CALENDARIA.SettingsPanel.ReloadRequired.Content')}</p>`,
+          yes: { label: _loc('CALENDARIA.SettingsPanel.ReloadRequired.Reload') },
+          no: { label: _loc('CALENDARIA.SettingsPanel.ReloadRequired.Later') },
           rejectClose: false
         });
         if (confirmed) foundry.utils.debouncedReload();
@@ -2433,15 +2431,15 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     const settingLabels = settingKeys
       .map((key) => {
         const meta = SettingsPanel.SETTING_METADATA[key];
-        return meta ? localize(meta.label) : key;
+        return meta ? _loc(meta.label) : key;
       })
       .filter((label) => label);
     const listHtml = settingLabels.map((label) => `<li>${label}</li>`).join('');
     const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: localize('CALENDARIA.SettingsPanel.ResetSection.Title'), contentClasses: ['calendaria', 'reset-section-dialog'] },
-      content: `<p>${localize('CALENDARIA.SettingsPanel.ResetSection.Content')}</p><ul class="reset-list">${listHtml}</ul>`,
-      yes: { label: localize('CALENDARIA.Common.Reset'), icon: 'fas fa-undo' },
-      no: { label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' },
+      window: { title: _loc('CALENDARIA.SettingsPanel.ResetSection.Title'), contentClasses: ['calendaria', 'reset-section-dialog'] },
+      content: `<p>${_loc('CALENDARIA.SettingsPanel.ResetSection.Content')}</p><ul class="reset-list">${listHtml}</ul>`,
+      yes: { label: _loc('CALENDARIA.Common.Reset'), icon: 'fas fa-undo' },
+      no: { label: _loc('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' },
       rejectClose: false
     });
     if (!confirmed) return;
@@ -2460,10 +2458,10 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static async #onResetFogOfWar() {
     const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: localize('CALENDARIA.Settings.FogOfWar.ResetRanges') },
-      content: `<p>${localize('CALENDARIA.Settings.FogOfWar.ResetRangesConfirm')}</p>`,
-      yes: { label: localize('CALENDARIA.Common.Reset'), icon: 'fas fa-undo' },
-      no: { label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' },
+      window: { title: _loc('CALENDARIA.Settings.FogOfWar.ResetRanges') },
+      content: `<p>${_loc('CALENDARIA.Settings.FogOfWar.ResetRangesConfirm')}</p>`,
+      yes: { label: _loc('CALENDARIA.Common.Reset'), icon: 'fas fa-undo' },
+      no: { label: _loc('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' },
       rejectClose: false
     });
     if (!confirmed) return;
@@ -2487,7 +2485,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       }
     }
     await game.settings.set(MODULE.ID, SETTINGS.FOG_OF_WAR_RANGES, newRanges);
-    ui.notifications.info(localize('CALENDARIA.Settings.FogOfWar.ResetRangesDone'));
+    ui.notifications.info(_loc('CALENDARIA.Settings.FogOfWar.ResetRangesDone'));
   }
 
   /**
@@ -2503,7 +2501,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       const custom = getCustomTheme(themeMode);
       themeName = custom?.name || themeMode;
     } else {
-      themeName = localize(THEME_PRESETS[themeMode]?.name) || themeMode;
+      themeName = _loc(THEME_PRESETS[themeMode]?.name) || themeMode;
     }
     const exportData = {
       name: themeName,
@@ -2585,10 +2583,10 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!isCustomThemeKey(currentMode)) return;
     const custom = getCustomTheme(currentMode);
     const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: localize('CALENDARIA.ThemeEditor.DeleteCustom.Title') },
-      content: `<p>${format('CALENDARIA.ThemeEditor.DeleteCustom.Content', { name: custom?.name || currentMode })}</p>`,
-      yes: { label: localize('CALENDARIA.Common.Delete'), icon: 'fas fa-trash' },
-      no: { label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' },
+      window: { title: _loc('CALENDARIA.ThemeEditor.DeleteCustom.Title') },
+      content: `<p>${_loc('CALENDARIA.ThemeEditor.DeleteCustom.Content', { name: custom?.name || currentMode })}</p>`,
+      yes: { label: _loc('CALENDARIA.Common.Delete'), icon: 'fas fa-trash' },
+      no: { label: _loc('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' },
       rejectClose: false
     });
     if (!confirmed) return;
@@ -2854,13 +2852,13 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static async #onRegenerateAllWeather() {
     const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: localize('CALENDARIA.Settings.RegenerateWeather.Name') },
-      content: `<p>${localize('CALENDARIA.Settings.RegenerateWeather.Confirm')}</p>`,
+      window: { title: _loc('CALENDARIA.Settings.RegenerateWeather.Name') },
+      content: `<p>${_loc('CALENDARIA.Settings.RegenerateWeather.Confirm')}</p>`,
       rejectClose: false
     });
     if (!confirmed) return;
     await WeatherManager.regenerateAllWeather();
-    ui.notifications.info(localize('CALENDARIA.Settings.RegenerateWeather.Done'));
+    ui.notifications.info(_loc('CALENDARIA.Settings.RegenerateWeather.Done'));
   }
 
   /**
@@ -2872,7 +2870,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!calendarId || !calendar) return;
     await FestivalManager.clearSeedRecord(calendarId);
     const created = await FestivalManager.seedFestivalNotes(calendarId, calendar);
-    ui.notifications.info(localize(created ? 'CALENDARIA.Settings.SyncFestivals.Done' : 'CALENDARIA.Settings.SyncFestivals.NoneCreated'));
+    ui.notifications.info(_loc(created ? 'CALENDARIA.Settings.SyncFestivals.Done' : 'CALENDARIA.Settings.SyncFestivals.NoneCreated'));
   }
 
   /**
@@ -3044,12 +3042,12 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
             if (isCompact) dialStyleSelect.value = 'slice';
             else dialStyleSelect.value = game.settings.get(MODULE.ID, SETTINGS.HUD_DIAL_STYLE);
             dialStyleGroup?.classList.toggle('disabled', isCompact);
-            if (dialStyleHint) dialStyleHint.textContent = isCompact ? localize('CALENDARIA.Settings.HUDDialStyle.DisabledHint') : localize('CALENDARIA.Settings.HUDDialStyle.Hint');
+            if (dialStyleHint) dialStyleHint.textContent = isCompact ? _loc('CALENDARIA.Settings.HUDDialStyle.DisabledHint') : _loc('CALENDARIA.Settings.HUDDialStyle.Hint');
           }
           if (widthScaleInput) {
             widthScaleInput.disabled = isCompact;
             widthScaleGroup?.classList.toggle('disabled', isCompact);
-            if (widthScaleHint) widthScaleHint.textContent = isCompact ? localize('CALENDARIA.Settings.HUDWidthScale.DisabledHint') : localize('CALENDARIA.Settings.HUDWidthScale.Hint');
+            if (widthScaleHint) widthScaleHint.textContent = isCompact ? _loc('CALENDARIA.Settings.HUDWidthScale.DisabledHint') : _loc('CALENDARIA.Settings.HUDWidthScale.Hint');
           }
         };
         hudModeSelect.addEventListener('change', updateCompactState);
@@ -3237,7 +3235,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       previewSpan.textContent = result.preview || formatStr;
       previewSpan.classList.remove('error');
     } else {
-      previewSpan.textContent = localize(result.error || 'CALENDARIA.Format.Error.Invalid');
+      previewSpan.textContent = _loc(result.error || 'CALENDARIA.Format.Error.Invalid');
       previewSpan.classList.add('error');
     }
   }

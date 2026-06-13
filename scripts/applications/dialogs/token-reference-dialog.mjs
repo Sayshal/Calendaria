@@ -1,5 +1,5 @@
 import { TEMPLATES } from '../../constants.mjs';
-import { getAvailableTokens, localize } from '../../utils/_module.mjs';
+import { getAvailableTokens } from '../../utils/_module.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -135,30 +135,30 @@ export class TokenReferenceDialog extends HandlebarsApplicationMixin(Application
     const context = await super._prepareContext(options);
     const tokens = getAvailableTokens();
     const groups = [
-      { id: 'year', label: localize('CALENDARIA.Common.Year'), tokens: [] },
-      { id: 'month', label: localize('CALENDARIA.Common.Month'), tokens: [] },
-      { id: 'day', label: localize('CALENDARIA.Common.Day'), tokens: [] },
-      { id: 'weekday', label: localize('CALENDARIA.Common.Weekday'), tokens: [] },
-      { id: 'week', label: localize('CALENDARIA.Common.Week'), tokens: [] },
-      { id: 'time', label: localize('CALENDARIA.Common.Time'), tokens: [] },
-      { id: 'era', label: localize('CALENDARIA.Common.Era'), tokens: [] },
-      { id: 'season', label: localize('CALENDARIA.TokenReference.Group.Season'), tokens: [] },
-      { id: 'fantasy', label: localize('CALENDARIA.Common.Fantasy'), tokens: [] },
-      { id: 'stopwatch', label: localize('CALENDARIA.Common.StopWatch'), tokens: [] }
+      { id: 'year', label: _loc('CALENDARIA.Common.Year'), tokens: [] },
+      { id: 'month', label: _loc('CALENDARIA.Common.Month'), tokens: [] },
+      { id: 'day', label: _loc('CALENDARIA.Common.Day'), tokens: [] },
+      { id: 'weekday', label: _loc('CALENDARIA.Common.Weekday'), tokens: [] },
+      { id: 'week', label: _loc('CALENDARIA.Common.Week'), tokens: [] },
+      { id: 'time', label: _loc('CALENDARIA.Common.Time'), tokens: [] },
+      { id: 'era', label: _loc('CALENDARIA.Common.Era'), tokens: [] },
+      { id: 'season', label: _loc('CALENDARIA.TokenReference.Group.Season'), tokens: [] },
+      { id: 'fantasy', label: _loc('CALENDARIA.Common.Fantasy'), tokens: [] },
+      { id: 'stopwatch', label: _loc('CALENDARIA.Common.StopWatch'), tokens: [] }
     ];
     const highlightedTokens = this.#getHighlightedTokens();
     for (const tokenDef of tokens) {
       const groupId = TOKEN_GROUPS[tokenDef.token] || 'fantasy';
       const group = groups.find((g) => g.id === groupId);
-      if (group) group.tokens.push({ token: tokenDef.token, description: localize(tokenDef.descriptionKey), highlighted: highlightedTokens.has(tokenDef.token), isCustom: tokenDef.type === 'custom' });
+      if (group) group.tokens.push({ token: tokenDef.token, description: _loc(tokenDef.descriptionKey), highlighted: highlightedTokens.has(tokenDef.token), isCustom: tokenDef.type === 'custom' });
     }
     if (this.#contextType === 'stopwatch' || this.#contextType === 'all') {
       const stopwatchGroup = groups.find((g) => g.id === 'stopwatch');
       stopwatchGroup.tokens = [
-        { token: 'HH', description: localize('CALENDARIA.TokenReference.Stopwatch.HH'), highlighted: this.#contextType === 'stopwatch', isCustom: false },
-        { token: 'mm', description: localize('CALENDARIA.TokenReference.Stopwatch.mm'), highlighted: this.#contextType === 'stopwatch', isCustom: false },
-        { token: 'ss', description: localize('CALENDARIA.TokenReference.Stopwatch.ss'), highlighted: this.#contextType === 'stopwatch', isCustom: false },
-        { token: 'SSS', description: localize('CALENDARIA.TokenReference.Stopwatch.SSS'), highlighted: this.#contextType === 'stopwatch', isCustom: false }
+        { token: 'HH', description: _loc('CALENDARIA.TokenReference.Stopwatch.HH'), highlighted: this.#contextType === 'stopwatch', isCustom: false },
+        { token: 'mm', description: _loc('CALENDARIA.TokenReference.Stopwatch.mm'), highlighted: this.#contextType === 'stopwatch', isCustom: false },
+        { token: 'ss', description: _loc('CALENDARIA.TokenReference.Stopwatch.ss'), highlighted: this.#contextType === 'stopwatch', isCustom: false },
+        { token: 'SSS', description: _loc('CALENDARIA.TokenReference.Stopwatch.SSS'), highlighted: this.#contextType === 'stopwatch', isCustom: false }
       ];
     }
     context.groups = groups.filter((g) => g.tokens.length > 0);

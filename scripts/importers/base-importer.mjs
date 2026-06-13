@@ -1,6 +1,6 @@
 import { CalendarManager } from '../calendar/_module.mjs';
 import { HOOKS } from '../constants.mjs';
-import { format, localize, log } from '../utils/_module.mjs';
+import { log } from '../utils/_module.mjs';
 
 /**
  * Abstract base class for calendar importers.
@@ -139,19 +139,19 @@ export default class BaseImporter {
    */
   validate(data) {
     const errors = [];
-    if (!data.name) errors.push(localize('CALENDARIA.Importer.Error.MissingName'));
+    if (!data.name) errors.push(_loc('CALENDARIA.Importer.Error.MissingName'));
     const months = data.months?.values ? Object.values(data.months.values) : [];
-    if (!months.length) errors.push(localize('CALENDARIA.Importer.Error.NoMonths'));
-    if (!data.days) errors.push(localize('CALENDARIA.Importer.Error.MissingTimeConfig'));
+    if (!months.length) errors.push(_loc('CALENDARIA.Importer.Error.NoMonths'));
+    if (!data.days) errors.push(_loc('CALENDARIA.Importer.Error.MissingTimeConfig'));
     if (data.days) {
-      if (!data.days.hoursPerDay || data.days.hoursPerDay < 1) errors.push(localize('CALENDARIA.Importer.Error.InvalidHoursPerDay'));
-      if (!data.days.minutesPerHour || data.days.minutesPerHour < 1) errors.push(localize('CALENDARIA.Importer.Error.InvalidMinutesPerHour'));
-      if (!data.days.secondsPerMinute || data.days.secondsPerMinute < 1) errors.push(localize('CALENDARIA.Importer.Error.InvalidSecondsPerMinute'));
+      if (!data.days.hoursPerDay || data.days.hoursPerDay < 1) errors.push(_loc('CALENDARIA.Importer.Error.InvalidHoursPerDay'));
+      if (!data.days.minutesPerHour || data.days.minutesPerHour < 1) errors.push(_loc('CALENDARIA.Importer.Error.InvalidMinutesPerHour'));
+      if (!data.days.secondsPerMinute || data.days.secondsPerMinute < 1) errors.push(_loc('CALENDARIA.Importer.Error.InvalidSecondsPerMinute'));
     }
     for (let i = 0; i < months.length; i++) {
       const month = months[i];
-      if (!month.name) errors.push(format('CALENDARIA.Importer.Error.MonthMissingName', { num: i + 1 }));
-      if (!month.days || month.days < 1) errors.push(format('CALENDARIA.Importer.Error.MonthNoDays', { num: i + 1 }));
+      if (!month.name) errors.push(_loc('CALENDARIA.Importer.Error.MonthMissingName', { num: i + 1 }));
+      if (!month.days || month.days < 1) errors.push(_loc('CALENDARIA.Importer.Error.MonthNoDays', { num: i + 1 }));
     }
     return { valid: errors.length === 0, errors };
   }
@@ -229,7 +229,7 @@ export default class BaseImporter {
     const journalData = this._undatedEvents.map((event) => ({ name: event.name, folder: parentId, pages: [{ name: event.name, type: 'text', text: { content: event.content || '' } }] }));
     await JournalEntry.createDocuments(journalData);
     const count = this._undatedEvents.length;
-    ui.notifications.info(format('CALENDARIA.Importer.UndatedEventsMigrated', { count }));
+    ui.notifications.info(_loc('CALENDARIA.Importer.UndatedEventsMigrated', { count }));
     log(3, `Migrated ${count} undated events to journal entries`);
     return { count };
   }

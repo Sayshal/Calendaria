@@ -1,6 +1,5 @@
 import { BigCal, Chronicle, HUD, MiniCal, Stopwatch, SunDial, TimeKeeper } from '../../applications/_module.mjs';
 import { MODULE, SETTINGS } from '../../constants.mjs';
-import { localize } from '../localization.mjs';
 import { canViewBigCal, canViewChronicle, canViewHUD, canViewMiniCal, canViewStopwatch, canViewSunDial, canViewTimeKeeper } from '../permissions.mjs';
 
 /** App definitions for toolbar buttons. */
@@ -25,6 +24,6 @@ export function onGetSceneControlButtons(controls) {
   for (const appId of toolbarApps) {
     const def = TOOLBAR_APP_DEFS[appId];
     if (!def) continue;
-    controls.notes.tools[`calendaria-${appId}`] = { name: `calendaria-${appId}`, title: localize(def.label), icon: `fas ${def.icon}`, visible: def.canView(), onChange: def.toggle, button: true };
+    controls.notes.tools[`calendaria-${appId}`] = { name: `calendaria-${appId}`, title: _loc(def.label), icon: `fas ${def.icon}`, visible: def.canView(), onChange: def.toggle, button: true };
   }
 }

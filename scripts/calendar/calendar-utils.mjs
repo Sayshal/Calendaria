@@ -1,5 +1,4 @@
 import { NoteManager } from '../notes/_module.mjs';
-import { format, localize } from '../utils/_module.mjs';
 
 /**
  * Parse a single interval string into an interval object.
@@ -108,24 +107,24 @@ export function isLeapYear(leapYearConfig, year, yearZeroExists = true) {
  * @returns {string} - Human-readable description
  */
 export function getLeapYearDescription(leapYearConfig) {
-  if (!leapYearConfig) return localize('CALENDARIA.LeapYear.None');
+  if (!leapYearConfig) return _loc('CALENDARIA.LeapYear.None');
   const rule = leapYearConfig.rule || 'none';
   switch (rule) {
     case 'none':
-      return localize('CALENDARIA.LeapYear.None');
+      return _loc('CALENDARIA.LeapYear.None');
     case 'simple': {
       const interval = leapYearConfig.interval ?? leapYearConfig.leapInterval ?? 4;
       const start = leapYearConfig.start ?? leapYearConfig.leapStart ?? 0;
-      return format('CALENDARIA.LeapYear.Simple', { interval, start });
+      return _loc('CALENDARIA.LeapYear.Simple', { interval, start });
     }
     case 'gregorian':
-      return localize('CALENDARIA.LeapYear.Gregorian');
+      return _loc('CALENDARIA.LeapYear.Gregorian');
     case 'custom': {
       const pattern = leapYearConfig.pattern || '';
-      return format('CALENDARIA.LeapYear.Custom', { pattern });
+      return _loc('CALENDARIA.LeapYear.Custom', { pattern });
     }
     default:
-      return localize('CALENDARIA.LeapYear.None');
+      return _loc('CALENDARIA.LeapYear.None');
   }
 }
 
@@ -143,7 +142,7 @@ export function preLocalizeCalendar(calendarData) {
     if (!value || typeof value !== 'object') return;
     for (const [key, entry] of Object.entries(value)) {
       if (LOCALIZE_KEYS.has(key) && typeof entry === 'string') {
-        value[key] = localize(entry) || entry;
+        value[key] = _loc(entry) || entry;
         continue;
       }
       walk(entry);
@@ -203,11 +202,11 @@ export function getMonthAbbreviation(month) {
  */
 export function formatMonthDay(calendar, components, options = {}) {
   const festivalDay = findFestivalDay(calendar, components);
-  if (festivalDay) return localize(festivalDay.name);
+  if (festivalDay) return _loc(festivalDay.name);
   const day = components.dayOfMonth + 1;
   const month = calendar.monthsArray[components.month];
   const monthName = options.abbreviated ? getMonthAbbreviation(month) : month.name;
-  return format('CALENDARIA.Formatters.DayMonth', { day, month: localize(monthName) });
+  return _loc('CALENDARIA.Formatters.DayMonth', { day, month: _loc(monthName) });
 }
 
 /**
@@ -221,13 +220,13 @@ export function formatMonthDayYear(calendar, components, options = {}) {
   const festivalDay = findFestivalDay(calendar, components);
   if (festivalDay) {
     const year = components.year + (calendar.years?.yearZero ?? 0);
-    return format('CALENDARIA.Formatters.FestivalDayYear', { day: localize(festivalDay.name), yyyy: year });
+    return _loc('CALENDARIA.Formatters.FestivalDayYear', { day: _loc(festivalDay.name), yyyy: year });
   }
   const day = components.dayOfMonth + 1;
   const month = calendar.monthsArray[components.month];
   const monthName = options.abbreviated ? getMonthAbbreviation(month) : month.name;
   const year = components.year + (calendar.years?.yearZero ?? 0);
-  return format('CALENDARIA.Formatters.DayMonthYear', { day, month: localize(monthName), yyyy: year });
+  return _loc('CALENDARIA.Formatters.DayMonthYear', { day, month: _loc(monthName), yyyy: year });
 }
 
 /**

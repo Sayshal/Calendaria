@@ -4,7 +4,7 @@ import { FestivalManager } from '../../festivals/_module.mjs';
 import { createImporter } from '../../importers/_module.mjs';
 import { isLuxonSyncRequired } from '../../integrations/luxon-sync.mjs';
 import { NoteManager, summarizeConditionTree } from '../../notes/_module.mjs';
-import { RangeSlider, format, localize, log, serializeNotes, validateFormatString } from '../../utils/_module.mjs';
+import { RangeSlider, log, serializeNotes, validateFormatString } from '../../utils/_module.mjs';
 import { CLIMATE_ZONE_TEMPLATES, getBlankZoneConfig, getClimateTemplateOptions, getDefaultZoneConfig, getPresetAlias, setPresetAlias } from '../../weather/_module.mjs';
 import { ClimateEditor, TokenReferenceDialog } from '../_module.mjs';
 
@@ -199,11 +199,11 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       years: { yearZero: 0, firstWeekday: 0, leapYear: null, resetWeekdays: false, allowNegativeYears: true, names: [] },
       months: {
         values: {
-          [foundry.utils.randomID()]: { name: format('CALENDARIA.Common.MonthFallback', { num: 1 }), abbreviation: format('CALENDARIA.Editor.Default.MonthAbbr', { num: 1 }), ordinal: 1, days: 30 }
+          [foundry.utils.randomID()]: { name: _loc('CALENDARIA.Common.MonthFallback', { num: 1 }), abbreviation: _loc('CALENDARIA.Editor.Default.MonthAbbr', { num: 1 }), ordinal: 1, days: 30 }
         }
       },
       days: {
-        values: { [foundry.utils.randomID()]: { name: format('CALENDARIA.Editor.Default.DayName', { num: 1 }), abbreviation: format('CALENDARIA.Editor.Default.DayAbbr', { num: 1 }), ordinal: 1 } },
+        values: { [foundry.utils.randomID()]: { name: _loc('CALENDARIA.Editor.Default.DayName', { num: 1 }), abbreviation: _loc('CALENDARIA.Editor.Default.DayAbbr', { num: 1 }), ordinal: 1 } },
         daysPerYear: 365,
         hoursPerDay: 24,
         minutesPerHour: 60,
@@ -296,18 +296,18 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @override */
   get title() {
-    const name = this.#calendarData?.name || localize('CALENDARIA.Editor.NewCalendar');
-    return format('CALENDARIA.Editor.TitleEdit', { name });
+    const name = this.#calendarData?.name || _loc('CALENDARIA.Editor.NewCalendar');
+    return _loc('CALENDARIA.Editor.TitleEdit', { name });
   }
 
   /** @override */
   async _preClose(options) {
     if (this.#isDirty) {
       const confirmed = await foundry.applications.api.DialogV2.confirm({
-        window: { title: localize('CALENDARIA.Editor.UnsavedChanges') },
-        content: `<p>${localize('CALENDARIA.Editor.UnsavedChangesMessage')}</p>`,
-        yes: { label: localize('CALENDARIA.Editor.DiscardChanges'), icon: 'fas fa-trash' },
-        no: { label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' },
+        window: { title: _loc('CALENDARIA.Editor.UnsavedChanges') },
+        content: `<p>${_loc('CALENDARIA.Editor.UnsavedChangesMessage')}</p>`,
+        yes: { label: _loc('CALENDARIA.Editor.DiscardChanges'), icon: 'fas fa-trash' },
+        no: { label: _loc('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' },
         rejectClose: false
       });
       if (!confirmed) throw new Error('Close cancelled by user. This is not a bug.');
@@ -327,10 +327,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   async #confirmDiscard() {
     if (!this.#isDirty) return true;
     return foundry.applications.api.DialogV2.confirm({
-      window: { title: localize('CALENDARIA.Editor.UnsavedChanges') },
-      content: `<p>${localize('CALENDARIA.Editor.UnsavedChangesMessage')}</p>`,
-      yes: { label: localize('CALENDARIA.Editor.DiscardChanges'), icon: 'fas fa-trash' },
-      no: { label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' },
+      window: { title: _loc('CALENDARIA.Editor.UnsavedChanges') },
+      content: `<p>${_loc('CALENDARIA.Editor.UnsavedChangesMessage')}</p>`,
+      yes: { label: _loc('CALENDARIA.Editor.DiscardChanges'), icon: 'fas fa-trash' },
+      no: { label: _loc('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' },
       rejectClose: false
     });
   }
@@ -352,7 +352,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     context.calculatedLeapDaysPerYear = this.#calculateDaysPerYear(true);
     context.hasLeapDaysDifference = context.calculatedLeapDaysPerYear !== context.calculatedDaysPerYear;
     context.daysMatch = context.calculatedDaysPerYear === this.#calendarData.days.daysPerYear;
-    if (context.hasLeapDaysDifference) context.daysPerYearDisplay = `${context.calculatedDaysPerYear} (${context.calculatedLeapDaysPerYear} ${localize('CALENDARIA.Editor.OnLeapYears')})`;
+    if (context.hasLeapDaysDifference) context.daysPerYearDisplay = `${context.calculatedDaysPerYear} (${context.calculatedLeapDaysPerYear} ${_loc('CALENDARIA.Editor.OnLeapYears')})`;
     else context.daysPerYearDisplay = String(context.calculatedDaysPerYear);
     const monthsArr = Object.entries(this.#calendarData.months.values);
     const daysArr = Object.entries(this.#calendarData.days.values);
@@ -387,7 +387,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       const tree = fd.conditionTree;
       let conditionSummary = tree ? summarizeConditionTree(tree, this.#calendarData) : '';
       const duration = fd.duration ?? 1;
-      if (conditionSummary && duration > 1) conditionSummary += ` (${duration} ${localize('CALENDARIA.Common.UnitDays')})`;
+      if (conditionSummary && duration > 1) conditionSummary += ` (${duration} ${_loc('CALENDARIA.Common.UnitDays')})`;
       return {
         key: fd.linkedFestival?.festivalKey ?? stub.id,
         noteId: stub.id,
@@ -442,15 +442,15 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         isNoEclipse: !moon.eclipseMode || moon.eclipseMode === 'never',
         apparentSizeDisplay: moon.apparentSize ?? 1.0,
         eclipseModeOptions: [
-          { value: 'never', label: localize('CALENDARIA.Common.None'), selected: (moon.eclipseMode ?? 'never') === 'never' },
-          { value: 'rare', label: localize('CALENDARIA.Editor.Eclipse.Rare'), selected: moon.eclipseMode === 'rare' },
-          { value: 'occasional', label: localize('CALENDARIA.Editor.Eclipse.Occasional'), selected: moon.eclipseMode === 'occasional' },
-          { value: 'frequent', label: localize('CALENDARIA.Editor.Eclipse.Frequent'), selected: moon.eclipseMode === 'frequent' },
-          { value: 'custom', label: localize('CALENDARIA.Common.Custom'), selected: moon.eclipseMode === 'custom' }
+          { value: 'never', label: _loc('CALENDARIA.Common.None'), selected: (moon.eclipseMode ?? 'never') === 'never' },
+          { value: 'rare', label: _loc('CALENDARIA.Editor.Eclipse.Rare'), selected: moon.eclipseMode === 'rare' },
+          { value: 'occasional', label: _loc('CALENDARIA.Editor.Eclipse.Occasional'), selected: moon.eclipseMode === 'occasional' },
+          { value: 'frequent', label: _loc('CALENDARIA.Editor.Eclipse.Frequent'), selected: moon.eclipseMode === 'frequent' },
+          { value: 'custom', label: _loc('CALENDARIA.Common.Custom'), selected: moon.eclipseMode === 'custom' }
         ],
         phaseModeOptions: [
-          { value: 'fixed', label: localize('CALENDARIA.Editor.Moon.PhaseMode.Fixed'), selected: (moon.phaseMode ?? 'fixed') === 'fixed' },
-          { value: 'randomized', label: localize('CALENDARIA.Editor.Moon.PhaseMode.Randomized'), selected: moon.phaseMode === 'randomized' }
+          { value: 'fixed', label: _loc('CALENDARIA.Editor.Moon.PhaseMode.Fixed'), selected: (moon.phaseMode ?? 'fixed') === 'fixed' },
+          { value: 'randomized', label: _loc('CALENDARIA.Editor.Moon.PhaseMode.Randomized'), selected: moon.phaseMode === 'randomized' }
         ],
         anchorPhasesWithIndex: anchorsArr.map(([anchorKey, anchor]) => ({
           ...anchor,
@@ -458,9 +458,9 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
           moonKey,
           displayDay: (anchor.dayOfMonth ?? 0) + 1,
           anchorMonthOptions: context.monthOptionsZeroIndexed.map((opt) => ({ ...opt, selected: opt.value === anchor.month })),
-          anchorPhaseOptions: phasesArr.map(([, phase], pIdx) => ({ value: pIdx, label: localize(phase.name), selected: pIdx === anchor.phaseIndex }))
+          anchorPhaseOptions: phasesArr.map(([, phase], pIdx) => ({ value: pIdx, label: _loc(phase.name), selected: pIdx === anchor.phaseIndex }))
         })),
-        referencePhaseOptions: phasesArr.map(([, phase], pIdx) => ({ value: pIdx, label: localize(phase.name), selected: pIdx === (moon.referencePhase ?? 0) })),
+        referencePhaseOptions: phasesArr.map(([, phase], pIdx) => ({ value: pIdx, label: _loc(phase.name), selected: pIdx === (moon.referencePhase ?? 0) })),
         refMonthOptions: context.monthOptionsZeroIndexed.map((opt) => ({ ...opt, selected: opt.value === moon.referenceDate?.month })),
         phasesWithIndex: phasesArr.map(([phaseKey, phase], pIdx) => {
           const rawStart = Math.round((phase.start ?? pIdx * 0.125) * 10000) / 100;
@@ -469,7 +469,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
           return {
             ...phase,
             phaseKey,
-            name: localize(phase.name),
+            name: _loc(phase.name),
             index: pIdx,
             moonKey,
             moonColor: moon.color || '',
@@ -660,7 +660,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const deleteBtn = this.element.querySelector('button[data-action="deleteCalendar"]');
     if (deleteBtn && (!this.#calendarId || !this.#isEditing)) {
       deleteBtn.disabled = true;
-      deleteBtn.dataset.tooltip = localize('CALENDARIA.Info.SaveBeforeDelete');
+      deleteBtn.dataset.tooltip = _loc('CALENDARIA.Info.SaveBeforeDelete');
     }
     const calendarSelect = this.element.querySelector('select[name="calendarSelect"]');
     if (calendarSelect) {
@@ -716,7 +716,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const list = this.element.querySelector('.named-weeks-list');
     if (!list || list.dataset.duplicateListenerAttached) return;
     list.dataset.duplicateListenerAttached = 'true';
-    const tooltip = localize('CALENDARIA.Editor.Tooltip.DuplicateWeekNumber');
+    const tooltip = _loc('CALENDARIA.Editor.Tooltip.DuplicateWeekNumber');
     list.addEventListener('change', (event) => {
       if (!event.target.matches('.col-week-number')) return;
       const inputs = list.querySelectorAll('input.col-week-number');
@@ -762,7 +762,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         field.classList.remove('error');
         input.classList.remove('invalid');
       } else {
-        field.textContent = localize(result.error || 'CALENDARIA.Format.Error.Invalid');
+        field.textContent = _loc(result.error || 'CALENDARIA.Format.Error.Invalid');
         field.classList.add('error');
         input.classList.add('invalid');
       }
@@ -1379,8 +1379,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const totalMonths = Object.keys(this.#calendarData.months.values ?? {}).length + 1;
     const newKey = foundry.utils.randomID();
     const newMonth = {
-      name: format('CALENDARIA.Common.MonthFallback', { num: totalMonths }),
-      abbreviation: format('CALENDARIA.Editor.Default.MonthAbbr', { num: totalMonths }),
+      name: _loc('CALENDARIA.Common.MonthFallback', { num: totalMonths }),
+      abbreviation: _loc('CALENDARIA.Editor.Default.MonthAbbr', { num: totalMonths }),
       ordinal: totalMonths,
       days: 30
     };
@@ -1457,32 +1457,32 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       .map(
         ([wdKey, wd]) => `
       <div class="custom-weekday-row">
-        <input type="text" name="weekday-${wdKey}-name" value="${wd.name}" placeholder="${localize('CALENDARIA.Common.Name')}">
-        <input type="text" name="weekday-${wdKey}-abbr" value="${wd.abbreviation}" placeholder="${localize('CALENDARIA.Common.Abbreviation')}">
+        <input type="text" name="weekday-${wdKey}-name" value="${wd.name}" placeholder="${_loc('CALENDARIA.Common.Name')}">
+        <input type="text" name="weekday-${wdKey}-abbr" value="${wd.abbreviation}" placeholder="${_loc('CALENDARIA.Common.Abbreviation')}">
         <input type="checkbox" name="weekday-${wdKey}-rest" ${wd.isRestDay ? 'checked' : ''}>
       </div>
     `
       )
       .join('');
     const content = `
-      <p class="hint">${localize('CALENDARIA.Editor.Month.CustomWeekdaysHint')}</p>
+      <p class="hint">${_loc('CALENDARIA.Editor.Month.CustomWeekdaysHint')}</p>
       <div class="custom-weekdays-list">
         <div class="custom-weekday-header">
-          <span>${localize('CALENDARIA.Common.Weekday')}</span>
-          <span>${localize('CALENDARIA.Common.Abbreviation')}</span>
-          <span>${localize('CALENDARIA.Common.RestDay')}</span>
+          <span>${_loc('CALENDARIA.Common.Weekday')}</span>
+          <span>${_loc('CALENDARIA.Common.Abbreviation')}</span>
+          <span>${_loc('CALENDARIA.Common.RestDay')}</span>
         </div>
         ${rows}
       </div>
     `;
     const editor = this;
     new foundry.applications.api.DialogV2({
-      window: { title: format('CALENDARIA.Editor.Month.CustomWeekdaysFor', { month: month.name }), contentClasses: ['calendaria', 'custom-weekdays-dialog'] },
+      window: { title: _loc('CALENDARIA.Editor.Month.CustomWeekdaysFor', { month: month.name }), contentClasses: ['calendaria', 'custom-weekdays-dialog'] },
       content,
       buttons: [
         {
           action: 'disable',
-          label: localize('CALENDARIA.Common.Reset'),
+          label: _loc('CALENDARIA.Common.Reset'),
           icon: 'fas fa-undo',
           callback: () => {
             delete month.weekdays;
@@ -1492,7 +1492,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         },
         {
           action: 'save',
-          label: localize('CALENDARIA.Common.Save'),
+          label: _loc('CALENDARIA.Common.Save'),
           icon: 'fas fa-save',
           default: true,
           callback: (_event, _button, dialog) => {
@@ -1527,8 +1527,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const totalDays = Object.keys(this.#calendarData.days.values ?? {}).length + 1;
     const newKey = foundry.utils.randomID();
     const newDay = {
-      name: format('CALENDARIA.Editor.Default.DayName', { num: totalDays }),
-      abbreviation: format('CALENDARIA.Editor.Default.DayAbbr', { num: totalDays }),
+      name: _loc('CALENDARIA.Editor.Default.DayName', { num: totalDays }),
+      abbreviation: _loc('CALENDARIA.Editor.Default.DayAbbr', { num: totalDays }),
       ordinal: totalDays,
       isRestDay: false
     };
@@ -1601,8 +1601,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const isPeriodic = this.#calendarData.seasons.type === 'periodic';
     const newKey = foundry.utils.randomID();
     const newSeason = {
-      name: format('CALENDARIA.Editor.Default.SeasonName', { num: totalSeasons }),
-      abbreviation: format('CALENDARIA.Editor.Default.SeasonAbbr', { num: totalSeasons }),
+      name: _loc('CALENDARIA.Editor.Default.SeasonName', { num: totalSeasons }),
+      abbreviation: _loc('CALENDARIA.Editor.Default.SeasonAbbr', { num: totalSeasons }),
       ordinal: totalSeasons
     };
     if (isPeriodic) {
@@ -1648,14 +1648,14 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const savedColor = savedSeason?.color || '#808080';
     const content = `
       <div class="form-group">
-        <label>${localize('CALENDARIA.Common.Icon')}</label>
+        <label>${_loc('CALENDARIA.Common.Icon')}</label>
         <div class="form-fields">
           <input type="text" name="icon" value="${season.icon || ''}" placeholder="fas fa-leaf">
         </div>
-        <p class="hint">${localize('CALENDARIA.Common.IconHint')}</p>
+        <p class="hint">${_loc('CALENDARIA.Common.IconHint')}</p>
       </div>
       <div class="form-group">
-        <label>${localize('CALENDARIA.Common.Color')}</label>
+        <label>${_loc('CALENDARIA.Common.Color')}</label>
         <div class="form-fields">
           <color-picker name="color" value="${season.color || '#808080'}"></color-picker>
         </div>
@@ -1663,12 +1663,12 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     `;
     const editor = this;
     new foundry.applications.api.DialogV2({
-      window: { title: format('CALENDARIA.Editor.Season.IconColorFor', { season: season.name }), contentClasses: ['calendaria', 'season-icon-dialog'] },
+      window: { title: _loc('CALENDARIA.Editor.Season.IconColorFor', { season: season.name }), contentClasses: ['calendaria', 'season-icon-dialog'] },
       content,
       buttons: [
         {
           action: 'reset',
-          label: localize('CALENDARIA.Common.Reset'),
+          label: _loc('CALENDARIA.Common.Reset'),
           icon: 'fas fa-undo',
           callback: () => {
             season.icon = savedIcon;
@@ -1679,7 +1679,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         },
         {
           action: 'save',
-          label: localize('CALENDARIA.Common.Save'),
+          label: _loc('CALENDARIA.Common.Save'),
           icon: 'fas fa-save',
           default: true,
           callback: (_event, _button, dialog) => {
@@ -1728,8 +1728,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const totalEras = Object.keys(this.#calendarData.eras ?? {}).length + 1;
     const newKey = foundry.utils.randomID();
     const newEra = {
-      name: format('CALENDARIA.Editor.Default.EraName', { num: totalEras }),
-      abbreviation: format('CALENDARIA.Editor.Default.EraAbbr', { num: totalEras }),
+      name: _loc('CALENDARIA.Editor.Default.EraName', { num: totalEras }),
+      abbreviation: _loc('CALENDARIA.Editor.Default.EraAbbr', { num: totalEras }),
       startYear: 1,
       endYear: null,
       format: 'suffix',
@@ -1769,7 +1769,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const newKey = foundry.utils.randomID();
     const today = game.time?.components ?? { month: 0, dayOfMonth: 0 };
     const seed = {
-      name: format('CALENDARIA.Editor.Default.FestivalName', { num: totalFestivals }),
+      name: _loc('CALENDARIA.Editor.Default.FestivalName', { num: totalFestivals }),
       month: today.month ?? 0,
       dayOfMonth: today.dayOfMonth ?? 0,
       conditionTree: null,
@@ -1819,8 +1819,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   static async #onResetFestivals(_event, _target) {
     if (!this.#calendarId) return;
     const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: localize('CALENDARIA.Editor.Festival.ResetTitle') },
-      content: `<p>${localize('CALENDARIA.Editor.Festival.ResetConfirm')}</p>`,
+      window: { title: _loc('CALENDARIA.Editor.Festival.ResetTitle') },
+      content: `<p>${_loc('CALENDARIA.Editor.Festival.ResetConfirm')}</p>`,
       rejectClose: false,
       modal: true
     });
@@ -1830,7 +1830,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     await FestivalManager.deleteAllFestivalNotes(this.#calendarId);
     await FestivalManager.clearSeedRecord(this.#calendarId);
     const created = await FestivalManager.seedFestivalNotes(this.#calendarId, calendar);
-    ui.notifications.info(format('CALENDARIA.Editor.Festival.ResetDone', { count: created }));
+    ui.notifications.info(_loc('CALENDARIA.Editor.Festival.ResetDone', { count: created }));
     this.render();
   }
 
@@ -1842,7 +1842,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   static async #onAddMoon(_event, _target) {
     const newKey = foundry.utils.randomID();
     this.#calendarData.moons[newKey] = {
-      name: localize('CALENDARIA.Common.Moon'),
+      name: _loc('CALENDARIA.Common.Moon'),
       cycleLength: 28,
       cycleDayAdjust: 0,
       referencePhase: 0,
@@ -1883,7 +1883,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const phaseCount = phasesArr.length;
     const newKey = foundry.utils.randomID();
     moon.phases[newKey] = {
-      name: format('CALENDARIA.Editor.Default.PhaseName', { num: phaseCount + 1 }),
+      name: _loc('CALENDARIA.Editor.Default.PhaseName', { num: phaseCount + 1 }),
       rising: '',
       fading: '',
       icon: `${ASSETS.MOON_ICONS}/05_fullmoon.svg`,
@@ -2007,11 +2007,11 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const newKey = foundry.utils.randomID();
     const stageKey = foundry.utils.randomID();
     this.#calendarData.cycles[newKey] = {
-      name: format('CALENDARIA.Editor.Default.CycleName', { num: totalCycles }),
+      name: _loc('CALENDARIA.Editor.Default.CycleName', { num: totalCycles }),
       length: 12,
       offset: 0,
       basedOn: 'month',
-      stages: { [stageKey]: { name: format('CALENDARIA.Editor.Default.CycleStage', { num: 1 }) } }
+      stages: { [stageKey]: { name: _loc('CALENDARIA.Editor.Default.CycleStage', { num: 1 }) } }
     };
     this.#isDirty = true;
     this.render();
@@ -2040,7 +2040,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!cycle) return;
     if (!cycle.stages) cycle.stages = {};
     const stageCount = Object.keys(cycle.stages).length + 1;
-    cycle.stages[foundry.utils.randomID()] = { name: format('CALENDARIA.Editor.Default.CycleStage', { num: stageCount }) };
+    cycle.stages[foundry.utils.randomID()] = { name: _loc('CALENDARIA.Editor.Default.CycleStage', { num: stageCount }) };
     this.#isDirty = true;
     this.render();
   }
@@ -2071,7 +2071,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const totalHours = Object.keys(this.#calendarData.canonicalHours).length;
     const newKey = foundry.utils.randomID();
     const newHour = {
-      name: format('CALENDARIA.Editor.Default.CanonicalHourName', { num: totalHours + 1 }),
+      name: _loc('CALENDARIA.Editor.Default.CanonicalHourName', { num: totalHours + 1 }),
       abbreviation: '',
       startHour: totalHours * 3,
       endHour: (totalHours + 1) * 3
@@ -2111,7 +2111,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const maxExisting = existingNumbers.length ? Math.max(...existingNumbers) : 0;
     const newKey = foundry.utils.randomID();
     const newWeek = {
-      name: format('CALENDARIA.Editor.Default.WeekName', { num: totalWeeks + 1 }),
+      name: _loc('CALENDARIA.Editor.Default.WeekName', { num: totalWeeks + 1 }),
       abbreviation: '',
       weekNumber: maxExisting + 1
     };
@@ -2183,21 +2183,21 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   static async #onAddZone(_event, target) {
     const afterKey = target.dataset.key;
     const templateOptions = getClimateTemplateOptions();
-    const selectHtml = templateOptions.map((opt) => `<option value="${opt.value}">${localize(opt.label)}</option>`).join('');
+    const selectHtml = templateOptions.map((opt) => `<option value="${opt.value}">${_loc(opt.label)}</option>`).join('');
     const content = `
       <form>
         <div class="form-group">
-          <label>${localize('CALENDARIA.Editor.Weather.Zone.CopyFrom')}</label>
+          <label>${_loc('CALENDARIA.Editor.Weather.Zone.CopyFrom')}</label>
           <select name="template">${selectHtml}</select>
         </div>
         <div class="form-group">
-          <label>${localize('CALENDARIA.Editor.Weather.Zone.Name')}</label>
-          <input type="text" name="name" placeholder="${localize('CALENDARIA.Editor.Weather.Zone.Name')}">
+          <label>${_loc('CALENDARIA.Editor.Weather.Zone.Name')}</label>
+          <input type="text" name="name" placeholder="${_loc('CALENDARIA.Editor.Weather.Zone.Name')}">
         </div>
       </form>
     `;
     const result = await foundry.applications.api.DialogV2.prompt({
-      window: { title: localize('CALENDARIA.Editor.Weather.Zone.Add') },
+      window: { title: _loc('CALENDARIA.Editor.Weather.Zone.Add') },
       content,
       ok: {
         callback: (_event, button, _dialog) => {
@@ -2217,7 +2217,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const existingIds = Object.values(this.#calendarData.weather?.zones ?? {}).map((z) => z.id);
     while (existingIds.includes(zoneId)) zoneId = `${baseId}-${counter++}`;
     zoneConfig.id = zoneId;
-    zoneConfig.name = result.name || localize(CLIMATE_ZONE_TEMPLATES[result.template]?.name || result.template);
+    zoneConfig.name = result.name || _loc(CLIMATE_ZONE_TEMPLATES[result.template]?.name || result.template);
     if (!this.#calendarData.weather) this.#calendarData.weather = { activeZone: null, zones: {} };
     if (!this.#calendarData.weather.zones) this.#calendarData.weather.zones = {};
     const zoneKey = foundry.utils.randomID();
@@ -2288,8 +2288,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     let counter = 2;
     while (existingIds.includes(newId)) newId = `${baseId}-copy-${counter++}`;
     cloned.id = newId;
-    const sourceName = localize(sourceZone.name || '') || sourceZone.name || '';
-    cloned.name = format('CALENDARIA.Editor.CopyOfName', { name: sourceName });
+    const sourceName = _loc(sourceZone.name || '') || sourceZone.name || '';
+    cloned.name = _loc('CALENDARIA.Editor.CopyOfName', { name: sourceName });
     const newKey = foundry.utils.randomID();
     this.#calendarData.weather.zones = this.#insertAfterKey(zonesObj, zoneKey, newKey, cloned);
     const sourcePresetIds = Object.values(sourceZone.presets ?? {})
@@ -2319,8 +2319,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const zone = zonesObj[zoneKey];
     if (!zone) return;
     const confirm = await foundry.applications.api.DialogV2.confirm({
-      window: { title: localize('CALENDARIA.Editor.Weather.Zone.Delete') },
-      content: `<p>${format('CALENDARIA.Editor.Weather.Zone.DeleteConfirm', { name: zone.name })}</p>`,
+      window: { title: _loc('CALENDARIA.Editor.Weather.Zone.Delete') },
+      content: `<p>${_loc('CALENDARIA.Editor.Weather.Zone.DeleteConfirm', { name: zone.name })}</p>`,
       rejectClose: false
     });
     if (!confirm) return;
@@ -2368,13 +2368,13 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!(await this.#confirmDiscard())) return;
     const calendar = CalendarManager.getCalendar(this.#calendarId);
     if (!calendar) {
-      ui.notifications.error(format('CALENDARIA.Editor.CalendarNotFound', { id: this.#calendarId }));
+      ui.notifications.error(_loc('CALENDARIA.Editor.CalendarNotFound', { id: this.#calendarId }));
       return;
     }
-    const calendarName = localize(calendar.name || this.#calendarId);
+    const calendarName = _loc(calendar.name || this.#calendarId);
     this.#calendarData = calendar.toObject();
     preLocalizeCalendar(this.#calendarData);
-    this.#calendarData.name = format('CALENDARIA.Editor.CopyOfName', { name: calendarName });
+    this.#calendarData.name = _loc('CALENDARIA.Editor.CopyOfName', { name: calendarName });
     if (!this.#calendarData.seasons) this.#calendarData.seasons = { values: {} };
     if (!this.#calendarData.eras) this.#calendarData.eras = {};
     if (!this.#calendarData.festivals) this.#calendarData.festivals = {};
@@ -2386,7 +2386,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#calendarId = null;
     this.#isEditing = false;
     this.#isDirty = true;
-    ui.notifications.info(format('CALENDARIA.Editor.Duplicated', { name: calendarName }));
+    ui.notifications.info(_loc('CALENDARIA.Editor.Duplicated', { name: calendarName }));
     this.render();
   }
 
@@ -2433,7 +2433,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
           if (importer) {
             log(3, `Importing ${this.#pendingNotes.length} pending notes to calendar ${calendarId}`);
             const result = await importer.importNotes(this.#pendingNotes, { calendarId });
-            if (result.count > 0) ui.notifications.info(format('CALENDARIA.Editor.NotesImported', { count: result.count }));
+            if (result.count > 0) ui.notifications.info(_loc('CALENDARIA.Editor.NotesImported', { count: result.count }));
             if (result.errors?.length > 0) log(1, 'Note import errors:', result.errors);
             this.#pendingNotes = null;
           }
@@ -2462,7 +2462,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       }
     } catch (error) {
       log(1, 'Error saving calendar:', error);
-      ui.notifications.error(format('CALENDARIA.Editor.SaveError', { error: error.message }));
+      ui.notifications.error(_loc('CALENDARIA.Editor.SaveError', { error: error.message }));
     }
   }
 
@@ -2477,25 +2477,25 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const isAlreadyActive = activeCalendarId === this.#calendarId;
     const showSetActiveOption = isGM && !isAlreadyActive;
     const content = `
-      <p>${localize('CALENDARIA.Editor.ConfirmSave')}</p>
+      <p>${_loc('CALENDARIA.Editor.ConfirmSave')}</p>
       ${
         showSetActiveOption
           ? `<div class="form-group">
         <label class="checkbox">
           <input type="checkbox" name="setActive" ${this.#setActiveOnSave ? 'checked' : ''}>
-          ${localize('CALENDARIA.Editor.SetAsActive')}
+          ${_loc('CALENDARIA.Editor.SetAsActive')}
         </label>
-        <p class="hint">${localize('CALENDARIA.Editor.SetAsActiveHint')}</p>
+        <p class="hint">${_loc('CALENDARIA.Editor.SetAsActiveHint')}</p>
       </div>`
           : ''
       }
     `;
     return new Promise((resolve) => {
       foundry.applications.api.DialogV2.prompt({
-        window: { title: localize('CALENDARIA.Common.Save') },
+        window: { title: _loc('CALENDARIA.Common.Save') },
         content,
         ok: {
-          label: localize('CALENDARIA.Common.Save'),
+          label: _loc('CALENDARIA.Common.Save'),
           icon: 'fas fa-save',
           callback: (_event, button, _dialog) => {
             const setActive = isGM ? (button.form.elements.setActive?.checked ?? false) : false;
@@ -2568,7 +2568,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
-    ui.notifications.info(format('CALENDARIA.Editor.ExportSuccess', { name: this.#calendarData.name }));
+    ui.notifications.info(_loc('CALENDARIA.Editor.ExportSuccess', { name: this.#calendarData.name }));
   }
 
   /**
@@ -2578,10 +2578,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static async #onResetCalendar(_event, _target) {
     const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: localize('CALENDARIA.Common.Reset') },
-      content: `<p>${localize('CALENDARIA.Editor.ConfirmReset')}</p>`,
-      yes: { label: localize('CALENDARIA.Common.Reset'), icon: 'fas fa-undo' },
-      no: { label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' },
+      window: { title: _loc('CALENDARIA.Common.Reset') },
+      content: `<p>${_loc('CALENDARIA.Editor.ConfirmReset')}</p>`,
+      yes: { label: _loc('CALENDARIA.Common.Reset'), icon: 'fas fa-undo' },
+      no: { label: _loc('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' },
       rejectClose: false
     });
     if (confirmed) {
@@ -2610,10 +2610,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     if (!isCustom && hasOverride) {
       const confirmed = await foundry.applications.api.DialogV2.confirm({
-        window: { title: localize('CALENDARIA.Editor.ResetToDefault') },
-        content: `<p>${localize('CALENDARIA.Editor.ConfirmResetToDefault')}</p>`,
-        yes: { label: localize('CALENDARIA.Editor.ResetToDefault'), icon: 'fas fa-history', callback: () => true },
-        no: { label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' },
+        window: { title: _loc('CALENDARIA.Editor.ResetToDefault') },
+        content: `<p>${_loc('CALENDARIA.Editor.ConfirmResetToDefault')}</p>`,
+        yes: { label: _loc('CALENDARIA.Editor.ResetToDefault'), icon: 'fas fa-history', callback: () => true },
+        no: { label: _loc('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' },
         rejectClose: false
       });
       if (!confirmed) return;
@@ -2627,10 +2627,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       return;
     }
     const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: localize('CALENDARIA.Common.DeleteCalendar') },
-      content: `<p>${format('CALENDARIA.Editor.ConfirmDelete', { name: this.#calendarData.name })}</p>`,
-      yes: { label: localize('CALENDARIA.Common.DeleteCalendar'), icon: 'fas fa-trash', callback: () => true },
-      no: { label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' },
+      window: { title: _loc('CALENDARIA.Common.DeleteCalendar') },
+      content: `<p>${_loc('CALENDARIA.Editor.ConfirmDelete', { name: this.#calendarData.name })}</p>`,
+      yes: { label: _loc('CALENDARIA.Common.DeleteCalendar'), icon: 'fas fa-trash', callback: () => true },
+      no: { label: _loc('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' },
       rejectClose: false
     });
     if (!confirmed) return;

@@ -2,7 +2,7 @@ import { CalendarManager } from '../calendar/_module.mjs';
 import { ASSETS } from '../constants.mjs';
 import { FestivalManager } from '../festivals/_module.mjs';
 import { NoteManager } from '../notes/_module.mjs';
-import { format, localize, log } from '../utils/_module.mjs';
+import { log } from '../utils/_module.mjs';
 import BaseImporter from './base-importer.mjs';
 
 /**
@@ -27,7 +27,7 @@ export default class MiniCalendarImporter extends BaseImporter {
    * @returns {Promise<object>} Raw MC calendar data
    */
   async loadFromModule() {
-    if (!this.constructor.detect()) throw new Error(localize('CALENDARIA.Importer.MiniCalendar.NotInstalled'));
+    if (!this.constructor.detect()) throw new Error(_loc('CALENDARIA.Importer.MiniCalendar.NotInstalled'));
     const calendarConfig = game.settings.get('wgtgm-mini-calendar', 'calendarConfiguration') || {};
     const calendarSource = game.settings.get('wgtgm-mini-calendar', 'calendarSource') || 'world';
     const biome = game.settings.get('wgtgm-mini-calendar', 'biome') || 'temperate';
@@ -142,8 +142,8 @@ export default class MiniCalendarImporter extends BaseImporter {
       daylight: this.#transformDaylight(rawSun, rawMonths),
       weather: this.#transformWeather(data, rawWeather),
       metadata: {
-        description: calendar.description || localize('CALENDARIA.Importer.ImportedFrom.MiniCalendar'),
-        system: calendar.name || localize('CALENDARIA.Common.Unknown'),
+        description: calendar.description || _loc('CALENDARIA.Importer.ImportedFrom.MiniCalendar'),
+        system: calendar.name || _loc('CALENDARIA.Common.Unknown'),
         importedFrom: 'mini-calendar',
         originalId: calendar.id
       }
@@ -399,7 +399,7 @@ export default class MiniCalendarImporter extends BaseImporter {
     const zone = {
       id: biome,
       name: biome.charAt(0).toUpperCase() + biome.slice(1),
-      description: format('CALENDARIA.Importer.ImportedFrom.MiniCalendarBiome', { biome }),
+      description: _loc('CALENDARIA.Importer.ImportedFrom.MiniCalendarBiome', { biome }),
       temperatures: { _default: { min: 50, max: 70 }, ...seasonOverrides },
       presets: [],
       seasonOverrides: {}

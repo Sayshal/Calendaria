@@ -16,7 +16,6 @@ import {
   getRestorePosition,
   getSidebarBuffer,
   isCombatBlocked,
-  localize,
   registerForZoneUpdates,
   restorePinnedState,
   unpinFromZone,
@@ -122,7 +121,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     const context = await super._prepareContext(options);
     context.running = this.#running;
     context.mode = this.#mode;
-    context.modeLabel = this.#mode === 'realtime' ? localize('CALENDARIA.Stopwatch.RealTime') : localize('CALENDARIA.Stopwatch.GameTime');
+    context.modeLabel = this.#mode === 'realtime' ? _loc('CALENDARIA.Stopwatch.RealTime') : _loc('CALENDARIA.Stopwatch.GameTime');
     context.elapsed = this.#getDisplayTime();
     context.laps = this.#laps.map((lap, i) => ({ index: i + 1, elapsed: this.#formatLapTime(lap.elapsed), label: lap.label }));
     context.hasLaps = this.#laps.length > 0;
@@ -712,7 +711,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
   static #onLap() {
     if (!this.#running) return;
     const elapsed = this.#getCurrentElapsed();
-    this.#laps.push({ elapsed, label: `${localize('CALENDARIA.Stopwatch.Lap')} ${this.#laps.length + 1}` });
+    this.#laps.push({ elapsed, label: `${_loc('CALENDARIA.Stopwatch.Lap')} ${this.#laps.length + 1}` });
     this.#saveState();
     this.render();
     Hooks.callAll(HOOKS.STOPWATCH_LAP, { mode: this.#mode, lap: this.#laps.length, elapsed });
@@ -761,30 +760,30 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     const currentSound = this.#notification?.sound || 'sounds/notify.wav';
     const content = `
       <div class="form-group">
-        <label>${localize('CALENDARIA.Stopwatch.NotificationThreshold')}</label>
-        <input type="number" name="threshold" value="${this.#notificationThreshold ?? ''}" min="1" placeholder="${localize('CALENDARIA.Stopwatch.ThresholdPlaceholder')}" />
-        <p class="hint">${this.#mode === 'realtime' ? localize('CALENDARIA.Stopwatch.ThresholdHintRealtime') : localize('CALENDARIA.Stopwatch.ThresholdHintGametime')}</p>
+        <label>${_loc('CALENDARIA.Stopwatch.NotificationThreshold')}</label>
+        <input type="number" name="threshold" value="${this.#notificationThreshold ?? ''}" min="1" placeholder="${_loc('CALENDARIA.Stopwatch.ThresholdPlaceholder')}" />
+        <p class="hint">${this.#mode === 'realtime' ? _loc('CALENDARIA.Stopwatch.ThresholdHintRealtime') : _loc('CALENDARIA.Stopwatch.ThresholdHintGametime')}</p>
       </div>
       <div class="form-group">
-        <label>${localize('CALENDARIA.Common.NotifType')}</label>
+        <label>${_loc('CALENDARIA.Common.NotifType')}</label>
         <select name="type">
-          <option value="toast" ${this.#notification?.type === 'toast' ? 'selected' : ''}>${localize('CALENDARIA.Stopwatch.NotificationToast')}</option>
-          <option value="sound" ${this.#notification?.type === 'sound' ? 'selected' : ''}>${localize('CALENDARIA.Stopwatch.NotificationSound')}</option>
-          <option value="both" ${this.#notification?.type === 'both' ? 'selected' : ''}>${localize('CALENDARIA.Stopwatch.NotificationBoth')}</option>
+          <option value="toast" ${this.#notification?.type === 'toast' ? 'selected' : ''}>${_loc('CALENDARIA.Stopwatch.NotificationToast')}</option>
+          <option value="sound" ${this.#notification?.type === 'sound' ? 'selected' : ''}>${_loc('CALENDARIA.Stopwatch.NotificationSound')}</option>
+          <option value="both" ${this.#notification?.type === 'both' ? 'selected' : ''}>${_loc('CALENDARIA.Stopwatch.NotificationBoth')}</option>
         </select>
       </div>
       <div class="form-group">
-        <label>${localize('CALENDARIA.WeatherEditor.SoundFile')}</label>
+        <label>${_loc('CALENDARIA.WeatherEditor.SoundFile')}</label>
         <div class="form-fields">
           <input type="text" name="sound" value="${currentSound}" placeholder="sounds/notify.wav" />
-          <button type="button" class="file-picker" data-type="audio" data-target="sound" data-tooltip="${localize('FILES.BrowseTooltip')}">
+          <button type="button" class="file-picker" data-type="audio" data-target="sound" data-tooltip="${_loc('FILES.BrowseTooltip')}">
             <i class="fas fa-file-audio"></i>
           </button>
         </div>
       </div>
     `;
     const result = await foundry.applications.api.DialogV2.wait({
-      window: { title: localize('CALENDARIA.Stopwatch.ConfigureNotification'), icon: 'fas fa-bell' },
+      window: { title: _loc('CALENDARIA.Stopwatch.ConfigureNotification'), icon: 'fas fa-bell' },
       content,
       render: (_event, dialog) => {
         const form = dialog.element.querySelector('form');
@@ -803,7 +802,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
       buttons: [
         {
           action: 'save',
-          label: localize('CALENDARIA.Common.Save'),
+          label: _loc('CALENDARIA.Common.Save'),
           icon: 'fas fa-save',
           callback: (_event, _button, dialog) => {
             const form = dialog.element.querySelector('form');
@@ -815,7 +814,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
         },
         {
           action: 'clear',
-          label: localize('CALENDARIA.Common.ClearAction'),
+          label: _loc('CALENDARIA.Common.ClearAction'),
           icon: 'fas fa-times',
           callback: () => ({ threshold: null, type: null, sound: null })
         }
@@ -889,7 +888,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
   #fireNotification() {
     const type = this.#notification?.type || 'toast';
     const sound = this.#notification?.sound || 'sounds/notify.wav';
-    const message = localize('CALENDARIA.Stopwatch.NotificationMessage');
+    const message = _loc('CALENDARIA.Stopwatch.NotificationMessage');
     if (type === 'toast' || type === 'both') ui.notifications.info(`<i class="fas fa-stopwatch"></i> ${message}`);
     if (type === 'sound' || type === 'both') foundry.audio.AudioHelper.play({ src: sound, volume: 1, autoplay: true });
   }
@@ -1149,32 +1148,32 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
   #getContextMenuItems() {
     const items = [];
     items.push({
-      name: 'CALENDARIA.Common.ResetPosition',
+      label: 'CALENDARIA.Common.ResetPosition',
       icon: '<i class="fas fa-arrows-to-dot"></i>',
-      callback: () => this.resetPosition()
+      onClick: () => this.resetPosition()
     });
     const stickyStates = game.settings.get(MODULE.ID, SETTINGS.STOPWATCH_STICKY_STATES) || {};
     const isLocked = stickyStates.position ?? false;
     items.push({
-      name: isLocked ? 'CALENDARIA.Common.UnlockPosition' : 'CALENDARIA.Common.LockPosition',
+      label: isLocked ? 'CALENDARIA.Common.UnlockPosition' : 'CALENDARIA.Common.LockPosition',
       icon: `<i class="fas fa-${isLocked ? 'unlock' : 'lock'}"></i>`,
-      callback: () => this.#toggleStickyPosition()
+      onClick: () => this.#toggleStickyPosition()
     });
     if (game.user.isGM) {
       const forceStopwatch = game.settings.get(MODULE.ID, SETTINGS.FORCE_STOPWATCH);
       items.push({
-        name: forceStopwatch ? 'CALENDARIA.Common.HideFromAll' : 'CALENDARIA.Common.ShowToAll',
+        label: forceStopwatch ? 'CALENDARIA.Common.HideFromAll' : 'CALENDARIA.Common.ShowToAll',
         icon: `<i class="fas fa-${forceStopwatch ? 'eye-slash' : 'eye'}"></i>`,
-        callback: async () => {
+        onClick: async () => {
           const newValue = !forceStopwatch;
-          if (newValue) warnShowToAll('viewStopwatch', game.i18n.localize('CALENDARIA.Permissions.ViewStopwatch'));
+          if (newValue) warnShowToAll('viewStopwatch', _loc('CALENDARIA.Permissions.ViewStopwatch'));
           await game.settings.set(MODULE.ID, SETTINGS.FORCE_STOPWATCH, newValue);
           CalendariaSocket.emit(SOCKET_TYPES.STOPWATCH_VISIBILITY, { visible: newValue });
         }
       });
     }
     items.push(buildOpenAppsMenuItem());
-    items.push({ name: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', callback: () => this.close() });
+    items.push({ label: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', onClick: () => this.close() });
     return items;
   }
 

@@ -4,7 +4,6 @@ import { FestivalManager } from '../festivals/_module.mjs';
 import { getAllPresets, upsertBundledCustomPreset } from '../notes/_module.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import { FRAMEWORK_INITIAL_DISPLAY_FORMATS } from './formatting/format-utils.mjs';
-import { format, localize } from './localization.mjs';
 import { log } from './logger.mjs';
 
 /**
@@ -246,13 +245,13 @@ async function importNotes(notes, calendarId, bundledCustomPresets = []) {
  */
 export async function exportSettings() {
   const activeCalendar = CalendarManager.getActiveCalendar();
-  const calendarName = activeCalendar?.name ? localize(activeCalendar.name) : null;
+  const calendarName = activeCalendar?.name ? _loc(activeCalendar.name) : null;
   const calendarId = activeCalendar?.metadata?.id;
-  let content = `<p>${localize('CALENDARIA.SettingsPanel.ExportSettings.DialogText')}</p>`;
+  let content = `<p>${_loc('CALENDARIA.SettingsPanel.ExportSettings.DialogText')}</p>`;
   if (calendarName) {
     content += `
       <div class="form-group">
-        <label for="includeCalendar">${format('CALENDARIA.SettingsPanel.ExportSettings.IncludeCalendar', { name: calendarName })}</label>
+        <label for="includeCalendar">${_loc('CALENDARIA.SettingsPanel.ExportSettings.IncludeCalendar', { name: calendarName })}</label>
         <div class="form-fields">
           <input type="checkbox" id="includeCalendar" name="includeCalendar" checked>
         </div>
@@ -260,11 +259,11 @@ export async function exportSettings() {
   }
   let dialogElement = null;
   const result = await foundry.applications.api.DialogV2.wait({
-    window: { title: localize('CALENDARIA.Common.ExportSettings') },
+    window: { title: _loc('CALENDARIA.Common.ExportSettings') },
     content,
     buttons: [
-      { action: 'export', label: localize('CALENDARIA.Common.Export'), icon: 'fas fa-file-export', default: true },
-      { action: 'cancel', label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' }
+      { action: 'export', label: _loc('CALENDARIA.Common.Export'), icon: 'fas fa-file-export', default: true },
+      { action: 'cancel', label: _loc('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' }
     ],
     close: () => 'cancel',
     render: (_event, dialog) => {
@@ -337,17 +336,17 @@ export async function importSettings(onComplete) {
       const hasNotes = Array.isArray(importData.notes) && importData.notes.length > 0;
       const settingsCount = Object.keys(importData.settings).length;
       const calendarName = importData.calendarData?.name;
-      let content = `<p>${format('CALENDARIA.SettingsPanel.ImportSettings.ConfirmContent', { count: settingsCount, version: importData.version || 'unknown' })}</p>`;
+      let content = `<p>${_loc('CALENDARIA.SettingsPanel.ImportSettings.ConfirmContent', { count: settingsCount, version: importData.version || 'unknown' })}</p>`;
       if (hasCalendarData) {
         content += `
           <div class="form-group">
-            <label for="importCalendar">${format('CALENDARIA.SettingsPanel.ImportSettings.IncludesCalendar', { name: calendarName })}</label>
+            <label for="importCalendar">${_loc('CALENDARIA.SettingsPanel.ImportSettings.IncludesCalendar', { name: calendarName })}</label>
             <div class="form-fields">
               <input type="checkbox" id="importCalendar" name="importCalendar" checked>
             </div>
           </div>
           <div class="form-group">
-            <label for="setActive">${localize('CALENDARIA.Editor.SetAsActive')}</label>
+            <label for="setActive">${_loc('CALENDARIA.Editor.SetAsActive')}</label>
             <div class="form-fields">
               <input type="checkbox" id="setActive" name="setActive" checked>
             </div>
@@ -356,7 +355,7 @@ export async function importSettings(onComplete) {
       if (hasNotes) {
         content += `
           <div class="form-group">
-            <label for="importNotes">${format('CALENDARIA.SettingsPanel.ImportSettings.IncludesNotes', { count: importData.notes.length })}</label>
+            <label for="importNotes">${_loc('CALENDARIA.SettingsPanel.ImportSettings.IncludesNotes', { count: importData.notes.length })}</label>
             <div class="form-fields">
               <input type="checkbox" id="importNotes" name="importNotes" checked>
             </div>
@@ -364,11 +363,11 @@ export async function importSettings(onComplete) {
       }
       let dialogElement = null;
       const result = await foundry.applications.api.DialogV2.wait({
-        window: { title: localize('CALENDARIA.Common.ImportSettings') },
+        window: { title: _loc('CALENDARIA.Common.ImportSettings') },
         content,
         buttons: [
-          { action: 'import', label: localize('CALENDARIA.Common.Import'), icon: 'fas fa-file-import', default: true },
-          { action: 'cancel', label: localize('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' }
+          { action: 'import', label: _loc('CALENDARIA.Common.Import'), icon: 'fas fa-file-import', default: true },
+          { action: 'cancel', label: _loc('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' }
         ],
         close: () => 'cancel',
         render: (_event, dialog) => {
@@ -391,7 +390,7 @@ export async function importSettings(onComplete) {
           }
         }
       }
-      ui.notifications.info(format('CALENDARIA.SettingsPanel.ImportSettings.Success', { count: imported }));
+      ui.notifications.info(_loc('CALENDARIA.SettingsPanel.ImportSettings.Success', { count: imported }));
       let importedCalendarId = null;
       if (hasCalendarData && doImportCalendar) {
         try {
@@ -404,10 +403,10 @@ export async function importSettings(onComplete) {
           const calendar = await CalendarManager.createCustomCalendar(calendarId, calendarData);
           if (calendar) {
             importedCalendarId = calendar.metadata?.id || `custom-${calendarId}`;
-            ui.notifications.info(format('CALENDARIA.SettingsPanel.ImportSettings.CalendarImported', { name: calendarName }));
+            ui.notifications.info(_loc('CALENDARIA.SettingsPanel.ImportSettings.CalendarImported', { name: calendarName }));
             if (setActive) {
               await CalendarManager.switchCalendar(importedCalendarId);
-              ui.notifications.info(format('CALENDARIA.SettingsPanel.ImportSettings.CalendarActivated', { name: calendarName }));
+              ui.notifications.info(_loc('CALENDARIA.SettingsPanel.ImportSettings.CalendarActivated', { name: calendarName }));
             }
           }
         } catch (calError) {
@@ -419,7 +418,7 @@ export async function importSettings(onComplete) {
         try {
           const noteCalendarId = importedCalendarId || CalendarManager.getActiveCalendar()?.metadata?.id;
           const noteCount = await importNotes(importData.notes, noteCalendarId, importData.customPresets || []);
-          if (noteCount > 0) ui.notifications.info(format('CALENDARIA.SettingsPanel.ImportSettings.NotesImported', { count: noteCount }));
+          if (noteCount > 0) ui.notifications.info(_loc('CALENDARIA.SettingsPanel.ImportSettings.NotesImported', { count: noteCount }));
         } catch (noteError) {
           log(1, 'Note import failed:', noteError);
           ui.notifications.error(`Note import failed: ${noteError.message}`);

@@ -23,7 +23,6 @@ import {
   buildWeatherPillData,
   canViewBigCal,
   enrichSeasonData,
-  format,
   formatForLocation,
   generateDayTooltip,
   getAllMoonPhases,
@@ -41,7 +40,6 @@ import {
   isFogEnabled,
   isMonthFullyFogged,
   isRevealed,
-  localize,
   renderCycleIndicator,
   renderEraIndicator,
   renderMoonIcons,
@@ -333,7 +331,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   _normalizeSeasonData(season) {
     if (!season) return null;
-    return { name: localize(season.name), icon: season.icon || 'fas fa-sun', color: season.color || '#888' };
+    return { name: _loc(season.name), icon: season.icon || 'fas fa-sun', color: season.color || '#888' };
   }
 
   /**
@@ -343,7 +341,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   _normalizeEraData(era) {
     if (!era) return null;
-    return { name: localize(era.name), abbreviation: localize(era.abbreviation || era.name) };
+    return { name: _loc(era.name), abbreviation: _loc(era.abbreviation || era.name) };
   }
 
   /**
@@ -407,7 +405,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
           .map((moon, index) => {
             const phase = calendar.getMoonPhase(index, dayWorldTime);
             if (!phase) return null;
-            return { moonName: localize(moon.name), phaseName: phase.subPhaseName || localize(phase.name), icon: phase.icon, color: moon.color || null };
+            return { moonName: _loc(moon.name), phaseName: phase.subPhaseName || _loc(phase.name), icon: phase.icon, color: moon.color || null };
           })
           .filter(Boolean)
           .sort((a, b) => a.moonName.localeCompare(b.moonName));
@@ -496,7 +494,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
         const festivalDay = calendar.findFestivalDay({ year: checkYear - yearZero, month: checkMonth, dayOfMonth: dayInMonth - 1 });
         const skipFestival = festivalDay?.countsForWeekday === false && !isIntercalaryMonth;
         if (!skipFestival) {
-          const monthName = isIntercalaryMonth ? localize(monthData?.name ?? '') : '';
+          const monthName = isIntercalaryMonth ? _loc(monthData?.name ?? '') : '';
           currentWeek.push({
             day: dayInMonth,
             dayOfMonth: dayInMonth - 1,
@@ -529,7 +527,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const currentEra = calendar.getCurrentEra?.();
     const monthWeekdaysRaw = calendar.getWeekdaysForMonth?.(month) ?? calendar.weekdaysArray ?? [];
     const monthWeekdays = monthWeekdaysRaw.length ? Array.from({ length: monthWeekdaysRaw.length }, (_, i) => monthWeekdaysRaw[(i + weekStartIdx) % monthWeekdaysRaw.length]) : monthWeekdaysRaw;
-    const weekdaysData = monthWeekdays.map((wd) => ({ name: localize(wd.name), isRestDay: wd.isRestDay || false }));
+    const weekdaysData = monthWeekdays.map((wd) => ({ name: _loc(wd.name), isRestDay: wd.isRestDay || false }));
     const showSelectedInHeader = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_HEADER_SHOW_SELECTED);
     const headerDate = showSelectedInHeader && this._selectedDate ? this._selectedDate : { year, month, dayOfMonth: date.dayOfMonth };
     const headerComponents = { year: headerDate.year, month: headerDate.month, dayOfMonth: headerDate.dayOfMonth ?? 0 };
@@ -538,7 +536,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     return {
       year,
       month,
-      monthName: localize(monthData.name),
+      monthName: _loc(monthData.name),
       yearDisplay: String(year),
       formattedHeader,
       formattedHeaderHtml: hasMoonIconMarkers(rawHeader),
@@ -598,7 +596,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
             .map((moon, index) => {
               const phase = calendar.getMoonPhase(index, dayWorldTime);
               if (!phase) return null;
-              return { moonName: localize(moon.name), phaseName: phase.subPhaseName || localize(phase.name), icon: phase.icon, color: moon.color || null };
+              return { moonName: _loc(moon.name), phaseName: phase.subPhaseName || _loc(phase.name), icon: phase.icon, color: moon.color || null };
             })
             .filter(Boolean)
             .sort((a, b) => a.moonName.localeCompare(b.moonName));
@@ -616,7 +614,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
           isSelected: this._isSelected(dayYear, 0, dayOfMonth),
           notes: dayNotes,
           isFestival: !dayIsFogged && !!festivalDay,
-          festivalName: !dayIsFogged && festivalDay ? localize(festivalDay.name) : null,
+          festivalName: !dayIsFogged && festivalDay ? _loc(festivalDay.name) : null,
           festivalColor: !dayIsFogged ? festivalDay?.color || '' : '',
           festivalIcon: !dayIsFogged && festivalDay?.icon ? `fas ${festivalDay.icon}` : '',
           festivalNoteId: dayIsFogged ? '' : festivalNoteId,
@@ -635,7 +633,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const weekdayData = calendar.weekdaysArray ?? [];
     const displayWeek = weekNumber + 1;
     const yearDisplay = String(year);
-    const formattedHeader = `${localize('CALENDARIA.Common.Week')} ${displayWeek}, ${yearDisplay}`;
+    const formattedHeader = `${_loc('CALENDARIA.Common.Week')} ${displayWeek}, ${yearDisplay}`;
     return {
       year,
       month: 0,
@@ -643,7 +641,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       yearDisplay,
       formattedHeader,
       weeks,
-      weekdays: weekdayData.map((wd) => ({ name: localize(wd.name), isRestDay: wd.isRestDay || false })),
+      weekdays: weekdayData.map((wd) => ({ name: _loc(wd.name), isRestDay: wd.isRestDay || false })),
       daysInWeek,
       currentSeason,
       currentEra,
@@ -728,8 +726,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       const dayNotes = weekDayFogged ? [] : this._getNotesForDay(notes, currentYear, currentMonth, currentDayOfMonth);
       const monthWeekdays = calendar.getWeekdaysForMonth?.(currentMonth) ?? calendar.weekdaysArray ?? [];
       const weekdayData = monthWeekdays.length ? monthWeekdays[(weekdayIndex + weekStartIdx) % monthWeekdays.length] : null;
-      const dayName = weekdayData?.name ? localize(weekdayData.name) : '';
-      const monthName = calendar.monthsArray[currentMonth]?.name ? localize(calendar.monthsArray[currentMonth].name) : '';
+      const dayName = weekdayData?.name ? _loc(weekdayData.name) : '';
+      const monthName = calendar.monthsArray[currentMonth]?.name ? _loc(calendar.monthsArray[currentMonth].name) : '';
       const isToday = this._isToday(currentYear, currentMonth, currentDayOfMonth);
       const selectedHour =
         this._selectedTimeSlot?.year === currentYear && this._selectedTimeSlot?.month === currentMonth && this._selectedTimeSlot?.dayOfMonth === currentDayOfMonth ? this._selectedTimeSlot.hour : null;
@@ -781,14 +779,14 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     return {
       year: weekStartYear,
       month: weekStartMonth,
-      monthName: calendar.monthsArray[month]?.name ? localize(calendar.monthsArray[month].name) : '',
+      monthName: calendar.monthsArray[month]?.name ? _loc(calendar.monthsArray[month].name) : '',
       yearDisplay: String(weekStartYear),
       formattedHeader,
       formattedHeaderHtml: hasMoonIconMarkers(rawHeader),
       weekNumber,
       days: days,
       timeSlots: timeSlots,
-      weekdays: weekWeekdays.map((wd) => ({ name: localize(wd.name), isRestDay: wd.isRestDay || false })),
+      weekdays: weekWeekdays.map((wd) => ({ name: _loc(wd.name), isRestDay: wd.isRestDay || false })),
       daysInWeek,
       hoursPerDay,
       currentHour,
@@ -822,8 +820,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
           isCurrent: displayYear === year,
           months:
             calendar.monthsArray.map((m, idx) => {
-              const localizedName = localize(m.name);
-              const localizedAbbrev = m.abbreviation ? localize(m.abbreviation) : localizedName;
+              const localizedName = _loc(m.name);
+              const localizedAbbrev = m.abbreviation ? _loc(m.abbreviation) : localizedName;
               const abbrevData = this._abbreviateMonthName(localizedAbbrev);
               const daysInMonth = calendar.getDaysInMonth(idx, displayYear - yearZero);
               return {
@@ -1369,9 +1367,9 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
   #getContextMenuItems() {
     const items = [];
     items.push({
-      name: 'CALENDARIA.BigCal.ContextMenu.Settings',
+      label: 'CALENDARIA.BigCal.ContextMenu.Settings',
       icon: '<i class="fas fa-gear"></i>',
-      callback: () => {
+      onClick: () => {
         const panel = new SettingsPanel();
         panel.render(true).then(() => {
           requestAnimationFrame(() => panel.changeTab('bigcal', 'primary'));
@@ -1382,17 +1380,17 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     if (game.user.isGM) {
       const forceBigCal = game.settings.get(MODULE.ID, SETTINGS.FORCE_BIG_CAL);
       items.push({
-        name: forceBigCal ? 'CALENDARIA.Common.HideFromAll' : 'CALENDARIA.Common.ShowToAll',
+        label: forceBigCal ? 'CALENDARIA.Common.HideFromAll' : 'CALENDARIA.Common.ShowToAll',
         icon: `<i class="fas fa-${forceBigCal ? 'eye-slash' : 'eye'}"></i>`,
-        callback: async () => {
+        onClick: async () => {
           const newValue = !forceBigCal;
-          if (newValue) warnShowToAll('viewBigCal', game.i18n.localize('CALENDARIA.Permissions.ViewBigCal'));
+          if (newValue) warnShowToAll('viewBigCal', _loc('CALENDARIA.Permissions.ViewBigCal'));
           await game.settings.set(MODULE.ID, SETTINGS.FORCE_BIG_CAL, newValue);
           CalendariaSocket.emit(SOCKET_TYPES.BIG_CAL_VISIBILITY, { visible: newValue });
         }
       });
     }
-    items.push({ name: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', callback: () => this.close() });
+    items.push({ label: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', onClick: () => this.close() });
     return items;
   }
 
@@ -1684,7 +1682,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
     const endHour = (parseInt(hour) + 1) % hoursPerDay;
     await NoteManager.createNote({
-      name: localize('CALENDARIA.Note.NewNote'),
+      name: _loc('CALENDARIA.Note.NewNote'),
       noteData: {
         startDate: { year: parseInt(year), month: parseInt(month), dayOfMonth: parseInt(dayOfMonth), hour: parseInt(hour), minute: 0 },
         endDate: { year: parseInt(year), month: parseInt(month), dayOfMonth: parseInt(dayOfMonth), hour: endHour, minute: 0 }
@@ -1721,7 +1719,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     const endHour = (parseInt(hour) + 1) % hoursPerDay;
     await NoteManager.createNote({
-      name: localize('CALENDARIA.Note.NewNote'),
+      name: _loc('CALENDARIA.Note.NewNote'),
       noteData: {
         startDate: { year: parseInt(year), month: parseInt(month), dayOfMonth: parseInt(dayOfMonth), hour: parseInt(hour), minute: parseInt(minute) },
         endDate: { year: parseInt(year), month: parseInt(month), dayOfMonth: parseInt(dayOfMonth), hour: endHour, minute: parseInt(minute) }
@@ -1754,8 +1752,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const page = journal?.pages.get(pageId);
     if (page) {
       const confirmed = await foundry.applications.api.DialogV2.confirm({
-        window: { title: localize('CALENDARIA.Common.DeleteNote') },
-        content: `<p>${format('CALENDARIA.ContextMenu.DeleteConfirm', { name: page.name })}</p>`,
+        window: { title: _loc('CALENDARIA.Common.DeleteNote') },
+        content: `<p>${_loc('CALENDARIA.ContextMenu.DeleteConfirm', { name: page.name })}</p>`,
         rejectClose: false,
         modal: true
       });
@@ -1894,7 +1892,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
   _getWeatherContext() {
     const weather = WeatherManager.getCurrentWeather(null, game.scenes?.active);
     if (!weather) return null;
-    const label = localize(weather.label);
+    const label = _loc(weather.label);
     const windSpeed = weather.wind?.speed ?? 0;
     const windDirection = weather.wind?.direction;
     const precipType = weather.precipitation?.type ?? null;
@@ -1902,7 +1900,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const windKph = weather.wind?.kph ?? null;
     const tooltipHtml = WeatherManager.buildWeatherTooltip({
       label,
-      description: weather.description ? localize(weather.description) : null,
+      description: weather.description ? _loc(weather.description) : null,
       temp,
       windSpeed,
       windKph,

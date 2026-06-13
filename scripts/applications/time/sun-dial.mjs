@@ -17,7 +17,6 @@ import {
   getSidebarBuffer,
   getSkyColorsRgb,
   isCombatBlocked,
-  localize,
   log,
   registerForZoneUpdates,
   restorePinnedState,
@@ -363,7 +362,7 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     const moons = [];
     if (calendar) {
       const showAll = game.settings.get(MODULE.ID, SETTINGS.HUD_SHOW_ALL_MOONS);
-      const sortedMoons = [...(calendar.moonsArray ?? [])].sort((a, b) => localize(a.name).localeCompare(localize(b.name)));
+      const sortedMoons = [...(calendar.moonsArray ?? [])].sort((a, b) => _loc(a.name).localeCompare(_loc(b.name)));
       const moonList = showAll ? sortedMoons : sortedMoons.slice(0, 1);
       const components = game.time.components;
       for (let mi = 0; mi < moonList.length; mi++) {
@@ -492,7 +491,7 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
       return;
     }
     const sign = dayOffset > 0 ? '+' : '';
-    label.textContent = `${sign}${dayOffset} ${localize('CALENDARIA.Common.UnitDays')}`;
+    label.textContent = `${sign}${dayOffset} ${_loc('CALENDARIA.Common.UnitDays')}`;
   }
 
   /** Setup handle drag and time input interaction. */
@@ -697,37 +696,37 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     const items = [];
     const crankMode = game.settings.get(MODULE.ID, SETTINGS.SUN_DIAL_CRANK_MODE);
     items.push({
-      name: crankMode ? 'CALENDARIA.SunDial.ContextMenu.DisableCrankMode' : 'CALENDARIA.SunDial.ContextMenu.EnableCrankMode',
+      label: crankMode ? 'CALENDARIA.SunDial.ContextMenu.DisableCrankMode' : 'CALENDARIA.SunDial.ContextMenu.EnableCrankMode',
       icon: `<i class="fas fa-${crankMode ? 'toggle-on' : 'toggle-off'}"></i>`,
-      callback: () => this.#toggleCrankMode()
+      onClick: () => this.#toggleCrankMode()
     });
     items.push({
-      name: 'CALENDARIA.Common.ResetPosition',
+      label: 'CALENDARIA.Common.ResetPosition',
       icon: '<i class="fas fa-arrows-to-dot"></i>',
-      callback: () => this.resetPosition()
+      onClick: () => this.resetPosition()
     });
     const stickyStates = game.settings.get(MODULE.ID, SETTINGS.SUN_DIAL_STICKY_STATES) || {};
     const isLocked = stickyStates.position ?? false;
     items.push({
-      name: isLocked ? 'CALENDARIA.Common.UnlockPosition' : 'CALENDARIA.Common.LockPosition',
+      label: isLocked ? 'CALENDARIA.Common.UnlockPosition' : 'CALENDARIA.Common.LockPosition',
       icon: `<i class="fas fa-${isLocked ? 'unlock' : 'lock'}"></i>`,
-      callback: () => this.#toggleStickyPosition()
+      onClick: () => this.#toggleStickyPosition()
     });
     if (game.user.isGM) {
       const forceSunDial = game.settings.get(MODULE.ID, SETTINGS.FORCE_SUN_DIAL);
       items.push({
-        name: forceSunDial ? 'CALENDARIA.Common.HideFromAll' : 'CALENDARIA.Common.ShowToAll',
+        label: forceSunDial ? 'CALENDARIA.Common.HideFromAll' : 'CALENDARIA.Common.ShowToAll',
         icon: `<i class="fas fa-${forceSunDial ? 'eye-slash' : 'eye'}"></i>`,
-        callback: async () => {
+        onClick: async () => {
           const newValue = !forceSunDial;
-          if (newValue) warnShowToAll('viewSunDial', game.i18n.localize('CALENDARIA.Permissions.ViewSunDial'));
+          if (newValue) warnShowToAll('viewSunDial', _loc('CALENDARIA.Permissions.ViewSunDial'));
           await game.settings.set(MODULE.ID, SETTINGS.FORCE_SUN_DIAL, newValue);
           CalendariaSocket.emit(SOCKET_TYPES.SUN_DIAL_VISIBILITY, { visible: newValue });
         }
       });
     }
     items.push(buildOpenAppsMenuItem());
-    items.push({ name: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', callback: () => this.close() });
+    items.push({ label: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', onClick: () => this.close() });
     return items;
   }
 
@@ -763,7 +762,7 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     const calendar = CalendarManager.getActiveCalendar();
     const yearZero = calendar?.years?.yearZero ?? 0;
     await NoteManager.createNote({
-      name: localize('CALENDARIA.Note.NewNote'),
+      name: _loc('CALENDARIA.Note.NewNote'),
       noteData: {
         startDate: { year: today.year + yearZero, month: today.month, dayOfMonth: today.dayOfMonth ?? 0, hour: today.hour ?? 0, minute: today.minute ?? 0 },
         endDate: { year: today.year + yearZero, month: today.month, dayOfMonth: today.dayOfMonth ?? 0, hour: (today.hour ?? 0) + 1, minute: today.minute ?? 0 }

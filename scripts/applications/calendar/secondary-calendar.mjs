@@ -1,7 +1,7 @@
 import { CalendarRegistry, getCurrentDateOn } from '../../calendar/_module.mjs';
 import { HOOKS, TEMPLATES } from '../../constants.mjs';
 import { dayOfWeek } from '../../notes/_module.mjs';
-import { formatCustom, getLeadingDays, localize } from '../../utils/_module.mjs';
+import { formatCustom, getLeadingDays } from '../../utils/_module.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -64,7 +64,7 @@ export class SecondaryCalendar extends HandlebarsApplicationMixin(ApplicationV2)
   /** @override */
   get title() {
     const cal = this.calendar;
-    const name = cal?.name ? localize(cal.name) : this.#calendarId;
+    const name = cal?.name ? _loc(cal.name) : this.#calendarId;
     return name;
   }
 
@@ -80,7 +80,7 @@ export class SecondaryCalendar extends HandlebarsApplicationMixin(ApplicationV2)
       return context;
     }
     const viewedDate = this.viewedDate;
-    context.calendarName = localize(calendar.name) || this.#calendarId;
+    context.calendarName = _loc(calendar.name) || this.#calendarId;
     if (calendar.isMonthless) {
       context.calendarData = this.#generateWeekViewData(calendar, viewedDate);
       context.formattedHeader = context.calendarData?.formattedHeader ?? '';
@@ -108,7 +108,7 @@ export class SecondaryCalendar extends HandlebarsApplicationMixin(ApplicationV2)
     if (!monthData) return null;
     const daysInMonth = calendar.getDaysInMonth(month, internalYear);
     const daysInWeek = calendar.daysInWeek;
-    const weekdays = calendar.weekdaysArray.map((w) => ({ name: localize(w.name), abbreviation: localize(w.abbreviation || w.name).slice(0, 2) }));
+    const weekdays = calendar.weekdaysArray.map((w) => ({ name: _loc(w.name), abbreviation: _loc(w.abbreviation || w.name).slice(0, 2) }));
     const currentDate = getCurrentDateOn(this.#calendarId);
     const todayYear = currentDate?.year;
     const todayMonth = currentDate?.month;
@@ -127,7 +127,7 @@ export class SecondaryCalendar extends HandlebarsApplicationMixin(ApplicationV2)
       const festivalDay = calendar.findFestivalDay({ year: internalYear, month, dayOfMonth: d });
       const isIntercalary = festivalDay?.countsForWeekday === false;
       if (isIntercalary) {
-        intercalaryDays.push({ day: d + 1, isToday, festivalName: festivalDay ? localize(festivalDay.name) : '' });
+        intercalaryDays.push({ day: d + 1, isToday, festivalName: festivalDay ? _loc(festivalDay.name) : '' });
       } else {
         currentWeek.push({ day: d + 1, isToday, isFromOtherMonth: false });
         if (currentWeek.length === daysInWeek) {
@@ -159,7 +159,7 @@ export class SecondaryCalendar extends HandlebarsApplicationMixin(ApplicationV2)
     const currentDate = getCurrentDateOn(this.#calendarId);
     const todayYear = currentDate?.year;
     const todayDay = currentDate?.dayOfMonth ?? 0;
-    const weekdays = calendar.weekdaysArray.map((w) => ({ name: localize(w.name), abbreviation: localize(w.abbreviation || w.name).slice(0, 2) }));
+    const weekdays = calendar.weekdaysArray.map((w) => ({ name: _loc(w.name), abbreviation: _loc(w.abbreviation || w.name).slice(0, 2) }));
     const weeks = [];
     for (let weekOffset = -1; weekOffset <= 1; weekOffset++) {
       const targetWeek = weekNumber + weekOffset;
@@ -183,7 +183,7 @@ export class SecondaryCalendar extends HandlebarsApplicationMixin(ApplicationV2)
     }
     const displayWeek = weekNumber + 1;
     const timeOfDay = formatCustom(calendar, currentDate ?? { year, month: 0, dayOfMonth: viewedDay }, 'HH:mm');
-    const formattedHeader = `${localize('CALENDARIA.Common.Week')} ${displayWeek}, ${year} (${timeOfDay})`;
+    const formattedHeader = `${_loc('CALENDARIA.Common.Week')} ${displayWeek}, ${year} (${timeOfDay})`;
     return { weekdays, weeks, intercalaryDays: [], formattedHeader, isMonthless: true, weekNumber: displayWeek };
   }
 
@@ -196,7 +196,7 @@ export class SecondaryCalendar extends HandlebarsApplicationMixin(ApplicationV2)
     const options = [];
     for (const [id, cal] of CalendarRegistry.getAll()) {
       if (id === activeId) continue;
-      options.push({ id, name: localize(cal.name) || id, selected: id === this.#calendarId });
+      options.push({ id, name: _loc(cal.name) || id, selected: id === this.#calendarId });
     }
     return options;
   }
