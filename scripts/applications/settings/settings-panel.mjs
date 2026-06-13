@@ -1363,6 +1363,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       { id: 'chatTimestamp', label: _loc('CALENDARIA.Format.Location.ChatTimestamp'), category: 'chat', contextType: 'date' },
       { id: 'noteViewerDate', label: _loc('CALENDARIA.Format.Location.NoteViewerDate'), category: 'notes', contextType: 'date' },
       { id: 'cinematicDate', label: _loc('CALENDARIA.Format.Location.CinematicDate'), category: 'cinematics', contextType: 'date' },
+      { id: 'cinematicTime', label: _loc('CALENDARIA.Common.TimeDisplay'), category: 'cinematics', contextType: 'time' },
       { id: 'sundialTime', label: _loc('CALENDARIA.Common.TimeDisplay'), category: 'sunDial', contextType: 'time' },
       { id: 'stopwatchRealtime', label: _loc('CALENDARIA.Format.Location.StopwatchRealtime'), category: 'stopwatch', contextType: 'stopwatch', gmOnly: true },
       { id: 'stopwatchGametime', label: _loc('CALENDARIA.Format.Location.StopwatchGametime'), category: 'stopwatch', contextType: 'stopwatch', gmOnly: true }
@@ -1490,6 +1491,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.cinematicOnRestDisabled = !game.settings.get(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST);
     const unit = game.settings.get(MODULE.ID, SETTINGS.CINEMATIC_THRESHOLD_UNIT);
     context.thresholdUnits = [
+      { value: 'hour', label: _loc('CALENDARIA.Common.Hour'), selected: unit === 'hour' },
       { value: 'day', label: _loc('CALENDARIA.Common.Day'), selected: unit === 'day' },
       { value: 'week', label: _loc('CALENDARIA.Common.Week'), selected: unit === 'week' },
       { value: 'month', label: _loc('CALENDARIA.Common.Month'), selected: unit === 'month' },

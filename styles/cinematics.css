@@ -140,6 +140,20 @@
     letter-spacing: 0.04em;
   }
 
+  .cinematic-time-label {
+    display: block;
+    color: var(--calendaria-text-heading, rgb(50 35 20));
+    font-weight: 600;
+    font-size: 1.75rem;
+    text-shadow: 0 0.0625rem 0 rgb(255 255 255 / 20%);
+    letter-spacing: 0.04em;
+    opacity: 0.85;
+  }
+
+  .cinematic-time-label:empty {
+    display: none;
+  }
+
   .cinematic-season-badge {
     gap: 0.5rem;
     display: flex;
