@@ -2402,7 +2402,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     const setActive = await this.#showSaveDialog();
     if (setActive === null) return;
-    this.#calendarData.days.daysPerYear = this.#calculateDaysPerYear();
+    if (Object.keys(this.#calendarData.months.values ?? {}).length > 0) this.#calendarData.days.daysPerYear = this.#calculateDaysPerYear();
     try {
       let calendar;
       let calendarId;
