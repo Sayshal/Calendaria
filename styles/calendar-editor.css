@@ -542,7 +542,8 @@
           height: 1.25rem;
           border-radius: 0.25rem;
           overflow: visible;
-          background:
+
+          --calendaria-starfield:
             radial-gradient(0.0625rem 0.0625rem at 10% 20%, rgb(255 255 255 / 80%), transparent), radial-gradient(0.0625rem 0.0625rem at 25% 70%, rgb(255 255 255 / 60%), transparent),
             radial-gradient(0.0625rem 0.0625rem at 40% 30%, rgb(255 255 255 / 70%), transparent), radial-gradient(0.0625rem 0.0625rem at 55% 80%, rgb(255 255 255 / 50%), transparent),
             radial-gradient(0.0625rem 0.0625rem at 70% 15%, rgb(255 255 255 / 80%), transparent), radial-gradient(0.0625rem 0.0625rem at 85% 60%, rgb(255 255 255 / 60%), transparent),
@@ -551,6 +552,8 @@
             radial-gradient(0.0313rem 0.0313rem at 45% 55%, rgb(255 255 255 / 40%), transparent), radial-gradient(0.0313rem 0.0313rem at 60% 45%, rgb(255 255 255 / 40%), transparent),
             radial-gradient(0.0313rem 0.0313rem at 75% 90%, rgb(255 255 255 / 40%), transparent), radial-gradient(0.0313rem 0.0313rem at 90% 25%, rgb(255 255 255 / 40%), transparent),
             linear-gradient(to bottom, rgb(13 16 51) 0%, rgb(10 10 26) 50%, rgb(5 5 16) 100%);
+
+          background: var(--calendaria-starfield);
         }
 
         .slider-segment {
