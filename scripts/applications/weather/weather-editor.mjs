@@ -150,6 +150,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const envCycleOverride = isCustom ? preset.environmentCycle : overrides.environmentCycle;
     const envCycleDefault = builtinPreset?.environmentCycle;
     const effectiveCycle = envCycleOverride ?? envCycleDefault ?? null;
+    const effectiveDarknessPenalty = (isCustom ? preset.darknessPenalty : (overrides.darknessPenalty ?? builtinPreset?.darknessPenalty)) ?? 0;
     const envBaseOverride = isCustom ? (preset.environmentBase ?? {}) : (overrides.environmentBase ?? {});
     const envDarkOverride = isCustom ? (preset.environmentDark ?? {}) : (overrides.environmentDark ?? {});
     const envBaseDefault = builtinPreset?.environmentBase ?? {};
@@ -172,6 +173,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       color,
       hudEffect: effectId,
       environmentCycle: effectiveCycle ?? true,
+      darknessPenalty: effectiveDarknessPenalty,
       baseHue: effectiveBaseHue ?? '',
       baseHueNorm: WeatherEditor.#hueToNorm(effectiveBaseHue),
       baseSaturation: effectiveBaseSat,
@@ -311,6 +313,8 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     const environmentCycle = data.environmentCycle ?? true;
     const parseEnvField = (val) => (val !== '' && val != null ? parseFloat(val) : null);
+    const darknessPenaltyRaw = parseEnvField(data.darknessPenalty);
+    const darknessPenalty = darknessPenaltyRaw == null ? 0 : Math.min(1, Math.max(0, darknessPenaltyRaw));
     const baseHue = WeatherEditor.#normToHue(data.baseHue);
     const baseSat = parseEnvField(data.baseSaturation);
     const baseColorSat = parseEnvField(data.baseColorSaturation);
@@ -360,6 +364,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       preset.soundFx = data.soundFx || null;
       preset.fxMacro = data.fxMacro || null;
       preset.environmentCycle = environmentCycle;
+      preset.darknessPenalty = darknessPenalty;
       preset.environmentBase = environmentBase;
       preset.environmentDark = environmentDark;
       preset.visualOverrides = visualOverrides;
@@ -382,6 +387,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       const fxMacroValue = data.fxMacro || null;
       if (fxMacroValue) override.fxMacro = fxMacroValue;
       if (environmentCycle !== (builtinPreset.environmentCycle ?? null)) override.environmentCycle = environmentCycle;
+      if (darknessPenalty !== (builtinPreset.darknessPenalty ?? 0)) override.darknessPenalty = darknessPenalty;
       if (environmentBase) override.environmentBase = environmentBase;
       if (environmentDark) override.environmentDark = environmentDark;
       if (visualOverrides) override.visualOverrides = visualOverrides;

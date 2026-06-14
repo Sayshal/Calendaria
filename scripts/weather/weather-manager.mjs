@@ -99,6 +99,17 @@ export default class WeatherManager {
   }
 
   /**
+   * Resolve the effective darknessPenalty for a preset, checking visual overrides for built-in presets.
+   * @param {object} preset - Weather preset object
+   * @returns {number} Darkness added to the scene by this weather
+   */
+  static #resolveDarknessPenalty(preset) {
+    const overrides = (game.settings.get(MODULE.ID, SETTINGS.WEATHER_VISUAL_OVERRIDES) || {})[preset.id];
+    if (overrides?.darknessPenalty != null) return overrides.darknessPenalty;
+    return preset.darknessPenalty ?? 0;
+  }
+
+  /**
    * Build a full weather state object from a generator result.
    * @param {object} result - Generator result { preset, temperature, wind, precipitation }
    * @param {string} [season] - Current season name
@@ -116,7 +127,7 @@ export default class WeatherManager {
       temperature: result.temperature,
       wind: result.wind ?? { speed: 0, direction: null, forced: false },
       precipitation: result.precipitation ?? { type: null, intensity: 0 },
-      darknessPenalty: result.preset.darknessPenalty ?? 0,
+      darknessPenalty: this.#resolveDarknessPenalty(result.preset),
       environmentBase: this.#resolveEnvironmentBase(result.preset),
       environmentDark: this.#resolveEnvironmentDark(result.preset),
       environmentCycle: this.#resolveEnvironmentCycle(result.preset),
@@ -198,6 +209,7 @@ export default class WeatherManager {
     if (!preset) return;
     for (const weather of Object.values(this.#currentWeatherByZone)) {
       if (weather?.id !== presetId) continue;
+      weather.darknessPenalty = this.#resolveDarknessPenalty(preset);
       weather.environmentBase = this.#resolveEnvironmentBase(preset);
       weather.environmentDark = this.#resolveEnvironmentDark(preset);
       weather.environmentCycle = this.#resolveEnvironmentCycle(preset);
@@ -279,7 +291,7 @@ export default class WeatherManager {
         temperature: periodWeather.temperature,
         wind: periodWeather.wind ?? { speed: 0, direction: null, forced: false },
         precipitation: periodWeather.precipitation ?? { type: null, intensity: 0 },
-        darknessPenalty: periodWeather.preset?.darknessPenalty ?? periodWeather.darknessPenalty ?? 0,
+        darknessPenalty: periodWeather.preset ? this.#resolveDarknessPenalty(periodWeather.preset) : (periodWeather.darknessPenalty ?? 0),
         activePeriod: periodId
       });
       const customPresets = this.getCustomPresets();
@@ -357,7 +369,7 @@ export default class WeatherManager {
       temperature,
       wind: normalizedOptionWind ?? preset.wind ?? { speed: 0, direction: null, forced: false },
       precipitation: options.precipitation ?? preset.precipitation ?? { type: null, intensity: 0 },
-      darknessPenalty: preset.darknessPenalty ?? 0,
+      darknessPenalty: this.#resolveDarknessPenalty(preset),
       environmentBase: this.#resolveEnvironmentBase(preset),
       environmentDark: this.#resolveEnvironmentDark(preset),
       environmentCycle: this.#resolveEnvironmentCycle(preset),
@@ -857,7 +869,7 @@ export default class WeatherManager {
             temperature: histEntry.temperature,
             wind: histEntry.wind ?? { speed: 0, direction: null, forced: false },
             precipitation: histEntry.precipitation ?? { type: null, intensity: 0 },
-            darknessPenalty: preset.darknessPenalty ?? 0,
+            darknessPenalty: this.#resolveDarknessPenalty(preset),
             environmentBase: this.#resolveEnvironmentBase(preset),
             environmentDark: this.#resolveEnvironmentDark(preset),
             environmentCycle: this.#resolveEnvironmentCycle(preset),
@@ -1041,7 +1053,7 @@ export default class WeatherManager {
           temperature: todayF.temperature,
           wind: todayF.wind ?? { speed: 0, direction: null, forced: false },
           precipitation: todayF.precipitation ?? { type: null, intensity: 0 },
-          darknessPenalty: todayF.preset.darknessPenalty ?? 0,
+          darknessPenalty: this.#resolveDarknessPenalty(todayF.preset),
           environmentBase: this.#resolveEnvironmentBase(todayF.preset),
           environmentDark: this.#resolveEnvironmentDark(todayF.preset),
           environmentCycle: this.#resolveEnvironmentCycle(todayF.preset),
@@ -1333,7 +1345,7 @@ export default class WeatherManager {
           temperature: f.temperature,
           wind: f.wind ?? null,
           precipitation: f.precipitation ?? null,
-          darknessPenalty: f.preset.darknessPenalty ?? 0,
+          darknessPenalty: this.#resolveDarknessPenalty(f.preset),
           environmentBase: this.#resolveEnvironmentBase(f.preset),
           environmentDark: this.#resolveEnvironmentDark(f.preset),
           environmentCycle: this.#resolveEnvironmentCycle(f.preset),
@@ -1355,7 +1367,7 @@ export default class WeatherManager {
               temperature: periodResult.temperature,
               wind: periodResult.wind ?? null,
               precipitation: periodResult.precipitation ?? null,
-              darknessPenalty: periodResult.preset?.darknessPenalty ?? periodResult.darknessPenalty ?? 0,
+              darknessPenalty: pPreset ? this.#resolveDarknessPenalty(pPreset) : (periodResult.darknessPenalty ?? 0),
               environmentBase: pPreset ? this.#resolveEnvironmentBase(pPreset) : null,
               environmentDark: pPreset ? this.#resolveEnvironmentDark(pPreset) : null,
               fxPreset: pPreset ? this.#resolveFxPreset(pPreset) : null,
