@@ -1,7 +1,7 @@
 import { CalendarManager } from '../calendar/_module.mjs';
 import { DEFAULT_MOON_PHASES } from '../constants.mjs';
 import { NoteManager } from '../notes/_module.mjs';
-import { format, localize, log } from '../utils/_module.mjs';
+import { log } from '../utils/_module.mjs';
 import { WeatherManager, getDefaultZoneConfig } from '../weather/_module.mjs';
 import BaseImporter from './base-importer.mjs';
 
@@ -127,7 +127,7 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
    */
   async parseFile(file) {
     const data = await super.parseFile(file);
-    if (data?._calendariaImport !== 'simple-timekeeping') throw new Error(localize('CALENDARIA.Importer.SimpleTimekeeping.InvalidFile'));
+    if (data?._calendariaImport !== 'simple-timekeeping') throw new Error(_loc('CALENDARIA.Importer.SimpleTimekeeping.InvalidFile'));
 
     return data;
   }
@@ -169,7 +169,7 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
       seasons: { values: transformedSeasons },
       festivals: this.#extractFestivals(rawMonths),
       metadata: {
-        description: calendar?.description || format('CALENDARIA.Importer.ImportedFrom.SimpleTimekeeping', { name: calendar?.name || config?.calendar || '' }),
+        description: calendar?.description || _loc('CALENDARIA.Importer.ImportedFrom.SimpleTimekeeping', { name: calendar?.name || config?.calendar || '' }),
         system: calendar?.system || calendar?.name || config?.calendar,
         importedFrom: 'simple-timekeeping'
       },
@@ -250,7 +250,7 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
   #localizeString(str) {
     if (!str) return '';
     if (str.includes('.') && !str.includes(' ')) {
-      const localized = localize(str);
+      const localized = _loc(str);
       if (localized === str) {
         const parts = str.split('.');
         return parts[parts.length - 1];
@@ -439,7 +439,7 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
   async importWeather(weather) {
     if (!weather?.label) return false;
     try {
-      await WeatherManager.setCustomWeather({ label: weather.label, color: weather.color, description: localize('CALENDARIA.Importer.ImportedFrom.SimpleTimekeepingCustom') });
+      await WeatherManager.setCustomWeather({ label: weather.label, color: weather.color, description: _loc('CALENDARIA.Importer.ImportedFrom.SimpleTimekeepingCustom') });
       return true;
     } catch (error) {
       log(1, 'Error importing weather:', error);

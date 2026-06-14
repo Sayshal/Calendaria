@@ -15,7 +15,6 @@ import {
   getSidebarBuffer,
   hasMoonIconMarkers,
   isCombatBlocked,
-  localize,
   registerForZoneUpdates,
   renderMoonIcons,
   restorePinnedState,
@@ -335,9 +334,9 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
   #getContextMenuItems() {
     const items = [];
     items.push({
-      name: 'CALENDARIA.TimeKeeper.ContextMenu.Settings',
+      label: 'CALENDARIA.TimeKeeper.ContextMenu.Settings',
       icon: '<i class="fas fa-gear"></i>',
-      callback: () => {
+      onClick: () => {
         const panel = new SettingsPanel();
         panel.render(true).then(() => {
           requestAnimationFrame(() => panel.changeTab('timekeeper', 'primary'));
@@ -347,36 +346,36 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
     if (game.user.isGM) {
       const forceTimeKeeper = game.settings.get(MODULE.ID, SETTINGS.FORCE_TIME_KEEPER);
       items.push({
-        name: forceTimeKeeper ? 'CALENDARIA.Common.HideFromAll' : 'CALENDARIA.Common.ShowToAll',
+        label: forceTimeKeeper ? 'CALENDARIA.Common.HideFromAll' : 'CALENDARIA.Common.ShowToAll',
         icon: `<i class="fas fa-${forceTimeKeeper ? 'eye-slash' : 'eye'}"></i>`,
-        callback: async () => {
+        onClick: async () => {
           const newValue = !forceTimeKeeper;
-          if (newValue) warnShowToAll('viewTimeKeeper', game.i18n.localize('CALENDARIA.Permissions.ViewTimeKeeper'));
+          if (newValue) warnShowToAll('viewTimeKeeper', _loc('CALENDARIA.Permissions.ViewTimeKeeper'));
           await game.settings.set(MODULE.ID, SETTINGS.FORCE_TIME_KEEPER, newValue);
           CalendariaSocket.emit(SOCKET_TYPES.TIME_KEEPER_VISIBILITY, { visible: newValue });
         }
       });
     }
     items.push({
-      name: 'CALENDARIA.Common.ResetPosition',
+      label: 'CALENDARIA.Common.ResetPosition',
       icon: '<i class="fas fa-arrows-to-dot"></i>',
-      callback: () => this.resetPosition()
+      onClick: () => this.resetPosition()
     });
     const stickyStates = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_STICKY_STATES) || {};
     const isLocked = stickyStates.position ?? false;
     items.push({
-      name: isLocked ? 'CALENDARIA.Common.UnlockPosition' : 'CALENDARIA.Common.LockPosition',
+      label: isLocked ? 'CALENDARIA.Common.UnlockPosition' : 'CALENDARIA.Common.LockPosition',
       icon: `<i class="fas fa-${isLocked ? 'unlock' : 'lock'}"></i>`,
-      callback: () => this._toggleStickyPosition()
+      onClick: () => this._toggleStickyPosition()
     });
     const isPinned = stickyStates.tray ?? false;
     items.push({
-      name: isPinned ? 'CALENDARIA.TimeKeeper.ContextMenu.UnpinTray' : 'CALENDARIA.TimeKeeper.ContextMenu.PinTray',
+      label: isPinned ? 'CALENDARIA.TimeKeeper.ContextMenu.UnpinTray' : 'CALENDARIA.TimeKeeper.ContextMenu.PinTray',
       icon: `<i class="fas fa-thumbtack${isPinned ? '-slash' : ''}"></i>`,
-      callback: () => this._toggleStickyTray()
+      onClick: () => this._toggleStickyTray()
     });
     items.push(buildOpenAppsMenuItem());
-    items.push({ name: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', callback: () => this.close() });
+    items.push({ label: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', onClick: () => this.close() });
     return items;
   }
 
@@ -535,15 +534,15 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #formatIncrementLabel(key) {
     const labels = {
-      second: localize('CALENDARIA.Common.Second'),
-      round: localize('CALENDARIA.Common.Round'),
-      minute: localize('CALENDARIA.Common.Minute'),
-      hour: localize('CALENDARIA.Common.Hour'),
-      day: localize('CALENDARIA.Common.Day'),
-      week: localize('CALENDARIA.Common.Week'),
-      month: localize('CALENDARIA.Common.Month'),
-      season: localize('CALENDARIA.Common.Season'),
-      year: localize('CALENDARIA.Common.Year')
+      second: _loc('CALENDARIA.Common.Second'),
+      round: _loc('CALENDARIA.Common.Round'),
+      minute: _loc('CALENDARIA.Common.Minute'),
+      hour: _loc('CALENDARIA.Common.Hour'),
+      day: _loc('CALENDARIA.Common.Day'),
+      week: _loc('CALENDARIA.Common.Week'),
+      month: _loc('CALENDARIA.Common.Month'),
+      season: _loc('CALENDARIA.Common.Season'),
+      year: _loc('CALENDARIA.Common.Year')
     };
     return labels[key] || key;
   }

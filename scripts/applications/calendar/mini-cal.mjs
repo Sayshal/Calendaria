@@ -29,7 +29,6 @@ import {
   enrichSeasonData,
   escapeText,
   finalizeDrag,
-  format,
   formatForLocation,
   generateDayTooltip,
   getAllMoonPhases,
@@ -53,7 +52,6 @@ import {
   isMonthFullyFogged,
   isRevealed,
   isToday,
-  localize,
   pinToZone,
   previewSnippet,
   registerForZoneUpdates,
@@ -297,7 +295,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       const activePresetIds = new Set(unfilteredNotes.flatMap((p) => p.system.categories || []));
       const hasFestivals = unfilteredNotes.some((p) => resolveNoteDisplayProps(p).isFestival);
       context.noteFilterPresets = [
-        { id: '__festival__', label: localize('CALENDARIA.Common.Festivals'), selected: this.#noteFilterPreset === '__festival__', hasNotes: hasFestivals },
+        { id: '__festival__', label: _loc('CALENDARIA.Common.Festivals'), selected: this.#noteFilterPreset === '__festival__', hasNotes: hasFestivals },
         ...getAllPresets().map((c) => ({ id: c.id, label: c.label, selected: c.id === this.#noteFilterPreset, hasNotes: activePresetIds.has(c.id) }))
       ];
     }
@@ -392,7 +390,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #normalizeSeasonData(season) {
     if (!season) return null;
-    return { name: localize(season.name), icon: season.icon || 'fas fa-sun', color: season.color || '#888' };
+    return { name: _loc(season.name), icon: season.icon || 'fas fa-sun', color: season.color || '#888' };
   }
 
   /**
@@ -402,7 +400,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #normalizeEraData(era) {
     if (!era) return null;
-    return { name: localize(era.name), abbreviation: localize(era.abbreviation || era.name) };
+    return { name: _loc(era.name), abbreviation: _loc(era.abbreviation || era.name) };
   }
 
   /**
@@ -423,7 +421,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const windKph = weather.wind?.kph ?? null;
     const tooltipHtml = WeatherManager.buildWeatherTooltip({
       label,
-      description: weather.description ? localize(weather.description) : null,
+      description: weather.description ? _loc(weather.description) : null,
       temp,
       windSpeed,
       windKph,
@@ -609,8 +607,8 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const rawHeader = formatForLocation(calendar, headerComponents, headerLocation);
     const formattedHeader = hasMoonIconMarkers(rawHeader) ? renderMoonIcons(rawHeader) : rawHeader;
     const weekdays = monthWeekdays.map((wd) => {
-      const fullName = wd?.name ? localize(wd.name) : '';
-      const abbr = wd?.abbreviation ? localize(wd.abbreviation) : (fullName || '').substring(0, 2);
+      const fullName = wd?.name ? _loc(wd.name) : '';
+      const abbr = wd?.abbreviation ? _loc(wd.abbreviation) : (fullName || '').substring(0, 2);
       return { name: abbr, isRestDay: wd?.isRestDay || false };
     });
     const headerEquivalentTooltip = getEquivalentDateTooltip(headerDate.year, headerDate.month, headerDate.dayOfMonth ?? 0);
@@ -623,7 +621,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     return {
       year,
       month,
-      monthName: localize(monthData.name),
+      monthName: _loc(monthData.name),
       yearDisplay: String(year),
       formattedHeader,
       headerEquivalentTooltip,
@@ -677,7 +675,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
         const festivalDay = dayIsFogged ? null : calendar.findFestivalDay({ year: dayYear - yearZero, month: 0, dayOfMonth });
         const moonData = !dayIsFogged ? getFirstMoonPhase(calendar, dayYear, 0, dayOfMonth) : null;
         const isIntercalary = festivalDay?.countsForWeekday === false;
-        const festivalNameStr = festivalDay ? localize(festivalDay.name) : null;
+        const festivalNameStr = festivalDay ? _loc(festivalDay.name) : null;
         const festivalInfo = festivalDay ? { name: festivalNameStr, description: festivalDay.description || '', color: festivalDay.color || '' } : null;
         const dayData = {
           day: dayNum,
@@ -714,8 +712,8 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const weekdayData = calendar.weekdaysArray ?? [];
     const displayWeek = weekNumber + 1;
     const yearDisplay = String(year);
-    const formattedHeader = `${localize('CALENDARIA.Common.Week')} ${displayWeek}, ${yearDisplay}`;
-    const weekdays = weekdayData.map((wd) => ({ name: wd.abbreviation ? localize(wd.abbreviation) : localize(wd.name).substring(0, 2), isRestDay: wd.isRestDay || false }));
+    const formattedHeader = `${_loc('CALENDARIA.Common.Week')} ${displayWeek}, ${yearDisplay}`;
+    const weekdays = weekdayData.map((wd) => ({ name: wd.abbreviation ? _loc(wd.abbreviation) : _loc(wd.name).substring(0, 2), isRestDay: wd.isRestDay || false }));
     return { year, month: 0, monthName: '', yearDisplay, formattedHeader, currentSeason, currentEra, weeks, daysInWeek, weekdays, isMonthless: true, weekNumber: displayWeek, totalWeeks };
   }
 
@@ -794,13 +792,13 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
         const isAllDay = enriched.allDay;
         let timeLabel = '';
         if (isAllDay) {
-          timeLabel = localize('CALENDARIA.Common.AllDay');
+          timeLabel = _loc('CALENDARIA.Common.AllDay');
         } else {
           const startTime = this._formatTime(start.hour, start.minute);
           const endTime = this._formatTime(end?.hour, end?.minute);
           timeLabel = `${startTime} - ${endTime}`;
         }
-        const authorName = enriched.author || localize('CALENDARIA.Common.Unknown');
+        const authorName = enriched.author || _loc('CALENDARIA.Common.Unknown');
         let repeatLabel = MiniCal._getRepeatLabel(page.system.repeat);
         if (!repeatLabel && page.system.conditionTree) {
           const calendar = CalendarManager.getActiveCalendar();
@@ -836,7 +834,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const { year, month, dayOfMonth } = this._selectedDate;
     const calendar = this.calendar;
     const monthData = calendar.monthsArray[month];
-    const monthName = monthData ? localize(monthData.name) : '';
+    const monthName = monthData ? _loc(monthData.name) : '';
     const yearDisplay = String(year);
     return `${monthName} ${dayOfMonth + 1}, ${yearDisplay}`;
   }
@@ -866,7 +864,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
   static _getRepeatLabel(repeat) {
     if (!repeat || repeat === 'never') return null;
     const key = `CALENDARIA.Notes.Repeat.${repeat.charAt(0).toUpperCase()}${repeat.slice(1)}`;
-    return localize(key);
+    return _loc(key);
   }
 
   /**
@@ -885,7 +883,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     if (enriched.visibility !== 'visible') {
       const visKey = enriched.visibility === 'hidden' ? 'CALENDARIA.Common.Hidden' : 'CALENDARIA.Note.Visibility.Secret';
       const visIcon = enriched.visibility === 'hidden' ? 'fa-eye-slash' : 'fa-lock';
-      lines.push(`<span><i class="fas ${visIcon}"></i> ${esc(localize(visKey))}</span>`);
+      lines.push(`<span><i class="fas ${visIcon}"></i> ${esc(_loc(visKey))}</span>`);
     }
     const categories = enriched.categories || [];
     if (categories.length) {
@@ -1093,7 +1091,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     new foundry.applications.ux.ContextMenu.implementation(
       this.element,
       '.minical-container',
-      [{ name: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', callback: () => MiniCal.hide() }],
+      [{ label: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', onClick: () => MiniCal.hide() }],
       {
         fixed: true,
         jQuery: false,
@@ -1267,9 +1265,9 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
   #getContextMenuItems() {
     const items = [];
     items.push({
-      name: 'CALENDARIA.MiniCal.ContextMenu.Settings',
+      label: 'CALENDARIA.MiniCal.ContextMenu.Settings',
       icon: '<i class="fas fa-gear"></i>',
-      callback: () => {
+      onClick: () => {
         const panel = new SettingsPanel();
         panel.render(true).then(() => {
           requestAnimationFrame(() => panel.changeTab('miniCal', 'primary'));
@@ -1279,11 +1277,11 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     if (game.user.isGM) {
       const forceMiniCal = game.settings.get(MODULE.ID, SETTINGS.FORCE_MINI_CAL);
       items.push({
-        name: forceMiniCal ? 'CALENDARIA.Common.HideFromAll' : 'CALENDARIA.Common.ShowToAll',
+        label: forceMiniCal ? 'CALENDARIA.Common.HideFromAll' : 'CALENDARIA.Common.ShowToAll',
         icon: forceMiniCal ? '<i class="fas fa-eye-slash"></i>' : '<i class="fas fa-eye"></i>',
-        callback: async () => {
+        onClick: async () => {
           const newValue = !forceMiniCal;
-          if (newValue) warnShowToAll('viewMiniCal', game.i18n.localize('CALENDARIA.Permissions.ViewMiniCal'));
+          if (newValue) warnShowToAll('viewMiniCal', _loc('CALENDARIA.Permissions.ViewMiniCal'));
           await game.settings.set(MODULE.ID, SETTINGS.FORCE_MINI_CAL, newValue);
           CalendariaSocket.emit(SOCKET_TYPES.MINI_CAL_VISIBILITY, { visible: newValue });
         }
@@ -1291,20 +1289,20 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     const compact = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_COMPACT_MODE);
     items.push({
-      name: compact ? 'CALENDARIA.MiniCal.ContextMenu.NormalMode' : 'CALENDARIA.MiniCal.ContextMenu.CompactMode',
+      label: compact ? 'CALENDARIA.MiniCal.ContextMenu.NormalMode' : 'CALENDARIA.MiniCal.ContextMenu.CompactMode',
       icon: '<i class="fas fa-compress"></i>',
-      callback: async () => {
+      onClick: async () => {
         await game.settings.set(MODULE.ID, SETTINGS.MINI_CAL_COMPACT_MODE, !compact);
       }
     });
-    items.push({ name: 'CALENDARIA.Common.ResetPosition', icon: '<i class="fas fa-arrows-to-dot"></i>', callback: () => MiniCal.resetPosition() });
+    items.push({ label: 'CALENDARIA.Common.ResetPosition', icon: '<i class="fas fa-arrows-to-dot"></i>', onClick: () => MiniCal.resetPosition() });
     items.push({
-      name: this.#stickyPosition ? 'CALENDARIA.Common.UnlockPosition' : 'CALENDARIA.Common.LockPosition',
+      label: this.#stickyPosition ? 'CALENDARIA.Common.UnlockPosition' : 'CALENDARIA.Common.LockPosition',
       icon: this.#stickyPosition ? '<i class="fas fa-lock-open"></i>' : '<i class="fas fa-lock"></i>',
-      callback: () => this._toggleStickyPosition()
+      onClick: () => this._toggleStickyPosition()
     });
     items.push(buildOpenAppsMenuItem());
-    items.push({ name: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', callback: () => MiniCal.hide() });
+    items.push({ label: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', onClick: () => MiniCal.hide() });
     return items;
   }
 
@@ -1423,7 +1421,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       const yearZero = calendar?.years?.yearZero ?? 0;
       const monthData = calendar?.monthsArray?.[components.month];
       const monthNameRaw = monthData?.name ?? `Month ${components.month + 1}`;
-      const monthName = localize(monthNameRaw);
+      const monthName = _loc(monthNameRaw);
       const day = (components.dayOfMonth ?? 0) + 1;
       const year = components.year + yearZero;
       dateEl.textContent = `${day} ${monthName}, ${year}`;
@@ -1597,7 +1595,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       dayOfMonth = today.dayOfMonth ?? 0;
     }
     await NoteManager.createNote({
-      name: localize('CALENDARIA.Note.NewNote'),
+      name: _loc('CALENDARIA.Note.NewNote'),
       noteData: {
         startDate: { year: parseInt(year), month: parseInt(month), dayOfMonth: parseInt(dayOfMonth), hour: 12, minute: 0 },
         endDate: { year: parseInt(year), month: parseInt(month), dayOfMonth: parseInt(dayOfMonth), hour: 13, minute: 0 }
@@ -1641,12 +1639,12 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const locked = TimeClock.locked || TimeClock.disabled;
     const running = TimeClock.running;
     const tooltip = TimeClock.disabled
-      ? localize('CALENDARIA.TimeClock.Disabled')
+      ? _loc('CALENDARIA.TimeClock.Disabled')
       : locked
-        ? localize('CALENDARIA.TimeClock.Locked')
+        ? _loc('CALENDARIA.TimeClock.Locked')
         : running
-          ? localize('CALENDARIA.TimeKeeper.Stop')
-          : localize('CALENDARIA.TimeKeeper.Start');
+          ? _loc('CALENDARIA.TimeKeeper.Stop')
+          : _loc('CALENDARIA.TimeKeeper.Start');
     for (const timeToggle of toggles) {
       timeToggle.classList.toggle('active', running);
       timeToggle.classList.toggle('clock-locked', locked);
@@ -1732,8 +1730,8 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     if (confirmEnabled) {
       const dateStr = this._formatSelectedDate();
       const confirmed = await foundry.applications.api.DialogV2.confirm({
-        window: { title: localize('CALENDARIA.MiniCal.SetCurrentDate') },
-        content: `<p>${format('CALENDARIA.MiniCal.SetCurrentDateConfirm', { date: dateStr })}</p>`,
+        window: { title: _loc('CALENDARIA.MiniCal.SetCurrentDate') },
+        content: `<p>${_loc('CALENDARIA.MiniCal.SetCurrentDateConfirm', { date: dateStr })}</p>`,
         rejectClose: false,
         modal: true
       });
@@ -1799,18 +1797,18 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       return;
     }
     const activeId = CalendarRegistry.getActiveId();
-    const calendars = [...CalendarRegistry.getAll().entries()].filter(([id]) => id !== activeId).map(([id, cal]) => ({ id, name: cal.name ? localize(cal.name) : id }));
+    const calendars = [...CalendarRegistry.getAll().entries()].filter(([id]) => id !== activeId).map(([id, cal]) => ({ id, name: cal.name ? _loc(cal.name) : id }));
     if (!calendars.length) return;
     if (calendars.length === 1) {
       SecondaryCalendar.open(calendars[0].id);
       return;
     }
     const options = calendars.map((c) => `<option value="${c.id}">${c.name}</option>`).join('');
-    const content = `<form><div class="form-group"><label>${localize('CALENDARIA.Common.Calendar')}</label><select name="calendarId">${options}</select></div></form>`;
+    const content = `<form><div class="form-group"><label>${_loc('CALENDARIA.Common.Calendar')}</label><select name="calendarId">${options}</select></div></form>`;
     const result = await foundry.applications.api.DialogV2.prompt({
-      window: { title: localize('CALENDARIA.MiniCal.SecondaryCalendar') },
+      window: { title: _loc('CALENDARIA.MiniCal.SecondaryCalendar') },
       content,
-      ok: { label: localize('CALENDARIA.Common.Open'), callback: (_event, button) => button.form.elements.calendarId.value }
+      ok: { label: _loc('CALENDARIA.Common.Open'), callback: (_event, button) => button.form.elements.calendarId.value }
     });
     if (result) SecondaryCalendar.open(result);
   }
@@ -1986,15 +1984,15 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #formatIncrementLabel(key) {
     const labels = {
-      second: localize('CALENDARIA.Common.Second'),
-      round: localize('CALENDARIA.Common.Round'),
-      minute: localize('CALENDARIA.Common.Minute'),
-      hour: localize('CALENDARIA.Common.Hour'),
-      day: localize('CALENDARIA.Common.Day'),
-      week: localize('CALENDARIA.Common.Week'),
-      month: localize('CALENDARIA.Common.Month'),
-      season: localize('CALENDARIA.Common.Season'),
-      year: localize('CALENDARIA.Common.Year')
+      second: _loc('CALENDARIA.Common.Second'),
+      round: _loc('CALENDARIA.Common.Round'),
+      minute: _loc('CALENDARIA.Common.Minute'),
+      hour: _loc('CALENDARIA.Common.Hour'),
+      day: _loc('CALENDARIA.Common.Day'),
+      week: _loc('CALENDARIA.Common.Week'),
+      month: _loc('CALENDARIA.Common.Month'),
+      season: _loc('CALENDARIA.Common.Season'),
+      year: _loc('CALENDARIA.Common.Year')
     };
     return labels[key] || key;
   }

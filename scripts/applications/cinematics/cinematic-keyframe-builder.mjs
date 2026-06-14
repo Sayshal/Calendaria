@@ -1,5 +1,5 @@
 import { NoteManager } from '../../notes/_module.mjs';
-import { formatForLocation, localize } from '../../utils/_module.mjs';
+import { formatForLocation } from '../../utils/_module.mjs';
 import { WeatherManager } from '../../weather/_module.mjs';
 
 /** @type {number} */
@@ -86,7 +86,7 @@ export default class CinematicKeyframeBuilder {
     const dateLabel = formatForLocation(calendar, components, 'cinematicDate');
     const rawSeason = calendar.getCurrentSeason?.(worldTime);
     const season = WeatherManager.applySeasonAlias(rawSeason, WeatherManager.getActiveZone(null, game.scenes?.active));
-    const seasonLabel = season ? localize(season.name) : null;
+    const seasonLabel = season ? _loc(season.name) : null;
     const seasonColor = season?.color ?? null;
     const seasonChanged = prevKeyframe ? seasonLabel !== prevKeyframe.seasonLabel : !!seasonLabel;
     let weather = null;
@@ -96,7 +96,7 @@ export default class CinematicKeyframeBuilder {
         const windKph = w.wind?.speed ? WeatherManager.getWindSpeedKph(w.wind.speed) : null;
         weather = {
           id: w.id,
-          label: localize(w.label ?? w.id),
+          label: _loc(w.label ?? w.id),
           icon: w.icon ?? null,
           color: w.color ?? null,
           temperature: w.temperature != null ? WeatherManager.formatTemperature(w.temperature) : null,
@@ -113,14 +113,14 @@ export default class CinematicKeyframeBuilder {
         if (!phase) continue;
         const phases = moonDef.phases ? Object.values(moonDef.phases) : [];
         moons.push({
-          name: localize(moonDef.name),
+          name: _loc(moonDef.name),
           color: moonDef.color ?? '#cccccc',
-          phaseName: phase.name ? localize(phase.name) : '',
+          phaseName: phase.name ? _loc(phase.name) : '',
           phaseIcon: phase.icon ?? '',
           phaseIndex: phase.phaseIndex ?? 0,
           position: phase.position ?? 0,
           cycleLength: moonDef.cycleLength ?? 28,
-          allPhases: phases.map((p) => ({ name: p.name ? localize(p.name) : '', icon: p.icon ?? '' }))
+          allPhases: phases.map((p) => ({ name: p.name ? _loc(p.name) : '', icon: p.icon ?? '' }))
         });
       }
     }

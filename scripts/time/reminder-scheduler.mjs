@@ -1,7 +1,7 @@
 import { CalendarManager, CalendarRegistry } from '../calendar/_module.mjs';
 import { HOOKS, MODULE, SOCKET_TYPES } from '../constants.mjs';
 import { NoteManager, getCurrentDate, isRecurringMatch } from '../notes/_module.mjs';
-import { CalendariaSocket, format, localize, log } from '../utils/_module.mjs';
+import { CalendariaSocket, log } from '../utils/_module.mjs';
 
 /**
  * Reminder Scheduler class that monitors time and triggers pre-event reminders.
@@ -281,9 +281,9 @@ export default class ReminderScheduler {
    */
   static #formatReminderMessage(note) {
     const hours = note.flagData.reminderOffset;
-    if (hours === 0) return format('CALENDARIA.Reminder.StartsNow', { name: note.name });
-    const timeStr = hours > 1 ? format('CALENDARIA.Reminder.HoursPlural', { hours }) : format('CALENDARIA.Reminder.Hours', { hours });
-    return format('CALENDARIA.Reminder.StartsIn', { name: note.name, time: timeStr });
+    if (hours === 0) return _loc('CALENDARIA.Reminder.StartsNow', { name: note.name });
+    const timeStr = hours > 1 ? _loc('CALENDARIA.Reminder.HoursPlural', { hours }) : _loc('CALENDARIA.Reminder.Hours', { hours });
+    return _loc('CALENDARIA.Reminder.StartsIn', { name: note.name, time: timeStr });
   }
 
   /**
@@ -314,7 +314,7 @@ export default class ReminderScheduler {
       <div class="calendaria chat-reminder">
         <div class="reminder-message">${message}</div>
         <a class="open-note" data-action="openNote" data-note-id="${note.id}" data-journal-id="${note.journalId}">
-          ${icon} ${localize('CALENDARIA.Common.OpenNote')}
+          ${icon} ${_loc('CALENDARIA.Common.OpenNote')}
         </a>
       </div>
     `.trim();
@@ -322,7 +322,7 @@ export default class ReminderScheduler {
       content,
       whisper,
       speaker: { alias: 'Calendaria' },
-      flavor: `<span style="color: ${color};">${icon}</span> ${localize('CALENDARIA.Reminder.Label')}`,
+      flavor: `<span style="color: ${color};">${icon}</span> ${_loc('CALENDARIA.Reminder.Label')}`,
       flags: { [MODULE.ID]: { isReminder: true, noteId: note.id } }
     });
   }
@@ -336,11 +336,11 @@ export default class ReminderScheduler {
   static async #showDialog(note, message) {
     const icon = this.#getIconHtml(note);
     const result = await foundry.applications.api.DialogV2.wait({
-      window: { title: localize('CALENDARIA.Reminder.Title'), icon: 'fas fa-bell' },
+      window: { title: _loc('CALENDARIA.Reminder.Title'), icon: 'fas fa-bell' },
       content: `<p>${icon} ${message}</p>`,
       buttons: [
-        { action: 'open', label: localize('CALENDARIA.Common.OpenNote'), icon: 'fas fa-book-open', callback: () => 'open' },
-        { action: 'dismiss', label: localize('CALENDARIA.Reminder.Dismiss'), icon: 'fas fa-times', default: true, callback: () => 'dismiss' }
+        { action: 'open', label: _loc('CALENDARIA.Common.OpenNote'), icon: 'fas fa-book-open', callback: () => 'open' },
+        { action: 'dismiss', label: _loc('CALENDARIA.Reminder.Dismiss'), icon: 'fas fa-times', default: true, callback: () => 'dismiss' }
       ],
       rejectClose: false
     });
@@ -407,19 +407,19 @@ export default class ReminderScheduler {
       ui.notifications.info(`${iconHtml} ${data.message}`, { permanent: false });
     } else if (data.type === 'dialog') {
       foundry.applications.api.DialogV2.wait({
-        window: { title: localize('CALENDARIA.Reminder.Title'), icon: 'fas fa-bell' },
+        window: { title: _loc('CALENDARIA.Reminder.Title'), icon: 'fas fa-bell' },
         content: `<p>${iconHtml} ${data.message}</p>`,
         buttons: [
           {
             action: 'open',
-            label: localize('CALENDARIA.Common.OpenNote'),
+            label: _loc('CALENDARIA.Common.OpenNote'),
             icon: 'fas fa-book-open',
             callback: () => {
               const page = NoteManager.getFullNote(data.noteId);
               if (page) page.sheet.render(true, { mode: 'view' });
             }
           },
-          { action: 'dismiss', label: localize('CALENDARIA.Reminder.Dismiss'), icon: 'fas fa-times', default: true }
+          { action: 'dismiss', label: _loc('CALENDARIA.Reminder.Dismiss'), icon: 'fas fa-times', default: true }
         ],
         rejectClose: false
       });

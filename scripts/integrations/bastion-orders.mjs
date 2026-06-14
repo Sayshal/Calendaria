@@ -1,7 +1,7 @@
 import { CalendarManager } from '../calendar/_module.mjs';
 import { MODULE, SETTINGS } from '../constants.mjs';
 import { TimeClock } from '../time/_module.mjs';
-import { CalendariaSocket, localize, log } from '../utils/_module.mjs';
+import { CalendariaSocket, log } from '../utils/_module.mjs';
 
 /** @type {Function|null} Cached reference to dnd5e's original confirmAdvance method. */
 let originalConfirmAdvance = null;
@@ -74,16 +74,16 @@ export function patchBastionButton() {
     const bastionConfig = game.settings.get('dnd5e', 'bastionConfiguration');
     if (!bastionConfig?.enabled) return originalConfirmAdvance();
     if (TimeClock.locked) {
-      ui.notifications.warn(localize('CALENDARIA.Bastion.ClockLocked'));
+      ui.notifications.warn(_loc('CALENDARIA.Bastion.ClockLocked'));
       return;
     }
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return originalConfirmAdvance();
     const duration = Math.max(1, bastionConfig.duration ?? 7);
     const proceed = await foundry.applications.api.DialogV2.confirm({
-      content: `<p>${localize('CALENDARIA.Bastion.AdvanceConfirm', { days: duration })}</p>`,
+      content: `<p>${_loc('CALENDARIA.Bastion.AdvanceConfirm', { days: duration })}</p>`,
       rejectClose: false,
-      window: { icon: 'fa-solid fa-chess-rook', title: localize('CALENDARIA.Bastion.AdvanceTitle') }
+      window: { icon: 'fa-solid fa-chess-rook', title: _loc('CALENDARIA.Bastion.AdvanceTitle') }
     });
     if (!proceed) return;
     const secondsPerDay = getSecondsPerDay(calendar);
@@ -94,7 +94,7 @@ export function patchBastionButton() {
   const button = document.getElementById('bastion-turn');
   if (button) {
     const duration = Math.max(1, game.settings.get('dnd5e', 'bastionConfiguration')?.duration ?? 7);
-    button.dataset.tooltip = localize('CALENDARIA.Bastion.ButtonTooltip', { days: duration });
+    button.dataset.tooltip = _loc('CALENDARIA.Bastion.ButtonTooltip', { days: duration });
   }
   log(3, 'Patched dnd5e bastion button to advance world time');
 }

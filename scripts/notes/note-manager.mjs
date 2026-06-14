@@ -1,6 +1,6 @@
 import { CalendarManager, isBundledCalendar } from '../calendar/_module.mjs';
 import { HOOKS, MODULE, NOTE_VISIBILITY, SETTINGS, SOCKET_TYPES } from '../constants.mjs';
-import { CalendariaSocket, canAddNotes, canDeleteNotes, format, localize, log } from '../utils/_module.mjs';
+import { CalendariaSocket, canAddNotes, canDeleteNotes, log } from '../utils/_module.mjs';
 import {
   DEFAULT_PRESET_ID,
   applyPresetDefaultsToNoteData,
@@ -364,7 +364,7 @@ export default class NoteManager {
     if (!folder) throw new Error('Failed to get or create calendar folder');
     const actualCreatorId = creatorId || game.user.id;
     const presetMerged = getPresetDefaults(sanitized.categories);
-    if (presetMerged.name && name === localize('CALENDARIA.Note.NewNote')) name = presetMerged.name;
+    if (presetMerged.name && name === _loc('CALENDARIA.Note.NewNote')) name = presetMerged.name;
     if (!sanitized.categories?.length && !sanitized.linkedFestival) {
       const defaultPreset = getPresetDefinition(DEFAULT_PRESET_ID);
       sanitized.icon = defaultPreset.icon;
@@ -450,7 +450,7 @@ export default class NoteManager {
       return true;
     } catch (error) {
       log(1, `Error deleting calendar note:`, error);
-      ui.notifications.error(format('CALENDARIA.Error.NoteDeleteFailed', { message: error.message }));
+      ui.notifications.error(_loc('CALENDARIA.Error.NoteDeleteFailed', { message: error.message }));
       throw error;
     }
   }
@@ -664,7 +664,7 @@ export default class NoteManager {
     if (game.user.isGM) {
       try {
         let calendarName = calendar.name || calendarId;
-        if (calendarName.includes('.')) calendarName = localize(calendarName);
+        if (calendarName.includes('.')) calendarName = _loc(calendarName);
         const folder = await Folder.create({ name: calendarName, type: 'JournalEntry', folder: parentFolder.id, color: '#4a9eff', flags: { [MODULE.ID]: { calendarId, isCalendarFolder: true } } });
         log(3, `Created calendar folder: ${folder.name}`);
         return folder;
@@ -749,7 +749,7 @@ export default class NoteManager {
       return existing;
     }
     if (game.user.isGM) {
-      const folder = await Folder.create({ name: localize('CALENDARIA.Note.CalendarNotesFolder'), type: 'JournalEntry', color: '#4a9eff', flags: { [MODULE.ID]: { isCalendarNotesFolder: true } } });
+      const folder = await Folder.create({ name: _loc('CALENDARIA.Note.CalendarNotesFolder'), type: 'JournalEntry', color: '#4a9eff', flags: { [MODULE.ID]: { isCalendarNotesFolder: true } } });
       this.#notesFolderId = folder.id;
       log(3, 'Created Calendar Notes folder');
       return folder;
@@ -813,7 +813,7 @@ export default class NoteManager {
     const presets = game.user.isGM ? getAllPresets() : getPlayerUsablePresets();
     const options = presets.map((p) => `<option value="${p.id}">${p.label}</option>`).join('');
     const html = `<div class="form-group">
-      <label>${localize('CALENDARIA.PresetDialog.SelectLabel')}</label>
+      <label>${_loc('CALENDARIA.PresetDialog.SelectLabel')}</label>
       <div class="form-fields">
         <multi-select name="presetChoice">${options}</multi-select>
       </div>
@@ -821,16 +821,16 @@ export default class NoteManager {
     <div class="form-group">
       <label class="checkbox">
         <input type="checkbox" name="alwaysUse">
-        ${localize('CALENDARIA.PresetDialog.AlwaysUse')}
+        ${_loc('CALENDARIA.PresetDialog.AlwaysUse')}
       </label>
     </div>`;
     const result = await foundry.applications.api.DialogV2.wait({
-      window: { title: localize('CALENDARIA.PresetDialog.Title') },
+      window: { title: _loc('CALENDARIA.PresetDialog.Title') },
       content: html,
       buttons: [
         {
           action: 'ok',
-          label: localize('CALENDARIA.Common.Confirm'),
+          label: _loc('CALENDARIA.Common.Confirm'),
           icon: 'fas fa-check',
           default: true,
           callback: (_event, button) => {
@@ -847,7 +847,7 @@ export default class NoteManager {
         },
         {
           action: 'cancel',
-          label: localize('CALENDARIA.Common.Cancel'),
+          label: _loc('CALENDARIA.Common.Cancel'),
           icon: 'fas fa-times'
         }
       ],

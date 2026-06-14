@@ -3,7 +3,7 @@ import { CalendarManager, CalendarRegistry, getEquivalentDates } from '../../cal
 import { MODULE, NOTE_VISIBILITY, SETTINGS, SOCKET_TYPES, TEMPLATES } from '../../constants.mjs';
 import { NoteManager, addDays, compareDays, extractNoteMatchData, getEffectiveDuration, isRecurringMatch, resolveNoteDisplayProps } from '../../notes/_module.mjs';
 import { WeatherManager } from '../../weather/_module.mjs';
-import { CalendariaSocket, canViewWeatherForecast, format, formatCustom, isFogEnabled, isRevealed, localize, revealRange, toRomanNumeral } from '../_module.mjs';
+import { CalendariaSocket, canViewWeatherForecast, formatCustom, isFogEnabled, isRevealed, revealRange, toRomanNumeral } from '../_module.mjs';
 
 const ContextMenu = foundry.applications.ux.ContextMenu.implementation;
 
@@ -123,7 +123,7 @@ export function enrichSeasonData(season, { zone } = {}) {
   const aliasZone = zone === undefined ? WeatherManager.getActiveZone(null, game.scenes?.active) : zone;
   const aliased = WeatherManager.applySeasonAlias(season, aliasZone) ?? season;
   if (aliased.icon && aliased.color) return aliased;
-  const seasonName = localize(aliased.name).toLowerCase();
+  const seasonName = _loc(aliased.name).toLowerCase();
   const SEASON_DEFAULTS = {
     autumn: { icon: 'fas fa-leaf', color: '#d2691e' },
     fall: { icon: 'fas fa-leaf', color: '#d2691e' },
@@ -251,7 +251,7 @@ export function renderWeatherIndicator({ weather, displayMode, canInteract, show
     if (showLabel && weather.precipType) precipHtml = `<span class="weather-precip"><i class="fas fa-droplet"></i></span>`;
     return `<span class="weather-indicator${clickable} weather-mode-${displayMode}" ${action} style="--weather-color: ${weather.color}" data-tooltip-html="${weather.tooltipHtml}">${icon}${label}${temp}${windHtml}${precipHtml}</span>`;
   } else if (showBlock && canInteract && WeatherManager.getCalendarZones().length > 0) {
-    return `<span class="weather-indicator clickable no-weather" data-action="openWeatherPicker" data-tooltip="${localize('CALENDARIA.Weather.ClickToGenerate')}"><i class="fas fa-cloud"></i></span>`;
+    return `<span class="weather-indicator clickable no-weather" data-action="openWeatherPicker" data-tooltip="${_loc('CALENDARIA.Weather.ClickToGenerate')}"><i class="fas fa-cloud"></i></span>`;
   }
   return '';
 }
@@ -321,10 +321,10 @@ export function renderCycleIndicator({ cycleData, displayMode, cycleText }) {
  */
 export function getFirstMoonPhase(calendar, year, month, dayOfMonth) {
   if (!calendar?.moonsArray?.length) return null;
-  const sortedMoons = [...calendar.moonsArray].map((m, i) => ({ ...m, originalIndex: i })).sort((a, b) => localize(a.name).localeCompare(localize(b.name)));
+  const sortedMoons = [...calendar.moonsArray].map((m, i) => ({ ...m, originalIndex: i })).sort((a, b) => _loc(a.name).localeCompare(_loc(b.name)));
   let moon = sortedMoons[0];
   if (selectedMoonOverride) {
-    const overrideMoon = sortedMoons.find((m) => localize(m.name) === selectedMoonOverride);
+    const overrideMoon = sortedMoons.find((m) => _loc(m.name) === selectedMoonOverride);
     if (overrideMoon) moon = overrideMoon;
   }
   const internalYear = year - (calendar.years?.yearZero ?? 0);
@@ -333,7 +333,7 @@ export function getFirstMoonPhase(calendar, year, month, dayOfMonth) {
   const phase = calendar.getMoonPhase(moon.originalIndex, dayWorldTime);
   if (!phase) return null;
   const color = moon.color || null;
-  return { icon: phase.icon, color, hue: color ? Math.round(foundry.utils.Color.from(color).hsv[0] * 360) : null, tooltip: `${localize(moon.name)}: ${phase.subPhaseName || localize(phase.name)}` };
+  return { icon: phase.icon, color, hue: color ? Math.round(foundry.utils.Color.from(color).hsv[0] * 360) : null, tooltip: `${_loc(moon.name)}: ${phase.subPhaseName || _loc(phase.name)}` };
 }
 
 /**
@@ -355,8 +355,8 @@ export function getAllMoonPhases(calendar, year, month, dayOfMonth) {
       if (!phase) return null;
       const color = moon.color || null;
       return {
-        moonName: localize(moon.name),
-        phaseName: phase.subPhaseName || localize(phase.name),
+        moonName: _loc(moon.name),
+        phaseName: phase.subPhaseName || _loc(phase.name),
         icon: phase.icon,
         color,
         hue: color ? Math.round(foundry.utils.Color.from(color).hsv[0] * 360) : null
@@ -412,7 +412,7 @@ export function getDayWeather(year, month, dayOfMonth, todayInfo, forecastLookup
       icon: w.icon,
       color: w.color,
       label: resolveLabel(w.id, w.label),
-      description: w.description ? localize(w.description) : null,
+      description: w.description ? _loc(w.description) : null,
       temperature: temp,
       wind: w.wind ?? null,
       precipitation: w.precipitation ?? null,
@@ -446,7 +446,7 @@ export function getDayWeather(year, month, dayOfMonth, todayInfo, forecastLookup
         icon: f.preset.icon,
         color: f.preset.color,
         label: resolveLabel(f.preset.id, f.preset.label),
-        description: f.preset.description ? localize(f.preset.description) : null,
+        description: f.preset.description ? _loc(f.preset.description) : null,
         temperature: f.temperature ?? null,
         wind: f.wind ?? null,
         precipitation: f.precipitation ?? null,
@@ -516,7 +516,7 @@ export async function createNoteOnDate(year, month, dayOfMonth) {
   const components = game.time.components ?? {};
   const hour = components.hour ?? 12;
   const page = await NoteManager.createNote({
-    name: localize('CALENDARIA.Note.NewNote'),
+    name: _loc('CALENDARIA.Note.NewNote'),
     noteData: { startDate: { year, month, dayOfMonth, hour, minute: 0 }, endDate: { year, month, dayOfMonth, hour: hour + 1, minute: 0 } },
     source: 'ui'
   });
@@ -543,18 +543,18 @@ export function getDayContextMenuItems({ calendar, onSetDate, onCreateNote, extr
     const isTodayDate = year === today.year && month === today.month && dayOfMonth === today.dayOfMonth;
     const items = [];
     items.push({
-      name: 'CALENDARIA.Common.AddNote',
+      label: 'CALENDARIA.Common.AddNote',
       icon: '<i class="fas fa-plus"></i>',
-      callback: async () => {
+      onClick: async () => {
         await createNoteOnDate(year, month, dayOfMonth);
         onCreateNote?.();
       }
     });
     if (game.user.isGM && !isTodayDate) {
       items.push({
-        name: 'CALENDARIA.MiniCal.SetCurrentDate',
+        label: 'CALENDARIA.MiniCal.SetCurrentDate',
         icon: '<i class="fas fa-calendar-check"></i>',
-        callback: async () => {
+        onClick: async () => {
           await setDateTo(year, month, dayOfMonth, calendar);
           onSetDate?.();
         }
@@ -562,9 +562,9 @@ export function getDayContextMenuItems({ calendar, onSetDate, onCreateNote, extr
     }
     if (game.user.isGM && isFogEnabled()) {
       items.push({
-        name: 'CALENDARIA.FogOfWar.RevealToHere',
+        label: 'CALENDARIA.FogOfWar.RevealToHere',
         icon: '<i class="fas fa-eye"></i>',
-        callback: async () => {
+        onClick: async () => {
           const currentDate = getCurrentViewedDate(calendar);
           const start = { year: currentDate.year, month: currentDate.month, dayOfMonth: currentDate.dayOfMonth };
           const end = { year, month, dayOfMonth };
@@ -574,9 +574,9 @@ export function getDayContextMenuItems({ calendar, onSetDate, onCreateNote, extr
       });
     }
     items.push({
-      name: 'CALENDARIA.Common.OpenChronicle',
+      label: 'CALENDARIA.Common.OpenChronicle',
       icon: '<i class="fas fa-scroll"></i>',
-      callback: () => CALENDARIA.apps.Chronicle.show()
+      onClick: () => CALENDARIA.apps.Chronicle.show()
     });
     if (extraItems?.length) items.push(...extraItems);
     if (notes.length > 0) {
@@ -588,15 +588,15 @@ export function getDayContextMenuItems({ calendar, onSetDate, onCreateNote, extr
         const noteColor = note.system?.color || '#4a9eff';
         const iconIsImage = typeof noteIcon === 'string' && !noteIcon.startsWith('fa') && (noteIcon.includes('/') || noteIcon.includes('.'));
         const iconHtml = iconIsImage ? `<img src="${noteIcon}" alt="" style="width: 1rem; height: 1rem; object-fit: contain;">` : `<i class="${noteIcon}" style="color: ${noteColor}"></i>`;
-        items.push({ name: note.name, icon: iconHtml, group: 'notes', _noteData: { note, isOwner }, callback: () => note.sheet.render(true, { mode: isOwner ? 'edit' : 'view' }) });
+        items.push({ label: note.name, icon: iconHtml, group: 'notes', _noteData: { note, isOwner }, onClick: () => note.sheet.render(true, { mode: isOwner ? 'edit' : 'view' }) });
       }
       const remaining = sortedNotes.length - shown.length;
       if (remaining > 0) {
         items.push({
-          name: `+${remaining} ${localize('CALENDARIA.Common.More')}`,
+          label: `+${remaining} ${_loc('CALENDARIA.Common.More')}`,
           icon: '<i class="fas fa-ellipsis-h"></i>',
           group: 'notes',
-          callback: () => NoteViewer.show({ date: { year, month: month + 1, day: dayOfMonth + 1 } })
+          onClick: () => NoteViewer.show({ date: { year, month: month + 1, day: dayOfMonth + 1 } })
         });
       }
     }
@@ -750,7 +750,7 @@ export function generateDayTooltip(calendar, year, month, dayOfMonth, festival =
   const fullDate = formatCustom(calendar, displayComponents, 'Do of MMMM, Y GGGG');
   const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
   const season = WeatherManager.applySeasonAlias(calendar.getCurrentSeason?.(internalComponents), zone);
-  const seasonName = season ? localize(season.name) : null;
+  const seasonName = season ? _loc(season.name) : null;
   const sunriseHour = calendar.sunrise?.(internalComponents, zone) ?? 6;
   const sunsetHour = calendar.sunset?.(internalComponents, zone) ?? 18;
   const formatTime = (hours) => {
@@ -766,7 +766,7 @@ export function generateDayTooltip(calendar, year, month, dayOfMonth, festival =
   rows.push(`<div class="date"><strong>${escapeText(fullDate)}</strong></div>`);
   if (festival?.name) {
     const colorStyle = festival.color ? ` style="color: ${festival.color}"` : '';
-    const prefix = festival.position ? `${localize(`CALENDARIA.Note.Festival.${festival.position === 'starting' ? 'Starting' : 'Ending'}`)}: ` : '';
+    const prefix = festival.position ? `${_loc(`CALENDARIA.Note.Festival.${festival.position === 'starting' ? 'Starting' : 'Ending'}`)}: ` : '';
     let festivalText = prefix + escapeText(festival.name);
     if (festival.description) festivalText += `: ${escapeText(festival.description)}`;
     rows.push(`<div class="festival"${colorStyle}><em>${festivalText}</em></div>`);
@@ -774,7 +774,7 @@ export function generateDayTooltip(calendar, year, month, dayOfMonth, festival =
   if (seasonName) rows.push(`<div class="season">${escapeText(seasonName)}</div>`);
   rows.push(`<div class="sun"><i class="fas fa-sun"></i> ${formatTime(sunriseHour)} <i class="fas fa-moon"></i> ${formatTime(sunsetHour)}</div>`);
   if (weatherData) {
-    const prefix = weatherData.isForecast ? `${localize('CALENDARIA.Weather.Forecast')}: ` : '';
+    const prefix = weatherData.isForecast ? `${_loc('CALENDARIA.Weather.Forecast')}: ` : '';
     const tempStr = weatherData.temperature != null ? ` ${weatherData.isForecast && weatherData.isVaried ? '~' : ''}${WeatherManager.formatTemperature(weatherData.temperature)}` : '';
     rows.push(`<div class="weather"><i class="fas ${weatherData.icon}" style="color:${weatherData.color}"></i> ${prefix}${escapeText(weatherData.label)}${tempStr}</div>`);
   }
@@ -802,7 +802,7 @@ export function generateDayTooltip(calendar, year, month, dayOfMonth, festival =
     const shown = regularNotes.slice(0, TOOLTIP_MAX_NOTES - festivalNotes.length);
     for (const n of shown) noteRows.push(`<div class="tooltip-note">${noteIconHtml(n)} ${escapeText(n.name)}</div>`);
     const remaining = notes.length - festivalNotes.length - shown.length;
-    if (remaining > 0) noteRows.push(`<div class="tooltip-note more">+${remaining} ${localize('CALENDARIA.Common.More')}</div>`);
+    if (remaining > 0) noteRows.push(`<div class="tooltip-note more">+${remaining} ${_loc('CALENDARIA.Common.More')}</div>`);
     rows.push(`<div class="tooltip-notes">${noteRows.join('')}</div>`);
   }
   const rawHtml = `<div class="calendaria"><div class="day-tooltip">${rows.join('')}</div></div>`;
@@ -863,7 +863,7 @@ export function setupDayContextMenu(container, selector, calendar, options = {})
           if (isOwner) {
             const actions = document.createElement('span');
             actions.className = 'note-actions';
-            actions.innerHTML = `<i class="fas fa-pen-to-square" data-action="edit" data-tooltip="${localize('CALENDARIA.Common.Edit')}"></i><i class="fas fa-trash" data-action="delete" data-tooltip="${localize('CALENDARIA.Common.Delete')}"></i>`;
+            actions.innerHTML = `<i class="fas fa-pen-to-square" data-action="edit" data-tooltip="${_loc('CALENDARIA.Common.Edit')}"></i><i class="fas fa-trash" data-action="delete" data-tooltip="${_loc('CALENDARIA.Common.Delete')}"></i>`;
             nameSpan.appendChild(actions);
             actions.addEventListener('click', async (e) => {
               e.stopPropagation();
@@ -874,8 +874,8 @@ export function setupDayContextMenu(container, selector, calendar, options = {})
               } else if (action === 'delete') {
                 ui.context?.close();
                 const confirmed = await foundry.applications.api.DialogV2.confirm({
-                  window: { title: localize('CALENDARIA.Common.DeleteNote') },
-                  content: `<p>${format('CALENDARIA.ContextMenu.DeleteConfirm', { name: note.name })}</p>`,
+                  window: { title: _loc('CALENDARIA.Common.DeleteNote') },
+                  content: `<p>${_loc('CALENDARIA.ContextMenu.DeleteConfirm', { name: note.name })}</p>`,
                   rejectClose: false,
                   modal: true
                 });
@@ -906,19 +906,19 @@ export function buildOpenAppsMenuItem() {
   };
   document.addEventListener('pointermove', onMove, { passive: true });
   return {
-    name: 'CALENDARIA.Common.Open',
+    label: 'CALENDARIA.Common.Open',
     icon: '<i class="fas fa-arrow-right"></i>',
-    callback: () => {
+    onClick: () => {
       document.removeEventListener('pointermove', onMove);
       requestAnimationFrame(async () => {
         const subItems = [
-          { name: 'CALENDARIA.Common.BigCal', icon: '<i class="fas fa-calendar-days"></i>', callback: () => BigCal.show() },
-          { name: 'CALENDARIA.Common.MiniCal', icon: '<i class="fas fa-calendar-alt"></i>', callback: () => MiniCal.show() },
-          { name: 'CALENDARIA.SettingsPanel.Tab.HUD', icon: '<i class="fas fa-layer-group"></i>', callback: () => HUD.show() },
-          { name: 'CALENDARIA.Common.TimeKeeper', icon: '<i class="fas fa-clock"></i>', callback: () => TimeKeeper.show() },
-          { name: 'CALENDARIA.Common.StopWatch', icon: '<i class="fas fa-stopwatch"></i>', callback: () => Stopwatch.show() },
-          { name: 'CALENDARIA.SettingsPanel.Tab.SunDial', icon: '<i class="fas fa-sun"></i>', callback: () => SunDial.show() },
-          { name: 'CALENDARIA.Chronicle.Title', icon: '<i class="fas fa-scroll"></i>', callback: () => CALENDARIA.apps.Chronicle.show() }
+          { label: 'CALENDARIA.Common.BigCal', icon: '<i class="fas fa-calendar-days"></i>', onClick: () => BigCal.show() },
+          { label: 'CALENDARIA.Common.MiniCal', icon: '<i class="fas fa-calendar-alt"></i>', onClick: () => MiniCal.show() },
+          { label: 'CALENDARIA.SettingsPanel.Tab.HUD', icon: '<i class="fas fa-layer-group"></i>', onClick: () => HUD.show() },
+          { label: 'CALENDARIA.Common.TimeKeeper', icon: '<i class="fas fa-clock"></i>', onClick: () => TimeKeeper.show() },
+          { label: 'CALENDARIA.Common.StopWatch', icon: '<i class="fas fa-stopwatch"></i>', onClick: () => Stopwatch.show() },
+          { label: 'CALENDARIA.SettingsPanel.Tab.SunDial', icon: '<i class="fas fa-sun"></i>', onClick: () => SunDial.show() },
+          { label: 'CALENDARIA.Chronicle.Title', icon: '<i class="fas fa-scroll"></i>', onClick: () => CALENDARIA.apps.Chronicle.show() }
         ];
         const subMenu = new ContextMenu(document.body, '.calendaria-open-submenu-no-match', subItems, { fixed: true, jQuery: false });
         await subMenu.render(document.body, { event: { clientX: pointer.x, clientY: pointer.y } });
@@ -968,7 +968,7 @@ export function getLeadingDays(calendar, year, month, startDayOfWeek) {
       checkDay--;
       continue;
     }
-    const monthName = isIntercalaryMonth ? localize(monthData?.name ?? '') : '';
+    const monthName = isIntercalaryMonth ? _loc(monthData?.name ?? '') : '';
     prevDays.unshift({
       day: checkDay,
       dayOfMonth: checkDay - 1,

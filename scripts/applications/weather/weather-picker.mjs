@@ -1,7 +1,7 @@
 import { CalendarManager } from '../../calendar/_module.mjs';
 import { COMPASS_DIRECTIONS, MODULE, PRECIPITATION_TYPES, SETTINGS, TEMPLATES, WEATHER_PERIODS, WIND_SPEEDS } from '../../constants.mjs';
 import { getAvailableFxPresets, isFXMasterActive } from '../../integrations/_module.mjs';
-import { getAvailableMacros, localize, log } from '../../utils/_module.mjs';
+import { getAvailableMacros, log } from '../../utils/_module.mjs';
 import { WEATHER_CATEGORIES, WeatherManager, fromDisplayUnit, getPreset, getPresetsByCategory, getTemperatureUnit, rollPresetTemperature, toDisplayUnit } from '../../weather/_module.mjs';
 import { CalendarEditor, WeatherProbabilityDialog } from '../_module.mjs';
 
@@ -13,11 +13,11 @@ const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
  * @returns {string} Localized intensity label
  */
 function getPrecipIntensityLabel(value) {
-  if (value <= 0) return localize('CALENDARIA.Common.None');
-  if (value <= 0.25) return localize('CALENDARIA.Common.Light');
-  if (value <= 0.5) return localize('CALENDARIA.Common.Moderate');
-  if (value <= 0.75) return localize('CALENDARIA.Weather.Precipitation.IntensityHeavy');
-  return localize('CALENDARIA.Weather.Precipitation.IntensityTorrential');
+  if (value <= 0) return _loc('CALENDARIA.Common.None');
+  if (value <= 0.25) return _loc('CALENDARIA.Common.Light');
+  if (value <= 0.5) return _loc('CALENDARIA.Common.Moderate');
+  if (value <= 0.75) return _loc('CALENDARIA.Weather.Precipitation.IntensityHeavy');
+  return _loc('CALENDARIA.Weather.Precipitation.IntensityTorrential');
 }
 
 /**
@@ -131,15 +131,15 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
     const scene = game.scenes?.active;
     const sceneZone = WeatherManager.getActiveZone(null, scene);
     const selectedZoneId = sceneZone?.id ?? null;
-    context.sceneZoneName = sceneZone ? localize(sceneZone.name) : localize('CALENDARIA.Weather.Picker.NoZone');
+    context.sceneZoneName = sceneZone ? _loc(sceneZone.name) : _loc('CALENDARIA.Weather.Picker.NoZone');
     context.zoneOptions = [];
-    for (const z of zones) context.zoneOptions.push({ value: z.id, label: localize(z.name), selected: z.id === selectedZoneId });
+    for (const z of zones) context.zoneOptions.push({ value: z.id, label: _loc(z.name), selected: z.id === selectedZoneId });
     context.zoneOptions.sort((a, b) => a.label.localeCompare(b.label, game.i18n.lang));
     context.intradayEnabled = game.settings.get(MODULE.ID, SETTINGS.INTRADAY_WEATHER);
     if (context.intradayEnabled) {
       const currentPeriod = WeatherManager.getCurrentPeriod();
       const selected = this.#selectedPeriod ?? currentPeriod;
-      context.periods = Object.values(WEATHER_PERIODS).map((p) => ({ id: p.id, label: localize(p.label), icon: p.icon, selected: p.id === selected, isCurrent: p.id === currentPeriod }));
+      context.periods = Object.values(WEATHER_PERIODS).map((p) => ({ id: p.id, label: _loc(p.label), icon: p.icon, selected: p.id === selected, isCurrent: p.id === currentPeriod }));
       context.selectedPeriod = selected;
     }
     const enabledPresetIds = new Set();
@@ -156,7 +156,7 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
     context.categories = [];
     context.selectedPresetId = this.#selectedPresetId;
     const calendarId = CalendarManager.getActiveCalendar()?.metadata?.id;
-    const notActiveLabel = localize('CALENDARIA.Weather.Picker.NotActiveInZone');
+    const notActiveLabel = _loc('CALENDARIA.Weather.Picker.NotActiveInZone');
     const categoryIds = ['standard', 'severe', 'environmental', 'fantasy'];
     for (const categoryId of categoryIds) {
       const category = WEATHER_CATEGORIES[categoryId];
@@ -165,7 +165,7 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
       const mappedPresets = presets
         .map((p) => {
           const label = WeatherManager.resolveDisplayLabel(p.id, p.label, calendarId, selectedZoneId);
-          const description = p.description ? localize(p.description) : label;
+          const description = p.description ? _loc(p.description) : label;
           const zoneEnabled = !hasZoneFilter || enabledPresetIds.has(p.id);
           const tooltip = zoneEnabled ? description : `${description} ${notActiveLabel}`;
           return { id: p.id, label, tooltip, icon: p.icon, color: p.color, selected: p.id === this.#selectedPresetId, zoneEnabled };
@@ -174,13 +174,13 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
           if (a.zoneEnabled !== b.zoneEnabled) return a.zoneEnabled ? -1 : 1;
           return a.label.localeCompare(b.label, game.i18n.lang);
         });
-      context.categories.push({ id: categoryId, label: localize(category.label), presets: mappedPresets });
+      context.categories.push({ id: categoryId, label: _loc(category.label), presets: mappedPresets });
     }
     if (customPresets.length > 0) {
       const mappedCustom = customPresets
         .map((p) => {
           const label = WeatherManager.resolveDisplayLabel(p.id, p.label, calendarId, selectedZoneId);
-          const description = p.description ? (p.description.startsWith('CALENDARIA.') ? localize(p.description) : p.description) : label;
+          const description = p.description ? (p.description.startsWith('CALENDARIA.') ? _loc(p.description) : p.description) : label;
           const zoneEnabled = !hasZoneFilter || enabledPresetIds.has(p.id);
           const tooltip = zoneEnabled ? description : `${description} ${notActiveLabel}`;
           return { id: p.id, label, tooltip, icon: p.icon, color: p.color, selected: p.id === this.#selectedPresetId, zoneEnabled };
@@ -190,7 +190,7 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
           return a.label.localeCompare(b.label, game.i18n.lang);
         });
       if (mappedCustom.length > 0) {
-        context.categories.push({ id: 'custom', label: localize(WEATHER_CATEGORIES.custom.label), presets: mappedCustom });
+        context.categories.push({ id: 'custom', label: _loc(WEATHER_CATEGORIES.custom.label), presets: mappedCustom });
       }
     }
     context.temperatureUnit = getTemperatureUnit() === 'fahrenheit' ? '°F' : '°C';
@@ -204,20 +204,20 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
     context.customColor = this.#customColor ?? (currentWeather?.color || '#888888');
     const activeWindSpeed = this.#windSpeed ?? currentWeather?.wind?.speed ?? 0;
     context.windSpeedRandom = this.#windSpeed === 'random';
-    context.windSpeedOptions = Object.values(WIND_SPEEDS).map((w) => ({ value: w.value, label: localize(w.label), kph: w.kph, selected: !context.windSpeedRandom && activeWindSpeed === w.value }));
+    context.windSpeedOptions = Object.values(WIND_SPEEDS).map((w) => ({ value: w.value, label: _loc(w.label), kph: w.kph, selected: !context.windSpeedRandom && activeWindSpeed === w.value }));
     context.compassDirections = Object.entries(COMPASS_DIRECTIONS).map(([id, deg]) => ({
       id,
       degrees: deg,
-      label: localize(`CALENDARIA.Weather.Wind.Dir.${id}`),
+      label: _loc(`CALENDARIA.Weather.Wind.Dir.${id}`),
       selected: (this.#windDirection ?? currentWeather?.wind?.direction) === deg
     }));
     const activePrecipType = this.#precipType ?? currentWeather?.precipitation?.type ?? null;
     context.precipTypeRandom = this.#precipType === 'random';
     context.precipitationTypes = [
-      { value: '', label: localize('CALENDARIA.Common.None'), selected: !context.precipTypeRandom && !activePrecipType },
+      { value: '', label: _loc('CALENDARIA.Common.None'), selected: !context.precipTypeRandom && !activePrecipType },
       ...Object.entries(PRECIPITATION_TYPES)
         .filter(([, v]) => v !== null)
-        .map(([, v]) => ({ value: v, label: localize(`CALENDARIA.Weather.Precipitation.${v.charAt(0).toUpperCase() + v.slice(1)}`), selected: !context.precipTypeRandom && activePrecipType === v }))
+        .map(([, v]) => ({ value: v, label: _loc(`CALENDARIA.Weather.Precipitation.${v.charAt(0).toUpperCase() + v.slice(1)}`), selected: !context.precipTypeRandom && activePrecipType === v }))
     ];
     context.precipIntensity = this.#precipIntensity ?? currentWeather?.precipitation?.intensity ?? 0;
     context.precipIntensityLabel = getPrecipIntensityLabel(context.precipIntensity);
@@ -227,19 +227,19 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
       context.fxPreset = currentFxPreset;
       const fxPresets = getAvailableFxPresets();
       context.fxPresetOptions = [
-        { value: '', label: localize('CALENDARIA.Common.None'), selected: !currentFxPreset },
+        { value: '', label: _loc('CALENDARIA.Common.None'), selected: !currentFxPreset },
         ...fxPresets.map((p) => ({ value: p.value, label: p.label, selected: p.value === currentFxPreset }))
       ];
       const fxLevels = ['very-low', 'low', 'medium', 'high', 'very-high'];
       const currentFxDensity = this.#fxDensity !== null ? this.#fxDensity : (currentWeather?.fxDensity ?? '');
       context.fxDensityOptions = [
-        { value: '', label: localize('CALENDARIA.Common.Default'), selected: !currentFxDensity },
-        ...fxLevels.map((v) => ({ value: v, label: localize(`CALENDARIA.FxParam.${v}`), selected: v === currentFxDensity }))
+        { value: '', label: _loc('CALENDARIA.Common.Default'), selected: !currentFxDensity },
+        ...fxLevels.map((v) => ({ value: v, label: _loc(`CALENDARIA.FxParam.${v}`), selected: v === currentFxDensity }))
       ];
       const currentFxSpeed = this.#fxSpeed !== null ? this.#fxSpeed : (currentWeather?.fxSpeed ?? '');
       context.fxSpeedOptions = [
-        { value: '', label: localize('CALENDARIA.Common.Default'), selected: !currentFxSpeed },
-        ...fxLevels.map((v) => ({ value: v, label: localize(`CALENDARIA.FxParam.${v}`), selected: v === currentFxSpeed }))
+        { value: '', label: _loc('CALENDARIA.Common.Default'), selected: !currentFxSpeed },
+        ...fxLevels.map((v) => ({ value: v, label: _loc(`CALENDARIA.FxParam.${v}`), selected: v === currentFxSpeed }))
       ];
       context.fxColor = this.#fxColor !== null ? this.#fxColor : (currentWeather?.fxColor ?? '');
     }
@@ -247,7 +247,7 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
     const currentFxMacro = this.#fxMacro !== null ? this.#fxMacro : (currentWeather?.fxMacro ?? '');
     const macros = getAvailableMacros();
     context.fxMacroOptions = [
-      { value: '', label: localize('CALENDARIA.Common.None'), selected: !currentFxMacro },
+      { value: '', label: _loc('CALENDARIA.Common.None'), selected: !currentFxMacro },
       ...macros.map((m) => ({ value: m.id, label: m.name, selected: m.id === currentFxMacro }))
     ];
     return context;

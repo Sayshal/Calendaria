@@ -190,5 +190,5 @@ export function warnShowToAll(permissionKey, featureLabel) {
   const blocked = getBlockedActiveUsers(permissionKey);
   if (blocked.length === 0) return;
   const names = blocked.map((u) => u.name).join(', ');
-  ui.notifications.warn(game.i18n.format('CALENDARIA.Permissions.MismatchWarning', { names, feature: featureLabel }));
+  ui.notifications.warn(_loc('CALENDARIA.Permissions.MismatchWarning', { names, feature: featureLabel }));
 }

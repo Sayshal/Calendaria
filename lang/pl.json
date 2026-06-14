@@ -612,6 +612,7 @@
   "CALENDARIA.Editor.Error.MinOneWeekday": "Kalendarz musi mieć co najmniej jeden dzień tygodnia.",
   "CALENDARIA.Editor.Error.NameRequired": "Kalendarz musi mieć nazwę.",
   "CALENDARIA.Editor.ExportSuccess": "Pomyślnie wyeksportowano \"{name}\".",
+  "CALENDARIA.Editor.Festival.PendingImport": "Po zapisaniu tego kalendarza zostaną utworzone {count} importowane święta. Przejrzyj pozostałe zakładki, a następnie ponownie otwórz kalendarz, aby je edytować.",
   "CALENDARIA.Editor.Festival.ResetConfirm": "Czy chcesz usunąć wszystkie notatki dotyczące świąt z tego kalendarza i utworzyć je ponownie na podstawie dołączonego szablonu?",
   "CALENDARIA.Editor.Festival.ResetDone": "Reset zakończony. Wprowadzono {count} notatek dotyczących festiwalu z dołączonego szablonu.",
   "CALENDARIA.Editor.Festival.ResetLabel": "Przywróć ustawienia domyślne",

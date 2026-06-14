@@ -1,17 +1,7 @@
 import { CalendarManager } from '../../calendar/_module.mjs';
 import { HOOKS, MODULE, SETTINGS, SOCKET_TYPES, TEMPLATES } from '../../constants.mjs';
 import { NoteManager, addDays, getPresetDefinition } from '../../notes/_module.mjs';
-import {
-  CalendariaSocket,
-  buildOpenAppsMenuItem,
-  buildScrollEntries,
-  canViewChronicle,
-  dateFormattingParts,
-  getDefaultDateRange,
-  isCombatBlocked,
-  localize,
-  warnShowToAll
-} from '../../utils/_module.mjs';
+import { CalendariaSocket, buildOpenAppsMenuItem, buildScrollEntries, canViewChronicle, dateFormattingParts, getDefaultDateRange, isCombatBlocked, warnShowToAll } from '../../utils/_module.mjs';
 import { SettingsPanel } from '../_module.mjs';
 
 const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
@@ -71,7 +61,7 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @override */
   get title() {
-    return localize('CALENDARIA.Chronicle.Title');
+    return _loc('CALENDARIA.Chronicle.Title');
   }
 
   /**
@@ -153,14 +143,14 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
     context.hasEntries = this._entries.length > 0;
     context.isGM = game.user.isGM;
     context.depths = [
-      { id: 'title', label: localize('CALENDARIA.Chronicle.Depth.Title'), active: this._entryDepth === 'title' },
-      { id: 'excerpt', label: localize('CALENDARIA.Chronicle.Depth.Excerpt'), active: this._entryDepth === 'excerpt' },
-      { id: 'full', label: localize('CALENDARIA.Common.Full'), active: this._entryDepth === 'full' }
+      { id: 'title', label: _loc('CALENDARIA.Chronicle.Depth.Title'), active: this._entryDepth === 'title' },
+      { id: 'excerpt', label: _loc('CALENDARIA.Chronicle.Depth.Excerpt'), active: this._entryDepth === 'excerpt' },
+      { id: 'full', label: _loc('CALENDARIA.Common.Full'), active: this._entryDepth === 'full' }
     ];
     context.viewMode = this._viewMode;
     context.viewModes = [
-      { id: 'scroll', label: localize('CALENDARIA.Chronicle.ViewMode.Scroll'), active: this._viewMode === 'scroll' },
-      { id: 'timeline', label: localize('CALENDARIA.Chronicle.ViewMode.Timeline'), active: this._viewMode === 'timeline' }
+      { id: 'scroll', label: _loc('CALENDARIA.Chronicle.ViewMode.Scroll'), active: this._viewMode === 'scroll' },
+      { id: 'timeline', label: _loc('CALENDARIA.Chronicle.ViewMode.Timeline'), active: this._viewMode === 'timeline' }
     ];
     const usedCategoryIds = NoteManager.getAllUsedPresetIds();
     const selectedSet = new Set(this._categoryFilter);
@@ -384,9 +374,9 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
   #getContextMenuItems() {
     const items = [];
     items.push({
-      name: 'CALENDARIA.Chronicle.ContextMenu.Settings',
+      label: 'CALENDARIA.Chronicle.ContextMenu.Settings',
       icon: '<i class="fas fa-gear"></i>',
-      callback: () => {
+      onClick: () => {
         const panel = new SettingsPanel();
         panel.render(true).then(() => {
           requestAnimationFrame(() => panel.changeTab('chronicle', 'primary'));
@@ -397,17 +387,17 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
     if (game.user.isGM) {
       const forceChronicle = game.settings.get(MODULE.ID, SETTINGS.FORCE_CHRONICLE);
       items.push({
-        name: forceChronicle ? 'CALENDARIA.Common.HideFromAll' : 'CALENDARIA.Common.ShowToAll',
+        label: forceChronicle ? 'CALENDARIA.Common.HideFromAll' : 'CALENDARIA.Common.ShowToAll',
         icon: `<i class="fas fa-${forceChronicle ? 'eye-slash' : 'eye'}"></i>`,
-        callback: async () => {
+        onClick: async () => {
           const newValue = !forceChronicle;
-          if (newValue) warnShowToAll('viewChronicle', game.i18n.localize('CALENDARIA.Permissions.ViewChronicle'));
+          if (newValue) warnShowToAll('viewChronicle', _loc('CALENDARIA.Permissions.ViewChronicle'));
           await game.settings.set(MODULE.ID, SETTINGS.FORCE_CHRONICLE, newValue);
           CalendariaSocket.emit(SOCKET_TYPES.CHRONICLE_VISIBILITY, { visible: newValue });
         }
       });
     }
-    items.push({ name: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', callback: () => this.close() });
+    items.push({ label: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', onClick: () => this.close() });
     return items;
   }
 
@@ -562,7 +552,7 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
     const dayOfMonth = parseInt(target.dataset.day);
     if (isNaN(year) || isNaN(month) || isNaN(dayOfMonth)) return;
     await NoteManager.createNote({
-      name: localize('CALENDARIA.Note.NewNote'),
+      name: _loc('CALENDARIA.Note.NewNote'),
       noteData: { startDate: { year, month, dayOfMonth, hour: 12, minute: 0 }, endDate: { year, month, dayOfMonth, hour: 13, minute: 0 } },
       source: 'ui'
     });

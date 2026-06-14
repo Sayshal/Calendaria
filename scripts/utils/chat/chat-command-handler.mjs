@@ -3,7 +3,6 @@ import { MODULE, SETTINGS, SOCKET_TYPES } from '../../constants.mjs';
 import { NoteManager } from '../../notes/_module.mjs';
 import { WeatherManager } from '../../weather/_module.mjs';
 import { PRESET_FORMATTERS, formatCustom, resolveFormatString } from '../formatting/format-utils.mjs';
-import { format, localize } from '../localization.mjs';
 import { log } from '../logger.mjs';
 import { canViewWeatherForecast } from '../permissions.mjs';
 import { CalendariaSocket } from '../socket.mjs';
@@ -203,22 +202,22 @@ export function cmdWeather(args) {
   if (!calendar) return null;
   if (args) {
     const match = args.match(/^(\d+)\s+(\d+)\s+(\d+)$/);
-    if (!match) return { content: localize('CALENDARIA.ChatCommand.InvalidDateFormat'), error: true };
+    if (!match) return { content: _loc('CALENDARIA.ChatCommand.InvalidDateFormat'), error: true };
     const year = parseInt(match[1], 10);
     const month = parseInt(match[2], 10) - 1;
     const day = parseInt(match[3], 10) - 1;
     const yearZero = calendar.years?.yearZero ?? 0;
     const weather = WeatherManager.getWeatherForDate(year - yearZero, month, day);
-    if (!weather) return { content: format('CALENDARIA.ChatCommand.NoWeatherForDate', { date: `${match[1]}/${match[2]}/${match[3]}` }) };
+    if (!weather) return { content: _loc('CALENDARIA.ChatCommand.NoWeatherForDate', { date: `${match[1]}/${match[2]}/${match[3]}` }) };
     const tempStr = weather.temperature != null ? ` (${WeatherManager.formatTemperature(weather.temperature)})` : '';
     const windStr = weather.wind?.speed > 0 ? ` · ${WeatherManager.getWindSpeedLabel(weather.wind.speed)}` : '';
-    return { content: `<i class="fas ${weather.icon}" style="color:${weather.color}"></i> <strong>${match[1]}/${match[2]}/${match[3]}</strong> — ${localize(weather.label)}${tempStr}${windStr}` };
+    return { content: `<i class="fas ${weather.icon}" style="color:${weather.color}"></i> <strong>${match[1]}/${match[2]}/${match[3]}</strong> — ${_loc(weather.label)}${tempStr}${windStr}` };
   }
   const weather = WeatherManager.getCurrentWeather();
-  if (!weather) return { content: localize('CALENDARIA.ChatCommand.NoWeather') };
+  if (!weather) return { content: _loc('CALENDARIA.ChatCommand.NoWeather') };
   const temp = WeatherManager.getTemperature();
   const tempStr = temp != null ? ` (${WeatherManager.formatTemperature(temp)})` : '';
-  return { content: `<i class="${weather.icon || 'fas fa-cloud'}"></i> ${localize(weather.label)}${tempStr}` };
+  return { content: `<i class="${weather.icon || 'fas fa-cloud'}"></i> ${_loc(weather.label)}${tempStr}` };
 }
 
 /**
@@ -230,24 +229,24 @@ export function cmdMoon(args) {
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return null;
   const moons = calendar.moonsArray;
-  if (!moons?.length) return { content: localize('CALENDARIA.Common.NoMoonsConfigured') };
+  if (!moons?.length) return { content: _loc('CALENDARIA.Common.NoMoonsConfigured') };
   const moonIndex = args ? parseInt(args, 10) : null;
   if (moonIndex !== null && !isNaN(moonIndex)) {
     const moon = moons[moonIndex];
     const phase = calendar.getMoonPhase(moonIndex);
-    if (!moon || !phase) return { content: localize('CALENDARIA.Common.NoMoonsConfigured') };
+    if (!moon || !phase) return { content: _loc('CALENDARIA.Common.NoMoonsConfigured') };
     const icon = phase.icon ? `<img src="${phase.icon}" style="height:1.2em;vertical-align:middle;margin-right:0.25rem;">` : '';
-    return { content: `${icon}<strong>${localize(moon.name)}:</strong> ${phase.subPhaseName || localize(phase.name)}` };
+    return { content: `${icon}<strong>${_loc(moon.name)}:</strong> ${phase.subPhaseName || _loc(phase.name)}` };
   }
   const lines = moons
     .map((moon, index) => {
       const phase = calendar.getMoonPhase(index);
       if (!phase) return null;
       const icon = phase.icon ? `<img src="${phase.icon}" style="height:1.2em;vertical-align:middle;margin-right:0.25rem;">` : '';
-      return `${icon}<strong>${localize(moon.name)}:</strong> ${phase.subPhaseName || localize(phase.name)}`;
+      return `${icon}<strong>${_loc(moon.name)}:</strong> ${phase.subPhaseName || _loc(phase.name)}`;
     })
     .filter(Boolean);
-  if (!lines.length) return { content: localize('CALENDARIA.Common.NoMoonsConfigured') };
+  if (!lines.length) return { content: _loc('CALENDARIA.Common.NoMoonsConfigured') };
   return { content: lines.join('<br>') };
 }
 
@@ -259,9 +258,9 @@ export function cmdSeason() {
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return null;
   const season = getCurrentSeason();
-  if (!season) return { content: localize('CALENDARIA.ChatCommand.NoSeason') };
+  if (!season) return { content: _loc('CALENDARIA.ChatCommand.NoSeason') };
   const icon = season.icon ? `<i class="${season.icon}"></i> ` : '';
-  return { content: `${icon}${localize(season.name)}` };
+  return { content: `${icon}${_loc(season.name)}` };
 }
 
 /**
@@ -273,12 +272,12 @@ export function cmdToday() {
   if (!calendar) return null;
   const dt = getCurrentDateTime();
   const notes = NoteManager.getNotesForDate(dt.year, dt.month, dt.dayOfMonth);
-  if (!notes?.length) return { content: localize('CALENDARIA.ChatCommand.NoNotesToday') };
+  if (!notes?.length) return { content: _loc('CALENDARIA.ChatCommand.NoNotesToday') };
   const lines = notes.map((n) => {
     const time = n.flagData.allDay ? '' : ` (${String(n.flagData.startDate.hour).padStart(2, '0')}:${String(n.flagData.startDate.minute).padStart(2, '0')})`;
     return `• ${n.name}${time}`;
   });
-  return { content: `<strong>${localize('CALENDARIA.ChatCommand.TodayHeader')}</strong><br>${lines.join('<br>')}` };
+  return { content: `<strong>${_loc('CALENDARIA.ChatCommand.TodayHeader')}</strong><br>${lines.join('<br>')}` };
 }
 
 /**
@@ -290,13 +289,13 @@ export function cmdSunrise(formatStr) {
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return null;
   const sunrise = getSunrise();
-  if (sunrise == null) return { content: localize('CALENDARIA.ChatCommand.NoSunData') };
+  if (sunrise == null) return { content: _loc('CALENDARIA.ChatCommand.NoSunData') };
   const dt = getCurrentDateTime();
   const h = Math.floor(sunrise);
   const m = Math.round((sunrise - h) * 60);
   const components = { ...dt, hour: h, minute: m, second: 0 };
   const formatted = formatDate(components, formatStr || 'time24');
-  return { content: `<i class="fas fa-sun"></i> ${localize('CALENDARIA.Common.Sunrise')}: ${formatted}` };
+  return { content: `<i class="fas fa-sun"></i> ${_loc('CALENDARIA.Common.Sunrise')}: ${formatted}` };
 }
 
 /**
@@ -308,13 +307,13 @@ export function cmdSunset(formatStr) {
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return null;
   const sunset = getSunset();
-  if (sunset == null) return { content: localize('CALENDARIA.ChatCommand.NoSunData') };
+  if (sunset == null) return { content: _loc('CALENDARIA.ChatCommand.NoSunData') };
   const dt = getCurrentDateTime();
   const h = Math.floor(sunset);
   const m = Math.round((sunset - h) * 60);
   const components = { ...dt, hour: h, minute: m, second: 0 };
   const formatted = formatDate(components, formatStr || 'time24');
-  return { content: `<i class="fas fa-moon"></i> ${localize('CALENDARIA.Common.Sunset')}: ${formatted}` };
+  return { content: `<i class="fas fa-moon"></i> ${_loc('CALENDARIA.Common.Sunset')}: ${formatted}` };
 }
 
 /**
@@ -326,11 +325,11 @@ export async function cmdAdvance(args) {
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return null;
   const match = args?.trim().match(/^(-?\d+)\s*(\w+)(?:\s+cinematic=(true|false))?$/i);
-  if (!match) return { content: localize('CALENDARIA.ChatCommand.InvalidTimeFormat'), error: true };
+  if (!match) return { content: _loc('CALENDARIA.ChatCommand.InvalidTimeFormat'), error: true };
   const value = parseInt(match[1], 10);
   const unitInput = match[2].toLowerCase();
   const baseUnit = TIME_UNIT_MAP[unitInput];
-  if (!baseUnit) return { content: localize('CALENDARIA.ChatCommand.InvalidTimeFormat'), error: true };
+  if (!baseUnit) return { content: _loc('CALENDARIA.ChatCommand.InvalidTimeFormat'), error: true };
   const cinematicOverride = match[3] ? match[3].toLowerCase() === 'true' : null;
   const dt = getCurrentDateTime();
   const daysPerWeek = calendar.weeks?.values?.length ?? 7;
@@ -359,7 +358,7 @@ export async function cmdAdvance(args) {
     else await CinematicOverlay.gatedAdvance(timeDelta);
   }
   log(3, `Advanced time by ${value} ${unitInput}`);
-  return { content: format('CALENDARIA.ChatCommand.TimeAdvanced', { value, unit: unitInput }) };
+  return { content: _loc('CALENDARIA.ChatCommand.TimeAdvanced', { value, unit: unitInput }) };
 }
 
 /**
@@ -371,14 +370,14 @@ export async function cmdSetDate(args) {
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return null;
   const match = args?.trim().match(/^(\d+)\s+(\d+)\s+(\d+)$/);
-  if (!match) return { content: localize('CALENDARIA.ChatCommand.InvalidDateFormat'), error: true };
+  if (!match) return { content: _loc('CALENDARIA.ChatCommand.InvalidDateFormat'), error: true };
   const year = parseInt(match[1], 10);
   const month = parseInt(match[2], 10) - 1;
   const dayOfMonth = parseInt(match[3], 10) - 1;
   if (!game.user.isGM) CalendariaSocket.emit(SOCKET_TYPES.TIME_REQUEST, { action: 'jump', date: { year, month, dayOfMonth } });
   else await calendar.jumpToDate({ year, month, dayOfMonth });
   log(3, `Set date to ${year}-${month + 1}-${dayOfMonth + 1}`);
-  return { content: localize('CALENDARIA.ChatCommand.DateSet') };
+  return { content: _loc('CALENDARIA.ChatCommand.DateSet') };
 }
 
 /**
@@ -390,7 +389,7 @@ export async function cmdSetTime(args) {
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return null;
   const match = args?.trim().match(/^(\d+)\s+(\d+)(?:\s+(\d+))?$/);
-  if (!match) return { content: localize('CALENDARIA.ChatCommand.InvalidTimeFormat'), error: true };
+  if (!match) return { content: _loc('CALENDARIA.ChatCommand.InvalidTimeFormat'), error: true };
   const hour = parseInt(match[1], 10);
   const minute = parseInt(match[2], 10);
   const second = match[3] ? parseInt(match[3], 10) : 0;
@@ -400,7 +399,7 @@ export async function cmdSetTime(args) {
   if (!game.user.isGM) CalendariaSocket.emit(SOCKET_TYPES.TIME_REQUEST, { action: 'set', components });
   else await game.time.set(components);
   log(3, `Set time to ${hour}:${minute}:${second}`);
-  return { content: localize('CALENDARIA.ChatCommand.TimeSet') };
+  return { content: _loc('CALENDARIA.ChatCommand.TimeSet') };
 }
 
 /**
@@ -411,30 +410,30 @@ export function cmdCalendar() {
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return null;
   const lines = [];
-  lines.push(`<strong>${localize('CALENDARIA.Common.Date')}:</strong> ${formatDate(null, 'dateLong')}`);
-  lines.push(`<strong>${localize('CALENDARIA.Common.Time')}:</strong> ${formatDate(null, 'time24')}`);
+  lines.push(`<strong>${_loc('CALENDARIA.Common.Date')}:</strong> ${formatDate(null, 'dateLong')}`);
+  lines.push(`<strong>${_loc('CALENDARIA.Common.Time')}:</strong> ${formatDate(null, 'time24')}`);
   const season = getCurrentSeason();
-  if (season) lines.push(`<strong>${localize('CALENDARIA.Common.Season')}:</strong> ${localize(season.name)}`);
+  if (season) lines.push(`<strong>${_loc('CALENDARIA.Common.Season')}:</strong> ${_loc(season.name)}`);
   const weather = WeatherManager.getCurrentWeather();
   if (weather) {
     const temp = WeatherManager.getTemperature();
     const unit = game.settings.get('calendaria', 'temperatureUnit');
     const tempStr = temp != null ? ` (${Math.round(temp)}°${unit === 'fahrenheit' ? 'F' : 'C'})` : '';
-    lines.push(`<strong>${localize('CALENDARIA.Common.Weather')}:</strong> <i class="${weather.icon || 'fas fa-cloud'}"></i> ${localize(weather.label)}${tempStr}`);
+    lines.push(`<strong>${_loc('CALENDARIA.Common.Weather')}:</strong> <i class="${weather.icon || 'fas fa-cloud'}"></i> ${_loc(weather.label)}${tempStr}`);
   }
   const calMoons = calendar.moonsArray;
   if (calMoons?.length) {
     const moonStrs = calMoons
       .map((moon, index) => {
         const phase = calendar.getMoonPhase(index);
-        return phase ? `${localize(moon.name)}: ${phase.subPhaseName || localize(phase.name)}` : null;
+        return phase ? `${_loc(moon.name)}: ${phase.subPhaseName || _loc(phase.name)}` : null;
       })
       .filter(Boolean);
-    if (moonStrs.length) lines.push(`<strong>${localize('CALENDARIA.Common.Moons')}:</strong> ${moonStrs.join(', ')}`);
+    if (moonStrs.length) lines.push(`<strong>${_loc('CALENDARIA.Common.Moons')}:</strong> ${moonStrs.join(', ')}`);
   }
   const sunrise = getSunrise();
   const sunset = getSunset();
-  if (sunrise != null && sunset != null) lines.push(`<strong>${localize('CALENDARIA.ChatCommand.Daylight')}:</strong> ${formatHours(sunrise)} - ${formatHours(sunset)}`);
+  if (sunrise != null && sunset != null) lines.push(`<strong>${_loc('CALENDARIA.ChatCommand.Daylight')}:</strong> ${formatHours(sunrise)} - ${formatHours(sunset)}`);
   return { content: lines.join('<br>') };
 }
 
@@ -444,14 +443,14 @@ export function cmdCalendar() {
  */
 export function cmdCalendars() {
   const calendars = CalendarManager.getAllCalendarMetadata();
-  if (!calendars?.length) return { content: localize('CALENDARIA.ChatCommand.NoCalendars') };
+  if (!calendars?.length) return { content: _loc('CALENDARIA.ChatCommand.NoCalendars') };
   const active = CalendarManager.getActiveCalendar();
   const lines = calendars.map((cal) => {
     const isActive = cal.id === active?.id;
     const marker = isActive ? ' <i class="fas fa-check"></i>' : '';
     return `• <strong>${cal.name}</strong>${marker}`;
   });
-  return { content: `<strong>${localize('CALENDARIA.ChatCommand.AvailableCalendars')}:</strong><br>${lines.join('<br>')}` };
+  return { content: `<strong>${_loc('CALENDARIA.ChatCommand.AvailableCalendars')}:</strong><br>${lines.join('<br>')}` };
 }
 
 /**
@@ -467,7 +466,7 @@ export async function cmdSwitchCal(args) {
   if (!game.user.isGM) CalendariaSocket.emit(SOCKET_TYPES.CALENDAR_REQUEST, { calendarId });
   else await CalendarManager.switchCalendar(calendarId);
   log(3, `Switched calendar to ${calendarId}`);
-  return { content: format('CALENDARIA.ChatCommand.CalendarSwitched', { name: calendar.name }) };
+  return { content: _loc('CALENDARIA.ChatCommand.CalendarSwitched', { name: calendar.name }) };
 }
 
 /**
@@ -478,9 +477,9 @@ export function cmdFestival() {
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return null;
   const festival = CalendarManager.getCurrentFestival();
-  if (!festival) return { content: localize('CALENDARIA.ChatCommand.NoFestival') };
+  if (!festival) return { content: _loc('CALENDARIA.ChatCommand.NoFestival') };
   const icon = festival.icon ? `<i class="fas ${festival.icon}"></i> ` : '<i class="fas fa-star"></i> ';
-  return { content: `${icon}<strong>${localize(festival.name)}</strong>` };
+  return { content: `${icon}<strong>${_loc(festival.name)}</strong>` };
 }
 
 /**
@@ -491,9 +490,9 @@ export function cmdWeekday() {
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return null;
   const weekday = getCurrentWeekday();
-  if (!weekday) return { content: localize('CALENDARIA.ChatCommand.NoWeekday') };
-  const restDay = weekday.isRestDay ? ` (${localize('CALENDARIA.Common.RestDay')})` : '';
-  return { content: `<i class="fas fa-calendar-week"></i> <strong>${localize(weekday.name)}</strong>${restDay}` };
+  if (!weekday) return { content: _loc('CALENDARIA.ChatCommand.NoWeekday') };
+  const restDay = weekday.isRestDay ? ` (${_loc('CALENDARIA.Common.RestDay')})` : '';
+  return { content: `<i class="fas fa-calendar-week"></i> <strong>${_loc(weekday.name)}</strong>${restDay}` };
 }
 
 /**
@@ -504,7 +503,7 @@ export function cmdCycle() {
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return null;
   const cycleData = calendar.getCycleValues();
-  if (!cycleData?.values?.length) return { content: localize('CALENDARIA.ChatCommand.NoCycles') };
+  if (!cycleData?.values?.length) return { content: _loc('CALENDARIA.ChatCommand.NoCycles') };
   const lines = cycleData.values.map((cycle) => `• <strong>${cycle.cycleName}:</strong> ${cycle.entryName}`);
   return { content: lines.join('<br>') };
 }
@@ -517,21 +516,21 @@ export function cmdCycle() {
 export function cmdForecast(args) {
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return null;
-  if (!game.settings.get(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER)) return { content: localize('CALENDARIA.ChatCommand.NoForecast') };
-  if (!canViewWeatherForecast()) return { content: localize('CALENDARIA.ChatCommand.NoPermission'), error: true };
+  if (!game.settings.get(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER)) return { content: _loc('CALENDARIA.ChatCommand.NoForecast') };
+  if (!canViewWeatherForecast()) return { content: _loc('CALENDARIA.ChatCommand.NoPermission'), error: true };
   const days = args ? parseInt(args, 10) : undefined;
-  if (args && isNaN(days)) return { content: localize('CALENDARIA.ChatCommand.InvalidForecastDays'), error: true };
+  if (args && isNaN(days)) return { content: _loc('CALENDARIA.ChatCommand.InvalidForecastDays'), error: true };
   const forecast = WeatherManager.getForecast({ days: days || undefined });
-  if (!forecast.length) return { content: localize('CALENDARIA.ChatCommand.NoForecast') };
+  if (!forecast.length) return { content: _loc('CALENDARIA.ChatCommand.NoForecast') };
   const zone = WeatherManager.getActiveZone(null, game.scenes?.active);
-  const zoneName = zone ? localize(zone.name) : '';
+  const zoneName = zone ? _loc(zone.name) : '';
   const subtitle = zoneName ? `<div class="forecast-zone">${zoneName}</div>` : '';
   const lines = forecast.map((f) => {
     const tempStr = f.temperature != null ? ` ${f.isVaried ? '~' : ''}${WeatherManager.formatTemperature(f.temperature)}` : '';
-    const label = localize(f.preset.label);
+    const label = _loc(f.preset.label);
     return `<i class="fas ${f.preset.icon}" style="color:${f.preset.color}"></i> <strong>${f.dayOfMonth + 1}</strong> — ${label}${tempStr}`;
   });
-  return { content: `<h3>${localize('CALENDARIA.ChatCommand.ForecastHeader')}</h3>${subtitle}${lines.join('<br>')}`, whisper: true };
+  return { content: `<h3>${_loc('CALENDARIA.ChatCommand.ForecastHeader')}</h3>${subtitle}${lines.join('<br>')}`, whisper: true };
 }
 
 /**
@@ -542,15 +541,15 @@ export function cmdForecast(args) {
 export function cmdWeatherProb(args) {
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return null;
-  if (!game.settings.get(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER)) return { content: localize('CALENDARIA.ChatCommand.NoForecast') };
-  if (!canViewWeatherForecast()) return { content: localize('CALENDARIA.ChatCommand.NoPermission'), error: true };
+  if (!game.settings.get(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER)) return { content: _loc('CALENDARIA.ChatCommand.NoForecast') };
+  if (!canViewWeatherForecast()) return { content: _loc('CALENDARIA.ChatCommand.NoPermission'), error: true };
   const data = WeatherManager.getWeatherProbabilities({ season: args || undefined });
-  if (!data.entries.length) return { content: localize('CALENDARIA.WeatherProbability.NoPresets') };
-  const header = `<h3>${localize('CALENDARIA.WeatherProbability.Title')}</h3>`;
+  if (!data.entries.length) return { content: _loc('CALENDARIA.WeatherProbability.NoPresets') };
+  const header = `<h3>${_loc('CALENDARIA.WeatherProbability.Title')}</h3>`;
   const subtitle = data.zone ? `<div class="forecast-zone">${data.zone.name}${data.season ? ` — ${data.season}` : ''}</div>` : '';
   const rows = data.entries.map((e) => `<i class="fas ${e.icon}" style="color:${e.color}"></i> ${e.label} — <strong>${e.percent}%</strong>`);
   const tempStr = `${WeatherManager.formatTemperature(data.tempRange.min)} – ${WeatherManager.formatTemperature(data.tempRange.max)}`;
-  const footer = `<div style="margin-top:0.5em;"><i class="fas fa-temperature-half"></i> ${localize('CALENDARIA.Common.TemperatureRange')}: ${tempStr}</div>`;
+  const footer = `<div style="margin-top:0.5em;"><i class="fas fa-temperature-half"></i> ${_loc('CALENDARIA.Common.TemperatureRange')}: ${tempStr}</div>`;
   return { content: `${header}${subtitle}${rows.join('<br>')}${footer}`, whisper: true };
 }
 
@@ -585,11 +584,11 @@ export async function cmdEnrichers() {
   const existing = game.journal.find((j) => j.getFlag(MODULE.ID, ENRICHER_JOURNAL_FLAG));
   if (existing) {
     existing.sheet.render(true);
-    return { content: `<i class="fas fa-book-open"></i> ${localize('CALENDARIA.Enricher.Reference.Opened')}` };
+    return { content: `<i class="fas fa-book-open"></i> ${_loc('CALENDARIA.Enricher.Reference.Opened')}` };
   }
   const { handlers: enricherHandlers } = await import('../enrichers.mjs');
-  const syntaxHeader = localize('CALENDARIA.Enricher.Reference.Syntax');
-  const outputHeader = localize('CALENDARIA.Enricher.Reference.Output');
+  const syntaxHeader = _loc('CALENDARIA.Enricher.Reference.Syntax');
+  const outputHeader = _loc('CALENDARIA.Enricher.Reference.Output');
   const sections = ENRICHER_CATEGORIES.map((cat) => {
     const examples = cat.examples ?? {};
     const rows = cat.keys
@@ -598,12 +597,12 @@ export async function cmdEnrichers() {
         const args = examples[k] ? ` ${examples[k]}` : '';
         return `<tr><td><code>[\u200B[cal.${k}${args}]\u200B]</code></td><td>[[cal.${k}${args}]]</td></tr>`;
       });
-    return `<h2>${localize(cat.label)}</h2><table><thead><tr><th>${syntaxHeader}</th><th>${outputHeader}</th></tr></thead><tbody>${rows.join('')}</tbody></table>`;
+    return `<h2>${_loc(cat.label)}</h2><table><thead><tr><th>${syntaxHeader}</th><th>${outputHeader}</th></tr></thead><tbody>${rows.join('')}</tbody></table>`;
   });
-  const wikiLink = `<p><a href="https://wiki.3deathsaves.com/calendaria/text-enrichers/">${localize('CALENDARIA.Enricher.Reference.WikiLink')}</a></p>`;
+  const wikiLink = `<p><a href="https://wiki.3deathsaves.com/calendaria/text-enrichers/">${_loc('CALENDARIA.Enricher.Reference.WikiLink')}</a></p>`;
   const content = `${wikiLink}${sections.join('')}`;
-  const journalName = localize('CALENDARIA.Enricher.Reference.Title');
+  const journalName = _loc('CALENDARIA.Enricher.Reference.Title');
   const journal = await JournalEntry.create({ name: journalName, pages: [{ name: journalName, type: 'text', text: { content } }], flags: { [MODULE.ID]: { [ENRICHER_JOURNAL_FLAG]: true } } });
   journal.sheet.render(true);
-  return { content: `<i class="fas fa-book-open"></i> ${localize('CALENDARIA.Enricher.Reference.Created')}` };
+  return { content: `<i class="fas fa-book-open"></i> ${_loc('CALENDARIA.Enricher.Reference.Created')}` };
 }
