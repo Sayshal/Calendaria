@@ -1,8 +1,3 @@
 ## Bug Fixes
 
-- Fantasy-Calendar imports place festivals on the correct days, keep multi-day festival durations, and import whole-month festivals. The Festivals tab shows a notice that imported festivals are created when you save the calendar.
-- Fixed a delay before the clock widgets updated on time changes in worlds with many darkness-synced scenes.
-- Note content saves automatically when you switch tabs, return to view mode, or close the note editor. The redundant save button on the content editor has been removed.
-- Players taking a short or long rest with Advance Time on Rest enabled no longer receive a permission error. The GM drives rest time advancement.
-- The HUD and sun dial moon waxes and wanes smoothly across the cycle and stays visible near the new moon, instead of freezing for several days and vanishing.
-- The time increment dropdown in the HUD, mini calendar, and time keeper keeps your chosen step size instead of reverting to minutes.
+- Calendars with no months now expose a Days Per Year field in the editor, and saving a monthless calendar keeps that value instead of resetting it to zero.
