@@ -573,7 +573,12 @@ const ENRICHER_CATEGORIES = [
     keys: ['event', 'notes', 'next', 'category', 'chronicle'],
     examples: { event: 'Winter Solstice', category: 'quest', chronicle: '1 1 1500 to 14 1 1500' }
   },
-  { label: 'CALENDARIA.Enricher.Category.Composite', keys: ['summary', 'almanac', 'format', 'compare', 'peek'], examples: { format: 'MMMM YYYY', compare: '1 1 2025 cal=gregorian', peek: '+7d' } }
+  { label: 'CALENDARIA.Enricher.Category.Composite', keys: ['summary', 'almanac', 'format', 'compare', 'peek'], examples: { format: 'MMMM YYYY', compare: '1 1 2025 cal=gregorian', peek: '+7d' } },
+  {
+    label: 'CALENDARIA.Enricher.Category.Actions',
+    keys: ['advancetotime', 'advanceinterval', 'advancetopreset', 'settime', 'jumptodate', 'toggleclock', 'setweather'],
+    examples: { advancetotime: '18:00', advanceinterval: 'hour=1', advancetopreset: 'sunset', settime: '12:00', jumptodate: '1 1 2030', setweather: 'rain' }
+  }
 ];
 
 /**

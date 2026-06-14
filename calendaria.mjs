@@ -27,6 +27,7 @@ import {
   migrateRemovedCalendars,
   overrideChatLogTimestamps,
   registerEnrichers,
+  registerInserts,
   registerKeybindings,
   runAllMigrations,
   showDebugZones,
@@ -75,6 +76,8 @@ Hooks.once('init', async () => {
   await foundry.applications.handlebars.loadTemplates(Object.values(TEMPLATES).flatMap((v) => (typeof v === 'string' ? v : Object.values(v))));
   log(3, 'Calendaria module initialized.');
 });
+
+Hooks.once('i18nInit', () => registerInserts());
 
 Hooks.once('dnd5e.setupCalendar', () => {
   CONFIG.DND5E.calendar.application = null;
