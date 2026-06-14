@@ -12,6 +12,17 @@
         <p class="hint">{{localize "CALENDARIA.Editor.MonthlessMode.Hint"}}</p>
       </div>
     </div>
+    <fieldset>
+      <legend>{{localize "CALENDARIA.Editor.DaysPerYear.Label"}}</legend>
+      <div class="form-group">
+        <label for="editor-days-per-year">{{localize "CALENDARIA.Editor.DaysPerYear.Label"}}</label>
+        <div class="form-fields">
+          <input type="number" id="editor-days-per-year" name="days.daysPerYear"
+            value="{{calendar.days.daysPerYear}}" min="1" step="1">
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Editor.DaysPerYear.Hint"}}</p>
+      </div>
+    </fieldset>
   {{/unless}}
   <fieldset>
     <legend data-tooltip aria-label="{{localize 'CALENDARIA.Editor.SectionTooltip.Months'}}">
