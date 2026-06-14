@@ -586,6 +586,8 @@
   "CALENDARIA.Editor.Cycle.BasedOn.Day": "Dia Absoluto",
   "CALENDARIA.Editor.Cycle.BasedOn.MonthDay": "Dia do Mês",
   "CALENDARIA.Editor.Cycle.BasedOn.Year": "Ano do Calendário",
+  "CALENDARIA.Editor.DaysPerYear.Hint": "Total de dias em cada ano, utilizado para navegação e cálculos de datas.",
+  "CALENDARIA.Editor.DaysPerYear.Label": "Dias Por Ano",
   "CALENDARIA.Editor.Default.CanonicalHourName": "Hora {num}",
   "CALENDARIA.Editor.Default.CycleName": "Ciclo {num}",
   "CALENDARIA.Editor.Default.CycleStage": "Estágio {num}",
