@@ -586,6 +586,8 @@
   "CALENDARIA.Editor.Cycle.BasedOn.Day": "Dzień Bezwzględny",
   "CALENDARIA.Editor.Cycle.BasedOn.MonthDay": "Dzień Miesiąca",
   "CALENDARIA.Editor.Cycle.BasedOn.Year": "Rok Kalendarzowy",
+  "CALENDARIA.Editor.DaysPerYear.Hint": "Łączna liczba dni w każdym roku, wykorzystywana do nawigacji i obliczeń dat.",
+  "CALENDARIA.Editor.DaysPerYear.Label": "Dni w roku",
   "CALENDARIA.Editor.Default.CanonicalHourName": "Godzina {num}",
   "CALENDARIA.Editor.Default.CycleName": "Cykl {num}",
   "CALENDARIA.Editor.Default.CycleStage": "Etap {num}",
