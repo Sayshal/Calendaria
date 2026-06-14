@@ -244,6 +244,17 @@ function buildPresetOptions(weather) {
   }
   if (useTopDown) options.topDown = true;
   if (game.settings.get(MODULE.ID, SETTINGS.FXMASTER_BELOW_TOKENS)) options.belowTokens = true;
+  if (game.settings.get(MODULE.ID, SETTINGS.FXMASTER_BELOW_TILES)) options.belowTiles = true;
+  if (game.settings.get(MODULE.ID, SETTINGS.FXMASTER_BELOW_FOREGROUND)) options.belowForeground = true;
+  if (game.settings.get(MODULE.ID, SETTINGS.FXMASTER_DARKNESS_ACTIVATION_ENABLED)) {
+    const dMin = game.settings.get(MODULE.ID, SETTINGS.FXMASTER_DARKNESS_ACTIVATION_MIN) ?? 0;
+    const dMax = game.settings.get(MODULE.ID, SETTINGS.FXMASTER_DARKNESS_ACTIVATION_MAX) ?? 1;
+    options.darknessActivationEnabled = true;
+    options.darknessActivationMin = Math.min(dMin, dMax);
+    options.darknessActivationMax = Math.max(dMin, dMax);
+  }
+  const fxLevels = canvas?.scene?.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_LEVELS);
+  if (Array.isArray(fxLevels) && fxLevels.length) options.levels = fxLevels;
   if (weather.fxDensity) options.density = weather.fxDensity;
   const speedMult = game.settings.get(MODULE.ID, SETTINGS.FXMASTER_SPEED_MULTIPLIER) ?? 1;
   if (speedMult !== 1) {

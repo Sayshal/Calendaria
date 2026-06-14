@@ -842,6 +842,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.FXMASTER_TOP_DOWN]: { tab: 'weather', label: 'CALENDARIA.Settings.FXMaster.TopDown.Name' },
     [SETTINGS.FXMASTER_FORCE_DOWNWARD]: { tab: 'weather', label: 'CALENDARIA.Settings.FXMaster.ForceDownward.Name' },
     [SETTINGS.FXMASTER_BELOW_TOKENS]: { tab: 'weather', label: 'CALENDARIA.Settings.FXMaster.BelowTokens.Name' },
+    [SETTINGS.FXMASTER_BELOW_TILES]: { tab: 'weather', label: 'CALENDARIA.Settings.FXMaster.BelowTiles.Name' },
+    [SETTINGS.FXMASTER_BELOW_FOREGROUND]: { tab: 'weather', label: 'CALENDARIA.Settings.FXMaster.BelowForeground.Name' },
+    [SETTINGS.FXMASTER_DARKNESS_ACTIVATION_ENABLED]: { tab: 'weather', label: 'CALENDARIA.Settings.FXMaster.DarknessActivation.Name' },
     [SETTINGS.FXMASTER_SOUND_FX]: { tab: 'weather', label: 'CALENDARIA.Settings.FXMaster.soundFX.Name' },
     [SETTINGS.WEATHER_INERTIA]: { tab: 'weather', label: 'CALENDARIA.Settings.WeatherInertia.Name' },
     [SETTINGS.WEATHER_HISTORY_DAYS]: { tab: 'weather', label: 'CALENDARIA.Settings.WeatherHistoryDays.Name' },
@@ -1607,6 +1610,11 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.fxmasterTopDown = game.settings.get(MODULE.ID, SETTINGS.FXMASTER_TOP_DOWN);
     context.fxmasterForceDownward = game.settings.get(MODULE.ID, SETTINGS.FXMASTER_FORCE_DOWNWARD);
     context.fxmasterBelowTokens = game.settings.get(MODULE.ID, SETTINGS.FXMASTER_BELOW_TOKENS);
+    context.fxmasterBelowTiles = game.settings.get(MODULE.ID, SETTINGS.FXMASTER_BELOW_TILES);
+    context.fxmasterBelowForeground = game.settings.get(MODULE.ID, SETTINGS.FXMASTER_BELOW_FOREGROUND);
+    context.fxmasterDarknessActivationEnabled = game.settings.get(MODULE.ID, SETTINGS.FXMASTER_DARKNESS_ACTIVATION_ENABLED);
+    context.fxmasterDarknessActivationMin = game.settings.get(MODULE.ID, SETTINGS.FXMASTER_DARKNESS_ACTIVATION_MIN) ?? 0;
+    context.fxmasterDarknessActivationMax = game.settings.get(MODULE.ID, SETTINGS.FXMASTER_DARKNESS_ACTIVATION_MAX) ?? 1;
     context.fxmasterSoundFx = game.settings.get(MODULE.ID, SETTINGS.FXMASTER_SOUND_FX);
     context.fxmasterSpeedMultiplier = game.settings.get(MODULE.ID, SETTINGS.FXMASTER_SPEED_MULTIPLIER) ?? 1.0;
     context.weatherSoundFx = game.settings.get(MODULE.ID, SETTINGS.WEATHER_SOUND_FX);
@@ -1994,6 +2002,19 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('fxmasterTopDown' in data) await game.settings.set(MODULE.ID, SETTINGS.FXMASTER_TOP_DOWN, !!data.fxmasterTopDown);
     if ('fxmasterForceDownward' in data) await game.settings.set(MODULE.ID, SETTINGS.FXMASTER_FORCE_DOWNWARD, !!data.fxmasterForceDownward);
     if ('fxmasterBelowTokens' in data) await game.settings.set(MODULE.ID, SETTINGS.FXMASTER_BELOW_TOKENS, !!data.fxmasterBelowTokens);
+    if ('fxmasterBelowTiles' in data) await game.settings.set(MODULE.ID, SETTINGS.FXMASTER_BELOW_TILES, !!data.fxmasterBelowTiles);
+    if ('fxmasterBelowForeground' in data) await game.settings.set(MODULE.ID, SETTINGS.FXMASTER_BELOW_FOREGROUND, !!data.fxmasterBelowForeground);
+    if ('fxmasterDarknessActivationEnabled' in data) {
+      const prev = game.settings.get(MODULE.ID, SETTINGS.FXMASTER_DARKNESS_ACTIVATION_ENABLED);
+      const next = !!data.fxmasterDarknessActivationEnabled;
+      await game.settings.set(MODULE.ID, SETTINGS.FXMASTER_DARKNESS_ACTIVATION_ENABLED, next);
+      if (prev !== next) {
+        const settingsPanel = foundry.applications.instances.get('calendaria-settings-panel');
+        if (settingsPanel?.rendered) settingsPanel.render({ parts: ['weather'] });
+      }
+    }
+    if ('fxmasterDarknessActivationMin' in data) await game.settings.set(MODULE.ID, SETTINGS.FXMASTER_DARKNESS_ACTIVATION_MIN, Number(data.fxmasterDarknessActivationMin));
+    if ('fxmasterDarknessActivationMax' in data) await game.settings.set(MODULE.ID, SETTINGS.FXMASTER_DARKNESS_ACTIVATION_MAX, Number(data.fxmasterDarknessActivationMax));
     if ('fxmasterSoundFx' in data) await game.settings.set(MODULE.ID, SETTINGS.FXMASTER_SOUND_FX, !!data.fxmasterSoundFx);
     if ('fxmasterSpeedMultiplier' in data) await game.settings.set(MODULE.ID, SETTINGS.FXMASTER_SPEED_MULTIPLIER, Number(data.fxmasterSpeedMultiplier));
     if ('weatherSoundFx' in data) await game.settings.set(MODULE.ID, SETTINGS.WEATHER_SOUND_FX, !!data.weatherSoundFx);
@@ -3124,6 +3145,11 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         speedInput.addEventListener('input', (e) => {
           speedValue.textContent = `${e.target.value}x`;
         });
+      }
+      for (const name of ['fxmasterDarknessActivationMin', 'fxmasterDarknessActivationMax']) {
+        const input = htmlElement.querySelector(`input[name="${name}"]`);
+        const value = input?.closest('.form-group')?.querySelector('.range-value');
+        if (input && value) input.addEventListener('input', (e) => (value.textContent = e.target.value));
       }
     }
     if (partId === 'cinematics') {

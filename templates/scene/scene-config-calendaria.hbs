@@ -104,6 +104,17 @@
       <input type="checkbox" name="flags.{{moduleId}}.weatherSoundDisabled" {{#if weatherSoundDisabled}}checked{{/if}}>
       <p class="hint">{{localize "CALENDARIA.Scene.WeatherSoundDisabled.Hint"}}</p>
     </div>
+    {{#if sceneLevels.length}}
+      <div class="form-group slim">
+        <label>{{localize "CALENDARIA.Scene.WeatherFxLevels.Name"}}</label>
+        <select name="flags.{{moduleId}}.weatherFxLevels" multiple>
+          {{#each sceneLevels}}
+            <option value="{{this.id}}" {{#if this.selected}}selected{{/if}}>{{this.name}}</option>
+          {{/each}}
+        </select>
+        <p class="hint">{{localize "CALENDARIA.Scene.WeatherFxLevels.Hint"}}</p>
+      </div>
+    {{/if}}
   </fieldset>
 
   <fieldset>

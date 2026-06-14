@@ -108,7 +108,12 @@ export const SETTINGS = {
   FORCED_THEME_COLORS: 'forcedThemeColors',
   FORECAST_ACCURACY: 'forecastAccuracy',
   FORECAST_DAYS: 'forecastDays',
+  FXMASTER_BELOW_FOREGROUND: 'fxmasterBelowForeground',
+  FXMASTER_BELOW_TILES: 'fxmasterBelowTiles',
   FXMASTER_BELOW_TOKENS: 'fxmasterBelowTokens',
+  FXMASTER_DARKNESS_ACTIVATION_ENABLED: 'fxmasterDarknessActivationEnabled',
+  FXMASTER_DARKNESS_ACTIVATION_MAX: 'fxmasterDarknessActivationMax',
+  FXMASTER_DARKNESS_ACTIVATION_MIN: 'fxmasterDarknessActivationMin',
   FXMASTER_ENABLED: 'fxmasterEnabled',
   FXMASTER_FORCE_DOWNWARD: 'fxmasterForceDownward',
   FXMASTER_SOUND_FX: 'fxMasterSoundFx',
@@ -236,6 +241,7 @@ export const SCENE_FLAGS = {
   DARKNESS_WEATHER_SYNC: 'darknessWeatherSync',
   FXMASTER_TOP_DOWN_OVERRIDE: 'fxmasterTopDownOverride',
   HUD_HIDE_FOR_PLAYERS: 'hudHideForPlayers',
+  WEATHER_FX_LEVELS: 'weatherFxLevels',
   WEATHER_FX_OVERRIDE: 'weatherFxOverride',
   WEATHER_SOUND_DISABLED: 'weatherSoundDisabled'
 };

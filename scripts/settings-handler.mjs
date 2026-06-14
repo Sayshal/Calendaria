@@ -1359,6 +1359,41 @@ export default class CalendariaSettings {
         config: false,
         type: new BooleanField({ initial: false })
       },
+      [SETTINGS.FXMASTER_BELOW_TILES]: {
+        name: 'CALENDARIA.Settings.FXMaster.BelowTiles.Name',
+        hint: 'CALENDARIA.Settings.FXMaster.BelowTiles.Hint',
+        scope: 'world',
+        config: false,
+        type: new BooleanField({ initial: false })
+      },
+      [SETTINGS.FXMASTER_BELOW_FOREGROUND]: {
+        name: 'CALENDARIA.Settings.FXMaster.BelowForeground.Name',
+        hint: 'CALENDARIA.Settings.FXMaster.BelowForeground.Hint',
+        scope: 'world',
+        config: false,
+        type: new BooleanField({ initial: false })
+      },
+      [SETTINGS.FXMASTER_DARKNESS_ACTIVATION_ENABLED]: {
+        name: 'CALENDARIA.Settings.FXMaster.DarknessActivation.Name',
+        hint: 'CALENDARIA.Settings.FXMaster.DarknessActivation.Hint',
+        scope: 'world',
+        config: false,
+        type: new BooleanField({ initial: false })
+      },
+      [SETTINGS.FXMASTER_DARKNESS_ACTIVATION_MIN]: {
+        name: 'CALENDARIA.Settings.FXMaster.DarknessActivationMin.Name',
+        hint: 'CALENDARIA.Settings.FXMaster.DarknessActivationMin.Hint',
+        scope: 'world',
+        config: false,
+        type: new NumberField({ initial: 0, min: 0, max: 1, step: 0.05 })
+      },
+      [SETTINGS.FXMASTER_DARKNESS_ACTIVATION_MAX]: {
+        name: 'CALENDARIA.Settings.FXMaster.DarknessActivationMax.Name',
+        hint: 'CALENDARIA.Settings.FXMaster.DarknessActivationMax.Hint',
+        scope: 'world',
+        config: false,
+        type: new NumberField({ initial: 1, min: 0, max: 1, step: 0.05 })
+      },
       [SETTINGS.FXMASTER_SOUND_FX]: {
         name: 'CALENDARIA.Settings.FXMaster.soundFX.Name',
         hint: 'CALENDARIA.Settings.FXMaster.soundFX.Hint',
