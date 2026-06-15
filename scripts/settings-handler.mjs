@@ -3,7 +3,7 @@ import { MODULE, SETTINGS } from './constants.mjs';
 import { syncWeatherToScene } from './integrations/fxmaster.mjs';
 import { invalidatePresetCache } from './notes/_module.mjs';
 import { refreshEnvironmentLighting } from './time/darkness.mjs';
-import { hideDebugZones, initializeTheme, localize, log, showDebugZones } from './utils/_module.mjs';
+import { hideDebugZones, initializeTheme, log, showDebugZones } from './utils/_module.mjs';
 import { invalidateCache as invalidateFogCache } from './utils/fog-of-war.mjs';
 import { FRAMEWORK_INITIAL_DISPLAY_FORMATS } from './utils/formatting/format-utils.mjs';
 
@@ -1359,6 +1359,41 @@ export default class CalendariaSettings {
         config: false,
         type: new BooleanField({ initial: false })
       },
+      [SETTINGS.FXMASTER_BELOW_TILES]: {
+        name: 'CALENDARIA.Settings.FXMaster.BelowTiles.Name',
+        hint: 'CALENDARIA.Settings.FXMaster.BelowTiles.Hint',
+        scope: 'world',
+        config: false,
+        type: new BooleanField({ initial: false })
+      },
+      [SETTINGS.FXMASTER_BELOW_FOREGROUND]: {
+        name: 'CALENDARIA.Settings.FXMaster.BelowForeground.Name',
+        hint: 'CALENDARIA.Settings.FXMaster.BelowForeground.Hint',
+        scope: 'world',
+        config: false,
+        type: new BooleanField({ initial: false })
+      },
+      [SETTINGS.FXMASTER_DARKNESS_ACTIVATION_ENABLED]: {
+        name: 'CALENDARIA.Settings.FXMaster.DarknessActivation.Name',
+        hint: 'CALENDARIA.Settings.FXMaster.DarknessActivation.Hint',
+        scope: 'world',
+        config: false,
+        type: new BooleanField({ initial: false })
+      },
+      [SETTINGS.FXMASTER_DARKNESS_ACTIVATION_MIN]: {
+        name: 'CALENDARIA.Settings.FXMaster.DarknessActivationMin.Name',
+        hint: 'CALENDARIA.Settings.FXMaster.DarknessActivationMin.Hint',
+        scope: 'world',
+        config: false,
+        type: new NumberField({ initial: 0, min: 0, max: 1, step: 0.05 })
+      },
+      [SETTINGS.FXMASTER_DARKNESS_ACTIVATION_MAX]: {
+        name: 'CALENDARIA.Settings.FXMaster.DarknessActivationMax.Name',
+        hint: 'CALENDARIA.Settings.FXMaster.DarknessActivationMax.Hint',
+        scope: 'world',
+        config: false,
+        type: new NumberField({ initial: 1, min: 0, max: 1, step: 0.05 })
+      },
       [SETTINGS.FXMASTER_SOUND_FX]: {
         name: 'CALENDARIA.Settings.FXMaster.soundFX.Name',
         hint: 'CALENDARIA.Settings.FXMaster.soundFX.Hint',
@@ -1560,7 +1595,7 @@ export default class CalendariaSettings {
               acc[user.id] = user.name;
               return acc;
             },
-            { '': localize('CALENDARIA.Settings.PrimaryGM.Auto') }
+            { '': _loc('CALENDARIA.Settings.PrimaryGM.Auto') }
           ),
         initial: ''
       })

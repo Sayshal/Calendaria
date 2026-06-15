@@ -1,6 +1,5 @@
 import { resolveRandomizedPhase } from '../../data/_module.mjs';
 import WeatherManager from '../../weather/weather-manager.mjs';
-import { format, localize } from '../localization.mjs';
 import { log } from '../logger.mjs';
 
 /**
@@ -22,12 +21,7 @@ function resolveArray(calendar, getter, path) {
  * @returns {string} - Number with ordinal suffix (1st, 2nd, 3rd, etc.)
  */
 export function ordinal(n) {
-  const s = [
-    game.i18n.localize('CALENDARIA.Format.Ordinal.th'),
-    game.i18n.localize('CALENDARIA.Format.Ordinal.st'),
-    game.i18n.localize('CALENDARIA.Format.Ordinal.nd'),
-    game.i18n.localize('CALENDARIA.Format.Ordinal.rd')
-  ];
+  const s = [_loc('CALENDARIA.Format.Ordinal.th'), _loc('CALENDARIA.Format.Ordinal.st'), _loc('CALENDARIA.Format.Ordinal.nd'), _loc('CALENDARIA.Format.Ordinal.rd')];
   const v = n % 100;
   return n + (s[(v - 20) % 10] || s[v] || s[0]);
 }
@@ -68,9 +62,9 @@ export function dateFormattingParts(calendar, components) {
   const festivalDay = calendar?.findFestivalDay?.({ ...components, year: internalYear, dayOfMonth });
   const isIntercalaryMonth = monthData?.type === 'intercalary';
   const isIntercalaryFestival = festivalDay?.countsForWeekday === false || isIntercalaryMonth;
-  const intercalaryName = isIntercalaryMonth && monthData ? localize(monthData.name) : festivalDay ? localize(festivalDay.name) : '';
-  const monthName = isIntercalaryFestival ? intercalaryName : isMonthless ? '' : monthData ? localize(monthData.name) : format('CALENDARIA.Common.MonthFallback', { num: month + 1 });
-  const monthAbbr = isIntercalaryFestival ? intercalaryName.slice(0, 3) : isMonthless ? '' : monthData?.abbreviation ? localize(monthData.abbreviation) : monthName.slice(0, 3);
+  const intercalaryName = isIntercalaryMonth && monthData ? _loc(monthData.name) : festivalDay ? _loc(festivalDay.name) : '';
+  const monthName = isIntercalaryFestival ? intercalaryName : isMonthless ? '' : monthData ? _loc(monthData.name) : _loc('CALENDARIA.Common.MonthFallback', { num: month + 1 });
+  const monthAbbr = isIntercalaryFestival ? intercalaryName.slice(0, 3) : isMonthless ? '' : monthData?.abbreviation ? _loc(monthData.abbreviation) : monthName.slice(0, 3);
   const weekdays = resolveArray(calendar, 'weekdaysArray', 'days.values');
   let daysInMonthsBefore = 0;
   if (!isMonthless && calendar?.getDaysInMonth) for (let m = 0; m < month; m++) daysInMonthsBefore += calendar.getDaysInMonth(m, internalYear);
@@ -93,8 +87,8 @@ export function dateFormattingParts(calendar, components) {
   const countingDays = totalDays - nonCountingTotal;
   const weekday = weekdays.length > 0 ? (((countingDays + firstWeekday) % weekdays.length) + weekdays.length) % weekdays.length : 0;
   const weekdayData = weekdays[weekday];
-  const weekdayName = weekdayData?.name ? localize(weekdayData.name) : '';
-  const weekdayAbbr = weekdayData?.abbreviation ? localize(weekdayData.abbreviation) : weekdayName.slice(0, 3);
+  const weekdayName = weekdayData?.name ? _loc(weekdayData.name) : '';
+  const weekdayAbbr = weekdayData?.abbreviation ? _loc(weekdayData.abbreviation) : weekdayName.slice(0, 3);
   const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
   const midday = Math.floor(hoursPerDay / 2);
   const hour12 = hour === 0 ? midday : hour > midday ? hour - midday : hour;
@@ -107,8 +101,8 @@ export function dateFormattingParts(calendar, components) {
   if (eras.length > 0) {
     for (const era of eras) {
       if (displayYear >= era.startYear && (era.endYear == null || displayYear <= era.endYear)) {
-        const name = localize(era.name);
-        const abbr = era.abbreviation ? localize(era.abbreviation) : name.slice(0, 2);
+        const name = _loc(era.name);
+        const abbr = era.abbreviation ? _loc(era.abbreviation) : name.slice(0, 2);
         matchingEras.push({ name, abbr, yearInEra: displayYear - era.startYear + 1 });
       }
     }
@@ -119,7 +113,7 @@ export function dateFormattingParts(calendar, components) {
   const eraYear = primaryEra.yearInEra || '';
   const yearNames = calendar?.years?.names || [];
   const yearNameEntry = yearNames.find((e) => e.year === displayYear);
-  const yearName = yearNameEntry ? localize(yearNameEntry.name) : '';
+  const yearName = yearNameEntry ? _loc(yearNameEntry.name) : '';
   let seasonName = '';
   let seasonAbbr = '';
   let seasonIndex = -1;
@@ -127,8 +121,8 @@ export function dateFormattingParts(calendar, components) {
   const aliasZone = WeatherManager?.getActiveZone?.(null, globalThis.game?.scenes?.active);
   const currentSeason = WeatherManager?.applySeasonAlias?.(rawSeason, aliasZone) ?? rawSeason;
   if (currentSeason) {
-    seasonName = localize(currentSeason.name);
-    seasonAbbr = currentSeason.abbreviation ? localize(currentSeason.abbreviation) : seasonName.slice(0, 3);
+    seasonName = _loc(currentSeason.name);
+    seasonAbbr = currentSeason.abbreviation ? _loc(currentSeason.abbreviation) : seasonName.slice(0, 3);
     const allSeasons = resolveArray(calendar, 'seasonsArray', 'seasons.values');
     seasonIndex = allSeasons.indexOf(rawSeason);
   }
@@ -150,7 +144,7 @@ export function dateFormattingParts(calendar, components) {
         const maxWeekNumber = weekNames.reduce((max, w) => Math.max(max, Number(w.weekNumber) || 0), 0);
         if (maxWeekNumber > 0) entry = weekNames.find((w) => Number(w.weekNumber) === ((weekNumber - 1) % maxWeekNumber) + 1);
       }
-      if (entry) currentWeek = { weekName: localize(entry.name), weekAbbr: entry.abbreviation ? localize(entry.abbreviation) : localize(entry.name).slice(0, 3) };
+      if (entry) currentWeek = { weekName: _loc(entry.name), weekAbbr: entry.abbreviation ? _loc(entry.abbreviation) : _loc(entry.name).slice(0, 3) };
     }
   }
   if (currentWeek) {
@@ -161,7 +155,7 @@ export function dateFormattingParts(calendar, components) {
   let climateZoneAbbr = '';
   const activeZone = calendar?.getActiveClimateZone?.();
   if (activeZone) {
-    climateZoneName = activeZone.name ? localize(activeZone.name) : activeZone.id || '';
+    climateZoneName = activeZone.name ? _loc(activeZone.name) : activeZone.id || '';
     climateZoneAbbr = climateZoneName.slice(0, 3);
   }
   return {
@@ -266,7 +260,7 @@ export function formatFull(calendar, components) {
  */
 export function formatOrdinal(calendar, components) {
   const parts = dateFormattingParts(calendar, components);
-  let result = game.i18n.format('CALENDARIA.Format.OrdinalDate', { day: parts.Do, month: parts.MMMM });
+  let result = _loc('CALENDARIA.Format.OrdinalDate', { day: parts.Do, month: parts.MMMM });
   if (parts.era) result += `, ${parts.era}`;
   return result;
 }
@@ -355,7 +349,7 @@ export function formatApproximateTime(calendar, components, zone = null) {
   else if (dayProgress > 0.85 && nightProgress < 0) formatter = 'Evening';
   else formatter = 'Night';
   const COMMON_OVERRIDES = { Midnight: 'CALENDARIA.Common.Midnight', Night: 'CALENDARIA.Common.Night' };
-  return localize(COMMON_OVERRIDES[formatter] ?? `CALENDARIA.Format.ApproxTime.${formatter}`);
+  return _loc(COMMON_OVERRIDES[formatter] ?? `CALENDARIA.Format.ApproxTime.${formatter}`);
 }
 
 /**
@@ -370,7 +364,7 @@ export function formatApproximateDate(calendar, components) {
   if (!rawSeason) return parts.MMMM;
   const aliasZone = WeatherManager?.getActiveZone?.(null, globalThis.game?.scenes?.active);
   const season = WeatherManager?.applySeasonAlias?.(rawSeason, aliasZone) ?? rawSeason;
-  const seasonName = localize(season.name);
+  const seasonName = _loc(season.name);
   const monthsValues = resolveArray(calendar, 'monthsArray', 'months.values');
   let dayOfYear;
   if (calendar?._calculateDayOfYear) dayOfYear = calendar._calculateDayOfYear(components);
@@ -409,7 +403,7 @@ export function formatApproximateDate(calendar, components) {
   if (seasonPercent <= 0.33) formatter = 'Early';
   else if (seasonPercent >= 0.66) formatter = 'Late';
   else formatter = 'Mid';
-  return format(`CALENDARIA.Format.ApproxDate.${formatter}`, { season: seasonName });
+  return _loc(`CALENDARIA.Format.ApproxDate.${formatter}`, { season: seasonName });
 }
 
 /**
@@ -595,7 +589,7 @@ function resolveMoonIndex(moons, moonSelector) {
   if (/^\d+$/.test(moonSelector)) return parseInt(moonSelector, 10);
   const selectorLower = String(moonSelector).toLowerCase();
   const foundIndex = moons.findIndex((m) => {
-    const moonName = localize(m.name).toLowerCase();
+    const moonName = _loc(m.name).toLowerCase();
     const rawName = (m.name || '').toLowerCase();
     return moonName === selectorLower || rawName === selectorLower;
   });
@@ -645,7 +639,7 @@ function getMoonPhaseName(calendar, components, moonSelector) {
   const cyclePosition = getFallbackPhasePosition(moon, components);
   const phaseIndex = Math.floor(cyclePosition * phasesArr.length);
   const phase = phasesArr[phaseIndex];
-  return phase ? localize(phase.name) : '';
+  return phase ? _loc(phase.name) : '';
 }
 
 /**
@@ -681,8 +675,8 @@ function getMoonPhaseIcon(calendar, components, moonSelector) {
     }
   }
   if (!phase?.icon) return '';
-  const phaseName = localize(phase.name);
-  const moonName = localize(moon.name);
+  const phaseName = _loc(phase.name);
+  const moonName = _loc(moon.name);
   const moonColor = moon.color || '';
   return `${'__MOONICON:'}${phase.icon}|${phaseName}|${moonName}: ${phaseName}|${moonColor}${'__'}`;
 }
@@ -729,7 +723,7 @@ function getCanonicalHour(calendar, components) {
   const { hour = 0 } = components;
   const hours = resolveArray(calendar, 'canonicalHoursArray', 'canonicalHours');
   if (!hours.length) return '';
-  for (const ch of hours) if (ch.startHour <= ch.endHour ? hour >= ch.startHour && hour < ch.endHour : hour >= ch.startHour || hour < ch.endHour) return localize(ch.name);
+  for (const ch of hours) if (ch.startHour <= ch.endHour ? hour >= ch.startHour && hour < ch.endHour : hour >= ch.startHour || hour < ch.endHour) return _loc(ch.name);
   return '';
 }
 
@@ -747,7 +741,7 @@ function getCanonicalHourAbbr(calendar, components) {
     let matches = false;
     if (ch.startHour <= ch.endHour) matches = hour >= ch.startHour && hour < ch.endHour;
     else matches = hour >= ch.startHour || hour < ch.endHour;
-    if (matches) return ch.abbreviation ? localize(ch.abbreviation) : localize(ch.name).slice(0, 3);
+    if (matches) return ch.abbreviation ? _loc(ch.abbreviation) : _loc(ch.name).slice(0, 3);
   }
   return '';
 }
@@ -762,7 +756,7 @@ function getCanonicalHourAbbr(calendar, components) {
 function getCycleName(calendar, components, cycleIndex = 0) {
   if (calendar?.getCycleEntry) {
     const entry = calendar.getCycleEntry(cycleIndex, components);
-    return entry?.name ? localize(entry.name) : '';
+    return entry?.name ? _loc(entry.name) : '';
   }
   const cycles = resolveArray(calendar, 'cyclesArray', 'cycles');
   if (!cycles.length || !cycles[cycleIndex]) return '';
@@ -774,7 +768,7 @@ function getCycleName(calendar, components, cycleIndex = 0) {
   const adjustedValue = displayYear + (cycle.offset || 0);
   let entryIndex = adjustedValue % stages.length;
   if (entryIndex < 0) entryIndex += stages.length;
-  return localize(stages[entryIndex]?.name ?? '');
+  return _loc(stages[entryIndex]?.name ?? '');
 }
 
 /**
@@ -959,7 +953,8 @@ export const LOCATION_DEFAULTS = {
   stopwatchRealtime: 'stopwatchRealtimeFull',
   stopwatchGametime: 'stopwatchGametimeFull',
   noteViewerDate: 'dateLong',
-  cinematicDate: 'dateLong'
+  cinematicDate: 'dateLong',
+  cinematicTime: 'time24'
 };
 
 /** Framework-initial DISPLAY_FORMATS object. */
@@ -974,7 +969,8 @@ export const FRAMEWORK_INITIAL_DISPLAY_FORMATS = {
   stopwatchRealtime: { gm: 'stopwatchRealtimeFull', player: 'stopwatchRealtimeFull' },
   stopwatchGametime: { gm: 'stopwatchGametimeFull', player: 'stopwatchGametimeFull' },
   noteViewerDate: { gm: 'dateLong', player: 'dateLong' },
-  cinematicDate: { gm: 'dateLong', player: 'dateLong' }
+  cinematicDate: { gm: 'dateLong', player: 'dateLong' },
+  cinematicTime: { gm: 'time24', player: 'time24' }
 };
 
 /**
@@ -1081,9 +1077,9 @@ export function timeSince(targetDate, currentDate, simple = false) {
   const targetDays = targetDate.year * daysPerYear + targetDate.month * daysPerMonth + targetDate.dayOfMonth;
   const currentDays = currentDate.year * daysPerYear + currentDate.month * daysPerMonth + currentDate.dayOfMonth;
   const diff = targetDays - currentDays;
-  if (diff === 0) return simple ? '0' : localize('CALENDARIA.Format.Today');
-  if (diff === 1) return simple ? '1' : localize('CALENDARIA.Format.Tomorrow');
-  if (diff === -1) return simple ? '1' : localize('CALENDARIA.Format.Yesterday');
+  if (diff === 0) return simple ? '0' : _loc('CALENDARIA.Format.Today');
+  if (diff === 1) return simple ? '1' : _loc('CALENDARIA.Format.Tomorrow');
+  if (diff === -1) return simple ? '1' : _loc('CALENDARIA.Format.Yesterday');
   const absDiff = Math.abs(diff);
   const isFuture = diff > 0;
   const years = Math.floor(absDiff / daysPerYear);
@@ -1092,21 +1088,21 @@ export function timeSince(targetDate, currentDate, simple = false) {
   const days = absDiff;
   let unit, count;
   if (years >= 1) {
-    unit = years === 1 ? localize('CALENDARIA.Common.UnitYear') : localize('CALENDARIA.Common.UnitYears');
+    unit = years === 1 ? _loc('CALENDARIA.Common.UnitYear') : _loc('CALENDARIA.Common.UnitYears');
     count = years;
   } else if (months >= 1) {
-    unit = months === 1 ? localize('CALENDARIA.Common.UnitMonth') : localize('CALENDARIA.Common.UnitMonths');
+    unit = months === 1 ? _loc('CALENDARIA.Common.UnitMonth') : _loc('CALENDARIA.Common.UnitMonths');
     count = months;
   } else if (weeks >= 1) {
-    unit = weeks === 1 ? localize('CALENDARIA.Common.UnitWeek') : localize('CALENDARIA.Common.UnitWeeks');
+    unit = weeks === 1 ? _loc('CALENDARIA.Common.UnitWeek') : _loc('CALENDARIA.Common.UnitWeeks');
     count = weeks;
   } else {
-    unit = days === 1 ? localize('CALENDARIA.Common.UnitDay') : localize('CALENDARIA.Common.UnitDays');
+    unit = days === 1 ? _loc('CALENDARIA.Common.UnitDay') : _loc('CALENDARIA.Common.UnitDays');
     count = days;
   }
   if (simple) return String(count);
-  if (isFuture) return format('CALENDARIA.Format.InFuture', { count, unit });
-  else return format('CALENDARIA.Format.InPast', { count, unit });
+  if (isFuture) return _loc('CALENDARIA.Format.InFuture', { count, unit });
+  else return _loc('CALENDARIA.Format.InPast', { count, unit });
 }
 
 /**

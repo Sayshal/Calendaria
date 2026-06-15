@@ -1,6 +1,6 @@
 import { CalendarManager } from '../calendar/_module.mjs';
 import { CONDITION_FIELDS, CONDITION_OPERATORS } from '../constants.mjs';
-import { findSeasonIndexByType, getCalendarMoonPhaseIndex, getDayOfYear, getMidpoint, getSeasonDayOfYearBounds, localize, log, seededRandom } from '../utils/_module.mjs';
+import { findSeasonIndexByType, getCalendarMoonPhaseIndex, getDayOfYear, getMidpoint, getSeasonDayOfYearBounds, log, seededRandom } from '../utils/_module.mjs';
 import {
   EpochDataCache,
   NoteManager,
@@ -493,8 +493,8 @@ export function getOccurrencesInRange(noteData, rangeStart, rangeEnd, maxOccurre
  */
 export function getRecurrenceDescription(noteData) {
   const tree = noteData.conditionTree;
-  if (tree && (tree.children?.length || (tree.type === 'condition' && tree.field))) return localize('CALENDARIA.Recurrence.Conditional');
-  return localize('CALENDARIA.Recurrence.DoesNotRepeat');
+  if (tree && (tree.children?.length || (tree.type === 'condition' && tree.field))) return _loc('CALENDARIA.Recurrence.Conditional');
+  return _loc('CALENDARIA.Recurrence.DoesNotRepeat');
 }
 
 /**

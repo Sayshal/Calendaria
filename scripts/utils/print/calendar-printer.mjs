@@ -1,7 +1,6 @@
 import { CalendarManager } from '../../calendar/_module.mjs';
 import { topologicalSortNotes } from '../../notes/event-dependency-resolver.mjs';
 import { isFogEnabled, isRevealed } from '../fog-of-war.mjs';
-import { localize } from '../localization.mjs';
 import { getCalendarNotes, getFestivalNoteForDay, getVisibleNotes } from '../ui/calendar-view-utils.mjs';
 
 const PRINT_CSS = `
@@ -51,8 +50,8 @@ function buildMonthGrid(calendar, year, month, notes) {
   const isIntercalary = monthData.type === 'intercalary';
   const daysInWeek = calendar.daysInWeek;
   const weekdays = calendar.weekdaysArray.map((w) => {
-    const name = localize(w.name || '');
-    return w.abbreviation ? localize(w.abbreviation) : name.slice(0, 3);
+    const name = _loc(w.name || '');
+    return w.abbreviation ? _loc(w.abbreviation) : name.slice(0, 3);
   });
   const fogActive = isFogEnabled() && !game.user.isGM;
   const moons = calendar.moonsArray || [];
@@ -87,7 +86,7 @@ function buildMonthGrid(calendar, year, month, notes) {
   if (isIntercalary) {
     const cells = [];
     for (let d = 0; d < daysInMonth; d++) cells.push(buildCell(d));
-    return { name: localize(monthData.name), weekdays: [], rows: [cells], intercalary: true };
+    return { name: _loc(monthData.name), weekdays: [], rows: [cells], intercalary: true };
   }
   const startWeekday = calendar._computeDayOfWeek({ year: internalYear, month, dayOfMonth: 0 });
   const cells = [];
@@ -96,7 +95,7 @@ function buildMonthGrid(calendar, year, month, notes) {
   while (cells.length % daysInWeek !== 0) cells.push(null);
   const rows = [];
   for (let i = 0; i < cells.length; i += daysInWeek) rows.push(cells.slice(i, i + daysInWeek));
-  return { name: localize(monthData.name), weekdays, rows, intercalary: false };
+  return { name: _loc(monthData.name), weekdays, rows, intercalary: false };
 }
 
 /**

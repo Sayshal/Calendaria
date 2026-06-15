@@ -1,5 +1,4 @@
 import { CONDITION_FIELDS, CONDITION_GROUP_MODES, CONDITION_OPERATORS, MAX_NESTING_DEPTH } from '../constants.mjs';
-import { localize } from '../utils/localization.mjs';
 import { getFieldSchema, getGroupedFieldOptions, getOperatorOptions, getValue2Options, getValueOptions } from './_module.mjs';
 import { isGroup } from './condition-engine.mjs';
 
@@ -113,7 +112,7 @@ export function annotateForRender(entry, calendar, path = '', depth = 0) {
  * @returns {object} Annotated group
  */
 function annotateGroup(group, calendar, path, depth) {
-  const modeOptions = Object.values(CONDITION_GROUP_MODES).map((mode) => ({ value: mode, label: localize(`CALENDARIA.Condition.Group.Mode.${mode}`), selected: group.mode === mode }));
+  const modeOptions = Object.values(CONDITION_GROUP_MODES).map((mode) => ({ value: mode, label: _loc(`CALENDARIA.Condition.Group.Mode.${mode}`), selected: group.mode === mode }));
   let conditionCount = 0;
   const children = (group.children ?? []).map((child, i) => {
     const childPath = path ? `${path}.${i}` : `${i}`;
@@ -180,11 +179,11 @@ function annotateCondition(condition, calendar, path, depth) {
       dateDay = value.dayOfMonth ?? 0;
     }
     const months = calendar?.monthsArray ?? [];
-    monthOptions = months.map((m, i) => ({ value: i, label: localize(m.name), selected: i === dateMonth }));
+    monthOptions = months.map((m, i) => ({ value: i, label: _loc(m.name), selected: i === dateMonth }));
     maxDay = months[dateMonth]?.days ?? 30;
   }
   let specialLabel = '';
-  if (isSpecialField) specialLabel = schema ? localize(schema.label) : field;
+  if (isSpecialField) specialLabel = schema ? _loc(schema.label) : field;
   return {
     entryType: 'condition',
     path,
@@ -207,8 +206,8 @@ function annotateCondition(condition, calendar, path, depth) {
     needsValue2,
     hasValue2Select: needsValue2 && !!value2Options?.length,
     hasValue2Number: needsValue2 && schema?.value2InputType === 'number',
-    value2Label: schema?.value2Label ? localize(schema.value2Label) : '',
-    value2Hint: schema?.value2Hint ? localize(schema.value2Hint) : '',
+    value2Label: schema?.value2Label ? _loc(schema.value2Label) : '',
+    value2Hint: schema?.value2Hint ? _loc(schema.value2Hint) : '',
     valueOptions,
     value2Options,
     boolTrue: value === true,
@@ -336,18 +335,18 @@ function resolveValueName(field, value, calendar, value2) {
   const weekdays = getCalendarArray(calendar, 'weekdaysArray', 'days.values');
   const seasons = getCalendarArray(calendar, 'seasonsArray', 'seasons.values');
   const eras = getCalendarArray(calendar, 'erasArray', 'eras');
-  if (field === 'month' && months[value - 1]) return localize(months[value - 1].name);
-  if (field === 'weekday' && weekdays[value - 1]) return localize(weekdays[value - 1].name);
-  if (field === 'season' && seasons[value - 1]) return localize(seasons[value - 1].name);
-  if (field === 'era' && eras[value - 1]) return localize(eras[value - 1].name);
+  if (field === 'month' && months[value - 1]) return _loc(months[value - 1].name);
+  if (field === 'weekday' && weekdays[value - 1]) return _loc(weekdays[value - 1].name);
+  if (field === 'season' && seasons[value - 1]) return _loc(seasons[value - 1].name);
+  if (field === 'era' && eras[value - 1]) return _loc(eras[value - 1].name);
   if (field === 'cycle') {
     const cycles = calendar?.cycles ?? {};
     const cycle = (typeof value2 === 'string' && cycles[value2]) || Object.values(cycles)[0] || null;
     const stage = cycle?.stages?.[value];
-    return stage?.name ? localize(stage.name) : String(value ?? '');
+    return stage?.name ? _loc(stage.name) : String(value ?? '');
   }
   if (field === 'date' && typeof value === 'object' && value !== null) {
-    const monthName = months[value.month]?.name ? localize(months[value.month].name) : value.month + 1;
+    const monthName = months[value.month]?.name ? _loc(months[value.month].name) : value.month + 1;
     return `${monthName} ${(value.dayOfMonth ?? 0) + 1}, ${value.year}`;
   }
   return String(value ?? '');
@@ -362,7 +361,7 @@ function resolveValueName(field, value, calendar, value2) {
 function describeOneCondition(cond, calendar) {
   const { field, op, value, value2, offset } = cond;
   const schema = getFieldSchema(field);
-  const fieldLabel = schema ? localize(schema.label) : field;
+  const fieldLabel = schema ? _loc(schema.label) : field;
   const valueStr = resolveValueName(field, value, calendar, value2);
   const booleanFields = ['isLongestDay', 'isShortestDay', 'isSpringEquinox', 'isAutumnEquinox', 'intercalary', 'isLeapYear'];
   if (booleanFields.includes(field)) return value ? fieldLabel : `not ${fieldLabel}`;

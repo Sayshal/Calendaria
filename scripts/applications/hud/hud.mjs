@@ -31,7 +31,6 @@ import {
   hideSnapIndicator,
   isBottomAnchored,
   isCombatBlocked,
-  localize,
   previewSnippet,
   registerForZoneUpdates,
   renderCycleIndicator,
@@ -226,13 +225,13 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const seasonDisplayMode = isCompact ? 'icon' : game.settings.get(MODULE.ID, SETTINGS.HUD_SEASON_DISPLAY_MODE);
     context.seasonDisplayMode = seasonDisplayMode;
     const season = WeatherManager.applySeasonAlias(calendar?.getCurrentSeason?.(), WeatherManager.getActiveZone(null, game.scenes?.active));
-    context.currentSeason = showSeasonBlock && season ? { name: localize(season.name), color: season.color || '#888', icon: season.icon || 'fas fa-sun' } : null;
+    context.currentSeason = showSeasonBlock && season ? { name: _loc(season.name), color: season.color || '#888', icon: season.icon || 'fas fa-sun' } : null;
     context.showSeasonIcon = seasonDisplayMode === 'full' || seasonDisplayMode === 'icon';
     context.showSeasonLabel = seasonDisplayMode === 'full' || seasonDisplayMode === 'text';
     const eraDisplayMode = isCompact ? 'icon' : game.settings.get(MODULE.ID, SETTINGS.HUD_ERA_DISPLAY_MODE);
     context.eraDisplayMode = eraDisplayMode;
     const era = calendar?.getCurrentEra?.();
-    context.currentEra = showEraBlock && era ? { name: localize(era.name), abbreviation: localize(era.abbreviation || era.name), icon: 'fas fa-hourglass-half' } : null;
+    context.currentEra = showEraBlock && era ? { name: _loc(era.name), abbreviation: _loc(era.abbreviation || era.name), icon: 'fas fa-hourglass-half' } : null;
     context.showEraIcon = eraDisplayMode === 'full' || eraDisplayMode === 'icon';
     context.showEraLabel = eraDisplayMode === 'full' || eraDisplayMode === 'text';
     context.showEraAbbr = eraDisplayMode === 'abbr';
@@ -571,9 +570,9 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   #getContextMenuItems() {
     const items = [];
     items.push({
-      name: 'CALENDARIA.HUD.ContextMenu.Settings',
+      label: 'CALENDARIA.HUD.ContextMenu.Settings',
       icon: '<i class="fas fa-gear"></i>',
-      callback: () => {
+      onClick: () => {
         const panel = new SettingsPanel();
         panel.render(true).then(() => {
           requestAnimationFrame(() => panel.changeTab('hud', 'primary'));
@@ -583,32 +582,32 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     if (game.user.isGM) {
       const forceHUD = game.settings.get(MODULE.ID, SETTINGS.FORCE_HUD);
       items.push({
-        name: forceHUD ? 'CALENDARIA.Common.HideFromAll' : 'CALENDARIA.Common.ShowToAll',
+        label: forceHUD ? 'CALENDARIA.Common.HideFromAll' : 'CALENDARIA.Common.ShowToAll',
         icon: forceHUD ? '<i class="fas fa-eye-slash"></i>' : '<i class="fas fa-eye"></i>',
-        callback: async () => {
+        onClick: async () => {
           const newValue = !forceHUD;
-          if (newValue) warnShowToAll('viewHUD', game.i18n.localize('CALENDARIA.Permissions.ViewHUD'));
+          if (newValue) warnShowToAll('viewHUD', _loc('CALENDARIA.Permissions.ViewHUD'));
           await game.settings.set(MODULE.ID, SETTINGS.FORCE_HUD, newValue);
           CalendariaSocket.emit(SOCKET_TYPES.HUD_VISIBILITY, { visible: newValue });
         }
       });
     }
-    items.push({ name: 'CALENDARIA.Common.ResetPosition', icon: '<i class="fas fa-arrows-to-dot"></i>', callback: () => HUD.resetPosition() });
+    items.push({ label: 'CALENDARIA.Common.ResetPosition', icon: '<i class="fas fa-arrows-to-dot"></i>', onClick: () => HUD.resetPosition() });
     items.push({
-      name: this.#stickyPosition ? 'CALENDARIA.Common.UnlockPosition' : 'CALENDARIA.Common.LockPosition',
+      label: this.#stickyPosition ? 'CALENDARIA.Common.UnlockPosition' : 'CALENDARIA.Common.LockPosition',
       icon: this.#stickyPosition ? '<i class="fas fa-lock-open"></i>' : '<i class="fas fa-lock"></i>',
-      callback: () => this._toggleStickyPosition()
+      onClick: () => this._toggleStickyPosition()
     });
     items.push({
-      name: this.isCompact ? 'CALENDARIA.HUD.ContextMenu.FullsizeMode' : 'CALENDARIA.HUD.ContextMenu.CompactMode',
+      label: this.isCompact ? 'CALENDARIA.HUD.ContextMenu.FullsizeMode' : 'CALENDARIA.HUD.ContextMenu.CompactMode',
       icon: this.isCompact ? '<i class="fas fa-expand"></i>' : '<i class="fas fa-compress"></i>',
-      callback: () => {
+      onClick: () => {
         const newMode = this.isCompact ? 'fullsize' : 'compact';
         game.settings.set(MODULE.ID, SETTINGS.CALENDAR_HUD_MODE, newMode);
       }
     });
     items.push(buildOpenAppsMenuItem());
-    items.push({ name: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', callback: () => HUD.hide() });
+    items.push({ label: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', onClick: () => HUD.hide() });
     return items;
   }
 
@@ -987,7 +986,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const calendar = this.calendar;
     if (calendar) {
       const showAll = game.settings.get(MODULE.ID, SETTINGS.HUD_SHOW_ALL_MOONS);
-      const sortedMoons = [...(calendar.moonsArray ?? [])].sort((a, b) => localize(a.name).localeCompare(localize(b.name)));
+      const sortedMoons = [...(calendar.moonsArray ?? [])].sort((a, b) => _loc(a.name).localeCompare(_loc(b.name)));
       const moonList = showAll ? sortedMoons : sortedMoons.slice(0, 1);
       for (let mi = 0; mi < moonList.length; mi++) {
         const moon = moonList[mi];
@@ -1126,12 +1125,12 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       playBtn.classList.toggle('clock-locked', locked);
       playBtn.setAttribute('aria-pressed', String(running));
       const tooltip = TimeClock.disabled
-        ? localize('CALENDARIA.TimeClock.Disabled')
+        ? _loc('CALENDARIA.TimeClock.Disabled')
         : locked
-          ? localize('CALENDARIA.TimeClock.Locked')
+          ? _loc('CALENDARIA.TimeClock.Locked')
           : running
-            ? localize('CALENDARIA.HUD.PauseTime')
-            : localize('CALENDARIA.TimeKeeper.Start');
+            ? _loc('CALENDARIA.HUD.PauseTime')
+            : _loc('CALENDARIA.TimeKeeper.Start');
       playBtn.dataset.tooltip = tooltip;
       const icon = playBtn.querySelector('i');
       if (icon) {
@@ -1191,15 +1190,15 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #formatIncrementLabel(key) {
     const labels = {
-      second: localize('CALENDARIA.Common.Second'),
-      round: localize('CALENDARIA.Common.Round'),
-      minute: localize('CALENDARIA.Common.Minute'),
-      hour: localize('CALENDARIA.Common.Hour'),
-      day: localize('CALENDARIA.Common.Day'),
-      week: localize('CALENDARIA.Common.Week'),
-      month: localize('CALENDARIA.Common.Month'),
-      season: localize('CALENDARIA.Common.Season'),
-      year: localize('CALENDARIA.Common.Year')
+      second: _loc('CALENDARIA.Common.Second'),
+      round: _loc('CALENDARIA.Common.Round'),
+      minute: _loc('CALENDARIA.Common.Minute'),
+      hour: _loc('CALENDARIA.Common.Hour'),
+      day: _loc('CALENDARIA.Common.Day'),
+      week: _loc('CALENDARIA.Common.Week'),
+      month: _loc('CALENDARIA.Common.Month'),
+      season: _loc('CALENDARIA.Common.Season'),
+      year: _loc('CALENDARIA.Common.Year')
     };
     return labels[key] || key;
   }
@@ -1224,7 +1223,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const windKph = weather.wind?.kph ?? null;
     const tooltipArgs = {
       label,
-      description: weather.description ? localize(weather.description) : null,
+      description: weather.description ? _loc(weather.description) : null,
       temp,
       windSpeed,
       windKph,
@@ -1338,7 +1337,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const calendar = this.calendar;
     const yearZero = calendar?.years?.yearZero ?? 0;
     await NoteManager.createNote({
-      name: localize('CALENDARIA.Note.NewNote'),
+      name: _loc('CALENDARIA.Note.NewNote'),
       noteData: {
         startDate: { year: today.year + yearZero, month: today.month, dayOfMonth: today.dayOfMonth ?? 0, hour: today.hour ?? 0, minute: today.minute ?? 0 },
         endDate: { year: today.year + yearZero, month: today.month, dayOfMonth: today.dayOfMonth ?? 0, hour: (today.hour ?? 0) + 1, minute: today.minute ?? 0 }

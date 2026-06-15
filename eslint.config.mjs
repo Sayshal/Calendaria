@@ -11,6 +11,8 @@ export default [
       globals: {
         foundry: 'readonly',
         game: 'readonly',
+        _loc: 'readonly',
+        _del: 'readonly',
         ui: 'readonly',
         Hooks: 'readonly',
         CONFIG: 'readonly',

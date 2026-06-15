@@ -40,7 +40,7 @@ beforeEach(() => {
   game.settings.get.mockReturnValue([]);
   game.settings.set.mockResolvedValue(true);
   globalThis.CONFIG = {
-    JournalEntryPage: { dataModels: { 'calendaria.calendarnote': { _schema: { fields: { repeat: { choices: ['never', 'daily', 'weekly', 'monthly', 'yearly', 'moon', 'random', 'linked', 'seasonal', 'weekOfMonth', 'range'] } } } } } }
+    JournalEntryPage: { dataModels: { 'calendaria.calendarnote': { schema: { fields: { repeat: { choices: ['never', 'daily', 'weekly', 'monthly', 'yearly', 'moon', 'random', 'linked', 'seasonal', 'weekOfMonth', 'range', 'computed'] } } } } } }
   };
 });
 

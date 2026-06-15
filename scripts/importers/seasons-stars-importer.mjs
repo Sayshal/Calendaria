@@ -1,7 +1,7 @@
 import { CalendarManager } from '../calendar/_module.mjs';
 import { ASSETS } from '../constants.mjs';
 import { NoteManager, addCustomPreset, getAllPresets } from '../notes/_module.mjs';
-import { localize, log } from '../utils/_module.mjs';
+import { log } from '../utils/_module.mjs';
 import BaseImporter from './base-importer.mjs';
 
 /** @type {Object<string, string>} Map S&S season icon strings to FontAwesome classes. */
@@ -44,9 +44,9 @@ export default class SeasonsStarsImporter extends BaseImporter {
    * @returns {Promise<object>} Raw S&S calendar data
    */
   async loadFromModule() {
-    if (!this.constructor.detect()) throw new Error(localize('CALENDARIA.Importer.SeasonsStars.NotInstalled'));
+    if (!this.constructor.detect()) throw new Error(_loc('CALENDARIA.Importer.SeasonsStars.NotInstalled'));
     const calendarData = game.settings.get('seasons-and-stars', 'activeCalendarData');
-    if (!calendarData) throw new Error(localize('CALENDARIA.Importer.SeasonsStars.NoCalendar'));
+    if (!calendarData) throw new Error(_loc('CALENDARIA.Importer.SeasonsStars.NoCalendar'));
     let worldEvents = [];
     worldEvents = game.settings.get('seasons-and-stars', 'worldEvents') || [];
     const journalNotes = [];
@@ -127,7 +127,7 @@ export default class SeasonsStarsImporter extends BaseImporter {
     const calendar = data.calendar || data;
     const label = calendar.translations?.en?.label || calendar.id || 'Imported Calendar';
     log(3, 'Transforming Seasons & Stars data:', label);
-    if (calendar.variants) log(2, localize('CALENDARIA.Importer.SeasonsStars.Warning.Variants'));
+    if (calendar.variants) log(2, _loc('CALENDARIA.Importer.SeasonsStars.Warning.Variants'));
     const weekdays = this.#transformWeekdays(calendar.weekdays);
     const months = this.#transformMonths(calendar.months);
     const daysPerYear = months.reduce((sum, m) => sum + m.days, 0);
@@ -488,7 +488,7 @@ export default class SeasonsStarsImporter extends BaseImporter {
         note.repeat = 'yearly';
         note.startDate = { year: event.startYear ?? 1, month: (rec.month ?? 1) - 1, dayOfMonth: 0 };
         note.importWarnings = [`Ordinal recurrence (${rec.occurrence} ${rec.weekday} of month) imported as first of month`];
-        log(2, localize('CALENDARIA.Importer.SeasonsStars.Warning.OrdinalRecurrence'));
+        log(2, _loc('CALENDARIA.Importer.SeasonsStars.Warning.OrdinalRecurrence'));
       } else if (rec.type === 'interval') {
         note.repeat = 'yearly';
         note.interval = rec.intervalYears;

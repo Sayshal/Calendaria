@@ -1,6 +1,6 @@
 import { DISPLAY_STYLES, MODULE, NOTE_VISIBILITY, SETTINGS } from '../constants.mjs';
 import { NoteManager } from '../notes/_module.mjs';
-import { localize, log } from '../utils/_module.mjs';
+import { log } from '../utils/_module.mjs';
 import { findSeasonIndexByType, getMidpoint, getSeasonDayOfYearBounds } from '../utils/calendar-math.mjs';
 
 /** Creates and manages festival journal notes. */
@@ -15,8 +15,8 @@ export default class FestivalManager {
    */
   static async createFestivalNote(calendarId, key, festival, calendar) {
     const noteData = this.#mapFestivalToNoteData(calendarId, key, festival, calendar);
-    const name = festival.name ? localize(festival.name) : 'Festival';
-    const content = festival.description ? `<p>${localize(festival.description)}</p>` : '';
+    const name = festival.name ? _loc(festival.name) : 'Festival';
+    const content = festival.description ? `<p>${_loc(festival.description)}</p>` : '';
     return NoteManager.createNote({ name, content, noteData, calendarId, openSheet: false });
   }
 
@@ -195,6 +195,7 @@ export default class FestivalManager {
       visibility: festival.visibility || NOTE_VISIBILITY.VISIBLE,
       reminderType: festival.reminderType || 'none',
       reminderOffset: festival.reminderOffset ?? 0,
+      reminderUnit: festival.reminderUnit || 'hour',
       silent: festival.silent ?? true,
       linkedFestival: { calendarId, festivalKey, countsForWeekday: festival.countsForWeekday ?? true, leapYearOnly: !!festival.leapYearOnly, leapDuration: festival.leapDuration ?? null }
     };

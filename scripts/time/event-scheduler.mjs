@@ -1,7 +1,7 @@
 import { CalendarManager } from '../calendar/_module.mjs';
 import { HOOKS, MODULE, TEMPLATES } from '../constants.mjs';
 import { NoteManager, compareDates, generateRandomOccurrences, getCurrentDate, needsRandomRegeneration } from '../notes/_module.mjs';
-import { CalendariaSocket, format, localize, log } from '../utils/_module.mjs';
+import { CalendariaSocket, log } from '../utils/_module.mjs';
 import { WeatherManager } from '../weather/_module.mjs';
 
 /**
@@ -186,7 +186,7 @@ export default class EventScheduler {
       content,
       whisper,
       speaker: { alias: note.name },
-      flavor: `<span style="color: ${color};">${iconHtml}</span> ${localize('CALENDARIA.Event.CalendarEvent')}`,
+      flavor: `<span style="color: ${color};">${iconHtml}</span> ${_loc('CALENDARIA.Event.CalendarEvent')}`,
       flags: { [MODULE.ID]: { isAnnouncement: true, noteId: note.id, journalId: note.journalId } }
     });
     log(3, `Chat announcement sent for event: ${note.name}`, { visibility: flagData.visibility });
@@ -203,14 +203,14 @@ export default class EventScheduler {
     if (!calendar || !flagData.startDate) return '';
     const formatDate = (date) => {
       const monthData = calendar.monthsArray?.[date.month];
-      const monthName = monthData?.name ? localize(monthData.name) : `Month ${date.month + 1}`;
+      const monthName = monthData?.name ? _loc(monthData.name) : `Month ${date.month + 1}`;
       return `${(date.dayOfMonth ?? 0) + 1} ${monthName}, ${date.year}`;
     };
     const formatTime = (date) => {
       if (flagData.allDay) return '';
       const hour = String(date.hour ?? 0).padStart(2, '0');
       const minute = String(date.minute ?? 0).padStart(2, '0');
-      return ` ${format('CALENDARIA.Event.AtTime', { time: `${hour}:${minute}` })}`;
+      return ` ${_loc('CALENDARIA.Event.AtTime', { time: `${hour}:${minute}` })}`;
     };
     let result = formatDate(flagData.startDate) + formatTime(flagData.startDate);
     if (flagData.endDate && flagData.endDate.year) {
@@ -221,7 +221,7 @@ export default class EventScheduler {
         if (!flagData.allDay && flagData.endDate.hour !== undefined) result += formatTime(flagData.endDate);
       }
     }
-    if (flagData.allDay) result += ` ${localize('CALENDARIA.Event.AllDay')}`;
+    if (flagData.allDay) result += ` ${_loc('CALENDARIA.Event.AllDay')}`;
     return result;
   }
 

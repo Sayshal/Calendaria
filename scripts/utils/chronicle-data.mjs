@@ -12,10 +12,10 @@ import { dateFormattingParts } from './formatting/format-utils.mjs';
  */
 function buildWeatherSentence(w) {
   if (!w) return null;
-  const label = w.label ? game.i18n.localize(w.label) : null;
+  const label = w.label ? _loc(w.label) : null;
   const temp = w.temperature != null ? WeatherManager.formatTemperature(w.temperature) : null;
   const windDef = w.wind?.speed ? Object.values(WIND_SPEEDS).find((ws) => ws.value === w.wind.speed) : null;
-  const windLabel = windDef ? game.i18n.localize(windDef.label) : null;
+  const windLabel = windDef ? _loc(windDef.label) : null;
   const dir = w.wind?.direction != null ? compassLabel(w.wind.direction) : null;
   const precip = w.precipitation?.type || null;
   const fragments = [];
@@ -104,7 +104,7 @@ export function buildScrollEntries(startDate, endDate, options = {}) {
   const aliasZone = WeatherManager.getActiveZone(null, game.scenes?.active);
   if (showSeasons) {
     const prevSeason = WeatherManager.applySeasonAlias(calendar.getCurrentSeason?.(dayBeforeInternal), aliasZone);
-    prevSeasonName = prevSeason?.name ? game.i18n.localize(prevSeason.name) : null;
+    prevSeasonName = prevSeason?.name ? _loc(prevSeason.name) : null;
     prevSeasonIcon = prevSeason?.icon || 'fas fa-leaf';
     prevSeasonColor = prevSeason?.color || '#84cc16';
   }
@@ -120,7 +120,7 @@ export function buildScrollEntries(startDate, endDate, options = {}) {
     }
     const parts = dateFormattingParts(calendar, { year, month, dayOfMonth });
     const weekdayIndex = dayOfWeek(current, calendar);
-    const weekdayName = weekdays[weekdayIndex]?.name ? game.i18n.localize(weekdays[weekdayIndex].name) : '';
+    const weekdayName = weekdays[weekdayIndex]?.name ? _loc(weekdays[weekdayIndex].name) : '';
     const isToday = year === today.year && month === today.month && dayOfMonth === today.dayOfMonth;
     const isPastOrToday = compareDates(current, today) <= 0;
     const internalComponents = { year: year - yearZero, month, dayOfMonth };
@@ -128,7 +128,7 @@ export function buildScrollEntries(startDate, endDate, options = {}) {
     const filterActiveSuppressBanners = !!categoryFilterSet;
     if (showSeasons && !filterActiveSuppressBanners) {
       const season = WeatherManager.applySeasonAlias(calendar.getCurrentSeason?.(internalComponents), aliasZone);
-      const seasonName = season?.name ? game.i18n.localize(season.name) : null;
+      const seasonName = season?.name ? _loc(season.name) : null;
       if (seasonName && prevSeasonName && seasonName !== prevSeasonName) {
         const prevEntry = entries.length > 0 ? entries[entries.length - 1] : null;
         if (prevEntry && !prevEntry.fogged) {
@@ -150,7 +150,7 @@ export function buildScrollEntries(startDate, endDate, options = {}) {
         if (phase.dayWithinPhase === mid) {
           const icon = phase.icon || '';
           const isImage = icon && !icon.startsWith('fas ') && !icon.startsWith('far ');
-          const phaseName = game.i18n.localize(phase.name);
+          const phaseName = _loc(phase.name);
           banners.push({ type: 'moon', icon, label: `${moons[i].name}: ${phaseName}`, color: moons[i].color || '#c0c0c0', isImage });
         }
       }
@@ -213,7 +213,7 @@ export function buildScrollEntries(startDate, endDate, options = {}) {
 function buildFoggedEntry(date, calendar, weekdays) {
   const parts = dateFormattingParts(calendar, date);
   const weekdayIndex = dayOfWeek(date, calendar);
-  const weekdayName = weekdays[weekdayIndex]?.name ? game.i18n.localize(weekdays[weekdayIndex].name) : '';
+  const weekdayName = weekdays[weekdayIndex]?.name ? _loc(weekdays[weekdayIndex].name) : '';
   return { date: { ...date }, formattedDate: `${parts.D} ${parts.MMMM} ${parts.y}`, weekday: weekdayName, fogged: true, isToday: false, notes: [], banners: [], hasFestival: false, isEmpty: true };
 }
 

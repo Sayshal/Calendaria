@@ -27,6 +27,7 @@ import {
   migrateRemovedCalendars,
   overrideChatLogTimestamps,
   registerEnrichers,
+  registerInserts,
   registerKeybindings,
   runAllMigrations,
   showDebugZones,
@@ -48,6 +49,7 @@ import './styles/importer.css';
 import './styles/mini-cal.css';
 import './styles/note-sheet.css';
 import './styles/note-viewer.css';
+import './styles/scene-config.css';
 import './styles/secondary-calendar.css';
 import './styles/settings.css';
 import './styles/sun-dial.css';
@@ -74,6 +76,8 @@ Hooks.once('init', async () => {
   await foundry.applications.handlebars.loadTemplates(Object.values(TEMPLATES).flatMap((v) => (typeof v === 'string' ? v : Object.values(v))));
   log(3, 'Calendaria module initialized.');
 });
+
+Hooks.once('i18nInit', () => registerInserts());
 
 Hooks.once('dnd5e.setupCalendar', () => {
   CONFIG.DND5E.calendar.application = null;

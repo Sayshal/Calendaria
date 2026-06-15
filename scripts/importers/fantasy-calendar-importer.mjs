@@ -1,7 +1,7 @@
 import { CalendarManager } from '../calendar/_module.mjs';
 import { ASSETS, MOON_PHASE_LABELS } from '../constants.mjs';
 import { NoteManager, addCustomPreset, getAllPresets } from '../notes/_module.mjs';
-import { localize, log } from '../utils/_module.mjs';
+import { log } from '../utils/_module.mjs';
 import BaseImporter from './base-importer.mjs';
 
 /** @type {Object<string, string>} FC color names to hex mapping. */
@@ -59,7 +59,7 @@ export default class FantasyCalendarImporter extends BaseImporter {
    * @returns {Promise<object>} CalendariaCalendar-compatible data
    */
   async transform(data) {
-    if (!FantasyCalendarImporter.isFantasyCalendarExport(data)) throw new Error(localize('CALENDARIA.Importer.FantasyCalendar.InvalidFormat'));
+    if (!FantasyCalendarImporter.isFantasyCalendarExport(data)) throw new Error(_loc('CALENDARIA.Importer.FantasyCalendar.InvalidFormat'));
     log(3, 'Transforming Fantasy-Calendar data:', data.name);
     const staticData = data.static_data;
     const yearData = staticData.year_data;
@@ -72,7 +72,7 @@ export default class FantasyCalendarImporter extends BaseImporter {
     const year0FirstWeekday = ((yearData.first_day ?? 1) - 1 + daysInWeek) % daysInWeek;
     log(3, `FC first_day: ${yearData.first_day}, converted firstWeekday: ${year0FirstWeekday}, yearZero: 1`);
     return {
-      name: data.name || localize('CALENDARIA.Importer.Fallback.CalendarName'),
+      name: data.name || _loc('CALENDARIA.Importer.Fallback.CalendarName'),
       days: { values: weekdays, ...this.#transformTime(staticData.clock), daysPerYear },
       months: { values: months },
       years: { yearZero: 1, firstWeekday: year0FirstWeekday, leapYear: null },
@@ -83,7 +83,7 @@ export default class FantasyCalendarImporter extends BaseImporter {
       cycles: this.#transformCycles(staticData.cycles?.data),
       cycleFormat: staticData.cycles?.format || '',
       daylight: this.#transformDaylight(staticData.seasons?.data),
-      metadata: { description: localize('CALENDARIA.Importer.ImportedFrom.FantasyCalendar'), system: data.name || localize('CALENDARIA.Common.Unknown'), importedFrom: 'fantasy-calendar' },
+      metadata: { description: _loc('CALENDARIA.Importer.ImportedFrom.FantasyCalendar'), system: data.name || _loc('CALENDARIA.Common.Unknown'), importedFrom: 'fantasy-calendar' },
       currentDate: this.#transformCurrentDate(data.dynamic_data)
     };
   }
@@ -249,7 +249,7 @@ export default class FantasyCalendarImporter extends BaseImporter {
    */
   #transformEras(eras = []) {
     return eras.map((era) => ({
-      name: era.name || localize('CALENDARIA.Common.Era'),
+      name: era.name || _loc('CALENDARIA.Common.Era'),
       abbreviation: era.abbreviation || era.name?.substring(0, 2) || 'E',
       startYear: era.start ?? 0,
       endYear: era.end ?? null
@@ -264,7 +264,7 @@ export default class FantasyCalendarImporter extends BaseImporter {
   #transformCycles(cycles = []) {
     const basedOnMap = { year: 'year', era_year: 'eraYear', month: 'month', day: 'monthDay', epoch: 'day', year_day: 'yearDay' };
     return cycles.map((cycle) => ({
-      name: cycle.name || localize('CALENDARIA.Common.Cycle'),
+      name: cycle.name || _loc('CALENDARIA.Common.Cycle'),
       length: cycle.length || 12,
       offset: cycle.offset ?? 0,
       basedOn: basedOnMap[cycle.type] || 'year',

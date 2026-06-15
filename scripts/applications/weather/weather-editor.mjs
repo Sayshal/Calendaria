@@ -1,6 +1,6 @@
 import { HOOKS, MODULE, SETTINGS, TEMPLATES } from '../../constants.mjs';
 import { getAvailableFxPresets, isFXMasterActive } from '../../integrations/_module.mjs';
-import { getAvailableMacros, localize, log } from '../../utils/_module.mjs';
+import { getAvailableMacros, log } from '../../utils/_module.mjs';
 import { ALL_PRESETS, HUD_EFFECTS, WEATHER_CATEGORIES, WeatherManager } from '../../weather/_module.mjs';
 import { getEffectDefaults, SKY_OVERRIDES } from '../_module.mjs';
 
@@ -64,7 +64,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       groups[cat].tabs.push({
         id: preset.id,
         group: 'primary',
-        label: preset.category === 'custom' ? preset.label : localize(preset.label),
+        label: preset.category === 'custom' ? preset.label : _loc(preset.label),
         icon: `fas ${preset.icon}`,
         active: isActive,
         cssClass: isActive ? 'active' : '',
@@ -92,7 +92,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       tabs[preset.id] = {
         id: preset.id,
         group: 'primary',
-        label: preset.category === 'custom' ? preset.label : localize(preset.label),
+        label: preset.category === 'custom' ? preset.label : _loc(preset.label),
         icon: `fas ${preset.icon}`,
         active: isActive,
         cssClass: isActive ? 'active' : ''
@@ -131,7 +131,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     const isCustom = !builtinPreset;
     const overrides = !isCustom ? (game.settings.get(MODULE.ID, SETTINGS.WEATHER_VISUAL_OVERRIDES) || {})[presetId] || {} : {};
-    const label = isCustom ? preset.label : overrides.label || localize(preset.label);
+    const label = isCustom ? preset.label : overrides.label || _loc(preset.label);
     const icon = overrides.icon || preset.icon;
     const color = overrides.color || preset.color;
     const effectId = isCustom ? preset.hudEffect || 'clear' : overrides.hudEffect || preset.hudEffect || 'clear';
@@ -150,6 +150,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const envCycleOverride = isCustom ? preset.environmentCycle : overrides.environmentCycle;
     const envCycleDefault = builtinPreset?.environmentCycle;
     const effectiveCycle = envCycleOverride ?? envCycleDefault ?? null;
+    const effectiveDarknessPenalty = (isCustom ? preset.darknessPenalty : (overrides.darknessPenalty ?? builtinPreset?.darknessPenalty)) ?? 0;
     const envBaseOverride = isCustom ? (preset.environmentBase ?? {}) : (overrides.environmentBase ?? {});
     const envDarkOverride = isCustom ? (preset.environmentDark ?? {}) : (overrides.environmentDark ?? {});
     const envBaseDefault = builtinPreset?.environmentBase ?? {};
@@ -172,6 +173,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       color,
       hudEffect: effectId,
       environmentCycle: effectiveCycle ?? true,
+      darknessPenalty: effectiveDarknessPenalty,
       baseHue: effectiveBaseHue ?? '',
       baseHueNorm: WeatherEditor.#hueToNorm(effectiveBaseHue),
       baseSaturation: effectiveBaseSat,
@@ -185,7 +187,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       darkLuminosity: effectiveDarkLum,
       darkShadows: effectiveDarkShd
     };
-    context.hudEffectOptions = HUD_EFFECTS.map((e) => ({ value: e, label: localize(`CALENDARIA.HudEffect.${e}`), selected: e === effectId })).sort((a, b) =>
+    context.hudEffectOptions = HUD_EFFECTS.map((e) => ({ value: e, label: _loc(`CALENDARIA.HudEffect.${e}`), selected: e === effectId })).sort((a, b) =>
       a.label.localeCompare(b.label, game.i18n.lang)
     );
     context.hasFXMaster = isFXMasterActive();
@@ -194,7 +196,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       context.preset.fxPreset = currentFxPreset;
       const fxPresets = getAvailableFxPresets();
       context.fxPresetOptions = [
-        { value: '', label: localize('CALENDARIA.Common.None'), selected: !currentFxPreset },
+        { value: '', label: _loc('CALENDARIA.Common.None'), selected: !currentFxPreset },
         ...fxPresets.map((p) => ({ value: p.value, label: p.label, selected: p.value === currentFxPreset }))
       ];
     }
@@ -203,7 +205,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     context.preset.fxMacro = currentFxMacro;
     const macros = getAvailableMacros();
     context.fxMacroOptions = [
-      { value: '', label: localize('CALENDARIA.Common.None'), selected: !currentFxMacro },
+      { value: '', label: _loc('CALENDARIA.Common.None'), selected: !currentFxMacro },
       ...macros.map((m) => ({ value: m.id, label: m.name, selected: m.id === currentFxMacro }))
     ];
     context.visuals = {
@@ -311,6 +313,8 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     const environmentCycle = data.environmentCycle ?? true;
     const parseEnvField = (val) => (val !== '' && val != null ? parseFloat(val) : null);
+    const darknessPenaltyRaw = parseEnvField(data.darknessPenalty);
+    const darknessPenalty = darknessPenaltyRaw == null ? 0 : Math.min(1, Math.max(0, darknessPenaltyRaw));
     const baseHue = WeatherEditor.#normToHue(data.baseHue);
     const baseSat = parseEnvField(data.baseSaturation);
     const baseColorSat = parseEnvField(data.baseColorSaturation);
@@ -360,6 +364,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       preset.soundFx = data.soundFx || null;
       preset.fxMacro = data.fxMacro || null;
       preset.environmentCycle = environmentCycle;
+      preset.darknessPenalty = darknessPenalty;
       preset.environmentBase = environmentBase;
       preset.environmentDark = environmentDark;
       preset.visualOverrides = visualOverrides;
@@ -370,7 +375,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       const allOverrides = game.settings.get(MODULE.ID, SETTINGS.WEATHER_VISUAL_OVERRIDES) || {};
       const override = {};
       const trimLabel = (data.label || '').trim();
-      if (trimLabel && trimLabel !== localize(builtinPreset.label)) override.label = trimLabel;
+      if (trimLabel && trimLabel !== _loc(builtinPreset.label)) override.label = trimLabel;
       const trimIcon = (data.icon || '').trim();
       if (trimIcon && trimIcon !== builtinPreset.icon) override.icon = trimIcon;
       if (data.color && data.color !== builtinPreset.color) override.color = data.color;
@@ -382,6 +387,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       const fxMacroValue = data.fxMacro || null;
       if (fxMacroValue) override.fxMacro = fxMacroValue;
       if (environmentCycle !== (builtinPreset.environmentCycle ?? null)) override.environmentCycle = environmentCycle;
+      if (darknessPenalty !== (builtinPreset.darknessPenalty ?? 0)) override.darknessPenalty = darknessPenalty;
       if (environmentBase) override.environmentBase = environmentBase;
       if (environmentDark) override.environmentDark = environmentDark;
       if (visualOverrides) override.visualOverrides = visualOverrides;
@@ -400,7 +406,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const presets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
     const newPreset = {
       id: foundry.utils.randomID(),
-      label: localize('CALENDARIA.WeatherEditor.NewName'),
+      label: _loc('CALENDARIA.WeatherEditor.NewName'),
       icon: 'fa-cloud',
       color: '#888888',
       category: 'custom',
@@ -427,8 +433,8 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const presetId = this.tabGroups.primary;
     if (!presetId) return;
     const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: localize('CALENDARIA.Common.Delete') },
-      content: `<p>${localize('CALENDARIA.WeatherEditor.DeleteConfirm')}</p>`,
+      window: { title: _loc('CALENDARIA.Common.Delete') },
+      content: `<p>${_loc('CALENDARIA.WeatherEditor.DeleteConfirm')}</p>`,
       rejectClose: false
     });
     if (!confirmed) return;
@@ -446,7 +452,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const allOverrides = game.settings.get(MODULE.ID, SETTINGS.WEATHER_VISUAL_OVERRIDES) || {};
     delete allOverrides[presetId];
     await game.settings.set(MODULE.ID, SETTINGS.WEATHER_VISUAL_OVERRIDES, allOverrides);
-    ui.notifications.info(localize('CALENDARIA.WeatherEditor.VisualsReset'));
+    ui.notifications.info(_loc('CALENDARIA.WeatherEditor.VisualsReset'));
     this.render({ parts: [presetId] });
   }
 

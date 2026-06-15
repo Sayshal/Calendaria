@@ -1,7 +1,7 @@
 import { CalendarManager } from '../../calendar/_module.mjs';
 import { DISPLAY_STYLES, HOOKS, MODULE, NOTE_VISIBILITY, SETTINGS, TEMPLATES } from '../../constants.mjs';
 import { NoteManager, filterNotes, formatNoteDate, getAllPresets, getAvailableAuthors } from '../../notes/_module.mjs';
-import { canAddNotes, canDeleteNotes, localize } from '../../utils/_module.mjs';
+import { canAddNotes, canDeleteNotes } from '../../utils/_module.mjs';
 
 const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
 const ContextMenu = foundry.applications.ux.ContextMenu.implementation;
@@ -93,7 +93,7 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @override */
   get title() {
-    return localize('CALENDARIA.NoteViewer.Title');
+    return _loc('CALENDARIA.NoteViewer.Title');
   }
 
   /**
@@ -161,8 +161,8 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
       const mentioned = [];
       for (const row of this._allFilteredNotes) (row.name?.toLowerCase().includes(searchTerm) ? direct : mentioned).push(row);
       if (mentioned.length) {
-        if (direct.length) direct[0].groupHeaderLabel = localize('CALENDARIA.NoteViewer.DirectMatches');
-        mentioned[0].groupHeaderLabel = localize('CALENDARIA.NoteViewer.Mentioned');
+        if (direct.length) direct[0].groupHeaderLabel = _loc('CALENDARIA.NoteViewer.DirectMatches');
+        mentioned[0].groupHeaderLabel = _loc('CALENDARIA.NoteViewer.Mentioned');
       }
       this._allFilteredNotes = [...direct, ...mentioned];
     }
@@ -180,7 +180,7 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
     if (this._selectionMode) for (const note of context.notes) note.selected = this._selectedIds.has(note.id);
     context.searchValue = this._filterState.search;
     const presets = getAllPresets();
-    context.presets = presets.map((p) => ({ id: p.id, label: localize(p.label), color: p.color, selected: this._filterState.presets.has(p.id) }));
+    context.presets = presets.map((p) => ({ id: p.id, label: _loc(p.label), color: p.color, selected: this._filterState.presets.has(p.id) }));
     context.selectedNone = this._filterState.presets.has('__none__');
     context.visibility = this._filterState.visibility;
     context.sortBy = this._filterState.sortBy;
@@ -246,18 +246,18 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
       .slice(0, 4)
       .map((catId) => {
         const preset = allPresets.find((p) => p.id === catId);
-        return preset ? { icon: preset.icon, color: preset.color, label: localize(preset.label) } : null;
+        return preset ? { icon: preset.icon, color: preset.color, label: _loc(preset.label) } : null;
       })
       .filter(Boolean);
     let repeatIcon = null;
     let repeatTooltip = null;
     if (flagData.conditionTree) {
       repeatIcon = 'fas fa-code-branch';
-      repeatTooltip = localize('CALENDARIA.Notes.Repeat.Computed');
+      repeatTooltip = _loc('CALENDARIA.Notes.Repeat.Computed');
     } else if (flagData.repeat && flagData.repeat !== 'never') {
       const icons = { daily: 'fas fa-rotate', weekly: 'fas fa-rotate', monthly: 'fas fa-rotate', yearly: 'fas fa-rotate', moon: 'fas fa-moon' };
       repeatIcon = icons[flagData.repeat] || 'fas fa-rotate';
-      repeatTooltip = localize(`CALENDARIA.Notes.Repeat.${flagData.repeat[0].toUpperCase()}${flagData.repeat.slice(1)}`);
+      repeatTooltip = _loc(`CALENDARIA.Notes.Repeat.${flagData.repeat[0].toUpperCase()}${flagData.repeat.slice(1)}`);
     }
     return {
       id: stub.id,
@@ -315,7 +315,7 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
         newBtn.type = 'button';
         newBtn.className = 'clear-filters-btn';
         newBtn.dataset.action = 'clearFilters';
-        newBtn.innerHTML = `<i class="fas fa-filter-circle-xmark"></i> ${localize('CALENDARIA.NoteViewer.ClearFilters')}`;
+        newBtn.innerHTML = `<i class="fas fa-filter-circle-xmark"></i> ${_loc('CALENDARIA.NoteViewer.ClearFilters')}`;
         filtersEl.appendChild(newBtn);
       }
     }
@@ -331,10 +331,10 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
     const names = calendarIds
       .map((id) => CalendarManager.getCalendar(id)?.name)
       .filter(Boolean)
-      .map((n) => localize(n));
-    if (names.length) parts.push(localize('CALENDARIA.NoteViewer.TooltipCalendar').replace('{name}', names.join(', ')));
-    if (!game.user.isGM) parts.push(localize('CALENDARIA.NoteViewer.TooltipPlayerVisibility'));
-    if (this.#hasActiveFilters()) parts.push(localize('CALENDARIA.NoteViewer.TooltipFiltersActive'));
+      .map((n) => _loc(n));
+    if (names.length) parts.push(_loc('CALENDARIA.NoteViewer.TooltipCalendar').replace('{name}', names.join(', ')));
+    if (!game.user.isGM) parts.push(_loc('CALENDARIA.NoteViewer.TooltipPlayerVisibility'));
+    if (this.#hasActiveFilters()) parts.push(_loc('CALENDARIA.NoteViewer.TooltipFiltersActive'));
     return parts.join('\n') || '';
   }
 
@@ -619,9 +619,9 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
         if (!pageId) return;
         const items = [
           {
-            name: localize('CALENDARIA.Common.Open'),
+            label: _loc('CALENDARIA.Common.Open'),
             icon: '<i class="fas fa-eye"></i>',
-            callback: () => {
+            onClick: () => {
               const page = NoteManager.getFullNote(pageId);
               if (page) page.sheet.render(true, { mode: 'view' });
             }
@@ -630,17 +630,17 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
         const editPage = NoteManager.getFullNote(pageId);
         if (game.user.isGM || editPage?.parent?.isOwner) {
           items.push({
-            name: localize('CALENDARIA.Common.Edit'),
+            label: _loc('CALENDARIA.Common.Edit'),
             icon: '<i class="fas fa-pen-to-square"></i>',
-            callback: () => {
+            onClick: () => {
               if (editPage) editPage.sheet.render(true, { mode: 'edit', forceMode: 'edit' });
             }
           });
         }
         items.push({
-          name: localize('CALENDARIA.NoteViewer.Context.JumpToDate'),
+          label: _loc('CALENDARIA.NoteViewer.Context.JumpToDate'),
           icon: '<i class="fas fa-calendar-day"></i>',
-          callback: () => {
+          onClick: () => {
             const stub = NoteManager.getNote(pageId);
             if (!stub?.flagData?.startDate) return;
             const { year, month, dayOfMonth } = stub.flagData.startDate;
@@ -649,12 +649,12 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
         });
         if (isGM && canDeleteNotes()) {
           items.push({
-            name: localize('CALENDARIA.Common.Delete'),
+            label: _loc('CALENDARIA.Common.Delete'),
             icon: '<i class="fas fa-trash"></i>',
-            callback: async () => {
+            onClick: async () => {
               const stub = NoteManager.getNote(pageId);
               const confirmed = await foundry.applications.api.DialogV2.confirm({
-                window: { title: localize('CALENDARIA.Common.DeleteNote') },
+                window: { title: _loc('CALENDARIA.Common.DeleteNote') },
                 content: `<p>${stub?.name || 'this note'}</p>`,
                 yes: { default: false },
                 rejectClose: false
@@ -665,9 +665,9 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
         }
         if (canAddNotes()) {
           items.push({
-            name: localize('CALENDARIA.Common.AddNote'),
+            label: _loc('CALENDARIA.Common.AddNote'),
             icon: '<i class="fas fa-plus"></i>',
-            callback: () => NoteViewer.#onCreateNote()
+            onClick: () => NoteViewer.#onCreateNote()
           });
         }
         ui.context.menuItems = items;
@@ -738,7 +738,7 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
     const calendar = CalendarManager.getActiveCalendar();
     const yearZero = calendar?.years?.yearZero ?? 0;
     await NoteManager.createNote({
-      name: localize('CALENDARIA.Note.NewNote'),
+      name: _loc('CALENDARIA.Note.NewNote'),
       noteData: {
         startDate: { year: today.year + yearZero, month: today.month, dayOfMonth: today.dayOfMonth ?? 0, hour: today.hour ?? 0, minute: today.minute ?? 0 },
         endDate: { year: today.year + yearZero, month: today.month, dayOfMonth: today.dayOfMonth ?? 0, hour: (today.hour ?? 0) + 1, minute: today.minute ?? 0 }
@@ -804,14 +804,14 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
     const skipped = ids.length - deletableIds.length;
     const countLabel =
       skipped > 0
-        ? `${localize('CALENDARIA.NoteViewer.BulkDeleteConfirm').replace('{count}', deletableIds.length)} (${skipped} festival notes skipped)`
-        : localize('CALENDARIA.NoteViewer.BulkDeleteConfirm').replace('{count}', deletableIds.length);
+        ? `${_loc('CALENDARIA.NoteViewer.BulkDeleteConfirm').replace('{count}', deletableIds.length)} (${skipped} festival notes skipped)`
+        : _loc('CALENDARIA.NoteViewer.BulkDeleteConfirm').replace('{count}', deletableIds.length);
     if (deletableIds.length === 0) {
-      ui.notifications.warn(localize('CALENDARIA.NoteViewer.BulkDeleteAllFestivals'));
+      ui.notifications.warn(_loc('CALENDARIA.NoteViewer.BulkDeleteAllFestivals'));
       return false;
     }
     const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: localize('CALENDARIA.NoteViewer.BulkDeleteTitle') },
+      window: { title: _loc('CALENDARIA.NoteViewer.BulkDeleteTitle') },
       content: `<p>${countLabel}</p>`,
       yes: { default: false },
       rejectClose: false
@@ -824,7 +824,7 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
         deleted++;
       } catch {}
     }
-    if (deleted > 0) ui.notifications.info(localize('CALENDARIA.NoteViewer.BulkComplete').replace('{count}', deleted));
+    if (deleted > 0) ui.notifications.info(_loc('CALENDARIA.NoteViewer.BulkComplete').replace('{count}', deleted));
     return true;
   }
 
@@ -835,10 +835,10 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   async #executeBulkChangePreset(ids) {
     const presets = getAllPresets();
-    const options = presets.map((p) => `<option value="${p.id}">${localize(p.label)}</option>`).join('');
-    const content = `<div class="form-group"><label>${localize('CALENDARIA.NoteViewer.Filter.Preset')}</label><select id="bulk-preset-select">${options}</select></div>`;
+    const options = presets.map((p) => `<option value="${p.id}">${_loc(p.label)}</option>`).join('');
+    const content = `<div class="form-group"><label>${_loc('CALENDARIA.NoteViewer.Filter.Preset')}</label><select id="bulk-preset-select">${options}</select></div>`;
     const result = await foundry.applications.api.DialogV2.prompt({
-      window: { title: localize('CALENDARIA.NoteViewer.BulkAction.ChangePreset') },
+      window: { title: _loc('CALENDARIA.NoteViewer.BulkAction.ChangePreset') },
       content,
       ok: { callback: (_event, button, _dialog) => button.form.elements['bulk-preset-select']?.value }
     });
@@ -846,7 +846,7 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
 
     const updates = ids.map((id) => NoteManager.updateNote(id, { noteData: { categories: [result] } }));
     await Promise.allSettled(updates);
-    ui.notifications.info(localize('CALENDARIA.NoteViewer.BulkComplete').replace('{count}', ids.length));
+    ui.notifications.info(_loc('CALENDARIA.NoteViewer.BulkComplete').replace('{count}', ids.length));
     return true;
   }
 
@@ -856,21 +856,21 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
    * @returns {Promise<boolean>} Whether the operation completed
    */
   async #executeBulkChangeVisibility(ids) {
-    const content = `<div class="form-group"><label>${localize('CALENDARIA.Common.Visibility')}</label>
+    const content = `<div class="form-group"><label>${_loc('CALENDARIA.Common.Visibility')}</label>
       <select id="bulk-visibility-select">
-        <option value="visible">${localize('CALENDARIA.Note.Visibility.Visible')}</option>
-        <option value="hidden">${localize('CALENDARIA.Common.Hidden')}</option>
-        <option value="secret">${localize('CALENDARIA.Note.Visibility.Secret')}</option>
+        <option value="visible">${_loc('CALENDARIA.Note.Visibility.Visible')}</option>
+        <option value="hidden">${_loc('CALENDARIA.Common.Hidden')}</option>
+        <option value="secret">${_loc('CALENDARIA.Note.Visibility.Secret')}</option>
       </select></div>`;
     const result = await foundry.applications.api.DialogV2.prompt({
-      window: { title: localize('CALENDARIA.NoteViewer.BulkAction.ChangeVisibility') },
+      window: { title: _loc('CALENDARIA.NoteViewer.BulkAction.ChangeVisibility') },
       content,
       ok: { callback: (_event, button, _dialog) => button.form.elements['bulk-visibility-select']?.value }
     });
     if (!result) return false;
     const updates = ids.map((id) => NoteManager.updateNote(id, { noteData: { visibility: result } }));
     await Promise.allSettled(updates);
-    ui.notifications.info(localize('CALENDARIA.NoteViewer.BulkComplete').replace('{count}', ids.length));
+    ui.notifications.info(_loc('CALENDARIA.NoteViewer.BulkComplete').replace('{count}', ids.length));
     return true;
   }
 
@@ -880,21 +880,21 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
    * @returns {Promise<boolean>} Whether the operation completed
    */
   async #executeBulkChangeDisplayStyle(ids) {
-    const content = `<div class="form-group"><label>${localize('CALENDARIA.Note.DisplayStyleLabel')}</label>
+    const content = `<div class="form-group"><label>${_loc('CALENDARIA.Note.DisplayStyleLabel')}</label>
       <select id="bulk-style-select">
-        <option value="icon">${localize('CALENDARIA.Common.Icon')}</option>
-        <option value="pip">${localize('CALENDARIA.Note.DisplayStyle.Pip')}</option>
-        <option value="banner">${localize('CALENDARIA.Note.DisplayStyle.Banner')}</option>
+        <option value="icon">${_loc('CALENDARIA.Common.Icon')}</option>
+        <option value="pip">${_loc('CALENDARIA.Note.DisplayStyle.Pip')}</option>
+        <option value="banner">${_loc('CALENDARIA.Note.DisplayStyle.Banner')}</option>
       </select></div>`;
     const result = await foundry.applications.api.DialogV2.prompt({
-      window: { title: localize('CALENDARIA.NoteViewer.BulkAction.ChangeDisplayStyle') },
+      window: { title: _loc('CALENDARIA.NoteViewer.BulkAction.ChangeDisplayStyle') },
       content,
       ok: { callback: (_event, button, _dialog) => button.form.elements['bulk-style-select']?.value }
     });
     if (!result) return false;
     const updates = ids.map((id) => NoteManager.updateNote(id, { noteData: { displayStyle: result } }));
     await Promise.allSettled(updates);
-    ui.notifications.info(localize('CALENDARIA.NoteViewer.BulkComplete').replace('{count}', ids.length));
+    ui.notifications.info(_loc('CALENDARIA.NoteViewer.BulkComplete').replace('{count}', ids.length));
     return true;
   }
 }

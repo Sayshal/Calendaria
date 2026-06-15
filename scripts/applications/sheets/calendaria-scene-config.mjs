@@ -35,12 +35,18 @@ export class CalendariaSceneConfig extends foundry.applications.sheets.SceneConf
       context = await origPrepare.call(this, partId, context, options);
       if (partId === 'calendaria') {
         const doc = this.document;
-        const flagValue = doc.getFlag(MODULE.ID, SCENE_FLAGS.DARKNESS_SYNC);
-        let darknessSync = 'default';
-        if (flagValue === true || flagValue === 'enabled') darknessSync = 'enabled';
-        else if (flagValue === false || flagValue === 'disabled') darknessSync = 'disabled';
+        const threeWay = (flagKey) => {
+          const v = doc.getFlag(MODULE.ID, flagKey);
+          if (v === true || v === 'enabled') return 'enabled';
+          if (v === false || v === 'disabled') return 'disabled';
+          return 'default';
+        };
         context.moduleId = MODULE.ID;
-        context.darknessSync = darknessSync;
+        context.darknessSync = threeWay(SCENE_FLAGS.DARKNESS_SYNC);
+        context.ambienceSync = threeWay(SCENE_FLAGS.AMBIENCE_SYNC);
+        context.colorShiftSync = threeWay(SCENE_FLAGS.COLOR_SHIFT_SYNC);
+        context.weatherDarknessSync = threeWay(SCENE_FLAGS.DARKNESS_WEATHER_SYNC);
+        context.moonDarknessSync = threeWay(SCENE_FLAGS.DARKNESS_MOON_SYNC);
         context.brightnessMultiplier = doc.getFlag(MODULE.ID, SCENE_FLAGS.BRIGHTNESS_MULTIPLIER) ?? 1.0;
         context.hudHideForPlayers = doc.getFlag(MODULE.ID, SCENE_FLAGS.HUD_HIDE_FOR_PLAYERS) ?? false;
         context.climateZoneOverride = doc.getFlag(MODULE.ID, SCENE_FLAGS.CLIMATE_ZONE_OVERRIDE) ?? '';
@@ -54,6 +60,8 @@ export class CalendariaSceneConfig extends foundry.applications.sheets.SceneConf
         ];
         context.fxTopDownOverride = doc.getFlag(MODULE.ID, SCENE_FLAGS.FXMASTER_TOP_DOWN_OVERRIDE) ?? 'default';
         context.weatherSoundDisabled = doc.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_SOUND_DISABLED) ?? false;
+        const selectedLevels = doc.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_LEVELS) ?? [];
+        context.sceneLevels = [...(doc.levels ?? [])].map((l) => ({ id: l.id, name: l.name, selected: selectedLevels.includes(l.id) }));
       }
       return context;
     };

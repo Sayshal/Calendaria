@@ -1,5 +1,5 @@
 import { HOOKS, MODULE, SCENE_FLAGS, SETTINGS } from '../constants.mjs';
-import { CalendariaSocket, localize, log } from '../utils/_module.mjs';
+import { CalendariaSocket, log } from '../utils/_module.mjs';
 import { WeatherManager } from '../weather/_module.mjs';
 
 /** FXMaster relative-level labels mapped to their numeric multipliers, matching FXMaster's RELATIVE_LEVEL_SCALE. */
@@ -54,7 +54,7 @@ export function isFXMasterActive() {
 export function getAvailableFxPresets() {
   const fxApi = getFxApi();
   const names = fxApi?.listValid?.() ?? fxApi?.list?.() ?? [];
-  return names.map((name) => ({ value: name, label: localize(`CALENDARIA.FxPreset.${name}`) })).sort((a, b) => a.label.localeCompare(b.label, game.i18n.lang));
+  return names.map((name) => ({ value: name, label: _loc(`CALENDARIA.FxPreset.${name}`) })).sort((a, b) => a.label.localeCompare(b.label, game.i18n.lang));
 }
 
 /**
@@ -244,6 +244,17 @@ function buildPresetOptions(weather) {
   }
   if (useTopDown) options.topDown = true;
   if (game.settings.get(MODULE.ID, SETTINGS.FXMASTER_BELOW_TOKENS)) options.belowTokens = true;
+  if (game.settings.get(MODULE.ID, SETTINGS.FXMASTER_BELOW_TILES)) options.belowTiles = true;
+  if (game.settings.get(MODULE.ID, SETTINGS.FXMASTER_BELOW_FOREGROUND)) options.belowForeground = true;
+  if (game.settings.get(MODULE.ID, SETTINGS.FXMASTER_DARKNESS_ACTIVATION_ENABLED)) {
+    const dMin = game.settings.get(MODULE.ID, SETTINGS.FXMASTER_DARKNESS_ACTIVATION_MIN) ?? 0;
+    const dMax = game.settings.get(MODULE.ID, SETTINGS.FXMASTER_DARKNESS_ACTIVATION_MAX) ?? 1;
+    options.darknessActivationEnabled = true;
+    options.darknessActivationMin = Math.min(dMin, dMax);
+    options.darknessActivationMax = Math.max(dMin, dMax);
+  }
+  const fxLevels = canvas?.scene?.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_LEVELS);
+  if (Array.isArray(fxLevels) && fxLevels.length) options.levels = fxLevels;
   if (weather.fxDensity) options.density = weather.fxDensity;
   const speedMult = game.settings.get(MODULE.ID, SETTINGS.FXMASTER_SPEED_MULTIPLIER) ?? 1;
   if (speedMult !== 1) {
@@ -269,19 +280,19 @@ function buildPresetOptions(weather) {
  */
 export async function playStandaloneFX(presetName, options = {}) {
   if (!isFXMasterActive()) {
-    log(2, localize('CALENDARIA.Weather.Error.FXMasterInactive'));
+    log(2, _loc('CALENDARIA.Weather.Error.FXMasterInactive'));
     return false;
   }
   const fxApi = getFxApi();
   if (!fxApi) return false;
   const scene = canvas?.scene;
   if (!isFxEnabledForScene(scene)) {
-    log(2, localize('CALENDARIA.Weather.Error.FXDisabled'));
+    log(2, _loc('CALENDARIA.Weather.Error.FXDisabled'));
     return false;
   }
   const available = fxApi.listValid?.() ?? [];
   if (!available.includes(presetName)) {
-    ui.notifications.warn(localize('CALENDARIA.Weather.Error.FXPresetInvalid', { name: presetName }));
+    ui.notifications.warn(_loc('CALENDARIA.Weather.Error.FXPresetInvalid', { name: presetName }));
     return false;
   }
   const fxOptions = { ...options, silent: true };

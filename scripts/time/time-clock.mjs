@@ -1,6 +1,6 @@
 import { CinematicOverlay } from '../applications/_module.mjs';
 import { HOOKS, MODULE, SETTINGS, SOCKET_TYPES } from '../constants.mjs';
-import { CalendariaSocket, canChangeDateTime, localize, log } from '../utils/_module.mjs';
+import { CalendariaSocket, canChangeDateTime, log } from '../utils/_module.mjs';
 import { updateDarknessFromWorldTime } from './darkness.mjs';
 import EventScheduler from './event-scheduler.mjs';
 import ReminderScheduler from './reminder-scheduler.mjs';
@@ -607,7 +607,7 @@ export default class TimeClock {
     const components = cal.timeToComponents(game.time.worldTime);
     const monthData = cal.monthsArray?.[components.month];
     const monthNameRaw = monthData?.name ?? `Month ${components.month + 1}`;
-    const monthName = localize(monthNameRaw);
+    const monthName = _loc(monthNameRaw);
     const day = components.dayOfMonth + 1;
     const yearZero = cal.years?.yearZero ?? 0;
     const year = components.year + yearZero;

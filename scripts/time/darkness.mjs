@@ -70,12 +70,12 @@ export function calculateAdjustedDarkness(baseDarkness, scene) {
   const brightness = 1 - baseDarkness;
   const adjustedBrightness = brightness * sceneBrightnessMult * climateBrightnessMult;
   let adjustedDarkness = 1 - adjustedBrightness;
-  const moonSync = game.settings.get(MODULE.ID, SETTINGS.DARKNESS_MOON_SYNC);
+  const moonSync = resolveSceneSync(scene, SCENE_FLAGS.DARKNESS_MOON_SYNC, SETTINGS.DARKNESS_MOON_SYNC);
   if (moonSync) {
     const moonResult = calculateMoonIllumination(adjustedDarkness);
     adjustedDarkness -= moonResult.reduction;
   }
-  const weatherSync = game.settings.get(MODULE.ID, SETTINGS.DARKNESS_WEATHER_SYNC);
+  const weatherSync = resolveSceneSync(scene, SCENE_FLAGS.DARKNESS_WEATHER_SYNC, SETTINGS.DARKNESS_WEATHER_SYNC);
   if (weatherSync) {
     const currentWeather = WeatherManager.getCurrentWeather?.(null, scene);
     const weatherDarknessPenalty = currentWeather?.darknessPenalty ?? 0;
@@ -198,7 +198,7 @@ function lerpHue(a, b, t) {
  * @returns {{base: {hue: number|null, intensity: number|null, saturation: number|null, luminosity: number|null, shadows: number|null}, dark: {hue: number|null, intensity: number|null, saturation: number|null, luminosity: number|null, shadows: number|null}}|null} - environment config
  */
 export function calculateEnvironmentLighting(scene) {
-  const colorShiftSync = game.settings.get(MODULE.ID, SETTINGS.COLOR_SHIFT_SYNC);
+  const colorShiftSync = resolveSceneSync(scene, SCENE_FLAGS.COLOR_SHIFT_SYNC, SETTINGS.COLOR_SHIFT_SYNC);
   const activeZone = WeatherManager.getActiveZone?.(null, scene);
   const currentWeather = WeatherManager.getCurrentWeather?.(null, scene);
   let base = { hue: null, intensity: null, saturation: null, luminosity: null, shadows: null };
@@ -218,7 +218,7 @@ export function calculateEnvironmentLighting(scene) {
     base = { hue: timeColor.hue, intensity: scaledIntensity, saturation: null, luminosity: timeColor.luminosity, shadows: null };
     dark = { hue: timeColor.hue, intensity: scaledIntensity, saturation: null, luminosity: timeColor.luminosity, shadows: null };
   }
-  const moonSync = game.settings.get(MODULE.ID, SETTINGS.DARKNESS_MOON_SYNC);
+  const moonSync = resolveSceneSync(scene, SCENE_FLAGS.DARKNESS_MOON_SYNC, SETTINGS.DARKNESS_MOON_SYNC);
   if (moonSync) {
     const baseDarkness = getCurrentDarkness();
     if (baseDarkness > 0.5) {
@@ -267,13 +267,13 @@ export function calculateEnvironmentLighting(scene) {
 
 /**
  * Build environment lighting update data for a scene.
- * @param {object} _scene - The scene to get update data for (unused, kept for future per-scene overrides)
+ * @param {object} scene - The scene whose per-scene ambience override is resolved
  * @param {{cycle: boolean|null, base: {hue: number|null, intensity: number|null, saturation: number|null, luminosity: number|null, shadows: number|null}, dark: {hue: number|null, intensity: number|null, saturation: number|null, luminosity: number|null, shadows: number|null}}|null} lighting - Lighting overrides
  * @returns {object|null} Update data object, or null if ambience sync is off or not primary GM
  */
-function buildEnvironmentUpdateData(_scene, lighting) {
+function buildEnvironmentUpdateData(scene, lighting) {
   if (!CalendariaSocket.isPrimaryGM()) return null;
-  const ambienceSync = game.settings.get(MODULE.ID, SETTINGS.AMBIENCE_SYNC);
+  const ambienceSync = resolveSceneSync(scene, SCENE_FLAGS.AMBIENCE_SYNC, SETTINGS.AMBIENCE_SYNC);
   if (!ambienceSync) return null;
   const base = lighting?.base ?? {};
   const dark = lighting?.dark ?? {};
@@ -329,11 +329,21 @@ export async function updateDarknessFromWorldTime(worldTime, dt) {
  * @returns {boolean} True if darkness should be synced
  */
 function shouldSyncSceneDarkness(scene) {
-  const sceneFlag = scene.getFlag(MODULE.ID, SCENE_FLAGS.DARKNESS_SYNC);
-  if (sceneFlag === true || sceneFlag === 'enabled') return true;
-  if (sceneFlag === false || sceneFlag === 'disabled') return false;
-  const globalSetting = game.settings.get(MODULE.ID, SETTINGS.DARKNESS_SYNC);
-  return globalSetting;
+  return resolveSceneSync(scene, SCENE_FLAGS.DARKNESS_SYNC, SETTINGS.DARKNESS_SYNC);
+}
+
+/**
+ * Resolve a per-scene sync override against its global setting.
+ * @param {object} scene - The scene to check (may be null)
+ * @param {string} flagKey - SCENE_FLAGS key holding 'default' | 'enabled' | 'disabled'
+ * @param {string} globalSetting - SETTINGS key used as the fallback default
+ * @returns {boolean} Whether the sync is enabled for this scene
+ */
+function resolveSceneSync(scene, flagKey, globalSetting) {
+  const flag = scene?.getFlag?.(MODULE.ID, flagKey);
+  if (flag === true || flag === 'enabled') return true;
+  if (flag === false || flag === 'disabled') return false;
+  return game.settings.get(MODULE.ID, globalSetting);
 }
 
 /**

@@ -1071,7 +1071,7 @@ export const CalendariaAPI = {
    * @param {string} options.label - Display name
    * @param {string} [options.color] - Hex color (default '#868e96')
    * @param {string} [options.icon] - FontAwesome icon class (default 'fas fa-tag')
-   * @param {object} [options.defaults] - Default values: { allDay, displayStyle, visibility, reminderType, reminderOffset, hasDuration, duration, macro, content }
+   * @param {object} [options.defaults] - Default values: { allDay, displayStyle, visibility, reminderType, reminderOffset, reminderUnit, hasDuration, duration, macro, content }
    * @returns {Promise<object>} The created preset
    */
   async addPreset({ label, color, icon, defaults } = {}) {
@@ -1203,7 +1203,7 @@ export const CalendariaAPI = {
       formClass: '',
       year: current.year,
       isMonthless,
-      months: isMonthless ? [] : calendar.monthsArray.map((m, i) => ({ index: i, name: game.i18n.localize(m.name), selected: i === currentMonth })),
+      months: isMonthless ? [] : calendar.monthsArray.map((m, i) => ({ index: i, name: _loc(m.name), selected: i === currentMonth })),
       days: Array.from({ length: maxDays }, (_, i) => i + 1),
       currentDay,
       showTime,
@@ -1213,7 +1213,7 @@ export const CalendariaAPI = {
       maxMinute: minutesPerHour - 1
     });
     const dialogOptions = {
-      window: { title: options.title ?? game.i18n.localize('CALENDARIA.Note.SelectDateTitle') },
+      window: { title: options.title ?? _loc('CALENDARIA.Note.SelectDateTitle') },
       content,
       ok: {
         callback: (_event, button) => {

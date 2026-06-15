@@ -1,6 +1,6 @@
 import { CalendarManager } from '../calendar/_module.mjs';
 import { MODULE } from '../constants.mjs';
-import { canAddNotes, canChangeActiveCalendar, canChangeDateTime, format, localize, log } from '../utils/_module.mjs';
+import { canAddNotes, canChangeActiveCalendar, canChangeDateTime, log } from '../utils/_module.mjs';
 import {
   cmdAdvance,
   cmdCalendar,
@@ -68,7 +68,7 @@ function wrapContent(content) {
  * @returns {object} Chat message data
  */
 function wrapResult(result) {
-  if (!result) return { content: wrapContent(localize('CALENDARIA.ChatCommand.NoCalendar')) };
+  if (!result) return { content: wrapContent(_loc('CALENDARIA.ChatCommand.NoCalendar')) };
   if (!result.content) return {};
   return { content: wrapContent(result.content) };
 }
@@ -90,7 +90,7 @@ function registerCommands() {
     {
       name: '/date',
       aliases: ['/d'],
-      description: localize('CALENDARIA.ChatCommander.DateDesc'),
+      description: _loc('CALENDARIA.ChatCommander.DateDesc'),
       icon: '<i class="fas fa-calendar-day"></i>',
       requiredRole: 'NONE',
       callback: (_chat, parameters) => wrapResult(cmdDate(parameters?.trim() || '')),
@@ -99,7 +99,7 @@ function registerCommands() {
     {
       name: '/time',
       aliases: ['/t'],
-      description: localize('CALENDARIA.ChatCommander.TimeDesc'),
+      description: _loc('CALENDARIA.ChatCommander.TimeDesc'),
       icon: '<i class="fas fa-clock"></i>',
       requiredRole: 'NONE',
       callback: (_chat, parameters) => wrapResult(cmdTime(parameters?.trim() || '')),
@@ -108,7 +108,7 @@ function registerCommands() {
     {
       name: '/datetime',
       aliases: ['/dt'],
-      description: localize('CALENDARIA.ChatCommander.DateTimeDesc'),
+      description: _loc('CALENDARIA.ChatCommander.DateTimeDesc'),
       icon: '<i class="fas fa-calendar-clock"></i>',
       requiredRole: 'NONE',
       callback: (_chat, parameters) => wrapResult(cmdDateTime(parameters?.trim() || '')),
@@ -117,7 +117,7 @@ function registerCommands() {
     {
       name: '/note',
       aliases: ['/n'],
-      description: localize('CALENDARIA.ChatCommander.NoteDesc'),
+      description: _loc('CALENDARIA.ChatCommander.NoteDesc'),
       icon: '<i class="fas fa-sticky-note"></i>',
       requiredRole: 'NONE',
       callback: async (_chat, parameters) => {
@@ -133,7 +133,7 @@ function registerCommands() {
     },
     {
       name: '/weather',
-      description: localize('CALENDARIA.ChatCommander.WeatherDesc'),
+      description: _loc('CALENDARIA.ChatCommander.WeatherDesc'),
       icon: '<i class="fas fa-cloud-sun"></i>',
       requiredRole: 'NONE',
       callback: (_chat, parameters) => wrapResult(cmdWeather(parameters?.trim() || '')),
@@ -141,28 +141,28 @@ function registerCommands() {
     },
     {
       name: '/moon',
-      description: localize('CALENDARIA.ChatCommander.MoonDesc'),
+      description: _loc('CALENDARIA.ChatCommander.MoonDesc'),
       icon: '<i class="fas fa-moon"></i>',
       requiredRole: 'NONE',
       callback: (_chat, parameters) => wrapResult(cmdMoon(parameters?.trim() || ''))
     },
     {
       name: '/season',
-      description: localize('CALENDARIA.ChatCommander.SeasonDesc'),
+      description: _loc('CALENDARIA.ChatCommander.SeasonDesc'),
       icon: '<i class="fas fa-leaf"></i>',
       requiredRole: 'NONE',
       callback: () => wrapResult(cmdSeason())
     },
     {
       name: '/today',
-      description: localize('CALENDARIA.ChatCommander.TodayDesc'),
+      description: _loc('CALENDARIA.ChatCommander.TodayDesc'),
       icon: '<i class="fas fa-list"></i>',
       requiredRole: 'NONE',
       callback: () => wrapResult(cmdToday())
     },
     {
       name: '/sunrise',
-      description: localize('CALENDARIA.ChatCommander.SunriseDesc'),
+      description: _loc('CALENDARIA.ChatCommander.SunriseDesc'),
       icon: '<i class="fas fa-sun"></i>',
       requiredRole: 'NONE',
       callback: (_chat, parameters) => wrapResult(cmdSunrise(parameters?.trim() || '')),
@@ -170,7 +170,7 @@ function registerCommands() {
     },
     {
       name: '/sunset',
-      description: localize('CALENDARIA.ChatCommander.SunsetDesc'),
+      description: _loc('CALENDARIA.ChatCommander.SunsetDesc'),
       icon: '<i class="fas fa-moon"></i>',
       requiredRole: 'NONE',
       callback: (_chat, parameters) => wrapResult(cmdSunset(parameters?.trim() || '')),
@@ -179,7 +179,7 @@ function registerCommands() {
     {
       name: '/advance',
       aliases: ['/adv'],
-      description: localize('CALENDARIA.ChatCommander.AdvanceDesc'),
+      description: _loc('CALENDARIA.ChatCommander.AdvanceDesc'),
       icon: '<i class="fas fa-forward"></i>',
       requiredRole: 'GAMEMASTER',
       callback: async (_chat, parameters) => {
@@ -193,7 +193,7 @@ function registerCommands() {
     },
     {
       name: '/setdate',
-      description: localize('CALENDARIA.ChatCommander.SetDateDesc'),
+      description: _loc('CALENDARIA.ChatCommander.SetDateDesc'),
       icon: '<i class="fas fa-calendar-plus"></i>',
       requiredRole: 'GAMEMASTER',
       callback: async (_chat, parameters) => {
@@ -206,7 +206,7 @@ function registerCommands() {
     },
     {
       name: '/settime',
-      description: localize('CALENDARIA.ChatCommander.SetTimeDesc'),
+      description: _loc('CALENDARIA.ChatCommander.SetTimeDesc'),
       icon: '<i class="fas fa-clock"></i>',
       requiredRole: 'GAMEMASTER',
       callback: async (_chat, parameters) => {
@@ -220,7 +220,7 @@ function registerCommands() {
     {
       name: '/calendar',
       aliases: ['/cal'],
-      description: localize('CALENDARIA.ChatCommander.CalendarDesc'),
+      description: _loc('CALENDARIA.ChatCommander.CalendarDesc'),
       icon: '<i class="fas fa-calendar"></i>',
       requiredRole: 'NONE',
       callback: () => wrapResult(cmdCalendar())
@@ -228,14 +228,14 @@ function registerCommands() {
     {
       name: '/calendars',
       aliases: ['/cals'],
-      description: localize('CALENDARIA.ChatCommander.CalendarsDesc'),
+      description: _loc('CALENDARIA.ChatCommander.CalendarsDesc'),
       icon: '<i class="fas fa-calendars"></i>',
       requiredRole: 'NONE',
       callback: () => wrapResult(cmdCalendars())
     },
     {
       name: '/switchcal',
-      description: localize('CALENDARIA.ChatCommander.SwitchCalDesc'),
+      description: _loc('CALENDARIA.ChatCommander.SwitchCalDesc'),
       icon: '<i class="fas fa-exchange-alt"></i>',
       requiredRole: 'GAMEMASTER',
       callback: async (_chat, parameters) => {
@@ -249,14 +249,14 @@ function registerCommands() {
     },
     {
       name: '/festival',
-      description: localize('CALENDARIA.ChatCommander.FestivalDesc'),
+      description: _loc('CALENDARIA.ChatCommander.FestivalDesc'),
       icon: '<i class="fas fa-star"></i>',
       requiredRole: 'NONE',
       callback: () => wrapResult(cmdFestival())
     },
     {
       name: '/weekday',
-      description: localize('CALENDARIA.ChatCommander.WeekdayDesc'),
+      description: _loc('CALENDARIA.ChatCommander.WeekdayDesc'),
       icon: '<i class="fas fa-calendar-week"></i>',
       requiredRole: 'NONE',
       callback: () => wrapResult(cmdWeekday())
@@ -264,7 +264,7 @@ function registerCommands() {
     {
       name: '/cycle',
       aliases: ['/zodiac'],
-      description: localize('CALENDARIA.ChatCommander.CycleDesc'),
+      description: _loc('CALENDARIA.ChatCommander.CycleDesc'),
       icon: '<i class="fas fa-yin-yang"></i>',
       requiredRole: 'NONE',
       callback: () => wrapResult(cmdCycle())
@@ -272,7 +272,7 @@ function registerCommands() {
     {
       name: '/forecast',
       aliases: ['/fc'],
-      description: localize('CALENDARIA.ChatCommander.ForecastDesc'),
+      description: _loc('CALENDARIA.ChatCommander.ForecastDesc'),
       icon: '<i class="fas fa-cloud-sun-rain"></i>',
       requiredRole: 'NONE',
       callback: (_chat, parameters) => wrapResult(cmdForecast(parameters?.trim() || '')),
@@ -281,7 +281,7 @@ function registerCommands() {
     {
       name: '/weatherprob',
       aliases: ['/wp'],
-      description: localize('CALENDARIA.ChatCommander.WeatherProbDesc'),
+      description: _loc('CALENDARIA.ChatCommander.WeatherProbDesc'),
       icon: '<i class="fas fa-chart-pie"></i>',
       requiredRole: 'NONE',
       callback: (_chat, parameters) => wrapResult(cmdWeatherProb(parameters?.trim() || '')),
@@ -289,7 +289,7 @@ function registerCommands() {
     },
     {
       name: '/enrichers',
-      description: localize('CALENDARIA.ChatCommander.EnrichersDesc'),
+      description: _loc('CALENDARIA.ChatCommander.EnrichersDesc'),
       icon: '<i class="fas fa-wand-magic-sparkles"></i>',
       requiredRole: 'NONE',
       callback: async () => {
@@ -330,7 +330,7 @@ function autocompleteFormat(command, presets, parameters) {
   for (const preset of filtered) {
     entries.push(game.chatCommands.createCommandElement(`${command} ${preset.key}`, `<span class="command-title">${preset.key}</span> <span class="notes">${preset.example}</span>`));
   }
-  if (!term) entries.push(game.chatCommands.createInfoElement(`<span class="notes">${localize('CALENDARIA.ChatCommander.FormatTokensHint')}</span>`));
+  if (!term) entries.push(game.chatCommands.createInfoElement(`<span class="notes">${_loc('CALENDARIA.ChatCommander.FormatTokensHint')}</span>`));
   return entries;
 }
 
@@ -395,8 +395,8 @@ function autocompleteSunset(_menu, _alias, parameters) {
  */
 function autocompleteWeather() {
   return [
-    game.chatCommands.createCommandElement('/weather', `<span class="command-title">${localize('CALENDARIA.ChatCommander.WeatherCurrent')}</span>`),
-    game.chatCommands.createCommandElement('/weather [year] [month] [day]', `<span class="command-title">${localize('CALENDARIA.ChatCommander.WeatherHistorical')}</span>`)
+    game.chatCommands.createCommandElement('/weather', `<span class="command-title">${_loc('CALENDARIA.ChatCommander.WeatherCurrent')}</span>`),
+    game.chatCommands.createCommandElement('/weather [year] [month] [day]', `<span class="command-title">${_loc('CALENDARIA.ChatCommander.WeatherHistorical')}</span>`)
   ];
 }
 
@@ -416,13 +416,13 @@ function autocompleteAdvance(_menu, _alias, parameters) {
     entries.push(
       game.chatCommands.createCommandElement(
         `/advance ${base} cinematic=true`,
-        `<span class="command-title">${base} cinematic=true</span> <span class="notes">${localize('CALENDARIA.ChatCommander.AdvanceCinematicTrue')}</span>`
+        `<span class="command-title">${base} cinematic=true</span> <span class="notes">${_loc('CALENDARIA.ChatCommander.AdvanceCinematicTrue')}</span>`
       )
     );
     entries.push(
       game.chatCommands.createCommandElement(
         `/advance ${base} cinematic=false`,
-        `<span class="command-title">${base} cinematic=false</span> <span class="notes">${localize('CALENDARIA.ChatCommander.AdvanceCinematicFalse')}</span>`
+        `<span class="command-title">${base} cinematic=false</span> <span class="notes">${_loc('CALENDARIA.ChatCommander.AdvanceCinematicFalse')}</span>`
       )
     );
     return entries;
@@ -430,7 +430,7 @@ function autocompleteAdvance(_menu, _alias, parameters) {
   const presets = ['1 hour', '8 hours', '1 day', '1 week', '1 month', '1 year'];
   const filtered = term ? presets.filter((p) => p.toLowerCase().includes(term.toLowerCase())) : presets;
   for (const p of filtered) entries.push(game.chatCommands.createCommandElement(`/advance ${p}`, `<span class="command-title">${p}</span>`));
-  entries.push(game.chatCommands.createInfoElement(`<span class="notes">${localize('CALENDARIA.ChatCommander.AdvanceCinematicHint')}</span>`));
+  entries.push(game.chatCommands.createInfoElement(`<span class="notes">${_loc('CALENDARIA.ChatCommander.AdvanceCinematicHint')}</span>`));
   return entries;
 }
 
@@ -445,7 +445,7 @@ function autocompleteForecast(_menu, _alias, _parameters) {
   const maxDays = game.settings.get(MODULE.ID, 'forecastDays') ?? 7;
   const entries = [];
   for (let i = 1; i <= maxDays; i++) {
-    const label = i === 1 ? format('CALENDARIA.ChatCommander.ForecastDay', { count: i }) : format('CALENDARIA.ChatCommander.ForecastDays', { count: i });
+    const label = i === 1 ? _loc('CALENDARIA.ChatCommander.ForecastDay', { count: i }) : _loc('CALENDARIA.ChatCommander.ForecastDays', { count: i });
     entries.push(game.chatCommands.createCommandElement(`/forecast ${i}`, `<span class="command-title">${label}</span>`));
   }
   return entries;
@@ -463,9 +463,9 @@ function autocompleteWeatherProb(_menu, _alias, parameters) {
   if (!calendar) return [];
   const seasons = calendar.seasonsArray ?? [];
   const term = parameters?.toLowerCase() || '';
-  const filtered = seasons.filter((s) => localize(s.name).toLowerCase().includes(term));
+  const filtered = seasons.filter((s) => _loc(s.name).toLowerCase().includes(term));
   return filtered.map((s) => {
-    const name = localize(s.name);
+    const name = _loc(s.name);
     return game.chatCommands.createCommandElement(`/weatherprob ${name}`, `<span class="command-title">${name}</span>`);
   });
 }

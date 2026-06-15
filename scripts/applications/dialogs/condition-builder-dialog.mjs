@@ -12,7 +12,6 @@ import {
   unwrapFromRootGroup,
   wrapInRootGroup
 } from '../../notes/_module.mjs';
-import { localize } from '../../utils/_module.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -121,8 +120,8 @@ export class ConditionBuilderDialog extends HandlebarsApplicationMixin(Applicati
     const entry = parent.children[index];
     if (isGroup(entry) && entry.children?.length > 0) {
       const confirmed = await foundry.applications.api.DialogV2.confirm({
-        window: { title: localize('CALENDARIA.Condition.Builder.ConfirmDeleteTitle') },
-        content: `<p>${localize('CALENDARIA.Condition.Builder.ConfirmDeleteGroup')}</p>`,
+        window: { title: _loc('CALENDARIA.Condition.Builder.ConfirmDeleteTitle') },
+        content: `<p>${_loc('CALENDARIA.Condition.Builder.ConfirmDeleteGroup')}</p>`,
         yes: { default: true },
         rejectClose: false
       });

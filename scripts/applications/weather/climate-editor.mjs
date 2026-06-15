@@ -1,7 +1,6 @@
 import { CalendarManager } from '../../calendar/_module.mjs';
 import { COMPASS_DIRECTIONS, MODULE, SETTINGS, TEMPLATES, WIND_SPEEDS } from '../../constants.mjs';
 import { CalendariaCalendar } from '../../data/_module.mjs';
-import { format, localize } from '../../utils/_module.mjs';
 import { ALL_PRESETS, WEATHER_CATEGORIES, fromDisplayDelta, fromDisplayUnit, getAllPresets, getPresetAlias, setPresetAlias, toDisplayDelta, toDisplayUnit } from '../../weather/_module.mjs';
 import { WeatherProbabilityDialog } from '../_module.mjs';
 
@@ -93,8 +92,8 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         contentClasses: ['standard-form'],
         title:
           mode === 'season'
-            ? format('CALENDARIA.Editor.Season.Climate.Title', { name: localize(options.data?.name ?? '') })
-            : format('CALENDARIA.Editor.Weather.Zone.EditTitle', { name: options.data?.name ?? '' })
+            ? _loc('CALENDARIA.Editor.Season.Climate.Title', { name: _loc(options.data?.name ?? '') })
+            : _loc('CALENDARIA.Editor.Weather.Zone.EditTitle', { name: options.data?.name ?? '' })
       }
     });
     this.#mode = mode;
@@ -159,7 +158,7 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         const hasAlias = !!(alias.name || alias.abbreviation || alias.icon || colorOverridden);
         return {
           seasonName: season,
-          label: localize(season),
+          label: _loc(season),
           min: formatMin,
           max: formatMax,
           isRelativeMin,
@@ -174,7 +173,7 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       });
     }
     const selectedSeason = isZoneMode ? this.#selectedSeason : null;
-    const seasonOptions = isZoneMode ? this.#seasonNames.map((name) => ({ value: name, label: localize(name), selected: name === selectedSeason })) : [];
+    const seasonOptions = isZoneMode ? this.#seasonNames.map((name) => ({ value: name, label: _loc(name), selected: name === selectedSeason })) : [];
     let selectedSeasonClimate = null;
     if (isZoneMode && selectedSeason) {
       const calendarSeasons = this.#calendarData?.seasons?.values ?? CalendarManager.getCalendar(this.#calendarId)?.seasons?.values ?? {};
@@ -205,7 +204,7 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
               id: preset.id,
               icon: preset.icon,
               color: preset.color,
-              label: localize(preset.label),
+              label: _loc(preset.label),
               alias,
               hasAlias: !!alias,
               enabled: effectiveEnabled,
@@ -228,11 +227,11 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
             id: preset.id,
             icon: preset.icon,
             color: preset.color,
-            label: localize(preset.label),
+            label: _loc(preset.label),
             chance: existing?.chance ?? ''
           };
         });
-        return { label: localize(cat.label), presets };
+        return { label: _loc(cat.label), presets };
       })
       .filter(Boolean);
     let latitude = this.#data.latitude ?? null;
@@ -306,7 +305,7 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     let windSpeedMax = null;
     if (isZoneMode) {
       const dirWeights = this.#data.windDirections ?? {};
-      windDirections = Object.entries(COMPASS_DIRECTIONS).map(([id]) => ({ id, label: game.i18n.localize(`CALENDARIA.Wind.${id}`), weight: dirWeights[id] ?? '' }));
+      windDirections = Object.entries(COMPASS_DIRECTIONS).map(([id]) => ({ id, label: _loc(`CALENDARIA.Wind.${id}`), weight: dirWeights[id] ?? '' }));
       windSpeedMin = this.#data.windSpeedRange?.min ?? null;
       windSpeedMax = this.#data.windSpeedRange?.max ?? null;
     }
@@ -344,8 +343,8 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       windDirections,
       windSpeedMin,
       windSpeedMax,
-      windSpeedMinOptions: Object.values(WIND_SPEEDS).map((w) => ({ value: w.value, label: localize(w.label), selected: w.value === windSpeedMin })),
-      windSpeedMaxOptions: Object.values(WIND_SPEEDS).map((w) => ({ value: w.value, label: localize(w.label), selected: w.value === windSpeedMax }))
+      windSpeedMinOptions: Object.values(WIND_SPEEDS).map((w) => ({ value: w.value, label: _loc(w.label), selected: w.value === windSpeedMin })),
+      windSpeedMaxOptions: Object.values(WIND_SPEEDS).map((w) => ({ value: w.value, label: _loc(w.label), selected: w.value === windSpeedMax }))
     };
   }
 

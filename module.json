@@ -10,10 +10,10 @@
   "bugs": "https://github.com/Sayshal/calendaria/issues",
   "changelog": "https://github.com/Sayshal/calendaria/releases",
   "compatibility": {
-    "minimum": "13.351",
-    "verified": "14.361"
+    "minimum": "14",
+    "verified": "14.364"
   },
-  "description": "A FVTT Module to handle calendar operations, passage of real time, and automated effect expiry.",
+  "description": "Your campaign's time deserves more than a number in the corner. Calendaria gives your world a calendar and clock, with an animated HUD that tracks the sun and moons and dims scenes at night. Schedule notes that fire on conditions like \"every full moon\", roll weather across seasons and zones, and jump ahead with a table-wide cinematic time-skip.",
   "documentTypes": {
     "JournalEntryPage": {
       "calendarnote": {

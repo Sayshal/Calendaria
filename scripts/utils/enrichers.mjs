@@ -232,8 +232,8 @@ function parseDateFromValues(values) {
     if (!isNaN(values[i])) continue;
     const val = values[i].toLowerCase();
     const idx = months.findIndex((m) => {
-      const name = game.i18n.localize(m.name).toLowerCase();
-      const abbr = m.abbreviation ? game.i18n.localize(m.abbreviation).toLowerCase() : '';
+      const name = _loc(m.name).toLowerCase();
+      const abbr = m.abbreviation ? _loc(m.abbreviation).toLowerCase() : '';
       return name === val || abbr === val;
     });
     if (idx >= 0) {
@@ -309,7 +309,7 @@ function createElement(type, content, configStr, isLive = false, iconClass = nul
 function createErrorElement(messageKey, data = {}) {
   const span = document.createElement('span');
   span.classList.add('calendaria-enricher', 'calendaria-enricher--error');
-  const message = Object.keys(data).length ? game.i18n.format(messageKey, data) : game.i18n.localize(messageKey);
+  const message = Object.keys(data).length ? _loc(messageKey, data) : _loc(messageKey);
   span.textContent = message;
   span.dataset.tooltip = message;
   return span;
@@ -382,10 +382,10 @@ function formatPercent(value) {
  * @returns {string} Localized countdown string
  */
 function formatCountdown(days) {
-  if (days === 0) return game.i18n.localize('CALENDARIA.Common.Today');
+  if (days === 0) return _loc('CALENDARIA.Common.Today');
   const abs = Math.abs(days);
-  if (days > 0) return abs === 1 ? game.i18n.localize('CALENDARIA.Enricher.Label.DayUntil') : game.i18n.format('CALENDARIA.Enricher.Label.DaysUntil', { count: abs });
-  return abs === 1 ? game.i18n.localize('CALENDARIA.Enricher.Label.DayAgo') : game.i18n.format('CALENDARIA.Enricher.Label.DaysAgo', { count: abs });
+  if (days > 0) return abs === 1 ? _loc('CALENDARIA.Enricher.Label.DayUntil') : _loc('CALENDARIA.Enricher.Label.DaysUntil', { count: abs });
+  return abs === 1 ? _loc('CALENDARIA.Enricher.Label.DayAgo') : _loc('CALENDARIA.Enricher.Label.DaysAgo', { count: abs });
 }
 
 /**
@@ -445,7 +445,7 @@ function appendWeatherIcon(parent, iconClass) {
  */
 function getWindLabel(speed) {
   const entry = Object.values(WIND_SPEEDS).find((w) => w.value === speed);
-  return game.i18n.localize(entry?.label || WIND_SPEEDS.CALM.label);
+  return _loc(entry?.label || WIND_SPEEDS.CALM.label);
 }
 
 /**
@@ -477,26 +477,26 @@ function enrichDate(config, label) {
   const { calendar, components } = resolveCalendar(config);
   if (config.approx) {
     const formatted = formatDate(null, 'approxDate', calendar);
-    const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.TimeOfYear', { value: formatted });
+    const tooltip = _loc('CALENDARIA.Enricher.Tooltip.TimeOfYear', { value: formatted });
     return createElement('date', label || formatted, 'approx=true', true, 'fa-calendar', tooltip);
   }
   if (config.time) {
     const formatted = formatDate(null, 'datetime24', calendar);
     const current = getCurrentDateTime(calendar, components);
-    const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.CurrentDateTime', { value: formatted });
+    const tooltip = _loc('CALENDARIA.Enricher.Tooltip.CurrentDateTime', { value: formatted });
     return createContentLink('date', label || formatted, { calYear: current.year, calMonth: current.month, calDay: current.day }, 'fa-calendar-days', tooltip, 'time=true');
   }
   if (config.values.length > 0) {
     const date = parseDateFromValues(config.values);
     if (!date) return createErrorElement('CALENDARIA.Enricher.Error.InvalidDate');
     const formatted = formatDate(date, config.format || 'dateLong', calendar);
-    const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.Date', { value: formatted });
+    const tooltip = _loc('CALENDARIA.Enricher.Tooltip.Date', { value: formatted });
     return createContentLink('date', label || formatted, { calYear: date.year, calMonth: date.month, calDay: date.day }, 'fa-calendar', tooltip);
   }
   const preset = config.format || 'dateLong';
   const formatted = formatDate(null, preset, calendar);
   const current = getCurrentDateTime(calendar, components);
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.CurrentDate', { value: formatted });
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.CurrentDate', { value: formatted });
   return createContentLink('date', label || formatted, { calYear: current.year, calMonth: current.month, calDay: current.day }, 'fa-calendar', tooltip, `format=${preset}`);
 }
 
@@ -510,12 +510,12 @@ function enrichTime(config, label) {
   const { calendar } = resolveCalendar(config);
   if (config.approx) {
     const formatted = formatDate(null, 'approxTime', calendar);
-    const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.TimeOfDay', { value: formatted });
+    const tooltip = _loc('CALENDARIA.Enricher.Tooltip.TimeOfDay', { value: formatted });
     return createElement('time', label || formatted, 'approx=true', true, 'fa-clock', tooltip);
   }
   const preset = config['12h'] ? 'time12' : 'time24';
   const formatted = formatDate(null, preset, calendar);
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.CurrentTime', { value: formatted });
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.CurrentTime', { value: formatted });
   const configStr = config['12h'] ? '12h=true' : '';
   return createElement('time', label || formatted, configStr, true, 'fa-clock', tooltip);
 }
@@ -531,7 +531,7 @@ function enrichWeekday(config, label) {
   const weekday = calendar?.getWeekdayForDate?.();
   if (!weekday) return createErrorElement('CALENDARIA.Enricher.Error.NoCalendar');
   const text = label || weekday.name;
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.Weekday', { value: weekday.name });
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.Weekday', { value: weekday.name });
   return createElement('weekday', text, '', true, 'fa-calendar-week', tooltip);
 }
 
@@ -546,8 +546,8 @@ function enrichSeason(config, label) {
   const rawSeason = calendar?.getCurrentSeason?.(components);
   const season = WeatherManager.applySeasonAlias(rawSeason, WeatherManager.getActiveZone?.(null, game.scenes?.active));
   if (!season) return createErrorElement('CALENDARIA.Enricher.Error.NoSeasons');
-  const name = game.i18n.localize(season.name);
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.Season', { value: name });
+  const name = _loc(season.name);
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.Season', { value: name });
   return createElement('season', label || name, '', true, season.icon || 'fa-leaf', tooltip);
 }
 
@@ -564,8 +564,8 @@ function enrichEra(config, label) {
   const current = getCurrentDateTime(calendar, components);
   const match = eras.find((e) => current.year >= e.startYear && (e.endYear == null || current.year <= e.endYear));
   if (!match) return createErrorElement('CALENDARIA.Enricher.Error.NoEras');
-  const name = game.i18n.localize(match.name);
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.Era', { value: name });
+  const name = _loc(match.name);
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.Era', { value: name });
   return createElement('era', label || name, '', true, 'fa-landmark', tooltip);
 }
 
@@ -579,8 +579,8 @@ function enrichCycle(config, label) {
   const { calendar } = resolveCalendar(config);
   const result = calendar?.getCycleValues();
   if (!result) return createErrorElement('CALENDARIA.Enricher.Error.NoCycles');
-  const text = result.values.map((v) => game.i18n.localize(v.entryName)).join(', ');
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.Cycle', { value: text });
+  const text = result.values.map((v) => _loc(v.entryName)).join(', ');
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.Cycle', { value: text });
   return createElement('cycle', label || text, '', true, 'fa-rotate', tooltip);
 }
 
@@ -594,12 +594,12 @@ function enrichFestival(config, label) {
   const { calendar, components } = resolveCalendar(config);
   const festival = calendar?.findFestivalDay?.();
   if (!festival) {
-    const text = label || game.i18n.localize('CALENDARIA.Enricher.Label.NoFestival');
-    const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.Festival', { value: game.i18n.localize('CALENDARIA.Enricher.Label.NoFestival') });
+    const text = label || _loc('CALENDARIA.Enricher.Label.NoFestival');
+    const tooltip = _loc('CALENDARIA.Enricher.Tooltip.Festival', { value: _loc('CALENDARIA.Enricher.Label.NoFestival') });
     return createElement('festival', text, '', true, 'fa-champagne-glasses', tooltip);
   }
-  const name = game.i18n.localize(festival.name);
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.Festival', { value: name });
+  const name = _loc(festival.name);
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.Festival', { value: name });
   const notes = searchNotes(name);
   const festivalNote = notes.find((n) => n.flagData?.linkedFestival);
   if (festivalNote) return createContentLink('festival', label || name, { calPageId: festivalNote.id }, 'fa-champagne-glasses', tooltip, '');
@@ -618,8 +618,8 @@ function enrichRestDay(config, label) {
   const weekday = calendar?.getWeekdayForDate?.();
   const isRest = weekday?.isRestDay ?? false;
   const key = isRest ? 'CALENDARIA.Common.RestDay' : 'CALENDARIA.Enricher.Label.WorkDay';
-  const text = game.i18n.localize(key);
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.DayType', { value: text });
+  const text = _loc(key);
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.DayType', { value: text });
   return createElement('restday', label || text, '', true, 'fa-couch', tooltip);
 }
 
@@ -636,9 +636,9 @@ function enrichCountdown(config, label) {
   const current = getCurrentDateTime(calendar, components);
   const days = daysBetween(toInternal(current), toInternal(target));
   const abs = Math.abs(days);
-  const unit = abs === 1 ? game.i18n.localize('CALENDARIA.Common.UnitDay') : game.i18n.localize('CALENDARIA.Common.UnitDays');
+  const unit = abs === 1 ? _loc('CALENDARIA.Common.UnitDay') : _loc('CALENDARIA.Common.UnitDays');
   const text = label || formatCountdown(days);
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.Countdown', { date: formatDate(target, 'dateLong', calendar), value: `${abs} ${unit}` });
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.Countdown', { date: formatDate(target, 'dateLong', calendar), value: `${abs} ${unit}` });
   return createContentLink('countdown', text, { calYear: target.year, calMonth: target.month, calDay: target.day }, 'fa-hourglass-half', tooltip, config.raw);
 }
 
@@ -691,8 +691,8 @@ function enrichCountup(config, label) {
   const isUntil = isStatic && totalDays > 0;
   const tooltipDate = formatDate(isStatic ? endDate : target, 'dateLong', calendar);
   const formatTooltip = (value) =>
-    isUntil ? game.i18n.format('CALENDARIA.Enricher.Tooltip.TimeUntil', { target: tooltipDate, value }) : game.i18n.format('CALENDARIA.Enricher.Tooltip.TimeSince', { date: tooltipDate, value });
-  const unit = absDays === 1 ? game.i18n.localize('CALENDARIA.Common.UnitDay') : game.i18n.localize('CALENDARIA.Common.UnitDays');
+    isUntil ? _loc('CALENDARIA.Enricher.Tooltip.TimeUntil', { target: tooltipDate, value }) : _loc('CALENDARIA.Enricher.Tooltip.TimeSince', { date: tooltipDate, value });
+  const unit = absDays === 1 ? _loc('CALENDARIA.Common.UnitDay') : _loc('CALENDARIA.Common.UnitDays');
   const dataset = { calYear: target.year, calMonth: target.month, calDay: target.day };
   const liveConfig = isStatic ? null : config.raw;
   if (config.relative) {
@@ -717,8 +717,8 @@ function enrichBetween(config, label) {
   const useMonths = config.unit === 'months';
   if (useMonths) {
     const months = Math.abs(monthsBetween(toInternal(dates.date1), toInternal(dates.date2)));
-    const unit = months === 1 ? game.i18n.localize('CALENDARIA.Common.UnitMonth') : game.i18n.localize('CALENDARIA.Common.UnitMonths');
-    const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.DaysBetween', {
+    const unit = months === 1 ? _loc('CALENDARIA.Common.UnitMonth') : _loc('CALENDARIA.Common.UnitMonths');
+    const tooltip = _loc('CALENDARIA.Enricher.Tooltip.DaysBetween', {
       value: `${months} ${unit}`,
       from: formatDate(dates.date1, 'dateLong', calendar),
       to: formatDate(dates.date2, 'dateLong', calendar)
@@ -726,8 +726,8 @@ function enrichBetween(config, label) {
     return createElement('between', label || `${months} ${unit}`, null, false, 'fa-ruler-horizontal', tooltip);
   }
   const days = Math.abs(daysBetween(toInternal(dates.date1), toInternal(dates.date2)));
-  const unit = days === 1 ? game.i18n.localize('CALENDARIA.Common.UnitDay') : game.i18n.localize('CALENDARIA.Common.UnitDays');
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.DaysBetween', {
+  const unit = days === 1 ? _loc('CALENDARIA.Common.UnitDay') : _loc('CALENDARIA.Common.UnitDays');
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.DaysBetween', {
     value: `${days} ${unit}`,
     from: formatDate(dates.date1, 'dateLong', calendar),
     to: formatDate(dates.date2, 'dateLong', calendar)
@@ -751,11 +751,11 @@ function enrichTimeUntil(config, label) {
     if (result.hours) parts.push(`${result.hours}h`);
     if (result.minutes) parts.push(`${result.minutes}m`);
     const text = parts.length ? parts.join(' ') : '0m';
-    const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.TimeUntil', { target, value: text });
+    const tooltip = _loc('CALENDARIA.Enricher.Tooltip.TimeUntil', { target, value: text });
     return createElement('timeuntil', label || text, config.raw, true, 'fa-hourglass-half', tooltip);
   }
   const text = formatDuration(result);
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.TimeUntil', { target, value: text });
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.TimeUntil', { target, value: text });
   return createElement('timeuntil', label || text, config.raw, true, 'fa-hourglass-half', tooltip);
 }
 
@@ -784,7 +784,7 @@ function enrichDateMath(config, label) {
     }
   }
   const formatted = formatDate(date, 'dateLong', calendar);
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.DateMath', { expr: config.raw, value: formatted });
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.DateMath', { expr: config.raw, value: formatted });
   return createContentLink('datemath', label || formatted, { calYear: date.year, calMonth: date.month, calDay: date.day }, 'fa-calculator', tooltip, config.raw);
 }
 
@@ -851,7 +851,7 @@ function enrichCalName(config, label) {
   const { calendar } = resolveCalendar(config);
   if (!calendar) return createErrorElement('CALENDARIA.Enricher.Error.NoCalendar');
   const name = calendar.metadata?.name || calendar.name || '';
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.Calendar', { value: name });
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.Calendar', { value: name });
   return createElement('calname', label || name, null, false, 'fa-book', tooltip);
 }
 
@@ -867,8 +867,8 @@ function enrichMonth(config, label) {
   const current = getCurrentDateTime(calendar, components);
   const months = calendar.monthsArray || [];
   const monthData = months[current.month - 1];
-  const name = monthData ? game.i18n.localize(monthData.name) : '';
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.CurrentMonth', { value: name });
+  const name = monthData ? _loc(monthData.name) : '';
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.CurrentMonth', { value: name });
   return createElement('month', label || name, '', true, 'fa-calendar', tooltip);
 }
 
@@ -882,7 +882,7 @@ function enrichYear(config, label) {
   const { calendar, components } = resolveCalendar(config);
   const current = getCurrentDateTime(calendar, components);
   const text = String(current.year);
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.CurrentYear', { value: text });
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.CurrentYear', { value: text });
   return createElement('year', label || text, '', true, 'fa-calendar', tooltip);
 }
 
@@ -897,7 +897,7 @@ function enrichDayOfYear(config, label) {
   const dayOfYear = getDayOfYear(calendar, components);
   if (dayOfYear == null) return createErrorElement('CALENDARIA.Enricher.Error.NoCalendar');
   const text = String(dayOfYear);
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.DayOfYear', { value: text });
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.DayOfYear', { value: text });
   return createElement('dayofyear', label || text, '', true, 'fa-calendar', tooltip);
 }
 
@@ -915,7 +915,7 @@ function enrichYearProgress(config, label) {
   const daysInYear = calendar.getDaysInYear?.(current.year - yearZero) ?? 365;
   const dayOfYear = getDayOfYear(calendar, components);
   const progress = (dayOfYear ?? 1) / daysInYear;
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.YearProgress', { value: formatPercent(progress) });
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.YearProgress', { value: formatPercent(progress) });
   if (label) return createElement('yearprogress', label, '', true, null, tooltip);
   const el = createProgressElement('yearprogress', progress);
   el.dataset.tooltip = tooltip;
@@ -935,8 +935,8 @@ function enrichLeapYear(config, label) {
   const yearZero = calendar.years?.yearZero ?? 0;
   const isLeap = calendar.isLeapYear?.(current.year - yearZero) ?? false;
   const key = isLeap ? 'CALENDARIA.Editor.Section.LeapYear' : 'CALENDARIA.Enricher.Label.NotLeapYear';
-  const text = game.i18n.localize(key);
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.LeapYear', { value: text });
+  const text = _loc(key);
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.LeapYear', { value: text });
   return createElement('leapyear', label || text, '', true, 'fa-calendar', tooltip);
 }
 
@@ -954,8 +954,8 @@ function enrichIntercalary(config, label) {
   const monthData = months[current.month - 1];
   const isIntercalary = monthData?.type === 'intercalary';
   const key = isIntercalary ? 'CALENDARIA.Editor.MonthType.Intercalary' : 'CALENDARIA.Common.Standard';
-  const text = game.i18n.localize(key);
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.MonthType', { value: text });
+  const text = _loc(key);
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.MonthType', { value: text });
   return createElement('intercalary', label || text, '', true, 'fa-calendar', tooltip);
 }
 
@@ -972,7 +972,7 @@ function enrichDaysInYear(config, label) {
   const yearZero = calendar.years?.yearZero ?? 0;
   const days = calendar.getDaysInYear?.(current.year - yearZero) ?? 365;
   const text = String(days);
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.DaysInYear', { value: text });
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.DaysInYear', { value: text });
   return createElement('daysinyear', label || text, null, false, 'fa-calendar', tooltip);
 }
 
@@ -1030,7 +1030,7 @@ function enrichSunrise(config, label) {
   const sunrise = calendar?.sunrise(undefined, zone);
   if (sunrise == null) return createErrorElement('CALENDARIA.Enricher.Error.NoSunData');
   const text = formatHoursToTime(sunrise);
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.Sunrise', { value: text });
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.Sunrise', { value: text });
   return createElement('sunrise', label || text, '', true, 'fa-sun', tooltip);
 }
 
@@ -1046,7 +1046,7 @@ function enrichSunset(config, label) {
   const sunset = calendar?.sunset(undefined, zone);
   if (sunset == null) return createErrorElement('CALENDARIA.Enricher.Error.NoSunData');
   const text = formatHoursToTime(sunset);
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.Sunset', { value: text });
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.Sunset', { value: text });
   return createElement('sunset', label || text, '', true, 'fa-sun', tooltip);
 }
 
@@ -1062,7 +1062,7 @@ function enrichDaylight(config, label) {
   const hours = calendar?.daylightHours(undefined, zone);
   if (hours == null) return createErrorElement('CALENDARIA.Enricher.Error.NoSunData');
   const text = `${hours.toFixed(1)}h`;
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.DaylightHours', { value: text });
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.DaylightHours', { value: text });
   return createElement('daylight', label || text, '', true, 'fa-sun', tooltip);
 }
 
@@ -1085,8 +1085,8 @@ function enrichIsDaytime(config, label) {
     isDaytime = currentHour >= sunrise && currentHour < sunset;
   }
   const key = isDaytime ? 'CALENDARIA.Enricher.Label.Daytime' : 'CALENDARIA.Enricher.Label.Nighttime';
-  const text = game.i18n.localize(key);
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.TimeOfDay', { value: text });
+  const text = _loc(key);
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.TimeOfDay', { value: text });
   return createElement('isdaytime', label || text, '', true, 'fa-sun', tooltip);
 }
 
@@ -1102,7 +1102,7 @@ function enrichDayProgress(config, label) {
   const progress = calendar?.progressDay(undefined, zone);
   if (progress == null) return createErrorElement('CALENDARIA.Enricher.Error.NoSunData');
   const text = formatPercent(Math.min(1, Math.max(0, progress)));
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.DayProgress', { value: text });
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.DayProgress', { value: text });
   return createElement('dayprogress', label || text, '', true, 'fa-sun', tooltip);
 }
 
@@ -1118,7 +1118,7 @@ function enrichNightProgress(config, label) {
   const progress = calendar?.progressNight(undefined, zone);
   if (progress == null) return createErrorElement('CALENDARIA.Enricher.Error.NoSunData');
   const text = formatPercent(Math.min(1, Math.max(0, progress)));
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.NightProgress', { value: text });
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.NightProgress', { value: text });
   return createElement('nightprogress', label || text, '', true, 'fa-moon', tooltip);
 }
 
@@ -1133,7 +1133,7 @@ function enrichUntilSunrise(config, label) {
   const result = resolveTimeUntilTarget('sunrise', calendar, components);
   if (!result) return createErrorElement('CALENDARIA.Enricher.Error.NoSunData');
   const text = formatDuration(result);
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.TimeUntilSunrise', { value: text });
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.TimeUntilSunrise', { value: text });
   return createElement('untilsunrise', label || text, '', true, 'fa-sun', tooltip);
 }
 
@@ -1148,7 +1148,7 @@ function enrichUntilSunset(config, label) {
   const result = resolveTimeUntilTarget('sunset', calendar, components);
   if (!result) return createErrorElement('CALENDARIA.Enricher.Error.NoSunData');
   const text = formatDuration(result);
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.TimeUntilSunset', { value: text });
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.TimeUntilSunset', { value: text });
   return createElement('untilsunset', label || text, '', true, 'fa-sun', tooltip);
 }
 
@@ -1168,14 +1168,14 @@ function enrichMoon(config, label) {
     if (!moon) return createErrorElement('CALENDARIA.Enricher.Error.MoonNotFound', { index: moonIndex });
     const position = getMoonPhasePosition(moon, components);
     const text = formatPercent(position);
-    const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.MoonCyclePosition', { value: text });
+    const tooltip = _loc('CALENDARIA.Enricher.Tooltip.MoonCyclePosition', { value: text });
     return createElement('moon', label || text, config.raw || '', true, 'fa-moon', tooltip);
   }
   if (config.cycleday) {
     const moon = calendar?.getMoonPhase?.(moonIndex);
     if (!moon) return createErrorElement('CALENDARIA.Enricher.Error.NoMoons');
     const text = String(moon.dayInCycle ?? '');
-    const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.MoonCycleDay', { value: text });
+    const tooltip = _loc('CALENDARIA.Enricher.Tooltip.MoonCycleDay', { value: text });
     return createElement('moon', label || text, config.raw || '', true, 'fa-moon', tooltip);
   }
   if (config.isfull) {
@@ -1185,20 +1185,20 @@ function enrichMoon(config, label) {
     if (!moon) return createErrorElement('CALENDARIA.Enricher.Error.MoonNotFound', { index: moonIndex });
     const isFull = isMoonFull(moon, components);
     const key = isFull ? 'CALENDARIA.MoonPhase.FullMoon' : 'CALENDARIA.Enricher.Label.NotFullMoon';
-    const text = game.i18n.localize(key);
-    const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.FullMoon', { value: text });
+    const text = _loc(key);
+    const tooltip = _loc('CALENDARIA.Enricher.Tooltip.FullMoon', { value: text });
     return createElement('moon', label || text, config.raw || '', true, 'fa-moon', tooltip);
   }
   const moon = calendar?.getMoonPhase?.(moonIndex);
   if (!moon) return createErrorElement('CALENDARIA.Enricher.Error.NoMoons');
   const moonDef = calendar?.moonsArray?.[moonIndex];
-  const phaseName = game.i18n.localize(moon.name);
+  const phaseName = _loc(moon.name);
   const span = createElement('moon', '', config.raw || '', true);
   span.classList.add('calendaria-enricher--badge');
   appendMoonIcon(span, moon.icon, moonDef?.color);
   if (!config.icon) span.append(label || phaseName);
   else if (label) span.append(label);
-  span.dataset.tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.MoonPhase', { value: phaseName });
+  span.dataset.tooltip = _loc('CALENDARIA.Enricher.Tooltip.MoonPhase', { value: phaseName });
   return span;
 }
 
@@ -1214,12 +1214,12 @@ function enrichMoons(config, label) {
   if (!moons?.length) return createErrorElement('CALENDARIA.Enricher.Error.NoMoons');
   const text = moons
     .map((m) => {
-      const moonName = m.moonName ? game.i18n.localize(m.moonName) : m.name ? game.i18n.localize(m.name) : '';
-      const phaseName = m.phaseName ? game.i18n.localize(m.phaseName) : m.name ? game.i18n.localize(m.name) : '';
+      const moonName = m.moonName ? _loc(m.moonName) : m.name ? _loc(m.name) : '';
+      const phaseName = m.phaseName ? _loc(m.phaseName) : m.name ? _loc(m.name) : '';
       return moonName !== phaseName ? `${moonName}: ${phaseName}` : phaseName;
     })
     .join(', ');
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.MoonPhases', { value: text });
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.MoonPhases', { value: text });
   return createElement('moons', label || text, '', true, 'fa-moon', tooltip);
 }
 
@@ -1245,11 +1245,11 @@ function enrichNextFullMoon(config, label) {
     const current = getCurrentDateTime(calendar, components);
     const days = daysBetween(toInternal(current), toInternal(nextDate));
     const text = formatCountdown(days);
-    const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.NextFullMoon', { value: text });
+    const tooltip = _loc('CALENDARIA.Enricher.Tooltip.NextFullMoon', { value: text });
     return createElement('nextfullmoon', label || text, config.raw, true, 'fa-moon', tooltip);
   }
   const dateText = formatDate(nextDate, 'dateLong', calendar);
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.NextFullMoon', { value: dateText });
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.NextFullMoon', { value: dateText });
   return createContentLink('nextfullmoon', label || dateText, { calYear: nextDate.year, calMonth: nextDate.month, calDay: nextDate.day }, 'fa-moon', tooltip, config.raw);
 }
 
@@ -1264,16 +1264,16 @@ function enrichConvergence(config, label) {
   const moonsArr = calendar?.moonsArray || [];
   if (moonsArr.length < 2) return createErrorElement('CALENDARIA.Enricher.Error.NoMoons');
   const result = getNextConvergence(moonsArr, components);
-  const moonNames = moonsArr.map((m) => game.i18n.localize(m.name)).join(', ');
+  const moonNames = moonsArr.map((m) => _loc(m.name)).join(', ');
   if (!result) {
-    const noText = game.i18n.localize('CALENDARIA.Common.NoConvergence');
-    const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.NextConvergence', { moons: moonNames, phase: '', date: noText });
+    const noText = _loc('CALENDARIA.Common.NoConvergence');
+    const tooltip = _loc('CALENDARIA.Enricher.Tooltip.NextConvergence', { moons: moonNames, phase: '', date: noText });
     return createElement('convergence', label || noText, '', true, 'fa-moon', tooltip);
   }
   const date = internalToPublic(result, calendar);
   const dateText = formatDate(date, 'dateLong', calendar);
-  const fullMoonLabel = game.i18n.localize('CALENDARIA.MoonPhase.FullMoon');
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.NextConvergence', { moons: moonNames, phase: fullMoonLabel, date: dateText });
+  const fullMoonLabel = _loc('CALENDARIA.MoonPhase.FullMoon');
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.NextConvergence', { moons: moonNames, phase: fullMoonLabel, date: dateText });
   return createContentLink('convergence', label || dateText, { calYear: date.year, calMonth: date.month, calDay: date.day }, 'fa-moon', tooltip, '');
 }
 
@@ -1292,8 +1292,8 @@ function enrichEclipse(config, label) {
   const targetMoon = moonsArr[moonIndex];
   if (!targetMoon) return createErrorElement('CALENDARIA.Enricher.Error.MoonNotFound', { index: moonIndex });
   const result = getEclipseAtDate(targetMoon, components, calendar);
-  const text = result.type ? game.i18n.localize(ECLIPSE_TYPE_LABELS[result.type] ?? result.type) : game.i18n.localize('CALENDARIA.Eclipse.None');
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.Eclipse', { value: text });
+  const text = result.type ? _loc(ECLIPSE_TYPE_LABELS[result.type] ?? result.type) : _loc('CALENDARIA.Eclipse.None');
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.Eclipse', { value: text });
   return createElement('eclipse', label || text, config.raw, true, 'fa-sun', tooltip);
 }
 
@@ -1315,16 +1315,16 @@ function enrichNextEclipse(config, label) {
   const result = getNextEclipse(targetMoon, components, { calendar });
   if (!result) return createErrorElement('CALENDARIA.Enricher.Error.NoEclipseFound');
   const nextDate = internalToPublic(result.date, calendar);
-  const typeLabel = game.i18n.localize(ECLIPSE_TYPE_LABELS[result.type] ?? result.type);
+  const typeLabel = _loc(ECLIPSE_TYPE_LABELS[result.type] ?? result.type);
   if (isCountdown) {
     const current = getCurrentDateTime(calendar, components);
     const days = daysBetween(toInternal(current), toInternal(nextDate));
     const text = formatCountdown(days);
-    const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.NextEclipse', { type: typeLabel, value: text });
+    const tooltip = _loc('CALENDARIA.Enricher.Tooltip.NextEclipse', { type: typeLabel, value: text });
     return createElement('nexteclipse', label || text, config.raw, true, 'fa-sun', tooltip);
   }
   const dateText = formatDate(nextDate, 'dateLong', calendar);
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.NextEclipse', { type: typeLabel, value: dateText });
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.NextEclipse', { type: typeLabel, value: dateText });
   return createContentLink('nexteclipse', label || dateText, { calYear: nextDate.year, calMonth: nextDate.month, calDay: nextDate.day }, 'fa-sun', tooltip, config.raw);
 }
 
@@ -1337,12 +1337,12 @@ function enrichNextEclipse(config, label) {
 function enrichWeather(_config, label) {
   const weather = WeatherManager.getCurrentWeather();
   if (!weather) return createErrorElement('CALENDARIA.Enricher.Error.NoWeather');
-  const weatherLabel = game.i18n.localize(weather.label);
+  const weatherLabel = _loc(weather.label);
   const span = createElement('weather', '', '', true);
   span.classList.add('calendaria-enricher--badge');
   appendWeatherIcon(span, weather.icon);
   span.append(label || weatherLabel);
-  span.dataset.tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.Weather', { value: weatherLabel });
+  span.dataset.tooltip = _loc('CALENDARIA.Enricher.Tooltip.Weather', { value: weatherLabel });
   return span;
 }
 
@@ -1356,7 +1356,7 @@ function enrichTemperature(_config, label) {
   const temp = WeatherManager.getTemperature();
   if (temp == null) return createErrorElement('CALENDARIA.Enricher.Error.NoWeather');
   const text = WeatherManager.formatTemperature(temp);
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.Temperature', { value: text });
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.Temperature', { value: text });
   return createElement('temperature', label || text, '', true, 'fa-temperature-half', tooltip);
 }
 
@@ -1373,7 +1373,7 @@ function enrichWind(_config, label) {
   const dir = weather.wind?.direction;
   const dirLabel = dir != null ? ` ${degreesToCompass(dir)}` : '';
   const text = `${speedLabel}${dirLabel}`;
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.Wind', { value: text });
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.Wind', { value: text });
   return createElement('wind', label || text, '', true, 'fa-wind', tooltip);
 }
 
@@ -1387,8 +1387,8 @@ function enrichPrecipitation(_config, label) {
   const weather = WeatherManager.getCurrentWeather();
   if (!weather) return createErrorElement('CALENDARIA.Enricher.Error.NoWeather');
   const precipType = weather.precipitation?.type;
-  const text = precipType ? precipType.charAt(0).toUpperCase() + precipType.slice(1) : game.i18n.localize('CALENDARIA.Common.None');
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.Precipitation', { value: text });
+  const text = precipType ? precipType.charAt(0).toUpperCase() + precipType.slice(1) : _loc('CALENDARIA.Common.None');
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.Precipitation', { value: text });
   return createElement('precipitation', label || text, '', true, 'fa-cloud-rain', tooltip);
 }
 
@@ -1405,8 +1405,8 @@ function enrichWeatherIcon(_config, label) {
   span.classList.add('calendaria-enricher--badge');
   appendWeatherIcon(span, weather.icon);
   if (label) span.append(label);
-  const weatherLabel = game.i18n.localize(weather.label);
-  span.dataset.tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.Weather', { value: weatherLabel });
+  const weatherLabel = _loc(weather.label);
+  span.dataset.tooltip = _loc('CALENDARIA.Enricher.Tooltip.Weather', { value: weatherLabel });
   return span;
 }
 
@@ -1418,9 +1418,9 @@ function enrichWeatherIcon(_config, label) {
  */
 function enrichZone(_config, label) {
   const zone = WeatherManager.getActiveZone(null, game.scenes?.active);
-  const name = zone?.name ? game.i18n.localize(zone.name) : zone?.id || '';
+  const name = zone?.name ? _loc(zone.name) : zone?.id || '';
   if (!name) return createErrorElement('CALENDARIA.Enricher.Error.NoZone');
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.ClimateZone', { value: name });
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.ClimateZone', { value: name });
   return createElement('zone', label || name, null, false, 'fa-globe', tooltip);
 }
 
@@ -1451,7 +1451,7 @@ function enrichForecast(config, label) {
   const lines = forecast.map((entry) => {
     const date = { year: entry.year, month: (entry.month ?? 0) + 1, day: (entry.dayOfMonth ?? 0) + 1 };
     const dateStr = formatDate(date, 'dateShort', calendar);
-    const weatherLabel = entry.preset?.label ? game.i18n.localize(entry.preset.label) : '';
+    const weatherLabel = entry.preset?.label ? _loc(entry.preset.label) : '';
     const temp = entry.temperature != null ? `, ${WeatherManager.formatTemperature(entry.temperature)}` : '';
     let windStr = '';
     if (entry.wind?.speed != null) {
@@ -1461,7 +1461,7 @@ function enrichForecast(config, label) {
     return `${dateStr}: ${weatherLabel}${temp}${windStr}`;
   });
   container.innerHTML = lines.map((l) => foundry.utils.escapeHTML(l)).join('<br>');
-  container.dataset.tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.Forecast', { days: String(forecast.length) });
+  container.dataset.tooltip = _loc('CALENDARIA.Enricher.Tooltip.Forecast', { days: String(forecast.length) });
   return container;
 }
 
@@ -1498,9 +1498,9 @@ function enrichAdvanceToTime(config, label) {
   const parsed = parseClockToken(token, calendar);
   if (!parsed) return createErrorElement('CALENDARIA.Enricher.Error.InvalidTime', { value: String(token ?? '') });
   const direction = config.direction === 'nearest' ? 'nearest' : 'forward';
-  const text = label || game.i18n.format('CALENDARIA.Enricher.Label.AdvanceToTime', { time: parsed.label });
+  const text = label || _loc('CALENDARIA.Enricher.Label.AdvanceToTime', { time: parsed.label });
   const tooltipKey = direction === 'nearest' ? 'CALENDARIA.Enricher.Tooltip.AdvanceToTimeNearest' : 'CALENDARIA.Enricher.Tooltip.AdvanceToTime';
-  const tooltip = game.i18n.format(tooltipKey, { time: parsed.label });
+  const tooltip = _loc(tooltipKey, { time: parsed.label });
   return createContentLink('advanceToTime', text, { calAction: 'advanceToTime', calTargetSeconds: String(parsed.targetSecondsOfDay), calDirection: direction }, 'fa-forward', tooltip);
 }
 
@@ -1526,8 +1526,8 @@ function enrichAdvanceInterval(config, label) {
   }
   if (totalSeconds === 0) return createErrorElement('CALENDARIA.Enricher.Error.InvalidInterval');
   const intervalLabel = parts.join(' ');
-  const text = label || game.i18n.format('CALENDARIA.Enricher.Label.AdvanceInterval', { interval: intervalLabel });
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.AdvanceInterval', { interval: intervalLabel });
+  const text = label || _loc('CALENDARIA.Enricher.Label.AdvanceInterval', { interval: intervalLabel });
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.AdvanceInterval', { interval: intervalLabel });
   return createContentLink('advanceInterval', text, { calAction: 'advanceInterval', calDeltaSeconds: String(totalSeconds) }, 'fa-forward', tooltip);
 }
 
@@ -1540,9 +1540,9 @@ function enrichAdvanceInterval(config, label) {
 function enrichAdvanceToPreset(config, label) {
   const preset = String(config.values?.[0] ?? config.preset ?? '').toLowerCase();
   if (!ADVANCE_PRESETS.includes(preset)) return createErrorElement('CALENDARIA.Enricher.Error.InvalidPreset', { value: preset });
-  const presetLabel = game.i18n.localize(`CALENDARIA.Enricher.Preset.${preset}`);
-  const text = label || game.i18n.format('CALENDARIA.Enricher.Label.AdvanceToPreset', { preset: presetLabel });
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.AdvanceToPreset', { preset: presetLabel });
+  const presetLabel = _loc(`CALENDARIA.Enricher.Preset.${preset}`);
+  const text = label || _loc('CALENDARIA.Enricher.Label.AdvanceToPreset', { preset: presetLabel });
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.AdvanceToPreset', { preset: presetLabel });
   return createContentLink('advanceToPreset', text, { calAction: 'advanceToPreset', calPreset: preset }, 'fa-forward', tooltip);
 }
 
@@ -1558,8 +1558,8 @@ function enrichSetTime(config, label) {
   const token = config.values?.[0] ?? config.time;
   const parsed = parseClockToken(token, calendar);
   if (!parsed) return createErrorElement('CALENDARIA.Enricher.Error.InvalidTime', { value: String(token ?? '') });
-  const text = label || game.i18n.format('CALENDARIA.Enricher.Label.SetTime', { time: parsed.label });
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.SetTime', { time: parsed.label });
+  const text = label || _loc('CALENDARIA.Enricher.Label.SetTime', { time: parsed.label });
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.SetTime', { time: parsed.label });
   const mph = calendar?.days?.minutesPerHour ?? 60;
   const spm = calendar?.days?.secondsPerMinute ?? 60;
   const hour = Math.floor(parsed.targetSecondsOfDay / (mph * spm));
@@ -1579,8 +1579,8 @@ function enrichJumpToDate(config, label) {
   const date = parseDateFromValues(config.values);
   if (!date) return createErrorElement('CALENDARIA.Enricher.Error.InvalidDate');
   const dateText = formatDate(date, 'dateLong', calendar);
-  const text = label || game.i18n.format('CALENDARIA.Enricher.Label.JumpToDate', { date: dateText });
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.JumpToDate', { date: dateText });
+  const text = label || _loc('CALENDARIA.Enricher.Label.JumpToDate', { date: dateText });
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.JumpToDate', { date: dateText });
   return createContentLink('jumpToDate', text, { calAction: 'jumpToDate', calYear: String(date.year), calMonth: String(date.month), calDay: String(date.day) }, 'fa-calendar-day', tooltip);
 }
 
@@ -1591,8 +1591,8 @@ function enrichJumpToDate(config, label) {
  * @returns {HTMLElement} Enricher element
  */
 function enrichToggleClock(_config, label) {
-  const text = label || game.i18n.localize('CALENDARIA.Enricher.Label.ToggleClock');
-  const tooltip = game.i18n.localize('CALENDARIA.Enricher.Tooltip.ToggleClock');
+  const text = label || _loc('CALENDARIA.Enricher.Label.ToggleClock');
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.ToggleClock');
   return createContentLink('toggleClock', text, { calAction: 'toggleClock' }, 'fa-play', tooltip);
 }
 
@@ -1613,9 +1613,9 @@ function enrichSetWeather(config, label) {
   if (config.period != null) options.period = String(config.period);
   if (config.zoneId != null) options.zoneId = String(config.zoneId);
   if (config.allPeriods != null) options.allPeriods = config.allPeriods === true || config.allPeriods === 'true';
-  const presetLabel = preset.label ? game.i18n.localize(preset.label) : presetId;
-  const text = label || game.i18n.format('CALENDARIA.Enricher.Label.SetWeather', { preset: presetLabel });
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.SetWeather', { preset: presetLabel });
+  const presetLabel = preset.label ? _loc(preset.label) : presetId;
+  const text = label || _loc('CALENDARIA.Enricher.Label.SetWeather', { preset: presetLabel });
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.SetWeather', { preset: presetLabel });
   return createContentLink('setWeather', text, { calAction: 'setWeather', calPresetId: presetId, calOptions: JSON.stringify(options) }, 'fa-cloud', tooltip);
 }
 
@@ -1635,7 +1635,7 @@ function enrichEvent(config, label) {
     return el;
   }
   const note = notes[0];
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.Event', { value: note.name });
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.Event', { value: note.name });
   return createContentLink('event', label || note.name, { calPageId: note.id }, 'fa-calendar-day', tooltip);
 }
 
@@ -1658,10 +1658,10 @@ function enrichNotes(config, label) {
       count = NoteManager.getNotesInRange({ year: current.year, month: internalMonth, dayOfMonth: 0 }, { year: current.year, month: internalMonth, dayOfMonth: daysInMonth - 1 }).length;
     } else count = NoteManager.getNotesForDate(current.year, current.month - 1, current.day - 1).length;
     let text;
-    if (count === 0) text = game.i18n.localize('CALENDARIA.Enricher.Label.NoNotes');
-    else if (count === 1) text = game.i18n.localize('CALENDARIA.Enricher.Label.NoteCountOne');
-    else text = game.i18n.format('CALENDARIA.Enricher.Label.NoteCount', { count });
-    const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.NoteCount', { value: text });
+    if (count === 0) text = _loc('CALENDARIA.Enricher.Label.NoNotes');
+    else if (count === 1) text = _loc('CALENDARIA.Enricher.Label.NoteCountOne');
+    else text = _loc('CALENDARIA.Enricher.Label.NoteCount', { count });
+    const tooltip = _loc('CALENDARIA.Enricher.Tooltip.NoteCount', { value: text });
     const configStr = scope ? `count=true scope=${scope}` : 'count=true';
     if (label) return createElement('notes', label, configStr, true, 'fa-note-sticky', tooltip);
     return createElement('notes', text, configStr, true, 'fa-note-sticky', tooltip);
@@ -1678,12 +1678,12 @@ function enrichNotes(config, label) {
     isLive = true;
   }
   if (!notes.length) {
-    const noText = game.i18n.localize('CALENDARIA.Enricher.Label.NoNotes');
-    const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.Notes', { value: noText });
+    const noText = _loc('CALENDARIA.Enricher.Label.NoNotes');
+    const tooltip = _loc('CALENDARIA.Enricher.Tooltip.Notes', { value: noText });
     return createElement('notes', label || noText, isLive ? '' : null, isLive, 'fa-note-sticky', tooltip);
   }
   const text = notes.map((n) => n.name).join(', ');
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.Notes', { value: text });
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.Notes', { value: text });
   return createElement('notes', label || text, isLive ? '' : null, isLive, 'fa-note-sticky', tooltip);
 }
 
@@ -1712,11 +1712,11 @@ function enrichNext(config, label) {
   const nextDate = nextOccs[0];
   if (countdown) {
     const days = daysBetween(toInternal(current), toInternal(nextDate));
-    const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.NextOccurrenceCountdown', { name: note.name, value: formatCountdown(days) });
+    const tooltip = _loc('CALENDARIA.Enricher.Tooltip.NextOccurrenceCountdown', { name: note.name, value: formatCountdown(days) });
     return createElement('next', label || formatCountdown(days), config.raw, true, 'fa-hourglass-half', tooltip);
   }
   const dateText = formatDate(nextDate, 'dateLong', calendar);
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.NextOccurrence', { name: note.name, date: dateText });
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.NextOccurrence', { name: note.name, date: dateText });
   return createContentLink('event', label || dateText, { calPageId: note.id }, 'fa-calendar-day', tooltip);
 }
 
@@ -1735,11 +1735,11 @@ function enrichCategory(config, label) {
   const presetLabel = preset?.label || presetId;
   const notes = NoteManager.getNotesByPreset(presetId);
   if (!notes.length) {
-    const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.Category', { preset: presetLabel, count: '0' });
-    return createElement('category', label || game.i18n.localize('CALENDARIA.Enricher.Label.NoNotes'), null, false, iconClass, tooltip);
+    const tooltip = _loc('CALENDARIA.Enricher.Tooltip.Category', { preset: presetLabel, count: '0' });
+    return createElement('category', label || _loc('CALENDARIA.Enricher.Label.NoNotes'), null, false, iconClass, tooltip);
   }
   const text = notes.map((n) => n.name).join(', ');
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.Category', { preset: presetLabel, count: String(notes.length) });
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.Category', { preset: presetLabel, count: String(notes.length) });
   return createElement('category', label || text, null, false, iconClass, tooltip);
 }
 
@@ -1758,7 +1758,7 @@ function enrichChronicle(config, label) {
   const startText = formatDate(startPublic, 'dateLong', calendar);
   const endText = formatDate(endPublic, 'dateLong', calendar);
   const text = label || `${startText} - ${endText}`;
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.Chronicle', { start: startText, end: endText });
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.Chronicle', { start: startText, end: endText });
   const dataset = {
     calChronicleFromYear: startPublic.year,
     calChronicleFromMonth: startPublic.month - 1,
@@ -1789,12 +1789,12 @@ function enrichSummary(config, label) {
   const parts = [];
   parts.push(formatDate(null, 'dateLong', calendar));
   const weather = WeatherManager.getCurrentWeather();
-  if (weather?.label) parts.push(game.i18n.localize(weather.label));
+  if (weather?.label) parts.push(_loc(weather.label));
   const moon = calendar?.getCurrentMoonPhase?.(0);
-  if (moon) parts.push(game.i18n.localize(moon.name));
+  if (moon) parts.push(_loc(moon.name));
   const text = label || parts.join(' · ');
   const current = getCurrentDateTime(calendar, components);
-  const tooltip = game.i18n.localize('CALENDARIA.Enricher.Tooltip.CalendarSummary');
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.CalendarSummary');
   return createContentLink('summary', text, { calYear: current.year, calMonth: current.month, calDay: current.day }, 'fa-calendar-days', tooltip, '');
 }
 
@@ -1815,36 +1815,36 @@ function enrichAlmanac(config, label) {
   lines.push(formatDate(null, 'dateFull', calendar));
   const seasonIndex = components.season ?? 0;
   const season = calendar?.seasonsArray?.[seasonIndex];
-  if (season) lines.push(`${game.i18n.localize('CALENDARIA.Common.Season')}: ${game.i18n.localize(season.name)}`);
+  if (season) lines.push(`${_loc('CALENDARIA.Common.Season')}: ${_loc(season.name)}`);
   const weather = WeatherManager.getCurrentWeather();
   if (weather) {
-    const weatherLabel = game.i18n.localize(weather.label);
+    const weatherLabel = _loc(weather.label);
     const temp = WeatherManager.getTemperature();
     const tempStr = temp != null ? ` ${WeatherManager.formatTemperature(temp)}` : '';
-    lines.push(`${game.i18n.localize('CALENDARIA.Common.Weather')}: ${weatherLabel}${tempStr}`);
+    lines.push(`${_loc('CALENDARIA.Common.Weather')}: ${weatherLabel}${tempStr}`);
     const windSpeed = weather.wind?.speed;
     if (windSpeed != null) {
       const windLabel = getWindLabel(windSpeed);
       const windDir = weather.wind?.direction;
       const dirStr = windDir != null ? ` ${degreesToCompass(windDir)}` : '';
-      lines.push(`${game.i18n.localize('CALENDARIA.Common.Wind')}: ${windLabel}${dirStr}`);
+      lines.push(`${_loc('CALENDARIA.Common.Wind')}: ${windLabel}${dirStr}`);
     }
   }
   const moon = calendar?.getCurrentMoonPhase?.(0);
   if (moon) {
-    const phaseName = game.i18n.localize(moon.name);
-    lines.push(`${game.i18n.localize('CALENDARIA.Common.Moon')}: ${phaseName}`);
+    const phaseName = _loc(moon.name);
+    lines.push(`${_loc('CALENDARIA.Common.Moon')}: ${phaseName}`);
   }
   const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
   const sunrise = calendar?.sunrise(undefined, zone);
   const sunset = calendar?.sunset(undefined, zone);
   if (sunrise != null && sunset != null) {
-    const srLabel = game.i18n.localize('CALENDARIA.Common.Sunrise');
-    const ssLabel = game.i18n.localize('CALENDARIA.Common.Sunset');
+    const srLabel = _loc('CALENDARIA.Common.Sunrise');
+    const ssLabel = _loc('CALENDARIA.Common.Sunset');
     lines.push(`${srLabel}: ${formatHoursToTime(sunrise)} | ${ssLabel}: ${formatHoursToTime(sunset)}`);
   }
   container.innerHTML = lines.map((l) => foundry.utils.escapeHTML(l)).join('<br>');
-  container.dataset.tooltip = game.i18n.localize('CALENDARIA.Enricher.Tooltip.DailyAlmanac');
+  container.dataset.tooltip = _loc('CALENDARIA.Enricher.Tooltip.DailyAlmanac');
   return container;
 }
 
@@ -1857,7 +1857,7 @@ function enrichAlmanac(config, label) {
 function enrichFormat(config, label) {
   const { calendar } = resolveCalendar(config);
   const text = formatDate(null, config.raw, calendar);
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.FormattedDate', { value: text });
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.FormattedDate', { value: text });
   return createElement('format', label || text, config.raw, true, 'fa-calendar', tooltip);
 }
 
@@ -1874,10 +1874,10 @@ function enrichCompare(config, label) {
   const yearZero = calendar?.years?.yearZero ?? 0;
   const timeSinceText = timeSince({ year: target.year - yearZero, month: target.month - 1, dayOfMonth: target.day - 1 }, components);
   const days = Math.abs(daysBetween(toInternal(target), toInternal(getCurrentDateTime(calendar, components))));
-  const unit = days === 1 ? game.i18n.localize('CALENDARIA.Common.UnitDay') : game.i18n.localize('CALENDARIA.Common.UnitDays');
+  const unit = days === 1 ? _loc('CALENDARIA.Common.UnitDay') : _loc('CALENDARIA.Common.UnitDays');
   const text = `${timeSinceText} (${days} ${unit})`;
   const targetStr = formatDate(target, 'dateLong', calendar);
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.DateComparison', { value: targetStr });
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.DateComparison', { value: targetStr });
   return createContentLink('compare', label || text, { calYear: target.year, calMonth: target.month, calDay: target.day }, 'fa-scale-balanced', tooltip, config.raw);
 }
 
@@ -1906,7 +1906,7 @@ function enrichPeek(config, label) {
     }
   }
   const text = formatDate(date, 'dateLong', calendar);
-  const tooltip = game.i18n.format('CALENDARIA.Enricher.Tooltip.DatePreview', { expr: config.raw, value: text });
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.DatePreview', { expr: config.raw, value: text });
   return createContentLink('peek', label || text, { calYear: date.year, calMonth: date.month, calDay: date.day }, 'fa-calendar', tooltip);
 }
 
