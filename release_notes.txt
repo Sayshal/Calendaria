@@ -1,3 +1,12 @@
-## Bug Fixes
+## Breaking Changes
 
-- Calendars with no months now expose a Days Per Year field in the editor, and saving a monthless calendar keeps that value instead of resetting it to zero.
+- Calendaria now requires Foundry VTT v14.
+
+## New Features
+
+- FXMaster weather can render below tiles or the foreground image, activate only within a scene-darkness range, and be restricted to selected scene levels per scene.
+- Note reminders can set the Notify Before unit (hours, days, weeks, months, or years).
+- Per-scene Scene Integration overrides let each scene override ambience sync, time-of-day color, weather darkness, and moon illumination.
+- The cinematic time-skip threshold can be set in hours, and the skip overlay animates the elapsed time as it plays.
+- The rich-text editor insert menu has a Calendaria group for dropping enricher markup into journals and notes.
+- The Weather Editor exposes a Darkness Penalty field per preset; set it to 0 to keep a weather's color without darkening the scene.
