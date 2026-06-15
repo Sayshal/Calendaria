@@ -421,6 +421,8 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
         { value: 'viewers', label: _loc('CALENDARIA.Note.ReminderTargetViewers'), selected: currentReminderTargets === 'viewers' },
         { value: 'specific', label: _loc('CALENDARIA.Note.ReminderTargetSpecific'), selected: currentReminderTargets === 'specific' }
       ];
+      const currentReminderUnit = this.document.system.reminderUnit || 'hour';
+      context.reminderUnitOptions = ['hour', 'day', 'week', 'month', 'year'].map((u) => ({ value: u, label: _loc(`CALENDARIA.Note.ReminderUnit.${u}`), selected: currentReminderUnit === u }));
       context.showReminderUsers = currentReminderTargets === 'specific';
       const selectedReminderUsers = this.document.system.reminderUsers || [];
       context.userOptions = game.users.contents.map((u) => ({ id: u.id, name: u.name, selected: selectedReminderUsers.includes(u.id) }));
@@ -649,6 +651,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       const disabled = target.value === 'none';
       this.element.querySelector('select[name="system.reminderTargets"]')?.setAttribute('disabled', disabled);
       this.element.querySelector('input[name="system.reminderOffset"]')?.setAttribute('disabled', disabled);
+      this.element.querySelector('select[name="system.reminderUnit"]')?.setAttribute('disabled', disabled);
     }
   }
 
@@ -674,7 +677,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const updates = {};
     if (preset.icon) updates['system.icon'] = `fas ${preset.icon}`;
     if (preset.color) updates['system.color'] = preset.color;
-    const defaultFields = ['displayStyle', 'visibility', 'allDay', 'reminderType', 'reminderOffset', 'hasDuration', 'duration', 'macro'];
+    const defaultFields = ['displayStyle', 'visibility', 'allDay', 'reminderType', 'reminderOffset', 'reminderUnit', 'hasDuration', 'duration', 'macro'];
     for (const field of defaultFields) if (noteData[field] !== this.document.system[field]) updates[`system.${field}`] = noteData[field];
     if (noteData.remindUsers?.length && noteData.remindUsers.length !== (this.document.system.remindUsers?.length ?? 0)) updates['system.remindUsers'] = noteData.remindUsers;
     if (Object.keys(updates).length === 0) return;

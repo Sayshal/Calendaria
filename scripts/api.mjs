@@ -1071,7 +1071,7 @@ export const CalendariaAPI = {
    * @param {string} options.label - Display name
    * @param {string} [options.color] - Hex color (default '#868e96')
    * @param {string} [options.icon] - FontAwesome icon class (default 'fas fa-tag')
-   * @param {object} [options.defaults] - Default values: { allDay, displayStyle, visibility, reminderType, reminderOffset, hasDuration, duration, macro, content }
+   * @param {object} [options.defaults] - Default values: { allDay, displayStyle, visibility, reminderType, reminderOffset, reminderUnit, hasDuration, duration, macro, content }
    * @returns {Promise<object>} The created preset
    */
   async addPreset({ label, color, icon, defaults } = {}) {

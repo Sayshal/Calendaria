@@ -109,7 +109,7 @@ export default class ReminderScheduler {
     const minutesPerHour = calendar?.days?.minutesPerHour ?? 60;
     const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
     const minutesInDay = hoursPerDay * minutesPerHour;
-    const offsetMinutes = (note.flagData.reminderOffset ?? 0) * minutesPerHour;
+    const offsetMinutes = this.#offsetToMinutes(note, calendar);
     const allDay = !!note.flagData.allDay;
     const eventMinuteOfDay = allDay ? 0 : (startDate.hour ?? 0) * minutesPerHour + (startDate.minute ?? 0);
     const shift = offsetMinutes - eventMinuteOfDay;
@@ -154,6 +154,33 @@ export default class ReminderScheduler {
       return currentMinutes >= reminderMinutes && currentMinutes < eventMinutes;
     }
     return false;
+  }
+
+  /**
+   * Convert a note's reminder offset and unit into minutes, using calendar-derived lengths.
+   * @param {object} note - The note stub
+   * @param {object} calendar - Active calendar
+   * @returns {number} Offset in minutes
+   * @private
+   */
+  static #offsetToMinutes(note, calendar) {
+    const value = note.flagData.reminderOffset ?? 0;
+    const unit = note.flagData.reminderUnit || 'hour';
+    const minutesPerHour = calendar?.days?.minutesPerHour ?? 60;
+    const minutesInDay = (calendar?.days?.hoursPerDay ?? 24) * minutesPerHour;
+    const daysPerYear = calendar?.getDaysInYear?.() ?? (calendar?.monthsArray?.reduce((sum, m) => sum + (m.days || 0), 0) || 365);
+    switch (unit) {
+      case 'day':
+        return value * minutesInDay;
+      case 'week':
+        return value * (Object.keys(calendar?.days?.values ?? {}).length || 7) * minutesInDay;
+      case 'month':
+        return value * Math.round(daysPerYear / (calendar?.monthsArray?.length || 12)) * minutesInDay;
+      case 'year':
+        return value * daysPerYear * minutesInDay;
+      default:
+        return value * minutesPerHour;
+    }
   }
 
   /**
@@ -280,9 +307,11 @@ export default class ReminderScheduler {
    * @private
    */
   static #formatReminderMessage(note) {
-    const hours = note.flagData.reminderOffset;
-    if (hours === 0) return _loc('CALENDARIA.Reminder.StartsNow', { name: note.name });
-    const timeStr = hours > 1 ? _loc('CALENDARIA.Reminder.HoursPlural', { hours }) : _loc('CALENDARIA.Reminder.Hours', { hours });
+    const value = note.flagData.reminderOffset;
+    if (value === 0) return _loc('CALENDARIA.Reminder.StartsNow', { name: note.name });
+    const unit = note.flagData.reminderUnit || 'hour';
+    const base = { hour: 'Hour', day: 'Day', week: 'Week', month: 'Month', year: 'Year' }[unit] ?? 'Hour';
+    const timeStr = _loc(`CALENDARIA.Reminder.Unit.${base}${value === 1 ? '' : 'Plural'}`, { count: value });
     return _loc('CALENDARIA.Reminder.StartsIn', { name: note.name, time: timeStr });
   }
 

@@ -149,6 +149,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
       visibility: 'string',
       reminderType: 'string',
       reminderOffset: 'number',
+      reminderUnit: 'string',
       reminderTargets: 'string',
       duration: 'number',
       maxOccurrences: 'number',
@@ -271,6 +272,16 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
           hint: _loc('CALENDARIA.Note.ReminderOffsetTooltip')
         },
         {
+          key: 'reminderUnit',
+          label: _loc('CALENDARIA.Note.ReminderUnit.Label'),
+          inputHtml: selectHtml(
+            'reminderUnit',
+            defaults.reminderUnit,
+            ['hour', 'day', 'week', 'month', 'year'].map((u) => ({ value: u, label: _loc(`CALENDARIA.Note.ReminderUnit.${u}`) }))
+          ),
+          hint: _loc('CALENDARIA.Note.ReminderUnitTooltip')
+        },
+        {
           key: 'defaultOwnership',
           label: _loc('CALENDARIA.PresetManager.DefaultOwnership'),
           inputHtml: selectHtml('defaultOwnership', defaults.defaultOwnership, ownershipOptions),
@@ -319,6 +330,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
         icon: null,
         reminderType: null,
         reminderOffset: null,
+        reminderUnit: null,
         reminderTargets: null,
         duration: null,
         maxOccurrences: null,
@@ -552,6 +564,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
       'visibility',
       'reminderType',
       'reminderOffset',
+      'reminderUnit',
       'reminderTargets',
       'duration',
       'maxOccurrences',
@@ -639,6 +652,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
             icon: raw.defaults?.icon ?? null,
             reminderType: raw.defaults?.reminderType ?? null,
             reminderOffset: raw.defaults?.reminderOffset ?? null,
+            reminderUnit: raw.defaults?.reminderUnit ?? null,
             reminderTargets: raw.defaults?.reminderTargets ?? null,
             duration: raw.defaults?.duration ?? null,
             maxOccurrences: raw.defaults?.maxOccurrences ?? null,
@@ -701,7 +715,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
     });
     if (!confirmed) return;
     const defaults = preset.defaults || {};
-    const syncFields = ['allDay', 'displayStyle', 'visibility', 'reminderType', 'reminderOffset', 'reminderTargets', 'duration', 'showBookends', 'maxOccurrences', 'silent', 'macro'];
+    const syncFields = ['allDay', 'displayStyle', 'visibility', 'reminderType', 'reminderOffset', 'reminderUnit', 'reminderTargets', 'duration', 'showBookends', 'maxOccurrences', 'silent', 'macro'];
     const updates = [];
     for (const stub of affected) {
       const noteUpdates = {};

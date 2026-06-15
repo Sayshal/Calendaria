@@ -195,6 +195,7 @@ export default class FestivalManager {
       visibility: festival.visibility || NOTE_VISIBILITY.VISIBLE,
       reminderType: festival.reminderType || 'none',
       reminderOffset: festival.reminderOffset ?? 0,
+      reminderUnit: festival.reminderUnit || 'hour',
       silent: festival.silent ?? true,
       linkedFestival: { calendarId, festivalKey, countsForWeekday: festival.countsForWeekday ?? true, leapYearOnly: !!festival.leapYearOnly, leapDuration: festival.leapDuration ?? null }
     };
