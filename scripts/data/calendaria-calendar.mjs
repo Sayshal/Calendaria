@@ -1266,11 +1266,29 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
         dayIndex = Math.floor(daysIntoCycle);
       }
     }
+    const subDayResolution = moon.cycleLength < phases.length;
+    let cyclePosition = normalizedPosition;
+    if (subDayResolution) {
+      const timeFrac = this._componentsToDayFraction(components);
+      const daysIntoCycleContinuous = (((normalizedPosition * moon.cycleLength + timeFrac) % moon.cycleLength) + moon.cycleLength) % moon.cycleLength;
+      cyclePosition = daysIntoCycleContinuous / moon.cycleLength;
+    }
     const hasRanges = phases.length > 0 && phases[0].start !== undefined && phases[0].end !== undefined;
     let phaseArrayIndex = 0;
     let dayWithinPhase = 0;
     let phaseDuration = 1;
-    if (hasRanges) {
+    if (hasRanges && subDayResolution) {
+      for (let i = 0; i < phases.length; i++) {
+        const phase = phases[i];
+        const ps = phase.start ?? 0;
+        const pe = phase.end ?? 1;
+        const inRange = pe > ps ? cyclePosition >= ps && cyclePosition < pe : cyclePosition >= ps || cyclePosition < pe;
+        if (inRange) {
+          phaseArrayIndex = i;
+          break;
+        }
+      }
+    } else if (hasRanges) {
       const totalCycleDays = Math.round(moon.cycleLength);
       const dayFrac = (dayIndex + 0.5) / moon.cycleLength;
       for (let i = 0; i < phases.length; i++) {
@@ -1304,7 +1322,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     const matchedPhase = phases[phaseArrayIndex] || phases[0];
     if (!matchedPhase) return null;
     const subPhaseName = CalendariaCalendar.#getSubPhaseName(matchedPhase, dayWithinPhase, phaseDuration);
-    return { name: matchedPhase.name, subPhaseName, icon: matchedPhase.icon || '', position: normalizedPosition, dayInCycle: dayIndex, phaseIndex: phaseArrayIndex, dayWithinPhase, phaseDuration };
+    return { name: matchedPhase.name, subPhaseName, icon: matchedPhase.icon || '', position: cyclePosition, dayInCycle: dayIndex, phaseIndex: phaseArrayIndex, dayWithinPhase, phaseDuration };
   }
 
   /**
@@ -1487,6 +1505,21 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     const worldTime = this.componentsToTime(normalized);
     const secondsPerDay = (this.days?.hoursPerDay || 24) * (this.days?.minutesPerHour || 60) * (this.days?.secondsPerMinute || 60);
     return Math.floor(worldTime / secondsPerDay);
+  }
+
+  /**
+   * Fraction of the current day elapsed, from the time-of-day components.
+   * @param {object} components  Time components with hour/minute/second.
+   * @returns {number}  Fraction in [0, 1).
+   * @private
+   */
+  _componentsToDayFraction(components) {
+    if (!components) return 0;
+    const minutesPerHour = this.days?.minutesPerHour || 60;
+    const secondsPerMinute = this.days?.secondsPerMinute || 60;
+    const secondsPerDay = (this.days?.hoursPerDay || 24) * minutesPerHour * secondsPerMinute;
+    const secs = (Number(components.hour) || 0) * minutesPerHour * secondsPerMinute + (Number(components.minute) || 0) * secondsPerMinute + (Number(components.second) || 0);
+    return (((secs % secondsPerDay) + secondsPerDay) % secondsPerDay) / secondsPerDay;
   }
 
   /**
