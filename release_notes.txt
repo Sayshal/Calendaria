@@ -1,12 +1,12 @@
-## Breaking Changes
-
-- Calendaria now requires Foundry VTT v14.
-
 ## New Features
 
-- FXMaster weather can render below tiles or the foreground image, activate only within a scene-darkness range, and be restricted to selected scene levels per scene.
-- Note reminders can set the Notify Before unit (hours, days, weeks, months, or years).
-- Per-scene Scene Integration overrides let each scene override ambience sync, time-of-day color, weather darkness, and moon illumination.
-- The cinematic time-skip threshold can be set in hours, and the skip overlay animates the elapsed time as it plays.
-- The rich-text editor insert menu has a Calendaria group for dropping enricher markup into journals and notes.
-- The Weather Editor exposes a Darkness Penalty field per preset; set it to 0 to keep a weather's color without darkening the scene.
+- A Particle Splash setting toggles the ground splash on rain and snow particles, with a per-scene Weather FX Splash override in Scene Configuration.
+
+## Bug Fixes
+
+- A moon with a cycle shorter than a day advances through its phases over the day instead of showing one fixed phase.
+- Custom weather presets keep their weight after you save and reopen the season climate editor.
+- Equinox and solstice festivals land on the correct day, following the calendar's daylight curve, and stay correct on month-based calendars and in leap years.
+- The import macro copies on servers without HTTPS, and the copied text pastes as valid script instead of HTML-escaped characters.
+- The per-scene Weather Effect Levels control is a multi-select, and weather still renders when a saved level no longer exists on the scene.
+- The Regenerate All Weather button produces fresh weather each time instead of rebuilding the identical forecast.
