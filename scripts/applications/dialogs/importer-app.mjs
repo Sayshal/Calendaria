@@ -353,13 +353,25 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
     const importer = getImporterOptions().find((i) => i.value === this.#selectedImporterId);
     const macro = importer?.exportMacro;
     if (!macro) return;
-    try {
-      await navigator.clipboard.writeText(macro);
-      ui.notifications.info('CALENDARIA.Importer.MacroCopied', { localize: true });
-    } catch (error) {
-      log(2, 'Failed to copy macro to clipboard:', error);
-      ui.notifications.warn('CALENDARIA.Importer.MacroCopyFailed', { localize: true });
+    if (navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(macro);
+        ui.notifications.info('CALENDARIA.Importer.MacroCopied', { localize: true });
+        return;
+      } catch (error) {
+        log(2, 'Clipboard API failed, falling back to manual selection:', error);
+      }
     }
+    const textarea = this.element.querySelector('.macro-source');
+    if (textarea) {
+      textarea.focus();
+      textarea.select();
+      if (document.execCommand('copy')) {
+        ui.notifications.info('CALENDARIA.Importer.MacroCopied', { localize: true });
+        return;
+      }
+    }
+    ui.notifications.warn('CALENDARIA.Importer.MacroCopyFailed', { localize: true });
   }
 
   /**
