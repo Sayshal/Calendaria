@@ -1,7 +1,7 @@
 import { CalendarManager } from '../../calendar/_module.mjs';
 import { COMPASS_DIRECTIONS, MODULE, SETTINGS, TEMPLATES, WIND_SPEEDS } from '../../constants.mjs';
 import { CalendariaCalendar } from '../../data/_module.mjs';
-import { ALL_PRESETS, WEATHER_CATEGORIES, fromDisplayDelta, fromDisplayUnit, getAllPresets, getPresetAlias, setPresetAlias, toDisplayDelta, toDisplayUnit } from '../../weather/_module.mjs';
+import { WEATHER_CATEGORIES, fromDisplayDelta, fromDisplayUnit, getAllPresets, getPresetAlias, setPresetAlias, toDisplayDelta, toDisplayUnit } from '../../weather/_module.mjs';
 import { WeatherProbabilityDialog } from '../_module.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -470,11 +470,13 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static #onSubmit(_event, _form, formData) {
     const data = formData.object;
+    const customPresets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
+    const allPresets = getAllPresets(customPresets);
     if (this.#mode === 'season') {
       const tempMin = data.tempMin;
       const tempMax = data.tempMax;
       const presets = [];
-      for (const preset of ALL_PRESETS) {
+      for (const preset of allPresets) {
         const chance = parseFloat(data[`preset_${preset.id}`]);
         if (chance > 0) presets.push({ id: preset.id, chance });
       }
@@ -486,8 +488,6 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       this.#onSave(result);
       return;
     }
-    const customPresets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
-    const allPresets = getAllPresets(customPresets);
     const seasonNames = this.#seasonNames.length ? this.#seasonNames : ['CALENDARIA.Season.Spring', 'CALENDARIA.Season.Summer', 'CALENDARIA.Season.Autumn', 'CALENDARIA.Season.Winter'];
     const baseHue = ClimateEditor.#normToHue(data.baseHue);
     const baseSat = data.baseSaturation !== '' && data.baseSaturation != null ? parseFloat(data.baseSaturation) : null;
