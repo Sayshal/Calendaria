@@ -1409,6 +1409,14 @@ export default class CalendariaSettings {
         type: new NumberField({ initial: 1.0, min: 0, max: 3, step: 0.1 }),
         onChange: () => syncWeatherToScene()
       },
+      [SETTINGS.FXMASTER_SPLASH]: {
+        name: 'CALENDARIA.Settings.FXMaster.Splash.Name',
+        hint: 'CALENDARIA.Settings.FXMaster.Splash.Hint',
+        scope: 'world',
+        config: false,
+        type: new BooleanField({ initial: true }),
+        onChange: () => syncWeatherToScene()
+      },
       [SETTINGS.WEATHER_SOUND_FX]: {
         name: 'CALENDARIA.Settings.Weather.SoundFx.Name',
         hint: 'CALENDARIA.Settings.Weather.SoundFx.Hint',

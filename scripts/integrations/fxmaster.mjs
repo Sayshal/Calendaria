@@ -111,7 +111,8 @@ function onSceneUpdate(scene, change) {
   const flat = foundry.utils.flattenObject(change);
   const fxOverrideKey = `flags.${MODULE.ID}.${SCENE_FLAGS.WEATHER_FX_OVERRIDE}`;
   const topDownKey = `flags.${MODULE.ID}.${SCENE_FLAGS.FXMASTER_TOP_DOWN_OVERRIDE}`;
-  if (!(fxOverrideKey in flat) && !(topDownKey in flat)) return;
+  const splashKey = `flags.${MODULE.ID}.${SCENE_FLAGS.FXMASTER_SPLASH_OVERRIDE}`;
+  if (!(fxOverrideKey in flat) && !(topDownKey in flat) && !(splashKey in flat)) return;
   syncWeatherToScene();
 }
 
@@ -254,7 +255,11 @@ function buildPresetOptions(weather) {
     options.darknessActivationMax = Math.max(dMin, dMax);
   }
   const fxLevels = canvas?.scene?.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_LEVELS);
-  if (Array.isArray(fxLevels) && fxLevels.length) options.levels = fxLevels;
+  if (Array.isArray(fxLevels) && fxLevels.length) {
+    const validIds = new Set([...(canvas.scene.levels ?? [])].map((l) => l.id));
+    const levels = fxLevels.filter((id) => validIds.has(id));
+    if (levels.length) options.levels = levels;
+  }
   if (weather.fxDensity) options.density = weather.fxDensity;
   const speedMult = game.settings.get(MODULE.ID, SETTINGS.FXMASTER_SPEED_MULTIPLIER) ?? 1;
   if (speedMult !== 1) {
@@ -263,6 +268,8 @@ function buildPresetOptions(weather) {
   } else if (weather.fxSpeed) options.speed = weather.fxSpeed;
   if (weather.fxColor) options.color = weather.fxColor;
   if (game.settings.get(MODULE.ID, SETTINGS.FXMASTER_SOUND_FX)) options.soundFx = true;
+  const sceneSplash = canvas?.scene?.getFlag(MODULE.ID, SCENE_FLAGS.FXMASTER_SPLASH_OVERRIDE);
+  options.splash = sceneSplash === 'on' || (sceneSplash !== 'off' && game.settings.get(MODULE.ID, SETTINGS.FXMASTER_SPLASH));
   return options;
 }
 

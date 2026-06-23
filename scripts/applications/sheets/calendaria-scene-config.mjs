@@ -59,6 +59,7 @@ export class CalendariaSceneConfig extends foundry.applications.sheets.SceneConf
           { value: 'off', label: 'CALENDARIA.SceneConfig.WeatherFxOverride.Off', selected: weatherFxOverride === 'off' }
         ];
         context.fxTopDownOverride = doc.getFlag(MODULE.ID, SCENE_FLAGS.FXMASTER_TOP_DOWN_OVERRIDE) ?? 'default';
+        context.fxSplashOverride = doc.getFlag(MODULE.ID, SCENE_FLAGS.FXMASTER_SPLASH_OVERRIDE) ?? 'default';
         context.weatherSoundDisabled = doc.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_SOUND_DISABLED) ?? false;
         const selectedLevels = doc.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_LEVELS) ?? [];
         context.sceneLevels = [...(doc.levels ?? [])].map((l) => ({ id: l.id, name: l.name, selected: selectedLevels.includes(l.id) }));
