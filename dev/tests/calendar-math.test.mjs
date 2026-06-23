@@ -319,8 +319,9 @@ describe('checkSolsticeOrEquinox()', () => {
     { name: 'Autumn', seasonalType: 'autumn', dayStart: 265, dayEnd: 354 },
     { name: 'Winter', seasonalType: 'winter', dayStart: 355, dayEnd: 79 }
   ];
-  it('detects spring equinox at season start (legacy convention)', () => {
-    expect(checkSolsticeOrEquinox({ year: 0, month: 2, dayOfMonth: 21 }, legacySeasons, 'spring')).toBe(true);
+  it('detects spring equinox from daylight anchors', () => {
+    expect(checkSolsticeOrEquinox({ year: 0, month: 2, dayOfMonth: 22 }, legacySeasons, 'spring')).toBe(true);
+    expect(checkSolsticeOrEquinox({ year: 0, month: 2, dayOfMonth: 21 }, legacySeasons, 'spring')).toBe(false);
   });
   it('returns false for non-equinox date', () => {
     expect(checkSolsticeOrEquinox({ year: 0, month: 5, dayOfMonth: 15 }, legacySeasons, 'spring')).toBe(false);
@@ -337,15 +338,16 @@ describe('checkSolsticeOrEquinox()', () => {
     ];
     expect(checkSolsticeOrEquinox({ year: 0, month: 2, dayOfMonth: 21 }, unTyped, 'spring')).toBe(false);
   });
-  it('handles month-anchored convention (regression for #635)', () => {
+  it('uses daylight anchors, not season start, for month-anchored seasons (regression for #635)', () => {
     const anchored = [
       { name: 'Aut', seasonalType: 'autumn', monthStart: 8, monthEnd: 10, dayStart: 0, dayEnd: 29 },
       { name: 'Win', seasonalType: 'winter', monthStart: 11, monthEnd: 1, dayStart: 0, dayEnd: 27 },
       { name: 'Spr', seasonalType: 'spring', monthStart: 2, monthEnd: 4, dayStart: 0, dayEnd: 30 },
       { name: 'Sum', seasonalType: 'summer', monthStart: 5, monthEnd: 7, dayStart: 0, dayEnd: 30 }
     ];
-    expect(checkSolsticeOrEquinox({ year: 0, month: 2, dayOfMonth: 0 }, anchored, 'spring')).toBe(true);
-    expect(checkSolsticeOrEquinox({ year: 0, month: 0, dayOfMonth: 0 }, anchored, 'spring')).toBe(false);
-    expect(checkSolsticeOrEquinox({ year: 0, month: 0, dayOfMonth: 14 }, anchored, 'longest')).toBe(false);
+    expect(checkSolsticeOrEquinox({ year: 0, month: 2, dayOfMonth: 22 }, anchored, 'spring')).toBe(true);
+    expect(checkSolsticeOrEquinox({ year: 0, month: 2, dayOfMonth: 0 }, anchored, 'spring')).toBe(false);
+    expect(checkSolsticeOrEquinox({ year: 0, month: 5, dayOfMonth: 21 }, anchored, 'longest')).toBe(true);
+    expect(checkSolsticeOrEquinox({ year: 0, month: 11, dayOfMonth: 21 }, anchored, 'shortest')).toBe(true);
   });
 });

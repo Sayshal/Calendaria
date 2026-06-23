@@ -1,7 +1,7 @@
 import { DISPLAY_STYLES, MODULE, NOTE_VISIBILITY, SETTINGS } from '../constants.mjs';
 import { NoteManager } from '../notes/_module.mjs';
 import { log } from '../utils/_module.mjs';
-import { findSeasonIndexByType, getMidpoint, getSeasonDayOfYearBounds } from '../utils/calendar-math.mjs';
+import { findSeasonIndexByType, getAstronomicalDayOfYear } from '../utils/calendar-math.mjs';
 
 /** Creates and manages festival journal notes. */
 export default class FestivalManager {
@@ -266,15 +266,11 @@ export default class FestivalManager {
     if (!seasons.length) return null;
     const yearZero = calendar.years?.yearZero ?? 0;
     const internalYear = currentDate.year - yearZero;
-    const totalDays = calendar.getDaysInYear?.(internalYear) ?? 365;
     const typeMap = { isLongestDay: 'summer', isShortestDay: 'winter', isSpringEquinox: 'spring', isAutumnEquinox: 'autumn' };
     const seasonalType = typeMap[astroField];
     if (!seasonalType) return null;
-    const idx = findSeasonIndexByType(seasons, seasonalType);
-    if (idx === -1) return null;
-    const bounds = getSeasonDayOfYearBounds(seasons[idx], calendar, internalYear);
-    if (!bounds) return null;
-    const dayOfYear = astroField === 'isLongestDay' || astroField === 'isShortestDay' ? getMidpoint(bounds.startDoY, bounds.endDoY, totalDays) : bounds.startDoY;
+    if (findSeasonIndexByType(seasons, seasonalType) === -1) return null;
+    const dayOfYear = getAstronomicalDayOfYear(calendar, seasonalType, currentDate.year);
     const months = calendar.monthsArray ?? [];
     let remaining = dayOfYear;
     for (let m = 0; m < months.length; m++) {

@@ -354,12 +354,13 @@ describe('FestivalManager', () => {
     const gregorianMonths = [{ days: 31 }, { days: 28 }, { days: 31 }, { days: 30 }, { days: 31 }, { days: 30 }, { days: 31 }, { days: 31 }, { days: 30 }, { days: 31 }, { days: 30 }, { days: 31 }];
     const daysInGregMonth = (m) => gregorianMonths[m]?.days ?? 30;
     const buildAstroTree = (field) => ({ type: 'group', mode: 'and', children: [{ type: 'condition', field, op: '==', value: 1 }] });
-    it('resolves isSpringEquinox to the start of the spring season (legacy day-of-year convention)', async () => {
+    it('resolves isSpringEquinox from daylight anchors', async () => {
       const calendar = {
         festivals: { fest1: { name: 'Vernal', duration: 1, conditionTree: buildAstroTree('isSpringEquinox') } },
         metadata: { id: 'gregorian' },
         years: { yearZero: 0 },
         monthsArray: gregorianMonths,
+        daylight: { summerSolstice: 172, winterSolstice: 355 },
         seasonsArray: [
           { name: 'Spring', seasonalType: 'spring', dayStart: 79, dayEnd: 171 },
           { name: 'Summer', seasonalType: 'summer', dayStart: 172, dayEnd: 264 },
@@ -372,15 +373,16 @@ describe('FestivalManager', () => {
       await FestivalManager.createFestivalNote('gregorian', 'fest1', calendar.festivals.fest1, calendar);
       const { startDate } = NoteManager.getAllNotes()[0].flagData;
       expect(startDate.month).toBe(2);
-      expect(startDate.dayOfMonth).toBe(20);
+      expect(startDate.dayOfMonth).toBe(22);
     });
-    it('resolves isAutumnEquinox to the start of autumn for month-anchored seasons (regression for #635)', async () => {
+    it('resolves isAutumnEquinox from daylight anchors, not season start, for month-anchored seasons (regression for #635)', async () => {
       const months30 = Array.from({ length: 12 }, () => ({ days: 30 }));
       const calendar = {
         festivals: { fest1: { name: 'Autumn Equinox Test', duration: 1, conditionTree: buildAstroTree('isAutumnEquinox') } },
         metadata: { id: 'symbaroum' },
         years: { yearZero: 0 },
         monthsArray: months30,
+        daylight: { summerSolstice: 90, winterSolstice: 270 },
         seasonsArray: [
           { name: 'Autumn', seasonalType: 'autumn', monthStart: 1, monthEnd: 3, dayStart: 0, dayEnd: 29 },
           { name: 'Winter', seasonalType: 'winter', monthStart: 4, monthEnd: 6, dayStart: 0, dayEnd: 29 },
@@ -392,16 +394,17 @@ describe('FestivalManager', () => {
       };
       await FestivalManager.createFestivalNote('symbaroum', 'fest1', calendar.festivals.fest1, calendar);
       const { startDate } = NoteManager.getAllNotes()[0].flagData;
-      expect(startDate.month).toBe(1);
+      expect(startDate.month).toBe(6);
       expect(startDate.dayOfMonth).toBe(0);
     });
-    it('resolves isLongestDay to the midpoint of summer for a wrap-around season', async () => {
+    it('resolves isLongestDay from the summer solstice daylight anchor', async () => {
       const months30 = Array.from({ length: 12 }, () => ({ days: 30 }));
       const calendar = {
         festivals: { fest1: { name: 'Longest Day', duration: 1, conditionTree: buildAstroTree('isLongestDay') } },
         metadata: { id: 'symbaroum' },
         years: { yearZero: 0 },
         monthsArray: months30,
+        daylight: { summerSolstice: 90, winterSolstice: 270 },
         seasonsArray: [
           { name: 'Autumn', seasonalType: 'autumn', monthStart: 1, monthEnd: 3, dayStart: 0, dayEnd: 29 },
           { name: 'Winter', seasonalType: 'winter', monthStart: 4, monthEnd: 6, dayStart: 0, dayEnd: 29 },
@@ -413,8 +416,8 @@ describe('FestivalManager', () => {
       };
       await FestivalManager.createFestivalNote('symbaroum', 'fest1', calendar.festivals.fest1, calendar);
       const { startDate } = NoteManager.getAllNotes()[0].flagData;
-      expect(startDate.month).toBe(11);
-      expect(startDate.dayOfMonth).toBe(15);
+      expect(startDate.month).toBe(3);
+      expect(startDate.dayOfMonth).toBe(0);
     });
     it('falls through to festival.month/dayOfMonth when no season has matching seasonalType', async () => {
       const calendar = {

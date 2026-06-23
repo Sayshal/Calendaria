@@ -174,7 +174,7 @@ describe('getFieldValue()', () => {
 
   describe('isSpringEquinox', () => {
     it('returns true on spring equinox day', () => {
-      const result = getFieldValue(CONDITION_FIELDS.IS_SPRING_EQUINOX, { year: 2024, month: 2, dayOfMonth: 21 });
+      const result = getFieldValue(CONDITION_FIELDS.IS_SPRING_EQUINOX, { year: 2024, month: 2, dayOfMonth: 22 });
       expect(result).toBe(true);
     });
     it('returns false on other days', () => {

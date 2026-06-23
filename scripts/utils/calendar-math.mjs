@@ -233,19 +233,91 @@ export function getSeasonDayOfYearBounds(season, calendar, internalYear = 0) {
 export function checkSolsticeOrEquinox(date, seasons, type) {
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return false;
-  const totalDays = getTotalDaysInYear(date.year);
-  const yearZero = calendar.years?.yearZero ?? 0;
-  const internalYear = date.year - yearZero;
   const doy = getDayOfYear(date);
   const typeMap = { longest: 'summer', shortest: 'winter', spring: 'spring', autumn: 'autumn' };
   const seasonalType = typeMap[type];
   if (!seasonalType) return false;
-  const idx = findSeasonIndexByType(seasons, seasonalType);
-  if (idx === -1) return false;
-  const bounds = getSeasonDayOfYearBounds(seasons[idx], calendar, internalYear);
-  if (!bounds) return false;
-  if (type === 'longest' || type === 'shortest') return doy === getMidpoint(bounds.startDoY, bounds.endDoY, totalDays);
-  return doy === bounds.startDoY;
+  if (findSeasonIndexByType(seasons, seasonalType) === -1) return false;
+  return doy === getAstronomicalDayOfYear(calendar, seasonalType, date.year);
+}
+
+const astroDayCache = new Map();
+
+/**
+ * Scan the calendar's daylight curve to find the longest and shortest days of a given year.
+ * @param {object} calendar - Active calendar instance
+ * @param {number} internalYear - Year minus yearZero
+ * @param {number} totalDays - Total days in the year
+ * @param {number} summerCfg - Configured summer solstice day-of-year (fallback)
+ * @param {number} winterCfg - Configured winter solstice day-of-year (fallback)
+ * @returns {{longest: number, shortest: number}} 0-based day-of-year of each solstice
+ */
+function scanSolsticeDays(calendar, internalYear, totalDays, summerCfg, winterCfg) {
+  const wrap = (d) => ((Math.round(d) % totalDays) + totalDays) % totalDays;
+  const months = calendar?.monthsArray ?? [];
+  let maxH = -Infinity;
+  let minH = Infinity;
+  let longest = wrap(summerCfg);
+  let shortest = wrap(winterCfg);
+  let doy = 0;
+  let firstH = null;
+  let varied = false;
+  for (let m = 0; m < months.length; m++) {
+    const dim = calendar.getDaysInMonth(m, internalYear);
+    for (let d = 0; d < dim; d++) {
+      const h = calendar.daylightHours?.({ year: internalYear, month: m, dayOfMonth: d, hour: 12 });
+      if (Number.isFinite(h)) {
+        if (firstH === null) firstH = h;
+        else if (Math.abs(h - firstH) > 1e-9) varied = true;
+        if (h > maxH) {
+          maxH = h;
+          longest = doy;
+        }
+        if (h < minH) {
+          minH = h;
+          shortest = doy;
+        }
+      }
+      doy++;
+    }
+  }
+  if (!varied) return { longest: wrap(summerCfg), shortest: wrap(winterCfg) };
+  return { longest, shortest };
+}
+
+/**
+ * Resolve the day-of-year for a solstice or equinox from the calendar's daylight curve.
+ * @param {object} calendar - Active calendar instance
+ * @param {string} seasonalType - 'summer', 'winter', 'spring', or 'autumn'
+ * @param {number} year - Display year of the date being resolved
+ * @returns {number|null} 0-based day-of-year, or null for an unknown type
+ */
+export function getAstronomicalDayOfYear(calendar, seasonalType, year) {
+  const yearZero = calendar?.years?.yearZero ?? 0;
+  const internalYear = year - yearZero;
+  const totalDays = calendar?.getDaysInYear?.(internalYear) ?? getTotalDaysInYear(year);
+  const wrap = (d) => ((Math.round(d) % totalDays) + totalDays) % totalDays;
+  const summerCfg = calendar?.daylight?.summerSolstice ?? Math.round(totalDays * 0.47);
+  const winterCfg = calendar?.daylight?.winterSolstice ?? wrap(summerCfg + totalDays / 2);
+  const cacheKey = `${calendar?.metadata?.id ?? 'cal'}:${internalYear}:${summerCfg}:${winterCfg}:${totalDays}`;
+  let solstices = astroDayCache.get(cacheKey);
+  if (!solstices) {
+    solstices = scanSolsticeDays(calendar, internalYear, totalDays, summerCfg, winterCfg);
+    astroDayCache.set(cacheKey, solstices);
+  }
+  const { longest, shortest } = solstices;
+  switch (seasonalType) {
+    case 'summer':
+      return longest;
+    case 'winter':
+      return shortest;
+    case 'spring':
+      return getMidpoint(shortest, longest, totalDays);
+    case 'autumn':
+      return getMidpoint(longest, shortest, totalDays);
+    default:
+      return null;
+  }
 }
 
 /**
