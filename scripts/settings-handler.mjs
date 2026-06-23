@@ -1323,6 +1323,7 @@ export default class CalendariaSettings {
       [SETTINGS.CUSTOM_WEATHER_PRESETS]: { name: 'Custom Weather Presets', scope: 'world', config: false, type: new ArrayField(new ObjectField()) },
       [SETTINGS.WEATHER_PRESET_ALIASES]: { name: 'Weather Preset Aliases', scope: 'world', config: false, type: new ObjectField({ initial: {} }) },
       [SETTINGS.WEATHER_FORECAST_PLAN]: { name: 'Weather Forecast Plan', scope: 'world', config: false, type: new ObjectField({ initial: {} }) },
+      [SETTINGS.WEATHER_SEED]: { name: 'Weather Seed', scope: 'world', config: false, type: new NumberField({ initial: 0, integer: true }) },
       [SETTINGS.GM_OVERRIDE_CLEARS_FORECAST]: {
         name: 'CALENDARIA.Settings.GMOverrideClearsForecast.Name',
         hint: 'CALENDARIA.Settings.GMOverrideClearsForecast.Hint',

@@ -1,4 +1,4 @@
-import { COMPASS_DIRECTIONS, WEATHER_PERIODS, WIND_SPEEDS } from '../constants.mjs';
+import { COMPASS_DIRECTIONS, MODULE, SETTINGS, WEATHER_PERIODS, WIND_SPEEDS } from '../constants.mjs';
 import { log } from '../utils/logger.mjs';
 import { getAllPresets, getPreset } from './data/weather-presets.mjs';
 
@@ -24,7 +24,7 @@ export function seededRandom(seed) {
  * @returns {number} Seed value
  */
 export function dateSeed(year, month, day) {
-  return year * 10000 + month * 100 + day;
+  return year * 10000 + month * 100 + day + (game.settings.get(MODULE.ID, SETTINGS.WEATHER_SEED) || 0);
 }
 
 /**

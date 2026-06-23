@@ -223,6 +223,7 @@ export const SETTINGS = {
   WEATHER_HISTORY: 'weatherHistory',
   WEATHER_INERTIA: 'weatherInertia',
   WEATHER_PRESET_ALIASES: 'weatherPresetAliases',
+  WEATHER_SEED: 'weatherSeed',
   WEATHER_SOUND_FX: 'weatherSoundFx',
   WEATHER_SOUND_VOLUME: 'weatherSoundVolume',
   WEATHER_SUPPRESS_MUFFLE: 'weatherSuppressMuffle',

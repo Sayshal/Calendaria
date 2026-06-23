@@ -620,6 +620,7 @@ export default class WeatherManager {
    * Regenerate weather for all zones — clears forecast, generates new current weather, rebuilds plan.
    */
   static async regenerateAllWeather() {
+    await game.settings.set(MODULE.ID, SETTINGS.WEATHER_SEED, Math.floor(Math.random() * 0x7fffffff));
     const zones = this.#getEffectiveZones();
     for (const zone of zones) await this.generateAndSetWeather({ zoneId: zone.id, broadcast: false });
     await this.#clearForecastPlan();
