@@ -23,10 +23,12 @@
       aria-label="{{localize 'CALENDARIA.Common.AddNote'}}">
       <i class="fas fa-plus"></i>
     </button>
-    <button type="button" class="minical-sidebar-btn" data-action="openNoteViewer" data-tooltip
-      data-tooltip-direction="RIGHT" aria-label="{{localize 'CALENDARIA.NoteViewer.OpenNoteViewer'}}">
-      <i class="fas fa-book-open"></i>
-    </button>
+    {{#if canViewNotes}}
+      <button type="button" class="minical-sidebar-btn" data-action="openNoteViewer" data-tooltip
+        data-tooltip-direction="RIGHT" aria-label="{{localize 'CALENDARIA.NoteViewer.OpenNoteViewer'}}">
+        <i class="fas fa-book-open"></i>
+      </button>
+    {{/if}}
     <button type="button" class="minical-sidebar-btn" data-action="viewNotes" {{#if disableViewNotes}}disabled{{/if}}
       data-tooltip data-tooltip-direction="RIGHT" aria-label="{{localize 'CALENDARIA.MiniCal.ViewNotes'}}">
       <i class="fas fa-list"></i>

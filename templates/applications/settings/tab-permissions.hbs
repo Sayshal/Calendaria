@@ -48,6 +48,16 @@
           <p class="hint">{{localize "CALENDARIA.Permissions.ViewMiniCalHint"}}</p>
         </li>
         <li class="permission-row">
+          <label class="permission-name">{{localize "CALENDARIA.Permissions.ViewNotes"}}</label>
+          <input type="checkbox" name="permissions.viewNotes.player" data-tooltip
+            aria-label="{{localize 'USER.RolePlayer'}}" {{#if permissions.viewNotes.player}}checked{{/if}} />
+          <input type="checkbox" name="permissions.viewNotes.trusted" data-tooltip
+            aria-label="{{localize 'USER.RoleTrusted'}}" {{#if permissions.viewNotes.trusted}}checked{{/if}} />
+          <input type="checkbox" name="permissions.viewNotes.assistant" data-tooltip
+            aria-label="{{localize 'USER.RoleAssistant'}}" {{#if permissions.viewNotes.assistant}}checked{{/if}} />
+          <p class="hint">{{localize "CALENDARIA.Permissions.ViewNotesHint"}}</p>
+        </li>
+        <li class="permission-row">
           <label class="permission-name">{{localize "CALENDARIA.Permissions.ViewChronicle"}}</label>
           <input type="checkbox" name="permissions.viewChronicle.player" data-tooltip
             aria-label="{{localize 'USER.RolePlayer'}}" {{#if permissions.viewChronicle.player}}checked{{/if}} />

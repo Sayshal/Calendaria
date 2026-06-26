@@ -13,6 +13,7 @@ import {
   canViewBigCal,
   canViewHUD,
   canViewMiniCal,
+  canViewNotes,
   checkStickyZones,
   cleanupSnapIndicator,
   computeStarAlpha,
@@ -192,6 +193,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     context.canChangeWeather = canChangeWeather();
     context.canViewBigCal = canViewBigCal();
     context.canViewMiniCal = canViewMiniCal();
+    context.canViewNotes = canViewNotes();
     context.hudCalendarButton = game.settings.get(MODULE.ID, SETTINGS.HUD_CALENDAR_BUTTON);
     context.locked = this.isLocked;
     context.isPlaying = TimeClock.running;
@@ -1311,6 +1313,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} _target - Target element
    */
   static #onOpenNoteViewer(_event, _target) {
+    if (!canViewNotes()) return;
     NoteViewer.toggle();
   }
 

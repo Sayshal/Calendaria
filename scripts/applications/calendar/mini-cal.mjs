@@ -22,6 +22,7 @@ import {
   canChangeDateTime,
   canChangeWeather,
   canViewMiniCal,
+  canViewNotes,
   checkStickyZones,
   cleanupSnapIndicator,
   closeMoonPicker,
@@ -240,6 +241,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     context.showChronicleButton = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_MINI_CAL_BUTTON);
     context.canChangeDateTime = canChangeDateTime();
     context.canChangeWeather = canChangeWeather();
+    context.canViewNotes = canViewNotes();
     context.running = TimeClock.running;
     context.clockDisabled = TimeClock.disabled;
     context.clockLocked = TimeClock.locked || TimeClock.disabled;
@@ -1932,6 +1934,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** Open the Note Viewer. */
   static _onOpenNoteViewer() {
+    if (!canViewNotes()) return;
     NoteViewer.toggle();
   }
 

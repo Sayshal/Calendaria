@@ -6,6 +6,7 @@ const DEFAULTS = {
   viewChronicle: { player: false, trusted: true, assistant: true },
   viewHUD: { player: true, trusted: true, assistant: true },
   viewMiniCal: { player: false, trusted: true, assistant: true },
+  viewNotes: { player: true, trusted: true, assistant: true },
   viewStopwatch: { player: false, trusted: true, assistant: true },
   viewSunDial: { player: false, trusted: true, assistant: true },
   viewTimeKeeper: { player: false, trusted: true, assistant: true },
@@ -63,6 +64,14 @@ export function canViewHUD() {
  */
 export function canViewMiniCal() {
   return hasPermission('viewMiniCal');
+}
+
+/**
+ * Check if the current user can open the Note Viewer.
+ * @returns {boolean} True if user has permission
+ */
+export function canViewNotes() {
+  return hasPermission('viewNotes');
 }
 
 /**

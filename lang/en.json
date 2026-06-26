@@ -1920,6 +1920,8 @@
   "CALENDARIA.Permissions.ViewHUDHint": "Allow users to see the HUD widget.",
   "CALENDARIA.Permissions.ViewMiniCal": "View MiniCal",
   "CALENDARIA.Permissions.ViewMiniCalHint": "Allow users to use the MiniCal.",
+  "CALENDARIA.Permissions.ViewNotes": "View Note Viewer",
+  "CALENDARIA.Permissions.ViewNotesHint": "Allow users to open the Note Viewer.",
   "CALENDARIA.Permissions.ViewStopwatch": "View Stopwatch",
   "CALENDARIA.Permissions.ViewStopwatchHint": "Allow users to use the Stopwatch.",
   "CALENDARIA.Permissions.ViewSunDial": "View Sun Dial",

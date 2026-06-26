@@ -3,10 +3,12 @@
     {{#if borderGlow}}{{#if hasEvents}}style="--event-glow: {{firstEventColor}};" {{/if}}{{/if}}>
     <div class="section left">
       <div class="btn-group left" role="group" aria-label="{{localize 'CALENDARIA.HUD.NoteActions'}}">
-        <button type="button" class="btn" data-action="openNoteViewer" data-tooltip
-          aria-label="{{localize 'CALENDARIA.NoteViewer.OpenNoteViewer'}}">
-          <i class="fa-solid fa-book-open"></i>
-        </button>
+        {{#if canViewNotes}}
+          <button type="button" class="btn" data-action="openNoteViewer" data-tooltip
+            aria-label="{{localize 'CALENDARIA.NoteViewer.OpenNoteViewer'}}">
+            <i class="fa-solid fa-book-open"></i>
+          </button>
+        {{/if}}
         <button type="button" class="btn" data-action="addNote" data-tooltip
           aria-label="{{localize 'CALENDARIA.Common.AddNote'}}">
           <i class="fa-solid fa-calendar-plus"></i>

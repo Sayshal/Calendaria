@@ -22,6 +22,7 @@ import {
   buildWeatherLookup,
   buildWeatherPillData,
   canViewBigCal,
+  canViewNotes,
   enrichSeasonData,
   formatForLocation,
   generateDayTooltip,
@@ -217,6 +218,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const viewedDate = this.viewedDate;
     context.editable = game.user.isGM;
     context.canAddNotes = true;
+    context.canViewNotes = canViewNotes();
     context.showChronicleButton = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_BIG_CAL_BUTTON);
     context.calendar = calendar;
     context.viewedDate = viewedDate;
@@ -1913,6 +1915,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** Open the Note Viewer. */
   static _onOpenNoteViewer() {
+    if (!canViewNotes()) return;
     NoteViewer.toggle();
   }
 

@@ -5,10 +5,12 @@
       aria-label="{{#if (eq displayMode 'week')}}{{localize 'CALENDARIA.Common.PreviousWeek'}}{{else if (eq displayMode 'year')}}{{localize 'CALENDARIA.CalendarApp.PreviousYears'}}{{else}}{{localize 'CALENDARIA.Common.PreviousMonth'}}{{/if}}">
       <i class="fas fa-chevron-left"></i>
     </button>
-    <button type="button" class="search-toggle" data-action="openNoteViewer" data-tooltip
-      aria-label="{{localize 'CALENDARIA.NoteViewer.OpenNoteViewer'}}">
-      <i class="fas fa-book-open"></i>
-    </button>
+    {{#if canViewNotes}}
+      <button type="button" class="search-toggle" data-action="openNoteViewer" data-tooltip
+        aria-label="{{localize 'CALENDARIA.NoteViewer.OpenNoteViewer'}}">
+        <i class="fas fa-book-open"></i>
+      </button>
+    {{/if}}
     <button type="button" data-action="toggleCompact" data-tooltip
       aria-label="{{localize 'CALENDARIA.CalendarApp.ToggleCompact'}}" class="toggle-compact-btn">
       <i class="fas fa-compress"></i>
