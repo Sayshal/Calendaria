@@ -1,12 +1,7 @@
 ## New Features
 
-- A Particle Splash setting toggles the ground splash on rain and snow particles, with a per-scene Weather FX Splash override in Scene Configuration.
+- Added a View Note Viewer permission that hides the Note Viewer button from chosen roles.
 
 ## Bug Fixes
 
-- A moon with a cycle shorter than a day advances through its phases over the day instead of showing one fixed phase.
-- Custom weather presets keep their weight after you save and reopen the season climate editor.
-- Equinox and solstice festivals land on the correct day, following the calendar's daylight curve, and stay correct on month-based calendars and in leap years.
-- The import macro copies on servers without HTTPS, and the copied text pastes as valid script instead of HTML-escaped characters.
-- The per-scene Weather Effect Levels control is a multi-select, and weather still renders when a saved level no longer exists on the scene.
-- The Regenerate All Weather button produces fresh weather each time instead of rebuilding the identical forecast.
+- The Note Viewer note count no longer reveals the number of hidden notes to players.
