@@ -168,7 +168,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       dayOfMonth -= d;
       month++;
     }
-    return { year, month, dayOfMonth, hour, minute, second };
+    const dayOfWeek = this._computeDayOfWeek({ year, month, dayOfMonth });
+    return { year, month, dayOfMonth, dayOfWeek, hour, minute, second };
   }
 
   /** @override */
