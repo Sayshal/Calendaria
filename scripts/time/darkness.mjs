@@ -293,6 +293,32 @@ function buildEnvironmentUpdateData(scene, lighting) {
 }
 
 /**
+ * Build scene darkness/environment updates, skipping scenes already at the computed values.
+ * @param {object} components - Time components with hour/minute
+ * @returns {object[]} Scene update payloads whose values differ from current state
+ */
+function buildDarknessUpdates(components) {
+  const calendar = game.time.calendar;
+  const currentHour = components?.hour ?? 0;
+  const currentMinute = components?.minute ?? 0;
+  const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
+  const minutesPerHour = calendar?.days?.minutesPerHour ?? 60;
+  return getDarknessScenes()
+    .map((scene) => {
+      const zone = WeatherManager.getActiveZone?.(null, scene);
+      const sunrise = calendar?.sunrise?.(components, zone) ?? null;
+      const sunset = calendar?.sunset?.(components, zone) ?? null;
+      const baseDarkness = calculateDarknessFromTime(currentHour, currentMinute, hoursPerDay, minutesPerHour, sunrise, sunset);
+      const darkness = calculateAdjustedDarkness(baseDarkness, scene);
+      const lighting = calculateEnvironmentLighting(scene);
+      const envData = buildEnvironmentUpdateData(scene, lighting);
+      return { scene, update: { _id: scene.id, 'environment.darknessLevel': darkness, ...envData } };
+    })
+    .filter(({ scene, update }) => Object.entries(update).some(([key, value]) => key !== '_id' && foundry.utils.getProperty(scene, key) !== value))
+    .map(({ update }) => update);
+}
+
+/**
  * Update scene darkness when world time changes.
  * @param {number} worldTime - The new world time
  * @param {number} dt - The time delta in seconds
@@ -306,20 +332,10 @@ export async function updateDarknessFromWorldTime(worldTime, dt) {
   if (lastHour !== null && lastHour === currentHour && lastMinute === currentMinute) return;
   lastHour = currentHour;
   lastMinute = currentMinute;
-  const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
   const minutesPerHour = calendar?.days?.minutesPerHour ?? 60;
   const secondsPerHour = (calendar?.days?.secondsPerMinute ?? 60) * minutesPerHour;
   const animateDarkness = Math.abs(dt) < secondsPerHour;
-  const updates = getDarknessScenes().map((scene) => {
-    const zone = WeatherManager.getActiveZone?.(null, scene);
-    const sunrise = calendar?.sunrise?.(components, zone) ?? null;
-    const sunset = calendar?.sunset?.(components, zone) ?? null;
-    const baseDarkness = calculateDarknessFromTime(currentHour, currentMinute, hoursPerDay, minutesPerHour, sunrise, sunset);
-    const darkness = calculateAdjustedDarkness(baseDarkness, scene);
-    const lighting = calculateEnvironmentLighting(scene);
-    const envData = buildEnvironmentUpdateData(scene, lighting);
-    return { _id: scene.id, 'environment.darknessLevel': darkness, ...envData };
-  });
+  const updates = buildDarknessUpdates(components);
   if (updates.length) await Scene.updateDocuments(updates, { animateDarkness }).catch((error) => log(1, 'Darkness batch update failed:', error));
 }
 
@@ -383,22 +399,8 @@ export async function refreshEnvironmentLighting() {
  */
 export async function onWeatherChange() {
   if (!CalendariaSocket.isPrimaryGM()) return;
-  const calendar = game.time.calendar;
   const components = game.time.components;
-  const currentHour = components?.hour ?? 0;
-  const currentMinute = components?.minute ?? 0;
-  const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
-  const minutesPerHour = calendar?.days?.minutesPerHour ?? 60;
-  const updates = getDarknessScenes().map((scene) => {
-    const zone = WeatherManager.getActiveZone?.(null, scene);
-    const sunrise = calendar?.sunrise?.(components, zone) ?? null;
-    const sunset = calendar?.sunset?.(components, zone) ?? null;
-    const baseDarkness = calculateDarknessFromTime(currentHour, currentMinute, hoursPerDay, minutesPerHour, sunrise, sunset);
-    const darkness = calculateAdjustedDarkness(baseDarkness, scene);
-    const lighting = calculateEnvironmentLighting(scene);
-    const envData = buildEnvironmentUpdateData(scene, lighting);
-    return { _id: scene.id, 'environment.darknessLevel': darkness, ...envData };
-  });
+  const updates = buildDarknessUpdates(components);
   if (updates.length) await Scene.updateDocuments(updates).catch((error) => log(1, 'Weather darkness batch update failed:', error));
 }
 
