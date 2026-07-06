@@ -9,7 +9,7 @@ export async function checkReleaseMessage() {
   if (!version) return;
   const lastSeen = game.user.getFlag(MODULE.ID, 'lastSeenVersion');
   if (lastSeen === version) return;
-  const repoUrl = `https://github.com/Timemaster-Games/calendaria/releases/tag/release-${version}`;
+  const repoUrl = `https://github.com/Sayshal/Calendaria/releases/tag/release-${version}`;
   const content = await foundry.applications.handlebars.renderTemplate(`modules/${MODULE.ID}/templates/chat/release-message.hbs`, { version, repoUrl });
   await ChatMessage.create({ content, whisper: [game.user.id], speaker: { alias: MODULE.TITLE } });
   await game.user.setFlag(MODULE.ID, 'lastSeenVersion', version);
