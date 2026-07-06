@@ -410,7 +410,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       months: extendedMonthSchema,
       seasons: extendedSeasonSchema,
       days: extendedDaysSchema,
-      secondsPerRound: new NumberField({ required: false, integer: true, min: 1, initial: 6 }),
+      secondsPerRound: new NumberField({ required: false, integer: true, min: 0, initial: 6 }),
       leapYearConfig: new SchemaField(
         {
           rule: new StringField({ required: false, initial: 'none' }),

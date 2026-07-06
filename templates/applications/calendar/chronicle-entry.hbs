@@ -85,7 +85,7 @@
         </div>
       {{/if}}
 
-      {{#if isGM}}
+      {{#if canAdd}}
         <button type="button" class="add-note-btn" data-action="addNote" data-year="{{date.year}}"
           data-month="{{date.month}}" data-day="{{date.dayOfMonth}}"
           data-tooltip="{{localize 'CALENDARIA.Chronicle.AddNote'}}">

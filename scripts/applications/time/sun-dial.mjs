@@ -673,7 +673,6 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
       await game.time.advance(timeDiff);
       log(3, `Time adjusted by ${timeDiff} seconds to ${this.#formatDialTime(this.#currentHours, this.#currentMinutes)}`);
     }
-    this.#initialTime = this.#initialTime + timeDiff;
   }
 
   /** Set up the right-click context menu on the dial. */

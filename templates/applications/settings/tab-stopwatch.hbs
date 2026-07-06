@@ -1,22 +1,20 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
 
-  {{#if isGM}}
-    <div class="button-row app-controls">
-      <button type="button" data-action="resetPosition" data-target="stopwatch">
-        <i class="fas fa-undo"></i>
-        {{localize "CALENDARIA.Common.ResetPosition"}}
-      </button>
-      <button type="button" data-action="closeStopwatch">
-        <i class="fas fa-times"></i>
-        {{localize "CALENDARIA.SettingsPanel.CloseStopwatch"}}
-      </button>
-      <button type="button" data-action="openStopwatch">
-        <i class="fas fa-external-link-alt"></i>
-        {{localize "CALENDARIA.Common.OpenStopWatch"}}
-      </button>
-    </div>
-    <p class="hint section-hint">{{openHint}}</p>
-  {{/if}}
+  <div class="button-row app-controls">
+    <button type="button" data-action="resetPosition" data-target="stopwatch">
+      <i class="fas fa-undo"></i>
+      {{localize "CALENDARIA.Common.ResetPosition"}}
+    </button>
+    <button type="button" data-action="closeStopwatch">
+      <i class="fas fa-times"></i>
+      {{localize "CALENDARIA.SettingsPanel.CloseStopwatch"}}
+    </button>
+    <button type="button" data-action="openStopwatch">
+      <i class="fas fa-external-link-alt"></i>
+      {{localize "CALENDARIA.Common.OpenStopWatch"}}
+    </button>
+  </div>
+  <p class="hint section-hint">{{openHint}}</p>
 
   <fieldset data-section="stopwatch-display">
     <legend>

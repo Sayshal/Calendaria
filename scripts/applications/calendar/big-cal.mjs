@@ -430,6 +430,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
           festivalName: !isFogged && fi?.showVisuals ? fi.name : '',
           festivalColor: !isFogged && fi?.showVisuals ? fi.color : '',
           festivalIcon: !isFogged && fi?.showVisuals ? fi.icon : '',
+          festivalIconIsImage: !isFogged && fi?.showVisuals ? fi.iconIsImage : false,
           festivalDescription: !isFogged ? fi?.description || '' : '',
           festivalNoteId: !isFogged ? fi?.note?.id || '' : '',
           dayTooltip: isFogged ? '' : generateDayTooltip(calendar, year, month, dayOfMonth, festivalInfo, wd, dayNotes),
@@ -454,6 +455,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
           festivalName: !isFogged && fi?.showVisuals ? fi.name : '',
           festivalColor: !isFogged && fi?.showVisuals ? fi.color : '',
           festivalIcon: !isFogged && fi?.showVisuals ? fi.icon : '',
+          festivalIconIsImage: !isFogged && fi?.showVisuals ? fi.iconIsImage : false,
           festivalDescription: !isFogged ? fi?.description || '' : '',
           festivalNoteId: !isFogged ? fi?.note?.id || '' : '',
           dayTooltip: isFogged ? '' : generateDayTooltip(calendar, year, month, dayOfMonth, festivalInfo, wd, dayNotes),
@@ -606,6 +608,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
         }
         const weekdayData = calendar.weekdaysArray[i % daysInWeek];
         const festivalNoteId = this._getFestivalNoteId(festivalDay);
+        const festivalIconIsImage = typeof festivalDay?.icon === 'string' && !festivalDay.icon.startsWith('fa') && (festivalDay.icon.includes('/') || festivalDay.icon.includes('.'));
         const dayData = {
           day: dayNum,
           dayOfMonth,
@@ -618,7 +621,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
           isFestival: !dayIsFogged && !!festivalDay,
           festivalName: !dayIsFogged && festivalDay ? _loc(festivalDay.name) : null,
           festivalColor: !dayIsFogged ? festivalDay?.color || '' : '',
-          festivalIcon: !dayIsFogged && festivalDay?.icon ? `fas ${festivalDay.icon}` : '',
+          festivalIconIsImage: !dayIsFogged && festivalIconIsImage,
+          festivalIcon: !dayIsFogged && festivalDay?.icon ? (festivalIconIsImage ? festivalDay.icon : `fas ${festivalDay.icon}`) : '',
           festivalNoteId: dayIsFogged ? '' : festivalNoteId,
           moonPhases,
           isRestDay: weekdayData?.isRestDay || false,

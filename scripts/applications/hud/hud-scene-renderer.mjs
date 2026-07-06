@@ -655,7 +655,8 @@ export class HudSceneRenderer {
     this.#mode = mode;
     this.#perfConfig = this.#getPerformanceConfig();
     const parent = canvas.parentElement;
-    this.#app = new PIXI.Application({ view: canvas, backgroundAlpha: 0, resizeTo: parent, antialias: true });
+    const resolution = Math.min(window.devicePixelRatio || 1, 2);
+    this.#app = new PIXI.Application({ view: canvas, backgroundAlpha: 0, resizeTo: parent, antialias: true, resolution, autoDensity: true });
     this.#app.ticker.maxFPS = this.#perfConfig.maxFPS;
     this.#buildSkyLayer();
     this.#buildStarLayer();
@@ -836,7 +837,7 @@ export class HudSceneRenderer {
       sprite.anchor.set(0.5);
       sprite.x = rand(4, w - 4);
       sprite.y = rand(4, h * 0.85);
-      sprite.scale.set(rand(0.5, 1.2));
+      sprite.scale.set(rand(0.5, 1.2) * (this.#mode === 'dial' ? (w / 300) * 3 : 1));
       sprite.alpha = 0.5;
       this.#starContainer.addChild(sprite);
       this.#stars.push(sprite);
@@ -1026,7 +1027,7 @@ export class HudSceneRenderer {
       const sunHour = sunrise + sunProgress * daylightHours;
       const angleDegs = sunHour * (360 / hoursPerDay) + 90;
       const angleRads = (angleDegs * Math.PI) / 180;
-      const sunSize = 20;
+      const sunSize = w * 0.09;
       const orbitRadius = w * 0.28;
       this.#sunSprite.x = w / 2 + Math.cos(angleRads) * orbitRadius;
       this.#sunSprite.y = h / 2 + Math.sin(angleRads) * orbitRadius;
@@ -1112,7 +1113,7 @@ export class HudSceneRenderer {
     const h = this.#app.screen.height;
     const count = moons.length;
     const isDial = this.#mode === 'dial';
-    const baseMoonSize = isDial ? 20 : this.#mode === 'dome' ? (w > 120 ? 18 : 14) : w > 110 ? 12 : 10;
+    const baseMoonSize = isDial ? w * 0.09 : this.#mode === 'dome' ? (w > 120 ? 18 : 14) : w > 110 ? 12 : 10;
     const secondaryScale = Math.max(0.6, 0.92 - Math.max(0, count - 3) * 0.03);
     const trailSpacing = baseMoonSize * secondaryScale * 1.3;
     let arcPixels;

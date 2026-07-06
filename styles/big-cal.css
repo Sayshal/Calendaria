@@ -365,6 +365,13 @@
       font-size: var(--font-size-12);
     }
 
+    img.festival-icon {
+      width: 1em;
+      height: 1em;
+      object-fit: contain;
+      vertical-align: middle;
+    }
+
     .day-weather-pill + .day-notes {
       margin-top: 0;
     }

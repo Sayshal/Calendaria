@@ -1,6 +1,6 @@
 import { CalendarManager } from '../../calendar/_module.mjs';
 import { DISPLAY_STYLES, HOOKS, MODULE, NOTE_VISIBILITY, SETTINGS, TEMPLATES } from '../../constants.mjs';
-import { NoteManager, filterNotes, formatNoteDate, getAllPresets, getAvailableAuthors } from '../../notes/_module.mjs';
+import { NoteManager, compareDates, filterNotes, formatNoteDate, getAllPresets, getAvailableAuthors, getCurrentDate } from '../../notes/_module.mjs';
 import { canAddNotes, canDeleteNotes } from '../../utils/_module.mjs';
 
 const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
@@ -59,6 +59,8 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
     this._allFilteredNotes = [];
     this._renderedCount = 0;
     this._loading = false;
+    this._todayIndex = -1;
+    this._initialTodayScroll = true;
     if (options.search) this._filterState.search = options.search;
     if (options.preset) this._filterState.presets.add(options.preset);
     if (options.visibility) this._filterState.visibility = options.visibility;
@@ -166,7 +168,11 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
       }
       this._allFilteredNotes = [...direct, ...mentioned];
     }
+    const today = getCurrentDate();
+    this._todayIndex = this._allFilteredNotes.findIndex((row) => row.startDate && compareDates(row.startDate, today) >= 0);
+    if (this._todayIndex >= 0) this._allFilteredNotes[this._todayIndex].isToday = true;
     this._renderedCount = Math.min(BATCH_SIZE, this._allFilteredNotes.length);
+    if (this._initialTodayScroll && this._todayIndex >= this._renderedCount) this._renderedCount = this._todayIndex + 1;
     const calendarIdSet = new Set(calendarIds);
     context.notes = this._allFilteredNotes.slice(0, this._renderedCount);
     const calendarScoped = calendarIdSet.size ? allNotes.filter((n) => calendarIdSet.has(n.calendarId)) : allNotes;
@@ -205,6 +211,10 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
     if (options.isFirstRender) {
       this.#centerPosition();
       this.#registerHooks();
+      if (this._initialTodayScroll) {
+        this._initialTodayScroll = false;
+        if (this._todayIndex >= 0) requestAnimationFrame(() => this.element?.querySelector('.note-viewer-today')?.scrollIntoView({ block: 'start' }));
+      }
     }
     this.#bindFilterListeners();
     this.#bindResultListeners();
@@ -265,6 +275,7 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
     return {
       id: stub.id,
       name: stub.name,
+      startDate: flagData.startDate,
       dateLabel: formatNoteDate(stub),
       color: flagData.color || '#4a9eff',
       icon: flagData.icon || 'fas fa-calendar',

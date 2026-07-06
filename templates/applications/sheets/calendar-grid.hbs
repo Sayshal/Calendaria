@@ -101,7 +101,9 @@
                       <span class="festival-icon-wrapper" {{#if festivalNoteId}}data-action="editNote"
                         data-note-id="{{festivalNoteId}}" {{/if}} data-tooltip
                         aria-label="{{festivalName}}{{#if festivalDescription}}: {{festivalDescription}}{{/if}}">
-                        <i class="{{#if festivalIcon}}{{festivalIcon}}{{else}}fas fa-star{{/if}} festival-icon"></i>
+                        {{#if festivalIconIsImage}}<img src="{{festivalIcon}}" class="festival-icon"
+                          alt="{{festivalName}}">{{else}}<i
+                          class="{{#if festivalIcon}}{{festivalIcon}}{{else}}fas fa-star{{/if}} festival-icon"></i>{{/if}}
                       </span>
                     {{/if}}
                     {{#if moonPhases}}
