@@ -973,7 +973,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#calendarData.days.hoursPerDay = parseInt(data['days.hoursPerDay']) || 24;
     this.#calendarData.days.minutesPerHour = parseInt(data['days.minutesPerHour']) || 60;
     this.#calendarData.days.secondsPerMinute = parseInt(data['days.secondsPerMinute']) || 60;
-    this.#calendarData.secondsPerRound = parseInt(data.secondsPerRound) || 6;
+    const spr = parseInt(data.secondsPerRound);
+    this.#calendarData.secondsPerRound = Number.isFinite(spr) ? spr : 6;
     if (!this.#calendarData.daylight) this.#calendarData.daylight = {};
     this.#calendarData.daylight.enabled = data['daylight.enabled'] ?? false;
     const shortRaw = parseFloat(data['daylight.shortestDay']);
