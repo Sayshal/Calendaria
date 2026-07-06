@@ -1,7 +1,17 @@
 import { CalendarManager } from '../../calendar/_module.mjs';
 import { HOOKS, MODULE, SETTINGS, SOCKET_TYPES, TEMPLATES } from '../../constants.mjs';
 import { NoteManager, addDays, getPresetDefinition } from '../../notes/_module.mjs';
-import { CalendariaSocket, buildOpenAppsMenuItem, buildScrollEntries, canViewChronicle, dateFormattingParts, getDefaultDateRange, isCombatBlocked, warnShowToAll } from '../../utils/_module.mjs';
+import {
+  CalendariaSocket,
+  buildOpenAppsMenuItem,
+  buildScrollEntries,
+  canAddNotes,
+  canViewChronicle,
+  dateFormattingParts,
+  getDefaultDateRange,
+  isCombatBlocked,
+  warnShowToAll
+} from '../../utils/_module.mjs';
 import { SettingsPanel } from '../_module.mjs';
 
 const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
@@ -132,16 +142,17 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
       entryDepth: this._entryDepth,
       categoryFilter: this._categoryFilter
     });
-    const isGM = game.user.isGM;
+    const canAdd = canAddNotes();
     for (const entry of this._entries) {
       if (!entry.notes) continue;
       for (const note of entry.notes) if (note.content) note.content = await foundry.applications.ux.TextEditor.implementation.enrichHTML(note.content);
     }
-    context.entries = this._entries.map((e) => ({ ...e, isGM }));
+    context.entries = this._entries.map((e) => ({ ...e, canAdd }));
     context.entryDepth = this._entryDepth;
     context.showEmpty = this._showEmpty;
     context.hasEntries = this._entries.length > 0;
     context.isGM = game.user.isGM;
+    context.canAdd = canAdd;
     context.depths = [
       { id: 'title', label: _loc('CALENDARIA.Chronicle.Depth.Title'), active: this._entryDepth === 'title' },
       { id: 'excerpt', label: _loc('CALENDARIA.Chronicle.Depth.Excerpt'), active: this._entryDepth === 'excerpt' },
@@ -512,7 +523,7 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     const parts = [];
     for (const entry of entries) {
-      const html = await foundry.applications.handlebars.renderTemplate(template, { ...entry, isGM: game.user.isGM });
+      const html = await foundry.applications.handlebars.renderTemplate(template, { ...entry, canAdd: canAddNotes() });
       parts.push(html);
     }
     return parts.join('');
