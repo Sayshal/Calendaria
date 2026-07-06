@@ -195,6 +195,7 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
     if (options.isFirstRender) {
       this.#restorePosition();
       this.#initContextMenu();
+      if (!this._lockedRange) this._scrollToToday = true;
     }
     this.#registerHooks();
     this.#bindSelectListeners();
