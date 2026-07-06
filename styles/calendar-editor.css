@@ -193,6 +193,13 @@
 
         opacity: 0.8;
       }
+
+      img {
+        width: 1em;
+        height: 1em;
+        object-fit: contain;
+        vertical-align: middle;
+      }
     }
 
     .festival-name {

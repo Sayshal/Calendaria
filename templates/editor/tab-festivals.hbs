@@ -29,7 +29,8 @@
             <div class="festival-main flexrow">
               <span class="col-icon festival-icon-display"
                 style="color: {{#if this.color}}{{this.color}}{{else}}#d4af37{{/if}}">
-                <i class="{{#if this.icon}}fas {{this.icon}}{{else}}fas fa-star{{/if}}"></i>
+                {{#if this.iconIsImage}}<img src="{{this.icon}}" alt="">{{else}}<i
+                    class="{{#if this.icon}}fas {{this.icon}}{{else}}fas fa-star{{/if}}"></i>{{/if}}
               </span>
               <span class="col-name festival-name">{{this.name}}</span>
               <span class="col-schedule hint">{{this.conditionSummary}}</span>

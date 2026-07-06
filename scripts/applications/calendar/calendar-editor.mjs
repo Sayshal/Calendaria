@@ -388,11 +388,14 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       let conditionSummary = tree ? summarizeConditionTree(tree, this.#calendarData) : '';
       const duration = fd.duration ?? 1;
       if (conditionSummary && duration > 1) conditionSummary += ` (${duration} ${_loc('CALENDARIA.Common.UnitDays')})`;
+      const icon = fd.icon || '';
+      const iconIsImage = typeof icon === 'string' && !icon.startsWith('fa') && (icon.includes('/') || icon.includes('.'));
       return {
         key: fd.linkedFestival?.festivalKey ?? stub.id,
         noteId: stub.id,
         name: stub.name,
-        icon: fd.icon || '',
+        icon,
+        iconIsImage,
         color: fd.color || '',
         countsForWeekday: fd.linkedFestival?.countsForWeekday ?? true,
         conditionSummary
