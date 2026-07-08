@@ -30,15 +30,15 @@ body:
     attributes:
       label: Foundry Version
       description: What version of foundry?
-      placeholder: '13.347'
+      placeholder: '14.364'
     validations:
       required: true
   - type: input
     id: system-version
     attributes:
       label: Game System
-      description: What game system and version? (e.g., dnd5e 5.2.4, pf2e 6.1.0)
-      placeholder: 'dnd5e 5.2.4'
+      description: What game system and version? (e.g., dnd5e 6.0.0, pf2e 6.1.0)
+      placeholder: 'dnd5e 6.0.0'
     validations:
       required: false
   - type: input
