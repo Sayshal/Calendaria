@@ -30,7 +30,7 @@ body:
     attributes:
       label: Foundry Version
       description: What version of foundry?
-      placeholder: '12.331'
+      placeholder: '13.347'
     validations:
       required: true
   - type: input
@@ -38,9 +38,9 @@ body:
     attributes:
       label: Game System
       description: What game system and version? (e.g., dnd5e 5.2.4, pf2e 6.1.0)
-      placeholder: 'dnd5e 4.3.0'
+      placeholder: 'dnd5e 5.2.4'
     validations:
-      required: true
+      required: false
   - type: input
     id: active-calendar
     attributes:

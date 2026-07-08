@@ -1,5 +1,5 @@
 name: Feature Request
-description: 'Request a new feature'
+description: Request a new feature
 title: '[FEATURE] '
 labels: ['type:feature']
 assignees:
