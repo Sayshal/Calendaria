@@ -1,7 +1,7 @@
 import { CalendarManager, CalendarRegistry } from '../calendar/_module.mjs';
 import { HOOKS, MODULE, SOCKET_TYPES } from '../constants.mjs';
 import { NoteManager, getCurrentDate, isRecurringMatch } from '../notes/_module.mjs';
-import { CalendariaSocket, log } from '../utils/_module.mjs';
+import { CalendariaSocket } from '../utils/_module.mjs';
 
 /**
  * Reminder Scheduler class that monitors time and triggers pre-event reminders.
@@ -47,7 +47,7 @@ export default class ReminderScheduler {
     if (this.#skipNext) {
       this.#skipNext = false;
       this.#lastDate = getCurrentDate();
-      log(3, 'Skipping reminders (timepoint jump)');
+      ATLAS.log(3, 'Skipping reminders (timepoint jump)');
       return;
     }
     const currentDate = getCurrentDate();
@@ -91,7 +91,7 @@ export default class ReminderScheduler {
         fired++;
       }
     }
-    if (fired > 0) log(3, `Fired ${fired} reminder(s) at ${currentDate.year}-${currentDate.month}-${currentDate.dayOfMonth} ${currentDate.hour}:${currentDate.minute}`);
+    if (fired > 0) ATLAS.log(3, `Fired ${fired} reminder(s) at ${currentDate.year}-${currentDate.month}-${currentDate.dayOfMonth} ${currentDate.hour}:${currentDate.minute}`);
   }
 
   /**

@@ -19,10 +19,6 @@ import {
   canViewStopwatch,
   canViewSunDial,
   canViewTimeKeeper,
-  checkReleaseMessage,
-  initializeLogger,
-  initializeTheme,
-  log,
   migrateRemovedCalendarOverrides,
   migrateRemovedCalendars,
   overrideChatLogTimestamps,
@@ -59,10 +55,10 @@ import './styles/tooltips.css';
 import './styles/weather.css';
 
 Hooks.once('init', async () => {
+  ATLAS.register('calendaria', { title: 'Calendaria', github: 'Sayshal/calendaria', theme: { scope: '.calendaria' } });
   createGlobalNamespace();
   Hooks.callAll(HOOKS.INIT);
   CalendariaSettings.registerSettings();
-  initializeLogger();
   registerKeybindings();
   registerHooks();
   registerEnrichers();
@@ -74,7 +70,7 @@ Hooks.once('init', async () => {
   foundry.applications.apps.DocumentSheetConfig.registerSheet(JournalEntryPage, SHEETS.CALENDARIA, CalendarNoteSheet, { types: [JOURNALS.CALENDAR_NOTE], makeDefault: true, label: 'Calendar Note' });
   CalendariaSceneConfig.patchBaseSceneConfig();
   await foundry.applications.handlebars.loadTemplates(Object.values(TEMPLATES).flatMap((v) => (typeof v === 'string' ? v : Object.values(v))));
-  log(3, 'Calendaria module initialized.');
+  ATLAS.log(3, 'Calendaria module initialized.');
 });
 
 Hooks.once('i18nInit', () => registerInserts());
@@ -100,11 +96,10 @@ Hooks.once('ready', async () => {
   TimeClock.initialize();
   EventScheduler.initialize();
   ReminderScheduler.initialize();
-  initializeTheme();
   try {
     await WeatherManager.initialize();
   } catch (err) {
-    log(1, 'WeatherManager initialization failed:', err);
+    ATLAS.log(1, 'WeatherManager initialization failed:', err);
   }
   BigCal.updateIdleOpacity();
   TimeKeeper.updateIdleOpacity();
@@ -140,7 +135,6 @@ Hooks.once('ready', async () => {
   initializeChatCommander();
   initializeFXMaster();
   initializeWeatherSound();
-  await checkReleaseMessage();
   Hooks.callAll(HOOKS.READY, { api: CalendariaAPI, calendar: CalendarManager.getActiveCalendar(), version: game.modules.get('calendaria')?.version });
   if (game.settings.get(MODULE.ID, SETTINGS.SHOW_TIME_KEEPER) && canViewTimeKeeper()) TimeKeeper.show({ silent: true });
   if (game.settings.get(MODULE.ID, SETTINGS.SHOW_SUN_DIAL) && canViewSunDial()) SunDial.show({ silent: true });
@@ -153,4 +147,9 @@ Hooks.once('ready', async () => {
 });
 Hooks.once('setup', () => {
   CONFIG.time.worldCalendarClass = CalendariaCalendar;
+});
+
+Hooks.on('3ds-atlas.themeChanged', ({ moduleId }) => {
+  if (moduleId !== 'calendaria') return;
+  for (const id of ['calendaria-hud', 'calendaria-timekeeper', 'calendaria-mini-cal', 'calendaria-big-cal', 'calendaria-stopwatch']) foundry.applications.instances.get(id)?.render();
 });

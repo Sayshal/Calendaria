@@ -1,6 +1,5 @@
 import { CalendarManager } from '../calendar/_module.mjs';
 import { HOOKS } from '../constants.mjs';
-import { log } from '../utils/_module.mjs';
 
 /**
  * Abstract base class for calendar importers.
@@ -74,7 +73,7 @@ export default class BaseImporter {
    * @throws {Error} If not implemented
    */
   async transform(data) {
-    log(1, `${this.constructor.name}.transform() not implemented`, { data });
+    ATLAS.log(1, `${this.constructor.name}.transform() not implemented`, { data });
     return null;
   }
 
@@ -84,7 +83,7 @@ export default class BaseImporter {
    * @returns {Promise<object[]>} Array of note data objects
    */
   async extractNotes(data) {
-    log(1, `${this.constructor.name}.extractNotes() not implemented`, { data });
+    ATLAS.log(1, `${this.constructor.name}.extractNotes() not implemented`, { data });
     return null;
   }
 
@@ -118,16 +117,16 @@ export default class BaseImporter {
     try {
       const calendar = CalendarManager.getCalendar(calendarId);
       if (!calendar) {
-        log(2, `Cannot apply date: calendar ${calendarId} not found`);
+        ATLAS.log(2, `Cannot apply date: calendar ${calendarId} not found`);
         return false;
       }
       const yearZero = calendar.years?.yearZero ?? 0;
       const displayYear = dateComponents.year + yearZero;
-      log(3, `Applying imported date: ${displayYear}/${dateComponents.month + 1}/${(dateComponents.dayOfMonth ?? 0) + 1}`);
+      ATLAS.log(3, `Applying imported date: ${displayYear}/${dateComponents.month + 1}/${(dateComponents.dayOfMonth ?? 0) + 1}`);
       await calendar.jumpToDate({ year: displayYear, month: dateComponents.month, dayOfMonth: dateComponents.dayOfMonth });
       return true;
     } catch (error) {
-      log(2, `Failed to apply current date:`, error);
+      ATLAS.log(2, `Failed to apply current date:`, error);
       return false;
     }
   }
@@ -175,14 +174,14 @@ export default class BaseImporter {
       const calendar = await CalendarManager.createCustomCalendar(calendarId, data);
       if (calendar) {
         const actualCalendarId = calendar.metadata?.id || `custom-${calendarId}`;
-        log(3, `Successfully imported calendar: ${actualCalendarId}`);
+        ATLAS.log(3, `Successfully imported calendar: ${actualCalendarId}`);
         Hooks.callAll(HOOKS.IMPORT_COMPLETE, { importerId: this.constructor.id, calendarId: actualCalendarId, calendar });
         return { success: true, calendar, calendarId: actualCalendarId };
       } else {
         throw new Error('Calendar creation returned null');
       }
     } catch (error) {
-      log(2, `Import failed for ${calendarId}:`, error);
+      ATLAS.log(2, `Import failed for ${calendarId}:`, error);
       Hooks.callAll(HOOKS.IMPORT_FAILED, { importerId: this.constructor.id, calendarId, error: error.message });
       return { success: false, error: error.message };
     }
@@ -196,7 +195,7 @@ export default class BaseImporter {
    * @returns {Promise<{success: boolean, count: number, errors: string[]}>} - Import result
    */
   async importNotes(notes, options = {}) {
-    log(1, `${this.constructor.name}.importNotes() not implemented`, { notes, options });
+    ATLAS.log(1, `${this.constructor.name}.importNotes() not implemented`, { notes, options });
     return null;
   }
 
@@ -208,7 +207,7 @@ export default class BaseImporter {
    * @returns {Promise<{success: boolean, count: number, errors: string[]}>} - Import result
    */
   async importFestivals(festivals, options = {}) {
-    log(1, `${this.constructor.name}.importFestivals() not implemented`, { festivals, options });
+    ATLAS.log(1, `${this.constructor.name}.importFestivals() not implemented`, { festivals, options });
     return null;
   }
 
@@ -230,7 +229,7 @@ export default class BaseImporter {
     await JournalEntry.createDocuments(journalData);
     const count = this._undatedEvents.length;
     ui.notifications.info(_loc('CALENDARIA.Importer.UndatedEventsMigrated', { count }));
-    log(3, `Migrated ${count} undated events to journal entries`);
+    ATLAS.log(3, `Migrated ${count} undated events to journal entries`);
     return { count };
   }
 

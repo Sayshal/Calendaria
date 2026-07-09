@@ -5,14 +5,9 @@ import { isLuxonCompatible, isLuxonSyncRequired } from '../../integrations/luxon
 import { addDays, getAllPresets } from '../../notes/_module.mjs';
 import { TimeClock, getTimeIncrements } from '../../time/_module.mjs';
 import {
-  COLOR_CATEGORIES,
-  COLOR_DEFINITIONS,
-  DEFAULT_COLORS,
   DEFAULT_FORMAT_PRESETS,
   LOCATION_DEFAULTS,
   LOCATION_FORMAT_KEYS,
-  THEME_PRESETS,
-  applyCustomColors,
   canChangeActiveCalendar,
   canViewBigCal,
   canViewChronicle,
@@ -21,16 +16,8 @@ import {
   canViewStopwatch,
   canViewSunDial,
   canViewTimeKeeper,
-  createCustomTheme,
-  deleteCustomTheme,
   exportSettings,
-  getColorsForTheme,
-  getCustomTheme,
-  getCustomThemes,
-  getForcedTheme,
   importSettings,
-  initializeTheme,
-  isCustomThemeKey,
   printCurrentMonth,
   printCurrentYear,
   validateFormatString
@@ -84,11 +71,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       resetPosition: SettingsPanel.#onResetPosition,
       openPresetManager: SettingsPanel.#onOpenPresetManager,
       openEnricherReference: SettingsPanel.#onOpenEnricherReference,
-      resetColor: SettingsPanel.#onResetColor,
-      customizeTheme: SettingsPanel.#onCustomizeTheme,
-      deleteCustomTheme: SettingsPanel.#onDeleteCustomTheme,
-      exportTheme: SettingsPanel.#onExportTheme,
-      importTheme: SettingsPanel.#onImportTheme,
       openHUD: SettingsPanel.#onOpenHUD,
       closeHUD: SettingsPanel.#onCloseHUD,
       openMiniCal: SettingsPanel.#onOpenMiniCal,
@@ -129,7 +111,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     notes: { template: TEMPLATES.SETTINGS.PANEL_NOTES, scrollable: [''] },
     time: { template: TEMPLATES.SETTINGS.PANEL_TIME, scrollable: [''] },
     weather: { template: TEMPLATES.SETTINGS.PANEL_WEATHER, scrollable: [''] },
-    theme: { template: TEMPLATES.SETTINGS.PANEL_THEME, scrollable: [''] },
     macros: { template: TEMPLATES.SETTINGS.PANEL_MACROS, scrollable: [''] },
     chat: { template: TEMPLATES.SETTINGS.PANEL_CHAT, scrollable: [''] },
     permissions: { template: TEMPLATES.SETTINGS.PANEL_PERMISSIONS, scrollable: [''] },
@@ -163,7 +144,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         { id: 'time', group: 'primary', icon: 'fas fa-clock', label: 'CALENDARIA.Common.Time', tabGroup: 'calendar', gmOnly: true },
         { id: 'weather', group: 'primary', icon: 'fas fa-cloud-sun', label: 'CALENDARIA.Common.Weather', tabGroup: 'calendar', gmOnly: true },
         { id: 'fogofwar', group: 'primary', icon: 'fas fa-eye-slash', label: 'CALENDARIA.SettingsPanel.Tab.FogOfWar', tabGroup: 'calendar', gmOnly: true },
-        { id: 'theme', group: 'primary', icon: 'fas fa-palette', label: 'CALENDARIA.SettingsPanel.Tab.Theme', tabGroup: 'calendar' },
         { id: 'macros', group: 'primary', icon: 'fas fa-bolt', label: 'CALENDARIA.SettingsPanel.Tab.Macros', tabGroup: 'technical', gmOnly: true },
         { id: 'chat', group: 'primary', icon: 'fas fa-comments', label: 'CALENDARIA.SettingsPanel.Tab.Chat', tabGroup: 'technical', gmOnly: true },
         { id: 'permissions', group: 'primary', icon: 'fas fa-user-shield', label: 'CALENDARIA.SettingsPanel.Tab.Permissions', tabGroup: 'technical', gmOnly: true },
@@ -235,30 +215,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   _onRender(context, options) {
     super._onRender(context, options);
     if (this.#navCollapsed) this.element.classList.add('nav-collapsed');
-    const themeModeSelect = this.element.querySelector('select[name="themeMode"]');
-    if (themeModeSelect && !themeModeSelect.dataset.listenerAttached) {
-      themeModeSelect.dataset.listenerAttached = 'true';
-      themeModeSelect.addEventListener('change', async (e) => {
-        const mode = e.target.value;
-        if (!mode) return;
-        await game.settings.set(MODULE.ID, SETTINGS.THEME_MODE, mode);
-        applyCustomColors(getColorsForTheme(mode));
-        this.render({ force: true, parts: ['theme'] });
-      });
-    }
-    const forceThemeSelect = this.element.querySelector('select[name="forceTheme"]');
-    if (forceThemeSelect && !forceThemeSelect.dataset.listenerAttached) {
-      forceThemeSelect.dataset.listenerAttached = 'true';
-      forceThemeSelect.addEventListener('change', async (e) => {
-        const value = e.target.value;
-        const oldForce = game.settings.get(MODULE.ID, SETTINGS.FORCE_THEME);
-        await game.settings.set(MODULE.ID, SETTINGS.FORCE_THEME, value);
-        if (isCustomThemeKey(value)) await game.settings.set(MODULE.ID, SETTINGS.FORCED_THEME_COLORS, getColorsForTheme(value));
-        else if (value !== 'none') await game.settings.set(MODULE.ID, SETTINGS.FORCED_THEME_COLORS, {});
-        if (oldForce !== value) initializeTheme();
-        this.render({ force: true, parts: ['theme'] });
-      });
-    }
     if (!this.element.dataset.formListenerAttached) {
       this.element.dataset.formListenerAttached = 'true';
       this.element.addEventListener('change', () => this.#setSaveIndicator('saving'));
@@ -550,10 +506,10 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         (activeTab === 'timekeeper' && !canViewTimeKeeper()) ||
         (activeTab === 'sunDial' && !canViewSunDial());
       if (isActiveHidden) {
-        this.tabGroups[group] = 'theme';
+        this.tabGroups[group] = 'home';
         for (const tab of Object.values(filtered)) {
-          tab.active = tab.id === 'theme';
-          tab.cssClass = tab.id === 'theme' ? 'active' : tab.cssClass?.replace('active', '').trim() || undefined;
+          tab.active = tab.id === 'home';
+          tab.cssClass = tab.id === 'home' ? 'active' : tab.cssClass?.replace('active', '').trim() || undefined;
         }
       }
       return filtered;
@@ -599,9 +555,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         break;
       case 'weather':
         await this.#prepareWeatherContext(context);
-        break;
-      case 'theme':
-        await this.#prepareThemeContext(context);
         break;
       case 'macros':
         await this.#prepareMacrosContext(context);
@@ -718,9 +671,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.CHRONICLE_SHOW_WEATHER]: { tab: 'chronicle', label: 'CALENDARIA.Common.ShowWeather' },
     [SETTINGS.CHRONICLE_SHOW_MOON_PHASES]: { tab: 'chronicle', label: 'CALENDARIA.Common.ShowMoonPhases' },
     [SETTINGS.CHRONICLE_SHOW_SEASON_CHANGES]: { tab: 'chronicle', label: 'CALENDARIA.Chronicle.Settings.ShowSeasonChanges.Name' },
-    [SETTINGS.FORCE_THEME]: { tab: 'theme', label: 'CALENDARIA.Settings.ForceTheme.Name' },
-    [SETTINGS.THEME_MODE]: { tab: 'theme', label: 'CALENDARIA.ThemeEditor.PresetSelect' },
-    [SETTINGS.CUSTOM_THEME_COLORS]: { tab: 'theme', label: 'CALENDARIA.SettingsPanel.Section.Theme' },
     [SETTINGS.CHAT_TIMESTAMP_MODE]: { tab: 'chat', label: 'CALENDARIA.Settings.ChatTimestampMode.Name' },
     [SETTINGS.CHAT_TIMESTAMP_SHOW_TIME]: { tab: 'chat', label: 'CALENDARIA.Settings.ChatTimestampShowTime.Name' },
     [SETTINGS.PERMISSIONS]: { tab: 'permissions', label: 'CALENDARIA.SettingsPanel.Tab.Permissions' },
@@ -749,7 +699,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.DARKNESS_MOON_SYNC]: { tab: 'canvas', label: 'CALENDARIA.Settings.DarknessMoonSync.Name' },
     [SETTINGS.DEFAULT_BRIGHTNESS_MULTIPLIER]: { tab: 'canvas', label: 'CALENDARIA.Settings.DefaultBrightnessMultiplier.Name' },
     [SETTINGS.PRIMARY_GM]: { tab: 'module', label: 'CALENDARIA.Settings.PrimaryGM.Name' },
-    [SETTINGS.LOGGING_LEVEL]: { tab: 'module', label: 'CALENDARIA.Settings.Logger.Name' },
     [SETTINGS.DEV_MODE]: { tab: 'module', label: 'CALENDARIA.SettingsPanel.DevMode.Name' },
     [SETTINGS.SHOW_TOOLBAR_BUTTON]: { tab: 'module', label: 'CALENDARIA.Settings.ShowToolbarButton.Name' },
     [SETTINGS.TOOLBAR_APPS]: { tab: 'module', label: 'CALENDARIA.Settings.ToolbarApps.Name' },
@@ -970,7 +919,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     fxmaster: [SETTINGS.FXMASTER_ENABLED, SETTINGS.FXMASTER_TOP_DOWN, SETTINGS.FXMASTER_FORCE_DOWNWARD, SETTINGS.FXMASTER_BELOW_TOKENS, SETTINGS.FXMASTER_SOUND_FX, SETTINGS.FXMASTER_SPLASH],
     'module-sync': [SETTINGS.PRIMARY_GM],
     'module-integration': [SETTINGS.SHOW_TOOLBAR_BUTTON, SETTINGS.TOOLBAR_APPS, SETTINGS.SHOW_JOURNAL_FOOTER],
-    'module-debugging': [SETTINGS.DEV_MODE, SETTINGS.LOGGING_LEVEL],
+    'module-debugging': [SETTINGS.DEV_MODE],
     permissions: [SETTINGS.PERMISSIONS],
     'chronicle-visibility': [
       SETTINGS.SHOW_CHRONICLE,
@@ -985,8 +934,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     'fog-of-war': [SETTINGS.FOG_OF_WAR_ENABLED, SETTINGS.FOG_OF_WAR_CONFIG, SETTINGS.FOG_OF_WAR_START_DATE, SETTINGS.FOG_OF_WAR_REVEAL_INTERMEDIATE, SETTINGS.FOG_OF_WAR_NAV_MODE],
     'cinematic-behavior': [SETTINGS.CINEMATIC_ENABLED, SETTINGS.CINEMATIC_THRESHOLD, SETTINGS.CINEMATIC_THRESHOLD_UNIT, SETTINGS.CINEMATIC_ON_REST],
     'cinematic-animation': [SETTINGS.CINEMATIC_PANEL_DURATION],
-    'cinematic-content': [SETTINGS.CINEMATIC_SHOW_WEATHER, SETTINGS.CINEMATIC_SHOW_MOONS, SETTINGS.CINEMATIC_SHOW_EVENTS, SETTINGS.CINEMATIC_EVENT_WEIGHTING, SETTINGS.CINEMATIC_EVENT_MAX_CARDS],
-    theme: [SETTINGS.CUSTOM_THEME_COLORS, SETTINGS.THEME_MODE]
+    'cinematic-content': [SETTINGS.CINEMATIC_SHOW_WEATHER, SETTINGS.CINEMATIC_SHOW_MOONS, SETTINGS.CINEMATIC_SHOW_EVENTS, SETTINGS.CINEMATIC_EVENT_WEIGHTING, SETTINGS.CINEMATIC_EVENT_MAX_CARDS]
   };
 
   /**
@@ -1625,56 +1573,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Prepare context for the Theme tab.
-   * @param {object} context - The context object
-   */
-  async #prepareThemeContext(context) {
-    const themeMode = game.settings.get(MODULE.ID, SETTINGS.THEME_MODE) || 'dark';
-    const forcedTheme = getForcedTheme();
-    const themes = getCustomThemes();
-    if (context.isGM) {
-      const forceTheme = game.settings.get(MODULE.ID, SETTINGS.FORCE_THEME) || 'none';
-      const forcePresets = Object.keys(THEME_PRESETS)
-        .map((v) => ({ value: v, label: _loc(`CALENDARIA.ThemeEditor.Presets.${v.charAt(0).toUpperCase() + v.slice(1)}`), selected: forceTheme === v }))
-        .sort((a, b) => a.label.localeCompare(b.label));
-      const forceCustom = Object.entries(themes)
-        .filter(([, entry]) => entry && typeof entry === 'object' && entry.name)
-        .map(([key, entry]) => ({ value: key, label: entry.name, selected: forceTheme === key }))
-        .sort((a, b) => a.label.localeCompare(b.label));
-      context.forceThemeOptions = [{ value: 'none', label: _loc('CALENDARIA.Settings.ForceTheme.None'), selected: forceTheme === 'none' }, ...forcePresets, ...forceCustom];
-    }
-    context.themeForced = !!forcedTheme;
-    const displayMode = forcedTheme || themeMode;
-    context.builtInThemes = Object.keys(THEME_PRESETS)
-      .map((v) => ({ key: v, label: _loc(`CALENDARIA.ThemeEditor.Presets.${v.charAt(0).toUpperCase() + v.slice(1)}`), selected: displayMode === v }))
-      .sort((a, b) => a.label.localeCompare(b.label));
-    context.customThemes = Object.entries(themes)
-      .filter(([, entry]) => entry && typeof entry === 'object' && entry.name)
-      .map(([key, entry]) => ({ key, label: entry.name, selected: displayMode === key }))
-      .sort((a, b) => a.label.localeCompare(b.label));
-    context.isCustomThemeActive = isCustomThemeKey(themeMode);
-    context.canDeleteTheme = isCustomThemeKey(themeMode) && !forcedTheme;
-    context.showCustomColors = isCustomThemeKey(displayMode) && !forcedTheme;
-    if (context.isCustomThemeActive) {
-      const activeCustom = getCustomTheme(themeMode);
-      context.activeCustomThemeName = activeCustom?.name || themeMode;
-    }
-    if (context.showCustomColors) {
-      const activeCustom = getCustomTheme(displayMode);
-      const baseColors = THEME_PRESETS[activeCustom?.basePreset]?.colors || DEFAULT_COLORS;
-      const mergedColors = { ...baseColors, ...(activeCustom?.colors || {}) };
-      const categories = {};
-      for (const [catKey, catLabel] of Object.entries(COLOR_CATEGORIES)) categories[catKey] = { key: catKey, label: catLabel, colors: [] };
-      for (const def of COLOR_DEFINITIONS) {
-        const value = mergedColors[def.key] || baseColors[def.key];
-        const isCustom = activeCustom?.colors?.[def.key] !== undefined;
-        categories[def.category].colors.push({ key: def.key, label: def.label, value, defaultValue: baseColors[def.key], isCustom });
-      }
-      context.themeCategories = Object.values(categories).filter((c) => c.colors.length > 0);
-    }
-  }
-
-  /**
    * Prepare context for the Canvas tab.
    * @param {object} context - The context object
    */
@@ -1760,13 +1658,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       if (b.value === '') return 1;
       return a.label.localeCompare(b.label, game.i18n.lang);
     });
-    const logLevel = game.settings.get(MODULE.ID, SETTINGS.LOGGING_LEVEL);
-    context.loggingLevelOptions = [
-      { value: '0', label: _loc('CALENDARIA.Common.Off'), selected: logLevel === '0' || logLevel === 0 },
-      { value: '1', label: _loc('CALENDARIA.Settings.Logger.Choices.Errors'), selected: logLevel === '1' || logLevel === 1 },
-      { value: '2', label: _loc('CALENDARIA.Settings.Logger.Choices.Warnings'), selected: logLevel === '2' || logLevel === 2 },
-      { value: '3', label: _loc('CALENDARIA.Settings.Logger.Choices.Verbose'), selected: logLevel === '3' || logLevel === 3 }
-    ];
     context.devMode = game.settings.get(MODULE.ID, SETTINGS.DEV_MODE);
     context.moduleVersion = game.modules.get(MODULE.ID)?.version ?? 'Unknown';
     const moduleData = game.data.modules?.find((m) => m.id === MODULE.ID);
@@ -2128,7 +2019,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       foundry.applications.instances.get('calendaria-mini-cal')?.render();
     }
     if ('primaryGM' in data) await game.settings.set(MODULE.ID, SETTINGS.PRIMARY_GM, data.primaryGM || '');
-    if ('loggingLevel' in data) await game.settings.set(MODULE.ID, SETTINGS.LOGGING_LEVEL, data.loggingLevel);
     if ('devMode' in data) await game.settings.set(MODULE.ID, SETTINGS.DEV_MODE, data.devMode);
     if (data.permissions) {
       const permissionKeys = [
@@ -2200,28 +2090,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         await revealRange({ year: y, month: m - 1, dayOfMonth: d - 1 }, current);
       }
       if (this.rendered) this.render({ parts: ['fogofwar'] });
-    }
-    if (data.colors) {
-      const themeMode = game.settings.get(MODULE.ID, SETTINGS.THEME_MODE);
-      if (isCustomThemeKey(themeMode)) {
-        const themes = getCustomThemes();
-        const entry = themes[themeMode];
-        if (entry) {
-          const baseColors = THEME_PRESETS[entry.basePreset]?.colors || DEFAULT_COLORS;
-          const overrides = {};
-          for (const def of COLOR_DEFINITIONS) if (data.colors[def.key] && data.colors[def.key] !== baseColors[def.key]) overrides[def.key] = data.colors[def.key];
-          entry.colors = overrides;
-          await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS, themes);
-          applyCustomColors({ ...baseColors, ...overrides });
-        }
-      }
-    }
-    if ('forceTheme' in data && game.user.isGM) {
-      const oldForce = game.settings.get(MODULE.ID, SETTINGS.FORCE_THEME);
-      await game.settings.set(MODULE.ID, SETTINGS.FORCE_THEME, data.forceTheme);
-      if (isCustomThemeKey(data.forceTheme)) await game.settings.set(MODULE.ID, SETTINGS.FORCED_THEME_COLORS, getColorsForTheme(data.forceTheme));
-      else if (data.forceTheme !== 'none') await game.settings.set(MODULE.ID, SETTINGS.FORCED_THEME_COLORS, {});
-      if (oldForce !== data.forceTheme) initializeTheme();
     }
     if (data.showSecretNotes !== undefined) await game.settings.set(MODULE.ID, SETTINGS.SHOW_SECRET_NOTES, !!data.showSecretNotes);
     if ('defaultNotePreset' in data) await game.settings.set(MODULE.ID, SETTINGS.DEFAULT_NOTE_PRESET, data.defaultNotePreset || null);
@@ -2429,25 +2297,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Reset a single color to default.
-   * @param {PointerEvent} _event - The click event
-   * @param {HTMLElement} target - The clicked element
-   */
-  static async #onResetColor(_event, target) {
-    const app = foundry.applications.instances.get('calendaria-settings-panel');
-    const colorKey = target.dataset.key;
-    const themeMode = game.settings.get(MODULE.ID, SETTINGS.THEME_MODE);
-    if (!isCustomThemeKey(themeMode)) return;
-    const themes = getCustomThemes();
-    if (themes[themeMode]) {
-      delete themes[themeMode].colors[colorKey];
-      await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS, themes);
-    }
-    applyCustomColors(getColorsForTheme(themeMode));
-    app?.render({ force: true, parts: ['theme'] });
-  }
-
-  /**
    * Reset a section's settings to their default values.
    * @param {PointerEvent} _event - The click event
    * @param {HTMLElement} target - The clicked element
@@ -2514,112 +2363,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     await game.settings.set(MODULE.ID, SETTINGS.FOG_OF_WAR_RANGES, newRanges);
     ui.notifications.info(_loc('CALENDARIA.Settings.FogOfWar.ResetRangesDone'));
-  }
-
-  /**
-   * Export current theme as JSON.
-   * @param {PointerEvent} _event - The click event
-   * @param {HTMLElement} _target - The clicked element
-   */
-  static async #onExportTheme(_event, _target) {
-    const themeMode = game.settings.get(MODULE.ID, SETTINGS.THEME_MODE) || 'dark';
-    const colors = getColorsForTheme(themeMode);
-    let themeName;
-    if (isCustomThemeKey(themeMode)) {
-      const custom = getCustomTheme(themeMode);
-      themeName = custom?.name || themeMode;
-    } else {
-      themeName = _loc(THEME_PRESETS[themeMode]?.name) || themeMode;
-    }
-    const exportData = {
-      name: themeName,
-      basePreset: isCustomThemeKey(themeMode) ? getCustomTheme(themeMode)?.basePreset : themeMode,
-      colors,
-      version: game.modules.get(MODULE.ID)?.version
-    };
-    const filename = `calendaria-theme-${themeName.toLowerCase().replace(/\s+/g, '-')}.json`;
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
-    ui.notifications.info('CALENDARIA.ThemeEditor.ExportSuccess', { localize: true });
-  }
-
-  /**
-   * Import theme from JSON file — creates a new custom theme entry.
-   * @param {PointerEvent} _event - The click event
-   * @param {HTMLElement} _target - The clicked element
-   */
-  static async #onImportTheme(_event, _target) {
-    const app = foundry.applications.instances.get('calendaria-settings-panel');
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    input.addEventListener('change', async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      try {
-        const text = await file.text();
-        const importData = JSON.parse(text);
-        if (!importData.colors) throw new Error('Invalid theme file format');
-        const basePreset = importData.basePreset && THEME_PRESETS[importData.basePreset] ? importData.basePreset : 'dark';
-        const baseColors = THEME_PRESETS[basePreset]?.colors || DEFAULT_COLORS;
-        const overrides = {};
-        for (const [key, value] of Object.entries(importData.colors)) if (key in DEFAULT_COLORS && baseColors[key] !== value) overrides[key] = value;
-        const themes = getCustomThemes();
-        const importName = importData.name || `Imported ${new Date().toLocaleDateString()}`;
-        const safeKey = `custom_imported_${Date.now()}`;
-        themes[safeKey] = { name: importName, basePreset, colors: overrides };
-        await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS, themes);
-        await game.settings.set(MODULE.ID, SETTINGS.THEME_MODE, safeKey);
-        applyCustomColors({ ...baseColors, ...overrides });
-        ui.notifications.info('CALENDARIA.ThemeEditor.ImportSuccess', { localize: true });
-        app?.render({ force: true, parts: ['theme'] });
-      } catch (err) {
-        log(1, 'Theme import failed:', err);
-        ui.notifications.error('CALENDARIA.ThemeEditor.ImportError', { localize: true });
-      }
-    });
-    input.click();
-  }
-
-  /** Create a new custom theme from the current preset. */
-  static async #onCustomizeTheme() {
-    const app = foundry.applications.instances.get('calendaria-settings-panel');
-    const currentMode = game.settings.get(MODULE.ID, SETTINGS.THEME_MODE) || 'dark';
-    let basePreset = currentMode;
-    if (isCustomThemeKey(currentMode)) {
-      const custom = getCustomTheme(currentMode);
-      basePreset = custom?.basePreset || 'dark';
-    }
-    const { key, entry } = createCustomTheme(basePreset);
-    const themes = getCustomThemes();
-    themes[key] = entry;
-    await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS, themes);
-    await game.settings.set(MODULE.ID, SETTINGS.THEME_MODE, key);
-    applyCustomColors(getColorsForTheme(key));
-    app?.render({ force: true, parts: ['theme'] });
-  }
-
-  /** Delete the active custom theme after confirmation. */
-  static async #onDeleteCustomTheme() {
-    const app = foundry.applications.instances.get('calendaria-settings-panel');
-    const currentMode = game.settings.get(MODULE.ID, SETTINGS.THEME_MODE);
-    if (!isCustomThemeKey(currentMode)) return;
-    const custom = getCustomTheme(currentMode);
-    const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: _loc('CALENDARIA.ThemeEditor.DeleteCustom.Title') },
-      content: `<p>${_loc('CALENDARIA.ThemeEditor.DeleteCustom.Content', { name: custom?.name || currentMode })}</p>`,
-      yes: { label: _loc('CALENDARIA.Common.Delete'), icon: 'fas fa-trash' },
-      no: { label: _loc('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' },
-      rejectClose: false
-    });
-    if (!confirmed) return;
-    await deleteCustomTheme(currentMode);
-    app?.render({ force: true, parts: ['theme'] });
   }
 
   /**
@@ -2931,18 +2674,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @inheritdoc */
   _attachPartListeners(partId, htmlElement, options) {
     super._attachPartListeners(partId, htmlElement, options);
-    if (partId === 'theme') {
-      const colorInputs = htmlElement.querySelectorAll('color-picker[data-key]');
-      colorInputs.forEach((input) => {
-        input.addEventListener('change', () => {
-          const resetBtn = input.closest('.color-table-row')?.querySelector('.reset-color');
-          if (resetBtn) {
-            resetBtn.disabled = false;
-            resetBtn.removeAttribute('aria-disabled');
-          }
-        });
-      });
-    }
     if (partId === 'macros') {
       const moonSelect = htmlElement.querySelector('select[name="newMoonTrigger.moonIndex"]');
       const phaseSelect = htmlElement.querySelector('select[name="newMoonTrigger.phaseIndex"]');

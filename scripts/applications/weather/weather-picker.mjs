@@ -1,7 +1,7 @@
 import { CalendarManager } from '../../calendar/_module.mjs';
 import { COMPASS_DIRECTIONS, MODULE, PRECIPITATION_TYPES, SETTINGS, TEMPLATES, WEATHER_PERIODS, WIND_SPEEDS } from '../../constants.mjs';
 import { getAvailableFxPresets, isFXMasterActive } from '../../integrations/_module.mjs';
-import { getAvailableMacros, log } from '../../utils/_module.mjs';
+import { getAvailableMacros } from '../../utils/_module.mjs';
 import { WEATHER_CATEGORIES, WeatherManager, fromDisplayUnit, getPreset, getPresetsByCategory, getTemperatureUnit, rollPresetTemperature, toDisplayUnit } from '../../weather/_module.mjs';
 import { CalendarEditor, WeatherProbabilityDialog } from '../_module.mjs';
 
@@ -376,7 +376,7 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
         });
       }
     }
-    log(3, `Weather applied: ${this.#selectedPresetId ?? 'custom'}`);
+    ATLAS.log(3, `Weather applied: ${this.#selectedPresetId ?? 'custom'}`);
     if (fd.saveAsPreset) {
       const data = foundry.utils.expandObject(fd);
       const label = data.customLabel?.trim();
@@ -483,7 +483,7 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
     this.#fxDensity = weather?.fxDensity ?? null;
     this.#fxSpeed = weather?.fxSpeed ?? null;
     this.#fxColor = weather?.fxColor ?? null;
-    log(3, 'Random weather generated');
+    ATLAS.log(3, 'Random weather generated');
     this.render();
   }
 
@@ -510,7 +510,7 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
    */
   static async _onClearWeather(_event, _target) {
     await WeatherManager.clearWeather();
-    log(3, 'Weather cleared');
+    ATLAS.log(3, 'Weather cleared');
     this.#selectedPresetId = null;
     this.#customEdited = false;
     this.#customLabel = '';

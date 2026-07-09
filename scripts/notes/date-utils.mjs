@@ -1,5 +1,4 @@
 import { CalendarManager } from '../calendar/_module.mjs';
-import { log } from '../utils/_module.mjs';
 
 /**
  * Compare two date objects.
@@ -66,7 +65,7 @@ export function daysBetween(startDate, endDate) {
     const secondsPerDay = hoursPerDay * minutesPerHour * secondsPerMinute;
     return Math.floor((endTime - startTime) / secondsPerDay);
   } catch (error) {
-    log(1, 'Error calculating days between dates:', error);
+    ATLAS.log(1, 'Error calculating days between dates:', error);
     return 0;
   }
 }
@@ -100,7 +99,7 @@ export function dayOfWeek(date, cal) {
     const components = { year: date.year - yearZero, month: date.month, dayOfMonth: date.dayOfMonth ?? 0 };
     return calendar._computeDayOfWeek(components);
   } catch (error) {
-    log(1, 'Error calculating day of week:', error);
+    ATLAS.log(1, 'Error calculating day of week:', error);
     return 0;
   }
 }
@@ -127,7 +126,7 @@ export function addDays(date, days) {
     const newComponents = calendar.timeToComponents(newTime);
     return { year: newComponents.year + yearZero, month: newComponents.month, dayOfMonth: newComponents.dayOfMonth, hour: newComponents.hour, minute: newComponents.minute };
   } catch (error) {
-    log(1, 'Error adding days to date:', error);
+    ATLAS.log(1, 'Error adding days to date:', error);
     return date;
   }
 }
@@ -249,7 +248,7 @@ export function secondsBetween(startDate, endDate) {
     });
     return endTime - startTime;
   } catch (error) {
-    log(1, 'Error calculating seconds between dates:', error);
+    ATLAS.log(1, 'Error calculating seconds between dates:', error);
     return 0;
   }
 }

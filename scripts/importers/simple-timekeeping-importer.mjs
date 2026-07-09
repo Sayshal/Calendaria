@@ -1,7 +1,6 @@
 import { CalendarManager } from '../calendar/_module.mjs';
 import { DEFAULT_MOON_PHASES } from '../constants.mjs';
 import { NoteManager } from '../notes/_module.mjs';
-import { log } from '../utils/_module.mjs';
 import { WeatherManager, getDefaultZoneConfig } from '../weather/_module.mjs';
 import BaseImporter from './base-importer.mjs';
 
@@ -148,7 +147,7 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
    */
   async transform(data) {
     const { calendar, moons, config } = data;
-    log(3, 'Transforming Simple Timekeeping export:', calendar?.name);
+    ATLAS.log(3, 'Transforming Simple Timekeeping export:', calendar?.name);
     const rawWeekdays = calendar?.days?.values ? Object.values(calendar.days.values) : [];
     const rawMonths = calendar?.months?.values ? Object.values(calendar.months.values) : [];
     const weekdays = this.#transformWeekdays(rawWeekdays);
@@ -352,7 +351,7 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
    */
   async extractNotes(data) {
     const events = data?.events ?? [];
-    log(3, `Extracting ${events.length} STK events from macro export`);
+    ATLAS.log(3, `Extracting ${events.length} STK events from macro export`);
     return events.map((event) => ({
       name: event.name,
       content: event.content,
@@ -387,7 +386,7 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
     const { calendarId } = options;
     const errors = [];
     let count = 0;
-    log(3, `Starting note import: ${notes.length} notes to calendar ${calendarId}`);
+    ATLAS.log(3, `Starting note import: ${notes.length} notes to calendar ${calendarId}`);
     const calendar = CalendarManager.getCalendar(calendarId);
     const yearZero = calendar?.years?.yearZero ?? 0;
     for (const note of notes) {
@@ -400,10 +399,10 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
         else errors.push(`Failed to create note: ${note.name}`);
       } catch (error) {
         errors.push(`Error creating note "${note.name}": ${error.message}`);
-        log(1, `Error importing note "${note.name}":`, error);
+        ATLAS.log(1, `Error importing note "${note.name}":`, error);
       }
     }
-    log(3, `Note import complete: ${count}/${notes.length} imported, ${errors.length} errors`);
+    ATLAS.log(3, `Note import complete: ${count}/${notes.length} imported, ${errors.length} errors`);
     return { success: errors.length === 0, count, errors };
   }
 
@@ -425,7 +424,7 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
         count++;
       } catch (error) {
         errors.push(`Error setting darkness sync for scene: ${error.message}`);
-        log(1, `Error importing scene darkness:`, error);
+        ATLAS.log(1, `Error importing scene darkness:`, error);
       }
     }
     return { success: errors.length === 0, count, errors };
@@ -442,7 +441,7 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
       await WeatherManager.setCustomWeather({ label: weather.label, color: weather.color, description: _loc('CALENDARIA.Importer.ImportedFrom.SimpleTimekeepingCustom') });
       return true;
     } catch (error) {
-      log(1, 'Error importing weather:', error);
+      ATLAS.log(1, 'Error importing weather:', error);
       return false;
     }
   }

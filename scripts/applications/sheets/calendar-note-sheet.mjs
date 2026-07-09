@@ -19,7 +19,7 @@ import {
   wrapInRootGroup
 } from '../../notes/_module.mjs';
 import { daysBetween } from '../../notes/date-utils.mjs';
-import { CalendariaSocket, convertToConditionTree, formatForLocation, log } from '../../utils/_module.mjs';
+import { CalendariaSocket, convertToConditionTree, formatForLocation } from '../../utils/_module.mjs';
 import { CalendarEditor, ConditionBuilderDialog } from '../_module.mjs';
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
@@ -626,7 +626,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     if (deps.length) updateData['system.connectedEvents'] = deps;
     await this.document.update(updateData);
     ui.notifications.info(_loc('CALENDARIA.Note.AutoConverted'));
-    log(3, `Auto-converted legacy repeat "${noteData.repeat}" for note "${this.document.name}"`);
+    ATLAS.log(3, `Auto-converted legacy repeat "${noteData.repeat}" for note "${this.document.name}"`);
   }
 
   /** @override */
@@ -748,7 +748,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const deps = tree ? extractEventDependencies(tree) : [];
     if (deps.length) updateData['system.connectedEvents'] = deps;
     await this.document.update(updateData);
-    log(3, `Applied condition preset: ${preset.label}${merge ? ' (merged)' : ''}`);
+    ATLAS.log(3, `Applied condition preset: ${preset.label}${merge ? ' (merged)' : ''}`);
   }
 
   /** @override */
@@ -1097,7 +1097,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
         const validation = validateConditions(updated);
         if (!validation.valid) {
           ui.notifications.error(_loc('CALENDARIA.Condition.Builder.ValidationError'));
-          log(2, 'Condition validation errors:', validation.errors);
+          ATLAS.log(2, 'Condition validation errors:', validation.errors);
           return;
         }
         const tree = updated.length ? wrapInRootGroup(updated) : null;

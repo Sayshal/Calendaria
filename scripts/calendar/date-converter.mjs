@@ -1,4 +1,4 @@
-import { formatCustom, log } from '../utils/_module.mjs';
+import { formatCustom } from '../utils/_module.mjs';
 import { CalendarRegistry } from './_module.mjs';
 
 /**
@@ -13,7 +13,7 @@ export function convertDate(date, fromCalendarId, toCalendarId) {
   const fromCal = CalendarRegistry.get(fromCalendarId);
   const toCal = CalendarRegistry.get(toCalendarId);
   if (!fromCal || !toCal) {
-    log(2, `convertDate: calendar not found (from=${fromCalendarId}, to=${toCalendarId})`);
+    ATLAS.log(2, `convertDate: calendar not found (from=${fromCalendarId}, to=${toCalendarId})`);
     return null;
   }
   const fromYearZero = fromCal.years?.yearZero ?? 0;

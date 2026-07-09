@@ -3,7 +3,7 @@ import { MODULE, SETTINGS } from './constants.mjs';
 import { syncWeatherToScene } from './integrations/fxmaster.mjs';
 import { invalidatePresetCache } from './notes/_module.mjs';
 import { refreshEnvironmentLighting } from './time/darkness.mjs';
-import { hideDebugZones, initializeTheme, log, showDebugZones } from './utils/_module.mjs';
+import { hideDebugZones, showDebugZones } from './utils/_module.mjs';
 import { invalidateCache as invalidateFogCache } from './utils/fog-of-war.mjs';
 import { FRAMEWORK_INITIAL_DISPLAY_FORMATS } from './utils/formatting/format-utils.mjs';
 
@@ -1064,17 +1064,6 @@ export default class CalendariaSettings {
           }
         }
       },
-      [SETTINGS.CUSTOM_THEME_COLORS]: { name: 'Custom Theme Colors', scope: 'user', config: false, type: new ObjectField({ initial: {} }) },
-      [SETTINGS.THEME_MODE]: { name: 'Theme Mode', scope: 'user', config: false, type: new StringField({ initial: 'dark' }) },
-      [SETTINGS.FORCE_THEME]: {
-        name: 'CALENDARIA.Settings.ForceTheme.Name',
-        hint: 'CALENDARIA.Settings.ForceTheme.Hint',
-        scope: 'world',
-        config: false,
-        type: new StringField({ initial: 'none' }),
-        onChange: () => initializeTheme()
-      },
-      [SETTINGS.FORCED_THEME_COLORS]: { name: 'Forced Theme Colors', scope: 'world', config: false, type: new ObjectField({ initial: {} }), onChange: () => initializeTheme() },
       [SETTINGS.CUSTOM_CALENDARS]: { name: 'Custom Calendars', scope: 'world', config: false, type: new ObjectField({ initial: {} }) },
       [SETTINGS.ACTIVE_CALENDAR]: {
         name: 'CALENDARIA.Settings.ActiveCalendar.Name',
@@ -1179,6 +1168,7 @@ export default class CalendariaSettings {
       festivalNoteYearZeroMigrationComplete: { name: 'Festival Note Year Zero Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       noteDurationNormalizationMigrationComplete: { name: 'Note Duration Normalization Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       festivalNotesSourceOfTruthMigrationComplete: { name: 'Festival Notes Source Of Truth Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
+      themeAtlasMigrationComplete: { name: 'Theme ATLAS Migration Complete', scope: 'client', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.SEEDED_CALENDARS]: { name: 'Seeded Calendars', scope: 'world', config: false, type: new SetField(new StringField()) },
       [SETTINGS.CLOCK_LOCKED]: { name: 'Clock Locked', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.SYNC_CLOCK_PAUSE]: {
@@ -1529,24 +1519,6 @@ export default class CalendariaSettings {
           if (enabled) showDebugZones();
           else hideDebugZones();
         }
-      },
-      [SETTINGS.LOGGING_LEVEL]: {
-        name: 'CALENDARIA.Settings.Logger.Name',
-        hint: 'CALENDARIA.Settings.Logger.Hint',
-        scope: 'user',
-        config: false,
-        type: new StringField({
-          choices: {
-            0: 'CALENDARIA.Common.Off',
-            1: 'CALENDARIA.Settings.Logger.Choices.Errors',
-            2: 'CALENDARIA.Settings.Logger.Choices.Warnings',
-            3: 'CALENDARIA.Settings.Logger.Choices.Verbose'
-          },
-          initial: 2
-        }),
-        onChange: (value) => {
-          MODULE.LOG_LEVEL = parseInt(value);
-        }
       }
     };
   }
@@ -1585,7 +1557,7 @@ export default class CalendariaSettings {
   static registerSettings() {
     for (const [key, config] of Object.entries(this.settings)) game.settings.register(MODULE.ID, key, config);
     for (const [key, config] of Object.entries(this.menus)) game.settings.registerMenu(MODULE.ID, key, config);
-    log(3, 'Module settings registered.');
+    ATLAS.log(3, 'Module settings registered.');
   }
 
   /** Register settings that require game.users to be available (called during ready hook). */

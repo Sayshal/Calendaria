@@ -1,7 +1,7 @@
 .calendaria {
   &.set-date-dialog {
     .timepoints-section {
-      border: 0.0625rem solid var(--calendaria-border-light);
+      border: 0.0625rem solid var(--atlas-border-light, rgb(58 58 58));
       border-radius: 0.25rem;
 
       .timepoints-header {
@@ -32,7 +32,7 @@
 
       .timepoints-content {
         padding: 0.5rem;
-        border-top: 0.0625rem solid var(--calendaria-border-light);
+        border-top: 0.0625rem solid var(--atlas-border-light, rgb(58 58 58));
       }
 
       .timepoints-list {
@@ -88,7 +88,7 @@
           cursor: pointer;
 
           &.delete:hover {
-            color: var(--calendaria-error);
+            color: var(--atlas-error, rgb(244 67 54));
           }
         }
       }
@@ -108,15 +108,15 @@
         align-items: center;
         width: 100%;
         padding: 0.5rem;
-        border: 0.0625rem dashed var(--calendaria-border-light);
+        border: 0.0625rem dashed var(--atlas-border-light, rgb(58 58 58));
         border-radius: 0.25rem;
         font-size: var(--font-size-12);
         cursor: pointer;
         background: transparent;
 
         &:hover {
-          border-color: var(--calendaria-accent);
-          color: var(--calendaria-accent);
+          border-color: var(--atlas-accent, rgb(168 144 96));
+          color: var(--atlas-accent, rgb(168 144 96));
         }
       }
     }
@@ -127,7 +127,7 @@
       margin: 0.5rem 0 0 1.5rem;
       padding: 0;
       list-style-type: disc;
-      color: var(--calendaria-text-secondary);
+      color: var(--atlas-text-secondary, rgb(170 170 170));
       font-size: var(--font-size-13);
 
       li {
@@ -153,7 +153,7 @@
 
     .custom-weekday-header {
       span {
-        color: var(--calendaria-text-dim);
+        color: var(--atlas-text-dim, rgb(153 153 153));
         font-weight: 600;
         font-size: var(--font-size-14);
         text-align: center;
@@ -207,7 +207,7 @@
       h3.group-header {
         margin: 0 0 0.375rem;
         padding-bottom: 0.25rem;
-        border-bottom: 0.0625rem solid var(--calendaria-border-light);
+        border-bottom: 0.0625rem solid var(--atlas-border-light, rgb(58 58 58));
         font-size: var(--font-size-h4);
       }
 
@@ -238,7 +238,7 @@
           flex-shrink: 0;
           min-width: 5rem;
           padding: 0.125rem 0.375rem;
-          border: 0.0625rem solid var(--calendaria-border-light);
+          border: 0.0625rem solid var(--atlas-border-light, rgb(58 58 58));
           border-radius: 0.1875rem;
           font-size: var(--font-size-11);
           font-family: var(--font-mono);
@@ -256,7 +256,7 @@
 
     .token-syntax-help {
       padding: 0.75rem;
-      border: 0.0625rem solid var(--calendaria-border-light);
+      border: 0.0625rem solid var(--atlas-border-light, rgb(58 58 58));
       border-radius: 0.25rem;
       font-size: var(--font-size-12);
 
@@ -280,7 +280,7 @@
 
         code {
           padding: 0.125rem 0.25rem;
-          border: 0.0625rem solid var(--calendaria-border-light);
+          border: 0.0625rem solid var(--atlas-border-light, rgb(58 58 58));
           border-radius: 0.125rem;
           font-size: var(--font-size-11);
         }
@@ -300,14 +300,14 @@
       margin: 0;
       padding: 0.75rem;
       border-radius: 0.25rem;
-      color: var(--calendaria-accent);
+      color: var(--atlas-accent, rgb(168 144 96));
       font-size: var(--font-size-12);
-      background: var(--calendaria-surface-dim-25);
+      background: var(--atlas-surface-dim-25, rgb(45 45 45 / 25%));
     }
 
     fieldset {
       padding: 0.75rem;
-      border: 0.0625rem solid var(--calendaria-border-light);
+      border: 0.0625rem solid var(--atlas-border-light, rgb(58 58 58));
       border-radius: 0.25rem;
 
       legend {
@@ -318,9 +318,9 @@
     .chain-step {
       margin-bottom: 0.75rem;
       padding: 0.75rem;
-      border: 0.0625rem solid var(--calendaria-border);
+      border: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
       border-radius: 0.25rem;
-      background: var(--calendaria-surface-dim-10);
+      background: var(--atlas-surface-dim-10, rgb(45 45 45 / 10%));
 
       &:last-of-type {
         margin-bottom: 0;
@@ -333,7 +333,7 @@
       align-items: center;
       margin-bottom: 0.5rem;
       padding-bottom: 0.5rem;
-      border-bottom: 0.0625rem solid var(--calendaria-border);
+      border-bottom: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
     }
 
     .step-label {
@@ -346,13 +346,13 @@
       padding: 0.25rem 0.5rem;
       border: none;
       border-radius: 0.1875rem;
-      color: var(--calendaria-error);
+      color: var(--atlas-error, rgb(244 67 54));
       font-size: var(--font-size-11);
       cursor: pointer;
       background: transparent;
 
       &:hover {
-        background: var(--calendaria-error-bg);
+        background: var(--atlas-error-bg, rgb(244 67 54 / 15%));
       }
     }
 
@@ -387,9 +387,9 @@
       align-items: center;
       margin-top: 0.5rem;
       padding: 0.5rem;
-      border: 0.0625rem dashed var(--calendaria-border-light);
+      border: 0.0625rem dashed var(--atlas-border-light, rgb(58 58 58));
       border-radius: 0.25rem;
-      color: var(--calendaria-text-secondary);
+      color: var(--atlas-text-secondary, rgb(170 170 170));
       font-size: var(--font-size-12);
       cursor: pointer;
       background: transparent;
@@ -399,9 +399,9 @@
         background 0.15s ease;
 
       &:hover {
-        border-color: var(--calendaria-primary);
-        color: var(--calendaria-text);
-        background: var(--calendaria-surface-dim-10);
+        border-color: var(--atlas-primary, rgb(74 144 226));
+        color: var(--atlas-text, rgb(224 224 224));
+        background: var(--atlas-surface-dim-10, rgb(45 45 45 / 10%));
       }
     }
 
@@ -437,7 +437,7 @@
     .form-footer {
       justify-content: flex-end;
       padding-top: 0.5rem;
-      border-top: 0.0625rem solid var(--calendaria-border-light);
+      border-top: 0.0625rem solid var(--atlas-border-light, rgb(58 58 58));
     }
   }
 
@@ -461,7 +461,7 @@
           color: transparent;
           font-size: 0;
           line-height: 0;
-          background: var(--group-color, var(--calendaria-border));
+          background: var(--group-color, var(--atlas-border, rgb(74 74 74)));
         }
       }
 

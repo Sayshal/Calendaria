@@ -1,5 +1,4 @@
 import { HOOKS, REPLACEABLE_ELEMENTS, WIDGET_POINTS } from '../constants.mjs';
-import { log } from './logger.mjs';
 
 /** @type {Map<string, object>} fullId -> widget config */
 const widgets = new Map();
@@ -28,33 +27,33 @@ const replacements = new Map();
  */
 export function registerWidget(moduleId, config) {
   if (!moduleId || !config?.id) {
-    log(2, 'registerWidget requires moduleId and config.id');
+    ATLAS.log(2, 'registerWidget requires moduleId and config.id');
     return false;
   }
   if (!config.insertAt && !config.replaces) {
-    log(2, 'registerWidget requires either insertAt or replaces');
+    ATLAS.log(2, 'registerWidget requires either insertAt or replaces');
     return false;
   }
   if (config.insertAt && !Object.values(WIDGET_POINTS).includes(config.insertAt)) {
-    log(2, `Invalid insertion point: ${config.insertAt}`);
+    ATLAS.log(2, `Invalid insertion point: ${config.insertAt}`);
     return false;
   }
   if (config.replaces && !Object.values(REPLACEABLE_ELEMENTS).includes(config.replaces)) {
-    log(2, `Invalid replaceable element: ${config.replaces}`);
+    ATLAS.log(2, `Invalid replaceable element: ${config.replaces}`);
     return false;
   }
   const fullId = `${moduleId}.${config.id}`;
   if (widgets.has(fullId)) {
-    log(2, `Widget ${fullId} already registered`);
+    ATLAS.log(2, `Widget ${fullId} already registered`);
     return false;
   }
   if (config.replaces && replacements.has(config.replaces)) {
-    log(2, `Element ${config.replaces} already replaced by ${replacements.get(config.replaces)}`);
+    ATLAS.log(2, `Element ${config.replaces} already replaced by ${replacements.get(config.replaces)}`);
     return false;
   }
   widgets.set(fullId, { moduleId, fullId, ...config });
   if (config.replaces) replacements.set(config.replaces, fullId);
-  log(3, `Widget registered: ${fullId}`);
+  ATLAS.log(3, `Widget registered: ${fullId}`);
   Hooks.callAll(HOOKS.WIDGET_REGISTERED, fullId, config);
   refreshWidgets();
   return true;

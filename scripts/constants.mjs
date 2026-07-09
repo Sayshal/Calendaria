@@ -1,7 +1,6 @@
 /** @type {object} Module identification */
 export const MODULE = {
   ID: 'calendaria',
-  LOG_LEVEL: 0,
   TITLE: 'Calendaria'
 };
 
@@ -77,7 +76,6 @@ export const SETTINGS = {
   CURRENT_WEATHER: 'currentWeather',
   CUSTOM_CALENDARS: 'customCalendars',
   CUSTOM_PRESETS: 'customPresets',
-  CUSTOM_THEME_COLORS: 'customThemeColors',
   CUSTOM_TIME_JUMPS: 'customTimeJumps',
   CUSTOM_WEATHER_PRESETS: 'customWeatherPresets',
   DARKNESS_MOON_SYNC: 'darknessMoonSync',
@@ -103,9 +101,7 @@ export const SETTINGS = {
   FORCE_MINI_CAL: 'forceMiniCal',
   FORCE_STOPWATCH: 'forceStopwatch',
   FORCE_SUN_DIAL: 'forceSunDial',
-  FORCE_THEME: 'forceTheme',
   FORCE_TIME_KEEPER: 'forceTimeKeeper',
-  FORCED_THEME_COLORS: 'forcedThemeColors',
   FORECAST_ACCURACY: 'forecastAccuracy',
   FORECAST_DAYS: 'forecastDays',
   FXMASTER_BELOW_FOREGROUND: 'fxmasterBelowForeground',
@@ -145,7 +141,6 @@ export const SETTINGS = {
   HUD_WIDTH_SCALE: 'hudWidthScale',
   INTRADAY_CARRY_OVER: 'intradayCarryOver',
   INTRADAY_WEATHER: 'intradayWeather',
-  LOGGING_LEVEL: 'loggingLevel',
   MACRO_TRIGGERS: 'macroTriggers',
   MINI_CAL_AUTO_FADE: 'miniCalAutoFade',
   MINI_CAL_AUTO_OPEN_NOTES: 'miniCalAutoOpenNotes',
@@ -205,7 +200,6 @@ export const SETTINGS = {
   SYNC_CLOCK_PAUSE: 'syncClockPause',
   TEMPERATURE_SHOW_BOTH: 'temperatureShowBoth',
   TEMPERATURE_UNIT: 'temperatureUnit',
-  THEME_MODE: 'themeMode',
   TIME_ADVANCE_INTERVAL: 'timeAdvanceInterval',
   TIME_KEEPER_POSITION: 'timeKeeperPosition',
   TIME_SPEED_INCREMENT: 'timeSpeedIncrement',
@@ -270,7 +264,6 @@ export const TEMPLATES = {
     PANEL_PERMISSIONS: `modules/${MODULE.ID}/templates/applications/settings/tab-permissions.hbs`,
     PANEL_STOPWATCH: `modules/${MODULE.ID}/templates/applications/settings/tab-stopwatch.hbs`,
     PANEL_SUN_DIAL: `modules/${MODULE.ID}/templates/applications/settings/tab-sun-dial.hbs`,
-    PANEL_THEME: `modules/${MODULE.ID}/templates/applications/settings/tab-theme.hbs`,
     PANEL_TIME: `modules/${MODULE.ID}/templates/applications/settings/tab-time.hbs`,
     PANEL_TIMEKEEPER: `modules/${MODULE.ID}/templates/applications/settings/tab-timekeeper.hbs`,
     PANEL_WEATHER: `modules/${MODULE.ID}/templates/applications/settings/tab-weather.hbs`,
@@ -282,8 +275,7 @@ export const TEMPLATES = {
     CHAT_ANNOUNCEMENT: `modules/${MODULE.ID}/templates/partials/chat-announcement.hbs`,
     DATE_PICKER: `modules/${MODULE.ID}/templates/partials/dialog-date-picker.hbs`,
     MOON_PICKER: `modules/${MODULE.ID}/templates/partials/moon-picker.hbs`,
-    NOTE_PANEL_ITEM: `modules/${MODULE.ID}/templates/partials/note-panel-item.hbs`,
-    RELEASE_MESSAGE: `modules/${MODULE.ID}/templates/chat/release-message.hbs`
+    NOTE_PANEL_ITEM: `modules/${MODULE.ID}/templates/partials/note-panel-item.hbs`
   },
   CALENDAR_HUD_BAR: `modules/${MODULE.ID}/templates/applications/hud/calendaria-hud-bar.hbs`,
   CALENDAR_HUD_DOME: `modules/${MODULE.ID}/templates/applications/hud/calendaria-hud-dome.hbs`,
@@ -520,7 +512,6 @@ export const HOOKS = {
   STOPWATCH_PAUSE: 'calendaria.stopwatchPause',
   STOPWATCH_RESET: 'calendaria.stopwatchReset',
   STOPWATCH_START: 'calendaria.stopwatchStart',
-  THEME_CHANGED: 'calendaria.themeChanged',
   SUNRISE: 'calendaria.sunrise',
   SUNSET: 'calendaria.sunset',
   VISUAL_TICK: 'calendaria.visualTick',

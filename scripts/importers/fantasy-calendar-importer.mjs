@@ -1,7 +1,6 @@
 import { CalendarManager } from '../calendar/_module.mjs';
 import { ASSETS, MOON_PHASE_LABELS } from '../constants.mjs';
 import { NoteManager, addCustomPreset, getAllPresets } from '../notes/_module.mjs';
-import { log } from '../utils/_module.mjs';
 import BaseImporter from './base-importer.mjs';
 
 /** @type {Object<string, string>} FC color names to hex mapping. */
@@ -60,7 +59,7 @@ export default class FantasyCalendarImporter extends BaseImporter {
    */
   async transform(data) {
     if (!FantasyCalendarImporter.isFantasyCalendarExport(data)) throw new Error(_loc('CALENDARIA.Importer.FantasyCalendar.InvalidFormat'));
-    log(3, 'Transforming Fantasy-Calendar data:', data.name);
+    ATLAS.log(3, 'Transforming Fantasy-Calendar data:', data.name);
     const staticData = data.static_data;
     const yearData = staticData.year_data;
     const timespans = yearData.timespans || [];
@@ -70,7 +69,7 @@ export default class FantasyCalendarImporter extends BaseImporter {
     const weekdays = this.#transformWeekdays(yearData.global_week);
     const daysInWeek = weekdays.length || 7;
     const year0FirstWeekday = ((yearData.first_day ?? 1) - 1 + daysInWeek) % daysInWeek;
-    log(3, `FC first_day: ${yearData.first_day}, converted firstWeekday: ${year0FirstWeekday}, yearZero: 1`);
+    ATLAS.log(3, `FC first_day: ${yearData.first_day}, converted firstWeekday: ${year0FirstWeekday}, yearZero: 1`);
     return {
       name: data.name || _loc('CALENDARIA.Importer.Fallback.CalendarName'),
       days: { values: weekdays, ...this.#transformTime(staticData.clock), daysPerYear },
@@ -321,9 +320,9 @@ export default class FantasyCalendarImporter extends BaseImporter {
       if (existing.includes(cat.name.toLowerCase())) continue;
       try {
         await addCustomPreset(cat.name, cat.color, 'fa-tag');
-        log(3, `Imported FC category: ${cat.name}`);
+        ATLAS.log(3, `Imported FC category: ${cat.name}`);
       } catch (error) {
-        log(1, `Failed to import FC category "${cat.name}":`, error);
+        ATLAS.log(1, `Failed to import FC category "${cat.name}":`, error);
       }
     }
   }
@@ -337,7 +336,7 @@ export default class FantasyCalendarImporter extends BaseImporter {
     const events = data.events || [];
     const notes = [];
     this._undatedEvents = [];
-    log(3, `Extracting ${events.length} events from Fantasy-Calendar`);
+    ATLAS.log(3, `Extracting ${events.length} events from Fantasy-Calendar`);
     for (const event of events) {
       try {
         const conditions = event.data?.conditions || [];
@@ -349,10 +348,10 @@ export default class FantasyCalendarImporter extends BaseImporter {
           if (note) notes.push(note);
         }
       } catch (error) {
-        log(1, `Error transforming event "${event.name}":`, error);
+        ATLAS.log(1, `Error transforming event "${event.name}":`, error);
       }
     }
-    log(3, `Extracted ${notes.length} notes from Fantasy-Calendar`);
+    ATLAS.log(3, `Extracted ${notes.length} notes from Fantasy-Calendar`);
     return notes;
   }
 
@@ -369,7 +368,7 @@ export default class FantasyCalendarImporter extends BaseImporter {
       const note = this.#transformEvent(event, data);
       return note ? [note] : [];
     }
-    log(3, `Splitting event "${event.name}" into ${orBranches.length} notes (OR conditions)`);
+    ATLAS.log(3, `Splitting event "${event.name}" into ${orBranches.length} notes (OR conditions)`);
     const notes = [];
     for (let i = 0; i < orBranches.length; i++) {
       const branchEvent = { ...event, data: { ...event.data, conditions: orBranches[i] } };
@@ -427,7 +426,7 @@ export default class FantasyCalendarImporter extends BaseImporter {
       return null;
     }
     const eventType = this.#detectEventType(conditions, data);
-    if (eventType.warnings?.length) for (const warning of eventType.warnings) log(2, `Event "${event.name}": ${warning}`);
+    if (eventType.warnings?.length) for (const warning of eventType.warnings) ATLAS.log(2, `Event "${event.name}": ${warning}`);
     const category = this._categories?.get(event.event_category_id);
     const isHidden = event.settings?.hide || category?.isHidden || false;
     const date = this.#extractDate(event.data, conditions, data);
@@ -987,7 +986,7 @@ export default class FantasyCalendarImporter extends BaseImporter {
     const { calendarId } = options;
     const errors = [];
     let count = 0;
-    log(3, `Starting note import: ${notes.length} notes to calendar ${calendarId}`);
+    ATLAS.log(3, `Starting note import: ${notes.length} notes to calendar ${calendarId}`);
     if (this.#fcCategories.length) await this.#importNoteCategories();
     const calendar = CalendarManager.getCalendar(calendarId);
     const fcIdToPage = new Map();
@@ -1024,7 +1023,7 @@ export default class FantasyCalendarImporter extends BaseImporter {
     }
     if (pagesWithEventConditions.length > 0) await this.#resolveEventConditions(pagesWithEventConditions, fcIdToPage, errors);
     if (this._undatedEvents.length > 0) await this.migrateUndatedEvents(options.calendarName || 'Fantasy-Calendar Import');
-    log(3, `Note import complete: ${count}/${notes.length}, ${errors.length} errors`);
+    ATLAS.log(3, `Note import complete: ${count}/${notes.length}, ${errors.length} errors`);
     return { success: errors.length === 0, count, errors };
   }
 
@@ -1041,7 +1040,7 @@ export default class FantasyCalendarImporter extends BaseImporter {
         if (c.field !== 'event' || !c.value2?.fcEventId) return true;
         const calendariaId = fcIdToPage.get(String(c.value2.fcEventId));
         if (!calendariaId) {
-          log(2, `Event condition referencing FC event ${c.value2.fcEventId} dropped — target not found in import`);
+          ATLAS.log(2, `Event condition referencing FC event ${c.value2.fcEventId} dropped — target not found in import`);
           modified = true;
           return false;
         }

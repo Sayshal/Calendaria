@@ -13,7 +13,6 @@ import {
   getNextEclipse,
   getNextFullMoon,
   isMoonFull,
-  log,
   resolveFormatString,
   timeSince
 } from '../utils/_module.mjs';
@@ -1972,7 +1971,7 @@ async function enrichCalendaria(match, options) {
   const typeLower = type.toLowerCase();
   const handler = handlers[typeLower];
   if (!handler) {
-    log(2, `Unknown enricher type: ${type}`);
+    ATLAS.log(2, `Unknown enricher type: ${type}`);
     return null;
   }
   if (!CalendarManager.getActiveCalendar()) return createElement(typeLower, label || '', configStr?.trim() || '', true, 'fa-spinner fa-spin');

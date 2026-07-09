@@ -1,7 +1,7 @@
 import { CalendarManager } from '../../calendar/_module.mjs';
 import { MODULE, SETTINGS, SOCKET_TYPES, TEMPLATES } from '../../constants.mjs';
 import { EventScheduler, ReminderScheduler, TimeTracker } from '../../time/_module.mjs';
-import { CalendariaSocket, formatForLocation, log } from '../../utils/_module.mjs';
+import { CalendariaSocket, formatForLocation } from '../../utils/_module.mjs';
 import { CinematicOverlay } from '../_module.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -207,7 +207,7 @@ export class SetDateDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#editingTimepointId = newTimepoint.id;
     this.#timepointsExpanded = true;
     this.render();
-    log(3, `Saved new timepoint: ${newTimepoint.name}`);
+    ATLAS.log(3, `Saved new timepoint: ${newTimepoint.name}`);
   }
 
   /**
@@ -236,7 +236,7 @@ export class SetDateDialog extends HandlebarsApplicationMixin(ApplicationV2) {
       return;
     }
     await game.time.advance(delta);
-    log(3, `Jumped to timepoint: ${timepoint.name} (skip triggers: ${skipTriggers})`);
+    ATLAS.log(3, `Jumped to timepoint: ${timepoint.name} (skip triggers: ${skipTriggers})`);
     this.close();
   }
 
@@ -255,7 +255,7 @@ export class SetDateDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     const name = timepoints[index].name;
     timepoints.splice(index, 1);
     await game.settings.set(MODULE.ID, SETTINGS.SAVED_TIMEPOINTS, timepoints);
-    log(3, `Deleted timepoint: ${name}`);
+    ATLAS.log(3, `Deleted timepoint: ${name}`);
     this.render();
   }
 
@@ -306,7 +306,7 @@ export class SetDateDialog extends HandlebarsApplicationMixin(ApplicationV2) {
         return;
       }
       await game.time.advance(delta);
-      log(3, `Set date to ${year + yearZero}/${month + 1}/${day} ${hour}:${minute} (skip triggers: ${skipTriggers})`);
+      ATLAS.log(3, `Set date to ${year + yearZero}/${month + 1}/${day} ${hour}:${minute} (skip triggers: ${skipTriggers})`);
     }
   }
 
@@ -342,7 +342,7 @@ export class SetDateDialog extends HandlebarsApplicationMixin(ApplicationV2) {
       return;
     }
     await CinematicOverlay.triggerFromAdvance(delta);
-    log(3, `Cinematic advance to ${year + yearZero}/${month + 1}/${day} ${hour}:${minute}`);
+    ATLAS.log(3, `Cinematic advance to ${year + yearZero}/${month + 1}/${day} ${hour}:${minute}`);
     this.close();
   }
 

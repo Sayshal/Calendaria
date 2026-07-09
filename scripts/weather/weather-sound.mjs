@@ -1,5 +1,4 @@
 import { HOOKS, MODULE, SCENE_FLAGS, SETTINGS } from '../constants.mjs';
-import { log } from '../utils/logger.mjs';
 import { resolveWeatherSoundPath } from './data/weather-presets.mjs';
 import WeatherManager from './weather-manager.mjs';
 
@@ -48,7 +47,7 @@ export function initializeWeatherSound() {
     const weather = WeatherManager.getCurrentWeather();
     playSound(weather || null);
   }
-  log(3, 'WeatherSound initialized');
+  ATLAS.log(3, 'WeatherSound initialized');
 }
 
 /** Rebuild the cached set of regions whose `suppressWeather` behavior is active on the current scene. */
@@ -228,9 +227,9 @@ async function playSound(weather) {
     sound.fade(suppressedByRegion ? baseVolume * muffle : baseVolume, { duration: FADE_MS });
     activeSound = sound;
     activeSoundKey = src;
-    log(3, `Playing "${src}"${suppressedByRegion ? ' (suppressed by region)' : ''}`);
+    ATLAS.log(3, `Playing "${src}"${suppressedByRegion ? ' (suppressed by region)' : ''}`);
   } catch (error) {
-    log(1, 'Weather sound playback failed:', error);
+    ATLAS.log(1, 'Weather sound playback failed:', error);
   }
 }
 
@@ -243,11 +242,11 @@ async function stopSound() {
     const sound = activeSound;
     activeSound = null;
     activeSoundKey = null;
-    log(3, `Stopping "${stoppingKey}"`);
+    ATLAS.log(3, `Stopping "${stoppingKey}"`);
     try {
       await fadeOutAndStop(sound);
     } catch (error) {
-      log(1, 'Weather sound stop failed:', error);
+      ATLAS.log(1, 'Weather sound stop failed:', error);
     }
   }
 }
@@ -264,11 +263,11 @@ async function stopSound() {
  */
 export async function playStandaloneSound(src, options = {}) {
   if (!game.settings.get(MODULE.ID, SETTINGS.WEATHER_SOUND_FX)) {
-    log(2, 'Weather sounds are disabled');
+    ATLAS.log(2, 'Weather sounds are disabled');
     return false;
   }
   if (isSoundDisabledForScene(canvas?.scene)) {
-    log(2, 'Weather sounds are disabled for this scene');
+    ATLAS.log(2, 'Weather sounds are disabled for this scene');
     return false;
   }
   if (game.audio.locked) {
@@ -287,10 +286,10 @@ export async function playStandaloneSound(src, options = {}) {
     sound.fade(volume, { duration: fadeDuration });
     activeSound = sound;
     activeSoundKey = src;
-    log(3, `Standalone playing "${src}"`);
+    ATLAS.log(3, `Standalone playing "${src}"`);
     return true;
   } catch (error) {
-    log(1, 'Standalone sound playback failed:', error);
+    ATLAS.log(1, 'Standalone sound playback failed:', error);
     return false;
   }
 }
@@ -307,14 +306,14 @@ export async function stopStandaloneSound(options = {}) {
   const sound = activeSound;
   activeSound = null;
   activeSoundKey = null;
-  log(3, `Standalone stopping "${stoppingKey}"`);
+  ATLAS.log(3, `Standalone stopping "${stoppingKey}"`);
   try {
     const fadeDuration = options.fade ?? FADE_MS;
     await sound.fade(0, { duration: fadeDuration });
     sound.stop();
     return true;
   } catch (error) {
-    log(1, 'Standalone sound stop failed:', error);
+    ATLAS.log(1, 'Standalone sound stop failed:', error);
     return false;
   }
 }

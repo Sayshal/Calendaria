@@ -1,6 +1,6 @@
 import { CinematicOverlay } from '../applications/_module.mjs';
 import { HOOKS, MODULE, SETTINGS, SOCKET_TYPES } from '../constants.mjs';
-import { CalendariaSocket, canChangeDateTime, log } from '../utils/_module.mjs';
+import { CalendariaSocket, canChangeDateTime } from '../utils/_module.mjs';
 import { updateDarknessFromWorldTime } from './darkness.mjs';
 import EventScheduler from './event-scheduler.mjs';
 import ReminderScheduler from './reminder-scheduler.mjs';
@@ -108,7 +108,7 @@ export default class TimeClock {
     await game.settings.set(MODULE.ID, SETTINGS.CLOCK_LOCKED, this.#locked);
     ui.notifications.info(this.#locked ? 'CALENDARIA.TimeClock.Locked' : 'CALENDARIA.TimeClock.Unlocked', { localize: true });
     Hooks.callAll(HOOKS.CLOCK_START_STOP, { running: this.#running, increment: this.#increment, locked: this.#locked });
-    log(3, `Clock lock ${this.#locked ? 'engaged' : 'released'}`);
+    ATLAS.log(3, `Clock lock ${this.#locked ? 'engaged' : 'released'}`);
   }
 
   /**
@@ -174,7 +174,7 @@ export default class TimeClock {
     Hooks.on('combatStart', this.#onCombatStart.bind(this));
     Hooks.on('deleteCombat', this.#onCombatEnd.bind(this));
     this.#autoStartIfSynced();
-    log(3, 'TimeClock initialized');
+    ATLAS.log(3, 'TimeClock initialized');
   }
 
   /**
@@ -185,7 +185,7 @@ export default class TimeClock {
     if (!game.settings.get(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE)) return;
     if (this.#locked || this.disabled || game.paused || this.#combatBlocks) return;
     this.start();
-    log(3, 'Clock auto-started (sync enabled, game unpaused)');
+    ATLAS.log(3, 'Clock auto-started (sync enabled, game unpaused)');
   }
 
   /**
@@ -198,7 +198,7 @@ export default class TimeClock {
     const increments = getTimeIncrements();
     const incrementSeconds = increments[incrementKey] || 1;
     this.#realTimeSpeed = multiplier * incrementSeconds;
-    log(3, `TimeClock real-time speed set to: ${this.#realTimeSpeed} game seconds per real second (${multiplier} ${incrementKey}s)`);
+    ATLAS.log(3, `TimeClock real-time speed set to: ${this.#realTimeSpeed} game seconds per real second (${multiplier} ${incrementKey}s)`);
     if (this.#running) {
       if (this.disabled) this.stop();
       else {
@@ -220,10 +220,10 @@ export default class TimeClock {
     if (!CalendariaSocket.isPrimaryGM()) return;
     if (paused) {
       if (this.#running) this.stop();
-      log(3, 'Clock stopped: game paused');
+      ATLAS.log(3, 'Clock stopped: game paused');
     } else if (!this.#combatBlocks && !this.#locked && !this.disabled) {
       if (!this.#running) this.start();
-      log(3, 'Clock started at configured speed (game unpaused)');
+      ATLAS.log(3, 'Clock started at configured speed (game unpaused)');
     }
   }
 
@@ -236,7 +236,7 @@ export default class TimeClock {
     if (game.settings.get(MODULE.ID, SETTINGS.CLOCK_RUN_DURING_COMBAT)) return;
     if (this.#running) {
       this.stop();
-      log(3, 'Clock stopped: combat started');
+      ATLAS.log(3, 'Clock stopped: combat started');
     }
   }
 
@@ -249,7 +249,7 @@ export default class TimeClock {
     if (!game.settings.get(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE)) return;
     if (!this.#locked && !this.disabled && !game.paused && !this.#running) {
       this.start();
-      log(3, 'Clock started at configured speed (combat ended)');
+      ATLAS.log(3, 'Clock started at configured speed (combat ended)');
     }
   }
 
@@ -261,7 +261,7 @@ export default class TimeClock {
   static start({ broadcast = true } = {}) {
     if (this.#running) return;
     if (this.#locked || this.disabled) {
-      log(3, `Clock start blocked: ${this.disabled ? 'disabled (speed 0)' : 'locked'}`);
+      ATLAS.log(3, `Clock start blocked: ${this.disabled ? 'disabled (speed 0)' : 'locked'}`);
       return;
     }
     if (!this.canAdjustTime()) {
@@ -269,13 +269,13 @@ export default class TimeClock {
       return;
     }
     if (this.#combatBlocks) {
-      log(3, 'Clock start blocked: combat active');
+      ATLAS.log(3, 'Clock start blocked: combat active');
       ui.notifications.clear();
       ui.notifications.warn('CALENDARIA.TimeClock.ClockBlocked', { localize: true });
       return;
     }
     if (game.settings.get(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE) && game.paused) {
-      log(3, 'Clock start blocked: game paused');
+      ATLAS.log(3, 'Clock start blocked: game paused');
       ui.notifications.clear();
       ui.notifications.warn('CALENDARIA.TimeClock.ClockBlocked', { localize: true });
       return;
@@ -297,7 +297,7 @@ export default class TimeClock {
     this.#running = false;
     this.#flushAccumulated();
     this.#stopIntervals();
-    log(3, 'TimeClock stopped');
+    ATLAS.log(3, 'TimeClock stopped');
     Hooks.callAll(HOOKS.CLOCK_START_STOP, { running: false, increment: this.#increment });
     if (broadcast && CalendariaSocket.isPrimaryGM()) CalendariaSocket.emitClockUpdate(false, this.#increment);
   }
@@ -320,7 +320,7 @@ export default class TimeClock {
     if (!increments[key]) return;
     this.#incrementKey = key;
     this.#increment = increments[key];
-    log(3, `TimeClock manual increment set to: ${key} (${this.#increment}s)`);
+    ATLAS.log(3, `TimeClock manual increment set to: ${key} (${this.#increment}s)`);
   }
 
   /**
@@ -342,7 +342,7 @@ export default class TimeClock {
     const increments = getTimeIncrements();
     key = resolveIncrementKey(increments, key);
     if (!increments[key]) {
-      log(2, `Invalid increment key: ${key}`);
+      ATLAS.log(2, `Invalid increment key: ${key}`);
       return;
     }
     const settings = this.getAppSettings(appId);
@@ -375,7 +375,7 @@ export default class TimeClock {
     }
     if (this.#running) await this.#flushAccumulated();
     await this.#advanceWithCinematic(amount);
-    log(3, `Time advanced by ${amount}s for ${appId}`);
+    ATLAS.log(3, `Time advanced by ${amount}s for ${appId}`);
   }
 
   /**
@@ -394,7 +394,7 @@ export default class TimeClock {
     }
     if (this.#running) await this.#flushAccumulated();
     await game.time.advance(-amount);
-    log(3, `Time reversed by ${amount}s for ${appId}`);
+    ATLAS.log(3, `Time reversed by ${amount}s for ${appId}`);
   }
 
   /**
@@ -410,7 +410,7 @@ export default class TimeClock {
     }
     if (this.#running) await this.#flushAccumulated();
     await this.#advanceWithCinematic(amount);
-    log(3, `Time advanced by ${amount}s (${multiplier}x)`);
+    ATLAS.log(3, `Time advanced by ${amount}s (${multiplier}x)`);
   }
 
   /**
@@ -426,7 +426,7 @@ export default class TimeClock {
     }
     if (this.#running) await this.#flushAccumulated();
     await game.time.advance(-amount);
-    log(3, `Time reversed by ${amount}s (${multiplier}x)`);
+    ATLAS.log(3, `Time reversed by ${amount}s (${multiplier}x)`);
   }
 
   /**
@@ -441,7 +441,7 @@ export default class TimeClock {
     }
     if (this.#running) await this.#flushAccumulated();
     await this.#advanceWithCinematic(seconds);
-    log(3, `Time advanced by ${seconds}s`);
+    ATLAS.log(3, `Time advanced by ${seconds}s`);
   }
 
   /**
@@ -483,7 +483,7 @@ export default class TimeClock {
     const speed = this.#realTimeSpeed;
     const intervalMs = this.ADVANCE_INTERVAL_MS;
     const directMode = intervalMs <= 1000;
-    log(3, `TimeClock intervals started (speed: ${speed}, advance every ${intervalMs / 1000}s, direct: ${directMode})`);
+    ATLAS.log(3, `TimeClock intervals started (speed: ${speed}, advance every ${intervalMs / 1000}s, direct: ${directMode})`);
     if (directMode) {
       let advancing = false;
       this.#visualIntervalId = setInterval(async () => {
@@ -564,7 +564,7 @@ export default class TimeClock {
    * @private
    */
   static #onRemoteClockUpdate({ running, ratio }) {
-    log(3, `Remote clock update: running=${running}, ratio=${ratio}`);
+    ATLAS.log(3, `Remote clock update: running=${running}, ratio=${ratio}`);
     const increments = getTimeIncrements();
     const key = Object.entries(increments).find(([, v]) => v === ratio)?.[0];
     if (key) {

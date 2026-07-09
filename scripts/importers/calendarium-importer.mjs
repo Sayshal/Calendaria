@@ -1,6 +1,5 @@
 import { ASSETS, MOON_PHASE_LABELS } from '../constants.mjs';
 import { NoteManager, addCustomPreset, getAllPresets } from '../notes/_module.mjs';
-import { log } from '../utils/_module.mjs';
 import BaseImporter from './base-importer.mjs';
 
 /**
@@ -52,7 +51,7 @@ export default class CalendariumImporter extends BaseImporter {
     if (!CalendariumImporter.isCalendariumExport(data)) throw new Error(_loc('CALENDARIA.Importer.Calendarium.InvalidFormat'));
     const normalizedData = CalendariumImporter.normalizeData(data);
     const calendar = normalizedData.calendars[0];
-    log(3, 'Transforming Calendarium data:', calendar.name);
+    ATLAS.log(3, 'Transforming Calendarium data:', calendar.name);
     this._categories = this.#buildCategoryMap(calendar.categories);
     const months = this.#transformMonths(calendar.static.months);
     const daysPerYear = months.reduce((sum, m) => sum + (m.days || 0), 0);
@@ -131,7 +130,7 @@ export default class CalendariumImporter extends BaseImporter {
     const monthsWithCustomWeeks = months.filter((m) => m.week && Array.isArray(m.week) && m.week.length > 0);
     if (monthsWithCustomWeeks.length > 0) {
       const details = monthsWithCustomWeeks.map((m) => m.name).join(', ');
-      log(3, `Imported custom weekdays for months: ${details}`);
+      ATLAS.log(3, `Imported custom weekdays for months: ${details}`);
     }
     return weekdays.map((wd, idx) => ({ name: wd.name, abbreviation: wd.name.substring(0, 2), ordinal: idx + 1 }));
   }
@@ -337,12 +336,12 @@ export default class CalendariumImporter extends BaseImporter {
     const events = calendar.events || [];
     const notes = [];
     this._undatedEvents = [];
-    log(3, `Extracting ${events.length} events from Calendarium`);
+    ATLAS.log(3, `Extracting ${events.length} events from Calendarium`);
     for (const event of events) {
       const note = this.#transformEvent(event);
       if (note) notes.push(note);
     }
-    log(3, `Extracted ${notes.length} notes from Calendarium`);
+    ATLAS.log(3, `Extracted ${notes.length} notes from Calendarium`);
     return notes;
   }
 
@@ -450,7 +449,7 @@ export default class CalendariumImporter extends BaseImporter {
     const { calendarId } = options;
     const errors = [];
     let count = 0;
-    log(3, `Starting note import: ${notes.length} notes to calendar ${calendarId}`);
+    ATLAS.log(3, `Starting note import: ${notes.length} notes to calendar ${calendarId}`);
     if (this.#calCategories.length) await this.#importNoteCategories();
     for (const note of notes) {
       try {
@@ -471,7 +470,7 @@ export default class CalendariumImporter extends BaseImporter {
       }
     }
     if (this._undatedEvents.length > 0) await this.migrateUndatedEvents(options.calendarName || 'Calendarium Import');
-    log(3, `Note import complete: ${count}/${notes.length}, ${errors.length} errors`);
+    ATLAS.log(3, `Note import complete: ${count}/${notes.length}, ${errors.length} errors`);
     return { success: errors.length === 0, count, errors };
   }
 
@@ -484,9 +483,9 @@ export default class CalendariumImporter extends BaseImporter {
       if (existing.includes(cat.name.toLowerCase())) continue;
       try {
         await addCustomPreset(cat.name, cat.color, 'fa-tag');
-        log(3, `Imported Calendarium category: ${cat.name}`);
+        ATLAS.log(3, `Imported Calendarium category: ${cat.name}`);
       } catch (error) {
-        log(1, `Failed to import category "${cat.name}":`, error);
+        ATLAS.log(1, `Failed to import category "${cat.name}":`, error);
       }
     }
   }

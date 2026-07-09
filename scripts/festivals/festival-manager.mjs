@@ -1,6 +1,5 @@
 import { DISPLAY_STYLES, MODULE, NOTE_VISIBILITY, SETTINGS } from '../constants.mjs';
 import { NoteManager } from '../notes/_module.mjs';
-import { log } from '../utils/_module.mjs';
 import { findSeasonIndexByType, getAstronomicalDayOfYear } from '../utils/calendar-math.mjs';
 
 /** Creates and manages festival journal notes. */
@@ -57,7 +56,7 @@ export default class FestivalManager {
     const next = seeded instanceof Set ? new Set(seeded) : new Set(seeded);
     next.add(calendarId);
     await game.settings.set(MODULE.ID, SETTINGS.SEEDED_CALENDARS, next);
-    if (created) log(3, `Seeded ${created} festival notes for ${calendarId}`);
+    if (created) ATLAS.log(3, `Seeded ${created} festival notes for ${calendarId}`);
     return created;
   }
 
@@ -90,7 +89,7 @@ export default class FestivalManager {
       deleted++;
     }
     NoteManager.disableBypassDeleteProtection();
-    log(3, `Deleted ${deleted} festival notes for ${calendarId}`);
+    ATLAS.log(3, `Deleted ${deleted} festival notes for ${calendarId}`);
     return deleted;
   }
 
@@ -125,7 +124,7 @@ export default class FestivalManager {
     for (const stub of this.getFestivalNotes(calendarId)) {
       const link = stub.flagData?.linkedFestival;
       if (!link?.festivalKey) continue;
-      if (seen.has(link.festivalKey)) log(2, `Duplicate festivalKey ${link.festivalKey} in calendar ${calendarId}; last write wins`);
+      if (seen.has(link.festivalKey)) ATLAS.log(2, `Duplicate festivalKey ${link.festivalKey} in calendar ${calendarId}; last write wins`);
       seen.add(link.festivalKey);
       seeds[link.festivalKey] = {
         name: stub.name,

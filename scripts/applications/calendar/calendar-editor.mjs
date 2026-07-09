@@ -4,7 +4,7 @@ import { FestivalManager } from '../../festivals/_module.mjs';
 import { createImporter } from '../../importers/_module.mjs';
 import { isLuxonSyncRequired } from '../../integrations/luxon-sync.mjs';
 import { NoteManager, summarizeConditionTree } from '../../notes/_module.mjs';
-import { RangeSlider, log, serializeNotes, validateFormatString } from '../../utils/_module.mjs';
+import { RangeSlider, serializeNotes, validateFormatString } from '../../utils/_module.mjs';
 import { CLIMATE_ZONE_TEMPLATES, getBlankZoneConfig, getClimateTemplateOptions, getDefaultZoneConfig, getPresetAlias, setPresetAlias } from '../../weather/_module.mjs';
 import { ClimateEditor, TokenReferenceDialog } from '../_module.mjs';
 
@@ -291,7 +291,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     preLocalizeCalendar(this.#calendarData);
     this.#isDirty = true;
-    log(3, `Loaded initial data for calendar: ${this.#calendarData.name}`);
+    ATLAS.log(3, `Loaded initial data for calendar: ${this.#calendarData.name}`);
   }
 
   /** @override */
@@ -2431,14 +2431,14 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       if (calendar) {
         this.#isDirty = false;
         if (calendarId) await FestivalManager.seedFestivalNotes(calendarId, calendar);
-        log(3, `Checking for pending notes: ${this.#pendingNotes?.length || 0}, importerId: ${this.#pendingImporterId}, calendarId: ${calendarId}`);
+        ATLAS.log(3, `Checking for pending notes: ${this.#pendingNotes?.length || 0}, importerId: ${this.#pendingImporterId}, calendarId: ${calendarId}`);
         if (this.#pendingNotes?.length > 0 && this.#pendingImporterId && calendarId) {
           const importer = createImporter(this.#pendingImporterId);
           if (importer) {
-            log(3, `Importing ${this.#pendingNotes.length} pending notes to calendar ${calendarId}`);
+            ATLAS.log(3, `Importing ${this.#pendingNotes.length} pending notes to calendar ${calendarId}`);
             const result = await importer.importNotes(this.#pendingNotes, { calendarId });
             if (result.count > 0) ui.notifications.info(_loc('CALENDARIA.Editor.NotesImported', { count: result.count }));
-            if (result.errors?.length > 0) log(1, 'Note import errors:', result.errors);
+            if (result.errors?.length > 0) ATLAS.log(1, 'Note import errors:', result.errors);
             this.#pendingNotes = null;
           }
         }
@@ -2452,7 +2452,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
               await setPresetAlias(presetId, alias, calendarId, zoneId);
             }
           }
-          log(3, `Restored ${Object.keys(this.#pendingPresetAliases).length} zone preset aliases`);
+          ATLAS.log(3, `Restored ${Object.keys(this.#pendingPresetAliases).length} zone preset aliases`);
           this.#pendingPresetAliases = null;
         }
         this.#pendingCurrentDate = null;
@@ -2465,7 +2465,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         }
       }
     } catch (error) {
-      log(1, 'Error saving calendar:', error);
+      ATLAS.log(1, 'Error saving calendar:', error);
       ui.notifications.error(_loc('CALENDARIA.Editor.SaveError', { error: error.message }));
     }
   }
@@ -2551,13 +2551,13 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       const notes = serializeNotes(this.#calendarId);
       if (notes.length) {
         exportData.notes = notes;
-        log(3, `Included ${notes.length} calendar notes in export`);
+        ATLAS.log(3, `Included ${notes.length} calendar notes in export`);
       }
       const festivalSeeds = FestivalManager.buildFestivalSeedsFromNotes(this.#calendarId);
       const festivalCount = Object.keys(festivalSeeds).length;
       if (festivalCount) {
         exportData.festivals = { ...(exportData.festivals ?? {}), ...festivalSeeds };
-        log(3, `Included ${festivalCount} festival seed${festivalCount === 1 ? '' : 's'} in export`);
+        ATLAS.log(3, `Included ${festivalCount} festival seed${festivalCount === 1 ? '' : 's'} in export`);
       }
     }
     const filename = this.#calendarData.name

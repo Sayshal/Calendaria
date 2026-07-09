@@ -17,7 +17,6 @@ import {
   getSidebarBuffer,
   getSkyColorsRgb,
   isCombatBlocked,
-  log,
   registerForZoneUpdates,
   restorePinnedState,
   unpinFromZone,
@@ -671,7 +670,7 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
         return;
       }
       await game.time.advance(timeDiff);
-      log(3, `Time adjusted by ${timeDiff} seconds to ${this.#formatDialTime(this.#currentHours, this.#currentMinutes)}`);
+      ATLAS.log(3, `Time adjusted by ${timeDiff} seconds to ${this.#formatDialTime(this.#currentHours, this.#currentMinutes)}`);
     }
   }
 

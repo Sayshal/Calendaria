@@ -1,5 +1,4 @@
 import { COMPASS_DIRECTIONS, MODULE, SETTINGS, WEATHER_PERIODS, WIND_SPEEDS } from '../constants.mjs';
-import { log } from '../utils/logger.mjs';
 import { getAllPresets, getPreset } from './data/weather-presets.mjs';
 
 /**
@@ -50,7 +49,7 @@ function weightedSelect(weights, randomFn = Math.random) {
   if (entries.length === 0) return null;
   const totalWeight = entries.reduce((sum, [, w]) => sum + w, 0);
   if (totalWeight <= 0) {
-    log(2, 'Weather selection: all weights zero, using random fallback');
+    ATLAS.log(2, 'Weather selection: all weights zero, using random fallback');
     return entries[Math.floor(randomFn() * entries.length)][0];
   }
   let roll = randomFn() * totalWeight;

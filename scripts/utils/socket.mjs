@@ -3,7 +3,7 @@ import { CalendarManager } from '../calendar/_module.mjs';
 import { HOOKS, MODULE, SETTINGS, SOCKET_TYPES } from '../constants.mjs';
 import { NoteManager } from '../notes/_module.mjs';
 import { WeatherManager } from '../weather/_module.mjs';
-import { canViewBigCal, canViewChronicle, canViewHUD, canViewMiniCal, canViewStopwatch, canViewSunDial, canViewTimeKeeper, log } from './_module.mjs';
+import { canViewBigCal, canViewChronicle, canViewHUD, canViewMiniCal, canViewStopwatch, canViewSunDial, canViewTimeKeeper } from './_module.mjs';
 
 /**
  * Socket manager for handling multiplayer synchronization.
@@ -31,7 +31,7 @@ export class CalendariaSocket {
    */
   static initialize() {
     game.socket.on(`module.${MODULE.ID}`, this.#onMessage.bind(this));
-    log(3, 'Socket system initialized');
+    ATLAS.log(3, 'Socket system initialized');
   }
 
   /**
@@ -181,7 +181,7 @@ export class CalendariaSocket {
         this.#handleSunDialVisibility(data);
         break;
       default:
-        log(1, `Unknown socket message type: ${type}`);
+        ATLAS.log(1, `Unknown socket message type: ${type}`);
     }
   }
 
@@ -191,7 +191,7 @@ export class CalendariaSocket {
    * @param {object} data - CinematicPayload
    */
   static #handleCinematicPlay(data) {
-    log(3, 'Handling remote cinematic play');
+    ATLAS.log(3, 'Handling remote cinematic play');
     CinematicOverlay.play(data);
   }
 
@@ -200,7 +200,7 @@ export class CalendariaSocket {
    * @private
    */
   static #handleCinematicAbort() {
-    log(3, 'Handling remote cinematic abort');
+    ATLAS.log(3, 'Handling remote cinematic abort');
     CinematicOverlay.abort();
   }
 
@@ -214,7 +214,7 @@ export class CalendariaSocket {
   static #handleCalendarSwitch(data) {
     const { calendarId } = data;
     if (!calendarId) return;
-    log(3, `Handling remote calendar switch to: ${calendarId}`);
+    ATLAS.log(3, `Handling remote calendar switch to: ${calendarId}`);
     CalendarManager.handleRemoteSwitch(calendarId);
   }
 
@@ -227,7 +227,7 @@ export class CalendariaSocket {
    * @returns {void}
    */
   static #handleDateChange(data) {
-    log(3, 'Handling remote date change', data);
+    ATLAS.log(3, 'Handling remote date change', data);
     Hooks.callAll(HOOKS.REMOTE_DATE_CHANGE, data);
   }
 
@@ -244,7 +244,7 @@ export class CalendariaSocket {
   static #handleNoteUpdate(data) {
     const { action, id } = data;
     if (!action || !id) return;
-    log(3, `Handling remote note ${action}: ${id}`);
+    ATLAS.log(3, `Handling remote note ${action}: ${id}`);
     foundry.applications.instances.get('calendaria-big-cal')?.render();
     switch (action) {
       case 'created':
@@ -272,7 +272,7 @@ export class CalendariaSocket {
     if (!journalId || !ownership) return;
     const journal = game.journal.get(journalId);
     if (!journal) return;
-    log(3, `Primary GM handling ownership update for journal: ${journalId}`);
+    ATLAS.log(3, `Primary GM handling ownership update for journal: ${journalId}`);
     await journal.update({ ownership });
   }
 
@@ -286,7 +286,7 @@ export class CalendariaSocket {
    */
   static #handleClockUpdate(data) {
     const { running, ratio } = data;
-    log(3, `Handling remote clock update: running=${running}, ratio=${ratio}`);
+    ATLAS.log(3, `Handling remote clock update: running=${running}, ratio=${ratio}`);
     Hooks.callAll('calendaria.clockUpdate', { running, ratio });
   }
 
@@ -305,7 +305,7 @@ export class CalendariaSocket {
   static async #handleCreateNote(data) {
     if (!this.isPrimaryGM()) return;
     const { name, content, noteData, calendarId, journalData, requesterId } = data;
-    log(3, `Primary GM handling note creation request: ${name}`);
+    ATLAS.log(3, `Primary GM handling note creation request: ${name}`);
     const noteDataWithAuthor = { ...noteData, author: requesterId };
     const page = await NoteManager.createNote({ name, content, noteData: noteDataWithAuthor, calendarId, journalData, creatorId: requesterId });
     if (page && requesterId) this.emit(SOCKET_TYPES.CREATE_NOTE_COMPLETE, { pageId: page.id, journalId: page.parent.id, requesterId });
@@ -324,7 +324,7 @@ export class CalendariaSocket {
     const { pageId, journalId, requesterId, openSheet = 'edit' } = data;
     if (game.user.id !== requesterId) return;
     if (!openSheet) return;
-    log(3, `Note creation complete, opening editor for: ${pageId}`);
+    ATLAS.log(3, `Note creation complete, opening editor for: ${pageId}`);
     const journal = game.journal.get(journalId);
     const page = journal?.pages.get(pageId);
     if (page) page.sheet.render(true, { mode: openSheet });
@@ -339,7 +339,7 @@ export class CalendariaSocket {
    */
   static #handleWeatherChange(data) {
     const { weather } = data;
-    log(3, `Handling remote weather change: ${weather?.id ?? 'cleared'}`);
+    ATLAS.log(3, `Handling remote weather change: ${weather?.id ?? 'cleared'}`);
     WeatherManager.handleRemoteWeatherChange(data);
   }
 
@@ -355,7 +355,7 @@ export class CalendariaSocket {
   static async #handleWeatherRequest(data) {
     if (!this.isPrimaryGM()) return;
     const { action, presetId, options = {} } = data;
-    log(3, `Primary GM handling weather request: ${action}`, data);
+    ATLAS.log(3, `Primary GM handling weather request: ${action}`, data);
     switch (action) {
       case 'set':
         await WeatherManager.setWeather(presetId, { ...options, fromSocket: true });
@@ -383,7 +383,7 @@ export class CalendariaSocket {
   static async #handleTimeRequest(data) {
     if (!this.isPrimaryGM()) return;
     const { action, delta, components, date, cinematicOverride = null } = data;
-    log(3, `Primary GM handling time request: ${action}`, data);
+    ATLAS.log(3, `Primary GM handling time request: ${action}`, data);
     const runAdvance = async (seconds) => {
       if (cinematicOverride === true) await CinematicOverlay.triggerFromAdvance(seconds);
       else if (cinematicOverride === false) await game.time.advance(seconds);
@@ -426,7 +426,7 @@ export class CalendariaSocket {
   static async #handleCalendarRequest(data) {
     if (!this.isPrimaryGM()) return;
     const { calendarId } = data;
-    log(3, `Primary GM handling calendar switch request: ${calendarId}`);
+    ATLAS.log(3, `Primary GM handling calendar switch request: ${calendarId}`);
     await CalendarManager.switchCalendar(calendarId);
   }
 
@@ -437,7 +437,7 @@ export class CalendariaSocket {
    * @returns {void}
    */
   static #handleReminderNotify(data) {
-    log(3, `Handling reminder notification for ${data.noteName}`);
+    ATLAS.log(3, `Handling reminder notification for ${data.noteName}`);
     Hooks.callAll(HOOKS.REMINDER_RECEIVED, data);
   }
 
@@ -451,7 +451,7 @@ export class CalendariaSocket {
   static #handleBigCalVisibility(data) {
     if (game.user.isGM) return;
     const { visible } = data;
-    log(3, `Handling BigCal visibility: ${visible}`);
+    ATLAS.log(3, `Handling BigCal visibility: ${visible}`);
     if (visible && canViewBigCal()) BigCal.show();
     else if (!visible) BigCal.hide();
   }
@@ -466,7 +466,7 @@ export class CalendariaSocket {
   static #handleChronicleVisibility(data) {
     if (game.user.isGM) return;
     const { visible } = data;
-    log(3, `Handling Chronicle visibility: ${visible}`);
+    ATLAS.log(3, `Handling Chronicle visibility: ${visible}`);
     if (visible && canViewChronicle()) Chronicle.show({ silent: true });
     else if (!visible) Chronicle.hide();
   }
@@ -481,7 +481,7 @@ export class CalendariaSocket {
   static #handleHUDVisibility(data) {
     if (game.user.isGM) return;
     const { visible } = data;
-    log(3, `Handling HUD visibility: ${visible}`);
+    ATLAS.log(3, `Handling HUD visibility: ${visible}`);
     if (visible && canViewHUD() && game.settings.get(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD)) HUD.show();
     else if (!visible) HUD.hide();
   }
@@ -496,7 +496,7 @@ export class CalendariaSocket {
   static #handleMiniCalVisibility(data) {
     if (game.user.isGM) return;
     const { visible } = data;
-    log(3, `Handling MiniCal visibility: ${visible}`);
+    ATLAS.log(3, `Handling MiniCal visibility: ${visible}`);
     if (visible && canViewMiniCal()) MiniCal.show({ silent: true });
     else if (!visible) MiniCal.hide();
   }
@@ -511,7 +511,7 @@ export class CalendariaSocket {
   static #handleTimeKeeperVisibility(data) {
     if (game.user.isGM) return;
     const { visible } = data;
-    log(3, `Handling TimeKeeper visibility: ${visible}`);
+    ATLAS.log(3, `Handling TimeKeeper visibility: ${visible}`);
     if (visible && canViewTimeKeeper()) TimeKeeper.show({ silent: true });
     else if (!visible) TimeKeeper.hide();
   }
@@ -526,7 +526,7 @@ export class CalendariaSocket {
   static #handleStopwatchVisibility(data) {
     if (game.user.isGM) return;
     const { visible } = data;
-    log(3, `Handling Stop Watch visibility: ${visible}`);
+    ATLAS.log(3, `Handling Stop Watch visibility: ${visible}`);
     if (visible && canViewStopwatch()) Stopwatch.show();
     else if (!visible) Stopwatch.hide();
   }
@@ -541,7 +541,7 @@ export class CalendariaSocket {
   static #handleSunDialVisibility(data) {
     if (game.user.isGM) return;
     const { visible } = data;
-    log(3, `Handling Sun Dial visibility: ${visible}`);
+    ATLAS.log(3, `Handling Sun Dial visibility: ${visible}`);
     if (visible && canViewSunDial()) SunDial.show({ silent: true });
     else if (!visible) SunDial.hide();
   }

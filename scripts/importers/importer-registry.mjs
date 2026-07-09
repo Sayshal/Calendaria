@@ -1,4 +1,3 @@
-import { log } from '../utils/_module.mjs';
 import BaseImporter from './base-importer.mjs';
 import CalendariaImporter from './calendaria-importer.mjs';
 import CalendariumImporter from './calendarium-importer.mjs';
@@ -22,7 +21,7 @@ export function registerImporter(ImporterClass) {
   if (!ImporterClass?.id) throw new Error('Importer class must have a static id property');
   if (IMPORTERS.has(ImporterClass.id)) return;
   IMPORTERS.set(ImporterClass.id, ImporterClass);
-  log(3, `Registered importer: ${ImporterClass.id}`);
+  ATLAS.log(3, `Registered importer: ${ImporterClass.id}`);
 }
 
 /**
@@ -75,5 +74,5 @@ export function initializeImporters() {
   registerImporter(SeasonsStarsImporter);
   registerImporter(SimpleTimekeepingImporter);
   registerImporter(CalendariumImporter);
-  log(3, `Importer registry initialized with ${IMPORTERS.size} importers`);
+  ATLAS.log(3, `Importer registry initialized with ${IMPORTERS.size} importers`);
 }

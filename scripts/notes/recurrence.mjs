@@ -1,6 +1,6 @@
 import { CalendarManager } from '../calendar/_module.mjs';
 import { CONDITION_FIELDS, CONDITION_OPERATORS } from '../constants.mjs';
-import { findSeasonIndexByType, getCalendarMoonPhaseIndex, getDayOfYear, getMidpoint, getSeasonDayOfYearBounds, log, seededRandom } from '../utils/_module.mjs';
+import { findSeasonIndexByType, getCalendarMoonPhaseIndex, getDayOfYear, getMidpoint, getSeasonDayOfYearBounds, seededRandom } from '../utils/_module.mjs';
 import {
   EpochDataCache,
   NoteManager,
@@ -143,7 +143,7 @@ function resolveAnchor(anchorType, year, calendar) {
       if (anchorType?.startsWith('event:')) {
         const noteId = anchorType.split(':')[1];
         if (_resolvingAnchors.has(noteId)) {
-          log(2, `Circular event anchor detected for note ${noteId}`);
+          ATLAS.log(2, `Circular event anchor detected for note ${noteId}`);
           return null;
         }
         _resolvingAnchors.add(noteId);

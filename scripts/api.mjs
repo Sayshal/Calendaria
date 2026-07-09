@@ -74,7 +74,6 @@ import {
   getWidgetByReplacement,
   isEclipseOnDate,
   isMoonFull,
-  log,
   refreshWidgets,
   registerWidget,
   resolveFormatString,
@@ -241,7 +240,7 @@ export const CalendariaAPI = {
       return game.time.worldTime;
     }
     if (!CalendarManager.getActiveCalendar()) {
-      log(1, 'setDateTime failed: no active calendar');
+      ATLAS.log(1, 'setDateTime failed: no active calendar');
       return game.time.worldTime;
     }
     const calendar = CalendarManager.getActiveCalendar();
@@ -284,7 +283,7 @@ export const CalendariaAPI = {
     }
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) {
-      log(1, 'jumpToDate failed: no active calendar');
+      ATLAS.log(1, 'jumpToDate failed: no active calendar');
       ui.notifications.warn('CALENDARIA.Error.NoActiveCalendar', { localize: true });
       return;
     }
@@ -356,7 +355,7 @@ export const CalendariaAPI = {
    */
   async switchCalendar(id) {
     if (!canChangeActiveCalendar()) {
-      log(1, 'switchCalendar denied: insufficient permissions');
+      ATLAS.log(1, 'switchCalendar denied: insufficient permissions');
       ui.notifications.error('CALENDARIA.Permissions.NoAccess', { localize: true });
       return false;
     }
@@ -387,7 +386,7 @@ export const CalendariaAPI = {
       const formats = buildDisplayFormatsFromCalendar(calendar);
       await game.settings.set(MODULE.ID, SETTINGS.DISPLAY_FORMATS, formats);
     } catch (error) {
-      log(1, 'setActiveCalendar: failed to apply calendar display defaults:', error);
+      ATLAS.log(1, 'setActiveCalendar: failed to apply calendar display defaults:', error);
     }
     return true;
   },
@@ -1506,7 +1505,7 @@ export const CalendariaAPI = {
         targetHour = 0;
         break;
       default:
-        log(2, `Unknown preset: ${preset}`);
+        ATLAS.log(2, `Unknown preset: ${preset}`);
         return game.time.worldTime;
     }
     let hoursUntil = targetHour - currentHour;
@@ -2171,9 +2170,9 @@ export const CalendariaAPI = {
    */
   createCondition(field, op, ...values) {
     const validFields = Object.values(CONDITION_FIELDS);
-    if (!validFields.includes(field)) log(1, `Unknown condition field: "${field}". Valid fields: ${validFields.join(', ')}`);
+    if (!validFields.includes(field)) ATLAS.log(1, `Unknown condition field: "${field}". Valid fields: ${validFields.join(', ')}`);
     const validOps = Object.values(CONDITION_OPERATORS);
-    if (!validOps.includes(op)) log(1, `Unknown condition operator: "${op}". Valid operators: ${validOps.join(', ')}`);
+    if (!validOps.includes(op)) ATLAS.log(1, `Unknown condition operator: "${op}". Valid operators: ${validOps.join(', ')}`);
     const condition = { type: 'condition', field, op, value: values[0] ?? null };
     if (values.length > 1) condition.value2 = values[1];
     return condition;
@@ -2189,7 +2188,7 @@ export const CalendariaAPI = {
    */
   createConditionGroup(mode, children = [], options = {}) {
     const validModes = Object.values(CONDITION_GROUP_MODES);
-    if (!validModes.includes(mode)) log(1, `Unknown group mode: "${mode}". Valid modes: ${validModes.join(', ')}`);
+    if (!validModes.includes(mode)) ATLAS.log(1, `Unknown group mode: "${mode}". Valid modes: ${validModes.join(', ')}`);
     return createGroup(mode, children, options);
   },
 
@@ -2244,7 +2243,7 @@ export const CalendariaAPI = {
   evaluateNote(pageId, date, options = {}) {
     const stub = NoteManager.getNote(pageId);
     if (!stub) {
-      log(1, `evaluateNote: Note not found: ${pageId}`);
+      ATLAS.log(1, `evaluateNote: Note not found: ${pageId}`);
       return false;
     }
     const internalDate = toInternal(date);
@@ -2262,7 +2261,7 @@ export const CalendariaAPI = {
   getNextOccurrences(pageId, count = 5) {
     const stub = NoteManager.getNote(pageId);
     if (!stub) {
-      log(1, `getNextOccurrences: Note not found: ${pageId}`);
+      ATLAS.log(1, `getNextOccurrences: Note not found: ${pageId}`);
       return [];
     }
     const current = this.getCurrentDateTime();
@@ -2281,7 +2280,7 @@ export const CalendariaAPI = {
   getNoteOccurrencesInRange(pageId, startDate, endDate, maxOccurrences = 100) {
     const stub = NoteManager.getNote(pageId);
     if (!stub) {
-      log(1, `getNoteOccurrencesInRange: Note not found: ${pageId}`);
+      ATLAS.log(1, `getNoteOccurrencesInRange: Note not found: ${pageId}`);
       return [];
     }
     const internalStart = toInternal(startDate);
@@ -2298,7 +2297,7 @@ export const CalendariaAPI = {
   async setNoteVisibility(pageId, visibility) {
     const validValues = Object.values(NOTE_VISIBILITY);
     if (!validValues.includes(visibility)) {
-      log(1, `setNoteVisibility: Invalid visibility "${visibility}". Valid values: ${validValues.join(', ')}`);
+      ATLAS.log(1, `setNoteVisibility: Invalid visibility "${visibility}". Valid values: ${validValues.join(', ')}`);
       return null;
     }
     return this.updateNote(pageId, { visibility });
@@ -2313,7 +2312,7 @@ export const CalendariaAPI = {
   async setNoteDisplayStyle(pageId, style) {
     const validValues = Object.values(DISPLAY_STYLES);
     if (!validValues.includes(style)) {
-      log(1, `setNoteDisplayStyle: Invalid display style "${style}". Valid values: ${validValues.join(', ')}`);
+      ATLAS.log(1, `setNoteDisplayStyle: Invalid display style "${style}". Valid values: ${validValues.join(', ')}`);
       return null;
     }
     return this.updateNote(pageId, { displayStyle: style });
@@ -2339,7 +2338,7 @@ export const CalendariaAPI = {
       return null;
     }
     if (!calendarId || !festivalData?.name || !festivalData?.startDate) {
-      log(1, 'createFestival: calendarId, festivalData.name, and festivalData.startDate are required');
+      ATLAS.log(1, 'createFestival: calendarId, festivalData.name, and festivalData.startDate are required');
       return null;
     }
     const noteData = {

@@ -4,11 +4,11 @@
     position: fixed;
     width: 12.5rem;
     padding: 0.375rem;
-    border: 0.0625rem solid var(--calendaria-border);
+    border: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
     border-radius: 0.375rem;
     pointer-events: auto;
-    background: color-mix(in srgb, var(--calendaria-bg) 95%, transparent);
-    box-shadow: 0 0.125rem 0.5rem var(--calendaria-shadow);
+    background: color-mix(in srgb, var(--atlas-bg, rgb(31 31 31)) 95%, transparent);
+    box-shadow: 0 0.125rem 0.5rem var(--atlas-shadow-color, rgb(0 0 0 / 40%));
     transition: opacity 0.3s ease-in-out 2s;
 
     &:hover {
@@ -47,10 +47,10 @@
     }
 
     .time-display.near-snap {
-      border-color: var(--calendaria-primary);
+      border-color: var(--atlas-primary, rgb(74 144 226));
       box-shadow:
-        0 0 0.625rem var(--calendaria-shadow),
-        0 0 0.5rem var(--calendaria-primary);
+        0 0 0.625rem var(--atlas-shadow-color, rgb(0 0 0 / 40%)),
+        0 0 0.5rem var(--atlas-primary, rgb(74 144 226));
       animation: calendaria-wobble 0.15s ease-in-out infinite;
     }
 
@@ -89,7 +89,7 @@
     }
 
     .time {
-      color: var(--calendaria-text);
+      color: var(--atlas-text, rgb(224 224 224));
       font-weight: bold;
       font-size: 1.25rem;
       line-height: 1.2;
@@ -108,7 +108,7 @@
       align-items: center;
       padding: 0.25rem;
       border: none;
-      color: var(--calendaria-text-dim);
+      color: var(--atlas-text-dim, rgb(153 153 153));
       cursor: pointer;
       pointer-events: none;
       background: transparent;
@@ -122,12 +122,12 @@
       }
 
       &:hover {
-        color: var(--calendaria-text);
+        color: var(--atlas-text, rgb(224 224 224));
       }
     }
 
     .date {
-      color: var(--calendaria-text-dim);
+      color: var(--atlas-text-dim, rgb(153 153 153));
       font-size: 0.6875rem;
       line-height: 1.2;
     }
@@ -153,15 +153,15 @@
       box-sizing: border-box;
       height: 1.5rem;
       padding: 0;
-      border: 0.0625rem solid var(--calendaria-border);
+      border: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
       border-radius: 0.1875rem;
-      color: var(--calendaria-text);
+      color: var(--atlas-text, rgb(224 224 224));
       cursor: pointer;
-      background: var(--calendaria-button-bg);
+      background: var(--atlas-button-bg, rgb(58 58 58));
       transition: background 0.15s ease;
 
       &:hover {
-        background: var(--calendaria-button-hover);
+        background: var(--atlas-button-hover, rgb(74 74 74));
       }
 
       &:focus {
@@ -184,18 +184,18 @@
       height: 1.75rem;
       margin: 0;
       padding: 0 0.375rem;
-      border: 0.0625rem solid var(--calendaria-border);
+      border: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
       border-radius: 0.1875rem;
-      color: var(--calendaria-text);
+      color: var(--atlas-text, rgb(224 224 224));
       font-size: 0.75rem;
       line-height: calc(1.75rem - 0.125rem);
       text-align: center;
       cursor: pointer;
-      background: var(--calendaria-button-bg);
+      background: var(--atlas-button-bg, rgb(58 58 58));
       background-image: none;
 
       &:hover {
-        background: var(--calendaria-button-hover);
+        background: var(--atlas-button-hover, rgb(74 74 74));
       }
 
       &:focus {
@@ -213,7 +213,7 @@
       max-height: 0;
       padding: 0;
       overflow: hidden;
-      color: var(--calendaria-text-dim);
+      color: var(--atlas-text-dim, rgb(153 153 153));
       font-size: 0.6875rem;
       transition:
         opacity 0.2s ease-out,
@@ -238,7 +238,7 @@
       padding: 0;
       border: none;
       border-radius: 0.25rem;
-      color: var(--calendaria-text-dim);
+      color: var(--atlas-text-dim, rgb(153 153 153));
       font-size: 0.75rem;
       cursor: pointer;
       pointer-events: none;
@@ -248,7 +248,7 @@
         color 0.15s ease;
 
       &:hover {
-        color: var(--calendaria-text);
+        color: var(--atlas-text, rgb(224 224 224));
       }
     }
   }
@@ -315,7 +315,7 @@
     }
 
     .time {
-      color: var(--calendaria-text);
+      color: var(--atlas-text, rgb(224 224 224));
       font-weight: bold;
       font-size: calc(var(--stopwatch-size) * 0.06);
       line-height: 1;
@@ -349,7 +349,7 @@
       box-sizing: border-box;
       width: calc(var(--stopwatch-size) * 0.07);
       height: calc(var(--stopwatch-size) * 0.07);
-      color: var(--calendaria-text-dim);
+      color: var(--atlas-text-dim, rgb(153 153 153));
       font-size: calc(var(--stopwatch-size) * 0.042);
       cursor: pointer;
       pointer-events: auto;
@@ -358,7 +358,7 @@
         transform 0.1s ease;
 
       &:hover:not(.disabled) {
-        color: var(--calendaria-text);
+        color: var(--atlas-text, rgb(224 224 224));
         transform: scale(1.2);
       }
 
@@ -369,33 +369,33 @@
       }
 
       &.sw-notification.active {
-        color: var(--calendaria-primary);
+        color: var(--atlas-primary, rgb(74 144 226));
       }
 
       &.sw-start {
-        color: var(--calendaria-success);
+        color: var(--atlas-success, rgb(76 175 80));
       }
 
       &.sw-pause {
-        color: var(--calendaria-warning);
+        color: var(--atlas-warning, rgb(255 193 7));
       }
 
       &.sw-reset {
-        color: var(--calendaria-error);
+        color: var(--atlas-error, rgb(244 67 54));
       }
 
       &.sw-mode {
-        color: var(--calendaria-primary);
+        color: var(--atlas-primary, rgb(74 144 226));
       }
     }
 
     .laps {
       width: var(--stopwatch-size);
       margin-top: 1.5625rem;
-      border: 0.0625rem solid var(--calendaria-border);
+      border: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
       border-radius: 0.5rem;
-      background: var(--calendaria-bg);
-      box-shadow: 0 0.125rem 0.375rem var(--calendaria-shadow);
+      background: var(--atlas-bg, rgb(31 31 31));
+      box-shadow: 0 0.125rem 0.375rem var(--atlas-shadow-color, rgb(0 0 0 / 40%));
     }
 
     .laps-header {
@@ -403,8 +403,8 @@
       justify-content: space-between;
       align-items: center;
       padding: 0.25rem 0.5rem;
-      border-bottom: 0.0625rem solid var(--calendaria-border-light);
-      color: var(--calendaria-text-dim);
+      border-bottom: 0.0625rem solid var(--atlas-border-light, rgb(58 58 58));
+      color: var(--atlas-text-dim, rgb(153 153 153));
       font-weight: 600;
       font-size: 0.5625rem;
       text-transform: uppercase;
@@ -418,14 +418,14 @@
         padding: 0;
         border: none;
         border-radius: 0.1875rem;
-        color: var(--calendaria-text-dim);
+        color: var(--atlas-text-dim, rgb(153 153 153));
         font-size: 0.5rem;
         cursor: pointer;
         background: transparent;
         transition: color 0.15s ease;
 
         &:hover {
-          color: var(--calendaria-error);
+          color: var(--atlas-error, rgb(244 67 54));
         }
       }
     }
@@ -442,12 +442,12 @@
       display: flex;
       justify-content: space-between;
       padding: 0.125rem 0;
-      color: var(--calendaria-text);
+      color: var(--atlas-text, rgb(224 224 224));
       font-size: 0.625rem;
       font-family: monospace;
 
       .lap-index {
-        color: var(--calendaria-text-dim);
+        color: var(--atlas-text-dim, rgb(153 153 153));
       }
     }
 
@@ -467,13 +467,13 @@
         right: 0.125rem;
         width: 0.5rem;
         height: 0.5rem;
-        border-bottom: 0.125rem solid var(--calendaria-text-dim);
-        border-right: 0.125rem solid var(--calendaria-text-dim);
+        border-bottom: 0.125rem solid var(--atlas-text-dim, rgb(153 153 153));
+        border-right: 0.125rem solid var(--atlas-text-dim, rgb(153 153 153));
         content: '';
       }
 
       &:hover::after {
-        border-color: var(--calendaria-primary);
+        border-color: var(--atlas-primary, rgb(74 144 226));
       }
     }
   }

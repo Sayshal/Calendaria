@@ -3,7 +3,6 @@ import { CalendarManager } from '../calendar/_module.mjs';
 import { MODULE, SETTINGS } from '../constants.mjs';
 import { getCurrentDate } from '../notes/_module.mjs';
 import { TimeClock } from '../time/_module.mjs';
-import { log } from '../utils/_module.mjs';
 import { WeatherManager } from '../weather/_module.mjs';
 
 /** @type {number} Hour to advance to when "New Day" is selected (8:00 AM) */
@@ -23,14 +22,14 @@ let pf1eRestTimer = null;
  */
 export function onPreRest(_actor, config) {
   if (TimeClock.locked) {
-    log(2, 'Rest time advancement blocked (clock locked)');
+    ATLAS.log(2, 'Rest time advancement blocked (clock locked)');
     return;
   }
   const advanceTime = game.settings.get(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST);
   if (!advanceTime) return;
   if (config.advanceTime === false && (config.request || config.dialog === false)) return;
   config.advanceTime = true;
-  log(3, `Rest time advancement enabled for ${config.type} rest`);
+  ATLAS.log(3, `Rest time advancement enabled for ${config.type} rest`);
 }
 
 /**
@@ -58,24 +57,24 @@ export function onLongRest(actor, config) {
   if (mode === 'automatic') {
     const systemMinutes = config.duration;
     if (!systemMinutes || systemMinutes <= 0) {
-      log(3, 'Long rest time advancement skipped (system reported no duration)');
+      ATLAS.log(3, 'Long rest time advancement skipped (system reported no duration)');
       return;
     }
     const systemHours = systemMinutes / 60;
     const seconds = systemHours * minutesPerHour * secondsPerMinute;
     CinematicOverlay.gatedAdvance(seconds, { source: 'rest' });
-    log(3, `Long rest advancing ${systemHours} hours (system default)`);
+    ATLAS.log(3, `Long rest advancing ${systemHours} hours (system default)`);
     return;
   }
   if (mode === 'fixed' && !isGritty) {
     const fixedHours = game.settings.get(MODULE.ID, SETTINGS.REST_FIXED_HOURS);
     if (fixedHours <= 0) {
-      log(3, 'Long rest time advancement suppressed (fixed hours = 0)');
+      ATLAS.log(3, 'Long rest time advancement suppressed (fixed hours = 0)');
       return;
     }
     const seconds = fixedHours * minutesPerHour * secondsPerMinute;
     CinematicOverlay.gatedAdvance(seconds, { source: 'rest' });
-    log(3, `Long rest advancing ${fixedHours} hours`);
+    ATLAS.log(3, `Long rest advancing ${fixedHours} hours`);
     return;
   }
   const targetHour = getTargetHour(calendar, mode);
@@ -86,7 +85,7 @@ export function onLongRest(actor, config) {
   const daysToAdvance = isGritty ? 7 : 1;
   const minutesUntilTarget = daysToAdvance * minutesInDay - currentMinutes + targetMinutes;
   CinematicOverlay.gatedAdvance(minutesUntilTarget * secondsPerMinute, { source: 'rest' });
-  log(3, `Long rest (${restVariant}) advancing ${minutesUntilTarget} minutes to ${targetHour}:00 (${daysToAdvance} day${daysToAdvance > 1 ? 's' : ''} later)`);
+  ATLAS.log(3, `Long rest (${restVariant}) advancing ${minutesUntilTarget} minutes to ${targetHour}:00 (${daysToAdvance} day${daysToAdvance > 1 ? 's' : ''} later)`);
 }
 
 /**
@@ -111,22 +110,22 @@ export function onShortRest(actor, config) {
   if (mode === 'automatic') {
     const systemMinutes = config.duration;
     if (!systemMinutes || systemMinutes <= 0) {
-      log(3, 'Short rest time advancement skipped (system reported no duration)');
+      ATLAS.log(3, 'Short rest time advancement skipped (system reported no duration)');
       return;
     }
     const seconds = systemMinutes * secondsPerMinute;
     CinematicOverlay.gatedAdvance(seconds, { source: 'rest' });
-    log(3, `Short rest advancing ${systemMinutes} minutes (system default)`);
+    ATLAS.log(3, `Short rest advancing ${systemMinutes} minutes (system default)`);
     return;
   }
   const fixedMinutes = game.settings.get(MODULE.ID, SETTINGS.SHORT_REST_FIXED_MINUTES);
   if (fixedMinutes <= 0) {
-    log(3, 'Short rest time advancement suppressed (fixed minutes = 0)');
+    ATLAS.log(3, 'Short rest time advancement suppressed (fixed minutes = 0)');
     return;
   }
   const seconds = fixedMinutes * secondsPerMinute;
   CinematicOverlay.gatedAdvance(seconds, { source: 'rest' });
-  log(3, `Short rest advancing ${fixedMinutes} minutes`);
+  ATLAS.log(3, `Short rest advancing ${fixedMinutes} minutes`);
 }
 
 /**
@@ -140,7 +139,7 @@ export function onPF2eRest() {
     pf2eRestTimer = null;
   }, 500);
   if (TimeClock.locked) {
-    log(2, 'PF2E rest time advancement blocked (clock locked)');
+    ATLAS.log(2, 'PF2E rest time advancement blocked (clock locked)');
     return;
   }
   const advanceTime = game.settings.get(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST);
@@ -153,18 +152,18 @@ export function onPF2eRest() {
   if (mode === 'automatic') {
     const seconds = 8 * minutesPerHour * secondsPerMinute;
     CinematicOverlay.gatedAdvance(seconds, { source: 'rest' });
-    log(3, 'PF2E rest advancing 8 hours (system default)');
+    ATLAS.log(3, 'PF2E rest advancing 8 hours (system default)');
     return;
   }
   if (mode === 'fixed') {
     const fixedHours = game.settings.get(MODULE.ID, SETTINGS.REST_FIXED_HOURS);
     if (fixedHours <= 0) {
-      log(3, 'PF2E rest time advancement suppressed (fixed hours = 0)');
+      ATLAS.log(3, 'PF2E rest time advancement suppressed (fixed hours = 0)');
       return;
     }
     const seconds = fixedHours * minutesPerHour * secondsPerMinute;
     CinematicOverlay.gatedAdvance(seconds, { source: 'rest' });
-    log(3, `PF2E rest advancing ${fixedHours} hours`);
+    ATLAS.log(3, `PF2E rest advancing ${fixedHours} hours`);
     return;
   }
   const targetHour = getTargetHour(calendar, mode);
@@ -174,7 +173,7 @@ export function onPF2eRest() {
   const minutesInDay = (calendar.days?.hoursPerDay ?? 24) * minutesPerHour;
   const minutesUntilTarget = minutesInDay - currentMinutes + targetMinutes;
   CinematicOverlay.gatedAdvance(minutesUntilTarget * secondsPerMinute, { source: 'rest' });
-  log(3, `PF2E rest advancing ${minutesUntilTarget} minutes to ${targetHour}:00`);
+  ATLAS.log(3, `PF2E rest advancing ${minutesUntilTarget} minutes to ${targetHour}:00`);
 }
 
 /**
@@ -191,7 +190,7 @@ export function onPF1eRest(_actor, options = {}) {
     pf1eRestTimer = null;
   }, 500);
   if (TimeClock.locked) {
-    log(2, 'PF1E rest time advancement blocked (clock locked)');
+    ATLAS.log(2, 'PF1E rest time advancement blocked (clock locked)');
     return;
   }
   const advanceTime = game.settings.get(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST);
@@ -204,18 +203,18 @@ export function onPF1eRest(_actor, options = {}) {
   if (mode === 'automatic') {
     const seconds = options.hours * minutesPerHour * secondsPerMinute;
     CinematicOverlay.gatedAdvance(seconds, { source: 'rest' });
-    log(3, `PF1E rest advancing ${options.hours} hours (system default)`);
+    ATLAS.log(3, `PF1E rest advancing ${options.hours} hours (system default)`);
     return;
   }
   if (mode === 'fixed') {
     const fixedHours = game.settings.get(MODULE.ID, SETTINGS.REST_FIXED_HOURS);
     if (fixedHours <= 0) {
-      log(3, 'PF1E rest time advancement suppressed (fixed hours = 0)');
+      ATLAS.log(3, 'PF1E rest time advancement suppressed (fixed hours = 0)');
       return;
     }
     const seconds = fixedHours * minutesPerHour * secondsPerMinute;
     CinematicOverlay.gatedAdvance(seconds, { source: 'rest' });
-    log(3, `PF1E rest advancing ${fixedHours} hours`);
+    ATLAS.log(3, `PF1E rest advancing ${fixedHours} hours`);
     return;
   }
   const targetHour = getTargetHour(calendar, mode);
@@ -225,7 +224,7 @@ export function onPF1eRest(_actor, options = {}) {
   const minutesInDay = (calendar.days?.hoursPerDay ?? 24) * minutesPerHour;
   const minutesUntilTarget = minutesInDay - currentMinutes + targetMinutes;
   CinematicOverlay.gatedAdvance(minutesUntilTarget * secondsPerMinute, { source: 'rest' });
-  log(3, `PF1E rest advancing ${minutesUntilTarget} minutes to ${targetHour}:00`);
+  ATLAS.log(3, `PF1E rest advancing ${minutesUntilTarget} minutes to ${targetHour}:00`);
 }
 
 /**

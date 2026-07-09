@@ -1,5 +1,5 @@
 import { HOOKS, MODULE, SCENE_FLAGS, SETTINGS } from '../constants.mjs';
-import { CalendariaSocket, log } from '../utils/_module.mjs';
+import { CalendariaSocket } from '../utils/_module.mjs';
 import { WeatherManager } from '../weather/_module.mjs';
 
 /** FXMaster relative-level labels mapped to their numeric multipliers, matching FXMaster's RELATIVE_LEVEL_SCALE. */
@@ -75,7 +75,7 @@ function getActivePreset(scene) {
  */
 export function initializeFXMaster() {
   if (!isFXMasterActive()) return;
-  log(3, 'FXMaster detected, registering weather change handler');
+  ATLAS.log(3, 'FXMaster detected, registering weather change handler');
   Hooks.on(HOOKS.WEATHER_CHANGE, onWeatherChange);
   Hooks.on('canvasReady', onCanvasReady);
   Hooks.on('updateScene', onSceneUpdate);
@@ -170,7 +170,7 @@ export async function stopAllFX() {
   if (!fxApi) return;
   const active = fxApi.listActive?.() ?? [];
   for (const name of active) await fxApi.stop(name, { silent: true });
-  log(3, 'FXMaster effects stopped');
+  ATLAS.log(3, 'FXMaster effects stopped');
 }
 
 /**
@@ -187,14 +187,14 @@ async function playWeather(weather) {
   }
   const available = fxApi.listValid();
   if (!available.includes(fxName)) {
-    log(2, `FXMaster Preset "${fxName}" not available, stopping active effects`);
+    ATLAS.log(2, `FXMaster Preset "${fxName}" not available, stopping active effects`);
     await stopAllFX();
     return;
   }
   const options = buildPresetOptions(weather);
   options.silent = true;
   await fxApi.switch(fxName, options);
-  log(3, `FXMaster playing weather: ${fxName}`);
+  ATLAS.log(3, `FXMaster playing weather: ${fxName}`);
 }
 
 /**
@@ -287,14 +287,14 @@ function buildPresetOptions(weather) {
  */
 export async function playStandaloneFX(presetName, options = {}) {
   if (!isFXMasterActive()) {
-    log(2, _loc('CALENDARIA.Weather.Error.FXMasterInactive'));
+    ATLAS.log(2, _loc('CALENDARIA.Weather.Error.FXMasterInactive'));
     return false;
   }
   const fxApi = getFxApi();
   if (!fxApi) return false;
   const scene = canvas?.scene;
   if (!isFxEnabledForScene(scene)) {
-    log(2, _loc('CALENDARIA.Weather.Error.FXDisabled'));
+    ATLAS.log(2, _loc('CALENDARIA.Weather.Error.FXDisabled'));
     return false;
   }
   const available = fxApi.listValid?.() ?? [];
@@ -305,10 +305,10 @@ export async function playStandaloneFX(presetName, options = {}) {
   const fxOptions = { ...options, silent: true };
   try {
     await fxApi.switch(presetName, fxOptions);
-    log(3, `FXMaster standalone playing: ${presetName}`);
+    ATLAS.log(3, `FXMaster standalone playing: ${presetName}`);
     return true;
   } catch (error) {
-    log(1, 'FXMaster standalone playback failed:', error);
+    ATLAS.log(1, 'FXMaster standalone playback failed:', error);
     return false;
   }
 }

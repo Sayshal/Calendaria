@@ -1,6 +1,6 @@
 import { HOOKS, MODULE, SETTINGS, TEMPLATES } from '../../constants.mjs';
 import { getAvailableFxPresets, isFXMasterActive } from '../../integrations/_module.mjs';
-import { getAvailableMacros, log } from '../../utils/_module.mjs';
+import { getAvailableMacros } from '../../utils/_module.mjs';
 import { ALL_PRESETS, HUD_EFFECTS, WEATHER_CATEGORIES, WeatherManager } from '../../weather/_module.mjs';
 import { getEffectDefaults, SKY_OVERRIDES } from '../_module.mjs';
 
@@ -370,7 +370,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       preset.visualOverrides = visualOverrides;
       preset.skyOverrides = skyOverrides;
       await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS, presets);
-      log(3, `Weather Editor: saved custom weather "${preset.label}"`);
+      ATLAS.log(3, `Weather Editor: saved custom weather "${preset.label}"`);
     } else {
       const allOverrides = game.settings.get(MODULE.ID, SETTINGS.WEATHER_VISUAL_OVERRIDES) || {};
       const override = {};
@@ -395,7 +395,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       if (Object.keys(override).length) allOverrides[presetId] = override;
       else delete allOverrides[presetId];
       await game.settings.set(MODULE.ID, SETTINGS.WEATHER_VISUAL_OVERRIDES, allOverrides);
-      log(3, `Weather Editor: saved overrides for built-in "${presetId}"`);
+      ATLAS.log(3, `Weather Editor: saved overrides for built-in "${presetId}"`);
     }
     WeatherManager.refreshEnvironmentOverrides(presetId);
     Hooks.callAll(HOOKS.WEATHER_CHANGE, { visualOnly: true });
