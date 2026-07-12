@@ -1,18 +1,11 @@
-## New Features
+## Breaking Changes
 
-- The Chronicle scrolls to today's entry when first opened, unless it was opened with a locked date range.
-- The Note Viewer scrolls to the first note dated on or after today and places it at the top of the list when first opened.
-
-## Bug Fixes
-
-- Festivals with an image file icon such as an SVG now render that image on the calendar grid and in the festival editor list instead of nothing.
-- The chat card Release Notes link now points to the correct repository.
-- The Chronicle hover Add Note quick-add button now appears for any player with note-creation permission in both the scroll and timeline layouts, not only the GM.
-- The HUD dome sun, moon, and stars render sharper at high resolution and scale with the dial size.
-- The sun dial no longer jumps the time around on repeated drags or center-input edits.
-- You can now set Seconds Per Round to zero on the calendar Time tab, which stops world time from advancing when combat rounds change.
+- Calendaria now requires the 3DS:ATLAS module, which provides shared theming, logging, localization, and update notices.
+- Theme selection, custom themes, and the GM force-theme option now live in ATLAS's Theme Config; the old in-app theme editor and forced-theme settings are gone, and your existing theme choice and custom themes migrate into ATLAS automatically on first load.
 
 ## Changes
 
-- Darkness sync no longer rewrites scenes whose darkness and lighting already match the computed values, cutting redundant scene updates.
-- The Chronicle, Stop Watch, and Sun Dial settings tabs now show the open, reset position, and close controls to any non-GM user holding that app's view permission.
+- Bug reports run through the ATLAS troubleshooter, which now attaches the active calendar, its override settings, and every note on it as JSON for support.
+- Bumped the bug-report template's version placeholders to Foundry 14.364 and dnd5e 6.0.0.
+- Removed the bundled localization files; translations now come from the required 3DS:ATLAS module.
+- Standardized the GitHub issue templates on canonical type labels and added a Discord contact link to the issue chooser.
