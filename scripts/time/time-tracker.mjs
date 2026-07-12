@@ -1,6 +1,6 @@
 import { CalendarManager } from '../calendar/_module.mjs';
 import { HOOKS, MODULE, SETTINGS } from '../constants.mjs';
-import { executeMacroById, log } from '../utils/_module.mjs';
+import { executeMacroById } from '../utils/_module.mjs';
 import { WeatherManager } from '../weather/_module.mjs';
 
 /**
@@ -44,7 +44,7 @@ export default class TimeTracker {
     this.#lastSeason = game.time.components?.season ?? null;
     this.#lastMoonPhases = this.#getCurrentMoonPhases();
     this.#lastRestDay = this.#isCurrentDayRestDay();
-    log(3, 'Time Tracker initialized');
+    ATLAS.log(3, 'Time Tracker initialized');
   }
 
   /**
@@ -64,7 +64,7 @@ export default class TimeTracker {
     }
     if (this.#skipNextHooks) {
       this.#skipNextHooks = false;
-      log(3, 'Skipping threshold/period macros (timepoint jump)');
+      ATLAS.log(3, 'Skipping threshold/period macros (timepoint jump)');
       this.#fireDateTimeChangeHook(this.#lastComponents, currentComponents, delta, calendar);
       this.#checkPeriodChanges(this.#lastComponents, currentComponents, calendar, { skipMacros: true });
       this.#lastWorldTime = worldTime;
@@ -119,15 +119,15 @@ export default class TimeTracker {
     const yearZero = calendar?.years?.yearZero ?? 0;
     const hookData = { previous: { ...previousComponents, year: previousComponents.year + yearZero }, current: { ...currentComponents, year: currentComponents.year + yearZero }, calendar: calendar };
     if (previousComponents.year !== currentComponents.year) {
-      log(3, `Year changed: ${previousComponents.year + yearZero} -> ${currentComponents.year + yearZero}`);
+      ATLAS.log(3, `Year changed: ${previousComponents.year + yearZero} -> ${currentComponents.year + yearZero}`);
       Hooks.callAll(HOOKS.YEAR_CHANGE, hookData);
     }
     if (previousComponents.month !== currentComponents.month) {
-      log(3, `Month changed: ${previousComponents.month} -> ${currentComponents.month}`);
+      ATLAS.log(3, `Month changed: ${previousComponents.month} -> ${currentComponents.month}`);
       Hooks.callAll(HOOKS.MONTH_CHANGE, hookData);
     }
     if (previousComponents.dayOfMonth !== currentComponents.dayOfMonth || previousComponents.month !== currentComponents.month || previousComponents.year !== currentComponents.year) {
-      log(3, `Day changed`);
+      ATLAS.log(3, `Day changed`);
       Hooks.callAll(HOOKS.DAY_CHANGE, hookData);
       if (!skipMacros) this.#executePeriodMacro('day', hookData);
     }
@@ -135,7 +135,7 @@ export default class TimeTracker {
     const currentSeason = currentComponents.season;
     if (previousSeason !== null && currentSeason !== null && previousSeason !== currentSeason) {
       const seasonData = { ...hookData, previousSeason: calendar.seasonsArray?.[previousSeason] ?? null, currentSeason: calendar.seasonsArray?.[currentSeason] ?? null };
-      log(3, `Season changed: ${previousSeason} -> ${currentSeason}`);
+      ATLAS.log(3, `Season changed: ${previousSeason} -> ${currentSeason}`);
       Hooks.callAll(HOOKS.SEASON_CHANGE, seasonData);
       if (!skipMacros) this.#executePeriodMacro('season', seasonData);
     }
@@ -150,7 +150,7 @@ export default class TimeTracker {
    */
   static #checkThresholds(previousTime, currentTime, calendar) {
     if (currentTime <= previousTime) {
-      log(2, 'Time went backwards, skipping threshold checks');
+      ATLAS.log(2, 'Time went backwards, skipping threshold checks');
       return;
     }
     const previousComponents = this.#getComponentsForTime(previousTime);
@@ -186,7 +186,7 @@ export default class TimeTracker {
         if (hour !== null && startHour < hour) thresholds.push({ name, data: this.#createThresholdData(startComponents, calendar) });
       }
       const intermediateDays = Math.min(totalDays - 1, this.#MAX_THRESHOLD_DAYS);
-      if (totalDays - 1 > this.#MAX_THRESHOLD_DAYS) log(2, `Capping threshold hooks: ${totalDays - 1} intermediate days reduced to ${this.#MAX_THRESHOLD_DAYS}`);
+      if (totalDays - 1 > this.#MAX_THRESHOLD_DAYS) ATLAS.log(2, `Capping threshold hooks: ${totalDays - 1} intermediate days reduced to ${this.#MAX_THRESHOLD_DAYS}`);
       for (let day = 0; day < intermediateDays; day++) {
         for (const [name, hour] of Object.entries(dayThresholds)) if (hour !== null) thresholds.push({ name, data: this.#createThresholdData(endComponents, calendar) });
       }
@@ -261,7 +261,7 @@ export default class TimeTracker {
   static #fireThresholdHook(thresholdName, data) {
     const hookName = HOOKS[thresholdName.toUpperCase()];
     if (!hookName) return;
-    log(3, `Threshold crossed: ${thresholdName}`);
+    ATLAS.log(3, `Threshold crossed: ${thresholdName}`);
     Hooks.callAll(hookName, data);
     this.#executeThresholdMacro(thresholdName, data);
   }
@@ -340,7 +340,7 @@ export default class TimeTracker {
       }
     }
     if (changedMoons.length > 0) {
-      log(3, `Moon phase changed for ${changedMoons.length} moon(s)`);
+      ATLAS.log(3, `Moon phase changed for ${changedMoons.length} moon(s)`);
       Hooks.callAll(HOOKS.MOON_PHASE_CHANGE, { moons: changedMoons, calendar, worldTime: game.time.worldTime });
       this.#executeMoonPhaseMacros(changedMoons);
     }
@@ -458,7 +458,7 @@ export default class TimeTracker {
         worldTime: game.time.worldTime,
         calendar
       };
-      log(3, `Rest day status changed: ${this.#lastRestDay} -> ${currentRestDay}`);
+      ATLAS.log(3, `Rest day status changed: ${this.#lastRestDay} -> ${currentRestDay}`);
       Hooks.callAll(HOOKS.REST_DAY_CHANGE, hookData);
     }
   }

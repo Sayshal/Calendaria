@@ -1,6 +1,5 @@
 import { resolveRandomizedPhase } from '../../data/_module.mjs';
 import WeatherManager from '../../weather/weather-manager.mjs';
-import { log } from '../logger.mjs';
 
 /**
  * Resolve a convenience array getter from a calendar object.
@@ -570,7 +569,7 @@ export function validateFormatString(formatStr, calendar, components) {
       const cleanPreview = stripMoonIconMarkers(preview);
       return { valid: true, preview: cleanPreview };
     } catch (e) {
-      log(1, e);
+      ATLAS.log(1, e);
       return { valid: false, error: 'CALENDARIA.Format.Error.Invalid' };
     }
   }

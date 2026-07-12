@@ -1,6 +1,5 @@
 import { TEMPLATES } from '../../constants.mjs';
 import { createImporter, getImporterOptions } from '../../importers/_module.mjs';
-import { log } from '../../utils/_module.mjs';
 import { CalendarEditor } from '../_module.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -172,9 +171,9 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
           note.displayDate = `${month}/${day}`;
         });
       }
-      log(3, 'Import data processed successfully');
+      ATLAS.log(3, 'Import data processed successfully');
     } catch (error) {
-      log(1, 'Error processing import data:', error);
+      ATLAS.log(1, 'Error processing import data:', error);
       this.#errorMessage = error.message;
       this.#transformedData = null;
       this.#previewData = null;
@@ -287,7 +286,7 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
       this.#loadedFromModule = false;
       await this.#processData(data);
     } catch (error) {
-      log(1, 'Error parsing file:', error);
+      ATLAS.log(1, 'Error parsing file:', error);
       this.#errorMessage = _loc('CALENDARIA.Importer.ParseError', { error: error.message });
       this.render();
     }
@@ -317,7 +316,7 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
       this.#loadedFileName = null;
       await this.#processData(data);
     } catch (error) {
-      log(1, 'Error loading from module:', error);
+      ATLAS.log(1, 'Error loading from module:', error);
       this.#errorMessage = error.message;
       this.render();
     }
@@ -359,7 +358,7 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
         ui.notifications.info('CALENDARIA.Importer.MacroCopied', { localize: true });
         return;
       } catch (error) {
-        log(2, 'Clipboard API failed, falling back to manual selection:', error);
+        ATLAS.log(2, 'Clipboard API failed, falling back to manual selection:', error);
       }
     }
     const textarea = this.element.querySelector('.macro-source');
@@ -422,7 +421,7 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
         } else {
           for (const fest of newFestivals) this.#transformedData.festivals[foundry.utils.randomID()] = fest;
         }
-        log(3, `Added ${newFestivals.length} festivals to calendar data`);
+        ATLAS.log(3, `Added ${newFestivals.length} festivals to calendar data`);
       }
     }
     this.#transformedData.name = calendarName;
@@ -434,7 +433,7 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
       });
     }
     if (pendingNotes.length > 0) {
-      log(3, `${pendingNotes.length} notes queued for pending import`);
+      ATLAS.log(3, `${pendingNotes.length} notes queued for pending import`);
       if (!this.#transformedData.metadata) this.#transformedData.metadata = {};
       this.#transformedData.metadata.pendingNotes = pendingNotes;
       this.#transformedData.metadata.importerId = this.#selectedImporterId;

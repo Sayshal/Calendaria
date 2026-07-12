@@ -8,7 +8,6 @@ import { NoteManager, clearComputedDateCache } from './notes/_module.mjs';
 import { TimeClock, onMoonPhaseChange, onUpdateScene, onWeatherChange } from './time/_module.mjs';
 import {
   autoRevealCurrentDay,
-  log,
   onChatMessage,
   onGetSceneControlButtons,
   onPreCreateChatMessage,
@@ -91,5 +90,5 @@ export function registerHooks() {
   Hooks.once('ready', patchBastionButton);
   Hooks.once('pf2e.systemReady', () => CalendarManager.reapplyActiveCalendar());
   for (const config of WIDGET_COMBAT_CONFIGS) registerWidgetCombatHooks(config);
-  log(3, 'Hooks registered');
+  ATLAS.log(3, 'Hooks registered');
 }

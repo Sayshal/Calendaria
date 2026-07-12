@@ -1,6 +1,5 @@
 import { BigCal, Chronicle, HUD, MiniCal, NoteViewer, Stopwatch, SunDial, TimeKeeper } from '../applications/_module.mjs';
 import { KEYBINDS, MODULE } from '../constants.mjs';
-import { log } from './logger.mjs';
 
 /** Register all keybindings for the Calendaria module. */
 export function registerKeybindings() {
@@ -104,5 +103,5 @@ export function registerKeybindings() {
     },
     precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL
   });
-  log(3, 'Keybindings registered');
+  ATLAS.log(3, 'Keybindings registered');
 }

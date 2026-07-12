@@ -1,5 +1,4 @@
 import { CalendariaCalendar } from '../data/_module.mjs';
-import { log } from '../utils/_module.mjs';
 
 /**
  * Registry for managing calendar instances.
@@ -92,7 +91,7 @@ export default class CalendarRegistry {
   static setActive(id) {
     if (!this.has(id)) return false;
     this.#activeId = id;
-    log(3, `Active calendar set to: ${id}`);
+    ATLAS.log(3, `Active calendar set to: ${id}`);
     return true;
   }
 

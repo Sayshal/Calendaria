@@ -2,7 +2,6 @@ import { CalendarManager } from '../calendar/_module.mjs';
 import { ASSETS } from '../constants.mjs';
 import { FestivalManager } from '../festivals/_module.mjs';
 import { NoteManager } from '../notes/_module.mjs';
-import { log } from '../utils/_module.mjs';
 import BaseImporter from './base-importer.mjs';
 
 /**
@@ -102,7 +101,7 @@ export default class MiniCalendarImporter extends BaseImporter {
         for (const note of pageNotes) notes.push({ ...note, pageId: page.id, pageName: page.name, isJournalNote: true });
       }
     }
-    log(3, `Extracted ${notes.length} notes from Mini Calendar journals`);
+    ATLAS.log(3, `Extracted ${notes.length} notes from Mini Calendar journals`);
     return notes;
   }
 
@@ -114,7 +113,7 @@ export default class MiniCalendarImporter extends BaseImporter {
   async transform(data) {
     const calendar = data.calendar || data;
     if (!calendar || Object.keys(calendar).length === 0) throw new Error('No calendar data found in import');
-    log(3, 'Transforming Mini Calendar data:', calendar.name || calendar.id);
+    ATLAS.log(3, 'Transforming Mini Calendar data:', calendar.name || calendar.id);
     const rawWeekdays = calendar.days?.values ? Object.values(calendar.days.values) : [];
     const rawMonths = calendar.months?.values ? Object.values(calendar.months.values) : [];
     const rawSeasons = calendar.seasons?.values ? Object.values(calendar.seasons.values) : [];
@@ -458,7 +457,7 @@ export default class MiniCalendarImporter extends BaseImporter {
         suggestedType: note.content?.trim() ? 'note' : 'festival'
       });
     }
-    log(3, `Extracted ${allNotes.length} notes from Mini Calendar data`);
+    ATLAS.log(3, `Extracted ${allNotes.length} notes from Mini Calendar data`);
     return allNotes;
   }
 
@@ -484,7 +483,7 @@ export default class MiniCalendarImporter extends BaseImporter {
     const { calendarId } = options;
     const errors = [];
     let count = 0;
-    log(3, `Starting note import: ${notes.length} notes to calendar ${calendarId}`);
+    ATLAS.log(3, `Starting note import: ${notes.length} notes to calendar ${calendarId}`);
     const calendar = CalendarManager.getCalendar(calendarId);
     const yearZero = calendar?.years?.yearZero ?? 0;
     for (const note of notes) {
@@ -499,7 +498,7 @@ export default class MiniCalendarImporter extends BaseImporter {
         errors.push(`Error creating note "${note.name}": ${error.message}`);
       }
     }
-    log(3, `Note import complete: ${count}/${notes.length} imported, ${errors.length} errors`, { errors });
+    ATLAS.log(3, `Note import complete: ${count}/${notes.length} imported, ${errors.length} errors`, { errors });
     return { success: errors.length === 0, count, errors };
   }
 
@@ -512,7 +511,7 @@ export default class MiniCalendarImporter extends BaseImporter {
   async importFestivals(festivals, options = {}) {
     const { calendarId } = options;
     const errors = [];
-    log(3, `Starting festival import: ${festivals.length} festivals to calendar ${calendarId}`);
+    ATLAS.log(3, `Starting festival import: ${festivals.length} festivals to calendar ${calendarId}`);
     const calendar = CalendarManager.getCalendar(calendarId);
     if (!calendar) return { success: false, count: 0, errors: [`Calendar ${calendarId} not found`] };
     let created = 0;
@@ -523,10 +522,10 @@ export default class MiniCalendarImporter extends BaseImporter {
         created++;
       } catch (error) {
         errors.push(`Error processing festival "${festival.name}": ${error.message}`);
-        log(1, `Error processing festival "${festival.name}":`, error);
+        ATLAS.log(1, `Error processing festival "${festival.name}":`, error);
       }
     }
-    log(3, `Festival import complete: ${created} festival notes created`);
+    ATLAS.log(3, `Festival import complete: ${created} festival notes created`);
     return { success: errors.length === 0, count: created, errors };
   }
 

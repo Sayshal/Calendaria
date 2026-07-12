@@ -3,7 +3,6 @@ import { MODULE, SETTINGS, SOCKET_TYPES } from '../../constants.mjs';
 import { NoteManager } from '../../notes/_module.mjs';
 import { WeatherManager } from '../../weather/_module.mjs';
 import { PRESET_FORMATTERS, formatCustom, resolveFormatString } from '../formatting/format-utils.mjs';
-import { log } from '../logger.mjs';
 import { canViewWeatherForecast } from '../permissions.mjs';
 import { CalendariaSocket } from '../socket.mjs';
 
@@ -188,7 +187,7 @@ export async function cmdNote(args) {
     visibility: 'visible'
   };
   const page = await NoteManager.createNote({ name: title, content: description, noteData, openSheet: 'edit' });
-  if (page) log(3, `Created note via chat: ${title}`);
+  if (page) ATLAS.log(3, `Created note via chat: ${title}`);
   return { content: '' };
 }
 
@@ -357,7 +356,7 @@ export async function cmdAdvance(args) {
     else if (cinematicOverride === false) await game.time.advance(timeDelta);
     else await CinematicOverlay.gatedAdvance(timeDelta);
   }
-  log(3, `Advanced time by ${value} ${unitInput}`);
+  ATLAS.log(3, `Advanced time by ${value} ${unitInput}`);
   return { content: _loc('CALENDARIA.ChatCommand.TimeAdvanced', { value, unit: unitInput }) };
 }
 
@@ -376,7 +375,7 @@ export async function cmdSetDate(args) {
   const dayOfMonth = parseInt(match[3], 10) - 1;
   if (!game.user.isGM) CalendariaSocket.emit(SOCKET_TYPES.TIME_REQUEST, { action: 'jump', date: { year, month, dayOfMonth } });
   else await calendar.jumpToDate({ year, month, dayOfMonth });
-  log(3, `Set date to ${year}-${month + 1}-${dayOfMonth + 1}`);
+  ATLAS.log(3, `Set date to ${year}-${month + 1}-${dayOfMonth + 1}`);
   return { content: _loc('CALENDARIA.ChatCommand.DateSet') };
 }
 
@@ -398,7 +397,7 @@ export async function cmdSetTime(args) {
   const components = { ...dt, hour, minute, second, year: dt.year - yearZero };
   if (!game.user.isGM) CalendariaSocket.emit(SOCKET_TYPES.TIME_REQUEST, { action: 'set', components });
   else await game.time.set(components);
-  log(3, `Set time to ${hour}:${minute}:${second}`);
+  ATLAS.log(3, `Set time to ${hour}:${minute}:${second}`);
   return { content: _loc('CALENDARIA.ChatCommand.TimeSet') };
 }
 
@@ -465,7 +464,7 @@ export async function cmdSwitchCal(args) {
   if (!calendar) return null;
   if (!game.user.isGM) CalendariaSocket.emit(SOCKET_TYPES.CALENDAR_REQUEST, { calendarId });
   else await CalendarManager.switchCalendar(calendarId);
-  log(3, `Switched calendar to ${calendarId}`);
+  ATLAS.log(3, `Switched calendar to ${calendarId}`);
   return { content: _loc('CALENDARIA.ChatCommand.CalendarSwitched', { name: calendar.name }) };
 }
 

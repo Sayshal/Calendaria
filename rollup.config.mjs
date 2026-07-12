@@ -38,6 +38,7 @@ export default {
         { src: 'calendars', dest: 'dist' },
         { src: 'assets', dest: 'dist' },
         { src: 'module.json', dest: 'dist' },
+        { src: 'release_notes.txt', dest: 'dist' },
         { src: 'LICENSE', dest: 'dist' }
       ]
     })

@@ -2,7 +2,6 @@ import { HOOKS, MODULE, SETTINGS } from '../constants.mjs';
 import { CalendariaCalendar } from '../data/_module.mjs';
 import { FestivalManager } from '../festivals/_module.mjs';
 import { getSystemWorldClock, isLuxonSyncRequired, syncWithLuxon } from '../integrations/luxon-sync.mjs';
-import { log } from '../utils/_module.mjs';
 import { FRAMEWORK_INITIAL_DISPLAY_FORMATS, buildDisplayFormatsFromCalendar } from '../utils/formatting/format-utils.mjs';
 import { BUNDLED_CALENDARS, CalendarRegistry, DEFAULT_CALENDAR, isBundledCalendar, loadBundledCalendars } from './_module.mjs';
 
@@ -44,7 +43,7 @@ export default class CalendarManager {
     } else if (CalendarRegistry.size > 0) {
       const firstId = CalendarRegistry.getAllIds()[0];
       CalendarRegistry.setActive(firstId);
-      log(2, `Active calendar "${activeId}" not found, using "${firstId}"`);
+      ATLAS.log(2, `Active calendar "${activeId}" not found, using "${firstId}"`);
     }
     const activeCalendar = CalendarRegistry.getActive();
     if (activeCalendar) {
@@ -55,12 +54,12 @@ export default class CalendarManager {
       game.time.initializeCalendar();
       this.#patchFoundryCalendar();
       await this.#syncLuxonSystemState(activeCalendar);
-      log(3, `Synced game.time.calendar to: ${activeCalendar.name} (roundTime: ${CONFIG.time.roundTime}s)`);
+      ATLAS.log(3, `Synced game.time.calendar to: ${activeCalendar.name} (roundTime: ${CONFIG.time.roundTime}s)`);
     }
     const resolvedId = CalendarRegistry.getActive()?.metadata?.id;
     if (resolvedId) Hooks.callAll(HOOKS.CALENDAR_SWITCHED, resolvedId, CalendarRegistry.get(resolvedId));
     await this.#seedDisplayFormatsForFreshWorld();
-    log(3, 'Calendar Manager initialized');
+    ATLAS.log(3, 'Calendar Manager initialized');
   }
 
   /**
@@ -77,9 +76,9 @@ export default class CalendarManager {
     if (foundry.utils.equals(seeded, current)) return;
     try {
       await game.settings.set(MODULE.ID, SETTINGS.DISPLAY_FORMATS, seeded);
-      log(3, `Seeded DISPLAY_FORMATS from "${activeCalendar.name}" dateFormats for fresh world`);
+      ATLAS.log(3, `Seeded DISPLAY_FORMATS from "${activeCalendar.name}" dateFormats for fresh world`);
     } catch (error) {
-      log(1, 'Failed to seed DISPLAY_FORMATS from calendar:', error);
+      ATLAS.log(1, 'Failed to seed DISPLAY_FORMATS from calendar:', error);
     }
   }
 
@@ -102,9 +101,9 @@ export default class CalendarManager {
       try {
         await game.settings.set(systemId, 'worldClock', { ...current, ...update });
         if (update.dateTheme) ui.notifications.info(_loc('CALENDARIA.Notification.LuxonThemeSynced', { system: systemId.toUpperCase(), theme, calendar: calendar.name }));
-        log(3, `${systemId} WorldClock state synced for ${calendar.name}:`, update);
+        ATLAS.log(3, `${systemId} WorldClock state synced for ${calendar.name}:`, update);
       } catch (error) {
-        log(1, `Failed to sync ${systemId} WorldClock state:`, error);
+        ATLAS.log(1, `Failed to sync ${systemId} WorldClock state:`, error);
       }
       return;
     }
@@ -114,9 +113,9 @@ export default class CalendarManager {
     try {
       await game.settings.set(systemId, 'worldClock', { ...current, showClockButton: false });
       ui.notifications.warn(_loc('CALENDARIA.Notification.LuxonWorldClockDisabled', { system: systemId.toUpperCase(), calendar: calendar?.name ?? '' }), { permanent: true });
-      log(2, `${systemId} WorldClock button hidden; calendar "${calendar?.metadata?.id}" not Luxon-compatible`);
+      ATLAS.log(2, `${systemId} WorldClock button hidden; calendar "${calendar?.metadata?.id}" not Luxon-compatible`);
     } catch (error) {
-      log(1, `Failed to disable ${systemId} WorldClock button:`, error);
+      ATLAS.log(1, `Failed to disable ${systemId} WorldClock button:`, error);
     }
   }
 
@@ -159,17 +158,17 @@ export default class CalendarManager {
         if (CalendarManager.#normalizeCollectionKeys(data)) needsSave = true;
         const calendar = new CalendariaCalendar(data);
         CalendarRegistry.register(id, calendar);
-        log(3, `Loaded custom calendar: ${id}`);
+        ATLAS.log(3, `Loaded custom calendar: ${id}`);
       } catch (error) {
-        log(1, `Failed to load custom calendar "${id}":`, error);
+        ATLAS.log(1, `Failed to load custom calendar "${id}":`, error);
       }
     }
     if (needsSave && game.user?.isGM) {
       try {
         await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_CALENDARS, customCalendars);
-        log(3, 'Persisted normalized collection keys for custom calendars');
+        ATLAS.log(3, 'Persisted normalized collection keys for custom calendars');
       } catch (error) {
-        log(1, 'Failed to persist normalized custom calendar keys:', error);
+        ATLAS.log(1, 'Failed to persist normalized custom calendar keys:', error);
       }
     }
   }
@@ -233,7 +232,7 @@ export default class CalendarManager {
           delete calendarData._isDelta;
           const calendar = new CalendariaCalendar(calendarData);
           CalendarRegistry.register(id, calendar);
-          log(3, `Applied delta override for bundled calendar: ${id}`);
+          ATLAS.log(3, `Applied delta override for bundled calendar: ${id}`);
         } else if (bundledData) {
           if (CalendarManager.#alignOverrideKeys(data, bundledData)) needsSave = true;
           CalendarManager.#reconstructOperators(data);
@@ -241,14 +240,14 @@ export default class CalendarManager {
           const calendar = new CalendariaCalendar(merged);
           CalendarRegistry.register(id, calendar);
           needsSave = true;
-          log(3, `Applied legacy override for bundled calendar: ${id}`);
+          ATLAS.log(3, `Applied legacy override for bundled calendar: ${id}`);
         } else {
           const calendar = new CalendariaCalendar(data);
           CalendarRegistry.register(id, calendar);
-          log(3, `Applied override for calendar: ${id}`);
+          ATLAS.log(3, `Applied override for calendar: ${id}`);
         }
       } catch (error) {
-        log(1, `Failed to apply override for calendar "${id}":`, error);
+        ATLAS.log(1, `Failed to apply override for calendar "${id}":`, error);
       }
     }
     if (needsSave && game.user?.isGM) {
@@ -258,9 +257,9 @@ export default class CalendarManager {
         if (cal && bundledData) overrides[id] = CalendarManager.#computeOverrideDelta(bundledData, cal.toObject());
       }
       await game.settings.set(MODULE.ID, SETTINGS.DEFAULT_OVERRIDES, overrides);
-      log(3, 'Persisted override deltas');
+      ATLAS.log(3, 'Persisted override deltas');
     }
-    log(3, `Applied ${ids.length} default calendar overrides`);
+    ATLAS.log(3, `Applied ${ids.length} default calendar overrides`);
   }
 
   /**
@@ -599,7 +598,7 @@ export default class CalendarManager {
    */
   static async switchCalendar(id) {
     if (!CalendarRegistry.has(id)) {
-      log(1, `Cannot switch to calendar: ${id} not found`);
+      ATLAS.log(1, `Cannot switch to calendar: ${id} not found`);
       ui.notifications.error(_loc('CALENDARIA.Error.CalendarNotFound', { id }));
       return false;
     }
@@ -616,16 +615,16 @@ export default class CalendarManager {
       try {
         this.#isSwitchingCalendar = true;
         await game.settings.set(MODULE.ID, SETTINGS.ACTIVE_CALENDAR, id);
-        log(3, `Updated active calendar setting to: ${id}`);
+        ATLAS.log(3, `Updated active calendar setting to: ${id}`);
       } catch (error) {
-        if (error.name !== 'DataModelValidationError') log(1, `Error updating active calendar setting:`, error);
+        if (error.name !== 'DataModelValidationError') ATLAS.log(1, `Error updating active calendar setting:`, error);
       } finally {
         this.#isSwitchingCalendar = false;
       }
     }
     Hooks.callAll(HOOKS.CALENDAR_SWITCHED, id, calendar);
     this.rerenderCalendarUIs();
-    log(3, `Switched to calendar: ${id}`);
+    ATLAS.log(3, `Switched to calendar: ${id}`);
     return true;
   }
 
@@ -643,10 +642,10 @@ export default class CalendarManager {
    */
   static handleRemoteSwitch(id) {
     if (!CalendarRegistry.has(id)) {
-      log(2, `Cannot handle remote switch: calendar ${id} not found`);
+      ATLAS.log(2, `Cannot handle remote switch: calendar ${id} not found`);
       return;
     }
-    log(3, `Handling remote calendar switch to: ${id}`);
+    ATLAS.log(3, `Handling remote calendar switch to: ${id}`);
     CalendarRegistry.setActive(id);
     const calendar = CalendarRegistry.get(id);
     syncWithLuxon(calendar);
@@ -669,17 +668,17 @@ export default class CalendarManager {
    */
   static async addCalendar(id, definition) {
     if (CalendarRegistry.has(id)) {
-      log(2, `Cannot add calendar: ${id} already exists`);
+      ATLAS.log(2, `Cannot add calendar: ${id} already exists`);
       ui.notifications.error(_loc('CALENDARIA.Error.CalendarAlreadyExists', { id }));
       return null;
     }
     try {
       const calendar = CalendarRegistry.register(id, definition);
       Hooks.callAll(HOOKS.CALENDAR_ADDED, id, calendar);
-      log(3, `Added calendar: ${id}`);
+      ATLAS.log(3, `Added calendar: ${id}`);
       return calendar;
     } catch (error) {
-      log(1, `Error adding calendar ${id}:`, error);
+      ATLAS.log(1, `Error adding calendar ${id}:`, error);
       ui.notifications.error(_loc('CALENDARIA.Error.CalendarAddFailed', { message: error.message }));
       return null;
     }
@@ -692,18 +691,18 @@ export default class CalendarManager {
    */
   static async removeCalendar(id) {
     if (!CalendarRegistry.has(id)) {
-      log(2, `Cannot remove calendar: ${id} not found`);
+      ATLAS.log(2, `Cannot remove calendar: ${id} not found`);
       return false;
     }
     if (CalendarRegistry.getActiveId() === id) {
-      log(1, `Cannot remove active calendar: ${id}`);
+      ATLAS.log(1, `Cannot remove active calendar: ${id}`);
       ui.notifications.warn('CALENDARIA.Error.CannotRemoveActiveCalendar', { localize: true });
       return false;
     }
     const removed = CalendarRegistry.unregister(id);
     if (removed) {
       Hooks.callAll(HOOKS.CALENDAR_REMOVED, id);
-      log(3, `Removed calendar: ${id}`);
+      ATLAS.log(3, `Removed calendar: ${id}`);
     }
     return removed;
   }
@@ -745,7 +744,7 @@ export default class CalendarManager {
     if (setting.key === `${MODULE.ID}.${SETTINGS.ACTIVE_CALENDAR}`) {
       const newCalendarId = changes.value;
       if (this.#isSwitchingCalendar) return;
-      log(3, 'Active calendar updated (externally)');
+      ATLAS.log(3, 'Active calendar updated (externally)');
       if (newCalendarId && CalendarRegistry.has(newCalendarId)) {
         CalendarRegistry.setActive(newCalendarId);
         const calendar = CalendarRegistry.get(newCalendarId);
@@ -811,11 +810,11 @@ export default class CalendarManager {
     const calendarId = id.startsWith('custom-') ? id : `custom-${id}`;
     const customCalendars = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CALENDARS) || {};
     if (customCalendars[calendarId]) {
-      log(2, `Cannot create calendar: ${calendarId} already exists`);
+      ATLAS.log(2, `Cannot create calendar: ${calendarId} already exists`);
       return null;
     }
     if (CalendarRegistry.has(calendarId)) {
-      log(3, `Cleaning up stale registry entry for: ${calendarId}`);
+      ATLAS.log(3, `Cleaning up stale registry entry for: ${calendarId}`);
       CalendarRegistry.unregister(calendarId);
     }
     try {
@@ -828,10 +827,10 @@ export default class CalendarManager {
       await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_CALENDARS, customCalendars);
       CalendarRegistry.register(calendarId, calendar);
       Hooks.callAll(HOOKS.CALENDAR_ADDED, calendarId, calendar);
-      log(3, `Created custom calendar: ${calendarId}`);
+      ATLAS.log(3, `Created custom calendar: ${calendarId}`);
       return calendar;
     } catch (error) {
-      log(1, `Error creating custom calendar ${calendarId}:`, error);
+      ATLAS.log(1, `Error creating custom calendar ${calendarId}:`, error);
       return null;
     }
   }
@@ -845,13 +844,13 @@ export default class CalendarManager {
   static async updateCustomCalendar(id, changes) {
     const calendar = CalendarRegistry.get(id);
     if (!calendar) {
-      log(1, `Cannot update calendar: ${id} not found`);
+      ATLAS.log(1, `Cannot update calendar: ${id} not found`);
       ui.notifications.error(_loc('CALENDARIA.Error.CalendarNotFound', { id }));
       return null;
     }
     const customCalendars = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CALENDARS) || {};
     if (!customCalendars[id]) {
-      log(2, `Cannot update calendar: ${id} is not a custom calendar`);
+      ATLAS.log(2, `Cannot update calendar: ${id} is not a custom calendar`);
       return null;
     }
     try {
@@ -867,10 +866,10 @@ export default class CalendarManager {
         this.#patchFoundryCalendar();
       }
       Hooks.callAll(HOOKS.CALENDAR_UPDATED, id, updatedCalendar);
-      log(3, `Updated custom calendar: ${id}`);
+      ATLAS.log(3, `Updated custom calendar: ${id}`);
       return updatedCalendar;
     } catch (error) {
-      log(1, 'Calendar update failed:', error);
+      ATLAS.log(1, 'Calendar update failed:', error);
       ui.notifications.error(_loc('CALENDARIA.Error.CalendarUpdateFailed', { message: error.message }));
       return null;
     }
@@ -884,11 +883,11 @@ export default class CalendarManager {
   static async deleteCustomCalendar(id) {
     const customCalendars = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CALENDARS) || {};
     if (!customCalendars[id]) {
-      log(2, `Cannot delete calendar: ${id} is not a custom calendar`);
+      ATLAS.log(2, `Cannot delete calendar: ${id} is not a custom calendar`);
       return false;
     }
     if (CalendarRegistry.getActiveId() === id) {
-      log(2, `Cannot delete active calendar: ${id}`);
+      ATLAS.log(2, `Cannot delete active calendar: ${id}`);
       return false;
     }
     try {
@@ -896,10 +895,10 @@ export default class CalendarManager {
       await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_CALENDARS, customCalendars);
       CalendarRegistry.unregister(id);
       Hooks.callAll(HOOKS.CALENDAR_REMOVED, id);
-      log(3, `Deleted custom calendar: ${id}`);
+      ATLAS.log(3, `Deleted custom calendar: ${id}`);
       return true;
     } catch (error) {
-      log(1, `Error deleting custom calendar ${id}:`, error);
+      ATLAS.log(1, `Error deleting custom calendar ${id}:`, error);
       return false;
     }
   }
@@ -937,7 +936,7 @@ export default class CalendarManager {
   static async duplicateCalendar(sourceId, newId, newName) {
     const sourceCalendar = CalendarRegistry.get(sourceId);
     if (!sourceCalendar) {
-      log(2, `Cannot duplicate calendar: ${sourceId} not found`);
+      ATLAS.log(2, `Cannot duplicate calendar: ${sourceId} not found`);
       return null;
     }
     const newData = sourceCalendar.toObject();
@@ -979,7 +978,7 @@ export default class CalendarManager {
    */
   static async saveDefaultOverride(id, data) {
     if (!isBundledCalendar(id) && !this.hasDefaultOverride(id)) {
-      log(2, `Cannot save override: ${id} is not a bundled calendar`);
+      ATLAS.log(2, `Cannot save override: ${id} is not a bundled calendar`);
       return null;
     }
     try {
@@ -1005,10 +1004,10 @@ export default class CalendarManager {
         this.#patchFoundryCalendar();
       }
       Hooks.callAll(HOOKS.CALENDAR_UPDATED, id, calendar);
-      log(3, `Saved override for bundled calendar: ${id}`);
+      ATLAS.log(3, `Saved override for bundled calendar: ${id}`);
       return calendar;
     } catch (error) {
-      log(1, `Error saving override for ${id}:`, error);
+      ATLAS.log(1, `Error saving override for ${id}:`, error);
       return null;
     }
   }
@@ -1020,7 +1019,7 @@ export default class CalendarManager {
    */
   static async resetDefaultCalendar(id) {
     if (!this.hasDefaultOverride(id)) {
-      log(2, `Cannot reset: ${id} has no override`);
+      ATLAS.log(2, `Cannot reset: ${id} has no override`);
       return false;
     }
     try {
@@ -1043,10 +1042,10 @@ export default class CalendarManager {
         await FestivalManager.seedFestivalNotes(id, calendar);
         Hooks.callAll(HOOKS.CALENDAR_UPDATED, id, calendar);
       }
-      log(3, `Reset bundled calendar: ${id}`);
+      ATLAS.log(3, `Reset bundled calendar: ${id}`);
       return true;
     } catch (error) {
-      log(1, `Error resetting bundled calendar ${id}:`, error);
+      ATLAS.log(1, `Error resetting bundled calendar ${id}:`, error);
       return false;
     }
   }

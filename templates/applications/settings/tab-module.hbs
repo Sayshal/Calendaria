@@ -84,18 +84,6 @@
           class="fas fa-undo"></i></button>
     </legend>
 
-    <div class="form-group">
-      <label for="loggingLevel">{{localize "CALENDARIA.Settings.Logger.Name"}}</label>
-      <div class="form-fields">
-        <select id="loggingLevel" name="loggingLevel">
-          {{#each loggingLevelOptions}}
-            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
-          {{/each}}
-        </select>
-      </div>
-      <p class="hint">{{localize "CALENDARIA.Settings.Logger.Hint"}}</p>
-    </div>
-
     {{#if isGM}}
       <div class="form-group">
         <label for="devMode">{{localize "CALENDARIA.SettingsPanel.DevMode.Name"}}</label>

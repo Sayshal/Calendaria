@@ -40,63 +40,22 @@
       ],
       "paths": [
         "styles",
-        "lang",
         "templates"
       ]
     }
   },
   "id": "calendaria",
-  "languages": [
-    {
-      "lang": "en",
-      "name": "English",
-      "path": "lang/en.json"
-    },
-    {
-      "lang": "pt-BR",
-      "name": "Português (Brasil)",
-      "path": "lang/pt-BR.json"
-    },
-    {
-      "lang": "de",
-      "name": "German",
-      "path": "lang/de.json"
-    },
-    {
-      "lang": "tr",
-      "name": "Türkçe",
-      "path": "lang/tr.json"
-    },
-    {
-      "lang": "it",
-      "name": "Italian",
-      "path": "lang/it.json"
-    },
-    {
-      "lang": "ru",
-      "name": "Russian",
-      "path": "lang/ru.json"
-    },
-    {
-      "lang": "pl",
-      "name": "Polish",
-      "path": "lang/pl.json"
-    },
-    {
-      "lang": "fr",
-      "name": "Français",
-      "path": "lang/fr.json"
-    },
-    {
-      "lang": "es",
-      "name": "Español",
-      "path": "lang/es.json"
-    }
-  ],
   "license": "https://github.com/Sayshal/calendaria?tab=MIT-1-ov-file",
   "manifest": "https://github.com/Sayshal/calendaria/releases/latest/download/module.json",
   "readme": "https://github.com/Sayshal/calendaria?tab=readme-ov-file",
-  "relationships": {},
+  "relationships": {
+    "requires": [
+      {
+        "id": "3ds-atlas",
+        "type": "module"
+      }
+    ]
+  },
   "socket": true,
   "title": "Calendaria",
   "url": "https://github.com/Sayshal/calendaria",

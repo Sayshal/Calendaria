@@ -1,5 +1,5 @@
 import { MODULE, SCENE_FLAGS, SETTINGS, SOCKET_TYPES } from '../constants.mjs';
-import { CalendariaSocket, getMoonPhasePosition, log } from '../utils/_module.mjs';
+import { CalendariaSocket, getMoonPhasePosition } from '../utils/_module.mjs';
 import { WeatherManager } from '../weather/_module.mjs';
 
 /** @type {number|null} Last hour we calculated darkness for */
@@ -336,7 +336,7 @@ export async function updateDarknessFromWorldTime(worldTime, dt) {
   const secondsPerHour = (calendar?.days?.secondsPerMinute ?? 60) * minutesPerHour;
   const animateDarkness = Math.abs(dt) < secondsPerHour;
   const updates = buildDarknessUpdates(components);
-  if (updates.length) await Scene.updateDocuments(updates, { animateDarkness }).catch((error) => log(1, 'Darkness batch update failed:', error));
+  if (updates.length) await Scene.updateDocuments(updates, { animateDarkness }).catch((error) => ATLAS.log(1, 'Darkness batch update failed:', error));
 }
 
 /**
@@ -401,7 +401,7 @@ export async function onWeatherChange() {
   if (!CalendariaSocket.isPrimaryGM()) return;
   const components = game.time.components;
   const updates = buildDarknessUpdates(components);
-  if (updates.length) await Scene.updateDocuments(updates).catch((error) => log(1, 'Weather darkness batch update failed:', error));
+  if (updates.length) await Scene.updateDocuments(updates).catch((error) => ATLAS.log(1, 'Weather darkness batch update failed:', error));
 }
 
 /**
@@ -432,5 +432,5 @@ export async function onUpdateScene(scene, change) {
   const envData = buildEnvironmentUpdateData(scene, lighting);
   const updateData = { 'environment.darknessLevel': darkness, ...envData };
   await scene.update(updateData, { animateDarkness: true });
-  log(3, `Scene activated, transitioning darkness to ${darkness.toFixed(3)}`);
+  ATLAS.log(3, `Scene activated, transitioning darkness to ${darkness.toFixed(3)}`);
 }

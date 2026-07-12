@@ -1,5 +1,4 @@
 import { MODULE } from '../constants.mjs';
-import { log } from '../utils/_module.mjs';
 import { CalendarRegistry, preLocalizeCalendar } from './_module.mjs';
 
 /** @type {string[]} List of bundled calendar IDs that ship with the module. */
@@ -38,15 +37,15 @@ async function loadCalendarFile(id) {
   try {
     const response = await fetch(path);
     if (!response.ok) {
-      log(1, `Failed to load calendar file: ${path} (${response.status})`);
+      ATLAS.log(1, `Failed to load calendar file: ${path} (${response.status})`);
       return null;
     }
     const data = await response.json();
     preLocalizeCalendar(data);
-    log(3, `Loaded calendar file: ${id}`);
+    ATLAS.log(3, `Loaded calendar file: ${id}`);
     return data;
   } catch (error) {
-    log(1, `Error loading calendar file ${path}:`, error);
+    ATLAS.log(1, `Error loading calendar file ${path}:`, error);
     return null;
   }
 }
@@ -64,7 +63,7 @@ export async function loadBundledCalendars() {
       loaded.push(id);
     }
   }
-  log(3, `Loaded ${loaded.length}/${BUNDLED_CALENDARS.length} bundled calendars`);
+  ATLAS.log(3, `Loaded ${loaded.length}/${BUNDLED_CALENDARS.length} bundled calendars`);
   return loaded;
 }
 

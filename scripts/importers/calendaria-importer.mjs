@@ -1,6 +1,5 @@
 import { SETTINGS } from '../constants.mjs';
 import { NoteManager, getAllPresets, sanitizeNoteData, upsertBundledCustomPreset } from '../notes/_module.mjs';
-import { log } from '../utils/_module.mjs';
 import BaseImporter from './base-importer.mjs';
 
 /**
@@ -26,7 +25,7 @@ export default class CalendariaImporter extends BaseImporter {
    */
   #extractCalendarData(data) {
     if (data.settings && data.calendarData?.name) {
-      log(3, 'Detected settings export file, extracting calendarData');
+      ATLAS.log(3, 'Detected settings export file, extracting calendarData');
       return data.calendarData;
     }
     return data;
@@ -107,7 +106,7 @@ export default class CalendariaImporter extends BaseImporter {
     const calendarData = this.#extractCalendarData(data);
     const monthValues = calendarData.months?.values;
     if (!calendarData.name || !monthValues || !Object.values(monthValues).length) throw new Error('Invalid Calendaria export format');
-    log(3, `Transforming Calendaria export: ${calendarData.name}`);
+    ATLAS.log(3, `Transforming Calendaria export: ${calendarData.name}`);
     this.#bundledCustomPresets = data.customPresets || data.settings?.[SETTINGS.CUSTOM_PRESETS] || [];
     const metadata = { ...calendarData.metadata };
     delete metadata.id;
@@ -127,7 +126,7 @@ export default class CalendariaImporter extends BaseImporter {
     const { calendarId } = options;
     const errors = [];
     let count = 0;
-    log(3, `Starting Calendaria note import: ${notes.length} notes to calendar ${calendarId}`);
+    ATLAS.log(3, `Starting Calendaria note import: ${notes.length} notes to calendar ${calendarId}`);
     if (this.#bundledCustomPresets.length) {
       let restored = 0;
       for (const preset of this.#bundledCustomPresets) {
@@ -135,7 +134,7 @@ export default class CalendariaImporter extends BaseImporter {
         const added = await upsertBundledCustomPreset(preset);
         if (added) restored++;
       }
-      if (restored) log(3, `Restored ${restored} bundled custom presets`);
+      if (restored) ATLAS.log(3, `Restored ${restored} bundled custom presets`);
     }
     for (const note of notes) {
       try {
@@ -159,7 +158,7 @@ export default class CalendariaImporter extends BaseImporter {
         errors.push(`Error creating note "${note.name}": ${error.message}`);
       }
     }
-    log(3, `Calendaria note import complete: ${count}/${notes.length} imported, ${errors.length} errors`);
+    ATLAS.log(3, `Calendaria note import complete: ${count}/${notes.length} imported, ${errors.length} errors`);
     return { success: errors.length === 0, count, errors };
   }
 }

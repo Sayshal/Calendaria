@@ -1,7 +1,7 @@
 import { CalendarManager } from '../calendar/_module.mjs';
 import { MODULE, SETTINGS } from '../constants.mjs';
 import { TimeClock } from '../time/_module.mjs';
-import { CalendariaSocket, log } from '../utils/_module.mjs';
+import { CalendariaSocket } from '../utils/_module.mjs';
 
 /** @type {Function|null} Cached reference to dnd5e's original confirmAdvance method. */
 let originalConfirmAdvance = null;
@@ -56,7 +56,7 @@ export async function onDayChangeForBastions() {
   const characters = game.actors.filter((a) => a.system?.isCharacter && a.itemTypes?.facility?.length);
   for (const actor of characters) await game.dnd5e.bastion.advanceAllFacilities(actor, { duration: daysElapsed });
   await game.settings.set(MODULE.ID, SETTINGS.BASTION_LAST_ADVANCE, currentTime);
-  log(3, `Advanced bastion orders by ${daysElapsed} days for ${characters.length} actor(s)`);
+  ATLAS.log(3, `Advanced bastion orders by ${daysElapsed} days for ${characters.length} actor(s)`);
 }
 
 /**
@@ -96,5 +96,5 @@ export function patchBastionButton() {
     const duration = Math.max(1, game.settings.get('dnd5e', 'bastionConfiguration')?.duration ?? 7);
     button.dataset.tooltip = _loc('CALENDARIA.Bastion.ButtonTooltip', { days: duration });
   }
-  log(3, 'Patched dnd5e bastion button to advance world time');
+  ATLAS.log(3, 'Patched dnd5e bastion button to advance world time');
 }

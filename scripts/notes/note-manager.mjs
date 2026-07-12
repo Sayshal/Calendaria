@@ -1,6 +1,6 @@
 import { CalendarManager, isBundledCalendar } from '../calendar/_module.mjs';
 import { HOOKS, MODULE, NOTE_VISIBILITY, SETTINGS, SOCKET_TYPES } from '../constants.mjs';
-import { CalendariaSocket, canAddNotes, canDeleteNotes, log } from '../utils/_module.mjs';
+import { CalendariaSocket, canAddNotes, canDeleteNotes } from '../utils/_module.mjs';
 import {
   DEFAULT_PRESET_ID,
   applyPresetDefaultsToNoteData,
@@ -57,7 +57,7 @@ export default class NoteManager {
       await this.#initializeActiveCalendarFolder();
     }
     this.#initialized = true;
-    log(3, 'Note Manager initialized');
+    ATLAS.log(3, 'Note Manager initialized');
   }
 
   /**
@@ -69,14 +69,14 @@ export default class NoteManager {
     try {
       const activeCalendar = CalendarManager.getActiveCalendar();
       if (!activeCalendar?.metadata?.id) {
-        log(2, 'No active calendar found during initialization');
+        ATLAS.log(2, 'No active calendar found during initialization');
         return;
       }
       const calendarId = activeCalendar.metadata.id;
       const folder = await this.getCalendarFolder(calendarId, activeCalendar);
-      if (folder) log(3, `Initialized calendar folder for: ${calendarId}`);
+      if (folder) ATLAS.log(3, `Initialized calendar folder for: ${calendarId}`);
     } catch (error) {
-      log(1, 'Error initializing active calendar folder:', error);
+      ATLAS.log(1, 'Error initializing active calendar folder:', error);
     }
   }
 
@@ -92,7 +92,7 @@ export default class NoteManager {
         if (stub) this.#noteIndex.set(page.id, stub);
       }
     }
-    log(3, `Built note index with ${this.#noteIndex.size} notes`);
+    ATLAS.log(3, `Built note index with ${this.#noteIndex.size} notes`);
   }
 
   /**
@@ -173,7 +173,7 @@ export default class NoteManager {
                 else delete nextOwnership[authorId];
               }
               await journal.update({ ownership: nextOwnership });
-              log(3, `Updated journal ownership defaults for visibility change: ${changes.system.visibility}`);
+              ATLAS.log(3, `Updated journal ownership defaults for visibility change: ${changes.system.visibility}`);
             }
           }
         }
@@ -255,7 +255,7 @@ export default class NoteManager {
     for (const [key, value] of Object.entries(expected)) if (current[key] !== value) repair[key] = value;
     if (Object.keys(repair).length) {
       await journal.update({ ownership: repair });
-      log(3, `Re-synced ownership for "${journal.name}" after external edit`);
+      ATLAS.log(3, `Re-synced ownership for "${journal.name}" after external edit`);
     }
   }
 
@@ -267,7 +267,7 @@ export default class NoteManager {
   static async onCalendarSwitched(calendarId, calendar) {
     if (game.user.isGM && calendar) {
       await NoteManager.getCalendarFolder(calendarId, calendar);
-      log(3, `Ensured calendar folder exists for: ${calendarId}`);
+      ATLAS.log(3, `Ensured calendar folder exists for: ${calendarId}`);
     }
   }
 
@@ -285,13 +285,13 @@ export default class NoteManager {
     const isCalendarJournal = journal.getFlag(MODULE.ID, 'isCalendarJournal');
     if (isCalendarJournal) {
       ui.notifications.warn('CALENDARIA.Warning.CannotDeleteCalendarJournal', { localize: true });
-      log(2, `Prevented deletion of calendar journal: ${journal.name}`);
+      ATLAS.log(2, `Prevented deletion of calendar journal: ${journal.name}`);
       return false;
     }
     if (!game.user.isGM) {
       if (page?.system?.linkedFestival) {
         ui.notifications.warn('CALENDARIA.Warning.CannotDeleteFestivalNote', { localize: true });
-        log(2, `Prevented deletion of festival note: ${journal.name}`);
+        ATLAS.log(2, `Prevented deletion of festival note: ${journal.name}`);
         return false;
       }
     }
@@ -310,13 +310,13 @@ export default class NoteManager {
     const isCalendarNotesFolder = folder.getFlag(MODULE.ID, 'isCalendarNotesFolder');
     if (isCalendarNotesFolder) {
       ui.notifications.warn('CALENDARIA.Warning.CannotDeleteNotesFolder', { localize: true });
-      log(2, `Prevented deletion of Calendar Notes folder: ${folder.name}`);
+      ATLAS.log(2, `Prevented deletion of Calendar Notes folder: ${folder.name}`);
       return false;
     }
     const isCalendarFolder = folder.getFlag(MODULE.ID, 'isCalendarFolder');
     if (isCalendarFolder) {
       ui.notifications.warn('CALENDARIA.Warning.CannotDeleteCalendarFolder', { localize: true });
-      log(2, `Prevented deletion of calendar folder: ${folder.name}`);
+      ATLAS.log(2, `Prevented deletion of calendar folder: ${folder.name}`);
       return false;
     }
   }
@@ -340,7 +340,7 @@ export default class NoteManager {
       return null;
     }
     const validation = validateNoteData(noteData, calendarId);
-    if (!validation.valid) log(1, `Invalid note data: ${validation.errors.join(', ')}`);
+    if (!validation.valid) ATLAS.log(1, `Invalid note data: ${validation.errors.join(', ')}`);
     const sanitized = sanitizeNoteData(noteData);
     if (source === 'ui' && !sanitized.categories?.length && !sanitized.linkedFestival) {
       const result = await this.#resolvePresetForNewNote(sanitized);
@@ -355,7 +355,7 @@ export default class NoteManager {
     }
     if (!game.user.isGM && !game.user.can('JOURNAL_CREATE')) {
       CalendariaSocket.emit(SOCKET_TYPES.CREATE_NOTE, { name, content, noteData: sanitized, calendarId, journalData, requesterId: game.user.id, openSheet });
-      log(3, `Note creation requested via GM: ${name}`);
+      ATLAS.log(3, `Note creation requested via GM: ${name}`);
       return null;
     }
     const calendar = CalendarManager.getCalendar(calendarId);
@@ -381,7 +381,7 @@ export default class NoteManager {
       { name, type: 'calendaria.calendarnote', system: sanitized, text: { content }, title: { level: 1, show: true }, flags: { [MODULE.ID]: { calendarId } } },
       { parent: journal }
     );
-    log(3, `Created calendar note: ${name}`);
+    ATLAS.log(3, `Created calendar note: ${name}`);
     if (openSheet && (!creatorId || creatorId === game.user.id)) page.sheet.render(true, { mode: openSheet, forceMode: openSheet });
     return page;
   }
@@ -412,14 +412,14 @@ export default class NoteManager {
       const mergedNoteData = foundry.utils.mergeObject(currentNoteData, updates.noteData);
       if (mergedNoteData.color && typeof mergedNoteData.color !== 'string') mergedNoteData.color = String(mergedNoteData.color);
       const validation = validateNoteData(mergedNoteData);
-      if (!validation.valid) log(1, `Invalid note data: ${validation.errors.join(', ')}`);
+      if (!validation.valid) ATLAS.log(1, `Invalid note data: ${validation.errors.join(', ')}`);
       updateData.system = sanitizeNoteData(mergedNoteData);
     }
     if (updates.content !== undefined) {
       updateData['text.content'] = updates.content;
     }
     await page.update(updateData);
-    log(3, `Updated calendar note: ${page.name}`);
+    ATLAS.log(3, `Updated calendar note: ${page.name}`);
     return page;
   }
 
@@ -442,14 +442,14 @@ export default class NoteManager {
     try {
       if (parentJournal?.getFlag(MODULE.ID, 'isCalendarNote')) {
         await parentJournal.delete();
-        log(3, `Deleted calendar note journal: ${parentJournal.name}`);
+        ATLAS.log(3, `Deleted calendar note journal: ${parentJournal.name}`);
       } else {
         await page.delete();
-        log(3, `Deleted calendar note page: ${page.name}`);
+        ATLAS.log(3, `Deleted calendar note page: ${page.name}`);
       }
       return true;
     } catch (error) {
-      log(1, `Error deleting calendar note:`, error);
+      ATLAS.log(1, `Error deleting calendar note:`, error);
       ui.notifications.error(_loc('CALENDARIA.Error.NoteDeleteFailed', { message: error.message }));
       throw error;
     }
@@ -506,7 +506,7 @@ export default class NoteManager {
       await page.delete();
       deletedCount++;
     }
-    log(3, `Deleted ${deletedCount} calendar notes`);
+    ATLAS.log(3, `Deleted ${deletedCount} calendar notes`);
     return deletedCount;
   }
 
@@ -620,7 +620,7 @@ export default class NoteManager {
    */
   static async getCalendarFolder(calendarId, calendar) {
     if (!calendar) {
-      log(2, `Cannot get calendar folder: calendar ${calendarId} not found`);
+      ATLAS.log(2, `Cannot get calendar folder: calendar ${calendarId} not found`);
       return null;
     }
     const inFlight = this.#calendarFolderPromises.get(calendarId);
@@ -651,9 +651,9 @@ export default class NoteManager {
         for (const journal of game.journal.filter((j) => j.folder?.id === dup.id)) await journal.update({ folder: keep.id });
         try {
           await dup.delete();
-          log(3, `Merged duplicate calendar folder for ${calendarId}: ${dup.name}`);
+          ATLAS.log(3, `Merged duplicate calendar folder for ${calendarId}: ${dup.name}`);
         } catch (error) {
-          if (!game.folders.get(dup.id)) log(3, `Duplicate calendar folder ${dup.id} already removed`);
+          if (!game.folders.get(dup.id)) ATLAS.log(3, `Duplicate calendar folder ${dup.id} already removed`);
           else throw error;
         }
       }
@@ -666,10 +666,10 @@ export default class NoteManager {
         let calendarName = calendar.name || calendarId;
         if (calendarName.includes('.')) calendarName = _loc(calendarName);
         const folder = await Folder.create({ name: calendarName, type: 'JournalEntry', folder: parentFolder.id, color: '#4a9eff', flags: { [MODULE.ID]: { calendarId, isCalendarFolder: true } } });
-        log(3, `Created calendar folder: ${folder.name}`);
+        ATLAS.log(3, `Created calendar folder: ${folder.name}`);
         return folder;
       } catch (error) {
-        log(1, 'Error creating calendar folder:', error);
+        ATLAS.log(1, 'Error creating calendar folder:', error);
         return null;
       }
     }
@@ -694,7 +694,7 @@ export default class NoteManager {
     if (newDescription === currentDescription) return;
     if (calendar.metadata) calendar.metadata.description = newDescription;
     else calendar.description = newDescription;
-    log(3, `Synced description from journal to calendar ${calendarId}`);
+    ATLAS.log(3, `Synced description from journal to calendar ${calendarId}`);
     if (game.user.isGM) {
       if (isBundledCalendar(calendarId)) await CalendarManager.saveDefaultOverride(calendarId, calendar.toObject());
       else await CalendarManager.updateCustomCalendar(calendarId, calendar.toObject());
@@ -733,9 +733,9 @@ export default class NoteManager {
         for (const journal of game.journal.filter((j) => j.folder?.id === dup.id)) await journal.update({ folder: keep.id });
         try {
           await dup.delete();
-          log(3, `Merged duplicate Calendar Notes folder: ${dup.name}`);
+          ATLAS.log(3, `Merged duplicate Calendar Notes folder: ${dup.name}`);
         } catch (error) {
-          if (!game.folders.get(dup.id)) log(3, `Duplicate Calendar Notes folder ${dup.id} already removed`);
+          if (!game.folders.get(dup.id)) ATLAS.log(3, `Duplicate Calendar Notes folder ${dup.id} already removed`);
           else throw error;
         }
       }
@@ -751,7 +751,7 @@ export default class NoteManager {
     if (game.user.isGM) {
       const folder = await Folder.create({ name: _loc('CALENDARIA.Note.CalendarNotesFolder'), type: 'JournalEntry', color: '#4a9eff', flags: { [MODULE.ID]: { isCalendarNotesFolder: true } } });
       this.#notesFolderId = folder.id;
-      log(3, 'Created Calendar Notes folder');
+      ATLAS.log(3, 'Created Calendar Notes folder');
       return folder;
     }
     return null;

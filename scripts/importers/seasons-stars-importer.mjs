@@ -1,7 +1,6 @@
 import { CalendarManager } from '../calendar/_module.mjs';
 import { ASSETS } from '../constants.mjs';
 import { NoteManager, addCustomPreset, getAllPresets } from '../notes/_module.mjs';
-import { log } from '../utils/_module.mjs';
 import BaseImporter from './base-importer.mjs';
 
 /** @type {Object<string, string>} Map S&S season icon strings to FontAwesome classes. */
@@ -126,8 +125,8 @@ export default class SeasonsStarsImporter extends BaseImporter {
   async transform(data) {
     const calendar = data.calendar || data;
     const label = calendar.translations?.en?.label || calendar.id || 'Imported Calendar';
-    log(3, 'Transforming Seasons & Stars data:', label);
-    if (calendar.variants) log(2, _loc('CALENDARIA.Importer.SeasonsStars.Warning.Variants'));
+    ATLAS.log(3, 'Transforming Seasons & Stars data:', label);
+    if (calendar.variants) ATLAS.log(2, _loc('CALENDARIA.Importer.SeasonsStars.Warning.Variants'));
     const weekdays = this.#transformWeekdays(calendar.weekdays);
     const months = this.#transformMonths(calendar.months);
     const daysPerYear = months.reduce((sum, m) => sum + m.days, 0);
@@ -442,7 +441,7 @@ export default class SeasonsStarsImporter extends BaseImporter {
     const worldEvents = Array.isArray(data.worldEvents) ? data.worldEvents : [];
     const journalNotes = Array.isArray(data.journalNotes) ? data.journalNotes : [];
     const allEvents = [...events, ...worldEvents];
-    log(3, `Extracting ${allEvents.length} events + ${journalNotes.length} journal notes from Seasons & Stars data`);
+    ATLAS.log(3, `Extracting ${allEvents.length} events + ${journalNotes.length} journal notes from Seasons & Stars data`);
     const notes = allEvents.map((event) => this.#transformEvent(event));
     for (const entry of journalNotes) {
       const flags = entry.flags?.['seasons-and-stars'];
@@ -488,7 +487,7 @@ export default class SeasonsStarsImporter extends BaseImporter {
         note.repeat = 'yearly';
         note.startDate = { year: event.startYear ?? 1, month: (rec.month ?? 1) - 1, dayOfMonth: 0 };
         note.importWarnings = [`Ordinal recurrence (${rec.occurrence} ${rec.weekday} of month) imported as first of month`];
-        log(2, _loc('CALENDARIA.Importer.SeasonsStars.Warning.OrdinalRecurrence'));
+        ATLAS.log(2, _loc('CALENDARIA.Importer.SeasonsStars.Warning.OrdinalRecurrence'));
       } else if (rec.type === 'interval') {
         note.repeat = 'yearly';
         note.interval = rec.intervalYears;
@@ -519,7 +518,7 @@ export default class SeasonsStarsImporter extends BaseImporter {
     const { calendarId } = options;
     const errors = [];
     let count = 0;
-    log(3, `Starting note import: ${notes.length} notes to calendar ${calendarId}`);
+    ATLAS.log(3, `Starting note import: ${notes.length} notes to calendar ${calendarId}`);
     if (this.#ssNoteCategories.length) await this.#importNoteCategories(this.#ssNoteCategories);
     const calendar = CalendarManager.getCalendar(calendarId);
     const yearZero = calendar?.years?.yearZero ?? 0;
@@ -534,7 +533,7 @@ export default class SeasonsStarsImporter extends BaseImporter {
         errors.push(`Error creating note "${note.name}": ${error.message}`);
       }
     }
-    log(3, `Note import complete: ${count}/${notes.length} imported, ${errors.length} errors`);
+    ATLAS.log(3, `Note import complete: ${count}/${notes.length} imported, ${errors.length} errors`);
     return { success: errors.length === 0, count, errors };
   }
 
@@ -565,7 +564,7 @@ export default class SeasonsStarsImporter extends BaseImporter {
         .replace(/[^\da-z-]/g, '');
       if (!existingIds.has(id)) {
         await addCustomPreset(cat.name, cat.color, cat.icon || 'fa-tag');
-        log(3, `Imported S&S note category: ${cat.name}`);
+        ATLAS.log(3, `Imported S&S note category: ${cat.name}`);
       }
     }
   }

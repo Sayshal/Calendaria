@@ -1,7 +1,7 @@
 import { CalendarManager } from '../../calendar/_module.mjs';
 import { HOOKS, MODULE, SETTINGS } from '../../constants.mjs';
 import { getTimeIncrements } from '../../time/_module.mjs';
-import { CalendariaSocket, formatForLocation, getSkyColorsRgb, log } from '../../utils/_module.mjs';
+import { CalendariaSocket, formatForLocation, getSkyColorsRgb } from '../../utils/_module.mjs';
 import CinematicKeyframeBuilder from './cinematic-keyframe-builder.mjs';
 
 /** @type {number} */
@@ -155,7 +155,7 @@ export default class CinematicOverlay {
     this.#payload = payload;
     this.#currentFrame = -1;
     Hooks.callAll(HOOKS.CINEMATIC_START, payload);
-    log(3, `Cinematic starting: ${payload.keyframes.length} keyframes, ${payload.deltaSeconds}s skip`);
+    ATLAS.log(3, `Cinematic starting: ${payload.keyframes.length} keyframes, ${payload.deltaSeconds}s skip`);
     const panelMs = game.settings.get(MODULE.ID, SETTINGS.CINEMATIC_PANEL_DURATION) || 3000;
     this.#totalDuration = Math.max(1000, payload.keyframes.length * panelMs);
     if (!this.#element) this.#buildDOM();
@@ -175,7 +175,7 @@ export default class CinematicOverlay {
   static abort() {
     if (!this.#active) return;
     this.#aborted = true;
-    log(3, 'Cinematic aborted');
+    ATLAS.log(3, 'Cinematic aborted');
     if (game.user.isGM) CalendariaSocket.emitCinematicAbort();
     this.#cleanup();
     Hooks.callAll(HOOKS.CINEMATIC_ABORT, this.#payload);

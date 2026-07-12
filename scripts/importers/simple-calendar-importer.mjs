@@ -2,7 +2,6 @@ import { CalendarManager } from '../calendar/_module.mjs';
 import { ASSETS } from '../constants.mjs';
 import { FestivalManager } from '../festivals/_module.mjs';
 import { NoteManager, addCustomPreset, getAllPresets } from '../notes/_module.mjs';
-import { log } from '../utils/_module.mjs';
 import BaseImporter from './base-importer.mjs';
 
 /** Both module IDs to support original SC and SC Reborn. */
@@ -179,7 +178,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
     }
     if (monthMap.regularIndex.has(scMonth)) return { month: monthMap.regularIndex.get(scMonth), dayOfMonth: scDay, wasIntercalary: false };
     const fallback = monthMap.regularCount > 0 ? monthMap.regularCount - 1 : 0;
-    log(2, `Simple Calendar import: SC month ${scMonth} out of bounds (regularCount=${monthMap.regularCount}); clamped to ${fallback}`);
+    ATLAS.log(2, `Simple Calendar import: SC month ${scMonth} out of bounds (regularCount=${monthMap.regularCount}); clamped to ${fallback}`);
     return { month: fallback, dayOfMonth: scDay, wasIntercalary: false };
   }
 
@@ -232,7 +231,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
     const calendars = data.calendars || data;
     const calendar = Array.isArray(calendars) ? calendars[calendarIndex] : calendars;
     if (!calendar) throw new Error('No calendar found in import data');
-    log(3, 'Transforming Simple Calendar data:', calendar.name || calendar.id);
+    ATLAS.log(3, 'Transforming Simple Calendar data:', calendar.name || calendar.id);
     this.#scNoteCategories = this.#extractNoteCategories(Array.isArray(calendars) ? calendars : [calendars]);
     const weekdays = this.#transformWeekdays(calendar.weekdays);
     const weekdayNumericToIndex = new Map();
@@ -570,7 +569,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
         });
       }
     }
-    log(3, `Extracted ${allNotes.length} notes from Simple Calendar data`);
+    ATLAS.log(3, `Extracted ${allNotes.length} notes from Simple Calendar data`);
     return allNotes;
   }
 
@@ -596,7 +595,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
     const { calendarId } = options;
     const errors = [];
     let count = 0;
-    log(3, `Starting note import: ${notes.length} notes to calendar ${calendarId}`);
+    ATLAS.log(3, `Starting note import: ${notes.length} notes to calendar ${calendarId}`);
     const categoryMap = this.#scNoteCategories.length ? await this.#importNoteCategories(this.#scNoteCategories) : new Map();
     const calendar = CalendarManager.getCalendar(calendarId);
     const yearZero = calendar?.years?.yearZero ?? 0;
@@ -613,7 +612,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
         errors.push(`Error creating note "${note.name}": ${error.message}`);
       }
     }
-    log(3, `Note import complete: ${count}/${notes.length} imported, ${errors.length} errors`);
+    ATLAS.log(3, `Note import complete: ${count}/${notes.length} imported, ${errors.length} errors`);
     return { success: errors.length === 0, count, errors };
   }
 
@@ -635,7 +634,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
       categoryMap.set(cat.id ?? cat.name, id);
       if (!existingIds.has(id)) {
         await addCustomPreset(cat.name, cat.color, 'fa-tag');
-        log(3, `Imported SC note category: ${cat.name} (${cat.id} -> ${id})`);
+        ATLAS.log(3, `Imported SC note category: ${cat.name} (${cat.id} -> ${id})`);
       }
     }
     return categoryMap;
@@ -645,7 +644,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
   async importFestivals(festivals, options = {}) {
     const { calendarId } = options;
     const errors = [];
-    log(3, `Starting festival import: ${festivals.length} festivals to calendar ${calendarId}`);
+    ATLAS.log(3, `Starting festival import: ${festivals.length} festivals to calendar ${calendarId}`);
     const calendar = CalendarManager.getCalendar(calendarId);
     if (!calendar) return { success: false, count: 0, errors: [`Calendar ${calendarId} not found`] };
     let created = 0;
@@ -658,7 +657,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
         errors.push(`Error processing festival "${festival.name}": ${error.message}`);
       }
     }
-    log(3, `Festival import complete: ${created} festival notes created`);
+    ATLAS.log(3, `Festival import complete: ${created} festival notes created`);
     return { success: errors.length === 0, count: created, errors };
   }
 

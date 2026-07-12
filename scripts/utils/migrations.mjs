@@ -2,8 +2,6 @@ import { CalendarManager } from '../calendar/_module.mjs';
 import { MODULE, SETTINGS } from '../constants.mjs';
 import { addDays, dayOfWeek, daysBetween, extractEventDependencies, getOccurrencesInRange, invalidatePresetCache, migratePresetSchema } from '../notes/_module.mjs';
 import { getSeasonDayOfYearBounds } from './calendar-math.mjs';
-import { log } from './logger.mjs';
-import { DEFAULT_COLORS } from './theme-utils.mjs';
 
 /** Converter dispatch table. */
 const CONDITION_TREE_CONVERTERS = {
@@ -295,7 +293,7 @@ function validateNoteMigration(oldData, newData, name) {
   let discrepancies = 0;
   for (const key of oldSet) if (!newSet.has(key)) discrepancies++;
   for (const key of newSet) if (!oldSet.has(key)) discrepancies++;
-  if (discrepancies) log(2, `Migration discrepancy for "${name}": ${discrepancies} date mismatches over 3-year range`);
+  if (discrepancies) ATLAS.log(2, `Migration discrepancy for "${name}": ${discrepancies} date mismatches over 3-year range`);
   return discrepancies === 0;
 }
 
@@ -309,7 +307,7 @@ async function migrateNotesDataModel() {
   const KEY = 'noteConditionTreeMigrationComplete';
   if (!game.user?.isGM) return;
   if (game.settings.get(MODULE.ID, KEY)) return;
-  log(3, 'Starting note condition tree migration...');
+  ATLAS.log(3, 'Starting note condition tree migration...');
   const pages = [];
   for (const journal of game.journal) {
     for (const page of journal.pages) {
@@ -362,14 +360,14 @@ async function migrateNotesDataModel() {
       migrated++;
     } catch (error) {
       failed++;
-      log(1, `Failed to migrate note "${page.name}":`, error);
+      ATLAS.log(1, `Failed to migrate note "${page.name}":`, error);
     }
     if (total > BATCH_SIZE && (i + 1) % BATCH_SIZE === 0) {
       ui.notifications?.info(`Calendaria: Migrating notes... ${i + 1}/${total}`);
       await new Promise((r) => setTimeout(r, 0));
     }
   }
-  log(3, `Note migration complete: ${migrated} migrated, ${failed} failed${warnings ? `, ${warnings} with discrepancies` : ''}`);
+  ATLAS.log(3, `Note migration complete: ${migrated} migrated, ${failed} failed${warnings ? `, ${warnings} with discrepancies` : ''}`);
   await game.settings.set(MODULE.ID, KEY, true);
 }
 
@@ -383,7 +381,7 @@ async function migrateNoteVisibility() {
   const KEY = 'noteVisibilityMigrationComplete';
   if (!game.user?.isGM) return;
   if (game.settings.get(MODULE.ID, KEY)) return;
-  log(3, 'Starting note visibility migration...');
+  ATLAS.log(3, 'Starting note visibility migration...');
   let migrated = 0;
   for (const journal of game.journal) {
     for (const page of journal.pages) {
@@ -396,7 +394,7 @@ async function migrateNoteVisibility() {
       migrated++;
     }
   }
-  if (migrated > 0) log(3, `Migrated visibility for ${migrated} notes`);
+  if (migrated > 0) ATLAS.log(3, `Migrated visibility for ${migrated} notes`);
   await game.settings.set(MODULE.ID, KEY, true);
 }
 
@@ -430,29 +428,64 @@ async function migrateFestivalPresetRemoval() {
     const filtered = raw.filter((p) => p.id !== 'festival');
     invalidatePresetCache();
     await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_PRESETS, filtered);
-    log(3, 'Removed unused "festival" preset');
+    ATLAS.log(3, 'Removed unused "festival" preset');
   }
   await game.settings.set(MODULE.ID, KEY, true);
 }
 
 /**
- * Migrate flat CUSTOM_THEME_COLORS to new multi-theme map format.
- * @since 1.0.0
- * @deprecated Remove in 1.2.0
+ * Read a legacy (now-unregistered) Calendaria setting directly from its stored Setting
+ * document. `game.settings.get` throws for unregistered keys, so raw storage is required.
+ * @param {string} key       Unprefixed setting key
+ * @param {string} [userId]  Prefer a user-scoped entry belonging to this user id
+ * @returns {*} Parsed value, or undefined when not stored
  */
-async function migrateCustomThemeColors() {
-  const stored = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS) || {};
-  const keys = Object.keys(stored);
-  if (keys.length === 0) {
-    if (game.settings.get(MODULE.ID, SETTINGS.THEME_MODE) === 'custom') await game.settings.set(MODULE.ID, SETTINGS.THEME_MODE, 'dark');
-    return;
+function readLegacyThemeSetting(key, userId) {
+  const fullKey = `${MODULE.ID}.${key}`;
+  const world = game.settings.storage.get('world');
+  const matches = world?.filter?.((s) => s.key === fullKey) ?? [];
+  const doc = (userId && matches.find((s) => s.user === userId)) || matches.find((s) => !s.user) || matches[0];
+  if (!doc) return undefined;
+  try {
+    return typeof doc.value === 'string' ? JSON.parse(doc.value) : doc.value;
+  } catch {
+    return doc.value;
   }
-  const isOldFormat = keys.some((k) => k in DEFAULT_COLORS);
-  if (!isOldFormat) return;
-  const newMap = { custom_legacy: { name: 'Custom Legacy', basePreset: 'dark', colors: { ...stored } } };
-  await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_THEME_COLORS, newMap);
-  if (game.settings.get(MODULE.ID, SETTINGS.THEME_MODE) === 'custom') await game.settings.set(MODULE.ID, SETTINGS.THEME_MODE, 'custom_legacy');
-  log(3, 'Migrated flat custom theme colors to multi-theme map format');
+}
+
+/**
+ * Carry this client's Calendaria theme selection into the ATLAS theme system, once.
+ * Calendaria no longer owns theme state; ATLAS does. Reads the legacy user-scoped theme
+ * mode / custom colors and the world-scoped forced theme from raw storage, then persists
+ * them through the ATLAS theme API. Only the current client's selection carries; other
+ * users' per-user selections do not auto-migrate.
+ * @since 1.1.0
+ * @returns {Promise<void>}
+ */
+async function migrateThemeToAtlas() {
+  const KEY = 'themeAtlasMigrationComplete';
+  if (game.settings.get(MODULE.ID, KEY)) return;
+  const api = game.modules.get('3ds-atlas')?.api;
+  if (!api?.theme) return;
+  try {
+    const oldThemeMode = readLegacyThemeSetting('themeMode', game.user.id);
+    const oldCustomThemes = readLegacyThemeSetting('customThemeColors', game.user.id) || {};
+    const oldForced = readLegacyThemeSetting('forceTheme') || null;
+    const keyMap = {};
+    for (const [oldKey, entry] of Object.entries(oldCustomThemes)) {
+      if (!entry || typeof entry !== 'object' || !entry.colors) continue;
+      const newKey = await api.theme.createCustomTheme(entry.basePreset || 'dark', entry.name);
+      await api.theme.updateCustomTheme(newKey, entry.colors, entry.name);
+      keyMap[oldKey] = newKey;
+    }
+    const resolve = (k) => (k && keyMap[k]) || k;
+    if (oldThemeMode && oldThemeMode !== 'dark') await api.theme.setModuleTheme('calendaria', resolve(oldThemeMode));
+    if (oldForced && oldForced !== 'none') await api.theme.setForcedTheme('calendaria', resolve(oldForced));
+    ATLAS.log(3, 'Migrated Calendaria theme selection into ATLAS');
+  } catch (err) {
+    ATLAS.log(1, 'Theme ATLAS migration failed:', err);
+  }
+  await game.settings.set(MODULE.ID, KEY, true);
 }
 
 /**
@@ -476,7 +509,7 @@ async function migrateLimitedRepeatRemoval() {
       migrated++;
     }
   }
-  if (migrated > 0) log(3, `Removed limitedRepeat fields from ${migrated} notes`);
+  if (migrated > 0) ATLAS.log(3, `Removed limitedRepeat fields from ${migrated} notes`);
   await game.settings.set(MODULE.ID, KEY, true);
 }
 
@@ -514,7 +547,7 @@ export async function migrateRemovedCalendars() {
     await game.settings.set(MODULE.ID, SETTINGS.ACTIVE_CALENDAR, target);
     const content = `<p><strong>Calendaria 1.0.6:</strong> Active calendar migrated from <code>${active}</code> to <code>${target}</code>.</p><p>The <code>${active}</code> preset has been removed; <code>${target}</code> is the canonical equivalent. Month, weekday, moon, and festival IDs are preserved, so your notes will continue to resolve on their existing dates. World time is unchanged.</p>`;
     await ChatMessage.create({ user: game.user.id, whisper: ChatMessage.getWhisperRecipients('GM').map((u) => u.id), content, flags: { calendaria: { migrationNotice: true } } });
-    log(3, `Migrated active calendar: ${active} → ${target}`);
+    ATLAS.log(3, `Migrated active calendar: ${active} → ${target}`);
   }
   await game.settings.set(MODULE.ID, KEY, true);
 }
@@ -538,11 +571,11 @@ export async function migrateRemovedCalendarOverrides() {
     let dirty = false;
     for (const [from, to] of Object.entries(redirects)) {
       if (!(from in clone)) continue;
-      if (to in clone) log(2, `Migration: ${label} has both "${from}" and "${to}"; using "${from}" data and discarding "${to}"`);
+      if (to in clone) ATLAS.log(2, `Migration: ${label} has both "${from}" and "${to}"; using "${from}" data and discarding "${to}"`);
       clone[to] = clone[from];
       delete clone[from];
       dirty = true;
-      log(3, `Migration: renamed ${label}[${from}] → ${label}[${to}]`);
+      ATLAS.log(3, `Migration: renamed ${label}[${from}] → ${label}[${to}]`);
     }
     if (dirty) await game.settings.set(MODULE.ID, settingKey, clone);
   };
@@ -578,7 +611,7 @@ export async function migrateRemovedCalendarOverrides() {
       pageCount += pageUpdates.length;
     }
   }
-  if (folderCount || journalCount || pageCount) log(3, `Migrated calendarId flags: ${folderCount} folders, ${journalCount} journals, ${pageCount} pages`);
+  if (folderCount || journalCount || pageCount) ATLAS.log(3, `Migrated calendarId flags: ${folderCount} folders, ${journalCount} journals, ${pageCount} pages`);
   await game.settings.set(MODULE.ID, KEY, true);
 }
 
@@ -640,7 +673,7 @@ async function migrateZoneTempBlankInheritance() {
     }
   }
   if (overrideDirty) await game.settings.set(MODULE.ID, SETTINGS.DEFAULT_OVERRIDES, overrides);
-  if (totalTouched) log(3, `Cleared ${totalTouched} buggy zone temperature ranges so they inherit season climate defaults`);
+  if (totalTouched) ATLAS.log(3, `Cleared ${totalTouched} buggy zone temperature ranges so they inherit season climate defaults`);
   await game.settings.set(MODULE.ID, KEY, true);
 }
 
@@ -683,7 +716,7 @@ async function migrateFestivalNoteYearZero() {
       touched += pageUpdates.length;
     }
   }
-  if (touched) log(3, `Shifted ${touched} festival-linked note years by yearZero (${yearZero})`);
+  if (touched) ATLAS.log(3, `Shifted ${touched} festival-linked note years by yearZero (${yearZero})`);
   await game.settings.set(MODULE.ID, KEY, true);
 }
 
@@ -740,7 +773,7 @@ async function migrateNoteDurationNormalization() {
       touched += pageUpdates.length;
     }
   }
-  if (touched) log(3, `Normalized duration/endDate on ${touched} notes`);
+  if (touched) ATLAS.log(3, `Normalized duration/endDate on ${touched} notes`);
   await game.settings.set(MODULE.ID, KEY, true);
 }
 
@@ -781,8 +814,8 @@ async function migrateFestivalNotesAsSourceOfTruth() {
     }
   }
   await game.settings.set(MODULE.ID, SETTINGS.SEEDED_CALENDARS, seededSet);
-  if (touchedNotes) log(3, `Backfilled linkedFestival metadata on ${touchedNotes} notes`);
-  if (seededSet.size) log(3, `Seeded-calendars marker initialized for ${seededSet.size} calendar(s)`);
+  if (touchedNotes) ATLAS.log(3, `Backfilled linkedFestival metadata on ${touchedNotes} notes`);
+  if (seededSet.size) ATLAS.log(3, `Seeded-calendars marker initialized for ${seededSet.size} calendar(s)`);
   await game.settings.set(MODULE.ID, KEY, true);
 }
 
@@ -809,7 +842,7 @@ async function migrateWeatherFxFlag() {
       await scene.unsetFlag(MODULE.ID, 'weatherFxDisabled');
     }
   }
-  if (migrated > 0) log(3, `Migrated weatherFxDisabled flag on ${migrated} scene(s) to weatherFxOverride='off'`);
+  if (migrated > 0) ATLAS.log(3, `Migrated weatherFxDisabled flag on ${migrated} scene(s) to weatherFxOverride='off'`);
   await game.settings.set(MODULE.ID, KEY, true);
 }
 
@@ -818,7 +851,7 @@ async function migrateWeatherFxFlag() {
  * @returns {Promise<void>}
  */
 export async function runAllMigrations() {
-  await migrateCustomThemeColors();
+  await migrateThemeToAtlas();
   if (!game.user?.isGM) return;
   await migrateNotesDataModel();
   await migrateNoteVisibility();
@@ -870,9 +903,9 @@ async function recoverOrphanedPresets() {
       playerUsable: true,
       defaults: {}
     });
-    log(2, `Recovered orphaned preset "${id}" from note data`);
+    ATLAS.log(2, `Recovered orphaned preset "${id}" from note data`);
   }
   invalidatePresetCache();
   await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_PRESETS, raw);
-  log(2, `Recovered ${orphanIds.size} orphaned preset(s)`);
+  ATLAS.log(2, `Recovered ${orphanIds.size} orphaned preset(s)`);
 }

@@ -6,19 +6,19 @@
     flex-direction: column;
     border-radius: 0.75rem;
     overflow: hidden;
-    color: var(--calendaria-text);
-    background: var(--calendaria-bg);
+    color: var(--atlas-text, rgb(224 224 224));
+    background: var(--atlas-bg, rgb(31 31 31));
     box-shadow:
       0 0.5rem 2rem rgb(0 0 0 / 30%),
-      0 0 0 0.0625rem var(--calendaria-border);
+      0 0 0 0.0625rem var(--atlas-border, rgb(74 74 74));
 
     .calendar-header {
       display: flex;
       position: relative;
       flex-direction: column;
-      border-bottom: 0.0625rem solid var(--calendaria-border);
+      border-bottom: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
       cursor: grab;
-      background: var(--calendaria-bg-lighter);
+      background: var(--atlas-bg-lighter, rgb(42 42 42));
     }
 
     .header-row {
@@ -44,7 +44,7 @@
     }
 
     .equivalent-date-subtitle {
-      color: var(--calendaria-text-dim);
+      color: var(--atlas-text-dim, rgb(153 153 153));
       font-style: italic;
       font-size: 0.75rem;
       line-height: 1.4;
@@ -52,7 +52,7 @@
       transition: color 0.15s;
 
       &:hover {
-        color: var(--calendaria-primary);
+        color: var(--atlas-primary, rgb(74 144 226));
       }
 
       i {
@@ -69,13 +69,13 @@
       height: 0.25rem;
       margin: 0 0.375rem;
       border-radius: 50%;
-      background: var(--calendaria-text-dim);
+      background: var(--atlas-text-dim, rgb(153 153 153));
     }
 
     .calendar-title {
       flex: 1;
       margin: 0;
-      color: var(--calendaria-title-text);
+      color: var(--atlas-title-text, rgb(255 255 255));
       font-weight: bold;
       font-size: 1rem;
       font-family: var(--font-body);
@@ -91,7 +91,7 @@
       align-items: center;
       min-width: 0;
       overflow: hidden;
-      color: var(--calendaria-text-dim);
+      color: var(--atlas-text-dim, rgb(153 153 153));
       font-size: var(--font-size-12, 0.75rem);
     }
 
@@ -105,17 +105,17 @@
     .header-divider {
       width: 0.0625rem;
       height: 1rem;
-      background: var(--calendaria-border);
+      background: var(--atlas-border, rgb(74 74 74));
     }
 
     button:not(.add-note-btn) {
-      border-color: var(--calendaria-border);
+      border-color: var(--atlas-border, rgb(74 74 74));
       border-radius: 0.25rem;
-      color: var(--calendaria-text);
-      background: var(--calendaria-button-bg);
+      color: var(--atlas-text, rgb(224 224 224));
+      background: var(--atlas-button-bg, rgb(58 58 58));
 
       &:hover {
-        background: var(--calendaria-bg-hover);
+        background: var(--atlas-bg-hover, rgb(53 53 53));
       }
     }
 
@@ -140,18 +140,18 @@
       height: 1.5rem;
       margin: 0;
       padding: 0 0.375rem;
-      border: 0.0625rem solid var(--calendaria-border);
+      border: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
       border-radius: 0.25rem;
-      color: var(--calendaria-text);
+      color: var(--atlas-text, rgb(224 224 224));
       font-size: 0.75rem;
       line-height: 1.375rem;
       text-align: center;
       cursor: pointer;
-      background: var(--calendaria-button-bg);
+      background: var(--atlas-button-bg, rgb(58 58 58));
       background-image: none;
 
       &:hover {
-        border-color: var(--calendaria-primary);
+        border-color: var(--atlas-primary, rgb(74 144 226));
       }
 
       &:focus {
@@ -192,14 +192,14 @@
       margin: 0 calc(var(--calendaria-day-gap) / 2);
       border-radius: 0.25rem;
       overflow: hidden;
-      color: var(--calendaria-weekday-header);
+      color: var(--atlas-weekday-header, rgb(224 224 224));
       font-size: 0.9rem;
       text-overflow: ellipsis;
       white-space: nowrap;
-      background: var(--calendaria-bg-lighter);
+      background: var(--atlas-bg-lighter, rgb(42 42 42));
 
       &.rest-day {
-        color: var(--calendaria-rest-day, rgb(139 157 195));
+        color: var(--atlas-rest-day, rgb(139 157 195));
       }
     }
 
@@ -239,14 +239,14 @@
       width: var(--calendaria-day-size);
       height: var(--calendaria-day-size);
       padding: 0.25rem;
-      border: 0.0625rem solid var(--calendaria-border-light);
+      border: 0.0625rem solid var(--atlas-border-light, rgb(58 58 58));
       border-radius: 0.25rem;
       cursor: pointer;
-      background: var(--calendaria-bg);
+      background: var(--atlas-bg, rgb(31 31 31));
       transition: background 0.2s ease;
 
       &:not(.empty):hover {
-        background: var(--calendaria-bg-hover);
+        background: var(--atlas-bg-hover, rgb(53 53 53));
       }
 
       &.odd-day {
@@ -255,7 +255,7 @@
 
       &.empty {
         opacity: 0.3;
-        background: var(--calendaria-bg-lighter);
+        background: var(--atlas-bg-lighter, rgb(42 42 42));
       }
 
       &.other-month,
@@ -266,19 +266,19 @@
 
         &:hover {
           opacity: 0.6;
-          background: var(--calendaria-bg-hover);
+          background: var(--atlas-bg-hover, rgb(53 53 53));
         }
       }
 
       &.today {
         z-index: 1;
         position: relative;
-        border-color: var(--calendaria-today);
-        background: color-mix(in srgb, var(--calendaria-today) 18%, var(--calendaria-bg));
-        box-shadow: 0 0 0.375rem var(--calendaria-today);
+        border-color: var(--atlas-today, rgb(255 100 0));
+        background: color-mix(in srgb, var(--atlas-today, rgb(255 100 0)) 18%, var(--atlas-bg, rgb(31 31 31)));
+        box-shadow: 0 0 0.375rem var(--atlas-today, rgb(255 100 0));
 
         .day-number {
-          color: var(--calendaria-today);
+          color: var(--atlas-today, rgb(255 100 0));
           font-weight: 700;
         }
       }
@@ -286,26 +286,26 @@
       &.selected {
         z-index: 1;
         position: relative;
-        border-color: var(--calendaria-primary);
-        background: color-mix(in srgb, var(--calendaria-primary) 10%, var(--calendaria-bg));
+        border-color: var(--atlas-primary, rgb(74 144 226));
+        background: color-mix(in srgb, var(--atlas-primary, rgb(74 144 226)) 10%, var(--atlas-bg, rgb(31 31 31)));
         cursor: pointer;
-        box-shadow: 0 0 0.375rem var(--calendaria-primary);
+        box-shadow: 0 0 0.375rem var(--atlas-primary, rgb(74 144 226));
       }
 
       &.today.selected {
         box-shadow:
-          0 0 0.375rem var(--calendaria-primary),
-          inset 0 0 0 0.125rem var(--calendaria-today);
+          0 0 0.375rem var(--atlas-primary, rgb(74 144 226)),
+          inset 0 0 0 0.125rem var(--atlas-today, rgb(255 100 0));
       }
 
       &.has-notes {
-        border-color: var(--calendaria-border);
+        border-color: var(--atlas-border, rgb(74 74 74));
       }
 
       &.festival-day {
         position: relative;
-        border-color: var(--festival-color, var(--calendaria-festival-border));
-        background: color-mix(in srgb, var(--festival-color, var(--calendaria-festival-border)) 15%, var(--calendaria-bg));
+        border-color: var(--festival-color, var(--atlas-callout-border, rgb(212 175 55)));
+        background: color-mix(in srgb, var(--festival-color, var(--atlas-callout-border, rgb(212 175 55))) 15%, var(--atlas-bg, rgb(31 31 31)));
 
         &::after {
           opacity: 0.6;
@@ -315,11 +315,11 @@
           left: 0;
           height: 0.1875rem;
           content: '';
-          background: linear-gradient(90deg, transparent, var(--festival-color, var(--calendaria-festival-text)) 50%, transparent);
+          background: linear-gradient(90deg, transparent, var(--festival-color, var(--atlas-callout-text, rgb(255 215 0))) 50%, transparent);
         }
 
         .day-number {
-          color: var(--festival-color, var(--calendaria-festival-text));
+          color: var(--festival-color, var(--atlas-callout-text, rgb(255 215 0)));
         }
       }
 
@@ -334,8 +334,8 @@
           45deg,
           transparent,
           transparent 0.25rem,
-          color-mix(in srgb, var(--calendaria-text) 8%, transparent) 0.25rem,
-          color-mix(in srgb, var(--calendaria-text) 8%, transparent) 0.5rem
+          color-mix(in srgb, var(--atlas-text, rgb(224 224 224)) 8%, transparent) 0.25rem,
+          color-mix(in srgb, var(--atlas-text, rgb(224 224 224)) 8%, transparent) 0.5rem
         );
 
         .day-notes,
@@ -351,7 +351,7 @@
       display: flex;
       align-items: center;
       margin-bottom: 0.25rem;
-      color: var(--calendaria-text);
+      color: var(--atlas-text, rgb(224 224 224));
       font-weight: bold;
       font-size: var(--font-size-14);
     }
@@ -361,7 +361,7 @@
     }
 
     .festival-icon {
-      color: var(--festival-color, var(--calendaria-festival-text));
+      color: var(--festival-color, var(--atlas-callout-text, rgb(255 215 0)));
       font-size: var(--font-size-12);
     }
 
@@ -457,7 +457,7 @@
 
       .note-banner-text {
         overflow: hidden;
-        color: var(--calendaria-text-on-color);
+        color: var(--atlas-text-on-color, rgb(255 255 255));
         font-weight: 600;
         font-size: 0.625rem;
         text-overflow: ellipsis;
@@ -485,7 +485,7 @@
       padding: 0;
       border: none;
       border-radius: 0;
-      color: var(--calendaria-text-muted);
+      color: var(--atlas-text-dim, rgb(153 153 153));
       font-size: 0.875rem;
       cursor: pointer;
       pointer-events: auto;
@@ -553,10 +553,10 @@
       height: var(--font-size-12);
       padding: 0 0.1875rem;
       border-radius: 0.1875rem;
-      color: var(--calendaria-text);
+      color: var(--atlas-text, rgb(224 224 224));
       font-weight: 600;
       font-size: 0.625rem;
-      background: var(--calendaria-bg-lighter);
+      background: var(--atlas-bg-lighter, rgb(42 42 42));
     }
 
     .day-bottom {
@@ -627,7 +627,7 @@
     }
 
     .event-bar {
-      -webkit-text-stroke: 0.0313rem var(--calendaria-shadow-light);
+      -webkit-text-stroke: 0.0313rem var(--atlas-shadow-light, rgb(0 0 0 / 20%));
       display: flex;
       z-index: 10;
       position: absolute;
@@ -636,10 +636,10 @@
       box-sizing: border-box;
       height: 1rem;
       padding: 0 0.625rem;
-      border: 0.0625rem solid var(--calendaria-shadow-light);
+      border: 0.0625rem solid var(--atlas-shadow-light, rgb(0 0 0 / 20%));
       border-radius: 0.75rem;
       overflow: hidden;
-      color: var(--calendaria-text-on-color);
+      color: var(--atlas-text-on-color, rgb(255 255 255));
       font-weight: 600;
 
       i,
@@ -651,15 +651,15 @@
       font-size: 0.625rem;
       text-overflow: ellipsis;
       text-shadow:
-        -0.0625rem -0.0625rem 0 var(--calendaria-text-shadow-on-color),
-        0.0625rem -0.0625rem 0 var(--calendaria-text-shadow-on-color),
-        -0.0625rem 0.0625rem 0 var(--calendaria-text-shadow-on-color),
-        0.0625rem 0.0625rem 0 var(--calendaria-text-shadow-on-color),
-        0 0.125rem 0.25rem var(--calendaria-text-shadow-on-color);
+        -0.0625rem -0.0625rem 0 var(--atlas-text-shadow-on-color, rgb(0 0 0 / 50%)),
+        0.0625rem -0.0625rem 0 var(--atlas-text-shadow-on-color, rgb(0 0 0 / 50%)),
+        -0.0625rem 0.0625rem 0 var(--atlas-text-shadow-on-color, rgb(0 0 0 / 50%)),
+        0.0625rem 0.0625rem 0 var(--atlas-text-shadow-on-color, rgb(0 0 0 / 50%)),
+        0 0.125rem 0.25rem var(--atlas-text-shadow-on-color, rgb(0 0 0 / 50%));
       white-space: nowrap;
       cursor: pointer;
       pointer-events: auto;
-      box-shadow: 0 0.125rem 0.25rem var(--calendaria-shadow-light);
+      box-shadow: 0 0.125rem 0.25rem var(--atlas-shadow-light, rgb(0 0 0 / 20%));
       transition:
         box-shadow 0.15s ease,
         filter 0.15s ease,
@@ -667,7 +667,7 @@
 
       &:hover {
         z-index: 20;
-        box-shadow: 0 0.25rem 0.5rem var(--calendaria-shadow);
+        box-shadow: 0 0.25rem 0.5rem var(--atlas-shadow-color, rgb(0 0 0 / 40%));
         filter: brightness(1.1);
         transform: translateY(-0.125rem);
       }
@@ -677,9 +677,9 @@
         flex-shrink: 0;
         align-items: center;
         margin-right: 0.375rem;
-        color: var(--calendaria-text-on-color);
+        color: var(--atlas-text-on-color, rgb(255 255 255));
         line-height: 1;
-        filter: drop-shadow(0 0.0625rem 0.125rem var(--calendaria-text-shadow-on-color));
+        filter: drop-shadow(0 0.0625rem 0.125rem var(--atlas-text-shadow-on-color, rgb(0 0 0 / 50%)));
 
         &:is(img) {
           width: 0.875rem;
@@ -699,9 +699,9 @@
       .event-bar-continuation {
         flex-shrink: 0;
         margin-right: 0.375rem;
-        color: var(--calendaria-text-on-color);
+        color: var(--atlas-text-on-color, rgb(255 255 255));
         font-size: 0.75rem;
-        filter: drop-shadow(0 0.0625rem 0.125rem var(--calendaria-text-shadow-on-color));
+        filter: drop-shadow(0 0.0625rem 0.125rem var(--atlas-text-shadow-on-color, rgb(0 0 0 / 50%)));
       }
 
       &.event-bar-condensed {
@@ -728,7 +728,7 @@
           z-index: 30;
           height: 1rem;
           padding: 0 0.625rem;
-          box-shadow: 0 0.25rem 0.5rem var(--calendaria-shadow);
+          box-shadow: 0 0.25rem 0.5rem var(--atlas-shadow-color, rgb(0 0 0 / 40%));
           filter: none;
           transform: none;
 
@@ -760,7 +760,7 @@
     .calendar-week-view {
       width: fit-content;
       height: fit-content;
-      background: var(--calendaria-bg);
+      background: var(--atlas-bg, rgb(31 31 31));
     }
 
     .week-grid {
@@ -769,15 +769,15 @@
       display: grid;
       width: fit-content;
       height: fit-content;
-      border: 0.0625rem solid var(--calendaria-border);
+      border: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
       border-radius: 0.25rem;
-      background: var(--calendaria-border-light);
+      background: var(--atlas-border-light, rgb(58 58 58));
     }
 
     .week-corner-header {
-      border-right: 0.125rem solid var(--calendaria-border);
-      border-bottom: 0.125rem solid var(--calendaria-border);
-      background: var(--calendaria-bg-lighter);
+      border-right: 0.125rem solid var(--atlas-border, rgb(74 74 74));
+      border-bottom: 0.125rem solid var(--atlas-border, rgb(74 74 74));
+      background: var(--atlas-bg-lighter, rgb(42 42 42));
     }
 
     .week-hour-label {
@@ -787,15 +787,15 @@
       align-items: center;
       margin: 0;
       padding: 0;
-      border-bottom: 0.125rem solid var(--calendaria-border);
+      border-bottom: 0.125rem solid var(--atlas-border, rgb(74 74 74));
       overflow: hidden;
-      color: var(--calendaria-text-dim);
+      color: var(--atlas-text-dim, rgb(153 153 153));
       font-weight: 600;
       font-size: 0.75rem;
       text-align: center;
       text-overflow: ellipsis;
       white-space: nowrap;
-      background: var(--calendaria-bg-lighter);
+      background: var(--atlas-bg-lighter, rgb(42 42 42));
     }
 
     .week-day-header {
@@ -805,31 +805,31 @@
       left: 0;
       align-items: center;
       padding: 0.25rem 0.5rem;
-      border-right: 0.125rem solid var(--calendaria-border);
+      border-right: 0.125rem solid var(--atlas-border, rgb(74 74 74));
       font-size: 0.85rem;
       white-space: nowrap;
-      background: var(--calendaria-bg);
+      background: var(--atlas-bg, rgb(31 31 31));
 
       &.today {
-        border-right: 0.1875rem solid var(--calendaria-today);
-        background: var(--calendaria-today-bg);
+        border-right: 0.1875rem solid var(--atlas-today, rgb(255 100 0));
+        background: var(--atlas-highlight-bg, rgb(255 100 0 / 20%));
       }
 
       &.rest-day {
-        color: var(--calendaria-rest-day, rgb(139 157 195));
+        color: var(--atlas-rest-day, rgb(139 157 195));
       }
     }
 
     .week-time-cell {
       position: relative;
-      border-right: 0.0625rem solid var(--calendaria-border-light);
+      border-right: 0.0625rem solid var(--atlas-border-light, rgb(58 58 58));
       overflow: visible;
       cursor: pointer;
-      background: var(--calendaria-bg);
+      background: var(--atlas-bg, rgb(31 31 31));
       transition: background 0.15s ease;
 
       &:hover {
-        background: var(--calendaria-bg-hover);
+        background: var(--atlas-bg-hover, rgb(53 53 53));
 
         .add-note-btn {
           opacity: 1;
@@ -846,11 +846,11 @@
       }
 
       &.current-hour {
-        border: 0.05rem solid var(--calendaria-today);
+        border: 0.05rem solid var(--atlas-today, rgb(255 100 0));
       }
 
       &.selected {
-        border: 0.05rem solid var(--calendaria-primary);
+        border: 0.05rem solid var(--atlas-primary, rgb(74 144 226));
       }
     }
 
@@ -868,15 +868,15 @@
       align-items: center;
       width: calc(var(--hour-span) * 100% + (var(--hour-span) - 1) * 0.0625rem - 0.25rem);
       padding: 0.25rem 0.375rem;
-      border-top: 0.1875rem solid var(--calendaria-shadow);
+      border-top: 0.1875rem solid var(--atlas-shadow-color, rgb(0 0 0 / 40%));
       border-radius: 0.25rem;
       overflow: hidden;
-      color: var(--calendaria-text-on-color);
+      color: var(--atlas-text-on-color, rgb(255 255 255));
       font-size: 0.6875rem;
-      text-shadow: 0 0.0625rem 0.125rem var(--calendaria-text-shadow-on-color);
+      text-shadow: 0 0.0625rem 0.125rem var(--atlas-text-shadow-on-color, rgb(0 0 0 / 50%));
       cursor: pointer;
       box-shadow:
-        0 0.125rem 0.25rem var(--calendaria-shadow-light),
+        0 0.125rem 0.25rem var(--atlas-shadow-light, rgb(0 0 0 / 20%)),
         inset 0 0.0625rem 0 var(--calendaria-highlight);
       transition:
         box-shadow 0.15s ease,
@@ -903,7 +903,7 @@
       &:hover {
         z-index: 20;
         box-shadow:
-          0 0.25rem 0.5rem var(--calendaria-shadow),
+          0 0.25rem 0.5rem var(--atlas-shadow-color, rgb(0 0 0 / 40%)),
           inset 0 0.0625rem 0 var(--calendaria-highlight);
         filter: brightness(1.15);
         transform: translateY(-0.125rem);
@@ -1000,23 +1000,23 @@
       height: fit-content;
       margin: -0.0625rem;
       padding: var(--calendaria-year-cell-padding);
-      border: 0.0625rem solid var(--calendaria-border-light);
+      border: 0.0625rem solid var(--atlas-border-light, rgb(58 58 58));
       cursor: pointer;
-      background: var(--calendaria-bg);
+      background: var(--atlas-bg, rgb(31 31 31));
       transition:
         border-color 0.2s,
         box-shadow 0.2s;
 
       &:hover {
         z-index: 1;
-        border-color: var(--calendaria-border);
-        box-shadow: 0 0.125rem 0.5rem var(--calendaria-shadow-light);
+        border-color: var(--atlas-border, rgb(74 74 74));
+        box-shadow: 0 0.125rem 0.5rem var(--atlas-shadow-light, rgb(0 0 0 / 20%));
       }
 
       &.current-year {
         z-index: 2;
-        border-color: var(--calendaria-today);
-        box-shadow: 0 0 0.25rem var(--calendaria-today);
+        border-color: var(--atlas-today, rgb(255 100 0));
+        box-shadow: 0 0 0.25rem var(--atlas-today, rgb(255 100 0));
       }
     }
 
@@ -1026,8 +1026,8 @@
       align-items: center;
       height: var(--calendaria-year-header-height);
       padding-bottom: 0.25rem;
-      border-bottom: 0.0625rem solid var(--calendaria-border-light);
-      color: var(--calendaria-title-text);
+      border-bottom: 0.0625rem solid var(--atlas-border-light, rgb(58 58 58));
+      color: var(--atlas-title-text, rgb(255 255 255));
       font-weight: bold;
       font-size: 1.2rem;
       text-align: center;
@@ -1049,17 +1049,17 @@
       border-radius: 0.125rem;
       font-size: 0.8rem;
       cursor: pointer;
-      background: var(--calendaria-bg-lighter);
+      background: var(--atlas-bg-lighter, rgb(42 42 42));
       transition: background 0.2s;
 
       &:hover {
-        color: var(--calendaria-text-on-color);
-        background: var(--calendaria-primary);
+        color: var(--atlas-text-on-color, rgb(255 255 255));
+        background: var(--atlas-primary, rgb(74 144 226));
       }
 
       &.current-month {
-        border: 0.0625rem solid var(--calendaria-today);
-        box-shadow: 0 0 0.25rem var(--calendaria-today);
+        border: 0.0625rem solid var(--atlas-today, rgb(255 100 0));
+        box-shadow: 0 0 0.25rem var(--atlas-today, rgb(255 100 0));
       }
 
       &.no-days {

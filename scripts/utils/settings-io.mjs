@@ -4,7 +4,6 @@ import { FestivalManager } from '../festivals/_module.mjs';
 import { getAllPresets, upsertBundledCustomPreset } from '../notes/_module.mjs';
 import NoteManager from '../notes/note-manager.mjs';
 import { FRAMEWORK_INITIAL_DISPLAY_FORMATS } from './formatting/format-utils.mjs';
-import { log } from './logger.mjs';
 
 /**
  * Overlay a deep-cloned defaults object with valid entries from `value`.
@@ -19,7 +18,7 @@ function sanitizeDisplayFormats(value) {
     if (locationValue && typeof locationValue === 'object' && typeof locationValue.gm === 'string' && typeof locationValue.player === 'string') defaults[locationId] = locationValue;
     else droppedKeys.push(locationId);
   }
-  if (droppedKeys.length) log(2, `Dropped malformed displayFormats entries during import: ${droppedKeys.join(', ')}`);
+  if (droppedKeys.length) ATLAS.log(2, `Dropped malformed displayFormats entries during import: ${droppedKeys.join(', ')}`);
   return defaults;
 }
 
@@ -65,7 +64,6 @@ const EXPORTABLE_SETTINGS = [
   SETTINGS.CURRENT_WEATHER,
   SETTINGS.CUSTOM_CALENDARS,
   SETTINGS.CUSTOM_PRESETS,
-  SETTINGS.CUSTOM_THEME_COLORS,
   SETTINGS.CUSTOM_TIME_JUMPS,
   SETTINGS.CUSTOM_WEATHER_PRESETS,
   SETTINGS.COLOR_SHIFT_SYNC,
@@ -90,9 +88,7 @@ const EXPORTABLE_SETTINGS = [
   SETTINGS.FORCE_MINI_CAL,
   SETTINGS.FORCE_STOPWATCH,
   SETTINGS.FORCE_SUN_DIAL,
-  SETTINGS.FORCE_THEME,
   SETTINGS.FORCE_TIME_KEEPER,
-  SETTINGS.FORCED_THEME_COLORS,
   SETTINGS.FORECAST_ACCURACY,
   SETTINGS.FORECAST_DAYS,
   SETTINGS.GM_OVERRIDE_CLEARS_FORECAST,
@@ -145,7 +141,6 @@ const EXPORTABLE_SETTINGS = [
   SETTINGS.STOPWATCH_STICKY_STATES,
   SETTINGS.SYNC_CLOCK_PAUSE,
   SETTINGS.TEMPERATURE_UNIT,
-  SETTINGS.THEME_MODE,
   SETTINGS.TIME_SPEED_INCREMENT,
   SETTINGS.TIME_SPEED_MULTIPLIER,
   SETTINGS.TIMEKEEPER_AUTO_FADE,
@@ -236,7 +231,7 @@ async function importNotes(notes, calendarId, bundledCustomPresets = []) {
     }
     if (Object.keys(updates).length) await NoteManager.updateNote(newId, { noteData: updates });
   }
-  log(3, `Imported ${imported} calendar notes`);
+  ATLAS.log(3, `Imported ${imported} calendar notes`);
   return imported;
 }
 
@@ -283,18 +278,18 @@ export async function exportSettings() {
     const currentDate = CalendarManager.getCurrentDateTime();
     calendarData.currentDate = { year: currentDate.year - (refreshedCalendar.yearZero ?? 0), month: currentDate.month, dayOfMonth: currentDate.dayOfMonth };
     exportData.calendarData = calendarData;
-    log(3, `Included active calendar data: ${calendarData.name}`);
+    ATLAS.log(3, `Included active calendar data: ${calendarData.name}`);
     if (calendarId) {
       const festivalSeeds = FestivalManager.buildFestivalSeedsFromNotes(calendarId);
       const festivalCount = Object.keys(festivalSeeds).length;
       if (festivalCount) {
         calendarData.festivals = { ...(calendarData.festivals ?? {}), ...festivalSeeds };
-        log(3, `Included ${festivalCount} festival seed${festivalCount === 1 ? '' : 's'}`);
+        ATLAS.log(3, `Included ${festivalCount} festival seed${festivalCount === 1 ? '' : 's'}`);
       }
       const notes = serializeNotes(calendarId);
       if (notes.length) {
         exportData.notes = notes;
-        log(3, `Included ${notes.length} calendar notes`);
+        ATLAS.log(3, `Included ${notes.length} calendar notes`);
       }
       const referencedPresetIds = new Set();
       for (const note of notes) {
@@ -306,7 +301,7 @@ export async function exportSettings() {
         const bundledPresets = allCustomPresets.filter((p) => !p.builtin && referencedPresetIds.has(p.id));
         if (bundledPresets.length) {
           exportData.customPresets = bundledPresets;
-          log(3, `Included ${bundledPresets.length} referenced custom presets`);
+          ATLAS.log(3, `Included ${bundledPresets.length} referenced custom presets`);
         }
       }
     }
@@ -386,7 +381,7 @@ export async function importSettings(onComplete) {
             await game.settings.set(MODULE.ID, key, finalValue);
             imported++;
           } catch (err) {
-            log(1, `Skipped setting ${key}: ${err.message}`);
+            ATLAS.log(1, `Skipped setting ${key}: ${err.message}`);
           }
         }
       }
@@ -410,7 +405,7 @@ export async function importSettings(onComplete) {
             }
           }
         } catch (calError) {
-          log(1, 'Calendar import failed:', calError);
+          ATLAS.log(1, 'Calendar import failed:', calError);
           ui.notifications.error(`Calendar import failed: ${calError.message}`);
         }
       }
@@ -420,13 +415,13 @@ export async function importSettings(onComplete) {
           const noteCount = await importNotes(importData.notes, noteCalendarId, importData.customPresets || []);
           if (noteCount > 0) ui.notifications.info(_loc('CALENDARIA.SettingsPanel.ImportSettings.NotesImported', { count: noteCount }));
         } catch (noteError) {
-          log(1, 'Note import failed:', noteError);
+          ATLAS.log(1, 'Note import failed:', noteError);
           ui.notifications.error(`Note import failed: ${noteError.message}`);
         }
       }
       if (onComplete) onComplete();
     } catch (error) {
-      log(1, 'Settings import failed:', error);
+      ATLAS.log(1, 'Settings import failed:', error);
       ui.notifications.error('CALENDARIA.SettingsPanel.ImportSettings.Error', { localize: true });
     }
   });

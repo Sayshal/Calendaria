@@ -9,23 +9,23 @@
     position: fixed;
     border-radius: 0.75rem;
     overflow: hidden;
-    color: var(--calendaria-text);
-    background: var(--calendaria-bg);
+    color: var(--atlas-text, rgb(224 224 224));
+    background: var(--atlas-bg, rgb(31 31 31));
     box-shadow:
       0 0.5rem 2rem rgb(0 0 0 / 30%),
-      0 0 0 0.0625rem var(--calendaria-border);
+      0 0 0 0.0625rem var(--atlas-border, rgb(74 74 74));
 
     input[type='checkbox'],
     input[type='checkbox']:checked,
     input[type='checkbox']:indeterminate {
-      --checkbox-background-color: var(--calendaria-input-bg);
-      --checkbox-border-color: var(--calendaria-border);
-      --checkbox-checked-color: var(--calendaria-primary);
-      --checkbox-checkmark-color: var(--calendaria-text-on-color);
+      --checkbox-background-color: var(--atlas-input-bg, rgb(48 48 48));
+      --checkbox-border-color: var(--atlas-border, rgb(74 74 74));
+      --checkbox-checked-color: var(--atlas-primary, rgb(74 144 226));
+      --checkbox-checkmark-color: var(--atlas-text-on-color, rgb(255 255 255));
 
       width: var(--checkbox-size);
       height: var(--checkbox-size);
-      border: 0.0625rem solid var(--calendaria-border);
+      border: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
       border-radius: 0.1875rem;
 
       &:checked,
@@ -40,9 +40,9 @@
       display: flex;
       align-items: center;
       padding: 0.5rem 0.75rem;
-      border-bottom: 0.0625rem solid var(--calendaria-border);
+      border-bottom: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
       cursor: grab;
-      background: var(--calendaria-bg-lighter);
+      background: var(--atlas-bg-lighter, rgb(42 42 42));
 
       .search-input-wrapper {
         gap: 0.375rem;
@@ -51,13 +51,13 @@
         align-items: center;
         height: 1.625rem;
         padding: 0 0.375rem;
-        border: 0.0625rem solid var(--calendaria-border);
+        border: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
         border-radius: 0.25rem;
-        background: var(--calendaria-bg);
+        background: var(--atlas-bg, rgb(31 31 31));
         overflow: hidden;
 
         .search-icon {
-          color: var(--calendaria-text-dim);
+          color: var(--atlas-text-dim, rgb(153 153 153));
           font-size: var(--font-size-12, 0.75rem);
         }
 
@@ -66,12 +66,12 @@
           padding: 0;
           border: none;
           outline: none;
-          color: var(--calendaria-text);
+          color: var(--atlas-text, rgb(224 224 224));
           font-size: var(--font-size-12, 0.75rem);
           background: transparent;
 
           &::placeholder {
-            color: var(--calendaria-text-dim);
+            color: var(--atlas-text-dim, rgb(153 153 153));
           }
         }
 
@@ -85,13 +85,13 @@
           padding: 0;
           border: none;
           border-radius: 50%;
-          color: var(--calendaria-text-dim);
+          color: var(--atlas-text-dim, rgb(153 153 153));
           cursor: pointer;
           background: transparent;
 
           &:hover {
-            color: var(--calendaria-text);
-            background: var(--calendaria-bg-hover);
+            color: var(--atlas-text, rgb(224 224 224));
+            background: var(--atlas-bg-hover, rgb(53 53 53));
           }
         }
       }
@@ -106,13 +106,13 @@
         padding: 0;
         border: none;
         border-radius: 0.25rem;
-        color: var(--calendaria-text-dim);
+        color: var(--atlas-text-dim, rgb(153 153 153));
         cursor: pointer;
         background: transparent;
 
         &:hover {
-          color: var(--calendaria-text);
-          background: var(--calendaria-bg-hover);
+          color: var(--atlas-text, rgb(224 224 224));
+          background: var(--atlas-bg-hover, rgb(53 53 53));
         }
       }
     }
@@ -123,9 +123,9 @@
       display: flex;
       flex-direction: column;
       padding: 0.625rem;
-      border-right: 0.0625rem solid var(--calendaria-border);
+      border-right: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
       overflow-y: auto;
-      background: var(--calendaria-bg-lighter);
+      background: var(--atlas-bg-lighter, rgb(42 42 42));
 
       .filter-group {
         gap: 0.25rem;
@@ -134,7 +134,7 @@
       }
 
       .filter-label {
-        color: var(--calendaria-text-dim);
+        color: var(--atlas-text-dim, rgb(153 153 153));
         font-weight: 600;
         font-size: var(--font-size-11, 0.6875rem);
         text-transform: uppercase;
@@ -143,11 +143,11 @@
 
       .filter-select {
         padding: 0.25rem 0.375rem;
-        border: 0.0625rem solid var(--calendaria-border);
+        border: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
         border-radius: 0.25rem;
-        color: var(--calendaria-text);
+        color: var(--atlas-text, rgb(224 224 224));
         font-size: var(--font-size-12, 0.75rem);
-        background: var(--calendaria-bg);
+        background: var(--atlas-bg, rgb(31 31 31));
       }
 
       multi-select {
@@ -163,37 +163,37 @@
         .tag {
           padding: 0.125rem 0.375rem;
           border-radius: 0.1875rem;
-          color: var(--calendaria-text);
+          color: var(--atlas-text, rgb(224 224 224));
           font-size: var(--font-size-10, 0.625rem);
           cursor: pointer;
-          background: color-mix(in srgb, var(--calendaria-primary) 20%, var(--calendaria-bg));
+          background: color-mix(in srgb, var(--atlas-primary, rgb(74 144 226)) 20%, var(--atlas-bg, rgb(31 31 31)));
 
           &:hover {
-            background: color-mix(in srgb, var(--calendaria-primary) 35%, var(--calendaria-bg));
+            background: color-mix(in srgb, var(--atlas-primary, rgb(74 144 226)) 35%, var(--atlas-bg, rgb(31 31 31)));
           }
         }
 
         select {
           padding: 0.125rem 0.375rem;
-          border: 0.0625rem solid var(--calendaria-border);
+          border: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
           border-radius: 0.25rem;
-          color: var(--calendaria-text);
+          color: var(--atlas-text, rgb(224 224 224));
           font-size: var(--font-size-11, 0.6875rem);
-          background: var(--calendaria-bg);
+          background: var(--atlas-bg, rgb(31 31 31));
         }
       }
 
       .filter-checkboxes {
         gap: 0.375rem;
         padding-top: 0.5rem;
-        border-top: 0.0625rem solid var(--calendaria-border-light);
+        border-top: 0.0625rem solid var(--atlas-border-light, rgb(58 58 58));
       }
 
       .filter-checkbox {
         gap: 0.375rem;
         display: flex;
         align-items: center;
-        color: var(--calendaria-text);
+        color: var(--atlas-text, rgb(224 224 224));
         font-size: var(--font-size-12, 0.75rem);
         cursor: pointer;
       }
@@ -205,15 +205,15 @@
         align-items: center;
         margin-top: auto;
         padding: 0.25rem 0.5rem;
-        border: 0.0625rem solid var(--calendaria-primary);
+        border: 0.0625rem solid var(--atlas-primary, rgb(74 144 226));
         border-radius: 0.25rem;
-        color: var(--calendaria-primary);
+        color: var(--atlas-primary, rgb(74 144 226));
         font-size: var(--font-size-11, 0.6875rem);
         cursor: pointer;
         background: transparent;
 
         &:hover {
-          background: color-mix(in srgb, var(--calendaria-primary) 15%, transparent);
+          background: color-mix(in srgb, var(--atlas-primary, rgb(74 144 226)) 15%, transparent);
         }
       }
     }
@@ -231,7 +231,7 @@
 
       .note-group-header {
         padding: 0.4rem 0.75rem 0.2rem;
-        color: var(--calendaria-text-muted);
+        color: var(--atlas-text-dim, rgb(153 153 153));
         font-size: var(--font-size-12);
         font-weight: 600;
         text-transform: uppercase;
@@ -243,16 +243,16 @@
         display: flex;
         align-items: center;
         padding: 0.5rem 0.75rem;
-        border-bottom: 0.0625rem solid var(--calendaria-border-light);
+        border-bottom: 0.0625rem solid var(--atlas-border-light, rgb(58 58 58));
         cursor: pointer;
         transition: background 0.1s ease;
 
         &:hover {
-          background: var(--calendaria-bg-hover);
+          background: var(--atlas-bg-hover, rgb(53 53 53));
         }
 
         &.selected {
-          background: color-mix(in srgb, var(--calendaria-primary) 12%, transparent);
+          background: color-mix(in srgb, var(--atlas-primary, rgb(74 144 226)) 12%, transparent);
         }
 
         .note-select-checkbox {
@@ -271,7 +271,7 @@
           flex-shrink: 0;
           width: 1.25rem;
           height: 1.25rem;
-          color: var(--note-color, var(--calendaria-text-dim));
+          color: var(--note-color, var(--atlas-text-dim, rgb(153 153 153)));
           font-size: 1.125rem;
           text-align: center;
         }
@@ -290,7 +290,7 @@
 
           .note-name {
             overflow: hidden;
-            color: var(--calendaria-text);
+            color: var(--atlas-text, rgb(224 224 224));
             font-weight: 500;
             font-size: var(--font-size-13, 0.8125rem);
             text-overflow: ellipsis;
@@ -298,7 +298,7 @@
           }
 
           .note-date {
-            color: var(--calendaria-text-dim);
+            color: var(--atlas-text-dim, rgb(153 153 153));
             font-size: var(--font-size-11, 0.6875rem);
           }
         }
@@ -312,25 +312,25 @@
           i {
             display: inline-block;
             width: 0.75rem;
-            color: var(--calendaria-text-dim);
+            color: var(--atlas-text-dim, rgb(153 153 153));
             font-size: 0.6875rem;
             text-align: center;
           }
 
           .tag-visibility {
-            color: var(--calendaria-warning);
+            color: var(--atlas-warning, rgb(255 193 7));
           }
 
           .tag-duration {
-            color: var(--calendaria-accent);
+            color: var(--atlas-accent, rgb(168 144 96));
           }
 
           .tag-recurrence {
-            color: var(--calendaria-primary);
+            color: var(--atlas-primary, rgb(74 144 226));
           }
 
           .tag-festival {
-            color: var(--calendaria-festival-text);
+            color: var(--atlas-callout-text, rgb(255 215 0));
           }
         }
       }
@@ -342,7 +342,7 @@
         justify-content: center;
         align-items: center;
         padding: 3rem 1.5rem;
-        color: var(--calendaria-text-dim);
+        color: var(--atlas-text-dim, rgb(153 153 153));
         text-align: center;
 
         .empty-icon {
@@ -364,8 +364,8 @@
       align-items: center;
       height: 2rem;
       padding: 0 0.75rem;
-      border-top: 0.0625rem solid var(--calendaria-border);
-      background: var(--calendaria-bg-lighter);
+      border-top: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
+      background: var(--atlas-bg-lighter, rgb(42 42 42));
 
       .create-note-fab {
         display: flex;
@@ -380,23 +380,23 @@
         padding: 0;
         border: none;
         border-radius: 50%;
-        color: var(--calendaria-text-on-color);
+        color: var(--atlas-text-on-color, rgb(255 255 255));
         font-size: var(--font-size-14, 0.875rem);
         cursor: pointer;
-        background: var(--calendaria-primary);
+        background: var(--atlas-primary, rgb(74 144 226));
         box-shadow: 0 0.125rem 0.5rem rgb(0 0 0 / 30%);
         transition:
           background 0.15s ease,
           transform 0.15s ease;
 
         &:hover {
-          background: var(--calendaria-primary-hover, color-mix(in srgb, var(--calendaria-primary) 85%, rgb(255 255 255)));
+          background: var(--atlas-primary-hover, color-mix(in srgb, var(--atlas-primary, rgb(74 144 226)) 85%, rgb(255 255 255)));
           transform: scale(1.1);
         }
       }
 
       .note-count {
-        color: var(--calendaria-text-dim);
+        color: var(--atlas-text-dim, rgb(153 153 153));
         font-size: var(--font-size-11, 0.6875rem);
         white-space: nowrap;
       }
@@ -417,14 +417,14 @@
         padding: 0;
         border: none;
         border-radius: 0.25rem;
-        color: var(--calendaria-text-dim);
+        color: var(--atlas-text-dim, rgb(153 153 153));
         font-size: var(--font-size-12, 0.75rem);
         cursor: pointer;
         background: transparent;
 
         &:hover {
-          color: var(--calendaria-text);
-          background: var(--calendaria-bg-hover);
+          color: var(--atlas-text, rgb(224 224 224));
+          background: var(--atlas-bg-hover, rgb(53 53 53));
         }
       }
 
@@ -434,7 +434,7 @@
 
       .selection-count {
         min-width: 1rem;
-        color: var(--calendaria-text-dim);
+        color: var(--atlas-text-dim, rgb(153 153 153));
         font-size: var(--font-size-11, 0.6875rem);
         text-align: center;
       }
@@ -445,7 +445,7 @@
         align-items: center;
         margin-left: 0.25rem;
         padding-left: 0.375rem;
-        border-left: 0.0625rem solid var(--calendaria-border-light);
+        border-left: 0.0625rem solid var(--atlas-border-light, rgb(58 58 58));
       }
 
       .bulk-btn {
@@ -457,14 +457,14 @@
         padding: 0;
         border: none;
         border-radius: 0.25rem;
-        color: var(--calendaria-text-dim);
+        color: var(--atlas-text-dim, rgb(153 153 153));
         font-size: var(--font-size-11, 0.6875rem);
         cursor: pointer;
         background: transparent;
 
         &:hover:not(:disabled) {
-          color: var(--calendaria-text);
-          background: var(--calendaria-bg-hover);
+          color: var(--atlas-text, rgb(224 224 224));
+          background: var(--atlas-bg-hover, rgb(53 53 53));
         }
 
         &:disabled {

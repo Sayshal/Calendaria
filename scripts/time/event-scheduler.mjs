@@ -1,7 +1,7 @@
 import { CalendarManager } from '../calendar/_module.mjs';
 import { HOOKS, MODULE, TEMPLATES } from '../constants.mjs';
 import { NoteManager, compareDates, generateRandomOccurrences, getCurrentDate, needsRandomRegeneration } from '../notes/_module.mjs';
-import { CalendariaSocket, log } from '../utils/_module.mjs';
+import { CalendariaSocket } from '../utils/_module.mjs';
 import { WeatherManager } from '../weather/_module.mjs';
 
 /**
@@ -28,7 +28,7 @@ export default class EventScheduler {
    */
   static initialize() {
     this.#lastDate = getCurrentDate();
-    log(3, 'Event Scheduler initialized');
+    ATLAS.log(3, 'Event Scheduler initialized');
   }
 
   /**
@@ -42,7 +42,7 @@ export default class EventScheduler {
     if (this.#skipNext) {
       this.#skipNext = false;
       this.#lastDate = getCurrentDate();
-      log(3, 'Skipping event triggers (timepoint jump)');
+      ATLAS.log(3, 'Skipping event triggers (timepoint jump)');
       return;
     }
     const currentDate = getCurrentDate();
@@ -127,7 +127,7 @@ export default class EventScheduler {
    * @private
    */
   static async #triggerEvent(note, currentDate) {
-    log(3, `Triggering event: ${note.name}`);
+    ATLAS.log(3, `Triggering event: ${note.name}`);
     if (!note.flagData.silent) this.#sendChatAnnouncement(note);
     Hooks.callAll(HOOKS.EVENT_TRIGGERED, { id: note.id, name: note.name, flagData: note.flagData, currentDate });
     await this.#executeMacro(note);
@@ -144,7 +144,7 @@ export default class EventScheduler {
     if (!macroId) return;
     const macro = game.macros.get(macroId);
     if (!macro) return;
-    log(3, `Executing macro for event ${note.name}: ${macro.name}`);
+    ATLAS.log(3, `Executing macro for event ${note.name}: ${macro.name}`);
     const scope = { event: { id: note.id, name: note.name, flagData: note.flagData }, ...context };
     await macro.execute(scope);
   }
@@ -189,7 +189,7 @@ export default class EventScheduler {
       flavor: `<span style="color: ${color};">${iconHtml}</span> ${_loc('CALENDARIA.Event.CalendarEvent')}`,
       flags: { [MODULE.ID]: { isAnnouncement: true, noteId: note.id, journalId: note.journalId } }
     });
-    log(3, `Chat announcement sent for event: ${note.name}`, { visibility: flagData.visibility });
+    ATLAS.log(3, `Chat announcement sent for event: ${note.name}`, { visibility: flagData.visibility });
   }
 
   /**
@@ -245,7 +245,7 @@ export default class EventScheduler {
       const noteData = { startDate: fullNote.system.startDate, randomConfig: fullNote.system.randomConfig, repeatEndDate: fullNote.system.repeatEndDate };
       const occurrences = generateRandomOccurrences(noteData, targetYear);
       await fullNote.setFlag(MODULE.ID, 'randomOccurrences', { year: targetYear, generatedAt: Date.now(), occurrences });
-      log(3, `Auto-regenerated ${occurrences.length} random occurrences for ${fullNote.name} until year ${targetYear}`);
+      ATLAS.log(3, `Auto-regenerated ${occurrences.length} random occurrences for ${fullNote.name} until year ${targetYear}`);
     }
   }
 
@@ -321,7 +321,7 @@ export default class EventScheduler {
    * @private
    */
   static #showProgressNotification(note, progress) {
-    log(3, `Multi-day progress: ${note.name} — day ${progress.currentDay}/${progress.totalDays}`);
+    ATLAS.log(3, `Multi-day progress: ${note.name} — day ${progress.currentDay}/${progress.totalDays}`);
     Hooks.callAll(HOOKS.EVENT_DAY_CHANGED, { id: note.id, name: note.name, progress });
     this.#executeMacro(note, { trigger: 'multiDayProgress', progress });
   }

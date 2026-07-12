@@ -1,7 +1,6 @@
 import { isBundledCalendar } from '../calendar/calendar-loader.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
 import { COMPASS_DIRECTIONS, HOOKS, MODULE, SCENE_FLAGS, SETTINGS, WEATHER_PERIODS, WIND_SPEEDS } from '../constants.mjs';
-import { log } from '../utils/logger.mjs';
 import { executeMacroById } from '../utils/macro-utils.mjs';
 import { canChangeWeather } from '../utils/permissions.mjs';
 import { CalendariaSocket } from '../utils/socket.mjs';
@@ -152,7 +151,7 @@ export default class WeatherManager {
       delete this.#currentWeatherByZone['undefined'];
       if (CalendariaSocket.isPrimaryGM()) {
         await game.settings.set(MODULE.ID, SETTINGS.CURRENT_WEATHER, this.#currentWeatherByZone);
-        log(3, 'Migrated stale "undefined" weather zone key to _default');
+        ATLAS.log(3, 'Migrated stale "undefined" weather zone key to _default');
       }
     }
     Hooks.on(HOOKS.DAY_CHANGE, this.#onDayChange.bind(this));
@@ -167,7 +166,7 @@ export default class WeatherManager {
       await game.settings.set(MODULE.ID, SETTINGS.WEATHER_FORECAST_PLAN, {});
       await game.settings.set(MODULE.ID, SETTINGS.WEATHER_HISTORY, {});
       await game.settings.set(MODULE.ID, SETTINGS.WEATHER_YEAR_KEY_MIGRATED, true);
-      log(3, 'Cleared weather history and forecast plan for year key migration');
+      ATLAS.log(3, 'Cleared weather history and forecast plan for year key migration');
     }
     if (CalendariaSocket.isPrimaryGM()) {
       const calendar = CalendarManager.getActiveCalendar();
@@ -192,11 +191,11 @@ export default class WeatherManager {
         await this.#ensureForecastPlan();
         Hooks.callAll(HOOKS.WEATHER_CHANGE, { bulk: true });
         CalendariaSocket.emit('weatherChange', { weatherByZone: this.#currentWeatherByZone, bulk: true });
-        log(3, 'Generated initial weather and forecast plan for fresh world');
+        ATLAS.log(3, 'Generated initial weather and forecast plan for fresh world');
       }
     }
     this.#initialized = true;
-    log(3, 'WeatherManager initialized');
+    ATLAS.log(3, 'WeatherManager initialized');
   }
 
   /**
@@ -311,7 +310,7 @@ export default class WeatherManager {
     Hooks.callAll(HOOKS.WEATHER_CHANGE, { bulk: true });
     Hooks.callAll(HOOKS.WEATHER_PERIOD_CHANGE, { period: periodId });
     CalendariaSocket.emit('weatherChange', { weatherByZone: this.#currentWeatherByZone, bulk: true });
-    log(3, `Intraday weather period changed to: ${periodId}`);
+    ATLAS.log(3, `Intraday weather period changed to: ${periodId}`);
   }
 
   /**
@@ -342,7 +341,7 @@ export default class WeatherManager {
   static async setWeather(presetId, options = {}) {
     const zoneId = 'zoneId' in options ? options.zoneId : (this.getActiveZone(null, game.scenes?.active)?.id ?? this.DEFAULT_ZONE);
     if (!options.fromSocket && !canChangeWeather()) {
-      log(1, 'User lacks permission to set weather');
+      ATLAS.log(1, 'User lacks permission to set weather');
       ui.notifications.error('CALENDARIA.Permissions.NoAccess', { localize: true });
       return this.getCurrentWeather(zoneId);
     }
@@ -353,7 +352,7 @@ export default class WeatherManager {
     const customPresets = this.getCustomPresets();
     const preset = getPreset(presetId, customPresets);
     if (!preset) {
-      log(2, `Weather preset not found: ${presetId}`);
+      ATLAS.log(2, `Weather preset not found: ${presetId}`);
       ui.notifications.warn(_loc('CALENDARIA.Weather.Error.PresetNotFound', { id: presetId }));
       return this.getCurrentWeather(zoneId);
     }
@@ -504,7 +503,7 @@ export default class WeatherManager {
       return;
     }
     await this.#saveWeather(null, broadcast, resolvedZoneId);
-    log(3, `Weather cleared for zone ${resolvedZoneId}`);
+    ATLAS.log(3, `Weather cleared for zone ${resolvedZoneId}`);
   }
 
   /**
@@ -525,7 +524,7 @@ export default class WeatherManager {
     Hooks.callAll(HOOKS.WEATHER_CHANGE, { previous, current: weather, zoneId });
     if (broadcast) CalendariaSocket.emit('weatherChange', { weather, zoneId });
     if (weather?.fxMacro && CalendariaSocket.isPrimaryGM()) executeMacroById(weather.fxMacro, { weather, previousWeather: previous, zoneId });
-    log(3, `Weather changed for zone ${zoneId}:`, weather?.id ?? 'cleared');
+    ATLAS.log(3, `Weather changed for zone ${zoneId}:`, weather?.id ?? 'cleared');
   }
 
   /**
@@ -556,7 +555,7 @@ export default class WeatherManager {
   static async generateAndSetWeather(options = {}) {
     const zoneId = 'zoneId' in options ? options.zoneId : (this.getActiveZone(null, game.scenes?.active)?.id ?? this.DEFAULT_ZONE);
     if (!options.fromSocket && !canChangeWeather()) {
-      log(1, 'User lacks permission to generate weather');
+      ATLAS.log(1, 'User lacks permission to generate weather');
       return this.getCurrentWeather(zoneId);
     }
     if (!options.fromSocket && !game.user.isGM && canChangeWeather()) {
@@ -608,7 +607,7 @@ export default class WeatherManager {
       weather = this.#buildWeatherFromResult(result, season);
     }
     await this.#saveWeather(weather, options.broadcast !== false, zoneId);
-    log(3, `Weather generated for zone ${zoneId}: ${weather.preset}`);
+    ATLAS.log(3, `Weather generated for zone ${zoneId}: ${weather.preset}`);
     if (!options._fromPlan && game.settings.get(MODULE.ID, SETTINGS.GM_OVERRIDE_CLEARS_FORECAST)) {
       await this.#clearForecastPlan(zoneId);
       await this.#ensureForecastPlan();
@@ -627,7 +626,7 @@ export default class WeatherManager {
     await this.#ensureForecastPlan();
     Hooks.callAll(HOOKS.WEATHER_CHANGE, { bulk: true });
     CalendariaSocket.emit('weatherChange', { weatherByZone: this.#currentWeatherByZone, bulk: true });
-    log(3, `Regenerated weather for ${zones.length} zones`);
+    ATLAS.log(3, `Regenerated weather for ${zones.length} zones`);
   }
 
   /**
@@ -755,7 +754,7 @@ export default class WeatherManager {
     if (!game.settings.get(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER)) return;
     await this.generateAndSetWeather({ zoneId });
     await this.#ensureForecastPlan();
-    log(3, `Auto-generated weather for zone "${zoneId}" on scene activation`);
+    ATLAS.log(3, `Auto-generated weather for zone "${zoneId}" on scene activation`);
   }
 
   /**
@@ -1074,7 +1073,7 @@ export default class WeatherManager {
     CalendariaSocket.emit('weatherChange', { weatherByZone: this.#currentWeatherByZone, bulk: true });
     await this.#clearForecastPlan();
     await this.#ensureForecastPlan();
-    log(3, `Backfilled ${daysToFill} days of weather history for ${zones.length} zones`);
+    ATLAS.log(3, `Backfilled ${daysToFill} days of weather history for ${zones.length} zones`);
   }
 
   /**
@@ -1174,15 +1173,15 @@ export default class WeatherManager {
       const migrated = this.#shiftDayKeys(history);
       await game.settings.set(MODULE.ID, SETTINGS.WEATHER_HISTORY, migrated);
       changed = true;
-      log(3, 'Migrated weather history day keys from 1-indexed to 0-indexed');
+      ATLAS.log(3, 'Migrated weather history day keys from 1-indexed to 0-indexed');
     }
     const plan = game.settings.get(MODULE.ID, SETTINGS.WEATHER_FORECAST_PLAN) || {};
     if (Object.keys(plan).length) {
       await game.settings.set(MODULE.ID, SETTINGS.WEATHER_FORECAST_PLAN, {});
       changed = true;
-      log(3, 'Cleared forecast plan for 0-indexed day migration');
+      ATLAS.log(3, 'Cleared forecast plan for 0-indexed day migration');
     }
-    if (changed) log(3, 'Weather day index migration complete');
+    if (changed) ATLAS.log(3, 'Weather day index migration complete');
     await game.settings.set(MODULE.ID, SETTINGS.WEATHER_DAY_INDEX_MIGRATED, true);
   }
 
@@ -1203,7 +1202,7 @@ export default class WeatherManager {
     }
     if (changed) {
       await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS, customPresets);
-      log(3, 'Migrated custom preset soundFx keys to full paths');
+      ATLAS.log(3, 'Migrated custom preset soundFx keys to full paths');
     }
     let weatherChanged = false;
     for (const weather of Object.values(this.#currentWeatherByZone)) {
@@ -1214,7 +1213,7 @@ export default class WeatherManager {
     }
     if (weatherChanged) {
       await game.settings.set(MODULE.ID, SETTINGS.CURRENT_WEATHER, this.#currentWeatherByZone);
-      log(3, 'Migrated current weather soundFx keys to full paths');
+      ATLAS.log(3, 'Migrated current weather soundFx keys to full paths');
     }
   }
 
@@ -1381,14 +1380,14 @@ export default class WeatherManager {
       this.#prunePlanEntries(zonePlan, todayKey);
       plan[zone.id] = zonePlan;
       anyChanged = true;
-      log(3, `Forecast plan updated for zone ${zone.id}: ${toGenerate} entries generated`);
+      ATLAS.log(3, `Forecast plan updated for zone ${zone.id}: ${toGenerate} entries generated`);
     }
     const activeZoneIds = new Set(zones.map((z) => z.id));
     for (const planZoneId of Object.keys(plan)) {
       if (!activeZoneIds.has(planZoneId)) {
         delete plan[planZoneId];
         anyChanged = true;
-        log(3, `Removed stale forecast plan for defunct zone ${planZoneId}`);
+        ATLAS.log(3, `Removed stale forecast plan for defunct zone ${planZoneId}`);
       }
     }
     if (anyChanged) await game.settings.set(MODULE.ID, SETTINGS.WEATHER_FORECAST_PLAN, plan);
@@ -1419,10 +1418,10 @@ export default class WeatherManager {
       const plan = game.settings.get(MODULE.ID, SETTINGS.WEATHER_FORECAST_PLAN) || {};
       delete plan[zoneId];
       await game.settings.set(MODULE.ID, SETTINGS.WEATHER_FORECAST_PLAN, plan);
-      log(3, `Forecast plan cleared for zone ${zoneId}`);
+      ATLAS.log(3, `Forecast plan cleared for zone ${zoneId}`);
     } else {
       await game.settings.set(MODULE.ID, SETTINGS.WEATHER_FORECAST_PLAN, {});
-      log(3, 'Forecast plan cleared for all zones');
+      ATLAS.log(3, 'Forecast plan cleared for all zones');
     }
   }
 
@@ -1568,7 +1567,7 @@ export default class WeatherManager {
       await game.settings.set(MODULE.ID, SETTINGS.WEATHER_HISTORY, history);
     }
     if (options.clearForecast !== false) await this.#clearForecastPlan();
-    log(3, `Cleared ${removed} weather history entries`);
+    ATLAS.log(3, `Cleared ${removed} weather history entries`);
     return removed;
   }
 
@@ -1687,7 +1686,7 @@ export default class WeatherManager {
     if (zoneId === null) await scene.setFlag(MODULE.ID, SCENE_FLAGS.CLIMATE_ZONE_OVERRIDE, 'none');
     else if (zoneId) await scene.setFlag(MODULE.ID, SCENE_FLAGS.CLIMATE_ZONE_OVERRIDE, zoneId);
     else await scene.unsetFlag(MODULE.ID, SCENE_FLAGS.CLIMATE_ZONE_OVERRIDE);
-    log(3, `Scene zone override ${zoneId !== null ? `set to ${zoneId || 'default'}` : 'set to none'} for scene ${scene.name}`);
+    ATLAS.log(3, `Scene zone override ${zoneId !== null ? `set to ${zoneId || 'default'}` : 'set to none'} for scene ${scene.name}`);
   }
 
   /**
@@ -1712,7 +1711,7 @@ export default class WeatherManager {
     else await CalendarManager.updateCustomCalendar(calendarId, calendarData);
     Hooks.callAll(HOOKS.WEATHER_CHANGE, { bulk: true });
     CalendariaSocket.emit('weatherChange', { weatherByZone: this.#currentWeatherByZone, bulk: true });
-    log(3, `Active climate zone set to: ${zoneId}`);
+    ATLAS.log(3, `Active climate zone set to: ${zoneId}`);
   }
 
   /**
@@ -1752,16 +1751,16 @@ export default class WeatherManager {
    */
   static async createClimateZone(zoneConfig) {
     if (!game.user.isGM) {
-      log(1, 'createClimateZone: GM only');
+      ATLAS.log(1, 'createClimateZone: GM only');
       return null;
     }
     if (!zoneConfig?.name) {
-      log(1, 'createClimateZone: name is required');
+      ATLAS.log(1, 'createClimateZone: name is required');
       return null;
     }
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) {
-      log(1, 'createClimateZone: no active calendar');
+      ATLAS.log(1, 'createClimateZone: no active calendar');
       return null;
     }
     const calendarData = calendar.toObject();
@@ -1775,7 +1774,7 @@ export default class WeatherManager {
         .replace(/[^\da-z-]/g, '');
     const existingIds = Object.values(calendarData.weather.zones).map((z) => z.id);
     if (existingIds.includes(id)) {
-      log(1, `createClimateZone: zone ID "${id}" already exists`);
+      ATLAS.log(1, `createClimateZone: zone ID "${id}" already exists`);
       return null;
     }
     const zone = {
@@ -1825,7 +1824,7 @@ export default class WeatherManager {
     if (!canChangeWeather()) return null;
     const customPresets = this.getCustomPresets();
     if (customPresets.some((p) => p.id === preset.id) || ALL_PRESETS.some((p) => p.id === preset.id)) {
-      log(2, `Weather preset ID already exists: ${preset.id}`);
+      ATLAS.log(2, `Weather preset ID already exists: ${preset.id}`);
       ui.notifications.warn(_loc('CALENDARIA.Weather.Error.DuplicateId', { id: preset.id }));
       return null;
     }
@@ -1850,7 +1849,7 @@ export default class WeatherManager {
     };
     customPresets.push(newPreset);
     await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS, customPresets);
-    log(3, `Added custom weather preset: ${preset.id}`);
+    ATLAS.log(3, `Added custom weather preset: ${preset.id}`);
     return newPreset;
   }
 
@@ -1866,7 +1865,7 @@ export default class WeatherManager {
     if (index === -1) return false;
     customPresets.splice(index, 1);
     await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS, customPresets);
-    log(3, `Removed custom weather preset: ${presetId}`);
+    ATLAS.log(3, `Removed custom weather preset: ${presetId}`);
     return true;
   }
 
@@ -1885,7 +1884,7 @@ export default class WeatherManager {
     Object.assign(preset, updates);
     preset.category = 'custom';
     await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS, customPresets);
-    log(3, `Updated custom weather preset: ${presetId}`);
+    ATLAS.log(3, `Updated custom weather preset: ${presetId}`);
     return preset;
   }
 

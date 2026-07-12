@@ -1,6 +1,6 @@
 import { CalendarManager } from '../calendar/_module.mjs';
 import { MODULE } from '../constants.mjs';
-import { canAddNotes, canChangeActiveCalendar, canChangeDateTime, log } from '../utils/_module.mjs';
+import { canAddNotes, canChangeActiveCalendar, canChangeDateTime } from '../utils/_module.mjs';
 import {
   cmdAdvance,
   cmdCalendar,
@@ -78,7 +78,7 @@ function wrapResult(result) {
  */
 export function initializeChatCommander() {
   if (!game.modules.get('_chatcommands')?.active) return;
-  log(3, 'Chat Commander detected, registering commands');
+  ATLAS.log(3, 'Chat Commander detected, registering commands');
   registerCommands();
 }
 
@@ -126,7 +126,7 @@ function registerCommands() {
         try {
           await cmdNote(args);
         } catch (error) {
-          log(1, 'Error creating note:', error);
+          ATLAS.log(1, 'Error creating note:', error);
         }
         return {};
       }
@@ -299,7 +299,7 @@ function registerCommands() {
     }
   ];
   for (const cmd of commands) game.chatCommands.register({ ...cmd, module: MODULE.ID });
-  log(3, `Registered ${commands.length} Chat Commander commands`);
+  ATLAS.log(3, `Registered ${commands.length} Chat Commander commands`);
 }
 
 /**
