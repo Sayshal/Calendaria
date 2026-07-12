@@ -54,8 +54,40 @@ import './styles/time-keeper.css';
 import './styles/tooltips.css';
 import './styles/weather.css';
 
+/**
+ * Extra troubleshooter lines: the active calendar, its override settings, and every note on it (full system data).
+ * @returns {string[]} Markdown lines for the ATLAS troubleshooter Debug section.
+ */
+function troubleshooterDebug() {
+  const calendar = CalendarManager.getActiveCalendar();
+  const calendarId = calendar?.metadata?.id ?? null;
+  const overrides = game.settings.get(MODULE.ID, SETTINGS.DEFAULT_OVERRIDES) || {};
+  const notes = [];
+  for (const journal of game.journal) {
+    for (const page of journal.pages) {
+      if (page.type !== 'calendaria.calendarnote') continue;
+      if (calendarId && page.flags?.[MODULE.ID]?.calendarId !== calendarId) continue;
+      notes.push(page.toObject());
+    }
+  }
+  const json = (data) => ['```json', JSON.stringify(data, null, 2), '```'];
+  return [
+    `#### Active Calendar${calendarId ? ` (${calendarId})` : ''}`,
+    '',
+    ...json(calendar?.toObject?.() ?? null),
+    '',
+    '#### Calendar Overrides',
+    '',
+    ...json(overrides),
+    '',
+    `#### Notes (${notes.length})`,
+    '',
+    ...json(notes)
+  ];
+}
+
 Hooks.once('init', async () => {
-  ATLAS.register('calendaria', { title: 'Calendaria', github: 'Sayshal/calendaria', theme: { scope: '.calendaria' } });
+  ATLAS.register('calendaria', { title: 'Calendaria', github: 'Sayshal/calendaria', theme: { scope: '.calendaria' }, debug: troubleshooterDebug });
   createGlobalNamespace();
   Hooks.callAll(HOOKS.INIT);
   CalendariaSettings.registerSettings();
