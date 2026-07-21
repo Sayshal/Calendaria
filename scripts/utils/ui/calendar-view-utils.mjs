@@ -165,7 +165,6 @@ export function getVisibleNotes(notes) {
     const { visibility } = resolveNoteDisplayProps(page);
     if (visibility === NOTE_VISIBILITY.SECRET && !showSecrets) return false;
     if (game.user.isGM) return true;
-    if (visibility !== NOTE_VISIBILITY.VISIBLE) return false;
     const journal = page.parent;
     return journal ? journal.testUserPermission(game.user, 'OBSERVER') : page.testUserPermission(game.user, 'OBSERVER');
   });

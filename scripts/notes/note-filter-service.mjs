@@ -32,7 +32,7 @@ export function filterNotes(notes, state, options = {}) {
     result = result.filter((n) => {
       if (!n.visible) return false;
       const effective = n.flagData.visibility || NOTE_VISIBILITY.VISIBLE;
-      return effective === NOTE_VISIBILITY.VISIBLE;
+      return effective !== NOTE_VISIBILITY.SECRET;
     });
   }
   if (state.visibility && state.visibility !== 'all') {
