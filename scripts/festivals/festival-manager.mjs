@@ -321,7 +321,7 @@ export default class FestivalManager {
     } else {
       return { type: 'group', mode: 'and', children: [] };
     }
-    if (festival.leapYearOnly) return { type: 'group', mode: 'and', children: [{ type: 'condition', field: 'isLeapYear', op: '==', value: 1 }, dateCondition] };
+    if (festival.leapYearOnly) return { type: 'group', mode: 'and', children: [{ type: 'condition', field: 'isLeapYear', op: '==', value: true }, dateCondition] };
     return dateCondition;
   }
 }

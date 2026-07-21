@@ -93,7 +93,7 @@ describe('FestivalManager', () => {
       expect(tree.type).toBe('group');
       expect(tree.mode).toBe('and');
       expect(tree.children).toHaveLength(2);
-      expect(tree.children[0]).toEqual({ type: 'condition', field: CONDITION_FIELDS.IS_LEAP_YEAR, op: '==', value: 1 });
+      expect(tree.children[0]).toEqual({ type: 'condition', field: CONDITION_FIELDS.IS_LEAP_YEAR, op: '==', value: true });
       expect(tree.children[1]).toEqual({ type: 'condition', field: CONDITION_FIELDS.DAY_OF_YEAR, op: '==', value: 214 });
       expect(notes[0].flagData.linkedFestival.leapYearOnly).toBe(true);
     });
