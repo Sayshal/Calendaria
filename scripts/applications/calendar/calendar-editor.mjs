@@ -2422,11 +2422,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
             .replace(/[^\da-z]/g, '-')
             .replace(/-+/g, '-');
         calendar = await CalendarManager.createCustomCalendar(id, this.#calendarData);
-        if (calendar) {
-          calendarId = calendar.metadata?.id;
-          this.#calendarId = calendarId;
-          this.#isEditing = true;
-        }
+        if (!calendar) throw new Error(`Failed to create calendar: ${id}`);
+        calendarId = calendar.metadata?.id;
+        this.#calendarId = calendarId;
+        this.#isEditing = true;
       }
       if (calendar) {
         this.#isDirty = false;

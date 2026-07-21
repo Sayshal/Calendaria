@@ -802,17 +802,16 @@ export default class CalendarManager {
 
   /**
    * Create a new custom calendar from a definition.
-   * @param {string} id - Unique calendar ID (will be prefixed with 'custom-' if not already)
+   * @param {string} id - Base calendar ID (prefixed with 'custom-' if not already, numbered if already taken)
    * @param {object} definition - Calendar definition object
    * @returns {Promise<CalendariaCalendar|null>} The created calendar or null on error
    */
   static async createCustomCalendar(id, definition) {
-    const calendarId = id.startsWith('custom-') ? id : `custom-${id}`;
+    const baseId = id.startsWith('custom-') ? id : `custom-${id}`;
     const customCalendars = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_CALENDARS) || {};
-    if (customCalendars[calendarId]) {
-      ATLAS.log(2, `Cannot create calendar: ${calendarId} already exists`);
-      return null;
-    }
+    let calendarId = baseId;
+    for (let suffix = 2; customCalendars[calendarId]; suffix++) calendarId = `${baseId}-${suffix}`;
+    if (calendarId !== baseId) ATLAS.log(2, `Calendar ${baseId} already exists, creating ${calendarId} instead`);
     if (CalendarRegistry.has(calendarId)) {
       ATLAS.log(3, `Cleaning up stale registry entry for: ${calendarId}`);
       CalendarRegistry.unregister(calendarId);
