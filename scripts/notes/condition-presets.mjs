@@ -77,7 +77,7 @@ export function getConditionPresets(startDate) {
   const moName = mo[m] ? _loc(mo[m].name ?? '') : '';
   const L = 'CALENDARIA.Note.Preset.';
   const G = { BASIC: 'basic', WEEKLY: 'weekly', MONTHLY: 'monthly', YEARLY: 'yearly', INTERVAL: 'interval', SEASON: 'season' };
-  p.push({ id: 'everyDay', group: G.BASIC, label: _loc(`${L}EveryDay`), tree: andGroup([cond('day', '%', 1, { offset: 0 })]) });
+  p.push({ id: 'everyDay', group: G.BASIC, label: _loc(`${L}EveryDay`), tree: andGroup([cond('epoch', '%', 1)]) });
   const hasLeapYears = mo.some((month) => month.leapDays != null);
   if (hasLeapYears) p.push({ id: 'leapYearOnly', group: G.BASIC, label: _loc(`${L}LeapYearOnly`), tree: andGroup([cond('isLeapYear', '==', true)]) });
   for (let i = 0; i < wd.length; i++)
@@ -127,7 +127,7 @@ export function getConditionPresets(startDate) {
       tree: andGroup([cond('month', '==', m + 1), cond('weekday', '==', wdi), cond('inverseWeekNumber', '==', iwn)])
     });
   }
-  for (const n of [2, 3, 7, 14, 30]) p.push({ id: `everyNDays_${n}`, group: G.INTERVAL, label: _loc(`${L}EveryNDays`, { n }), tree: andGroup([cond('dayOfYear', '%', n)]) });
+  for (const n of [2, 3, 7, 14, 30]) p.push({ id: `everyNDays_${n}`, group: G.INTERVAL, label: _loc(`${L}EveryNDays`, { n }), tree: andGroup([cond('epoch', '%', n)]) });
   p.push({ id: 'everyXWeekday', group: G.INTERVAL, label: _loc(`${L}EveryXWeekday`, { n: ordinal(2), weekday: wdName }), tree: andGroup([cond('weekday', '==', wdi), cond('totalWeek', '%', 2)]) });
   p.push({ id: 'everyXMonthlyDate', group: G.INTERVAL, label: _loc(`${L}EveryXMonthlyDate`, { n: ordinal(2), day: d }), tree: andGroup([cond('month', '%', 2), cond('day', '==', d)]) });
   p.push({

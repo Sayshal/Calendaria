@@ -1,4 +1,5 @@
 import { CONDITION_FIELDS, CONDITION_GROUP_MODES, CONDITION_OPERATORS, MAX_NESTING_DEPTH } from '../constants.mjs';
+import { ordinal } from '../utils/formatting/format-utils.mjs';
 import { getFieldSchema, getGroupedFieldOptions, getOperatorOptions, getValue2Options, getValueOptions } from './_module.mjs';
 import { isGroup } from './condition-engine.mjs';
 
@@ -387,7 +388,10 @@ function describeOneCondition(cond, calendar) {
     if (field === 'daysBeforeMonthEnd' && op === '<=') return `within last ${valueStr} days of the month`;
     return `${fieldLabel} ${opLabels[op]} ${valueStr}`;
   }
-  if (op === '%') return offset ? `every ${value} ${fieldLabel} (offset ${offset})` : `every ${value} ${fieldLabel}`;
+  if (op === '%') {
+    const phrase = field === 'epoch' ? `every ${value} days` : field === 'day' ? `every ${ordinal(value)} day of the month` : `every ${value} ${fieldLabel}`;
+    return offset ? `${phrase} (offset ${offset})` : phrase;
+  }
   if (op === 'daysAgo') return `${value} days ago`;
   if (op === 'daysFromNow') return `in ${value} days`;
   if (op === 'withinLast') return `within last ${value} days`;

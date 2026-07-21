@@ -343,7 +343,7 @@ export function getFieldValue(field, date, value2 = null, epochCtx = null) {
  * @returns {boolean} True if condition passes
  */
 export function evaluateCondition(condition, date, options = {}) {
-  const { field, op, value, value2 } = condition;
+  const { field, op, value, value2, offset = 0 } = condition;
   const { startDate, epochCtx } = options;
   const handler = fieldHandlers.get(field);
   if (handler) return handler(condition, date, options);
@@ -377,8 +377,9 @@ export function evaluateCondition(condition, date, options = {}) {
       return fieldValue < compareValue;
     case CONDITION_OPERATORS.MODULO: {
       if (compareValue === 0) return false;
-      const effectiveOffset = startDate ? (getFieldValue(field, startDate, value2) ?? 0) : 0;
-      return (fieldValue - effectiveOffset) % compareValue === 0;
+      const anchor = startDate ? (getFieldValue(field, startDate, value2) ?? 0) : 0;
+      const delta = fieldValue - anchor - (Number(offset) || 0);
+      return ((delta % compareValue) + compareValue) % compareValue === 0;
     }
     default:
       return false;
@@ -679,9 +680,7 @@ function _collectGapEstimates(entry, estimates) {
     estimates.push(yearGap);
     return;
   }
-  if (op === CONDITION_OPERATORS.MODULO && (field === CONDITION_FIELDS.DAY || field === CONDITION_FIELDS.EPOCH) && value > 0) {
-    estimates.push(value);
-  } else if (op === CONDITION_OPERATORS.EQUAL) {
+  if (op === CONDITION_OPERATORS.EQUAL) {
     if (field === CONDITION_FIELDS.WEEKDAY) estimates.push(7);
     else if (field === CONDITION_FIELDS.MONTH) estimates.push(yearGap);
     else if (field === CONDITION_FIELDS.DAY) estimates.push(31);

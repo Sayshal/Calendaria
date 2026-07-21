@@ -404,6 +404,59 @@ describe('evaluateCondition()', () => {
     it('returns false when value is 0 (division by zero)', () => {
       expect(evaluateCondition({ field: 'year', op: '%', value: 0 }, date)).toBe(false);
     });
+    it('adds an authored offset on top of the startDate anchor', () => {
+      const startDate = { year: 2020, month: 0, dayOfMonth: 0 };
+      expect(evaluateCondition({ field: 'year', op: '%', value: 4, offset: 1 }, date, { startDate })).toBe(false);
+      expect(evaluateCondition({ field: 'year', op: '%', value: 4, offset: 4 }, date, { startDate })).toBe(true);
+    });
+    it('treats a missing offset as zero so existing conditions are unaffected', () => {
+      const startDate = { year: 2020, month: 0, dayOfMonth: 0 };
+      const without = evaluateCondition({ field: 'year', op: '%', value: 4 }, date, { startDate });
+      const withZero = evaluateCondition({ field: 'year', op: '%', value: 4, offset: 0 }, date, { startDate });
+      expect(without).toBe(withZero);
+    });
+    it('matches dates before the anchor without relying on negative remainders', () => {
+      const startDate = { year: 2028, month: 0, dayOfMonth: 0 };
+      expect(evaluateCondition({ field: 'year', op: '%', value: 4 }, date, { startDate })).toBe(true);
+    });
+  });
+
+  describe('interval spacing (issue #784)', () => {
+    const startDate = { year: 2026, month: 0, dayOfMonth: 0 };
+    const matchesIn = (field, value, month, daysInMonth) => {
+      const hits = [];
+      for (let d = 0; d < daysInMonth; d++) {
+        if (evaluateCondition({ field, op: '%', value }, { year: 2026, month, dayOfMonth: d }, { startDate })) hits.push(d + 1);
+      }
+      return hits;
+    };
+    it('day-of-month modulo collapses onto the anchor day every month, the reported bug', () => {
+      expect(matchesIn(CONDITION_FIELDS.DAY, 40, 0, 31)).toEqual([1]);
+      expect(matchesIn(CONDITION_FIELDS.DAY, 40, 1, 28)).toEqual([1]);
+      expect(matchesIn(CONDITION_FIELDS.DAY, 40, 2, 31)).toEqual([1]);
+    });
+    it('epoch modulo spaces occurrences evenly across a month boundary', () => {
+      expect(matchesIn(CONDITION_FIELDS.EPOCH, 40, 0, 31)).toEqual([1]);
+      expect(matchesIn(CONDITION_FIELDS.EPOCH, 40, 1, 28)).toEqual([10]);
+      expect(matchesIn(CONDITION_FIELDS.EPOCH, 40, 2, 31)).toEqual([22]);
+    });
+    it('epoch modulo keeps its cadence across a year boundary', () => {
+      const gaps = [];
+      let previous = null;
+      for (let d = 0; d < 800; d++) {
+        const date = { year: 2026, month: 0, dayOfMonth: d };
+        if (!evaluateCondition({ field: CONDITION_FIELDS.EPOCH, op: '%', value: 7 }, date, { startDate })) continue;
+        if (previous !== null) gaps.push(d - previous);
+        previous = d;
+      }
+      expect(gaps.length).toBeGreaterThan(100);
+      expect([...new Set(gaps)]).toEqual([7]);
+    });
+    it('always matches its own start date', () => {
+      for (const n of [2, 7, 40, 365]) {
+        expect(evaluateCondition({ field: CONDITION_FIELDS.EPOCH, op: '%', value: n }, startDate, { startDate })).toBe(true);
+      }
+    });
   });
   describe('unknown operator', () => {
     it('returns false', () => {

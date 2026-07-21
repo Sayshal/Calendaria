@@ -418,6 +418,7 @@ export default class CalendariaSettings {
         type: new NumberField({ initial: 40, min: 0, max: 100, integer: true }),
         onChange: () => BigCal.updateIdleOpacity()
       },
+      intervalConditionFieldMigrationComplete: { name: 'Interval Condition Field Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       noteConditionTreeMigrationComplete: { name: 'Note Condition Tree Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       noteVisibilityMigrationComplete: { name: 'Note Visibility Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       presetSchemaV2MigrationComplete: { name: 'Preset Schema V2 Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },

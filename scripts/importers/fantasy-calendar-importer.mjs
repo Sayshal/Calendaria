@@ -723,7 +723,7 @@ export default class FantasyCalendarImporter extends BaseImporter {
     if (ti <= 6) {
       const ops = ['==', '!=', '>=', '<=', '>', '<', '%'];
       const op = ops[ti] || '==';
-      if (op === '%') return [{ field: 'day', op: '%', value, offset: parseInt(values?.[1]) || 0 }];
+      if (op === '%') return [{ field: 'epoch', op: '%', value, offset: parseInt(values?.[1]) || 0 }];
       return [{ field: 'day', op, value }];
     }
     if (ti >= 7 && ti <= 13) {
