@@ -68,6 +68,9 @@
     <fieldset class="daylight-fieldset">
       <legend>{{localize "CALENDARIA.Editor.Section.Daylight"}}</legend>
       <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.DaylightHint"}}</p>
+      {{#if darknessSyncOff}}
+        <p class="notification warning">{{localize "CALENDARIA.ClimateEditor.DarknessSyncOff"}}</p>
+      {{/if}}
       <div class="form-group">
         <label>{{localize "CALENDARIA.Editor.Weather.Zone.OverrideSolstice"}}</label>
         <div class="form-fields">

@@ -1629,7 +1629,9 @@ export default class WeatherManager {
     if (sceneOverride === 'none' && zoneId == null) return null;
     const targetId = zoneId ?? sceneOverride ?? calendar.weather.activeZone;
     if (!targetId) return null;
-    return zones.find((z) => z.id === targetId) ?? zones[0] ?? null;
+    const match = zones.find((z) => z.id === targetId);
+    if (!match) ATLAS.log(2, `Climate zone '${targetId}' not found, falling back to '${zones[0]?.id}'`);
+    return match ?? zones[0] ?? null;
   }
 
   /**
