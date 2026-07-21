@@ -731,6 +731,8 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
       NoteManager.enableSuppressOwnershipRebuild();
       try {
         for (const stub of affected) {
+          const visibility = stub.flagData?.visibility || NOTE_VISIBILITY.VISIBLE;
+          if (visibility !== NOTE_VISIBILITY.VISIBLE) continue;
           const journal = game.journal.get(stub.journalId);
           if (journal) await journal.update({ ownership: { default: defaults.defaultOwnership } });
         }

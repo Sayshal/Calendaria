@@ -131,7 +131,13 @@ export default class NoteManager {
    * @param {string} _userId - User ID performing the update
    */
   static onPreUpdateJournalEntryPage(page, changes, _options, _userId) {
-    if (changes.system?.visibility !== undefined) NoteManager.#priorVisibilityByPage.set(page.id, page.system?.visibility);
+    if (changes.system?.visibility === undefined) return;
+    if (changes.system.visibility === NOTE_VISIBILITY.SECRET && !game.user.isGM) {
+      ui.notifications.warn('CALENDARIA.Permissions.NoAccess', { localize: true });
+      delete changes.system.visibility;
+      return;
+    }
+    NoteManager.#priorVisibilityByPage.set(page.id, page.system?.visibility);
   }
 
   /**
@@ -371,7 +377,7 @@ export default class NoteManager {
       sanitized.color = defaultPreset.color;
     }
     const ownership = this.#buildOwnership(sanitized.visibility, actualCreatorId);
-    if (presetMerged.defaultOwnership != null) {
+    if (presetMerged.defaultOwnership != null && sanitized.visibility === NOTE_VISIBILITY.VISIBLE) {
       const level = presetMerged.defaultOwnership;
       for (const user of game.users) if (!user.isGM && ownership[user.id] !== undefined) ownership[user.id] = Math.max(ownership[user.id], level);
       ownership.default = Math.max(ownership.default ?? 0, level);
