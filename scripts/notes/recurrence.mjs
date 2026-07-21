@@ -164,6 +164,46 @@ function resolveAnchor(anchorType, year, calendar) {
 }
 
 /**
+ * Get full moon phase info for a display date.
+ * @param {object} calendar - Calendar instance
+ * @param {object} date - Display date { year, month, dayOfMonth }
+ * @param {number} moonIndex - Moon index
+ * @returns {object|null} Phase info including position and phaseIndex
+ */
+function getMoonPhaseInfoAt(calendar, date, moonIndex) {
+  const yearZero = calendar?.years?.yearZero ?? 0;
+  const components = { year: date.year - yearZero, month: date.month, dayOfMonth: date.dayOfMonth, hour: 12, minute: 0, second: 0 };
+  return calendar?.getMoonPhase?.(moonIndex, components) ?? null;
+}
+
+/**
+ * Shortest distance between two normalized cycle positions, accounting for wraparound.
+ * @param {number} a - Position in [0, 1)
+ * @param {number} b - Position in [0, 1)
+ * @returns {number} Distance in [0, 0.5]
+ */
+function cycleDistance(a, b) {
+  const delta = Math.abs((a ?? 0) - (b ?? 0));
+  return Math.min(delta, 1 - delta);
+}
+
+/**
+ * Whether a moon phase entry matches a target token, by key or localized name.
+ * @param {[string, object]} entry - Phase entry from Object.entries(moon.phases)
+ * @param {string} target - Lowercased target token, e.g. 'full'
+ * @returns {boolean} True if the entry matches
+ */
+function phaseEntryMatches(entry, target) {
+  if (!entry) return false;
+  const [key, phase] = entry;
+  const normalizedKey = String(key ?? '')
+    .replace(/\d+$/, '')
+    .toLowerCase();
+  const name = String(phase?.name ?? '').toLowerCase();
+  return normalizedKey.includes(target) || name.split('.').pop().includes(target) || name.replace(/\s+/g, '').includes(target);
+}
+
+/**
  * Resolve "first X after" condition.
  * @param {object} startDate - Date to search from
  * @param {string} condition - Condition type (moonPhase, weekday)
@@ -173,21 +213,32 @@ function resolveAnchor(anchorType, year, calendar) {
  */
 function resolveFirstAfter(startDate, condition, params, calendar) {
   const maxSearch = 200;
+  const inclusive = params?.inclusive === true;
+  const boundary = inclusive ? { ...startDate } : addDays(startDate, 1);
   let currentDate = { ...startDate };
   for (let i = 0; i < maxSearch; i++) {
-    currentDate = addDays(currentDate, 1);
+    if (i > 0 || !inclusive) currentDate = addDays(currentDate, 1);
     switch (condition) {
       case 'moonPhase': {
         const moons = calendar?.moonsArray ?? [];
         const moonIndex = params?.moon ?? 0;
-        const targetPhase = params?.phase ?? 'full';
+        const targetPhase = (params?.phase ?? 'full').toLowerCase();
         if (moonIndex >= moons.length) return null;
-        const moon = moons[moonIndex];
-        const phaseIndex = getCalendarMoonPhaseIndex(currentDate, moonIndex);
-        if (phaseIndex === null) break;
-        const phaseName = Object.values(moon.phases ?? {})[phaseIndex]?.name?.toLowerCase() || '';
-        if (phaseName.includes(targetPhase.toLowerCase())) return currentDate;
-        break;
+        const entries = Object.entries(moons[moonIndex].phases ?? {});
+        if (!entries.length) return null;
+        const info = getMoonPhaseInfoAt(calendar, currentDate, moonIndex);
+        if (!info || !phaseEntryMatches(entries[info.phaseIndex], targetPhase)) break;
+        const previous = addDays(currentDate, -1);
+        const previousInfo = getMoonPhaseInfoAt(calendar, previous, moonIndex);
+        // Only resolve on the band's first day, so the chosen day is the same wherever the scan starts.
+        if (previousInfo && phaseEntryMatches(entries[previousInfo.phaseIndex], targetPhase)) break;
+        const phaseStart = entries[info.phaseIndex]?.[1]?.start ?? 0;
+        const onBand = cycleDistance(info.position, phaseStart);
+        const beforeBand = previousInfo ? cycleDistance(previousInfo.position, phaseStart) : Infinity;
+        const peak = beforeBand < onBand ? previous : currentDate;
+        // A peak preceding the search boundary belongs to the previous lunation; keep looking.
+        if (compareDays(peak, boundary) < 0) break;
+        return peak;
       }
       case 'weekday': {
         const targetWeekday = params?.weekday ?? 0;
