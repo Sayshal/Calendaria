@@ -1052,10 +1052,8 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    * @returns {object} Time components
    */
   #getPredictedComponents() {
-    if (TimeClock.running) {
-      const cal = game.time?.calendar;
-      if (cal) return cal.timeToComponents(TimeClock.predictedWorldTime);
-    }
+    const cal = game.time?.calendar;
+    if (cal) return cal.timeToComponents(TimeClock.predictedWorldTime);
     return game.time.components;
   }
 

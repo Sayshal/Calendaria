@@ -80,7 +80,7 @@ export function registerHooks() {
   Hooks.on('updateScene', onUpdateScene);
   Hooks.on('canvasReady', onCanvasReadyForHUD);
   Hooks.on('updateSetting', CalendarManager.onUpdateSetting.bind(CalendarManager));
-  Hooks.on('updateWorldTime', TimeClock.onUpdateWorldTime);
+  Hooks.on('updateWorldTime', TimeClock.onUpdateWorldTime.bind(TimeClock));
   Hooks.on(HOOKS.DAY_CHANGE, autoRevealCurrentDay);
   Hooks.on(HOOKS.DAY_CHANGE, onDayChangeForBastions);
   Hooks.on(HOOKS.MOON_PHASE_CHANGE, onMoonPhaseChange);

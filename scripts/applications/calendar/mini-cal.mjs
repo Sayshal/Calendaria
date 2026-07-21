@@ -1397,7 +1397,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @returns {object} Time components
    */
   #getPredictedComponents() {
-    if (TimeClock.running && game.time?.calendar) return game.time?.calendar.timeToComponents(TimeClock.predictedWorldTime);
+    if (game.time?.calendar) return game.time.calendar.timeToComponents(TimeClock.predictedWorldTime);
     return game.time.components;
   }
 
