@@ -338,7 +338,12 @@ export default class ReminderScheduler {
     const color = note.flagData.color || '#4a9eff';
     let whisper = [];
     if (note.flagData.reminderTargets !== 'all') whisper = targets;
-    if (note.flagData.visibility && note.flagData.visibility !== 'visible') whisper = game.users.filter((u) => u.isGM).map((u) => u.id);
+    if (note.flagData.visibility && note.flagData.visibility !== 'visible') {
+      const allowed = new Set(game.users.filter((u) => u.isGM).map((u) => u.id));
+      if (note.flagData.author) allowed.add(note.flagData.author);
+      whisper = (whisper.length ? whisper : targets).filter((id) => allowed.has(id));
+      if (!whisper.length) whisper = [...allowed];
+    }
     const content = `
       <div class="calendaria chat-reminder">
         <div class="reminder-message">${message}</div>

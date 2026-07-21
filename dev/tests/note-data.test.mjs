@@ -215,12 +215,12 @@ describe('validateNoteData()', () => {
     const result = validateNoteData({ ...validNote, icon: 123 });
     expect(result.valid).toBe(false);
   });
-  it('rejects non-array remindUsers', () => {
-    const result = validateNoteData({ ...validNote, remindUsers: 'user1' });
+  it('rejects non-array reminderUsers', () => {
+    const result = validateNoteData({ ...validNote, reminderUsers: 'user1' });
     expect(result.valid).toBe(false);
   });
-  it('rejects remindUsers with non-string entries', () => {
-    const result = validateNoteData({ ...validNote, remindUsers: [123] });
+  it('rejects reminderUsers with non-string entries', () => {
+    const result = validateNoteData({ ...validNote, reminderUsers: [123] });
     expect(result.valid).toBe(false);
   });
   it('rejects non-number reminderOffset', () => {

@@ -25,7 +25,7 @@ export function getDefaultNoteData() {
     color: '#4a9eff',
     icon: 'fas fa-calendar',
     iconType: 'fontawesome',
-    remindUsers: [],
+    reminderUsers: [],
     reminderOffset: 0,
     reminderUnit: 'hour',
     reminderType: 'toast',
@@ -132,9 +132,9 @@ export function validateNoteData(noteData, calendarId) {
     else if (!/^#[\dA-Fa-f]{6}$/.test(noteData.color)) errors.push('color must be a valid hex color (e.g., #4a9eff)');
   }
   if (noteData.icon !== undefined && typeof noteData.icon !== 'string') errors.push('icon must be a string');
-  if (noteData.remindUsers !== undefined) {
-    if (!Array.isArray(noteData.remindUsers)) errors.push('remindUsers must be an array');
-    else if (noteData.remindUsers.some((id) => typeof id !== 'string')) errors.push('remindUsers must be an array of user IDs (strings)');
+  if (noteData.reminderUsers !== undefined) {
+    if (!Array.isArray(noteData.reminderUsers)) errors.push('reminderUsers must be an array');
+    else if (noteData.reminderUsers.some((id) => typeof id !== 'string')) errors.push('reminderUsers must be an array of user IDs (strings)');
   }
   if (noteData.reminderOffset !== undefined) if (typeof noteData.reminderOffset !== 'number') errors.push('reminderOffset must be a number');
   if (noteData.macro !== undefined && noteData.macro !== null) if (typeof noteData.macro !== 'string') errors.push('macro must be a string (macro ID) or null');
@@ -212,7 +212,7 @@ export function sanitizeNoteData(noteData) {
     categories: Array.isArray(noteData.categories) ? noteData.categories : defaults.categories,
     color: noteData.color || defaults.color,
     icon: noteData.icon || defaults.icon,
-    remindUsers: Array.isArray(noteData.remindUsers) ? noteData.remindUsers : defaults.remindUsers,
+    reminderUsers: Array.isArray(noteData.reminderUsers) ? noteData.reminderUsers : defaults.reminderUsers,
     reminderOffset: noteData.reminderOffset ?? defaults.reminderOffset,
     reminderUnit: noteData.reminderUnit || defaults.reminderUnit,
     reminderType: noteData.reminderType || defaults.reminderType,
@@ -566,9 +566,9 @@ export function applyPresetDefaultsToNoteData(noteData, presetIds) {
     if (noteData[noteKey] === noteDefaults[noteKey] || noteData[noteKey] == null) noteData[noteKey] = defaults[defaultKey];
   }
   if (defaults.owners?.length) {
-    const existing = noteData.remindUsers || [];
+    const existing = noteData.reminderUsers || [];
     const combined = [...new Set([...existing, ...defaults.owners])];
-    noteData.remindUsers = combined;
+    noteData.reminderUsers = combined;
   }
   return noteData;
 }
