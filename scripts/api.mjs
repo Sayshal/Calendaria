@@ -909,7 +909,7 @@ export const CalendariaAPI = {
    * @param {string} pageId - Journal entry page ID
    * @param {object} [options] - Options
    * @param {string} [options.mode] - Sheet mode: 'view' (default) or 'edit'
-   * @param {string} [options.context] - Force target: 'bigcal' or 'minical' (auto-detects if omitted)
+   * @param {string} [options.context] - Force target, opening it if closed: 'bigcal' or 'minical'. When omitted, navigates only within an already-open calendar and opens nothing
    * @returns {Promise<void>}
    */
   async navigateToNote(pageId, options = {}) {
@@ -921,19 +921,14 @@ export const CalendariaAPI = {
     const startDate = stub.flagData.startDate;
     if (!startDate) return;
     const dateObj = { year: startDate.year, month: startDate.month, dayOfMonth: startDate.dayOfMonth ?? 0 };
-    const useMiniCal = options.context === 'minical' || (options.context !== 'bigcal' && MiniCal.instance?.rendered && !BigCal.instance?.rendered);
-    if (useMiniCal) {
-      const mini = MiniCal.show();
-      if (mini) {
-        mini.selectDate(dateObj);
-        await mini.render({ force: true });
-      }
-    } else {
-      const instance = BigCal.show();
-      if (instance) {
-        instance.selectDate(dateObj);
-        await instance.render({ force: true });
-      }
+    let instance = null;
+    if (options.context === 'minical') instance = MiniCal.show();
+    else if (options.context === 'bigcal') instance = BigCal.show();
+    else if (BigCal.instance?.rendered) instance = BigCal.instance;
+    else if (MiniCal.instance?.rendered) instance = MiniCal.instance;
+    if (instance) {
+      instance.selectDate(dateObj);
+      await instance.render({ force: true });
     }
     const page = NoteManager.getFullNote(pageId);
     if (page) page.sheet.render(true, { mode: options.mode ?? 'view' });
@@ -1074,12 +1069,14 @@ export const CalendariaAPI = {
    * @param {string} options.label - Display name
    * @param {string} [options.color] - Hex color (default '#868e96')
    * @param {string} [options.icon] - FontAwesome icon class (default 'fas fa-tag')
-   * @param {object} [options.defaults] - Default values: { allDay, displayStyle, visibility, reminderType, reminderOffset, reminderUnit, hasDuration, duration, macro, content }
+   * @param {boolean} [options.playerUsable] - Allow non-GM users (default true)
+   * @param {number} [options.sortOrder] - Explicit sort order, defaults to the end of the list
+   * @param {object} [options.defaults] - Default values: { name, allDay, displayStyle, visibility, color, icon, reminderType, reminderOffset, reminderUnit, reminderTargets, hasDuration, duration, maxOccurrences, silent, showBookends, defaultOwnership, macro, owners, content }
    * @returns {Promise<object>} The created preset
    */
-  async addPreset({ label, color, icon, defaults } = {}) {
+  async addPreset({ label, color, icon, playerUsable, sortOrder, defaults } = {}) {
     if (!label) throw new Error('Preset label is required');
-    const preset = await addCustomPreset(label, color, icon);
+    const preset = await addCustomPreset(label, color, icon, { playerUsable, sortOrder });
     if (defaults && Object.keys(defaults).length) await updatePreset(preset.id, { defaults });
     return preset;
   },
@@ -1091,9 +1088,9 @@ export const CalendariaAPI = {
    * @param {string} [updates.label] - New display name
    * @param {string} [updates.color] - New hex color
    * @param {string} [updates.icon] - New FontAwesome icon class
+   * @param {number} [updates.sortOrder] - New sort order
    * @param {boolean} [updates.playerUsable] - Allow non-GM users
    * @param {object} [updates.defaults] - Updated default values, merged with existing (includes content template)
-   * @param {object} [updates.overrides] - Updated override values (merged with existing)
    * @returns {Promise<object|null>} Updated preset or null if not found
    */
   async updatePreset(presetId, updates) {

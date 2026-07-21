@@ -1295,16 +1295,37 @@ describe('navigateToNote', () => {
     await CalendariaAPI.navigateToNote('missing');
     expect(ui.notifications.warn).toHaveBeenCalled();
   });
-  it('shows BigCal, sets viewed/selected date, and opens note sheet', async () => {
+  it('navigates within an already-open BigCal and opens note sheet', async () => {
     const startDate = { year: 1, month: 5, dayOfMonth: 14 };
     NoteManager.getNote.mockReturnValue({ id: '1', flagData: { startDate } });
     const render = vi.fn();
     NoteManager.getFullNote.mockReturnValue({ sheet: { render } });
+    const open = { rendered: true, selectDate: vi.fn(), render: vi.fn() };
+    BigCal.instance = open;
     await CalendariaAPI.navigateToNote('1');
-    const instance = BigCalMock._lastInstance;
-    expect(instance.viewedDate).toEqual({ year: 1, month: 5, dayOfMonth: 14 });
-    expect(instance._selectedDate).toEqual({ year: 1, month: 5, dayOfMonth: 14 });
+    expect(open.selectDate).toHaveBeenCalledWith({ year: 1, month: 5, dayOfMonth: 14 });
     expect(render).toHaveBeenCalledWith(true, { mode: 'view' });
+    BigCal.instance = null;
+  });
+  it('does not open a calendar when none is rendered, but still opens the note sheet', async () => {
+    BigCalMock._lastInstance = null;
+    BigCal.instance = null;
+    MiniCal.instance = null;
+    NoteManager.getNote.mockReturnValue({ id: '1', flagData: { startDate: { year: 1, month: 5, dayOfMonth: 14 } } });
+    const render = vi.fn();
+    NoteManager.getFullNote.mockReturnValue({ sheet: { render } });
+    await CalendariaAPI.navigateToNote('1');
+    expect(BigCalMock._lastInstance).toBeNull();
+    expect(render).toHaveBeenCalledWith(true, { mode: 'view' });
+  });
+  it('force-opens BigCal when context is explicit', async () => {
+    BigCalMock._lastInstance = null;
+    BigCal.instance = null;
+    MiniCal.instance = null;
+    NoteManager.getNote.mockReturnValue({ id: '1', flagData: { startDate: { year: 1, month: 5, dayOfMonth: 14 } } });
+    NoteManager.getFullNote.mockReturnValue({ sheet: { render: vi.fn() } });
+    await CalendariaAPI.navigateToNote('1', { context: 'bigcal' });
+    expect(BigCalMock._lastInstance).not.toBeNull();
   });
   it('opens note sheet in edit mode when specified', async () => {
     const startDate = { year: 1, month: 0, dayOfMonth: 0 };

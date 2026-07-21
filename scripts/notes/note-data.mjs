@@ -408,9 +408,12 @@ export function getPlayerUsablePresets() {
  * @param {string} label  Preset label
  * @param {string} [color]  Hex color
  * @param {string} [icon]  FontAwesome icon class
+ * @param {object} [options]  Additional preset fields
+ * @param {boolean} [options.playerUsable]  Whether non-GM users may apply the preset
+ * @param {number} [options.sortOrder]  Explicit sort order, defaults to the end of the list
  * @returns {Promise<object>}  The created preset
  */
-export async function addCustomPreset(label, color = '#868e96', icon = 'fas fa-tag') {
+export async function addCustomPreset(label, color = '#868e96', icon = 'fas fa-tag', { playerUsable = true, sortOrder } = {}) {
   const id =
     label
       .toLowerCase()
@@ -419,7 +422,7 @@ export async function addCustomPreset(label, color = '#868e96', icon = 'fas fa-t
   const existing = getAllPresets();
   if (existing.find((c) => c.id === id)) return existing.find((c) => c.id === id);
   const maxSort = existing.reduce((max, c) => Math.max(max, c.sortOrder ?? 0), -1);
-  const newPreset = { id, label, color, icon, builtin: false, sortOrder: maxSort + 1, playerUsable: true, defaults: emptyDefaults() };
+  const newPreset = { id, label, color, icon, builtin: false, sortOrder: sortOrder ?? maxSort + 1, playerUsable: !!playerUsable, defaults: emptyDefaults() };
   const raw = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_PRESETS) || [];
   raw.push(newPreset);
   invalidatePresetCache();
