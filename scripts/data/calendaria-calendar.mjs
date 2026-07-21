@@ -863,26 +863,31 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   }
 
   /**
-   * Progress between sunrise and sunset assuming it is daylight half the day duration.
+   * Progress between sunrise and sunset.
    * @param {number|object} [time] - The time to use, by default the current world time.
    * @param {object} [zone] - Optional climate zone with latitude/daylight overrides.
    * @returns {number} - Progress through day period, with 0 representing sunrise and 1 sunset.
    */
   progressDay(time = game.time.components, zone = null) {
-    return (CalendariaCalendar.hoursOfDay(time, this) - this.sunrise(time, zone)) / this.daylightHours(time, zone);
+    const daylightHrs = this.daylightHours(time, zone);
+    if (!daylightHrs) return 0;
+    return (CalendariaCalendar.hoursOfDay(time, this) - this.sunrise(time, zone)) / daylightHrs;
   }
 
   /**
-   * Progress between sunset and sunrise assuming it is night half the day duration.
+   * Progress between sunset and sunrise.
    * @param {number|object} [time] - The time to use, by default the current world time.
    * @param {object} [zone] - Optional climate zone with latitude/daylight overrides.
    * @returns {number} - Progress through night period, with 0 representing sunset and 1 sunrise.
    */
   progressNight(time = game.time.components, zone = null) {
-    const daylightHrs = this.daylightHours(time, zone);
+    const hoursPerDay = this.days.hoursPerDay;
+    const nightHrs = hoursPerDay - this.daylightHours(time, zone);
+    if (!nightHrs) return 0;
+    const sunset = this.sunset(time, zone);
     let hour = CalendariaCalendar.hoursOfDay(time, this);
-    if (hour < daylightHrs) hour += this.days.hoursPerDay;
-    return (hour - this.sunset(time, zone)) / daylightHrs;
+    if (hour < sunset) hour += hoursPerDay;
+    return (hour - sunset) / nightHrs;
   }
 
   /**
