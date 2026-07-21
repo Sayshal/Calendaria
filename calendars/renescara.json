@@ -1084,6 +1084,7 @@
     "yearLabel": "Y G"
   },
   "weather": {
+    "activeZone": "valdris",
     "zones": {
       "valdris000000000": {
         "id": "valdris",
