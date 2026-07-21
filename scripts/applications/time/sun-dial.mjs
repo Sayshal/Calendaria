@@ -6,6 +6,7 @@ import {
   CalendariaSocket,
   applyWeatherSkyTint,
   buildOpenAppsMenuItem,
+  canViewMoons,
   canViewSunDial,
   checkStickyZones,
   cleanupSnapIndicator,
@@ -359,7 +360,7 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     const tintedColors = applyWeatherSkyTint(skyColors);
     const starAlpha = computeStarAlpha(hour, sunrise, sunset);
     const moons = [];
-    if (calendar) {
+    if (calendar && canViewMoons()) {
       const showAll = game.settings.get(MODULE.ID, SETTINGS.HUD_SHOW_ALL_MOONS);
       const sortedMoons = [...(calendar.moonsArray ?? [])].sort((a, b) => _loc(a.name).localeCompare(_loc(b.name)));
       const moonList = showAll ? sortedMoons : sortedMoons.slice(0, 1);

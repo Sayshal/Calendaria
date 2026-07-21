@@ -175,4 +175,20 @@
     </div>
   </fieldset>
 
+  <fieldset data-section="player-visibility">
+    <legend>
+      {{localize "CALENDARIA.SettingsPanel.Section.PlayerVisibility"}}
+      <button type="button" class="reset-section" data-action="resetSection" data-section="player-visibility" data-tooltip
+        aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i class="fas fa-undo"></i></button>
+    </legend>
+
+    <div class="form-group">
+      <label for="hideMoonsFromPlayers">{{localize "CALENDARIA.Settings.HideMoonsFromPlayers.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="hideMoonsFromPlayers" name="hideMoonsFromPlayers" {{#if hideMoonsFromPlayers}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.HideMoonsFromPlayers.Hint"}}</p>
+    </div>
+  </fieldset>
+
 </section>

@@ -22,6 +22,7 @@ import {
   buildWeatherLookup,
   buildWeatherPillData,
   canViewBigCal,
+  canViewMoons,
   canViewNotes,
   enrichSeasonData,
   formatForLocation,
@@ -250,7 +251,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       context.fogNavDisableNext = !hasFogRevealedMonthInDirection(viewedDate.year, viewedDate.month, 1, calendar);
     }
     context.currentMonthNotes = this._getNotesForMonth(context.visibleNotes, viewedDate.year, viewedDate.month);
-    context.showMoonPhases = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SHOW_MOON_PHASES);
+    context.showMoonPhases = canViewMoons();
     context.weather = this._getWeatherContext();
     context.showWeather = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SHOW_WEATHER);
     context.showSeason = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SHOW_SEASON);
@@ -375,7 +376,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const daysInWeek = calendar.daysInWeek;
     const weeks = [];
     let currentWeek = [];
-    const showMoons = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SHOW_MOON_PHASES) && calendar.moonsArray.length;
+    const showMoons = canViewMoons() && calendar.moonsArray.length;
     const hasFixedStart = monthData?.startingWeekday != null;
     const rawStartDayOfWeek = hasFixedStart ? monthData.startingWeekday : dayOfWeek({ year, month, dayOfMonth: 0 });
     const weekStartIdx = getWeekStartIndex(calendar);
@@ -561,7 +562,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const daysInWeek = calendar.daysInWeek;
     const yearZero = calendar.years?.yearZero ?? 0;
     const daysInYear = calendar.getDaysInYear(year - yearZero);
-    const showMoons = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SHOW_MOON_PHASES) && calendar.moonsArray.length;
+    const showMoons = canViewMoons() && calendar.moonsArray.length;
     const fogEnabled = isFogEnabled();
     const weekNumber = Math.floor(viewedDayOfMonth / daysInWeek);
     const totalWeeks = Math.ceil(daysInYear / daysInWeek);

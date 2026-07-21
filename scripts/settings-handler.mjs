@@ -104,7 +104,6 @@ export default class CalendariaSettings {
       },
       [SETTINGS.CHRONICLE_CATEGORY_FILTER]: { name: 'Chronicle Category Filter', scope: 'client', config: false, type: new SetField(new StringField()), default: [] },
       [SETTINGS.CHRONICLE_SHOW_WEATHER]: { name: 'Chronicle Show Weather', scope: 'client', config: false, type: new BooleanField({ initial: true }) },
-      [SETTINGS.CHRONICLE_SHOW_MOON_PHASES]: { name: 'Chronicle Show Moon Phases', scope: 'client', config: false, type: new BooleanField({ initial: true }) },
       [SETTINGS.CHRONICLE_SHOW_SEASON_CHANGES]: { name: 'Chronicle Show Season Changes', scope: 'client', config: false, type: new BooleanField({ initial: true }) },
       [SETTINGS.CHRONICLE_VIEW_MODE]: { name: 'Chronicle View Mode', scope: 'client', config: false, type: new StringField({ initial: 'scroll' }) },
       [SETTINGS.CHRONICLE_POSITION]: { name: 'Chronicle Position', scope: 'user', config: false, type: new ObjectField({ nullable: true, initial: null }) },
@@ -279,14 +278,6 @@ export default class CalendariaSettings {
         }),
         onChange: renderMiniCal
       },
-      [SETTINGS.MINI_CAL_SHOW_MOON_PHASES]: {
-        name: 'CALENDARIA.Common.ShowMoonPhases',
-        hint: 'CALENDARIA.Settings.MiniCalShowMoonPhases.Hint',
-        scope: 'user',
-        config: false,
-        type: new BooleanField({ initial: true }),
-        onChange: renderMiniCal
-      },
       [SETTINGS.MINI_CAL_HEADER_SHOW_SELECTED]: {
         name: 'CALENDARIA.Common.ShowSelectedDateInHeader',
         hint: 'CALENDARIA.Common.ShowSelectedDateInHeaderHint',
@@ -384,14 +375,6 @@ export default class CalendariaSettings {
           },
           initial: 'icon'
         }),
-        onChange: renderBigCal
-      },
-      [SETTINGS.BIG_CAL_SHOW_MOON_PHASES]: {
-        name: 'CALENDARIA.Common.ShowMoonPhases',
-        hint: 'CALENDARIA.Settings.BigCalShowMoonPhases.Hint',
-        scope: 'user',
-        config: false,
-        type: new BooleanField({ initial: true }),
         onChange: renderBigCal
       },
       [SETTINGS.BIG_CAL_HEADER_SHOW_SELECTED]: {
@@ -985,6 +968,14 @@ export default class CalendariaSettings {
             HUD.show({ silent: true });
           }
         }
+      },
+      [SETTINGS.HIDE_MOONS_FROM_PLAYERS]: {
+        name: 'CALENDARIA.Settings.HideMoonsFromPlayers.Name',
+        hint: 'CALENDARIA.Settings.HideMoonsFromPlayers.Hint',
+        scope: 'world',
+        config: false,
+        type: new BooleanField({ initial: false }),
+        onChange: () => CalendarManager.rerenderCalendarUIs()
       },
       [SETTINGS.SHOW_CHRONICLE]: { name: 'Show Chronicle', scope: 'client', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.FORCE_CHRONICLE]: {

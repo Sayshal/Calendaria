@@ -35,6 +35,14 @@ export function hasPermission(permissionKey) {
 }
 
 /**
+ * Check whether moons should be shown to the current user. GMs always see them.
+ * @returns {boolean} True if moon display is allowed for this user
+ */
+export function canViewMoons() {
+  return game.user.isGM || !game.settings.get(MODULE.ID, SETTINGS.HIDE_MOONS_FROM_PLAYERS);
+}
+
+/**
  * Check if the current user can view the BigCal.
  * @returns {boolean} True if user has permission
  */

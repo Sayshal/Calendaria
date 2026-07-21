@@ -1,4 +1,5 @@
 import { resolveRandomizedPhase } from '../../data/_module.mjs';
+import { canViewMoons } from '../permissions.mjs';
 import WeatherManager from '../../weather/weather-manager.mjs';
 
 /**
@@ -696,6 +697,7 @@ export function hasMoonIconMarkers(str) {
  */
 export function renderMoonIcons(str) {
   if (!str || !hasMoonIconMarkers(str)) return str;
+  if (!canViewMoons()) return stripMoonIconMarkers(str);
   return str.replace(/__MOONICON:([^|]*)\|([^|]*)\|([^|]*)\|(.*?)__/g, (_, src, alt, tooltip, color) => {
     if (color) return `<span class="calendaria-moon-icon tinted" style="--moon-color: ${color}" data-tooltip="${tooltip}"><img src="${src}" alt="${alt}"></span>`;
     return `<img class="calendaria-moon-icon" src="${src}" alt="${alt}" data-tooltip="${tooltip}">`;

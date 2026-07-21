@@ -23,6 +23,7 @@ import {
   canChangeWeather,
   canViewBigCal,
   canViewMiniCal,
+  canViewMoons,
   canViewNotes,
   checkStickyZones,
   cleanupSnapIndicator,
@@ -316,7 +317,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     context.showSeason = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_SEASON);
     context.showEra = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_ERA);
     context.showCycles = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_CYCLES);
-    context.showMoonPhases = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_MOON_PHASES);
+    context.showMoonPhases = canViewMoons();
     context.canViewBigCal = canViewBigCal();
     context.weatherDisplayMode = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_WEATHER_DISPLAY_MODE);
     context.seasonDisplayMode = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SEASON_DISPLAY_MODE);
@@ -454,7 +455,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const daysInWeek = calendar.daysInWeek;
     const weeks = [];
     let currentWeek = [];
-    const showMoons = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_MOON_PHASES) && calendar.moonsArray.length;
+    const showMoons = canViewMoons() && calendar.moonsArray.length;
     const hasFixedStart = monthData?.startingWeekday != null;
     const rawStartDayOfWeek = hasFixedStart ? monthData.startingWeekday : dayOfWeek({ year, month, dayOfMonth: 0 });
     const weekStartIdx = getWeekStartIndex(calendar);
