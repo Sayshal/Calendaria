@@ -21,6 +21,7 @@ import {
   buildWeatherPillData,
   canChangeDateTime,
   canChangeWeather,
+  canViewBigCal,
   canViewMiniCal,
   canViewNotes,
   checkStickyZones,
@@ -316,6 +317,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     context.showEra = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_ERA);
     context.showCycles = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_CYCLES);
     context.showMoonPhases = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_MOON_PHASES);
+    context.canViewBigCal = canViewBigCal();
     context.weatherDisplayMode = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_WEATHER_DISPLAY_MODE);
     context.seasonDisplayMode = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SEASON_DISPLAY_MODE);
     context.eraDisplayMode = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_ERA_DISPLAY_MODE);
@@ -967,6 +969,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     container?.addEventListener('dblclick', (e) => {
       if (e.target.closest('button, a, input, select, .note-badge')) return;
       e.preventDefault();
+      if (!canViewBigCal()) return;
       this.close();
       BigCal.show();
     });
@@ -1612,6 +1615,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} _target - The clicked element
    */
   static async _onOpenFull(_event, _target) {
+    if (!canViewBigCal()) return;
     await this.close();
     BigCal.show();
   }

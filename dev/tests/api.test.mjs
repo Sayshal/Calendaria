@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CalendariaAPI, createGlobalNamespace } from '../../scripts/api.mjs';
+import { BigCal } from '../../scripts/applications/calendar/big-cal.mjs';
 import { MiniCal } from '../../scripts/applications/calendar/mini-cal.mjs';
 import { isBundledCalendar } from '../../scripts/calendar/calendar-loader.mjs';
 import CalendarManager from '../../scripts/calendar/calendar-manager.mjs';
@@ -1321,6 +1322,13 @@ describe('navigateToNote', () => {
     await CalendariaAPI.navigateToNote('1');
     expect(BigCalMock._lastInstance).toBeNull();
     expect(render).not.toHaveBeenCalled();
+  });
+});
+
+describe('navigateToDate', () => {
+  it('does not throw when BigCal cannot be opened', async () => {
+    vi.spyOn(BigCal, 'show').mockReturnValue(null);
+    await expect(CalendariaAPI.navigateToDate(1, 6, 15)).resolves.toBeUndefined();
   });
 });
 

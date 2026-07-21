@@ -2105,8 +2105,10 @@ async function navigateToDate(year, month, day) {
     }
   } else {
     const instance = BigCal.show();
-    instance.selectDate(dateObj);
-    await instance.render({ force: true });
+    if (instance) {
+      instance.selectDate(dateObj);
+      await instance.render({ force: true });
+    }
   }
 }
 

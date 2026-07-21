@@ -138,10 +138,6 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @override */
   _preRender(context, options) {
-    if (!canViewBigCal()) {
-      if (!options.silent) ui.notifications.warn('CALENDARIA.Permissions.NoAccess', { localize: true });
-      return false;
-    }
     Hooks.callAll(HOOKS.PRE_RENDER_CALENDAR, { app: this, displayMode: this._displayMode, calendar: CalendarManager.getActiveCalendar() });
     return super._preRender(context, options);
   }
@@ -2000,9 +1996,13 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {object} [options] - Show options
    * @param {boolean} [options.silent] - If true, don't show permission warning
    * @static
-   * @returns {BigCal} The BigCal instance
+   * @returns {BigCal|null} The BigCal instance, or null if blocked
    */
   static show({ silent = false } = {}) {
+    if (!canViewBigCal()) {
+      if (!silent) ui.notifications.warn('CALENDARIA.Permissions.NoAccess', { localize: true });
+      return null;
+    }
     if (isCombatBlocked(SETTINGS.BIG_CAL_COMBAT_MODE)) return null;
     const instance = this.instance ?? new BigCal();
     instance.render({ force: true, silent });

@@ -930,8 +930,10 @@ export const CalendariaAPI = {
       }
     } else {
       const instance = BigCal.show();
-      instance.selectDate(dateObj);
-      await instance.render({ force: true });
+      if (instance) {
+        instance.selectDate(dateObj);
+        await instance.render({ force: true });
+      }
     }
     const page = NoteManager.getFullNote(pageId);
     if (page) page.sheet.render(true, { mode: options.mode ?? 'view' });
@@ -959,8 +961,10 @@ export const CalendariaAPI = {
       }
     } else {
       const instance = BigCal.show();
-      instance.selectDate(dateObj);
-      await instance.render({ force: true });
+      if (instance) {
+        instance.selectDate(dateObj);
+        await instance.render({ force: true });
+      }
     }
   },
 
@@ -1107,13 +1111,9 @@ export const CalendariaAPI = {
 
   /**
    * Show the BigCal application.
-   * @returns {BigCal} The BigCal instance
+   * @returns {BigCal|null} The BigCal instance, or null if blocked
    */
   showBigCal() {
-    if (!Permissions.canViewBigCal()) {
-      ui.notifications.warn('CALENDARIA.Permissions.NoAccess', { localize: true });
-      return null;
-    }
     return BigCal.show();
   },
 
