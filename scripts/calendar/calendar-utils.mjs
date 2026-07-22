@@ -96,6 +96,16 @@ export function isLeapYear(leapYearConfig, year, yearZeroExists = true) {
       const intervals = parsePattern(pattern, start);
       return intersectsYear(intervals, year, yearZeroExists);
     }
+    case 'cycle': {
+      const period = leapYearConfig.interval;
+      if (!period || period <= 0 || !leapYearConfig.pattern) return false;
+      const intervals = leapYearConfig.pattern
+        .split(',')
+        .map((s) => parseInt(s.trim(), 10))
+        .filter((n) => Number.isFinite(n))
+        .map((r) => ({ interval: period, subtracts: false, offset: (((r - start) % period) + period) % period }));
+      return intersectsYear(intervals, year, yearZeroExists);
+    }
     default:
       return false;
   }
@@ -122,6 +132,11 @@ export function getLeapYearDescription(leapYearConfig) {
     case 'custom': {
       const pattern = leapYearConfig.pattern || '';
       return _loc('CALENDARIA.LeapYear.Custom', { pattern });
+    }
+    case 'cycle': {
+      const period = leapYearConfig.interval ?? 0;
+      const count = (leapYearConfig.pattern || '').split(',').filter((s) => s.trim().length > 0).length;
+      return _loc('CALENDARIA.LeapYear.Cycle', { count, period });
     }
     default:
       return _loc('CALENDARIA.LeapYear.None');

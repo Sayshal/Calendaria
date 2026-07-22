@@ -133,12 +133,12 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
 
   /** @override */
   timeToComponents(time) {
-    const adjustedTime = time + CalendariaCalendar.epochOffset;
     const secondsPerMinute = this.days?.secondsPerMinute ?? 60;
     const minutesPerHour = this.days?.minutesPerHour ?? 60;
     const hoursPerDay = this.days?.hoursPerDay ?? 24;
     const secondsPerHour = secondsPerMinute * minutesPerHour;
     const secondsPerDay = secondsPerHour * hoursPerDay;
+    const adjustedTime = time + CalendariaCalendar.epochOffset + (this.epochDayOffset ?? 0) * secondsPerDay;
     let dayOfMonth = Math.floor(adjustedTime / secondsPerDay);
     const daySeconds = adjustedTime - dayOfMonth * secondsPerDay;
     const hour = Math.floor(daySeconds / secondsPerHour);
@@ -183,7 +183,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     for (let m = 0; m < month; m++) totalDays += this.getDaysInMonth(m, year);
     totalDays += dayOfMonth;
     const totalSeconds = totalDays * secondsPerDay + hour * secondsPerHour + minute * secondsPerMinute + second;
-    return totalSeconds - CalendariaCalendar.epochOffset;
+    return totalSeconds - CalendariaCalendar.epochOffset - (this.epochDayOffset ?? 0) * secondsPerDay;
   }
 
   /**
@@ -411,6 +411,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       seasons: extendedSeasonSchema,
       days: extendedDaysSchema,
       secondsPerRound: new NumberField({ required: false, integer: true, min: 0, initial: 6 }),
+      epochDayOffset: new NumberField({ required: false, integer: true, initial: 0 }),
       leapYearConfig: new SchemaField(
         {
           rule: new StringField({ required: false, initial: 'none' }),
@@ -690,6 +691,18 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
         case 'custom':
           if (advancedConfig.pattern) intervals = parsePattern(advancedConfig.pattern, start);
           break;
+        case 'cycle': {
+          // Leap years at fixed offsets within a repeating period, e.g. the Islamic 30-year tabular cycle.
+          const period = advancedConfig.interval;
+          if (period && period > 0 && advancedConfig.pattern) {
+            intervals = advancedConfig.pattern
+              .split(',')
+              .map((s) => parseInt(s.trim(), 10))
+              .filter((n) => Number.isFinite(n))
+              .map((r) => ({ interval: period, subtracts: false, offset: (((r - start) % period) + period) % period }));
+          }
+          break;
+        }
       }
     } else if (leapConfig) {
       const interval = leapConfig.leapInterval;

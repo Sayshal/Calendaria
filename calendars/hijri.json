@@ -1,0 +1,56 @@
+{
+  "id": "hijri",
+  "name": "Islamic (Hijri)",
+  "years": { "yearZero": 1389, "firstWeekday": 0, "allowNegativeYears": false },
+  "epochDayOffset": 287,
+  "leapYearConfig": { "rule": "cycle", "interval": 30, "start": 0, "pattern": "2,5,7,10,13,16,18,21,24,26,29" },
+  "months": {
+    "values": {
+      "muharram00000000": { "name": "Muharram", "abbreviation": "Muh", "ordinal": 1, "days": 30 },
+      "safar00000000000": { "name": "Safar", "abbreviation": "Saf", "ordinal": 2, "days": 29 },
+      "rabialawwal00000": { "name": "Rabi al-Awwal", "abbreviation": "Rab1", "ordinal": 3, "days": 30 },
+      "rabialthani00000": { "name": "Rabi al-Thani", "abbreviation": "Rab2", "ordinal": 4, "days": 29 },
+      "jumadaalawwal000": { "name": "Jumada al-Awwal", "abbreviation": "Jum1", "ordinal": 5, "days": 30 },
+      "jumadaalthani000": { "name": "Jumada al-Thani", "abbreviation": "Jum2", "ordinal": 6, "days": 29 },
+      "rajab00000000000": { "name": "Rajab", "abbreviation": "Raj", "ordinal": 7, "days": 30 },
+      "shaban0000000000": { "name": "Sha'ban", "abbreviation": "Sha", "ordinal": 8, "days": 29 },
+      "ramadan000000000": { "name": "Ramadan", "abbreviation": "Ram", "ordinal": 9, "days": 30 },
+      "shawwal000000000": { "name": "Shawwal", "abbreviation": "Shw", "ordinal": 10, "days": 29 },
+      "dhualqidah000000": { "name": "Dhu al-Qi'dah", "abbreviation": "DhuQ", "ordinal": 11, "days": 30 },
+      "dhualhijjah00000": { "name": "Dhu al-Hijjah", "abbreviation": "DhuH", "ordinal": 12, "days": 29, "leapDays": 30 }
+    }
+  },
+  "days": {
+    "values": {
+      "alahad0000000000": { "name": "al-Ahad", "abbreviation": "Ahd", "ordinal": 1, "isRestDay": false },
+      "alithnayn0000000": { "name": "al-Ithnayn", "abbreviation": "Ith", "ordinal": 2, "isRestDay": false },
+      "althulatha000000": { "name": "al-Thulatha", "abbreviation": "Thu", "ordinal": 3, "isRestDay": false },
+      "alarbia000000000": { "name": "al-Arbi'a", "abbreviation": "Arb", "ordinal": 4, "isRestDay": false },
+      "alkhamis00000000": { "name": "al-Khamis", "abbreviation": "Kha", "ordinal": 5, "isRestDay": false },
+      "aljumuah00000000": { "name": "al-Jumu'ah", "abbreviation": "Jum", "ordinal": 6, "isRestDay": true },
+      "alsabt0000000000": { "name": "al-Sabt", "abbreviation": "Sab", "ordinal": 7, "isRestDay": false }
+    },
+    "daysPerYear": 354,
+    "hoursPerDay": 24,
+    "minutesPerHour": 60,
+    "secondsPerMinute": 60
+  },
+  "seasons": { "type": "dated", "offset": 0, "values": {} },
+  "weeks": { "enabled": false, "type": "year-based", "names": {} },
+  "amPmNotation": { "am": "Ante Meridiem", "pm": "Post Meridiem", "amAbbr": "AM", "pmAbbr": "PM" },
+  "dateFormats": { "short": "D MMM", "long": "D MMMM, Y", "full": "MMMM D, Y", "time": "HH:mm", "time12": "h:mm a", "weekHeader": "[Week] W [of] MMMM, Y", "yearHeader": "Y G", "crossCalendar": "D MMMM Y G" },
+  "eras": {
+    "annohegirae00000": { "name": "Anno Hegirae", "abbreviation": "AH", "startYear": 0, "yearOffset": 0, "format": "{year} {abbreviation}" }
+  },
+  "festivals": {
+    "ramadanstart0000": { "name": "First of Ramadan", "description": "The beginning of the month of fasting.", "color": "#2e7d32", "icon": "fas fa-moon", "month": 8, "dayOfMonth": 0, "duration": 1, "leapYearOnly": false, "countsForWeekday": true },
+    "eidalfitr0000000": { "name": "Eid al-Fitr", "description": "The festival of breaking the fast, on the first of Shawwal.", "color": "#f9a825", "icon": "fas fa-star-and-crescent", "month": 9, "dayOfMonth": 0, "duration": 3, "leapYearOnly": false, "countsForWeekday": true },
+    "eidaladha0000000": { "name": "Eid al-Adha", "description": "The festival of sacrifice, on the tenth of Dhu al-Hijjah.", "color": "#c62828", "icon": "fas fa-kaaba", "month": 11, "dayOfMonth": 9, "duration": 4, "leapYearOnly": false, "countsForWeekday": true }
+  },
+  "metadata": {
+    "id": "hijri",
+    "description": "A tabular Islamic (Hijri) lunar calendar: twelve alternating 30/29-day months across a 354-day year, with a 30-year leap cycle. Use the Epoch Day Offset on the Years tab to align it precisely to your world. Pair it with a solar calendar and the 'month/day in another calendar' conditions to place migrating festivals like Ramadan on your primary calendar.",
+    "author": "calendaria",
+    "system": "Real World"
+  }
+}

@@ -16,6 +16,7 @@ export const BUNDLED_CALENDARS = [
   'pact-standard',
   'greyhawk',
   'harptos',
+  'hijri',
   'imperial-warhammer',
   'krynn-elven',
   'krynn-solamnia',

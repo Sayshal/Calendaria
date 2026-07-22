@@ -210,6 +210,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         secondsPerMinute: 60
       },
       secondsPerRound: 6,
+      epochDayOffset: 0,
       seasons: { type: 'dated', offset: 0, values: {} },
       eras: {},
       festivals: {},
@@ -419,14 +420,18 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       { value: 'none', label: 'CALENDARIA.Common.None', selected: currentRule === 'none' },
       { value: 'simple', label: 'CALENDARIA.Editor.LeapRule.Simple', selected: currentRule === 'simple' },
       { value: 'gregorian', label: 'CALENDARIA.Common.Gregorian', selected: currentRule === 'gregorian' },
+      { value: 'cycle', label: 'CALENDARIA.Editor.LeapRule.Cycle', selected: currentRule === 'cycle' },
       { value: 'custom', label: 'CALENDARIA.Common.Custom', selected: currentRule === 'custom' }
     ];
     context.showLeapSimple = currentRule === 'simple';
     context.showLeapGregorian = currentRule === 'gregorian';
     context.showLeapCustom = currentRule === 'custom';
+    context.showLeapCycle = currentRule === 'cycle';
     context.leapInterval = leapYearConfig?.interval ?? legacyLeapYear?.leapInterval ?? 4;
     context.leapStart = leapYearConfig?.start ?? legacyLeapYear?.leapStart ?? 0;
     context.leapPattern = leapYearConfig?.pattern ?? '';
+    context.leapCyclePeriod = currentRule === 'cycle' ? (leapYearConfig?.interval ?? 30) : 30;
+    context.leapCycleOffsets = currentRule === 'cycle' ? (leapYearConfig?.pattern ?? '') : '';
     const yearNames = this.#calendarData.years.names || [];
     context.namedYears = yearNames.map((entry, idx) => ({ ...entry, index: idx }));
     const moonsArr = Object.entries(this.#calendarData.moons);
@@ -490,6 +495,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       { value: 'dated', label: 'CALENDARIA.Editor.Season.Type.Dated' },
       { value: 'periodic', label: 'CALENDARIA.Editor.Season.Type.Periodic' }
     ];
+    if (!this.#calendarData.seasons) this.#calendarData.seasons = { type: 'dated', offset: 0, values: {} };
     context.seasonType = this.#calendarData.seasons.type || 'dated';
     context.seasonOffset = this.#calendarData.seasons.offset ?? 0;
     context.seasonTypeOptions = seasonTypeOptions.map((opt) => ({ ...opt, selected: opt.value === context.seasonType }));
@@ -967,6 +973,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       } else if (leapRule === 'custom') {
         leapConfig.pattern = data['leapYearConfig.pattern'] || '';
         this.#calendarData.years.leapYear = null;
+      } else if (leapRule === 'cycle') {
+        leapConfig.interval = parseInt(data['leapYearConfig.cyclePeriod']) || 30;
+        leapConfig.pattern = data['leapYearConfig.cycleOffsets'] || '';
+        this.#calendarData.years.leapYear = null;
       } else if (leapRule === 'gregorian') {
         this.#calendarData.years.leapYear = { leapStart: leapConfig.start, leapInterval: 4 };
       }
@@ -978,6 +988,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#calendarData.days.secondsPerMinute = parseInt(data['days.secondsPerMinute']) || 60;
     const spr = parseInt(data.secondsPerRound);
     this.#calendarData.secondsPerRound = Number.isFinite(spr) ? spr : 6;
+    const edo = parseInt(data.epochDayOffset);
+    this.#calendarData.epochDayOffset = Number.isFinite(edo) ? edo : 0;
     if (!this.#calendarData.daylight) this.#calendarData.daylight = {};
     this.#calendarData.daylight.enabled = data['daylight.enabled'] ?? false;
     const shortRaw = parseFloat(data['daylight.shortestDay']);
