@@ -897,6 +897,77 @@
       "hasDuration": false,
       "reminderType": "none",
       "reminderOffset": 0
+    },
+    "easter0000000000": {
+      "name": "Easter",
+      "month": 3,
+      "icon": "fa-egg",
+      "color": "#C8A2C8",
+      "description": "The feast of resurrection, a moveable feast falling on the first Sunday after the first full moon of spring.",
+      "dayOfMonth": 0,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "computed",
+            "op": "==",
+            "value": true,
+            "value2": {
+              "chain": [
+                {
+                  "type": "anchor",
+                  "value": "springEquinox"
+                },
+                {
+                  "type": "firstAfter",
+                  "condition": "moonPhase",
+                  "params": {
+                    "moon": 0,
+                    "phase": "full"
+                  }
+                },
+                {
+                  "type": "firstAfter",
+                  "condition": "weekday",
+                  "params": {
+                    "weekday": 0
+                  }
+                }
+              ],
+              "yearOverrides": {
+                "1998": {
+                  "month": 3,
+                  "dayOfMonth": 11
+                },
+                "2018": {
+                  "month": 3,
+                  "dayOfMonth": 0
+                },
+                "2019": {
+                  "month": 3,
+                  "dayOfMonth": 20
+                },
+                "2038": {
+                  "month": 3,
+                  "dayOfMonth": 24
+                }
+              }
+            }
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
     }
   },
   "cycles": {},
