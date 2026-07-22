@@ -35,6 +35,24 @@
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.ForceHUD.Hint"}}</p>
       </div>
+      <div class="form-group">
+        <label for="forceHUDLock">{{localize "CALENDARIA.Settings.ForceHUDLock.Name"}}</label>
+        <div class="form-fields">
+          <input type="checkbox" id="forceHUDLock" name="forceHUDLock" {{#if forceHUDLock}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.ForceHUDLock.Hint"}}</p>
+      </div>
+      <div class="form-group">
+        <label for="forceHUDZone">{{localize "CALENDARIA.Settings.ForceHUDZone.Name"}}</label>
+        <div class="form-fields">
+          <select id="forceHUDZone" name="forceHUDZone">
+            {{#each forceHUDZoneOptions}}
+              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{localize this.label}}</option>
+            {{/each}}
+          </select>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.ForceHUDZone.Hint"}}</p>
+      </div>
     {{/if}}
     <div class="form-group">
       <label for="calendarHUDMode">{{localize "CALENDARIA.Settings.CalendarHUDMode.Name"}}</label>

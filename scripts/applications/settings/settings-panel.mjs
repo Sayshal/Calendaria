@@ -808,6 +808,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     'hud-display': [
       SETTINGS.SHOW_CALENDAR_HUD,
       SETTINGS.FORCE_HUD,
+      SETTINGS.FORCE_HUD_LOCK,
+      SETTINGS.FORCE_HUD_ZONE,
       SETTINGS.CALENDAR_HUD_MODE,
       SETTINGS.HUD_CALENDAR_BUTTON,
       SETTINGS.HUD_DIAL_STYLE,
@@ -1108,6 +1110,14 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.calendarHUDLocked = game.settings.get(MODULE.ID, SETTINGS.CALENDAR_HUD_LOCKED);
     context.showCalendarHUD = game.settings.get(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD);
     context.forceHUD = game.settings.get(MODULE.ID, SETTINGS.FORCE_HUD);
+    context.forceHUDLock = game.settings.get(MODULE.ID, SETTINGS.FORCE_HUD_LOCK);
+    const forcedZone = game.settings.get(MODULE.ID, SETTINGS.FORCE_HUD_ZONE);
+    context.forceHUDZoneOptions = [
+      { value: '', label: 'CALENDARIA.Settings.ForceHUDZone.None', selected: !forcedZone },
+      { value: 'top-center', label: 'CALENDARIA.HUD.Zone.TopCenter', selected: forcedZone === 'top-center' },
+      { value: 'above-hotbar', label: 'CALENDARIA.HUD.Zone.AboveHotbar', selected: forcedZone === 'above-hotbar' },
+      { value: 'below-controls', label: 'CALENDARIA.HUD.Zone.BelowControls', selected: forcedZone === 'below-controls' }
+    ];
     const hudMode = game.settings.get(MODULE.ID, SETTINGS.CALENDAR_HUD_MODE);
     context.hudModeOptions = [
       { value: 'fullsize', label: _loc('CALENDARIA.Settings.CalendarHUDMode.Fullsize'), selected: hudMode === 'fullsize' },
@@ -1787,6 +1797,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('showMiniCal' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_MINI_CAL, data.showMiniCal);
     if ('showCalendarHUD' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD, data.showCalendarHUD);
     if ('forceHUD' in data) await game.settings.set(MODULE.ID, SETTINGS.FORCE_HUD, data.forceHUD);
+    if ('forceHUDLock' in data) await game.settings.set(MODULE.ID, SETTINGS.FORCE_HUD_LOCK, data.forceHUDLock);
+    if ('forceHUDZone' in data) await game.settings.set(MODULE.ID, SETTINGS.FORCE_HUD_ZONE, data.forceHUDZone);
     if ('forceMiniCal' in data) await game.settings.set(MODULE.ID, SETTINGS.FORCE_MINI_CAL, data.forceMiniCal);
     if ('calendarHUDMode' in data) {
       const oldMode = game.settings.get(MODULE.ID, SETTINGS.CALENDAR_HUD_MODE);

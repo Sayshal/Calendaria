@@ -969,6 +969,31 @@ export default class CalendariaSettings {
           }
         }
       },
+      [SETTINGS.FORCE_HUD_LOCK]: {
+        name: 'CALENDARIA.Settings.ForceHUDLock.Name',
+        hint: 'CALENDARIA.Settings.ForceHUDLock.Hint',
+        scope: 'world',
+        config: false,
+        type: new BooleanField({ initial: false }),
+        onChange: () => HUD.reapplyPosition()
+      },
+      [SETTINGS.FORCE_HUD_ZONE]: {
+        name: 'CALENDARIA.Settings.ForceHUDZone.Name',
+        hint: 'CALENDARIA.Settings.ForceHUDZone.Hint',
+        scope: 'world',
+        config: false,
+        type: new StringField({
+          initial: '',
+          blank: true,
+          choices: {
+            '': 'CALENDARIA.Settings.ForceHUDZone.None',
+            'top-center': 'CALENDARIA.HUD.Zone.TopCenter',
+            'above-hotbar': 'CALENDARIA.HUD.Zone.AboveHotbar',
+            'below-controls': 'CALENDARIA.HUD.Zone.BelowControls'
+          }
+        }),
+        onChange: () => HUD.reapplyPosition()
+      },
       [SETTINGS.HIDE_MOONS_FROM_PLAYERS]: {
         name: 'CALENDARIA.Settings.HideMoonsFromPlayers.Name',
         hint: 'CALENDARIA.Settings.HideMoonsFromPlayers.Hint',

@@ -96,6 +96,8 @@ export const SETTINGS = {
   FORCE_BIG_CAL: 'forceBigCal',
   FORCE_CHRONICLE: 'forceChronicle',
   FORCE_HUD: 'forceHUD',
+  FORCE_HUD_LOCK: 'forceHUDLock',
+  FORCE_HUD_ZONE: 'forceHUDZone',
   FORCE_MINI_CAL: 'forceMiniCal',
   FORCE_STOPWATCH: 'forceStopwatch',
   FORCE_SUN_DIAL: 'forceSunDial',

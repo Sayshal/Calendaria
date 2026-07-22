@@ -164,6 +164,7 @@ Hooks.once('ready', async () => {
   }
   if (game.settings.get(MODULE.ID, SETTINGS.DEV_MODE)) showDebugZones();
   Hooks.on('renderSceneControls', () => updateZonePositions('below-controls'));
+  Hooks.on('renderHotbar', () => updateZonePositions('above-hotbar'));
   initializeChatCommander();
   initializeFXMaster();
   initializeWeatherSound();
