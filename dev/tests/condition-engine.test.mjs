@@ -620,8 +620,8 @@ describe('createEpochContext()', () => {
 });
 
 describe('CONDITION_FIELDS constant', () => {
-  it('has 30 fields', () => {
-    expect(Object.keys(CONDITION_FIELDS).length).toBe(41);
+  it('has 43 fields', () => {
+    expect(Object.keys(CONDITION_FIELDS).length).toBe(43);
   });
   it('includes all original 28 fields', () => {
     const originalFields = [

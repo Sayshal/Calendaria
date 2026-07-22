@@ -1,4 +1,4 @@
-import { CalendarManager } from '../calendar/_module.mjs';
+import { CalendarManager, CalendarRegistry, convertDate } from '../calendar/_module.mjs';
 import { CONDITION_FIELDS, CONDITION_GROUP_MODES, CONDITION_OPERATORS, MAX_NESTING_DEPTH } from '../constants.mjs';
 import {
   checkSolsticeOrEquinox,
@@ -122,6 +122,15 @@ export function getFieldValue(field, date, value2 = null, epochCtx = null) {
       return date.month + 1;
     case CONDITION_FIELDS.DAY:
       return date.dayOfMonth + 1;
+    case CONDITION_FIELDS.MONTH_IN_CALENDAR: {
+      // Read the converted coords directly; never route through active-calendar day math.
+      const converted = cache(`cal:${value2}`, () => convertDate(date, CalendarRegistry.getActiveId(), value2));
+      return converted ? converted.month + 1 : null;
+    }
+    case CONDITION_FIELDS.DAY_IN_CALENDAR: {
+      const converted = cache(`cal:${value2}`, () => convertDate(date, CalendarRegistry.getActiveId(), value2));
+      return converted ? converted.dayOfMonth + 1 : null;
+    }
     case CONDITION_FIELDS.DAY_OF_YEAR:
       return cache('dayOfYear', () => getDayOfYear(date)) + 1;
     case CONDITION_FIELDS.DAYS_BEFORE_MONTH_END: {
