@@ -497,7 +497,7 @@ export function getGroupedFieldOptions(calendar) {
     const options = [];
     for (const [fieldId, schema] of Object.entries(FIELD_REGISTRY)) {
       if (schema.category !== category) continue;
-      if (schema.inputType === 'special') continue;
+      if (schema.inputType === 'special' && fieldId !== CONDITION_FIELDS.COMPUTED) continue;
       if (schema.available && !schema.available(calendar)) continue;
       options.push({ value: fieldId, label: _loc(schema.label) });
     }

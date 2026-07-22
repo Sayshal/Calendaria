@@ -53,7 +53,8 @@ export function resolveComputedDate(computedConfig, year) {
   let result = null;
   if (yearOverrides?.[year]) {
     const override = yearOverrides[year];
-    result = { year, month: override.month, dayOfMonth: override.dayOfMonth ?? override.day };
+    // dayOfMonth is 0-indexed; day (from the builder UI) is 1-indexed.
+    result = { year, month: override.month, dayOfMonth: override.dayOfMonth ?? (override.day != null ? override.day - 1 : 0) };
   } else {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return null;
@@ -130,6 +131,10 @@ function resolveAnchor(anchorType, year, calendar) {
       return resolveSeasonAnchor('winter', true);
     }
     default:
+      if (anchorType?.startsWith('date:')) {
+        const [, m, d] = anchorType.split(':');
+        return { year, month: parseInt(m, 10) || 0, dayOfMonth: parseInt(d, 10) || 0 };
+      }
       if (anchorType?.startsWith('seasonStart:')) {
         const idx = parseInt(anchorType.split(':')[1], 10);
         const bounds = getSeasonDayOfYearBounds(seasons[idx], calendar, internalYear);

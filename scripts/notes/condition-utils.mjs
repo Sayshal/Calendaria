@@ -184,7 +184,11 @@ function annotateCondition(condition, calendar, path, depth) {
     maxDay = months[dateMonth]?.days ?? 30;
   }
   let specialLabel = '';
-  if (isSpecialField) specialLabel = schema ? _loc(schema.label) : field;
+  let computedStepCount = 0;
+  if (isSpecialField) {
+    specialLabel = schema ? _loc(schema.label) : field;
+    computedStepCount = Array.isArray(value2?.chain) ? value2.chain.length : 0;
+  }
   return {
     entryType: 'condition',
     path,
@@ -203,6 +207,8 @@ function annotateCondition(condition, calendar, path, depth) {
     isDateField,
     isSpecialField,
     specialLabel,
+    computedStepCount,
+    hasComputedChain: computedStepCount > 0,
     showOffset,
     needsValue2,
     hasValue2Select: needsValue2 && !!value2Options?.length,

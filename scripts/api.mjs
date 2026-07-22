@@ -1,4 +1,18 @@
-import { BigCal, CalendarEditor, Chronicle, CinematicOverlay, HUD, MiniCal, NoteViewer, SecondaryCalendar, Stopwatch, SunDial, TimeKeeper, WeatherProbabilityDialog } from './applications/_module.mjs';
+import {
+  BigCal,
+  CalendarEditor,
+  Chronicle,
+  CinematicOverlay,
+  ComputedEventBuilder,
+  HUD,
+  MiniCal,
+  NoteViewer,
+  SecondaryCalendar,
+  Stopwatch,
+  SunDial,
+  TimeKeeper,
+  WeatherProbabilityDialog
+} from './applications/_module.mjs';
 import {
   CalendarManager,
   CalendarRegistry,
@@ -2461,7 +2475,7 @@ export const CalendariaAPI = {
  */
 export function createGlobalNamespace() {
   globalThis['CALENDARIA'] = {
-    apps: { HUD, BigCal, CalendarEditor, MiniCal, Chronicle, NoteViewer, Stopwatch, TimeKeeper },
+    apps: { HUD, BigCal, CalendarEditor, ComputedEventBuilder, MiniCal, Chronicle, NoteViewer, Stopwatch, TimeKeeper },
     managers: { CalendarManager, WeatherManager, NoteManager, TimeClock, TimeTracker },
     models: { CalendariaCalendar },
     socket: CalendariaSocket,

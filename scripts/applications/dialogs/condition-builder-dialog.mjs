@@ -12,6 +12,7 @@ import {
   unwrapFromRootGroup,
   wrapInRootGroup
 } from '../../notes/_module.mjs';
+import { ComputedEventBuilder } from './computed-event-builder.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -61,6 +62,7 @@ export class ConditionBuilderDialog extends HandlebarsApplicationMixin(Applicati
       addCondition: ConditionBuilderDialog.#onAddCondition,
       addGroup: ConditionBuilderDialog.#onAddGroup,
       removeEntry: ConditionBuilderDialog.#onRemoveEntry,
+      configureComputed: ConditionBuilderDialog.#onConfigureComputed,
       close: ConditionBuilderDialog.#onClose
     }
   };
@@ -131,6 +133,26 @@ export class ConditionBuilderDialog extends HandlebarsApplicationMixin(Applicati
     parent.children.splice(index, 1);
     this.#notifyChange();
     this.render();
+  }
+
+  /**
+   * Open the computed-date builder for a computed condition node.
+   * @param {Event} _event - Click event (unused)
+   * @param {HTMLElement} target - Button with the node path
+   */
+  static async #onConfigureComputed(_event, target) {
+    const path = target.dataset.path;
+    const node = getNodeAtPath(this.#tree, path);
+    if (!node || isGroup(node)) return;
+    const initial = Array.isArray(node.value2?.chain) ? node.value2 : { chain: [], yearOverrides: {} };
+    new ComputedEventBuilder({
+      config: initial,
+      onChange: (cfg) => {
+        node.value2 = cfg;
+        this.#notifyChange();
+        this.render();
+      }
+    }).render(true);
   }
 
   /**
