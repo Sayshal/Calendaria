@@ -645,3 +645,105 @@ export async function recoverOrphanedPresets() {
   await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_PRESETS, raw);
   ATLAS.log(2, `Recovered ${orphanIds.size} orphaned preset(s)`);
 }
+
+/**
+ * Remap stored moon indices after the moon collection of a calendar changed shape.
+ * @param {string} calendarId - Calendar whose notes reference the moons
+ * @param {number[]} mapping - Old canonical index to new index, -1 for a deleted moon
+ * @returns {Promise<void>}
+ */
+export async function repairMoonIndexReferences(calendarId, mapping) {
+  const { getFieldSchema } = await import('./condition-field-schema.mjs');
+  const { CONDITION_FIELDS } = await import('../constants.mjs');
+  const moonFields = new Set(Object.values(CONDITION_FIELDS).filter((f) => getFieldSchema(f)?.value2Semantic === 'moonIndex'));
+  const orphanValue = mapping.length;
+  const remap = (v) => {
+    if (typeof v !== 'number' || v < 0 || v >= mapping.length) return v;
+    return mapping[v] === -1 ? orphanValue : mapping[v];
+  };
+  const fixChain = (chain, state) => {
+    for (const step of chain ?? []) {
+      if (step?.type !== 'firstAfter' || step.condition !== 'moonPhase' || typeof step.params?.moon !== 'number') continue;
+      const next = remap(step.params.moon);
+      if (next !== step.params.moon) {
+        step.params.moon = next;
+        state.changed = true;
+        if (next === orphanValue) state.dangling = true;
+      }
+    }
+  };
+  const fixNode = (node, state) => {
+    if (!node || typeof node !== 'object') return;
+    if (moonFields.has(node.field) && typeof node.value2 === 'number') {
+      const next = remap(node.value2);
+      if (next !== node.value2) {
+        node.value2 = next;
+        state.changed = true;
+        if (next === orphanValue) state.dangling = true;
+      }
+    }
+    if (node.field === CONDITION_FIELDS.COMPUTED && Array.isArray(node.value2?.chain)) fixChain(node.value2.chain, state);
+    if (Array.isArray(node.children)) for (const child of node.children) fixNode(child, state);
+  };
+  let repaired = 0;
+  const danglingNames = [];
+  for (const journal of game.journal) {
+    const updates = [];
+    for (const page of journal.pages) {
+      if (page.type !== 'calendaria.calendarnote') continue;
+      if (page.flags?.[MODULE.ID]?.calendarId !== calendarId) continue;
+      const src = page.toObject().system;
+      const state = { changed: false, dangling: false };
+      const tree = foundry.utils.deepClone(src.conditionTree);
+      if (tree) fixNode(tree, state);
+      const conditions = foundry.utils.deepClone(src.conditions ?? []);
+      for (const entry of conditions) fixNode(entry, state);
+      const computedConfig = foundry.utils.deepClone(src.computedConfig ?? null);
+      if (computedConfig?.chain) fixChain(computedConfig.chain, state);
+      const moonConditions = foundry.utils.deepClone(src.moonConditions ?? []);
+      for (const entry of moonConditions) {
+        if (typeof entry?.moonIndex !== 'number') continue;
+        const next = remap(entry.moonIndex);
+        if (next !== entry.moonIndex) {
+          entry.moonIndex = next;
+          state.changed = true;
+          if (next === orphanValue) state.dangling = true;
+        }
+      }
+      if (!state.changed) continue;
+      updates.push({ _id: page.id, 'system.conditionTree': tree, 'system.conditions': conditions, 'system.computedConfig': computedConfig, 'system.moonConditions': moonConditions });
+      repaired++;
+      if (state.dangling) danglingNames.push(page.name);
+    }
+    if (updates.length) await JournalEntryPage.updateDocuments(updates, { parent: journal });
+  }
+  const activeId = game.time?.calendar?.metadata?.id;
+  if (activeId === calendarId) {
+    const config = game.settings.get(MODULE.ID, SETTINGS.MACRO_TRIGGERS);
+    const triggers = config?.moonPhase ?? [];
+    if (triggers.length) {
+      const kept = [];
+      let triggersChanged = false;
+      for (const trigger of triggers) {
+        if (typeof trigger.moonIndex !== 'number' || trigger.moonIndex < 0) {
+          kept.push(trigger);
+          continue;
+        }
+        const next = remap(trigger.moonIndex);
+        if (next === orphanValue) {
+          triggersChanged = true;
+          continue;
+        }
+        if (next !== trigger.moonIndex) {
+          triggersChanged = true;
+          kept.push({ ...trigger, moonIndex: next });
+        } else {
+          kept.push(trigger);
+        }
+      }
+      if (triggersChanged) await game.settings.set(MODULE.ID, SETTINGS.MACRO_TRIGGERS, { ...config, moonPhase: kept });
+    }
+  }
+  if (repaired) ui.notifications.info(_loc('CALENDARIA.Note.MoonReferencesRepaired', { count: repaired }));
+  if (danglingNames.length) ui.notifications.warn(_loc('CALENDARIA.Note.MoonReferencesDangling', { count: danglingNames.length, names: danglingNames.join(', ') }));
+}

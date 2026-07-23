@@ -3,7 +3,7 @@ import { ASSETS, DEFAULT_MOON_PHASES, HOOKS, MOON_VISIBILITY, TEMPLATES } from '
 import { FestivalManager } from '../../festivals/_module.mjs';
 import { createImporter } from '../../importers/_module.mjs';
 import { isLuxonSyncRequired } from '../../integrations/luxon-sync.mjs';
-import { NoteManager, summarizeConditionTree } from '../../notes/_module.mjs';
+import { NoteManager, repairMoonIndexReferences, summarizeConditionTree } from '../../notes/_module.mjs';
 import { RangeSlider, serializeNotes, validateFormatString } from '../../utils/_module.mjs';
 import { CLIMATE_ZONE_TEMPLATES, getBlankZoneConfig, getClimateTemplateOptions, getDefaultZoneConfig, getPresetAlias, setPresetAlias } from '../../weather/_module.mjs';
 import { ClimateEditor, TokenReferenceDialog } from '../_module.mjs';
@@ -127,6 +127,9 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @type {object} The working calendar data */
   #calendarData = null;
+
+  /** @type {string[]|null} Moon keys as of the last load or save, for reference repair on save. */
+  #savedMoonKeys = null;
 
   /** @type {boolean} Flag indicating if we're editing an existing calendar */
   #isEditing = false;
@@ -258,6 +261,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       if (calObj.days?.values) this.#calendarData.days.values = calObj.days.values;
       if (calObj.seasons?.values) this.#calendarData.seasons.values = calObj.seasons.values;
       preLocalizeCalendar(this.#calendarData);
+      this.#savedMoonKeys = Object.keys(this.#calendarData.moons ?? {});
     } else {
       this.#initializeBlankCalendar();
     }
@@ -1888,6 +1892,13 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static async #onRemoveMoon(_event, target) {
     const key = target.dataset.key;
+    const moon = this.#calendarData.moons[key];
+    const confirmed = await foundry.applications.api.DialogV2.confirm({
+      window: { title: _loc('CALENDARIA.Editor.RemoveMoonTitle') },
+      content: `<p>${_loc('CALENDARIA.Editor.RemoveMoonContent', { name: _loc(moon?.name ?? '') })}</p>`,
+      rejectClose: false
+    });
+    if (!confirmed) return;
     delete this.#calendarData.moons[key];
     this.#isDirty = true;
     this.render();
@@ -2449,6 +2460,12 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       }
       if (calendar) {
         this.#isDirty = false;
+        if (calendarId && this.#savedMoonKeys) {
+          const newKeys = Object.keys(this.#calendarData.moons ?? {});
+          const mapping = this.#savedMoonKeys.map((k) => newKeys.indexOf(k));
+          if (mapping.some((v, i) => v !== i)) await repairMoonIndexReferences(calendarId, mapping);
+        }
+        this.#savedMoonKeys = Object.keys(this.#calendarData.moons ?? {});
         if (calendarId) await FestivalManager.seedFestivalNotes(calendarId, calendar);
         ATLAS.log(3, `Checking for pending notes: ${this.#pendingNotes?.length || 0}, importerId: ${this.#pendingImporterId}, calendarId: ${calendarId}`);
         if (this.#pendingNotes?.length > 0 && this.#pendingImporterId && calendarId) {
