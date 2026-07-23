@@ -916,7 +916,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     ],
     fxmaster: [SETTINGS.FXMASTER_ENABLED, SETTINGS.FXMASTER_TOP_DOWN, SETTINGS.FXMASTER_FORCE_DOWNWARD, SETTINGS.FXMASTER_BELOW_TOKENS, SETTINGS.FXMASTER_SOUND_FX, SETTINGS.FXMASTER_SPLASH],
     'module-sync': [SETTINGS.PRIMARY_GM],
-    'module-integration': [SETTINGS.SHOW_TOOLBAR_BUTTON, SETTINGS.TOOLBAR_APPS, SETTINGS.SHOW_JOURNAL_FOOTER],
+    'module-integration': [SETTINGS.SHOW_TOOLBAR_BUTTON, SETTINGS.TOOLBAR_APPS, SETTINGS.SHOW_JOURNAL_FOOTER, SETTINGS.ENRICHER_CLICK_TARGET],
     'module-debugging': [SETTINGS.DEV_MODE],
     permissions: [SETTINGS.PERMISSIONS],
     'player-visibility': [SETTINGS.HIDE_MOONS_FROM_PLAYERS],
@@ -2304,10 +2304,23 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {PointerEvent} _event - The click event
    * @param {HTMLElement} target - The clicked element
    */
+  /**
+   * The section's setting keys the current user is allowed to write.
+   * @param {string} sectionId - Section identifier from SECTION_SETTINGS
+   * @returns {string[]} Writable setting keys
+   */
+  static #resettableKeys(sectionId) {
+    const sectionKeys = SettingsPanel.SECTION_SETTINGS[sectionId] ?? [];
+    return sectionKeys.filter((key) => {
+      const setting = game.settings.settings.get(`${MODULE.ID}.${key}`);
+      return setting && (game.user.isGM || setting.scope !== 'world');
+    });
+  }
+
   static async #onResetSection(_event, target) {
     const sectionId = target.dataset.section;
-    const settingKeys = SettingsPanel.SECTION_SETTINGS[sectionId];
-    if (!settingKeys?.length) return;
+    const settingKeys = SettingsPanel.#resettableKeys(sectionId);
+    if (!settingKeys.length) return;
     const settingLabels = settingKeys
       .map((key) => {
         const meta = SettingsPanel.SETTING_METADATA[key];
