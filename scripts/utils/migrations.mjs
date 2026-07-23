@@ -101,7 +101,18 @@ function convertSeasonal(noteData) {
     const calendar = CalendarManager.getActiveCalendar();
     const season = calendar?.seasonsArray?.[config.seasonIndex];
     const bounds = getSeasonDayOfYearBounds(season, calendar);
-    if (bounds) children.push(ct('dayOfYear', '==', config.trigger === 'firstDay' ? bounds.startDoY : bounds.endDoY));
+    if (bounds) {
+      const months = calendar?.monthsArray ?? [];
+      let remaining = config.trigger === 'firstDay' ? bounds.startDoY : bounds.endDoY;
+      let month = 0;
+      for (; month < months.length; month++) {
+        const days = months[month]?.days ?? 30;
+        if (remaining < days) break;
+        remaining -= days;
+      }
+      children.push(ct('month', '==', month + 1));
+      children.push(ct('day', '==', remaining + 1));
+    }
   }
   return buildAndGroup(children);
 }

@@ -389,10 +389,9 @@ describe('moon phases', () => {
 });
 
 describe('getCurrentSeason', () => {
-  it('returns the season at the current season index', () => {
+  it('returns the calendar-resolved current season', () => {
     const seasons = [{ name: 'Spring' }, { name: 'Summer' }];
-    CalendarManager.getActiveCalendar.mockReturnValue({ seasons: true, seasonsArray: seasons });
-    game.time.components.season = 1;
+    CalendarManager.getActiveCalendar.mockReturnValue({ seasons: true, seasonsArray: seasons, getCurrentSeason: () => seasons[1] });
     expect(CalendariaAPI.getCurrentSeason()).toEqual({ name: 'Summer' });
   });
   it('returns null when no calendar is active', () => {
@@ -400,8 +399,7 @@ describe('getCurrentSeason', () => {
     expect(CalendariaAPI.getCurrentSeason()).toBeNull();
   });
   it('returns null when seasonsArray is empty', () => {
-    CalendarManager.getActiveCalendar.mockReturnValue({ seasons: true, seasonsArray: [] });
-    game.time.components.season = 0;
+    CalendarManager.getActiveCalendar.mockReturnValue({ seasons: true, seasonsArray: [], getCurrentSeason: () => null });
     expect(CalendariaAPI.getCurrentSeason()).toBeNull();
   });
   it('returns null when calendar has no seasons', () => {

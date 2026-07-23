@@ -319,8 +319,8 @@
         "icon": "fas fa-seedling",
         "color": "#90ee90",
         "seasonalType": "spring",
-        "dayStart": 79,
-        "dayEnd": 171,
+        "dayStart": 78,
+        "dayEnd": 170,
         "abbreviation": "Spr"
       },
       "summer0000000000": {
@@ -328,7 +328,7 @@
         "icon": "fas fa-sun",
         "color": "#ffd700",
         "seasonalType": "summer",
-        "dayStart": 172,
+        "dayStart": 171,
         "dayEnd": 264,
         "abbreviation": "Sum"
       },
@@ -338,7 +338,7 @@
         "color": "#d2691e",
         "seasonalType": "autumn",
         "dayStart": 265,
-        "dayEnd": 354,
+        "dayEnd": 353,
         "abbreviation": "Aut"
       },
       "winter0000000000": {
@@ -346,8 +346,8 @@
         "icon": "fas fa-snowflake",
         "color": "#87ceeb",
         "seasonalType": "winter",
-        "dayStart": 355,
-        "dayEnd": 78,
+        "dayStart": 354,
+        "dayEnd": 77,
         "abbreviation": "Win"
       }
     }
@@ -426,8 +426,10 @@
     "enabled": true,
     "shortestDay": 8,
     "longestDay": 16,
-    "winterSolstice": 355,
-    "summerSolstice": 172
+    "winterSolstice": 354,
+    "summerSolstice": 171,
+    "springEquinox": 78,
+    "autumnEquinox": 265
   },
   "cycles": {},
   "canonicalHours": {},

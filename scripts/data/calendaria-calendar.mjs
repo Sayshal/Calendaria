@@ -518,8 +518,10 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
           enabled: new foundry.data.fields.BooleanField({ required: false, initial: false }),
           shortestDay: new NumberField({ required: false, initial: 8, min: 0 }),
           longestDay: new NumberField({ required: false, initial: 16, min: 0 }),
-          winterSolstice: new NumberField({ required: false, initial: 355, integer: true, min: 0 }),
-          summerSolstice: new NumberField({ required: false, initial: 172, integer: true, min: 0 })
+          winterSolstice: new NumberField({ required: false, initial: 354, integer: true, min: 0 }),
+          summerSolstice: new NumberField({ required: false, initial: 171, integer: true, min: 0 }),
+          springEquinox: new NumberField({ required: false, nullable: true, initial: null, integer: true, min: 0 }),
+          autumnEquinox: new NumberField({ required: false, nullable: true, initial: null, integer: true, min: 0 })
         },
         { required: false }
       ),
@@ -982,16 +984,15 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     const hoursPerDay = this.days.hoursPerDay;
     const daysPerYear = this.days.daysPerYear ?? 365;
     let dayOfYear = components.dayOfMonth;
-    const months = this.monthsArray;
-    for (let i = 0; i < components.month; i++) dayOfYear += months[i]?.days ?? 0;
+    for (let i = 0; i < components.month; i++) dayOfYear += this.getDaysInMonth(i, components.year);
     if (zone?.latitude != null) {
-      const summerSolsticeDay = this.daylight?.summerSolstice ?? Math.round(daysPerYear * 0.47);
+      const summerSolsticeDay = this.#normalizeRawDoy(this.daylight?.summerSolstice ?? Math.round(daysPerYear * 0.47), components.year);
       return CalendariaCalendar.computeDaylightFromLatitude(zone.latitude, dayOfYear, daysPerYear, hoursPerDay, summerSolsticeDay);
     }
-    if (zone?.shortestDay != null && zone?.longestDay != null) return this.#computeSinusoidalDaylight(dayOfYear, daysPerYear, zone.shortestDay, zone.longestDay);
+    if (zone?.shortestDay != null && zone?.longestDay != null) return this.#computeSinusoidalDaylight(dayOfYear, daysPerYear, zone.shortestDay, zone.longestDay, components.year);
     if (this.daylight?.enabled) {
       const { shortestDay, longestDay } = this.daylight;
-      return this.#computeSinusoidalDaylight(dayOfYear, daysPerYear, shortestDay, longestDay);
+      return this.#computeSinusoidalDaylight(dayOfYear, daysPerYear, shortestDay, longestDay, components.year);
     }
     return hoursPerDay * 0.5;
   }
@@ -1002,12 +1003,13 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    * @param {number} daysPerYear - Total days per year
    * @param {number} shortestDay - Shortest daylight hours
    * @param {number} longestDay - Longest daylight hours
+   * @param {number} [internalYear] - Year minus yearZero
    * @returns {number} Hours of daylight
    * @private
    */
-  #computeSinusoidalDaylight(dayOfYear, daysPerYear, shortestDay, longestDay) {
-    const winterSolstice = this.daylight?.winterSolstice ?? Math.round(daysPerYear * 0.97);
-    const summerSolstice = this.daylight?.summerSolstice ?? Math.round(daysPerYear * 0.47);
+  #computeSinusoidalDaylight(dayOfYear, daysPerYear, shortestDay, longestDay, internalYear = 0) {
+    const winterSolstice = this.#normalizeRawDoy(this.daylight?.winterSolstice ?? Math.round(daysPerYear * 0.97), internalYear);
+    const summerSolstice = this.#normalizeRawDoy(this.daylight?.summerSolstice ?? Math.round(daysPerYear * 0.47), internalYear);
     const daysSinceWinter = (dayOfYear - winterSolstice + daysPerYear) % daysPerYear;
     const daysBetweenSolstices = (summerSolstice - winterSolstice + daysPerYear) % daysPerYear;
     let progress;
@@ -1565,13 +1567,50 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    * @param {number|object} [time]  Time to use, by default the current world time.
    * @returns {object|null} Current season.
    */
+  /**
+   * Split a stored 0-based reference-year day-of-year into month and day of month.
+   * @param {number} value - 0-based reference-year day-of-year
+   * @returns {number[]} Month index and 0-based day of month
+   */
+  #rawDoyToMonthDay(value) {
+    const months = this.monthsArray;
+    let remaining = Math.max(0, value);
+    let month = 0;
+    for (; month < months.length; month++) {
+      const days = months[month]?.days ?? 30;
+      if (remaining < days) break;
+      remaining -= days;
+    }
+    if (month >= months.length) {
+      month = months.length - 1;
+      remaining = (months[month]?.days ?? 1) - 1;
+    }
+    return [month, remaining];
+  }
+
+  /**
+   * Re-resolve a stored 0-based day-of-year for a specific year, leap-aware.
+   * @param {number} value - 0-based reference-year day-of-year
+   * @param {number} internalYear - Year minus yearZero
+   * @returns {number} 0-based day-of-year valid for internalYear
+   */
+  #normalizeRawDoy(value, internalYear) {
+    const [month, day] = this.#rawDoyToMonthDay(value);
+    let doy = 0;
+    for (let m = 0; m < month; m++) doy += this.getDaysInMonth(m, internalYear);
+    return doy + Math.min(day, this.getDaysInMonth(month, internalYear) - 1);
+  }
+
+  /**
+   * Get the season containing a given time.
+   * @param {number|object} [time] - World time in seconds or time components
+   * @returns {object|null} Season record or null
+   */
   getCurrentSeason(time = game.time.worldTime) {
     const seasons = this.seasonsArray;
     if (!seasons.length) return null;
     const components = typeof time === 'number' ? this.timeToComponents(time) : time;
     const months = this.monthsArray;
-    let dayOfYear = components.dayOfMonth;
-    for (let i = 0; i < components.month; i++) dayOfYear += months[i]?.days ?? 0;
     if (this.seasons.type === 'periodic') {
       const totalDays = this.getDaysInYear(components.year);
       const { cycleLength } = this._calculatePeriodicSeasonBounds(0, totalDays);
@@ -1604,8 +1643,12 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
           if (currentMonth === season.monthEnd && components.dayOfMonth <= endDay) return season;
         }
       } else if (season.dayStart != null && season.dayEnd != null) {
-        const { dayStart, dayEnd } = season;
-        const inRange = dayStart <= dayEnd ? dayOfYear >= dayStart && dayOfYear <= dayEnd : dayOfYear >= dayStart || dayOfYear <= dayEnd;
+        const [sm, sd] = this.#rawDoyToMonthDay(season.dayStart);
+        const [em, ed] = this.#rawDoyToMonthDay(season.dayEnd);
+        const current = components.month * 1000 + components.dayOfMonth;
+        const start = sm * 1000 + sd;
+        const end = em * 1000 + ed;
+        const inRange = start <= end ? current >= start && current <= end : current >= start || current <= end;
         if (inRange) return season;
       }
     }

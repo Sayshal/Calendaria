@@ -237,9 +237,9 @@ export default class CalendariumImporter extends BaseImporter {
       return aDay - bDay;
     });
     return sortedSeasons.map((season, index) => {
-      const dayStart = (monthDayStarts[season.date?.month] ?? 0) + (season.date?.day ?? 0);
+      const dayStart = (monthDayStarts[season.date?.month] ?? 0) + Math.max(0, (season.date?.day ?? 1) - 1);
       const nextSeason = sortedSeasons[(index + 1) % sortedSeasons.length];
-      let dayEnd = (monthDayStarts[nextSeason.date?.month] ?? 0) + (nextSeason.date?.day ?? 0) - 1;
+      let dayEnd = (monthDayStarts[nextSeason.date?.month] ?? 0) + Math.max(0, (nextSeason.date?.day ?? 1) - 1) - 1;
       if (dayEnd < 0) dayEnd = totalDays - 1;
       if (dayEnd < dayStart) dayEnd += totalDays;
       return {

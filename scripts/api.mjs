@@ -578,9 +578,7 @@ export const CalendariaAPI = {
   getCurrentSeason() {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar?.seasons) return null;
-    const components = game.time.components;
-    const seasonIndex = components.season ?? 0;
-    return calendar.seasonsArray?.[seasonIndex] ?? null;
+    return calendar.getCurrentSeason() ?? null;
   },
 
   /**

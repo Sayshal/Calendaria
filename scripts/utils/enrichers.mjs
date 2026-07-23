@@ -1812,8 +1812,7 @@ function enrichAlmanac(config, label) {
   container.dataset.calConfig = '';
   const lines = [];
   lines.push(formatDate(null, 'dateFull', calendar));
-  const seasonIndex = components.season ?? 0;
-  const season = calendar?.seasonsArray?.[seasonIndex];
+  const season = calendar?.getCurrentSeason?.();
   if (season) lines.push(`${_loc('CALENDARIA.Common.Season')}: ${_loc(season.name)}`);
   const weather = WeatherManager.getCurrentWeather();
   if (weather) {

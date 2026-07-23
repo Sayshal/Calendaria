@@ -1,6 +1,6 @@
 import { CalendarManager } from '../calendar/_module.mjs';
 import { CONDITION_FIELDS, CONDITION_OPERATORS } from '../constants.mjs';
-import { findSeasonIndexByType, getCalendarMoonPhaseIndex, getDayOfYear, getMidpoint, getSeasonDayOfYearBounds, seededRandom } from '../utils/_module.mjs';
+import { findSeasonIndexByType, getCalendarMoonPhaseIndex, getDayOfYear, getMidpoint, getSeasonDayOfYearBounds, normalizeRawDoy, seededRandom } from '../utils/_module.mjs';
 import {
   EpochDataCache,
   NoteManager,
@@ -46,43 +46,40 @@ export function getEffectiveDuration(noteData) {
  */
 export function resolveComputedDate(computedConfig, year) {
   if (!computedConfig?.chain?.length) return null;
+  const { chain, yearOverrides } = computedConfig;
+  if (yearOverrides?.[year]) {
+    const override = yearOverrides[year];
+    return { year, month: override.month, dayOfMonth: override.dayOfMonth ?? (override.day != null ? override.day - 1 : 0) };
+  }
   const key = (computedConfig._cacheKey ??= JSON.stringify(computedConfig.chain));
   let yearMap = _computedDateCache.get(key);
   if (yearMap?.has(year)) return yearMap.get(year);
-  const { chain, yearOverrides } = computedConfig;
-  let result = null;
-  if (yearOverrides?.[year]) {
-    const override = yearOverrides[year];
-    // dayOfMonth is 0-indexed; day (from the builder UI) is 1-indexed.
-    result = { year, month: override.month, dayOfMonth: override.dayOfMonth ?? (override.day != null ? override.day - 1 : 0) };
-  } else {
-    const calendar = CalendarManager.getActiveCalendar();
-    if (!calendar) return null;
-    let currentDate = null;
-    for (const step of chain) {
-      switch (step.type) {
-        case 'anchor':
-          currentDate = resolveAnchor(step.value, year, calendar);
-          break;
-        case 'firstAfter':
-          if (!currentDate) break;
-          currentDate = resolveFirstAfter(currentDate, step.condition, step.params, calendar);
-          break;
-        case 'daysAfter':
-          if (!currentDate) break;
-          currentDate = addDays(currentDate, step.params?.days ?? 0);
-          break;
-        case 'weekdayOnOrAfter':
-          if (!currentDate) break;
-          currentDate = resolveWeekdayOnOrAfter(currentDate, step.params?.weekday ?? 0, calendar);
-          break;
-        default:
-          break;
-      }
-      if (!currentDate) break;
+  const calendar = CalendarManager.getActiveCalendar();
+  if (!calendar) return null;
+  let currentDate = null;
+  for (const step of chain) {
+    switch (step.type) {
+      case 'anchor':
+        currentDate = resolveAnchor(step.value, year, calendar);
+        break;
+      case 'firstAfter':
+        if (!currentDate) break;
+        currentDate = resolveFirstAfter(currentDate, step.condition, step.params, calendar);
+        break;
+      case 'daysAfter':
+        if (!currentDate) break;
+        currentDate = addDays(currentDate, step.params?.days ?? 0);
+        break;
+      case 'weekdayOnOrAfter':
+        if (!currentDate) break;
+        currentDate = resolveWeekdayOnOrAfter(currentDate, step.params?.weekday ?? 0, calendar);
+        break;
+      default:
+        break;
     }
-    result = currentDate ?? null;
+    if (!currentDate) break;
   }
+  const result = currentDate ?? null;
   if (!yearMap) {
     yearMap = new Map();
     _computedDateCache.set(key, yearMap);
@@ -123,11 +120,11 @@ function resolveAnchor(anchorType, year, calendar) {
     case 'autumnEquinox':
       return resolveSeasonAnchor('autumn', false);
     case 'summerSolstice': {
-      if (daylight.summerSolstice) return dayOfYearToDate(daylight.summerSolstice, year, calendar);
+      if (daylight.summerSolstice != null) return dayOfYearToDate(normalizeRawDoy(daylight.summerSolstice, calendar, internalYear), year, calendar);
       return resolveSeasonAnchor('summer', true);
     }
     case 'winterSolstice': {
-      if (daylight.winterSolstice) return dayOfYearToDate(daylight.winterSolstice, year, calendar);
+      if (daylight.winterSolstice != null) return dayOfYearToDate(normalizeRawDoy(daylight.winterSolstice, calendar, internalYear), year, calendar);
       return resolveSeasonAnchor('winter', true);
     }
     default:
@@ -274,20 +271,23 @@ function resolveWeekdayOnOrAfter(startDate, targetWeekday, calendar) {
 
 /**
  * Convert day of year to date object.
- * @param {number} dayOfYear - Day of year (1-based)
- * @param {number} year - Year
+ * @param {number} dayOfYear - 0-based day of year
+ * @param {number} year - Display year
  * @param {object} calendar - Calendar instance
  * @returns {object} Date { year, month, dayOfMonth }
  */
 function dayOfYearToDate(dayOfYear, year, calendar) {
   const months = calendar?.monthsArray ?? [];
-  let remaining = dayOfYear;
+  if (!months.length) return { year, month: 0, dayOfMonth: 0 };
+  const internalYear = year - (calendar?.years?.yearZero ?? 0);
+  let remaining = Math.max(0, dayOfYear);
   for (let m = 0; m < months.length; m++) {
-    const daysInMonth = months[m]?.days || 30;
-    if (remaining <= daysInMonth) return { year, month: m, dayOfMonth: remaining - 1 };
+    const daysInMonth = calendar?.getDaysInMonth?.(m, internalYear) ?? months[m]?.days ?? 30;
+    if (remaining < daysInMonth) return { year, month: m, dayOfMonth: remaining };
     remaining -= daysInMonth;
   }
-  return { year, month: months.length - 1, dayOfMonth: (months[months.length - 1]?.days || 1) - 1 };
+  const last = months.length - 1;
+  return { year, month: last, dayOfMonth: Math.max(0, (calendar?.getDaysInMonth?.(last, internalYear) ?? months[last]?.days ?? 1) - 1) };
 }
 
 /**

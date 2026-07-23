@@ -1,4 +1,5 @@
 import { resolveRandomizedPhase } from '../../data/_module.mjs';
+import { normalizeRawDoy } from '../calendar-math.mjs';
 import { canViewMoons } from '../permissions.mjs';
 import WeatherManager from '../../weather/weather-manager.mjs';
 
@@ -370,7 +371,7 @@ export function formatApproximateDate(calendar, components) {
   if (calendar?._calculateDayOfYear) dayOfYear = calendar._calculateDayOfYear(components);
   else {
     dayOfYear = components.dayOfMonth;
-    for (let i = 0; i < components.month; i++) dayOfYear += monthsValues[i]?.days ?? 0;
+    for (let i = 0; i < components.month; i++) dayOfYear += calendar?.getDaysInMonth?.(i, components.year) ?? monthsValues[i]?.days ?? 0;
   }
   let seasonStart = 0;
   let seasonEnd = 365;
@@ -386,8 +387,8 @@ export function formatApproximateDate(calendar, components) {
     seasonStart = bounds.dayStart;
     seasonEnd = bounds.dayEnd;
   } else if (season.dayStart !== undefined) {
-    seasonStart = season.dayStart;
-    seasonEnd = season.dayEnd ?? 365;
+    seasonStart = normalizeRawDoy(season.dayStart, calendar, components.year);
+    seasonEnd = season.dayEnd != null ? normalizeRawDoy(season.dayEnd, calendar, components.year) : 365;
   }
   let seasonLength, seasonPercent;
   if (seasonStart <= seasonEnd) {

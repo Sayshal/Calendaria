@@ -72,8 +72,35 @@ export function getTotalDaysSinceEpoch(date) {
 }
 
 /**
+ * Re-resolve a stored 0-based reference-year day-of-year for a specific year, leap-aware.
+ * @param {number} value - 0-based day-of-year in a non-leap reference year
+ * @param {object} calendar - Calendar instance
+ * @param {number} [internalYear] - Year minus yearZero (for leap-aware month sizes)
+ * @returns {number} 0-based day-of-year valid for internalYear
+ */
+export function normalizeRawDoy(value, calendar, internalYear = 0) {
+  const months = calendar?.monthsArray ?? [];
+  if (!months.length || !Number.isFinite(value)) return value;
+  let remaining = Math.max(0, value);
+  let month = 0;
+  for (; month < months.length; month++) {
+    const days = months[month]?.days ?? 30;
+    if (remaining < days) break;
+    remaining -= days;
+  }
+  if (month >= months.length) {
+    month = months.length - 1;
+    remaining = (months[month]?.days ?? 1) - 1;
+  }
+  const daysIn = (m) => calendar.getDaysInMonth?.(m, internalYear) ?? months[m]?.days ?? 30;
+  let doy = 0;
+  for (let m = 0; m < month; m++) doy += daysIn(m);
+  return doy + Math.min(remaining, daysIn(month) - 1);
+}
+
+/**
  * Get season index for a given day-of-year.
- * @param {number} dayOfYear - Day of year (1-based)
+ * @param {number} dayOfYear - Day of year (0-based)
  * @param {object[]} seasons - Seasons array
  * @param {object} [date] - Full date for month-based season resolution
  * @returns {number} Season index or -1
@@ -108,8 +135,9 @@ export function getSeasonIndex(dayOfYear, seasons, date) {
         if (currentMonth === season.monthEnd && date.dayOfMonth <= endDay) return i;
       }
     } else {
-      const start = season.dayStart ?? 0;
-      const end = season.dayEnd ?? start;
+      const internalYear = (date?.year ?? 0) - (calendar?.years?.yearZero ?? 0);
+      const start = normalizeRawDoy(season.dayStart ?? 0, calendar, internalYear);
+      const end = normalizeRawDoy(season.dayEnd ?? season.dayStart ?? 0, calendar, internalYear);
       if (isInSeasonRange(dayOfYear, start, end)) return i;
     }
   }
@@ -147,8 +175,8 @@ function resolveSeasonDayBounds(seasons, idx, totalDays, internalYear = 0) {
     const bounds = getSeasonDayOfYearBounds(season, calendar, internalYear);
     if (bounds) return { start: bounds.startDoY, end: bounds.endDoY };
   }
-  const start = season.dayStart ?? 0;
-  return { start, end: season.dayEnd ?? start };
+  const start = normalizeRawDoy(season.dayStart ?? 0, calendar, internalYear);
+  return { start, end: normalizeRawDoy(season.dayEnd ?? season.dayStart ?? 0, calendar, internalYear) };
 }
 
 /**
@@ -220,7 +248,7 @@ export function getSeasonDayOfYearBounds(season, calendar, internalYear = 0) {
     return { startDoY, endDoY };
   }
   if (season.dayStart == null) return null;
-  return { startDoY: season.dayStart, endDoY: season.dayEnd ?? season.dayStart };
+  return { startDoY: normalizeRawDoy(season.dayStart, calendar, internalYear), endDoY: normalizeRawDoy(season.dayEnd ?? season.dayStart, calendar, internalYear) };
 }
 
 /**
@@ -297,8 +325,11 @@ export function getAstronomicalDayOfYear(calendar, seasonalType, year) {
   const internalYear = year - yearZero;
   const totalDays = calendar?.getDaysInYear?.(internalYear) ?? getTotalDaysInYear(year);
   const wrap = (d) => ((Math.round(d) % totalDays) + totalDays) % totalDays;
-  const summerCfg = calendar?.daylight?.summerSolstice ?? Math.round(totalDays * 0.47);
-  const winterCfg = calendar?.daylight?.winterSolstice ?? wrap(summerCfg + totalDays / 2);
+  // Explicit equinox authoring wins over the solstice-midpoint derivation.
+  if (seasonalType === 'spring' && calendar?.daylight?.springEquinox != null) return normalizeRawDoy(calendar.daylight.springEquinox, calendar, internalYear);
+  if (seasonalType === 'autumn' && calendar?.daylight?.autumnEquinox != null) return normalizeRawDoy(calendar.daylight.autumnEquinox, calendar, internalYear);
+  const summerCfg = calendar?.daylight?.summerSolstice != null ? normalizeRawDoy(calendar.daylight.summerSolstice, calendar, internalYear) : Math.round(totalDays * 0.47);
+  const winterCfg = calendar?.daylight?.winterSolstice != null ? normalizeRawDoy(calendar.daylight.winterSolstice, calendar, internalYear) : wrap(summerCfg + totalDays / 2);
   const cacheKey = `${calendar?.metadata?.id ?? 'cal'}:${internalYear}:${summerCfg}:${winterCfg}:${totalDays}`;
   let solstices = astroDayCache.get(cacheKey);
   if (!solstices) {

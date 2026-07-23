@@ -958,7 +958,7 @@
     "enabled": true,
     "shortestDay": 8,
     "longestDay": 16,
-    "winterSolstice": 281,
+    "winterSolstice": 280,
     "summerSolstice": 126
   },
   "eras": {
