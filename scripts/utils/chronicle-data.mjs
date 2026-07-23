@@ -4,6 +4,8 @@ import { NoteManager, addDays, compareDates, dayOfWeek } from '../notes/_module.
 import { WeatherManager } from '../weather/_module.mjs';
 import { isFogEnabled, isRevealed } from './fog-of-war.mjs';
 import { dateFormattingParts } from './formatting/format-utils.mjs';
+import { isMoonVisible } from './formatting/moon-utils.mjs';
+import { canViewMoons } from './permissions.mjs';
 
 /**
  * Build a journal-style weather sentence from weather data.
@@ -91,7 +93,7 @@ export function buildScrollEntries(startDate, endDate, options = {}) {
   const weekdays = calendar.weekdaysArray || [];
   const yearZero = calendar.years?.yearZero ?? 0;
   const showWeather = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_SHOW_WEATHER);
-  const showMoons = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_SHOW_MOON_PHASES);
+  const showMoons = canViewMoons();
   const showSeasons = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_SHOW_SEASON_CHANGES);
   const emptyContentTypes = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_EMPTY_CONTENT_TYPES);
   const currentComponents = calendar.timeToComponents(game.time.worldTime);
@@ -144,6 +146,7 @@ export function buildScrollEntries(startDate, endDate, options = {}) {
     }
     if (showMoons && !filterActiveSuppressBanners) {
       for (let i = 0; i < moons.length; i++) {
+        if (!isMoonVisible(moons[i])) continue;
         const phase = calendar.getMoonPhase(i, internalComponents);
         if (!phase || !phase.name) continue;
         const mid = Math.floor(phase.phaseDuration / 2);

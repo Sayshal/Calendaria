@@ -151,7 +151,7 @@ export default class CalendariaImporter extends BaseImporter {
           const knownIds = new Set(getAllPresets().map((p) => p.id));
           noteData.categories = noteData.categories.filter((id) => knownIds.has(id));
         }
-        const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData, calendarId, openSheet: false });
+        const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData: this._convertForeignRecurrence(noteData), calendarId, openSheet: false });
         if (page) count++;
         else errors.push(`Failed to create note: ${note.name}`);
       } catch (error) {

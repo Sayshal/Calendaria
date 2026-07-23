@@ -1,4 +1,5 @@
 import { CONDITION_FIELDS, CONDITION_GROUP_MODES, CONDITION_OPERATORS, MAX_NESTING_DEPTH } from '../constants.mjs';
+import { ordinal } from '../utils/formatting/format-utils.mjs';
 import { getFieldSchema, getGroupedFieldOptions, getOperatorOptions, getValue2Options, getValueOptions } from './_module.mjs';
 import { isGroup } from './condition-engine.mjs';
 
@@ -183,7 +184,11 @@ function annotateCondition(condition, calendar, path, depth) {
     maxDay = months[dateMonth]?.days ?? 30;
   }
   let specialLabel = '';
-  if (isSpecialField) specialLabel = schema ? _loc(schema.label) : field;
+  let computedStepCount = 0;
+  if (isSpecialField) {
+    specialLabel = schema ? _loc(schema.label) : field;
+    computedStepCount = Array.isArray(value2?.chain) ? value2.chain.length : 0;
+  }
   return {
     entryType: 'condition',
     path,
@@ -202,6 +207,8 @@ function annotateCondition(condition, calendar, path, depth) {
     isDateField,
     isSpecialField,
     specialLabel,
+    computedStepCount,
+    hasComputedChain: computedStepCount > 0,
     showOffset,
     needsValue2,
     hasValue2Select: needsValue2 && !!value2Options?.length,
@@ -387,7 +394,10 @@ function describeOneCondition(cond, calendar) {
     if (field === 'daysBeforeMonthEnd' && op === '<=') return `within last ${valueStr} days of the month`;
     return `${fieldLabel} ${opLabels[op]} ${valueStr}`;
   }
-  if (op === '%') return offset ? `every ${value} ${fieldLabel} (offset ${offset})` : `every ${value} ${fieldLabel}`;
+  if (op === '%') {
+    const phrase = field === 'epoch' ? `every ${value} days` : field === 'day' ? `every ${ordinal(value)} day of the month` : `every ${value} ${fieldLabel}`;
+    return offset ? `${phrase} (offset ${offset})` : phrase;
+  }
   if (op === 'daysAgo') return `${value} days ago`;
   if (op === 'daysFromNow') return `in ${value} days`;
   if (op === 'withinLast') return `within last ${value} days`;

@@ -25,7 +25,7 @@ export function getDefaultNoteData() {
     color: '#4a9eff',
     icon: 'fas fa-calendar',
     iconType: 'fontawesome',
-    remindUsers: [],
+    reminderUsers: [],
     reminderOffset: 0,
     reminderUnit: 'hour',
     reminderType: 'toast',
@@ -132,56 +132,14 @@ export function validateNoteData(noteData, calendarId) {
     else if (!/^#[\dA-Fa-f]{6}$/.test(noteData.color)) errors.push('color must be a valid hex color (e.g., #4a9eff)');
   }
   if (noteData.icon !== undefined && typeof noteData.icon !== 'string') errors.push('icon must be a string');
-  if (noteData.remindUsers !== undefined) {
-    if (!Array.isArray(noteData.remindUsers)) errors.push('remindUsers must be an array');
-    else if (noteData.remindUsers.some((id) => typeof id !== 'string')) errors.push('remindUsers must be an array of user IDs (strings)');
+  if (noteData.reminderUsers !== undefined) {
+    if (!Array.isArray(noteData.reminderUsers)) errors.push('reminderUsers must be an array');
+    else if (noteData.reminderUsers.some((id) => typeof id !== 'string')) errors.push('reminderUsers must be an array of user IDs (strings)');
   }
   if (noteData.reminderOffset !== undefined) if (typeof noteData.reminderOffset !== 'number') errors.push('reminderOffset must be a number');
   if (noteData.macro !== undefined && noteData.macro !== null) if (typeof noteData.macro !== 'string') errors.push('macro must be a string (macro ID) or null');
   if (noteData.sceneId !== undefined && noteData.sceneId !== null) if (typeof noteData.sceneId !== 'string') errors.push('sceneId must be a string (scene ID) or null');
   return { valid: errors.length === 0, errors };
-}
-
-/** Legacy `repeat` values that are superseded by conditionTree. `'computed'` is still functional via computedConfig. */
-const DEPRECATED_REPEAT_VALUES = new Set(['daily', 'weekly', 'monthly', 'yearly', 'moon', 'random', 'linked', 'seasonal', 'weekOfMonth', 'range']);
-
-/** Legacy `repeat` values that can be auto-migrated to an equivalent conditionTree. */
-const AUTO_MIGRATABLE_REPEAT_VALUES = new Set(['daily', 'weekly', 'monthly', 'yearly']);
-
-/**
- * Build an equivalent conditionTree for a legacy `repeat` value when possible.
- * @param {object} noteData  Raw note data with a legacy `repeat` field
- * @returns {object|null}  Condition tree, or null if migration isn't possible
- */
-function buildConditionTreeFromLegacyRepeat(noteData) {
-  const repeat = noteData?.repeat;
-  if (!AUTO_MIGRATABLE_REPEAT_VALUES.has(repeat)) return null;
-  const startDate = noteData.startDate ?? {};
-  if (repeat === 'daily') return { type: 'group', mode: 'and', children: [] };
-  if (repeat === 'weekly') {
-    const weekday = noteData.weekday;
-    if (weekday == null) return null;
-    return { type: 'group', mode: 'and', children: [{ type: 'condition', field: 'weekday', op: '==', value: weekday + 1 }] };
-  }
-  if (repeat === 'monthly') {
-    const dayOfMonth = startDate.dayOfMonth;
-    if (dayOfMonth == null) return null;
-    return { type: 'group', mode: 'and', children: [{ type: 'condition', field: 'day', op: '==', value: dayOfMonth + 1 }] };
-  }
-  if (repeat === 'yearly') {
-    const month = startDate.month;
-    const dayOfMonth = startDate.dayOfMonth;
-    if (month == null || dayOfMonth == null) return null;
-    return {
-      type: 'group',
-      mode: 'and',
-      children: [
-        { type: 'condition', field: 'month', op: '==', value: month + 1 },
-        { type: 'condition', field: 'day', op: '==', value: dayOfMonth + 1 }
-      ]
-    };
-  }
-  return null;
 }
 
 /**
@@ -190,11 +148,6 @@ function buildConditionTreeFromLegacyRepeat(noteData) {
  * @returns {object}  Sanitized note data
  */
 export function sanitizeNoteData(noteData) {
-  if (noteData?.repeat && DEPRECATED_REPEAT_VALUES.has(noteData.repeat)) {
-    const migrated = !noteData.conditionTree && AUTO_MIGRATABLE_REPEAT_VALUES.has(noteData.repeat) ? buildConditionTreeFromLegacyRepeat(noteData) : null;
-    if (migrated) noteData = { ...noteData, conditionTree: migrated, repeat: 'never' };
-    else foundry.utils.logCompatibilityWarning(`Calendaria: noteData.repeat ('${noteData.repeat}') is deprecated. Use noteData.conditionTree instead.`, { since: '1.0.0', until: '1.2.0', once: true });
-  }
   const defaults = getDefaultNoteData();
   return {
     startDate: noteData.startDate || defaults.startDate,
@@ -212,7 +165,7 @@ export function sanitizeNoteData(noteData) {
     categories: Array.isArray(noteData.categories) ? noteData.categories : defaults.categories,
     color: noteData.color || defaults.color,
     icon: noteData.icon || defaults.icon,
-    remindUsers: Array.isArray(noteData.remindUsers) ? noteData.remindUsers : defaults.remindUsers,
+    reminderUsers: Array.isArray(noteData.reminderUsers) ? noteData.reminderUsers : defaults.reminderUsers,
     reminderOffset: noteData.reminderOffset ?? defaults.reminderOffset,
     reminderUnit: noteData.reminderUnit || defaults.reminderUnit,
     reminderType: noteData.reminderType || defaults.reminderType,
@@ -408,9 +361,12 @@ export function getPlayerUsablePresets() {
  * @param {string} label  Preset label
  * @param {string} [color]  Hex color
  * @param {string} [icon]  FontAwesome icon class
+ * @param {object} [options]  Additional preset fields
+ * @param {boolean} [options.playerUsable]  Whether non-GM users may apply the preset
+ * @param {number} [options.sortOrder]  Explicit sort order, defaults to the end of the list
  * @returns {Promise<object>}  The created preset
  */
-export async function addCustomPreset(label, color = '#868e96', icon = 'fas fa-tag') {
+export async function addCustomPreset(label, color = '#868e96', icon = 'fas fa-tag', { playerUsable = true, sortOrder } = {}) {
   const id =
     label
       .toLowerCase()
@@ -419,7 +375,7 @@ export async function addCustomPreset(label, color = '#868e96', icon = 'fas fa-t
   const existing = getAllPresets();
   if (existing.find((c) => c.id === id)) return existing.find((c) => c.id === id);
   const maxSort = existing.reduce((max, c) => Math.max(max, c.sortOrder ?? 0), -1);
-  const newPreset = { id, label, color, icon, builtin: false, sortOrder: maxSort + 1, playerUsable: true, defaults: emptyDefaults() };
+  const newPreset = { id, label, color, icon, builtin: false, sortOrder: sortOrder ?? maxSort + 1, playerUsable: !!playerUsable, defaults: emptyDefaults() };
   const raw = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_PRESETS) || [];
   raw.push(newPreset);
   invalidatePresetCache();
@@ -563,9 +519,9 @@ export function applyPresetDefaultsToNoteData(noteData, presetIds) {
     if (noteData[noteKey] === noteDefaults[noteKey] || noteData[noteKey] == null) noteData[noteKey] = defaults[defaultKey];
   }
   if (defaults.owners?.length) {
-    const existing = noteData.remindUsers || [];
+    const existing = noteData.reminderUsers || [];
     const combined = [...new Set([...existing, ...defaults.owners])];
-    noteData.remindUsers = combined;
+    noteData.reminderUsers = combined;
   }
   return noteData;
 }
@@ -657,52 +613,137 @@ export function extractNoteMatchData(page) {
 }
 
 /**
- * Migrate the preset schema: seed built-in presets into settings, backfill missing fields on custom presets.
- * @since 1.0.0
- * @deprecated Remove in 1.2.0
- * @returns {Promise<boolean>}  True if migration was performed
+ * Detect notes referencing preset IDs that no longer exist and reconstruct stub presets.
+ * Protects against custom presets lost during module updates or carried in by imported notes.
+ * Permanent repair pass, run once per world load.
+ * @returns {Promise<void>}
  */
-export async function migratePresetSchema() {
-  if (!game.user?.isGM) return false;
-  const KEY = 'presetSchemaV2MigrationComplete';
-  if (game.settings.get(MODULE.ID, KEY)) return false;
+export async function recoverOrphanedPresets() {
+  if (!game.user?.isGM) return;
   const raw = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_PRESETS) || [];
-  const existingIds = new Set(raw.map((c) => c.id));
-  const seeds = getBuiltinPresetSeeds();
-  const migrated = [];
-  for (let i = 0; i < seeds.length; i++) {
-    const seed = seeds[i];
-    if (existingIds.has(seed.id)) {
-      const existing = raw.find((c) => c.id === seed.id);
-      migrated.push({
-        ...existing,
-        label: existing.label || existing.name || seed.label,
-        builtin: true,
-        sortOrder: existing.sortOrder ?? i,
-        playerUsable: existing.playerUsable ?? true,
-        defaults: existing.defaults || emptyDefaults()
-      });
-    } else {
-      migrated.push({ ...seed, builtin: true, sortOrder: i, playerUsable: true, defaults: emptyDefaults() });
+  const savedIds = new Set(raw.map((c) => c.id));
+  const builtinIds = new Set([DEFAULT_PRESET_ID, ...getBuiltinPresetSeeds().map((s) => s.id)]);
+  const orphanIds = new Map();
+  for (const journal of game.journal) {
+    for (const page of journal.pages) {
+      if (page.type !== 'calendaria.calendarnote') continue;
+      const cats = page.system?.categories;
+      if (!Array.isArray(cats)) continue;
+      for (const id of cats) {
+        if (savedIds.has(id) || builtinIds.has(id) || orphanIds.has(id)) continue;
+        orphanIds.set(id, { color: page.system.color, icon: page.system.icon });
+      }
     }
   }
-  const builtinIds = new Set(seeds.map((s) => s.id));
-  let customIndex = seeds.length;
-  for (const cat of raw) {
-    if (builtinIds.has(cat.id)) continue;
-    migrated.push({
-      id: cat.id,
-      label: cat.label || cat.name || 'Unnamed',
-      color: cat.color || '#868e96',
-      icon: cat.icon || 'fa-tag',
-      builtin: false,
-      sortOrder: cat.sortOrder ?? customIndex++,
-      playerUsable: cat.playerUsable ?? true,
-      defaults: cat.defaults || emptyDefaults()
-    });
+  if (!orphanIds.size) return;
+  let sortOrder = raw.reduce((max, c) => Math.max(max, c.sortOrder ?? 0), -1) + 1;
+  for (const [id, data] of orphanIds) {
+    raw.push({ id, label: id, color: data.color || '#868e96', icon: data.icon || 'fas fa-tag', builtin: false, sortOrder: sortOrder++, playerUsable: true, defaults: {} });
+    ATLAS.log(2, `Recovered orphaned preset "${id}" from note data`);
   }
   invalidatePresetCache();
-  await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_PRESETS, migrated);
-  await game.settings.set(MODULE.ID, KEY, true);
-  return true;
+  await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_PRESETS, raw);
+  ATLAS.log(2, `Recovered ${orphanIds.size} orphaned preset(s)`);
+}
+
+/**
+ * Remap stored moon indices after the moon collection of a calendar changed shape.
+ * @param {string} calendarId - Calendar whose notes reference the moons
+ * @param {number[]} mapping - Old canonical index to new index, -1 for a deleted moon
+ * @returns {Promise<void>}
+ */
+export async function repairMoonIndexReferences(calendarId, mapping) {
+  const { getFieldSchema } = await import('./condition-field-schema.mjs');
+  const { CONDITION_FIELDS } = await import('../constants.mjs');
+  const moonFields = new Set(Object.values(CONDITION_FIELDS).filter((f) => getFieldSchema(f)?.value2Semantic === 'moonIndex'));
+  const orphanValue = mapping.length;
+  const remap = (v) => {
+    if (typeof v !== 'number' || v < 0 || v >= mapping.length) return v;
+    return mapping[v] === -1 ? orphanValue : mapping[v];
+  };
+  const fixChain = (chain, state) => {
+    for (const step of chain ?? []) {
+      if (step?.type !== 'firstAfter' || step.condition !== 'moonPhase' || typeof step.params?.moon !== 'number') continue;
+      const next = remap(step.params.moon);
+      if (next !== step.params.moon) {
+        step.params.moon = next;
+        state.changed = true;
+        if (next === orphanValue) state.dangling = true;
+      }
+    }
+  };
+  const fixNode = (node, state) => {
+    if (!node || typeof node !== 'object') return;
+    if (moonFields.has(node.field) && typeof node.value2 === 'number') {
+      const next = remap(node.value2);
+      if (next !== node.value2) {
+        node.value2 = next;
+        state.changed = true;
+        if (next === orphanValue) state.dangling = true;
+      }
+    }
+    if (node.field === CONDITION_FIELDS.COMPUTED && Array.isArray(node.value2?.chain)) fixChain(node.value2.chain, state);
+    if (Array.isArray(node.children)) for (const child of node.children) fixNode(child, state);
+  };
+  let repaired = 0;
+  const danglingNames = [];
+  for (const journal of game.journal) {
+    const updates = [];
+    for (const page of journal.pages) {
+      if (page.type !== 'calendaria.calendarnote') continue;
+      if (page.flags?.[MODULE.ID]?.calendarId !== calendarId) continue;
+      const src = page.toObject().system;
+      const state = { changed: false, dangling: false };
+      const tree = foundry.utils.deepClone(src.conditionTree);
+      if (tree) fixNode(tree, state);
+      const conditions = foundry.utils.deepClone(src.conditions ?? []);
+      for (const entry of conditions) fixNode(entry, state);
+      const computedConfig = foundry.utils.deepClone(src.computedConfig ?? null);
+      if (computedConfig?.chain) fixChain(computedConfig.chain, state);
+      const moonConditions = foundry.utils.deepClone(src.moonConditions ?? []);
+      for (const entry of moonConditions) {
+        if (typeof entry?.moonIndex !== 'number') continue;
+        const next = remap(entry.moonIndex);
+        if (next !== entry.moonIndex) {
+          entry.moonIndex = next;
+          state.changed = true;
+          if (next === orphanValue) state.dangling = true;
+        }
+      }
+      if (!state.changed) continue;
+      updates.push({ _id: page.id, 'system.conditionTree': tree, 'system.conditions': conditions, 'system.computedConfig': computedConfig, 'system.moonConditions': moonConditions });
+      repaired++;
+      if (state.dangling) danglingNames.push(page.name);
+    }
+    if (updates.length) await JournalEntryPage.updateDocuments(updates, { parent: journal });
+  }
+  const activeId = game.time?.calendar?.metadata?.id;
+  if (activeId === calendarId) {
+    const config = game.settings.get(MODULE.ID, SETTINGS.MACRO_TRIGGERS);
+    const triggers = config?.moonPhase ?? [];
+    if (triggers.length) {
+      const kept = [];
+      let triggersChanged = false;
+      for (const trigger of triggers) {
+        if (typeof trigger.moonIndex !== 'number' || trigger.moonIndex < 0) {
+          kept.push(trigger);
+          continue;
+        }
+        const next = remap(trigger.moonIndex);
+        if (next === orphanValue) {
+          triggersChanged = true;
+          continue;
+        }
+        if (next !== trigger.moonIndex) {
+          triggersChanged = true;
+          kept.push({ ...trigger, moonIndex: next });
+        } else {
+          kept.push(trigger);
+        }
+      }
+      if (triggersChanged) await game.settings.set(MODULE.ID, SETTINGS.MACRO_TRIGGERS, { ...config, moonPhase: kept });
+    }
+  }
+  if (repaired) ui.notifications.info(_loc('CALENDARIA.Note.MoonReferencesRepaired', { count: repaired }));
+  if (danglingNames.length) ui.notifications.warn(_loc('CALENDARIA.Note.MoonReferencesDangling', { count: danglingNames.length, names: danglingNames.join(', ') }));
 }

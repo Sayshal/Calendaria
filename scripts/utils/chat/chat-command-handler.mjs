@@ -3,6 +3,7 @@ import { MODULE, SETTINGS, SOCKET_TYPES } from '../../constants.mjs';
 import { NoteManager } from '../../notes/_module.mjs';
 import { WeatherManager } from '../../weather/_module.mjs';
 import { PRESET_FORMATTERS, formatCustom, resolveFormatString } from '../formatting/format-utils.mjs';
+import { isMoonVisible } from '../formatting/moon-utils.mjs';
 import { canViewWeatherForecast } from '../permissions.mjs';
 import { CalendariaSocket } from '../socket.mjs';
 
@@ -86,9 +87,7 @@ function getCurrentDateTime() {
 function getCurrentSeason() {
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar?.seasons) return null;
-  const components = game.time.components;
-  const seasonIndex = components.season ?? 0;
-  const raw = calendar.seasonsArray?.[seasonIndex] ?? null;
+  const raw = calendar.getCurrentSeason() ?? null;
   return WeatherManager.applySeasonAlias(raw, WeatherManager.getActiveZone(null, game.scenes?.active));
 }
 
@@ -233,12 +232,13 @@ export function cmdMoon(args) {
   if (moonIndex !== null && !isNaN(moonIndex)) {
     const moon = moons[moonIndex];
     const phase = calendar.getMoonPhase(moonIndex);
-    if (!moon || !phase) return { content: _loc('CALENDARIA.Common.NoMoonsConfigured') };
+    if (!moon || !isMoonVisible(moon) || !phase) return { content: _loc('CALENDARIA.Common.NoMoonsConfigured') };
     const icon = phase.icon ? `<img src="${phase.icon}" style="height:1.2em;vertical-align:middle;margin-right:0.25rem;">` : '';
     return { content: `${icon}<strong>${_loc(moon.name)}:</strong> ${phase.subPhaseName || _loc(phase.name)}` };
   }
   const lines = moons
     .map((moon, index) => {
+      if (!isMoonVisible(moon)) return null;
       const phase = calendar.getMoonPhase(index);
       if (!phase) return null;
       const icon = phase.icon ? `<img src="${phase.icon}" style="height:1.2em;vertical-align:middle;margin-right:0.25rem;">` : '';
@@ -424,6 +424,7 @@ export function cmdCalendar() {
   if (calMoons?.length) {
     const moonStrs = calMoons
       .map((moon, index) => {
+        if (!isMoonVisible(moon)) return null;
         const phase = calendar.getMoonPhase(index);
         return phase ? `${_loc(moon.name)}: ${phase.subPhaseName || _loc(phase.name)}` : null;
       })

@@ -560,7 +560,7 @@
         "icon": "fas fa-seedling",
         "color": "#90ee90",
         "seasonalType": "spring",
-        "dayStart": 78,
+        "dayStart": 79,
         "dayEnd": 170,
         "abbreviation": "Spr"
       },
@@ -588,7 +588,7 @@
         "color": "#87ceeb",
         "seasonalType": "winter",
         "dayStart": 354,
-        "dayEnd": 77,
+        "dayEnd": 78,
         "abbreviation": "Win"
       }
     }

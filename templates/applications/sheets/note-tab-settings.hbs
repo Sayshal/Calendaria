@@ -18,7 +18,7 @@
           {{localize "CALENDARIA.Common.Visibility"}}
         </legend>
         <div class="visibility-group">
-          {{#if isGM}}
+          {{#if canSetVisibility}}
             <select name="system.visibility" data-tooltip aria-label="{{localize 'CALENDARIA.Note.VisibilityTooltip'}}">
               <option value="visible" {{#if (eq system.visibility "visible")}}selected{{/if}}>
                 {{localize "CALENDARIA.Note.Visibility.Visible"}}
@@ -26,9 +26,11 @@
               <option value="hidden" {{#if (eq system.visibility "hidden")}}selected{{/if}}>
                 {{localize "CALENDARIA.Common.Hidden"}}
               </option>
-              <option value="secret" {{#if (eq system.visibility "secret")}}selected{{/if}}>
-                {{localize "CALENDARIA.Note.Visibility.Secret"}}
-              </option>
+              {{#if isGM}}
+                <option value="secret" {{#if (eq system.visibility "secret")}}selected{{/if}}>
+                  {{localize "CALENDARIA.Note.Visibility.Secret"}}
+                </option>
+              {{/if}}
             </select>
           {{else}}
             <span class="visibility-label">

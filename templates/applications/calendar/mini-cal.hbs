@@ -4,10 +4,12 @@
       aria-label="{{localize 'CALENDARIA.Common.Close'}}">
       <i class="fas fa-times"></i>
     </button>
+    {{#if canViewBigCal}}
     <button type="button" class="minical-sidebar-btn" data-action="openFull" data-tooltip data-tooltip-direction="RIGHT"
       aria-label="{{localize 'CALENDARIA.Common.OpenBigCal'}}">
       <i class="fas fa-expand"></i>
     </button>
+    {{/if}}
     <button type="button" class="minical-sidebar-btn" data-action="today" data-tooltip data-tooltip-direction="RIGHT"
       aria-label="{{localize 'CALENDARIA.Common.Today'}}">
       <i class="fas fa-calendar-day"></i>

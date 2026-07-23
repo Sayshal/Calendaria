@@ -224,6 +224,23 @@ describe('isLeapYear()', () => {
     });
   });
 
+  describe('rule: cycle (Islamic tabular)', () => {
+    const hijri = { rule: 'cycle', interval: 30, start: 0, pattern: '2,5,7,10,13,16,18,21,24,26,29' };
+    const leapSet = new Set([2, 5, 7, 10, 13, 16, 18, 21, 24, 26, 29]);
+    it('marks exactly the 11 Islamic leap offsets within a 30-year cycle', () => {
+      const leaps = [];
+      for (let y = 0; y < 30; y++) if (isLeapYear(hijri, y)) leaps.push(y);
+      expect(leaps).toEqual([2, 5, 7, 10, 13, 16, 18, 21, 24, 26, 29]);
+    });
+    it('repeats the cycle across multiple periods', () => {
+      for (let y = 0; y < 90; y++) expect(isLeapYear(hijri, y)).toBe(leapSet.has(y % 30));
+    });
+    it('returns false when period or pattern is missing', () => {
+      expect(isLeapYear({ rule: 'cycle', pattern: '2,5' }, 5)).toBe(false);
+      expect(isLeapYear({ rule: 'cycle', interval: 30 }, 5)).toBe(false);
+    });
+  });
+
   describe('rule: unknown', () => {
     it('returns false for unknown rule', () => {
       expect(isLeapYear({ rule: 'unknown' }, 2020)).toBe(false);

@@ -1,6 +1,6 @@
 import { CalendarManager } from '../calendar/_module.mjs';
 import { HOOKS, MODULE, SETTINGS } from '../constants.mjs';
-import { executeMacroById } from '../utils/_module.mjs';
+import { executeMacroById, isMoonVisible } from '../utils/_module.mjs';
 import { WeatherManager } from '../weather/_module.mjs';
 
 /**
@@ -331,6 +331,7 @@ export default class TimeTracker {
         const currentPhase = phasesArr[currentPhaseIndex];
         changedMoons.push({
           moonIndex,
+          visible: isMoonVisible(moon),
           moonName: moon.name ? _loc(moon.name) : _loc('CALENDARIA.Calendar.MoonFallback', { num: moonIndex + 1 }),
           previousPhaseIndex: lastPhaseIndex,
           previousPhaseName: previousPhase?.name ? _loc(previousPhase.name) : null,

@@ -37,7 +37,6 @@ export const SETTINGS = {
   BIG_CAL_SEASON_DISPLAY_MODE: 'bigCalSeasonDisplayMode',
   BIG_CAL_SHOW_CYCLES: 'bigCalShowCycles',
   BIG_CAL_SHOW_ERA: 'bigCalShowEra',
-  BIG_CAL_SHOW_MOON_PHASES: 'bigCalShowMoonPhases',
   BIG_CAL_SHOW_SEASON: 'bigCalShowSeason',
   BIG_CAL_SHOW_WEATHER: 'bigCalShowWeather',
   BIG_CAL_WEATHER_DISPLAY_MODE: 'bigCalWeatherDisplayMode',
@@ -56,7 +55,6 @@ export const SETTINGS = {
   CHRONICLE_MINI_CAL_BUTTON: 'chronicleMiniCalButton',
   CHRONICLE_POSITION: 'chroniclePosition',
   CHRONICLE_SHOW_EMPTY: 'chronicleShowEmpty',
-  CHRONICLE_SHOW_MOON_PHASES: 'chronicleShowMoonPhases',
   CHRONICLE_SHOW_SEASON_CHANGES: 'chronicleShowSeasonChanges',
   CHRONICLE_SHOW_WEATHER: 'chronicleShowWeather',
   CHRONICLE_VIEW_MODE: 'chronicleViewMode',
@@ -98,9 +96,12 @@ export const SETTINGS = {
   FORCE_BIG_CAL: 'forceBigCal',
   FORCE_CHRONICLE: 'forceChronicle',
   FORCE_HUD: 'forceHUD',
+  FORCE_HUD_LOCK: 'forceHUDLock',
+  FORCE_HUD_ZONE: 'forceHUDZone',
   FORCE_MINI_CAL: 'forceMiniCal',
   FORCE_STOPWATCH: 'forceStopwatch',
   FORCE_SUN_DIAL: 'forceSunDial',
+  HIDE_MOONS_FROM_PLAYERS: 'hideMoonsFromPlayers',
   FORCE_TIME_KEEPER: 'forceTimeKeeper',
   FORECAST_ACCURACY: 'forecastAccuracy',
   FORECAST_DAYS: 'forecastDays',
@@ -156,7 +157,6 @@ export const SETTINGS = {
   MINI_CAL_SEASON_DISPLAY_MODE: 'miniCalSeasonDisplayMode',
   MINI_CAL_SHOW_CYCLES: 'miniCalShowCycles',
   MINI_CAL_SHOW_ERA: 'miniCalShowEra',
-  MINI_CAL_SHOW_MOON_PHASES: 'miniCalShowMoonPhases',
   MINI_CAL_SHOW_SEASON: 'miniCalShowSeason',
   MINI_CAL_SHOW_TIME: 'miniCalShowTime',
   MINI_CAL_SHOW_WEATHER: 'miniCalShowWeather',
@@ -401,6 +401,7 @@ export const CONDITION_FIELDS = {
   DATE: 'date',
   DAY_OF_YEAR: 'dayOfYear',
   DAY: 'day',
+  DAY_IN_CALENDAR: 'dayInCalendar',
   DAYS_BEFORE_MONTH_END: 'daysBeforeMonthEnd',
   ECLIPSE: 'eclipse',
   EPOCH: 'epoch',
@@ -418,6 +419,7 @@ export const CONDITION_FIELDS = {
   IS_SOLAR_ECLIPSE: 'isSolarEclipse',
   IS_SPRING_EQUINOX: 'isSpringEquinox',
   MONTH: 'month',
+  MONTH_IN_CALENDAR: 'monthInCalendar',
   MOON_PHASE_COUNT_MONTH: 'moonPhaseCountMonth',
   MOON_PHASE_COUNT_EPOCH: 'moonPhaseCountEpoch',
   MOON_PHASE_COUNT_YEAR: 'moonPhaseCountYear',
@@ -468,6 +470,9 @@ export const DISPLAY_STYLES = { BANNER: 'banner', ICON: 'icon', PIP: 'pip' };
 
 /** @enum {string} Note visibility levels. */
 export const NOTE_VISIBILITY = { HIDDEN: 'hidden', SECRET: 'secret', VISIBLE: 'visible' };
+
+/** @type {Object<string, string>} Moon visibility states. Two-state by design; hidden moons render only for the GM. */
+export const MOON_VISIBILITY = { HIDDEN: 'hidden', VISIBLE: 'visible' };
 
 /** @enum {string} Custom hook names fired by the module */
 export const HOOKS = {

@@ -1,4 +1,4 @@
-import { CalendarManager } from '../calendar/_module.mjs';
+import { CalendarManager, CalendarRegistry, convertDate } from '../calendar/_module.mjs';
 import { CONDITION_FIELDS, CONDITION_GROUP_MODES, CONDITION_OPERATORS, MAX_NESTING_DEPTH } from '../constants.mjs';
 import {
   checkSolsticeOrEquinox,
@@ -122,6 +122,15 @@ export function getFieldValue(field, date, value2 = null, epochCtx = null) {
       return date.month + 1;
     case CONDITION_FIELDS.DAY:
       return date.dayOfMonth + 1;
+    case CONDITION_FIELDS.MONTH_IN_CALENDAR: {
+      // Read the converted coords directly; never route through active-calendar day math.
+      const converted = cache(`cal:${value2}`, () => convertDate(date, CalendarRegistry.getActiveId(), value2));
+      return converted ? converted.month + 1 : null;
+    }
+    case CONDITION_FIELDS.DAY_IN_CALENDAR: {
+      const converted = cache(`cal:${value2}`, () => convertDate(date, CalendarRegistry.getActiveId(), value2));
+      return converted ? converted.dayOfMonth + 1 : null;
+    }
     case CONDITION_FIELDS.DAY_OF_YEAR:
       return cache('dayOfYear', () => getDayOfYear(date)) + 1;
     case CONDITION_FIELDS.DAYS_BEFORE_MONTH_END: {
@@ -343,7 +352,7 @@ export function getFieldValue(field, date, value2 = null, epochCtx = null) {
  * @returns {boolean} True if condition passes
  */
 export function evaluateCondition(condition, date, options = {}) {
-  const { field, op, value, value2 } = condition;
+  const { field, op, value, value2, offset = 0 } = condition;
   const { startDate, epochCtx } = options;
   const handler = fieldHandlers.get(field);
   if (handler) return handler(condition, date, options);
@@ -377,8 +386,9 @@ export function evaluateCondition(condition, date, options = {}) {
       return fieldValue < compareValue;
     case CONDITION_OPERATORS.MODULO: {
       if (compareValue === 0) return false;
-      const effectiveOffset = startDate ? (getFieldValue(field, startDate, value2) ?? 0) : 0;
-      return (fieldValue - effectiveOffset) % compareValue === 0;
+      const anchor = startDate ? (getFieldValue(field, startDate, value2) ?? 0) : 0;
+      const delta = fieldValue - anchor - (Number(offset) || 0);
+      return ((delta % compareValue) + compareValue) % compareValue === 0;
     }
     default:
       return false;
@@ -679,9 +689,7 @@ function _collectGapEstimates(entry, estimates) {
     estimates.push(yearGap);
     return;
   }
-  if (op === CONDITION_OPERATORS.MODULO && (field === CONDITION_FIELDS.DAY || field === CONDITION_FIELDS.EPOCH) && value > 0) {
-    estimates.push(value);
-  } else if (op === CONDITION_OPERATORS.EQUAL) {
+  if (op === CONDITION_OPERATORS.EQUAL) {
     if (field === CONDITION_FIELDS.WEEKDAY) estimates.push(7);
     else if (field === CONDITION_FIELDS.MONTH) estimates.push(yearGap);
     else if (field === CONDITION_FIELDS.DAY) estimates.push(31);

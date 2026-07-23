@@ -1,4 +1,18 @@
-import { BigCal, CalendarEditor, Chronicle, CinematicOverlay, HUD, MiniCal, NoteViewer, SecondaryCalendar, Stopwatch, SunDial, TimeKeeper, WeatherProbabilityDialog } from './applications/_module.mjs';
+import {
+  BigCal,
+  CalendarEditor,
+  Chronicle,
+  CinematicOverlay,
+  ComputedEventBuilder,
+  HUD,
+  MiniCal,
+  NoteViewer,
+  SecondaryCalendar,
+  Stopwatch,
+  SunDial,
+  TimeKeeper,
+  WeatherProbabilityDialog
+} from './applications/_module.mjs';
 import {
   CalendarManager,
   CalendarRegistry,
@@ -74,6 +88,7 @@ import {
   getWidgetByReplacement,
   isEclipseOnDate,
   isMoonFull,
+  isMoonVisible,
   refreshWidgets,
   registerWidget,
   resolveFormatString,
@@ -342,7 +357,7 @@ export const CalendariaAPI = {
    * Add a new calendar.
    * @param {string} id - Unique calendar ID
    * @param {object} definition - Calendar definition object
-   * @returns {Promise<object|null>} The created calendar or null if the ID already exists
+   * @returns {Promise<object|null>} The registered calendar, the existing one when the id is already registered, or null on failure
    */
   async addCalendar(id, definition) {
     return CalendarManager.addCalendar(id, definition);
@@ -433,6 +448,8 @@ export const CalendariaAPI = {
    * @returns {object|null} Moon phase data with name, icon, position, and dayInCycle
    */
   getMoonPhase(moonIndex = 0) {
+    const moon = CalendarManager.getActiveCalendar()?.moonsArray?.[moonIndex];
+    if (moon && !isMoonVisible(moon)) return null;
     return CalendarManager.getCurrentMoonPhase(moonIndex);
   },
 
@@ -441,7 +458,8 @@ export const CalendariaAPI = {
    * @returns {Array<object>} Array of moon phase data
    */
   getAllMoonPhases() {
-    return CalendarManager.getAllCurrentMoonPhases();
+    const moons = CalendarManager.getActiveCalendar()?.moonsArray ?? [];
+    return CalendarManager.getAllCurrentMoonPhases().map((entry, i) => (entry && isMoonVisible(moons[entry.moonIndex ?? i]) ? entry : null));
   },
 
   /**
@@ -564,9 +582,7 @@ export const CalendariaAPI = {
   getCurrentSeason() {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar?.seasons) return null;
-    const components = game.time.components;
-    const seasonIndex = components.season ?? 0;
-    return calendar.seasonsArray?.[seasonIndex] ?? null;
+    return calendar.getCurrentSeason() ?? null;
   },
 
   /**
@@ -909,7 +925,7 @@ export const CalendariaAPI = {
    * @param {string} pageId - Journal entry page ID
    * @param {object} [options] - Options
    * @param {string} [options.mode] - Sheet mode: 'view' (default) or 'edit'
-   * @param {string} [options.context] - Force target: 'bigcal' or 'minical' (auto-detects if omitted)
+   * @param {string} [options.context] - Force target, opening it if closed: 'bigcal' or 'minical'. When omitted, navigates only within an already-open calendar and opens nothing
    * @returns {Promise<void>}
    */
   async navigateToNote(pageId, options = {}) {
@@ -921,15 +937,12 @@ export const CalendariaAPI = {
     const startDate = stub.flagData.startDate;
     if (!startDate) return;
     const dateObj = { year: startDate.year, month: startDate.month, dayOfMonth: startDate.dayOfMonth ?? 0 };
-    const useMiniCal = options.context === 'minical' || (options.context !== 'bigcal' && MiniCal.instance?.rendered && !BigCal.instance?.rendered);
-    if (useMiniCal) {
-      const mini = MiniCal.show();
-      if (mini) {
-        mini.selectDate(dateObj);
-        await mini.render({ force: true });
-      }
-    } else {
-      const instance = BigCal.show();
+    let instance = null;
+    if (options.context === 'minical') instance = MiniCal.show();
+    else if (options.context === 'bigcal') instance = BigCal.show();
+    else if (BigCal.instance?.rendered) instance = BigCal.instance;
+    else if (MiniCal.instance?.rendered) instance = MiniCal.instance;
+    if (instance) {
       instance.selectDate(dateObj);
       await instance.render({ force: true });
     }
@@ -959,8 +972,10 @@ export const CalendariaAPI = {
       }
     } else {
       const instance = BigCal.show();
-      instance.selectDate(dateObj);
-      await instance.render({ force: true });
+      if (instance) {
+        instance.selectDate(dateObj);
+        await instance.render({ force: true });
+      }
     }
   },
 
@@ -1070,12 +1085,14 @@ export const CalendariaAPI = {
    * @param {string} options.label - Display name
    * @param {string} [options.color] - Hex color (default '#868e96')
    * @param {string} [options.icon] - FontAwesome icon class (default 'fas fa-tag')
-   * @param {object} [options.defaults] - Default values: { allDay, displayStyle, visibility, reminderType, reminderOffset, reminderUnit, hasDuration, duration, macro, content }
+   * @param {boolean} [options.playerUsable] - Allow non-GM users (default true)
+   * @param {number} [options.sortOrder] - Explicit sort order, defaults to the end of the list
+   * @param {object} [options.defaults] - Default values: { name, allDay, displayStyle, visibility, color, icon, reminderType, reminderOffset, reminderUnit, reminderTargets, hasDuration, duration, maxOccurrences, silent, showBookends, defaultOwnership, macro, owners, content }
    * @returns {Promise<object>} The created preset
    */
-  async addPreset({ label, color, icon, defaults } = {}) {
+  async addPreset({ label, color, icon, playerUsable, sortOrder, defaults } = {}) {
     if (!label) throw new Error('Preset label is required');
-    const preset = await addCustomPreset(label, color, icon);
+    const preset = await addCustomPreset(label, color, icon, { playerUsable, sortOrder });
     if (defaults && Object.keys(defaults).length) await updatePreset(preset.id, { defaults });
     return preset;
   },
@@ -1087,9 +1104,9 @@ export const CalendariaAPI = {
    * @param {string} [updates.label] - New display name
    * @param {string} [updates.color] - New hex color
    * @param {string} [updates.icon] - New FontAwesome icon class
+   * @param {number} [updates.sortOrder] - New sort order
    * @param {boolean} [updates.playerUsable] - Allow non-GM users
    * @param {object} [updates.defaults] - Updated default values, merged with existing (includes content template)
-   * @param {object} [updates.overrides] - Updated override values (merged with existing)
    * @returns {Promise<object|null>} Updated preset or null if not found
    */
   async updatePreset(presetId, updates) {
@@ -1107,13 +1124,9 @@ export const CalendariaAPI = {
 
   /**
    * Show the BigCal application.
-   * @returns {BigCal} The BigCal instance
+   * @returns {BigCal|null} The BigCal instance, or null if blocked
    */
   showBigCal() {
-    if (!Permissions.canViewBigCal()) {
-      ui.notifications.warn('CALENDARIA.Permissions.NoAccess', { localize: true });
-      return null;
-    }
     return BigCal.show();
   },
 
@@ -2464,7 +2477,7 @@ export const CalendariaAPI = {
  */
 export function createGlobalNamespace() {
   globalThis['CALENDARIA'] = {
-    apps: { HUD, BigCal, CalendarEditor, MiniCal, Chronicle, NoteViewer, Stopwatch, TimeKeeper },
+    apps: { HUD, BigCal, CalendarEditor, ComputedEventBuilder, MiniCal, Chronicle, NoteViewer, Stopwatch, TimeKeeper },
     managers: { CalendarManager, WeatherManager, NoteManager, TimeClock, TimeTracker },
     models: { CalendariaCalendar },
     socket: CalendariaSocket,

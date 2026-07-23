@@ -3,7 +3,23 @@ import { CalendarManager, CalendarRegistry, getEquivalentDates } from '../../cal
 import { MODULE, NOTE_VISIBILITY, SETTINGS, SOCKET_TYPES, TEMPLATES } from '../../constants.mjs';
 import { NoteManager, addDays, compareDays, extractNoteMatchData, getEffectiveDuration, isRecurringMatch, resolveNoteDisplayProps } from '../../notes/_module.mjs';
 import { WeatherManager } from '../../weather/_module.mjs';
-import { CalendariaSocket, canViewWeatherForecast, formatCustom, isFogEnabled, isRevealed, revealRange, toRomanNumeral } from '../_module.mjs';
+import {
+  CalendariaSocket,
+  canViewBigCal,
+  canViewChronicle,
+  canViewHUD,
+  canViewMiniCal,
+  canViewStopwatch,
+  canViewSunDial,
+  canViewTimeKeeper,
+  canViewWeatherForecast,
+  formatCustom,
+  isFogEnabled,
+  isMoonVisible,
+  isRevealed,
+  revealRange,
+  toRomanNumeral
+} from '../_module.mjs';
 
 const ContextMenu = foundry.applications.ux.ContextMenu.implementation;
 
@@ -165,7 +181,6 @@ export function getVisibleNotes(notes) {
     const { visibility } = resolveNoteDisplayProps(page);
     if (visibility === NOTE_VISIBILITY.SECRET && !showSecrets) return false;
     if (game.user.isGM) return true;
-    if (visibility !== NOTE_VISIBILITY.VISIBLE) return false;
     const journal = page.parent;
     return journal ? journal.testUserPermission(game.user, 'OBSERVER') : page.testUserPermission(game.user, 'OBSERVER');
   });
@@ -321,7 +336,10 @@ export function renderCycleIndicator({ cycleData, displayMode, cycleText }) {
  */
 export function getFirstMoonPhase(calendar, year, month, dayOfMonth) {
   if (!calendar?.moonsArray?.length) return null;
-  const sortedMoons = [...calendar.moonsArray].map((m, i) => ({ ...m, originalIndex: i })).sort((a, b) => _loc(a.name).localeCompare(_loc(b.name)));
+  const sortedMoons = [...calendar.moonsArray]
+    .map((m, i) => ({ ...m, originalIndex: i }))
+    .filter((m) => isMoonVisible(m))
+    .sort((a, b) => _loc(a.name).localeCompare(_loc(b.name)));
   let moon = sortedMoons[0];
   if (selectedMoonOverride) {
     const overrideMoon = sortedMoons.find((m) => _loc(m.name) === selectedMoonOverride);
@@ -351,6 +369,7 @@ export function getAllMoonPhases(calendar, year, month, dayOfMonth) {
   const dayWorldTime = calendar.componentsToTime(dayComponents);
   return calendar.moonsArray
     .map((moon, index) => {
+      if (!isMoonVisible(moon)) return null;
       const phase = calendar.getMoonPhase(index, dayWorldTime);
       if (!phase) return null;
       const color = moon.color || null;
@@ -912,14 +931,14 @@ export function buildOpenAppsMenuItem() {
       document.removeEventListener('pointermove', onMove);
       requestAnimationFrame(async () => {
         const subItems = [
-          { label: 'CALENDARIA.Common.BigCal', icon: '<i class="fas fa-calendar-days"></i>', onClick: () => BigCal.show() },
-          { label: 'CALENDARIA.Common.MiniCal', icon: '<i class="fas fa-calendar-alt"></i>', onClick: () => MiniCal.show() },
-          { label: 'CALENDARIA.SettingsPanel.Tab.HUD', icon: '<i class="fas fa-layer-group"></i>', onClick: () => HUD.show() },
-          { label: 'CALENDARIA.Common.TimeKeeper', icon: '<i class="fas fa-clock"></i>', onClick: () => TimeKeeper.show() },
-          { label: 'CALENDARIA.Common.StopWatch', icon: '<i class="fas fa-stopwatch"></i>', onClick: () => Stopwatch.show() },
-          { label: 'CALENDARIA.SettingsPanel.Tab.SunDial', icon: '<i class="fas fa-sun"></i>', onClick: () => SunDial.show() },
-          { label: 'CALENDARIA.Chronicle.Title', icon: '<i class="fas fa-scroll"></i>', onClick: () => CALENDARIA.apps.Chronicle.show() }
-        ];
+          { label: 'CALENDARIA.Common.BigCal', icon: '<i class="fas fa-calendar-days"></i>', onClick: () => BigCal.show(), canView: canViewBigCal },
+          { label: 'CALENDARIA.Common.MiniCal', icon: '<i class="fas fa-calendar-alt"></i>', onClick: () => MiniCal.show(), canView: canViewMiniCal },
+          { label: 'CALENDARIA.SettingsPanel.Tab.HUD', icon: '<i class="fas fa-layer-group"></i>', onClick: () => HUD.show(), canView: canViewHUD },
+          { label: 'CALENDARIA.Common.TimeKeeper', icon: '<i class="fas fa-clock"></i>', onClick: () => TimeKeeper.show(), canView: canViewTimeKeeper },
+          { label: 'CALENDARIA.Common.StopWatch', icon: '<i class="fas fa-stopwatch"></i>', onClick: () => Stopwatch.show(), canView: canViewStopwatch },
+          { label: 'CALENDARIA.SettingsPanel.Tab.SunDial', icon: '<i class="fas fa-sun"></i>', onClick: () => SunDial.show(), canView: canViewSunDial },
+          { label: 'CALENDARIA.Chronicle.Title', icon: '<i class="fas fa-scroll"></i>', onClick: () => CALENDARIA.apps.Chronicle.show(), canView: canViewChronicle }
+        ].filter((item) => item.canView());
         const subMenu = new ContextMenu(document.body, '.calendaria-open-submenu-no-match', subItems, { fixed: true, jQuery: false });
         await subMenu.render(document.body, { event: { clientX: pointer.x, clientY: pointer.y } });
         ui.context = subMenu;

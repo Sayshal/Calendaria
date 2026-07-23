@@ -51,23 +51,26 @@
         </a>
       </legend>
       <div class="cb-condition-row">
+        <select name="condition.{{path}}.field" class="cb-field-select" data-tooltip
+          aria-label="{{localize 'CALENDARIA.Condition.Builder.Tooltip.Field'}}">
+          {{#each fieldOptions}}
+            <optgroup label="{{label}}">
+              {{#each options}}
+                <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+              {{/each}}
+            </optgroup>
+          {{/each}}
+        </select>
+
         {{#if isSpecialField}}
-          <span class="cb-special-label"><i class="fas fa-lock"></i> {{specialLabel}}</span>
+          <button type="button" class="cb-configure-computed" data-action="configureComputed" data-path="{{path}}"
+            data-tooltip aria-label="{{localize 'CALENDARIA.Condition.Builder.ConfigureComputed'}}">
+            <i class="fas fa-calculator"></i> {{localize "CALENDARIA.Condition.Builder.ConfigureComputed"}}
+          </button>
           <span class="cb-special-value">
-            {{localize "CALENDARIA.Condition.Builder.ComputedReadOnly"}}
+            {{#if hasComputedChain}}{{localize "CALENDARIA.Condition.Builder.ComputedConfigured"}}{{else}}{{localize "CALENDARIA.Condition.Builder.ComputedNotConfigured"}}{{/if}}
           </span>
         {{else}}
-          <select name="condition.{{path}}.field" class="cb-field-select" data-tooltip
-            aria-label="{{localize 'CALENDARIA.Condition.Builder.Tooltip.Field'}}">
-            {{#each fieldOptions}}
-              <optgroup label="{{label}}">
-                {{#each options}}
-                  <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
-                {{/each}}
-              </optgroup>
-            {{/each}}
-          </select>
-
           <select name="condition.{{path}}.op" class="cb-op-select" data-tooltip
             aria-label="{{localize 'CALENDARIA.Condition.Builder.Tooltip.Operator'}}">
             {{#each opOptions}}

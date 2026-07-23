@@ -24,6 +24,9 @@ export default class WeatherManager {
   /** @type {Promise<void> | null} Promise of the currently running day-change auto-gen work. Null when idle. */
   static #dayChangeWork = null;
 
+  /** @type {Set<string>} Zone IDs already warned about, so per-tick lookups do not spam the log */
+  static #warnedZoneIds = new Set();
+
   /** @type {string} Default zone key used when no climate zone is configured */
   static DEFAULT_ZONE = '_default';
 
@@ -1616,6 +1619,21 @@ export default class WeatherManager {
   }
 
   /**
+   * Warn once per unmatched zone id, since zone lookups run on every world tick.
+   * @param {string|null} zoneId - The zone ID that did not match
+   * @param {string} [fallbackId] - The zone ID being used instead
+   * @returns {null} Always null, so callers can use it inline
+   * @private
+   */
+  static #warnStaleZone(zoneId, fallbackId) {
+    if (!zoneId || this.#warnedZoneIds.has(zoneId)) return null;
+    this.#warnedZoneIds.add(zoneId);
+    const suffix = fallbackId ? `, falling back to '${fallbackId}'` : ', ignoring it';
+    ATLAS.log(2, `Climate zone '${zoneId}' not found in the active calendar${suffix}`);
+    return null;
+  }
+
+  /**
    * Get the active climate zone config from the calendar.
    * @param {string} [zoneId] - Optional zone ID override
    * @param {object} [scene] - Optional scene to check for scene-level override
@@ -1625,11 +1643,15 @@ export default class WeatherManager {
     const calendar = CalendarManager.getActiveCalendar();
     const zones = calendar?.weatherZonesArray;
     if (!zones?.length) return null;
-    const sceneOverride = scene?.getFlag?.(MODULE.ID, SCENE_FLAGS.CLIMATE_ZONE_OVERRIDE) || null;
-    if (sceneOverride === 'none' && zoneId == null) return null;
+    const rawOverride = scene?.getFlag?.(MODULE.ID, SCENE_FLAGS.CLIMATE_ZONE_OVERRIDE) || null;
+    if (rawOverride === 'none' && zoneId == null) return null;
+    // A scene override left behind by a different calendar must not outrank the active calendar's own zone.
+    const sceneOverride = rawOverride && zones.some((z) => z.id === rawOverride) ? rawOverride : this.#warnStaleZone(rawOverride);
     const targetId = zoneId ?? sceneOverride ?? calendar.weather.activeZone;
     if (!targetId) return null;
-    return zones.find((z) => z.id === targetId) ?? zones[0] ?? null;
+    const match = zones.find((z) => z.id === targetId);
+    if (!match) this.#warnStaleZone(targetId, zones[0]?.id);
+    return match ?? zones[0] ?? null;
   }
 
   /**

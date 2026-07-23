@@ -23,14 +23,14 @@
       padding: 0.4rem 0.6rem;
       border: 0.0625rem solid color-mix(in srgb, var(--weather-color) 50%, transparent);
       border-radius: 0.25rem;
-      background: color-mix(in srgb, var(--weather-color) 15%, var(--atlas-surface-dim, rgb(45 45 45)));
+      background: color-mix(in srgb, var(--weather-color) 15%, transparent);
       transition:
         border-color 0.15s ease,
         background 0.15s ease;
 
       &.active {
         border-color: var(--weather-color);
-        background: color-mix(in srgb, var(--weather-color) 35%, var(--atlas-surface-dim, rgb(45 45 45)));
+        background: color-mix(in srgb, var(--weather-color) 35%, transparent);
       }
 
       i {
@@ -92,7 +92,6 @@
     }
 
     .units {
-      color: var(--atlas-text-secondary, rgb(170 170 170));
       font-size: 0.85rem;
     }
 
@@ -106,7 +105,6 @@
 
     .preset-header {
       border-bottom: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
-      color: var(--atlas-text-secondary, rgb(170 170 170));
       font-weight: 600;
       font-size: var(--font-size-14);
 
@@ -127,7 +125,6 @@
       }
 
       .solstice-date {
-        color: var(--atlas-text-secondary, rgb(170 170 170));
         font-size: 0.85rem;
       }
     }
@@ -158,20 +155,14 @@
         align-items: center;
         padding: 0.5rem 1rem;
         border-bottom: 0.125rem solid transparent;
-        color: var(--atlas-text-secondary, rgb(170 170 170));
         font-weight: 500;
         cursor: pointer;
         transition:
           color 0.15s ease,
           border-color 0.15s ease;
 
-        &:hover {
-          color: var(--atlas-text, rgb(224 224 224));
-        }
-
         &.active {
           border-bottom-color: var(--atlas-accent, rgb(168 144 96));
-          color: var(--atlas-text, rgb(224 224 224));
         }
       }
     }
@@ -206,7 +197,6 @@
       th {
         padding: 0.25rem 0.5rem;
         border-bottom: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
-        color: var(--atlas-text-secondary, rgb(170 170 170));
         font-size: var(--font-size-11);
         text-align: center;
         white-space: nowrap;
@@ -233,7 +223,6 @@
 
       .preset-weight {
         width: 1%;
-        color: var(--atlas-text-secondary, rgb(170 170 170));
         text-align: center;
         white-space: nowrap;
       }
@@ -263,7 +252,6 @@
       top: 0;
       right: 0;
       left: 0;
-      color: var(--atlas-text, rgb(224 224 224));
       font-weight: bold;
       font-size: var(--font-size-11);
       line-height: 1.25rem;
@@ -274,7 +262,6 @@
       margin-top: 0.5rem;
       padding: 0.5rem;
       border-top: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
-      color: var(--atlas-text-secondary, rgb(170 170 170));
       text-align: center;
 
       i {
@@ -291,7 +278,6 @@
     margin-left: 0.25rem;
     padding: 0 0.4rem;
     border: none;
-    color: var(--atlas-text-secondary, rgb(170 170 170));
     cursor: pointer;
     background: transparent;
     transition: color 0.15s ease;

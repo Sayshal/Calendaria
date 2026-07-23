@@ -215,12 +215,12 @@ describe('validateNoteData()', () => {
     const result = validateNoteData({ ...validNote, icon: 123 });
     expect(result.valid).toBe(false);
   });
-  it('rejects non-array remindUsers', () => {
-    const result = validateNoteData({ ...validNote, remindUsers: 'user1' });
+  it('rejects non-array reminderUsers', () => {
+    const result = validateNoteData({ ...validNote, reminderUsers: 'user1' });
     expect(result.valid).toBe(false);
   });
-  it('rejects remindUsers with non-string entries', () => {
-    const result = validateNoteData({ ...validNote, remindUsers: [123] });
+  it('rejects reminderUsers with non-string entries', () => {
+    const result = validateNoteData({ ...validNote, reminderUsers: [123] });
     expect(result.valid).toBe(false);
   });
   it('rejects non-number reminderOffset', () => {
@@ -271,83 +271,6 @@ describe('sanitizeNoteData()', () => {
   });
   it('sets macro to null when missing', () => {
     expect(sanitizeNoteData({}).macro).toBeNull();
-  });
-  it('emits a deprecation warning for legacy repeat values', () => {
-    foundry.utils.logCompatibilityWarning.mockClear();
-    sanitizeNoteData({ repeat: 'yearly' });
-    expect(foundry.utils.logCompatibilityWarning).toHaveBeenCalledWith(
-      expect.stringContaining("repeat ('yearly')"),
-      expect.objectContaining({ since: '1.0.0', until: '1.2.0' })
-    );
-  });
-  it('does not warn for repeat: never (default)', () => {
-    foundry.utils.logCompatibilityWarning.mockClear();
-    sanitizeNoteData({ repeat: 'never' });
-    expect(foundry.utils.logCompatibilityWarning).not.toHaveBeenCalled();
-  });
-  it('does not warn for repeat: computed (still functional)', () => {
-    foundry.utils.logCompatibilityWarning.mockClear();
-    sanitizeNoteData({ repeat: 'computed' });
-    expect(foundry.utils.logCompatibilityWarning).not.toHaveBeenCalled();
-  });
-  it('does not warn when repeat is omitted entirely', () => {
-    foundry.utils.logCompatibilityWarning.mockClear();
-    sanitizeNoteData({});
-    expect(foundry.utils.logCompatibilityWarning).not.toHaveBeenCalled();
-  });
-  it('auto-migrates legacy repeat: daily to an empty AND conditionTree', () => {
-    foundry.utils.logCompatibilityWarning.mockClear();
-    const result = sanitizeNoteData({ repeat: 'daily' });
-    expect(result.repeat).toBe('never');
-    expect(result.conditionTree).toEqual({ type: 'group', mode: 'and', children: [] });
-    expect(foundry.utils.logCompatibilityWarning).not.toHaveBeenCalled();
-  });
-  it('auto-migrates legacy repeat: weekly with weekday to a weekday condition', () => {
-    foundry.utils.logCompatibilityWarning.mockClear();
-    const result = sanitizeNoteData({ repeat: 'weekly', weekday: 2 });
-    expect(result.repeat).toBe('never');
-    expect(result.conditionTree).toEqual({ type: 'group', mode: 'and', children: [{ type: 'condition', field: 'weekday', op: '==', value: 3 }] });
-    expect(foundry.utils.logCompatibilityWarning).not.toHaveBeenCalled();
-  });
-  it('auto-migrates legacy repeat: monthly with startDate to a day condition', () => {
-    foundry.utils.logCompatibilityWarning.mockClear();
-    const result = sanitizeNoteData({ repeat: 'monthly', startDate: { month: 0, dayOfMonth: 14 } });
-    expect(result.repeat).toBe('never');
-    expect(result.conditionTree).toEqual({ type: 'group', mode: 'and', children: [{ type: 'condition', field: 'day', op: '==', value: 15 }] });
-    expect(foundry.utils.logCompatibilityWarning).not.toHaveBeenCalled();
-  });
-  it('auto-migrates legacy repeat: yearly with startDate to month + day conditions', () => {
-    foundry.utils.logCompatibilityWarning.mockClear();
-    const result = sanitizeNoteData({ repeat: 'yearly', startDate: { month: 5, dayOfMonth: 20 } });
-    expect(result.repeat).toBe('never');
-    expect(result.conditionTree).toEqual({
-      type: 'group',
-      mode: 'and',
-      children: [
-        { type: 'condition', field: 'month', op: '==', value: 6 },
-        { type: 'condition', field: 'day', op: '==', value: 21 }
-      ]
-    });
-    expect(foundry.utils.logCompatibilityWarning).not.toHaveBeenCalled();
-  });
-  it('still warns for legacy repeat: weekly when weekday is missing', () => {
-    foundry.utils.logCompatibilityWarning.mockClear();
-    const result = sanitizeNoteData({ repeat: 'weekly' });
-    expect(result.repeat).toBe('weekly');
-    expect(foundry.utils.logCompatibilityWarning).toHaveBeenCalledWith(expect.stringContaining("repeat ('weekly')"), expect.anything());
-  });
-  it('still warns for non-migratable legacy repeat values (moon)', () => {
-    foundry.utils.logCompatibilityWarning.mockClear();
-    sanitizeNoteData({ repeat: 'moon' });
-    expect(foundry.utils.logCompatibilityWarning).toHaveBeenCalledWith(expect.stringContaining("repeat ('moon')"), expect.anything());
-  });
-  it('does not overwrite an existing conditionTree when migrating', () => {
-    foundry.utils.logCompatibilityWarning.mockClear();
-    const existingTree = { type: 'group', mode: 'or', children: [{ type: 'condition', field: 'month', op: '==', value: 3 }] };
-    const result = sanitizeNoteData({ repeat: 'monthly', startDate: { month: 0, dayOfMonth: 14 }, conditionTree: existingTree });
-    expect(result.conditionTree).toEqual(existingTree);
-    expect(result.repeat).toBe('monthly');
-    expect(foundry.utils.logCompatibilityWarning).toHaveBeenCalled();
   });
 });
 

@@ -229,13 +229,14 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
   #transformSeasons(seasons = [], config = {}) {
     if (!seasons.length) return [];
     const seasonColors = [config.season0, config.season1, config.season2, config.season3].filter(Boolean);
+    const dec = (v) => (v == null ? v : Math.max(0, v - 1));
     return seasons.map((season, index) => ({
       name: this.#localizeString(season.name),
       abbreviation: this.#localizeString(season.abbreviation) || this.#localizeString(season.name).substring(0, 3),
-      monthStart: season.monthStart,
-      monthEnd: season.monthEnd,
-      dayStart: season.dayStart,
-      dayEnd: season.dayEnd,
+      monthStart: dec(season.monthStart),
+      monthEnd: dec(season.monthEnd),
+      dayStart: dec(season.dayStart),
+      dayEnd: dec(season.dayEnd),
       color: seasonColors[index] || '',
       ordinal: index + 1
     }));
@@ -394,7 +395,7 @@ export default class SimpleTimekeepingImporter extends BaseImporter {
         const startDate = { ...note.startDate, year: note.startDate.year + yearZero };
         const endDate = note.endDate ? { ...note.endDate, year: note.endDate.year + yearZero } : null;
         const noteData = { startDate, endDate, allDay: note.allDay, repeat: note.repeat };
-        const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData, calendarId, openSheet: false });
+        const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData: this._convertForeignRecurrence(noteData), calendarId, openSheet: false });
         if (page) count++;
         else errors.push(`Failed to create note: ${note.name}`);
       } catch (error) {

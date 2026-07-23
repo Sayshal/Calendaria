@@ -646,6 +646,9 @@ export class HudSceneRenderer {
   /** @type {number} User-configured particle density multiplier (0–1) */
   #densityScale = 1;
 
+  /** @type {boolean} Whether the dome renders below the bar, vertically flipped */
+  #flipped = false;
+
   /**
    * @param {HTMLCanvasElement} canvas - Target canvas element
    * @param {string} mode - 'dome', 'slice', or 'dial'
@@ -749,7 +752,17 @@ export class HudSceneRenderer {
    */
   setFlipped(flipped) {
     if (this.#destroyed) return;
-    const h = this.#app.renderer.height;
+    this.#flipped = flipped;
+    this.#applyFlip();
+  }
+
+  /**
+   * Apply the cached flip state against the current screen height.
+   * @private
+   */
+  #applyFlip() {
+    const h = this.#app.screen.height;
+    const flipped = this.#flipped;
     this.#app.stage.scale.y = flipped ? -1 : 1;
     this.#app.stage.y = flipped ? h : 0;
     this.#weatherContainer.scale.y = flipped ? -1 : 1;
@@ -988,6 +1001,7 @@ export class HudSceneRenderer {
     this.#skySpriteBg.height = h;
     this.#skySpriteFg.width = w;
     this.#skySpriteFg.height = h;
+    this.#applyFlip();
   }
 
   /**

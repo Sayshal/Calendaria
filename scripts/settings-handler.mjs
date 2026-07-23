@@ -104,7 +104,6 @@ export default class CalendariaSettings {
       },
       [SETTINGS.CHRONICLE_CATEGORY_FILTER]: { name: 'Chronicle Category Filter', scope: 'client', config: false, type: new SetField(new StringField()), default: [] },
       [SETTINGS.CHRONICLE_SHOW_WEATHER]: { name: 'Chronicle Show Weather', scope: 'client', config: false, type: new BooleanField({ initial: true }) },
-      [SETTINGS.CHRONICLE_SHOW_MOON_PHASES]: { name: 'Chronicle Show Moon Phases', scope: 'client', config: false, type: new BooleanField({ initial: true }) },
       [SETTINGS.CHRONICLE_SHOW_SEASON_CHANGES]: { name: 'Chronicle Show Season Changes', scope: 'client', config: false, type: new BooleanField({ initial: true }) },
       [SETTINGS.CHRONICLE_VIEW_MODE]: { name: 'Chronicle View Mode', scope: 'client', config: false, type: new StringField({ initial: 'scroll' }) },
       [SETTINGS.CHRONICLE_POSITION]: { name: 'Chronicle Position', scope: 'user', config: false, type: new ObjectField({ nullable: true, initial: null }) },
@@ -279,14 +278,6 @@ export default class CalendariaSettings {
         }),
         onChange: renderMiniCal
       },
-      [SETTINGS.MINI_CAL_SHOW_MOON_PHASES]: {
-        name: 'CALENDARIA.Common.ShowMoonPhases',
-        hint: 'CALENDARIA.Settings.MiniCalShowMoonPhases.Hint',
-        scope: 'user',
-        config: false,
-        type: new BooleanField({ initial: true }),
-        onChange: renderMiniCal
-      },
       [SETTINGS.MINI_CAL_HEADER_SHOW_SELECTED]: {
         name: 'CALENDARIA.Common.ShowSelectedDateInHeader',
         hint: 'CALENDARIA.Common.ShowSelectedDateInHeaderHint',
@@ -386,14 +377,6 @@ export default class CalendariaSettings {
         }),
         onChange: renderBigCal
       },
-      [SETTINGS.BIG_CAL_SHOW_MOON_PHASES]: {
-        name: 'CALENDARIA.Common.ShowMoonPhases',
-        hint: 'CALENDARIA.Settings.BigCalShowMoonPhases.Hint',
-        scope: 'user',
-        config: false,
-        type: new BooleanField({ initial: true }),
-        onChange: renderBigCal
-      },
       [SETTINGS.BIG_CAL_HEADER_SHOW_SELECTED]: {
         name: 'CALENDARIA.Common.ShowSelectedDateInHeader',
         hint: 'CALENDARIA.Common.ShowSelectedDateInHeaderHint',
@@ -418,11 +401,7 @@ export default class CalendariaSettings {
         type: new NumberField({ initial: 40, min: 0, max: 100, integer: true }),
         onChange: () => BigCal.updateIdleOpacity()
       },
-      noteConditionTreeMigrationComplete: { name: 'Note Condition Tree Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
-      noteVisibilityMigrationComplete: { name: 'Note Visibility Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
-      presetSchemaV2MigrationComplete: { name: 'Preset Schema V2 Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
-      festivalPresetRemovalComplete: { name: 'Festival Preset Removal Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
-      limitedRepeatRemovalComplete: { name: 'Limited Repeat Removal Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
+      intervalConditionFieldMigrationComplete: { name: 'Interval Condition Field Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.DARKNESS_SYNC]: {
         name: 'CALENDARIA.Settings.DarknessSync.Name',
         hint: 'CALENDARIA.Settings.DarknessSync.Hint',
@@ -985,6 +964,39 @@ export default class CalendariaSettings {
           }
         }
       },
+      [SETTINGS.FORCE_HUD_LOCK]: {
+        name: 'CALENDARIA.Settings.ForceHUDLock.Name',
+        hint: 'CALENDARIA.Settings.ForceHUDLock.Hint',
+        scope: 'world',
+        config: false,
+        type: new BooleanField({ initial: false }),
+        onChange: () => HUD.reapplyPosition()
+      },
+      [SETTINGS.FORCE_HUD_ZONE]: {
+        name: 'CALENDARIA.Settings.ForceHUDZone.Name',
+        hint: 'CALENDARIA.Settings.ForceHUDZone.Hint',
+        scope: 'world',
+        config: false,
+        type: new StringField({
+          initial: '',
+          blank: true,
+          choices: {
+            '': 'CALENDARIA.Settings.ForceHUDZone.None',
+            'top-center': 'CALENDARIA.HUD.Zone.TopCenter',
+            'above-hotbar': 'CALENDARIA.HUD.Zone.AboveHotbar',
+            'below-controls': 'CALENDARIA.HUD.Zone.BelowControls'
+          }
+        }),
+        onChange: () => HUD.reapplyPosition()
+      },
+      [SETTINGS.HIDE_MOONS_FROM_PLAYERS]: {
+        name: 'CALENDARIA.Settings.HideMoonsFromPlayers.Name',
+        hint: 'CALENDARIA.Settings.HideMoonsFromPlayers.Hint',
+        scope: 'world',
+        config: false,
+        type: new BooleanField({ initial: false }),
+        onChange: () => CalendarManager.rerenderCalendarUIs()
+      },
       [SETTINGS.SHOW_CHRONICLE]: { name: 'Show Chronicle', scope: 'client', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.FORCE_CHRONICLE]: {
         name: 'CALENDARIA.Common.ForceDisplayForAll',
@@ -1160,14 +1172,6 @@ export default class CalendariaSettings {
         config: false,
         type: new NumberField({ integer: true, min: 0, initial: 60 })
       },
-      restAdvanceModeMigrationComplete: { name: 'Rest Advance Mode Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
-      weatherFxFlagMigrationComplete: { name: 'Weather FX Flag Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
-      removedCalendarsMigrationComplete: { name: 'Removed Calendars Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
-      removedCalendarOverridesMigrationComplete: { name: 'Removed Calendar Overrides Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
-      zoneTempBlankInheritanceMigrationComplete: { name: 'Zone Temp Blank Inheritance Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
-      festivalNoteYearZeroMigrationComplete: { name: 'Festival Note Year Zero Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
-      noteDurationNormalizationMigrationComplete: { name: 'Note Duration Normalization Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
-      festivalNotesSourceOfTruthMigrationComplete: { name: 'Festival Notes Source Of Truth Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       themeAtlasMigrationComplete: { name: 'Theme ATLAS Migration Complete', scope: 'client', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.SEEDED_CALENDARS]: { name: 'Seeded Calendars', scope: 'world', config: false, type: new SetField(new StringField()) },
       [SETTINGS.CLOCK_LOCKED]: { name: 'Clock Locked', scope: 'world', config: false, type: new BooleanField({ initial: false }) },

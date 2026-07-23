@@ -1,6 +1,6 @@
 import { CalendarManager } from '../calendar/_module.mjs';
 import { CONDITION_FIELDS, CONDITION_OPERATORS } from '../constants.mjs';
-import { findSeasonIndexByType, getCalendarMoonPhaseIndex, getDayOfYear, getMidpoint, getSeasonDayOfYearBounds, seededRandom } from '../utils/_module.mjs';
+import { findSeasonIndexByType, getCalendarMoonPhaseIndex, getDayOfYear, getMidpoint, getSeasonDayOfYearBounds, normalizeRawDoy, seededRandom } from '../utils/_module.mjs';
 import {
   EpochDataCache,
   NoteManager,
@@ -46,42 +46,40 @@ export function getEffectiveDuration(noteData) {
  */
 export function resolveComputedDate(computedConfig, year) {
   if (!computedConfig?.chain?.length) return null;
+  const { chain, yearOverrides } = computedConfig;
+  if (yearOverrides?.[year]) {
+    const override = yearOverrides[year];
+    return { year, month: override.month, dayOfMonth: override.dayOfMonth ?? (override.day != null ? override.day - 1 : 0) };
+  }
   const key = (computedConfig._cacheKey ??= JSON.stringify(computedConfig.chain));
   let yearMap = _computedDateCache.get(key);
   if (yearMap?.has(year)) return yearMap.get(year);
-  const { chain, yearOverrides } = computedConfig;
-  let result = null;
-  if (yearOverrides?.[year]) {
-    const override = yearOverrides[year];
-    result = { year, month: override.month, dayOfMonth: override.dayOfMonth ?? override.day };
-  } else {
-    const calendar = CalendarManager.getActiveCalendar();
-    if (!calendar) return null;
-    let currentDate = null;
-    for (const step of chain) {
-      switch (step.type) {
-        case 'anchor':
-          currentDate = resolveAnchor(step.value, year, calendar);
-          break;
-        case 'firstAfter':
-          if (!currentDate) break;
-          currentDate = resolveFirstAfter(currentDate, step.condition, step.params, calendar);
-          break;
-        case 'daysAfter':
-          if (!currentDate) break;
-          currentDate = addDays(currentDate, step.params?.days ?? 0);
-          break;
-        case 'weekdayOnOrAfter':
-          if (!currentDate) break;
-          currentDate = resolveWeekdayOnOrAfter(currentDate, step.params?.weekday ?? 0, calendar);
-          break;
-        default:
-          break;
-      }
-      if (!currentDate) break;
+  const calendar = CalendarManager.getActiveCalendar();
+  if (!calendar) return null;
+  let currentDate = null;
+  for (const step of chain) {
+    switch (step.type) {
+      case 'anchor':
+        currentDate = resolveAnchor(step.value, year, calendar);
+        break;
+      case 'firstAfter':
+        if (!currentDate) break;
+        currentDate = resolveFirstAfter(currentDate, step.condition, step.params, calendar);
+        break;
+      case 'daysAfter':
+        if (!currentDate) break;
+        currentDate = addDays(currentDate, step.params?.days ?? 0);
+        break;
+      case 'weekdayOnOrAfter':
+        if (!currentDate) break;
+        currentDate = resolveWeekdayOnOrAfter(currentDate, step.params?.weekday ?? 0, calendar);
+        break;
+      default:
+        break;
     }
-    result = currentDate ?? null;
+    if (!currentDate) break;
   }
+  const result = currentDate ?? null;
   if (!yearMap) {
     yearMap = new Map();
     _computedDateCache.set(key, yearMap);
@@ -122,14 +120,18 @@ function resolveAnchor(anchorType, year, calendar) {
     case 'autumnEquinox':
       return resolveSeasonAnchor('autumn', false);
     case 'summerSolstice': {
-      if (daylight.summerSolstice) return dayOfYearToDate(daylight.summerSolstice, year, calendar);
+      if (daylight.summerSolstice != null) return dayOfYearToDate(normalizeRawDoy(daylight.summerSolstice, calendar, internalYear), year, calendar);
       return resolveSeasonAnchor('summer', true);
     }
     case 'winterSolstice': {
-      if (daylight.winterSolstice) return dayOfYearToDate(daylight.winterSolstice, year, calendar);
+      if (daylight.winterSolstice != null) return dayOfYearToDate(normalizeRawDoy(daylight.winterSolstice, calendar, internalYear), year, calendar);
       return resolveSeasonAnchor('winter', true);
     }
     default:
+      if (anchorType?.startsWith('date:')) {
+        const [, m, d] = anchorType.split(':');
+        return { year, month: parseInt(m, 10) || 0, dayOfMonth: parseInt(d, 10) || 0 };
+      }
       if (anchorType?.startsWith('seasonStart:')) {
         const idx = parseInt(anchorType.split(':')[1], 10);
         const bounds = getSeasonDayOfYearBounds(seasons[idx], calendar, internalYear);
@@ -164,6 +166,46 @@ function resolveAnchor(anchorType, year, calendar) {
 }
 
 /**
+ * Get full moon phase info for a display date.
+ * @param {object} calendar - Calendar instance
+ * @param {object} date - Display date { year, month, dayOfMonth }
+ * @param {number} moonIndex - Moon index
+ * @returns {object|null} Phase info including position and phaseIndex
+ */
+function getMoonPhaseInfoAt(calendar, date, moonIndex) {
+  const yearZero = calendar?.years?.yearZero ?? 0;
+  const components = { year: date.year - yearZero, month: date.month, dayOfMonth: date.dayOfMonth, hour: 12, minute: 0, second: 0 };
+  return calendar?.getMoonPhase?.(moonIndex, components) ?? null;
+}
+
+/**
+ * Shortest distance between two normalized cycle positions, accounting for wraparound.
+ * @param {number} a - Position in [0, 1)
+ * @param {number} b - Position in [0, 1)
+ * @returns {number} Distance in [0, 0.5]
+ */
+function cycleDistance(a, b) {
+  const delta = Math.abs((a ?? 0) - (b ?? 0));
+  return Math.min(delta, 1 - delta);
+}
+
+/**
+ * Whether a moon phase entry matches a target token, by key or localized name.
+ * @param {[string, object]} entry - Phase entry from Object.entries(moon.phases)
+ * @param {string} target - Lowercased target token, e.g. 'full'
+ * @returns {boolean} True if the entry matches
+ */
+function phaseEntryMatches(entry, target) {
+  if (!entry) return false;
+  const [key, phase] = entry;
+  const normalizedKey = String(key ?? '')
+    .replace(/\d+$/, '')
+    .toLowerCase();
+  const name = String(phase?.name ?? '').toLowerCase();
+  return normalizedKey.includes(target) || name.split('.').pop().includes(target) || name.replace(/\s+/g, '').includes(target);
+}
+
+/**
  * Resolve "first X after" condition.
  * @param {object} startDate - Date to search from
  * @param {string} condition - Condition type (moonPhase, weekday)
@@ -173,21 +215,32 @@ function resolveAnchor(anchorType, year, calendar) {
  */
 function resolveFirstAfter(startDate, condition, params, calendar) {
   const maxSearch = 200;
+  const inclusive = params?.inclusive === true;
+  const boundary = inclusive ? { ...startDate } : addDays(startDate, 1);
   let currentDate = { ...startDate };
   for (let i = 0; i < maxSearch; i++) {
-    currentDate = addDays(currentDate, 1);
+    if (i > 0 || !inclusive) currentDate = addDays(currentDate, 1);
     switch (condition) {
       case 'moonPhase': {
         const moons = calendar?.moonsArray ?? [];
         const moonIndex = params?.moon ?? 0;
-        const targetPhase = params?.phase ?? 'full';
+        const targetPhase = (params?.phase ?? 'full').toLowerCase();
         if (moonIndex >= moons.length) return null;
-        const moon = moons[moonIndex];
-        const phaseIndex = getCalendarMoonPhaseIndex(currentDate, moonIndex);
-        if (phaseIndex === null) break;
-        const phaseName = Object.values(moon.phases ?? {})[phaseIndex]?.name?.toLowerCase() || '';
-        if (phaseName.includes(targetPhase.toLowerCase())) return currentDate;
-        break;
+        const entries = Object.entries(moons[moonIndex].phases ?? {});
+        if (!entries.length) return null;
+        const info = getMoonPhaseInfoAt(calendar, currentDate, moonIndex);
+        if (!info || !phaseEntryMatches(entries[info.phaseIndex], targetPhase)) break;
+        const previous = addDays(currentDate, -1);
+        const previousInfo = getMoonPhaseInfoAt(calendar, previous, moonIndex);
+        // Only resolve on the band's first day, so the chosen day is the same wherever the scan starts.
+        if (previousInfo && phaseEntryMatches(entries[previousInfo.phaseIndex], targetPhase)) break;
+        const phaseStart = entries[info.phaseIndex]?.[1]?.start ?? 0;
+        const onBand = cycleDistance(info.position, phaseStart);
+        const beforeBand = previousInfo ? cycleDistance(previousInfo.position, phaseStart) : Infinity;
+        const peak = beforeBand < onBand ? previous : currentDate;
+        // A peak preceding the search boundary belongs to the previous lunation; keep looking.
+        if (compareDays(peak, boundary) < 0) break;
+        return peak;
       }
       case 'weekday': {
         const targetWeekday = params?.weekday ?? 0;
@@ -218,20 +271,23 @@ function resolveWeekdayOnOrAfter(startDate, targetWeekday, calendar) {
 
 /**
  * Convert day of year to date object.
- * @param {number} dayOfYear - Day of year (1-based)
- * @param {number} year - Year
+ * @param {number} dayOfYear - 0-based day of year
+ * @param {number} year - Display year
  * @param {object} calendar - Calendar instance
  * @returns {object} Date { year, month, dayOfMonth }
  */
 function dayOfYearToDate(dayOfYear, year, calendar) {
   const months = calendar?.monthsArray ?? [];
-  let remaining = dayOfYear;
+  if (!months.length) return { year, month: 0, dayOfMonth: 0 };
+  const internalYear = year - (calendar?.years?.yearZero ?? 0);
+  let remaining = Math.max(0, dayOfYear);
   for (let m = 0; m < months.length; m++) {
-    const daysInMonth = months[m]?.days || 30;
-    if (remaining <= daysInMonth) return { year, month: m, dayOfMonth: remaining - 1 };
+    const daysInMonth = calendar?.getDaysInMonth?.(m, internalYear) ?? months[m]?.days ?? 30;
+    if (remaining < daysInMonth) return { year, month: m, dayOfMonth: remaining };
     remaining -= daysInMonth;
   }
-  return { year, month: months.length - 1, dayOfMonth: (months[months.length - 1]?.days || 1) - 1 };
+  const last = months.length - 1;
+  return { year, month: last, dayOfMonth: Math.max(0, (calendar?.getDaysInMonth?.(last, internalYear) ?? months[last]?.days ?? 1) - 1) };
 }
 
 /**

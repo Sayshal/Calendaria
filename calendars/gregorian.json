@@ -138,8 +138,8 @@
         "icon": "fas fa-seedling",
         "color": "#90ee90",
         "seasonalType": "spring",
-        "dayStart": 79,
-        "dayEnd": 171,
+        "dayStart": 78,
+        "dayEnd": 170,
         "abbreviation": "Spr"
       },
       "summer0000000000": {
@@ -147,8 +147,8 @@
         "icon": "fas fa-sun",
         "color": "#ffd700",
         "seasonalType": "summer",
-        "dayStart": 172,
-        "dayEnd": 265,
+        "dayStart": 171,
+        "dayEnd": 264,
         "abbreviation": "Sum"
       },
       "autumn0000000000": {
@@ -156,8 +156,8 @@
         "icon": "fas fa-leaf",
         "color": "#d2691e",
         "seasonalType": "autumn",
-        "dayStart": 266,
-        "dayEnd": 354,
+        "dayStart": 265,
+        "dayEnd": 353,
         "abbreviation": "Aut"
       },
       "winter0000000000": {
@@ -165,8 +165,8 @@
         "icon": "fas fa-snowflake",
         "color": "#87ceeb",
         "seasonalType": "winter",
-        "dayStart": 355,
-        "dayEnd": 78,
+        "dayStart": 354,
+        "dayEnd": 77,
         "abbreviation": "Win"
       }
     }
@@ -246,8 +246,10 @@
     "enabled": true,
     "shortestDay": 8,
     "longestDay": 16,
-    "winterSolstice": 355,
-    "summerSolstice": 172
+    "winterSolstice": 354,
+    "summerSolstice": 171,
+    "springEquinox": 78,
+    "autumnEquinox": 265
   },
   "festivals": {
     "newyearsday00000": {
@@ -887,6 +889,77 @@
             "field": "day",
             "op": "==",
             "value": 31
+          }
+        ]
+      },
+      "allDay": true,
+      "displayStyle": "banner",
+      "visibility": "visible",
+      "silent": true,
+      "hasDuration": false,
+      "reminderType": "none",
+      "reminderOffset": 0
+    },
+    "easter0000000000": {
+      "name": "Easter",
+      "month": 3,
+      "icon": "fa-egg",
+      "color": "#C8A2C8",
+      "description": "The feast of resurrection, a moveable feast falling on the first Sunday after the first full moon of spring.",
+      "dayOfMonth": 0,
+      "duration": 1,
+      "countsForWeekday": true,
+      "leapYearOnly": false,
+      "conditionTree": {
+        "type": "group",
+        "mode": "and",
+        "children": [
+          {
+            "type": "condition",
+            "field": "computed",
+            "op": "==",
+            "value": true,
+            "value2": {
+              "chain": [
+                {
+                  "type": "anchor",
+                  "value": "springEquinox"
+                },
+                {
+                  "type": "firstAfter",
+                  "condition": "moonPhase",
+                  "params": {
+                    "moon": 0,
+                    "phase": "full"
+                  }
+                },
+                {
+                  "type": "firstAfter",
+                  "condition": "weekday",
+                  "params": {
+                    "weekday": 0
+                  }
+                }
+              ],
+              "yearOverrides": {
+                "1998": {
+                  "month": 3,
+                  "dayOfMonth": 11
+                },
+                "2018": {
+                  "month": 3,
+                  "dayOfMonth": 0
+                },
+                "2019": {
+                  "month": 3,
+                  "dayOfMonth": 20
+                },
+                "2038": {
+                  "month": 3,
+                  "dayOfMonth": 24
+                }
+              }
+            }
           }
         ]
       },

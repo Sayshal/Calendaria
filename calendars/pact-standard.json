@@ -192,8 +192,8 @@
     "enabled": true,
     "shortestDay": 8,
     "longestDay": 16,
-    "winterSolstice": 355,
-    "summerSolstice": 172
+    "winterSolstice": 354,
+    "summerSolstice": 171
   },
   "cycles": {},
   "canonicalHours": {},

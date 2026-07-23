@@ -22,6 +22,7 @@ import {
   buildWeatherLookup,
   buildWeatherPillData,
   canViewBigCal,
+  canViewMoons,
   canViewNotes,
   enrichSeasonData,
   formatForLocation,
@@ -40,6 +41,7 @@ import {
   isCombatBlocked,
   isFogEnabled,
   isMonthFullyFogged,
+  isMoonVisible,
   isRevealed,
   renderCycleIndicator,
   renderEraIndicator,
@@ -138,10 +140,6 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @override */
   _preRender(context, options) {
-    if (!canViewBigCal()) {
-      if (!options.silent) ui.notifications.warn('CALENDARIA.Permissions.NoAccess', { localize: true });
-      return false;
-    }
     Hooks.callAll(HOOKS.PRE_RENDER_CALENDAR, { app: this, displayMode: this._displayMode, calendar: CalendarManager.getActiveCalendar() });
     return super._preRender(context, options);
   }
@@ -254,7 +252,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       context.fogNavDisableNext = !hasFogRevealedMonthInDirection(viewedDate.year, viewedDate.month, 1, calendar);
     }
     context.currentMonthNotes = this._getNotesForMonth(context.visibleNotes, viewedDate.year, viewedDate.month);
-    context.showMoonPhases = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SHOW_MOON_PHASES);
+    context.showMoonPhases = canViewMoons();
     context.weather = this._getWeatherContext();
     context.showWeather = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SHOW_WEATHER);
     context.showSeason = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SHOW_SEASON);
@@ -379,7 +377,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const daysInWeek = calendar.daysInWeek;
     const weeks = [];
     let currentWeek = [];
-    const showMoons = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SHOW_MOON_PHASES) && calendar.moonsArray.length;
+    const showMoons = canViewMoons() && calendar.moonsArray.length;
     const hasFixedStart = monthData?.startingWeekday != null;
     const rawStartDayOfWeek = hasFixedStart ? monthData.startingWeekday : dayOfWeek({ year, month, dayOfMonth: 0 });
     const weekStartIdx = getWeekStartIndex(calendar);
@@ -405,6 +403,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
         const dayWorldTime = calendar.componentsToTime(dayComponents);
         moonPhases = calendar.moonsArray
           .map((moon, index) => {
+            if (!isMoonVisible(moon)) return null;
             const phase = calendar.getMoonPhase(index, dayWorldTime);
             if (!phase) return null;
             return { moonName: _loc(moon.name), phaseName: phase.subPhaseName || _loc(phase.name), icon: phase.icon, color: moon.color || null };
@@ -565,7 +564,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const daysInWeek = calendar.daysInWeek;
     const yearZero = calendar.years?.yearZero ?? 0;
     const daysInYear = calendar.getDaysInYear(year - yearZero);
-    const showMoons = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SHOW_MOON_PHASES) && calendar.moonsArray.length;
+    const showMoons = canViewMoons() && calendar.moonsArray.length;
     const fogEnabled = isFogEnabled();
     const weekNumber = Math.floor(viewedDayOfMonth / daysInWeek);
     const totalWeeks = Math.ceil(daysInYear / daysInWeek);
@@ -598,6 +597,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
           const dayWorldTime = calendar.componentsToTime(dayComponents);
           moonPhases = calendar.moonsArray
             .map((moon, index) => {
+              if (!isMoonVisible(moon)) return null;
               const phase = calendar.getMoonPhase(index, dayWorldTime);
               if (!phase) return null;
               return { moonName: _loc(moon.name), phaseName: phase.subPhaseName || _loc(phase.name), icon: phase.icon, color: moon.color || null };
@@ -2000,9 +2000,13 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {object} [options] - Show options
    * @param {boolean} [options.silent] - If true, don't show permission warning
    * @static
-   * @returns {BigCal} The BigCal instance
+   * @returns {BigCal|null} The BigCal instance, or null if blocked
    */
   static show({ silent = false } = {}) {
+    if (!canViewBigCal()) {
+      if (!silent) ui.notifications.warn('CALENDARIA.Permissions.NoAccess', { localize: true });
+      return null;
+    }
     if (isCombatBlocked(SETTINGS.BIG_CAL_COMBAT_MODE)) return null;
     const instance = this.instance ?? new BigCal();
     instance.render({ force: true, silent });

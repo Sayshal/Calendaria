@@ -1,4 +1,14 @@
 import { CalendarManager } from '../../calendar/_module.mjs';
+import { MOON_VISIBILITY } from '../../constants.mjs';
+
+/**
+ * Whether a moon should be rendered for the current user.
+ * @param {object} moon - Moon definition
+ * @returns {boolean} True when the moon is visible to this user
+ */
+export function isMoonVisible(moon) {
+  return game.user.isGM || moon?.visibility !== MOON_VISIBILITY.HIDDEN;
+}
 
 /**
  * Get the current phase position (0-1) for a moon at a given date.

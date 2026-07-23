@@ -7,7 +7,7 @@ import { FestivalManager } from './scripts/festivals/_module.mjs';
 import { registerHooks } from './scripts/hooks.mjs';
 import { initializeImporters } from './scripts/importers/_module.mjs';
 import { initializeChatCommander, initializeFXMaster } from './scripts/integrations/_module.mjs';
-import { NoteManager } from './scripts/notes/_module.mjs';
+import { NoteManager, recoverOrphanedPresets } from './scripts/notes/_module.mjs';
 import CalendariaSettings from './scripts/settings-handler.mjs';
 import { EventScheduler, ReminderScheduler, TimeClock, TimeTracker } from './scripts/time/_module.mjs';
 import {
@@ -19,8 +19,6 @@ import {
   canViewStopwatch,
   canViewSunDial,
   canViewTimeKeeper,
-  migrateRemovedCalendarOverrides,
-  migrateRemovedCalendars,
   overrideChatLogTimestamps,
   registerEnrichers,
   registerInserts,
@@ -115,11 +113,10 @@ Hooks.once('dnd5e.setupCalendar', () => {
 
 Hooks.once('ready', async () => {
   CalendariaSettings.registerReadySettings();
-  await migrateRemovedCalendars();
-  await migrateRemovedCalendarOverrides();
   await CalendarManager.initialize();
   await runAllMigrations();
   await NoteManager.initialize();
+  await recoverOrphanedPresets();
   if (game.user.isGM) {
     const activeCalendar = CalendarManager.getActiveCalendar();
     if (activeCalendar?.metadata?.id) await FestivalManager.seedFestivalNotes(activeCalendar.metadata.id, activeCalendar);
@@ -164,6 +161,7 @@ Hooks.once('ready', async () => {
   }
   if (game.settings.get(MODULE.ID, SETTINGS.DEV_MODE)) showDebugZones();
   Hooks.on('renderSceneControls', () => updateZonePositions('below-controls'));
+  Hooks.on('renderHotbar', () => updateZonePositions('above-hotbar'));
   initializeChatCommander();
   initializeFXMaster();
   initializeWeatherSound();

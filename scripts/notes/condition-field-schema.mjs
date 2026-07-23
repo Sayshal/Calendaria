@@ -1,3 +1,4 @@
+import { CalendarRegistry } from '../calendar/_module.mjs';
 import { CONDITION_FIELDS, CONDITION_OPERATORS, MOON_PHASE_LABELS } from '../constants.mjs';
 import { WeatherManager } from '../weather/_module.mjs';
 import { NoteManager } from './_module.mjs';
@@ -85,6 +86,39 @@ const FIELD_REGISTRY = {
     operators: ALL_OPS,
     category: 'date',
     label: 'CALENDARIA.Common.Day'
+  },
+  [CONDITION_FIELDS.MONTH_IN_CALENDAR]: {
+    inputType: 'select',
+    operators: EQUALITY_OPS,
+    category: 'date',
+    label: 'CALENDARIA.Condition.Field.monthInCalendar',
+    needsValue2: true,
+    value2Label: 'CALENDARIA.Condition.Field.targetCalendar',
+    value2Hint: 'CALENDARIA.Condition.Field.targetCalendarHint',
+    value2Type: 'string',
+    value2Semantic: 'calendarId',
+    getOptions: (_cal, value2) => (CalendarRegistry.get(value2)?.monthsArray ?? []).map((m, i) => ({ value: i + 1, label: _loc(m.name) })),
+    getValue2Options: () =>
+      CalendarRegistry.getAllIds()
+        .filter((id) => id !== CalendarRegistry.getActiveId())
+        .map((id) => ({ value: id, label: CalendarRegistry.get(id)?.name ?? id })),
+    available: () => CalendarRegistry.size > 1
+  },
+  [CONDITION_FIELDS.DAY_IN_CALENDAR]: {
+    inputType: 'number',
+    operators: EQUALITY_OPS,
+    category: 'date',
+    label: 'CALENDARIA.Condition.Field.dayInCalendar',
+    needsValue2: true,
+    value2Label: 'CALENDARIA.Condition.Field.targetCalendar',
+    value2Hint: 'CALENDARIA.Condition.Field.targetCalendarHint',
+    value2Type: 'string',
+    value2Semantic: 'calendarId',
+    getValue2Options: () =>
+      CalendarRegistry.getAllIds()
+        .filter((id) => id !== CalendarRegistry.getActiveId())
+        .map((id) => ({ value: id, label: CalendarRegistry.get(id)?.name ?? id })),
+    available: () => CalendarRegistry.size > 1
   },
   [CONDITION_FIELDS.DAY_OF_YEAR]: {
     inputType: 'number',
@@ -463,7 +497,7 @@ export function getGroupedFieldOptions(calendar) {
     const options = [];
     for (const [fieldId, schema] of Object.entries(FIELD_REGISTRY)) {
       if (schema.category !== category) continue;
-      if (schema.inputType === 'special') continue;
+      if (schema.inputType === 'special' && fieldId !== CONDITION_FIELDS.COMPUTED) continue;
       if (schema.available && !schema.available(calendar)) continue;
       options.push({ value: fieldId, label: _loc(schema.label) });
     }

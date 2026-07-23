@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import CalendarManager from '../../scripts/calendar/calendar-manager.mjs';
-import { generateRandomOccurrences, getNextOccurrences, getOccurrencesInRange, getRecurrenceDescription, isRecurringMatch, needsRandomRegeneration, resolveComputedDate } from '../../scripts/notes/recurrence.mjs';
+import { dayOfWeek, daysBetween } from '../../scripts/notes/date-utils.mjs';
+import { clearComputedDateCache, generateRandomOccurrences, getNextOccurrences, getOccurrencesInRange, getRecurrenceDescription, isRecurringMatch, needsRandomRegeneration, resolveComputedDate } from '../../scripts/notes/recurrence.mjs';
 
 vi.mock('../../scripts/utils/localization.mjs', () => ({
   localize: (key) => key,
@@ -140,6 +141,56 @@ describe('computed events', () => {
     CalendarManager._configure({ seasons: { values: [{ name: 'Spring', seasonalType: 'spring', dayStart: 80, dayEnd: 171 }] } });
     const config = { chain: [{ type: 'anchor', value: 'springEquinox' }, { type: 'firstAfter', condition: 'weekday', params: { weekday: 0 } }] };
     expect(resolveComputedDate(config, 2024)).not.toBe(null);
+  });
+
+  describe('resolved dates (issue #789)', () => {
+    const springSeasons = { values: [{ name: 'Spring', seasonalType: 'spring', dayStart: 80, dayEnd: 171 }] };
+    const anchorOnly = { chain: [{ type: 'anchor', value: 'springEquinox' }] };
+
+    it('resolves the spring equinox anchor to a concrete date rather than just non-null', () => {
+      CalendarManager._configure({ seasons: springSeasons });
+      clearComputedDateCache();
+      const anchor = resolveComputedDate(anchorOnly, 2024);
+      expect(anchor).toMatchObject({ year: 2024 });
+      expect(Number.isInteger(anchor.month)).toBe(true);
+      expect(Number.isInteger(anchor.dayOfMonth)).toBe(true);
+      expect(anchor.dayOfMonth).toBeGreaterThanOrEqual(0);
+    });
+
+    it('daysAfter offsets the anchor by exactly the requested number of days', () => {
+      CalendarManager._configure({ seasons: springSeasons });
+      clearComputedDateCache();
+      const anchor = resolveComputedDate(anchorOnly, 2024);
+      const shifted = resolveComputedDate({ chain: [{ type: 'anchor', value: 'springEquinox' }, { type: 'daysAfter', params: { days: 10 } }] }, 2024);
+      expect(daysBetween(anchor, shifted)).toBe(10);
+    });
+
+    it('firstAfter weekday lands on the requested weekday, strictly after the anchor', () => {
+      CalendarManager._configure({ seasons: springSeasons });
+      clearComputedDateCache();
+      const anchor = resolveComputedDate(anchorOnly, 2024);
+      const target = dayOfWeek(anchor);
+      const result = resolveComputedDate({ chain: [{ type: 'anchor', value: 'springEquinox' }, { type: 'firstAfter', condition: 'weekday', params: { weekday: target } }] }, 2024);
+      expect(dayOfWeek(result)).toBe(target);
+      expect(daysBetween(anchor, result)).toBeGreaterThan(0);
+    });
+
+    it('firstAfter weekday returns the anchor itself when inclusive is set', () => {
+      CalendarManager._configure({ seasons: springSeasons });
+      clearComputedDateCache();
+      const anchor = resolveComputedDate(anchorOnly, 2024);
+      const target = dayOfWeek(anchor);
+      const result = resolveComputedDate({ chain: [{ type: 'anchor', value: 'springEquinox' }, { type: 'firstAfter', condition: 'weekday', params: { weekday: target, inclusive: true } }] }, 2024);
+      expect(result).toEqual(anchor);
+    });
+
+    it('weekdayOnOrAfter returns the anchor unchanged when it already matches', () => {
+      CalendarManager._configure({ seasons: springSeasons });
+      clearComputedDateCache();
+      const anchor = resolveComputedDate(anchorOnly, 2024);
+      const result = resolveComputedDate({ chain: [{ type: 'anchor', value: 'springEquinox' }, { type: 'weekdayOnOrAfter', params: { weekday: dayOfWeek(anchor) } }] }, 2024);
+      expect(result).toEqual(anchor);
+    });
   });
 });
 

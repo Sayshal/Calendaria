@@ -43,6 +43,7 @@ globalThis.game = { i18n, user, users, time, settings, scenes, macros, modules: 
 // v14 core globals: _loc binds i18n.localize (data arg covers format); _del is the ForcedDeletion sentinel.
 globalThis._loc = (key, data) => (data ? i18n.format(key, data) : i18n.localize(key));
 globalThis._del = Symbol('ForcedDeletion');
+globalThis.ATLAS = { log: vi.fn(), register: vi.fn() };
 globalThis.ui = { notifications: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } };
 globalThis.Hooks = { on: vi.fn(), once: vi.fn(), off: vi.fn(), call: vi.fn(), callAll: vi.fn() };
 globalThis.CONFIG = {};

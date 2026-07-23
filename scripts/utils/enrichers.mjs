@@ -13,6 +13,7 @@ import {
   getNextEclipse,
   getNextFullMoon,
   isMoonFull,
+  isMoonVisible,
   resolveFormatString,
   timeSince
 } from '../utils/_module.mjs';
@@ -1160,6 +1161,8 @@ function enrichUntilSunset(config, label) {
 function enrichMoon(config, label) {
   const { calendar, components } = resolveCalendar(config);
   const moonIndex = config.values.length > 0 && !isNaN(config.values[0]) ? parseInt(config.values[0]) : 0;
+  const targetDef = calendar?.moonsArray?.[moonIndex];
+  if (targetDef && !isMoonVisible(targetDef)) return createErrorElement('CALENDARIA.Enricher.Error.MoonNotFound', { index: moonIndex });
   if (config.position) {
     const moonsArr = calendar?.moonsArray || [];
     if (!moonsArr.length) return createErrorElement('CALENDARIA.Enricher.Error.NoMoons');
@@ -1212,6 +1215,7 @@ function enrichMoons(config, label) {
   const moons = calendar?.getAllMoonPhases?.();
   if (!moons?.length) return createErrorElement('CALENDARIA.Enricher.Error.NoMoons');
   const text = moons
+    .filter((m, i) => m && isMoonVisible(calendar?.moonsArray?.[m.moonIndex ?? i]))
     .map((m) => {
       const moonName = m.moonName ? _loc(m.moonName) : m.name ? _loc(m.name) : '';
       const phaseName = m.phaseName ? _loc(m.phaseName) : m.name ? _loc(m.name) : '';
@@ -1236,7 +1240,7 @@ function enrichNextFullMoon(config, label) {
   const moonIdxVal = config.values.find((v) => !isNaN(v));
   const moonIndex = moonIdxVal != null ? parseInt(moonIdxVal) : 0;
   const targetMoon = moonsArr[moonIndex];
-  if (!targetMoon) return createErrorElement('CALENDARIA.Enricher.Error.MoonNotFound', { index: moonIndex });
+  if (!targetMoon || !isMoonVisible(targetMoon)) return createErrorElement('CALENDARIA.Enricher.Error.MoonNotFound', { index: moonIndex });
   const nextFull = getNextFullMoon(targetMoon, components);
   if (!nextFull) return createErrorElement('CALENDARIA.Common.NoConvergence');
   const nextDate = internalToPublic(nextFull, calendar);
@@ -1260,7 +1264,7 @@ function enrichNextFullMoon(config, label) {
  */
 function enrichConvergence(config, label) {
   const { calendar, components } = resolveCalendar(config);
-  const moonsArr = calendar?.moonsArray || [];
+  const moonsArr = (calendar?.moonsArray || []).filter(isMoonVisible);
   if (moonsArr.length < 2) return createErrorElement('CALENDARIA.Enricher.Error.NoMoons');
   const result = getNextConvergence(moonsArr, components);
   const moonNames = moonsArr.map((m) => _loc(m.name)).join(', ');
@@ -1289,7 +1293,7 @@ function enrichEclipse(config, label) {
   const moonIdxVal = config.values.find((v) => !isNaN(v));
   const moonIndex = moonIdxVal != null ? parseInt(moonIdxVal) : 0;
   const targetMoon = moonsArr[moonIndex];
-  if (!targetMoon) return createErrorElement('CALENDARIA.Enricher.Error.MoonNotFound', { index: moonIndex });
+  if (!targetMoon || !isMoonVisible(targetMoon)) return createErrorElement('CALENDARIA.Enricher.Error.MoonNotFound', { index: moonIndex });
   const result = getEclipseAtDate(targetMoon, components, calendar);
   const text = result.type ? _loc(ECLIPSE_TYPE_LABELS[result.type] ?? result.type) : _loc('CALENDARIA.Eclipse.None');
   const tooltip = _loc('CALENDARIA.Enricher.Tooltip.Eclipse', { value: text });
@@ -1310,7 +1314,7 @@ function enrichNextEclipse(config, label) {
   const moonIdxVal = config.values.find((v) => !isNaN(v));
   const moonIndex = moonIdxVal != null ? parseInt(moonIdxVal) : 0;
   const targetMoon = moonsArr[moonIndex];
-  if (!targetMoon) return createErrorElement('CALENDARIA.Enricher.Error.MoonNotFound', { index: moonIndex });
+  if (!targetMoon || !isMoonVisible(targetMoon)) return createErrorElement('CALENDARIA.Enricher.Error.MoonNotFound', { index: moonIndex });
   const result = getNextEclipse(targetMoon, components, { calendar });
   if (!result) return createErrorElement('CALENDARIA.Enricher.Error.NoEclipseFound');
   const nextDate = internalToPublic(result.date, calendar);
@@ -1804,7 +1808,7 @@ function enrichSummary(config, label) {
  * @returns {HTMLElement} Enricher element
  */
 function enrichAlmanac(config, label) {
-  const { calendar, components } = resolveCalendar(config);
+  const { calendar } = resolveCalendar(config);
   if (label) return createElement('almanac', label, '', true);
   const container = document.createElement('span');
   container.classList.add('calendaria-enricher', 'calendaria-enricher--almanac', 'calendaria-enricher--live');
@@ -1812,8 +1816,7 @@ function enrichAlmanac(config, label) {
   container.dataset.calConfig = '';
   const lines = [];
   lines.push(formatDate(null, 'dateFull', calendar));
-  const seasonIndex = components.season ?? 0;
-  const season = calendar?.seasonsArray?.[seasonIndex];
+  const season = calendar?.getCurrentSeason?.();
   if (season) lines.push(`${_loc('CALENDARIA.Common.Season')}: ${_loc(season.name)}`);
   const weather = WeatherManager.getCurrentWeather();
   if (weather) {
@@ -2105,8 +2108,10 @@ async function navigateToDate(year, month, day) {
     }
   } else {
     const instance = BigCal.show();
-    instance.selectDate(dateObj);
-    await instance.render({ force: true });
+    if (instance) {
+      instance.selectDate(dateObj);
+      await instance.render({ force: true });
+    }
   }
 }
 

@@ -1,135 +1,152 @@
-<section class="content">
-  <p class="computed-help">{{helpText}}</p>
+<section class="cb-content standard-form">
+  <p class="hint">{{helpText}}</p>
 
-  <fieldset class="chain-section">
+  <fieldset>
     <legend>{{localize "CALENDARIA.Note.ComputedChain"}}</legend>
 
     {{#each chain}}
-      <div class="chain-step" data-index="{{index}}">
-        <header class="step-header">
-          <span class="step-label">{{localize "CALENDARIA.Note.ComputedStep" num=(math index "+" 1)}}</span>
-          <button type="button" class="remove-step" data-action="removeStep" data-index="{{index}}" data-tooltip
+      <fieldset class="cb-condition">
+        <legend class="cb-condition-legend">
+          {{localize "CALENDARIA.Note.ComputedStep" num=num}}
+          <a class="cb-remove" data-action="removeStep" data-index="{{index}}" data-tooltip
             aria-label="{{localize 'CALENDARIA.Note.ComputedRemoveStep'}}">
             <i class="fas fa-times"></i>
-          </button>
-        </header>
-
-        <div class="step-content">
-          <div class="form-group">
-            <label>{{localize "CALENDARIA.Note.ComputedStepType"}}</label>
-            <select name="chain.{{index}}.type">
-              {{#each ../stepTypes}}
-                <option value="{{value}}" {{#if (eq value ../type)}}selected{{/if}}>{{label}}</option>
-              {{/each}}
-            </select>
-          </div>
+          </a>
+        </legend>
+        <div class="cb-condition-row">
+          <select name="chain.{{index}}.type" class="cb-field-select" data-tooltip
+            aria-label="{{localize 'CALENDARIA.Note.ComputedStepType'}}">
+            {{#each ../stepTypes}}
+              <option value="{{value}}" {{#if (eq value ../type)}}selected{{/if}}>{{label}}</option>
+            {{/each}}
+          </select>
 
           {{#if isAnchor}}
-            <div class="form-group">
-              <label>{{localize "CALENDARIA.Note.ComputedAnchor"}}</label>
-              <select name="chain.{{index}}.value">
-                {{#each ../anchorTypes}}
-                  <option value="{{value}}" {{#if (eq value ../value)}}selected{{/if}}>{{label}}</option>
+            <select name="chain.{{index}}.value" class="cb-value-select" data-tooltip
+              aria-label="{{localize 'CALENDARIA.Note.ComputedAnchor'}}">
+              {{#each ../anchorTypes}}
+                <option value="{{value}}" {{#if (eq value ../value)}}selected{{/if}}>{{label}}</option>
+              {{/each}}
+            </select>
+            {{#if isDateAnchor}}
+              <select name="chain.{{index}}.anchorMonth" class="cb-value-select" data-tooltip
+                aria-label="{{localize 'CALENDARIA.Common.Month'}}">
+                {{#each ../months}}
+                  <option value="{{index}}" {{#if (eq index ../dateAnchorMonth)}}selected{{/if}}>{{name}}</option>
                 {{/each}}
               </select>
-            </div>
+              <span class="cb-labeled-input">
+                <span class="cb-inline-label">{{localize "CALENDARIA.Common.Day"}}</span>
+                <input type="number" name="chain.{{index}}.anchorDay" value="{{dateAnchorDay}}" min="1" class="cb-value-input">
+              </span>
+            {{/if}}
           {{/if}}
 
           {{#if isFirstAfter}}
-            <div class="form-group">
-              <label>{{localize "CALENDARIA.Condition.Builder.ConditionLabel"}}</label>
-              <select name="chain.{{index}}.condition">
-                {{#each ../conditionTypes}}
-                  <option value="{{value}}" {{#if (eq value ../condition)}}selected{{/if}}>{{label}}</option>
+            <select name="chain.{{index}}.condition" class="cb-value-select" data-tooltip
+              aria-label="{{localize 'CALENDARIA.Condition.Builder.ConditionLabel'}}">
+              {{#each ../conditionTypes}}
+                <option value="{{value}}" {{#if (eq value ../condition)}}selected{{/if}}>{{label}}</option>
+              {{/each}}
+            </select>
+            {{#if isMoonPhase}}
+              <select name="chain.{{index}}.params.moon" class="cb-value-select" data-tooltip
+                aria-label="{{localize 'CALENDARIA.Common.Moon'}}">
+                {{#each ../moons}}
+                  <option value="{{index}}" {{#if (eq index ../params.moon)}}selected{{/if}}>{{name}}</option>
                 {{/each}}
               </select>
-            </div>
-
-            {{#if isMoonPhase}}
-              <div class="form-group">
-                <label>Moon</label>
-                <select name="chain.{{index}}.params.moon">
-                  {{#each ../moons}}
-                    <option value="{{index}}" {{#if (eq index ../params.moon)}}selected{{/if}}>{{name}}</option>
-                  {{/each}}
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Phase</label>
-                <select name="chain.{{index}}.params.phase">
-                  {{#each ../moonPhases}}
-                    <option value="{{this}}" {{#if (eq this ../params.phase)}}selected{{/if}}>{{capitalize this}}
-                    </option>
-                  {{/each}}
-                </select>
-              </div>
+              <select name="chain.{{index}}.params.phase" class="cb-value-select" data-tooltip
+                aria-label="{{localize 'CALENDARIA.Common.Phase'}}">
+                {{#each ../moonPhases}}
+                  <option value="{{value}}" {{#if (eq value ../params.phase)}}selected{{/if}}>{{label}}</option>
+                {{/each}}
+              </select>
             {{/if}}
-
             {{#if isWeekdayCondition}}
-              <div class="form-group">
-                <label>{{localize "CALENDARIA.Common.Weekday"}}</label>
-                <select name="chain.{{index}}.params.weekday">
-                  {{#each ../weekdays}}
-                    <option value="{{index}}" {{#if (eq index ../params.weekday)}}selected{{/if}}>{{name}}</option>
-                  {{/each}}
-                </select>
-              </div>
-            {{/if}}
-          {{/if}}
-
-          {{#if isDaysAfter}}
-            <div class="form-group">
-              <label>Days</label>
-              <input type="number" name="chain.{{index}}.params.days" value="{{params.days}}">
-            </div>
-          {{/if}}
-
-          {{#if isWeekdayOnOrAfter}}
-            <div class="form-group">
-              <label>{{localize "CALENDARIA.Common.Weekday"}}</label>
-              <select name="chain.{{index}}.params.weekday">
+              <select name="chain.{{index}}.params.weekday" class="cb-value-select" data-tooltip
+                aria-label="{{localize 'CALENDARIA.Common.Weekday'}}">
                 {{#each ../weekdays}}
                   <option value="{{index}}" {{#if (eq index ../params.weekday)}}selected{{/if}}>{{name}}</option>
                 {{/each}}
               </select>
-            </div>
+            {{/if}}
+            <label class="cb-labeled-input">
+              <input type="checkbox" name="chain.{{index}}.params.inclusive" {{#if params.inclusive}}checked{{/if}}>
+              <span class="cb-inline-label">{{localize "CALENDARIA.Note.ComputedInclusive"}}</span>
+            </label>
+          {{/if}}
+
+          {{#if isDaysAfter}}
+            <span class="cb-labeled-input">
+              <span class="cb-inline-label">{{localize "CALENDARIA.Common.Days"}}</span>
+              <input type="number" name="chain.{{index}}.params.days" value="{{params.days}}" class="cb-value-input"
+                data-tooltip aria-label="{{localize 'CALENDARIA.Note.ComputedDaysHint'}}">
+            </span>
+          {{/if}}
+
+          {{#if isWeekdayOnOrAfter}}
+            <select name="chain.{{index}}.params.weekday" class="cb-value-select" data-tooltip
+              aria-label="{{localize 'CALENDARIA.Common.Weekday'}}">
+              {{#each ../weekdays}}
+                <option value="{{index}}" {{#if (eq index ../params.weekday)}}selected{{/if}}>{{name}}</option>
+              {{/each}}
+            </select>
           {{/if}}
         </div>
-      </div>
+      </fieldset>
     {{/each}}
 
-    <button type="button" class="add-step" data-action="addStep">
-      <i class="fas fa-plus"></i> {{localize "CALENDARIA.Note.ComputedAddStep"}}
-    </button>
+    <div class="cb-group-actions">
+      <button type="button" class="cb-add-btn" data-action="addStep">
+        <i class="fas fa-plus"></i> {{localize "CALENDARIA.Note.ComputedAddStep"}}
+      </button>
+    </div>
   </fieldset>
 
-  <fieldset class="overrides-section">
+  {{#if preview.length}}
+    <fieldset>
+      <legend>{{localize "CALENDARIA.Note.ComputedPreview"}}</legend>
+      {{#each preview}}
+        <div class="cb-condition-row">
+          <span class="cb-inline-label">{{year}}:</span>
+          {{#if failed}}<em>{{label}}</em>{{else}}<span>{{label}}</span>{{/if}}
+        </div>
+      {{/each}}
+    </fieldset>
+  {{/if}}
+
+  <fieldset>
     <legend>{{localize "CALENDARIA.Note.ComputedOverrides"}}</legend>
     <p class="hint">{{localize "CALENDARIA.Note.ComputedOverridesHint"}}</p>
 
     {{#each overrides}}
-      <div class="override-row" data-year="{{year}}">
-        <span class="override-year">{{year}}:</span>
-        <select name="override.{{year}}.month">
+      <div class="cb-condition-row">
+        <span class="cb-labeled-input">
+          <span class="cb-inline-label">{{localize "CALENDARIA.Common.Year"}}</span>
+          <input type="number" name="override.{{year}}.year" value="{{year}}" step="1" class="cb-value-input">
+        </span>
+        <select name="override.{{year}}.month" class="cb-value-select" data-tooltip
+          aria-label="{{localize 'CALENDARIA.Common.Month'}}">
           {{#each ../months}}
             <option value="{{index}}" {{#if (eq index ../month)}}selected{{/if}}>{{name}}</option>
           {{/each}}
         </select>
-        <input type="number" name="override.{{year}}.day" value="{{day}}" min="1" max="31">
-        <button type="button" class="remove-override" data-action="removeOverride" data-year="{{year}}">
+        <span class="cb-labeled-input">
+          <span class="cb-inline-label">{{localize "CALENDARIA.Common.Day"}}</span>
+          <input type="number" name="override.{{year}}.day" value="{{day}}" min="1" max="31" class="cb-value-input">
+        </span>
+        <a class="cb-remove" data-action="removeOverride" data-year="{{year}}" data-tooltip
+          aria-label="{{localize 'CALENDARIA.Common.Delete'}}">
           <i class="fas fa-times"></i>
-        </button>
+        </a>
       </div>
     {{/each}}
 
-    <button type="button" class="add-override" data-action="addOverride">
-      <i class="fas fa-plus"></i> Add Override
-    </button>
+    <div class="cb-group-actions">
+      <button type="button" class="cb-add-btn" data-action="addOverride">
+        <i class="fas fa-plus"></i> {{localize "CALENDARIA.Note.ComputedAddOverride"}}
+      </button>
+    </div>
   </fieldset>
-
-  <footer class="form-footer">
-    <button type="button" data-action="save">
-      <i class="fas fa-save"></i> {{localize "Save"}}
-    </button>
-  </footer>
 </section>

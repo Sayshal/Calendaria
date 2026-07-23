@@ -1,5 +1,5 @@
 import { findFestivalDay as findFestivalDayViaNotes, getLeapYearDescription, intersectsYear, parseInterval, parsePattern } from '../calendar/_module.mjs';
-import { DEFAULT_MOON_PHASES } from '../constants.mjs';
+import { DEFAULT_MOON_PHASES, MOON_VISIBILITY } from '../constants.mjs';
 import { NoteManager } from '../notes/_module.mjs';
 import { resolveRandomizedPhase } from './_module.mjs';
 
@@ -133,12 +133,12 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
 
   /** @override */
   timeToComponents(time) {
-    const adjustedTime = time + CalendariaCalendar.epochOffset;
     const secondsPerMinute = this.days?.secondsPerMinute ?? 60;
     const minutesPerHour = this.days?.minutesPerHour ?? 60;
     const hoursPerDay = this.days?.hoursPerDay ?? 24;
     const secondsPerHour = secondsPerMinute * minutesPerHour;
     const secondsPerDay = secondsPerHour * hoursPerDay;
+    const adjustedTime = time + CalendariaCalendar.epochOffset + (this.epochDayOffset ?? 0) * secondsPerDay;
     let dayOfMonth = Math.floor(adjustedTime / secondsPerDay);
     const daySeconds = adjustedTime - dayOfMonth * secondsPerDay;
     const hour = Math.floor(daySeconds / secondsPerHour);
@@ -183,7 +183,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     for (let m = 0; m < month; m++) totalDays += this.getDaysInMonth(m, year);
     totalDays += dayOfMonth;
     const totalSeconds = totalDays * secondsPerDay + hour * secondsPerHour + minute * secondsPerMinute + second;
-    return totalSeconds - CalendariaCalendar.epochOffset;
+    return totalSeconds - CalendariaCalendar.epochOffset - (this.epochDayOffset ?? 0) * secondsPerDay;
   }
 
   /**
@@ -411,6 +411,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       seasons: extendedSeasonSchema,
       days: extendedDaysSchema,
       secondsPerRound: new NumberField({ required: false, integer: true, min: 0, initial: 6 }),
+      epochDayOffset: new NumberField({ required: false, integer: true, initial: 0 }),
       leapYearConfig: new SchemaField(
         {
           rule: new StringField({ required: false, initial: 'none' }),
@@ -475,7 +476,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
           }),
           eclipseMode: new StringField({ required: false, initial: 'never', choices: ['never', 'rare', 'occasional', 'frequent', 'custom'] }),
           nodalPeriod: new NumberField({ required: false, nullable: true, initial: null, min: 1 }),
-          apparentSize: new NumberField({ required: false, nullable: false, initial: 1.0, min: 0.1, max: 2.0 })
+          apparentSize: new NumberField({ required: false, nullable: false, initial: 1.0, min: 0.1, max: 2.0 }),
+          visibility: new StringField({ required: false, initial: MOON_VISIBILITY.VISIBLE, choices: Object.values(MOON_VISIBILITY) })
         })
       ),
       eras: new TypedObjectField(
@@ -517,8 +519,10 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
           enabled: new foundry.data.fields.BooleanField({ required: false, initial: false }),
           shortestDay: new NumberField({ required: false, initial: 8, min: 0 }),
           longestDay: new NumberField({ required: false, initial: 16, min: 0 }),
-          winterSolstice: new NumberField({ required: false, initial: 355, integer: true, min: 0 }),
-          summerSolstice: new NumberField({ required: false, initial: 172, integer: true, min: 0 })
+          winterSolstice: new NumberField({ required: false, initial: 354, integer: true, min: 0 }),
+          summerSolstice: new NumberField({ required: false, initial: 171, integer: true, min: 0 }),
+          springEquinox: new NumberField({ required: false, nullable: true, initial: null, integer: true, min: 0 }),
+          autumnEquinox: new NumberField({ required: false, nullable: true, initial: null, integer: true, min: 0 })
         },
         { required: false }
       ),
@@ -690,6 +694,18 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
         case 'custom':
           if (advancedConfig.pattern) intervals = parsePattern(advancedConfig.pattern, start);
           break;
+        case 'cycle': {
+          // Leap years at fixed offsets within a repeating period, e.g. the Islamic 30-year tabular cycle.
+          const period = advancedConfig.interval;
+          if (period && period > 0 && advancedConfig.pattern) {
+            intervals = advancedConfig.pattern
+              .split(',')
+              .map((s) => parseInt(s.trim(), 10))
+              .filter((n) => Number.isFinite(n))
+              .map((r) => ({ interval: period, subtracts: false, offset: (((r - start) % period) + period) % period }));
+          }
+          break;
+        }
       }
     } else if (leapConfig) {
       const interval = leapConfig.leapInterval;
@@ -863,26 +879,31 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   }
 
   /**
-   * Progress between sunrise and sunset assuming it is daylight half the day duration.
+   * Progress between sunrise and sunset.
    * @param {number|object} [time] - The time to use, by default the current world time.
    * @param {object} [zone] - Optional climate zone with latitude/daylight overrides.
    * @returns {number} - Progress through day period, with 0 representing sunrise and 1 sunset.
    */
   progressDay(time = game.time.components, zone = null) {
-    return (CalendariaCalendar.hoursOfDay(time, this) - this.sunrise(time, zone)) / this.daylightHours(time, zone);
+    const daylightHrs = this.daylightHours(time, zone);
+    if (!daylightHrs) return 0;
+    return (CalendariaCalendar.hoursOfDay(time, this) - this.sunrise(time, zone)) / daylightHrs;
   }
 
   /**
-   * Progress between sunset and sunrise assuming it is night half the day duration.
+   * Progress between sunset and sunrise.
    * @param {number|object} [time] - The time to use, by default the current world time.
    * @param {object} [zone] - Optional climate zone with latitude/daylight overrides.
    * @returns {number} - Progress through night period, with 0 representing sunset and 1 sunrise.
    */
   progressNight(time = game.time.components, zone = null) {
-    const daylightHrs = this.daylightHours(time, zone);
+    const hoursPerDay = this.days.hoursPerDay;
+    const nightHrs = hoursPerDay - this.daylightHours(time, zone);
+    if (!nightHrs) return 0;
+    const sunset = this.sunset(time, zone);
     let hour = CalendariaCalendar.hoursOfDay(time, this);
-    if (hour < daylightHrs) hour += this.days.hoursPerDay;
-    return (hour - this.sunset(time, zone)) / daylightHrs;
+    if (hour < sunset) hour += hoursPerDay;
+    return (hour - sunset) / nightHrs;
   }
 
   /**
@@ -964,16 +985,15 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     const hoursPerDay = this.days.hoursPerDay;
     const daysPerYear = this.days.daysPerYear ?? 365;
     let dayOfYear = components.dayOfMonth;
-    const months = this.monthsArray;
-    for (let i = 0; i < components.month; i++) dayOfYear += months[i]?.days ?? 0;
+    for (let i = 0; i < components.month; i++) dayOfYear += this.getDaysInMonth(i, components.year);
     if (zone?.latitude != null) {
-      const summerSolsticeDay = this.daylight?.summerSolstice ?? Math.round(daysPerYear * 0.47);
+      const summerSolsticeDay = this.#normalizeRawDoy(this.daylight?.summerSolstice ?? Math.round(daysPerYear * 0.47), components.year);
       return CalendariaCalendar.computeDaylightFromLatitude(zone.latitude, dayOfYear, daysPerYear, hoursPerDay, summerSolsticeDay);
     }
-    if (zone?.shortestDay != null && zone?.longestDay != null) return this.#computeSinusoidalDaylight(dayOfYear, daysPerYear, zone.shortestDay, zone.longestDay);
+    if (zone?.shortestDay != null && zone?.longestDay != null) return this.#computeSinusoidalDaylight(dayOfYear, daysPerYear, zone.shortestDay, zone.longestDay, components.year);
     if (this.daylight?.enabled) {
       const { shortestDay, longestDay } = this.daylight;
-      return this.#computeSinusoidalDaylight(dayOfYear, daysPerYear, shortestDay, longestDay);
+      return this.#computeSinusoidalDaylight(dayOfYear, daysPerYear, shortestDay, longestDay, components.year);
     }
     return hoursPerDay * 0.5;
   }
@@ -984,12 +1004,13 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    * @param {number} daysPerYear - Total days per year
    * @param {number} shortestDay - Shortest daylight hours
    * @param {number} longestDay - Longest daylight hours
+   * @param {number} [internalYear] - Year minus yearZero
    * @returns {number} Hours of daylight
    * @private
    */
-  #computeSinusoidalDaylight(dayOfYear, daysPerYear, shortestDay, longestDay) {
-    const winterSolstice = this.daylight?.winterSolstice ?? Math.round(daysPerYear * 0.97);
-    const summerSolstice = this.daylight?.summerSolstice ?? Math.round(daysPerYear * 0.47);
+  #computeSinusoidalDaylight(dayOfYear, daysPerYear, shortestDay, longestDay, internalYear = 0) {
+    const winterSolstice = this.#normalizeRawDoy(this.daylight?.winterSolstice ?? Math.round(daysPerYear * 0.97), internalYear);
+    const summerSolstice = this.#normalizeRawDoy(this.daylight?.summerSolstice ?? Math.round(daysPerYear * 0.47), internalYear);
     const daysSinceWinter = (dayOfYear - winterSolstice + daysPerYear) % daysPerYear;
     const daysBetweenSolstices = (summerSolstice - winterSolstice + daysPerYear) % daysPerYear;
     let progress;
@@ -1487,7 +1508,10 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    * @returns {Array<{name: string, icon: string, position: number}>} - All moon phase data
    */
   getAllMoonPhases(time = game.time.worldTime) {
-    return this.moonsArray.map((_moon, index) => this.getMoonPhase(index, time)).filter(Boolean);
+    return this.moonsArray.map((moon, index) => {
+      const phase = this.getMoonPhase(index, time);
+      return phase ? { moonIndex: index, moonName: moon.name ?? '', ...phase } : null;
+    });
   }
 
   /**
@@ -1547,13 +1571,50 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    * @param {number|object} [time]  Time to use, by default the current world time.
    * @returns {object|null} Current season.
    */
+  /**
+   * Split a stored 0-based reference-year day-of-year into month and day of month.
+   * @param {number} value - 0-based reference-year day-of-year
+   * @returns {number[]} Month index and 0-based day of month
+   */
+  #rawDoyToMonthDay(value) {
+    const months = this.monthsArray;
+    let remaining = Math.max(0, value);
+    let month = 0;
+    for (; month < months.length; month++) {
+      const days = months[month]?.days ?? 30;
+      if (remaining < days) break;
+      remaining -= days;
+    }
+    if (month >= months.length) {
+      month = months.length - 1;
+      remaining = (months[month]?.days ?? 1) - 1;
+    }
+    return [month, remaining];
+  }
+
+  /**
+   * Re-resolve a stored 0-based day-of-year for a specific year, leap-aware.
+   * @param {number} value - 0-based reference-year day-of-year
+   * @param {number} internalYear - Year minus yearZero
+   * @returns {number} 0-based day-of-year valid for internalYear
+   */
+  #normalizeRawDoy(value, internalYear) {
+    const [month, day] = this.#rawDoyToMonthDay(value);
+    let doy = 0;
+    for (let m = 0; m < month; m++) doy += this.getDaysInMonth(m, internalYear);
+    return doy + Math.min(day, this.getDaysInMonth(month, internalYear) - 1);
+  }
+
+  /**
+   * Get the season containing a given time.
+   * @param {number|object} [time] - World time in seconds or time components
+   * @returns {object|null} Season record or null
+   */
   getCurrentSeason(time = game.time.worldTime) {
     const seasons = this.seasonsArray;
     if (!seasons.length) return null;
     const components = typeof time === 'number' ? this.timeToComponents(time) : time;
     const months = this.monthsArray;
-    let dayOfYear = components.dayOfMonth;
-    for (let i = 0; i < components.month; i++) dayOfYear += months[i]?.days ?? 0;
     if (this.seasons.type === 'periodic') {
       const totalDays = this.getDaysInYear(components.year);
       const { cycleLength } = this._calculatePeriodicSeasonBounds(0, totalDays);
@@ -1586,8 +1647,12 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
           if (currentMonth === season.monthEnd && components.dayOfMonth <= endDay) return season;
         }
       } else if (season.dayStart != null && season.dayEnd != null) {
-        const { dayStart, dayEnd } = season;
-        const inRange = dayStart <= dayEnd ? dayOfYear >= dayStart && dayOfYear <= dayEnd : dayOfYear >= dayStart || dayOfYear <= dayEnd;
+        const [sm, sd] = this.#rawDoyToMonthDay(season.dayStart);
+        const [em, ed] = this.#rawDoyToMonthDay(season.dayEnd);
+        const current = components.month * 1000 + components.dayOfMonth;
+        const start = sm * 1000 + sd;
+        const end = em * 1000 + ed;
+        const inRange = start <= end ? current >= start && current <= end : current >= start || current <= end;
         if (inRange) return season;
       }
     }

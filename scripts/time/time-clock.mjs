@@ -54,8 +54,11 @@ export default class TimeClock {
   /** @type {number} Game seconds accumulated since last advance */
   static #accumulatedSeconds = 0;
 
-  /** @type {boolean} Guard against re-entrant day-boundary flush */
-  static #flushing = false;
+  /** @type {number} Game seconds handed to game.time.advance but not yet landed */
+  static #pendingCommit = 0;
+
+  /** @type {boolean} Guard against overlapping commits */
+  static #committing = false;
 
   /** @type {boolean} Whether the clock is currently running */
   static #running = false;
@@ -148,7 +151,7 @@ export default class TimeClock {
    * @returns {number} Predicted world time in seconds
    */
   static get predictedWorldTime() {
-    return game.time.worldTime + this.#accumulatedSeconds;
+    return game.time.worldTime + this.#accumulatedSeconds + this.#pendingCommit;
   }
 
   /**
@@ -167,9 +170,6 @@ export default class TimeClock {
     this.#locked = game.settings.get(MODULE.ID, SETTINGS.CLOCK_LOCKED) ?? false;
     this.loadSpeedFromSettings();
     Hooks.on(HOOKS.CLOCK_UPDATE, this.#onRemoteClockUpdate.bind(this));
-    Hooks.on('updateWorldTime', (_worldTime, delta) => {
-      this.#accumulatedSeconds = Math.max(0, this.#accumulatedSeconds - Math.abs(delta));
-    });
     Hooks.on('pauseGame', this.#onPauseGame.bind(this));
     Hooks.on('combatStart', this.#onCombatStart.bind(this));
     Hooks.on('deleteCombat', this.#onCombatEnd.bind(this));
@@ -202,6 +202,7 @@ export default class TimeClock {
     if (this.#running) {
       if (this.disabled) this.stop();
       else {
+        this.#flushAccumulated();
         this.#stopIntervals();
         this.#startIntervals();
       }
@@ -282,6 +283,7 @@ export default class TimeClock {
     }
     this.#running = true;
     this.#accumulatedSeconds = 0;
+    this.#pendingCommit = 0;
     this.#startIntervals();
     Hooks.callAll(HOOKS.CLOCK_START_STOP, { running: true, increment: this.#increment });
     if (broadcast && CalendariaSocket.isPrimaryGM()) CalendariaSocket.emitClockUpdate(true, this.#increment);
@@ -470,6 +472,7 @@ export default class TimeClock {
    */
   static restartIntervals() {
     if (!this.#running) return;
+    this.#flushAccumulated();
     this.#stopIntervals();
     this.#startIntervals();
   }
@@ -503,18 +506,13 @@ export default class TimeClock {
       this.#accumulatedSeconds += speed;
       const predicted = this.predictedWorldTime;
       Hooks.callAll(HOOKS.VISUAL_TICK, { predictedWorldTime: predicted });
-      if (!this.#flushing && CalendariaSocket.isPrimaryGM() && this.#accumulatedSeconds > 0) {
+      if (!this.#committing && CalendariaSocket.isPrimaryGM() && this.#accumulatedSeconds > 0) {
         const cal = game.time?.calendar;
         if (cal) {
           const committed = cal.timeToComponents(game.time.worldTime);
           const pred = cal.timeToComponents(predicted);
           if (committed.dayOfMonth !== pred.dayOfMonth || committed.month !== pred.month || committed.year !== pred.year) {
-            this.#flushing = true;
-            const toAdvance = this.#accumulatedSeconds;
-            this.#accumulatedSeconds = 0;
-            game.time.advance(toAdvance).finally(() => {
-              this.#flushing = false;
-            });
+            this.#commit(this.#accumulatedSeconds);
           }
         }
       }
@@ -522,14 +520,12 @@ export default class TimeClock {
     this.#advanceIntervalId = setInterval(async () => {
       if (!TimeClock.#running || TimeClock.#combatBlocks) return;
       if (!CalendariaSocket.isPrimaryGM()) return;
-      const toAdvance = this.#accumulatedSeconds;
-      if (toAdvance <= 0) return;
-      await game.time.advance(toAdvance);
+      await this.#commit(this.#accumulatedSeconds);
     }, intervalMs);
   }
 
   /**
-   * Stop both intervals and reset accumulated seconds.
+   * Stop both intervals and reset accumulated seconds. Any in-flight commit is left to retire on its own.
    * @private
    */
   static #stopIntervals() {
@@ -545,15 +541,45 @@ export default class TimeClock {
   }
 
   /**
+   * Commit accumulated seconds to world time, holding them in #pendingCommit while in flight.
+   * @param {number} seconds - Seconds to commit
+   * @private
+   */
+  static async #commit(seconds) {
+    if (!(seconds > 0) || this.#committing) return;
+    this.#committing = true;
+    this.#accumulatedSeconds = Math.max(0, this.#accumulatedSeconds - seconds);
+    this.#pendingCommit += seconds;
+    try {
+      await game.time.advance(seconds);
+    } catch (error) {
+      this.#pendingCommit = Math.max(0, this.#pendingCommit - seconds);
+      ATLAS.log(1, 'TimeClock failed to advance world time:', error);
+    } finally {
+      this.#committing = false;
+    }
+  }
+
+  /**
+   * Retire an in-flight commit, or drain locally accumulated seconds on clients that never commit.
+   * @param {number} dt - World time delta in seconds
+   * @private
+   */
+  static #reconcileCommit(dt) {
+    if (!(dt > 0)) return;
+    const fromPending = Math.min(this.#pendingCommit, dt);
+    this.#pendingCommit -= fromPending;
+    const rest = dt - fromPending;
+    if (rest > 0) this.#accumulatedSeconds = Math.max(0, this.#accumulatedSeconds - rest);
+  }
+
+  /**
    * Flush any accumulated seconds as a final advance before stopping.
    * @private
    */
   static async #flushAccumulated() {
-    if (this.#accumulatedSeconds <= 0) return;
     if (!CalendariaSocket.isPrimaryGM()) return;
-    const toAdvance = this.#accumulatedSeconds;
-    this.#accumulatedSeconds = 0;
-    await game.time.advance(toAdvance);
+    await this.#commit(this.#accumulatedSeconds);
   }
 
   /**
@@ -574,6 +600,7 @@ export default class TimeClock {
     if (running && !this.#running) {
       this.#running = true;
       this.#accumulatedSeconds = 0;
+      this.#pendingCommit = 0;
       this.#startIntervals();
       Hooks.callAll(HOOKS.CLOCK_START_STOP, { running: true, increment: this.#increment });
     } else if (!running && this.#running) {
@@ -632,6 +659,7 @@ export default class TimeClock {
    * @param {number} dt - The delta time in seconds
    */
   static async onUpdateWorldTime(worldTime, dt) {
+    TimeClock.#reconcileCommit(dt);
     ReminderScheduler.onUpdateWorldTime(worldTime, dt);
     TimeTracker.onUpdateWorldTime(worldTime, dt);
     Hooks.callAll(HOOKS.WORLD_TIME_UPDATED, worldTime, dt);

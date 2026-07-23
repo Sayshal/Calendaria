@@ -19,7 +19,7 @@ import {
   wrapInRootGroup
 } from '../../notes/_module.mjs';
 import { daysBetween } from '../../notes/date-utils.mjs';
-import { CalendariaSocket, convertToConditionTree, formatForLocation } from '../../utils/_module.mjs';
+import { CalendariaSocket, formatForLocation } from '../../utils/_module.mjs';
 import { CalendarEditor, ConditionBuilderDialog } from '../_module.mjs';
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
@@ -235,7 +235,6 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
         titleInput.select();
       }
     }
-    if (this.isEditMode) this.#autoConvertLegacy();
   }
 
   /** @override */
@@ -387,6 +386,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     context.isEditMode = this.isEditMode;
     context.isGM = game.user.isGM;
     context.canEdit = this.document.isOwner;
+    context.canSetVisibility = game.user.isGM || this.document.isOwner;
     if (this.isEditMode) {
       const { ungroupedTabs, tabGroups } = this.#prepareTabGroups();
       context.ungroupedTabs = ungroupedTabs;
@@ -611,24 +611,6 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       });
   }
 
-  /**
-   * Auto-convert legacy repeat data to condition tree format.
-   * @private
-   */
-  async #autoConvertLegacy() {
-    const noteData = this.document.system;
-    if (noteData.conditionTree) return;
-    if ((noteData.repeat === 'never' || !noteData.repeat) && !noteData.conditions?.length) return;
-    const tree = convertToConditionTree(noteData);
-    if (!tree) return;
-    const updateData = { 'system.conditionTree': tree };
-    const deps = extractEventDependencies(tree);
-    if (deps.length) updateData['system.connectedEvents'] = deps;
-    await this.document.update(updateData);
-    ui.notifications.info(_loc('CALENDARIA.Note.AutoConverted'));
-    ATLAS.log(3, `Auto-converted legacy repeat "${noteData.repeat}" for note "${this.document.name}"`);
-  }
-
   /** @override */
   _onChangeForm(formConfig, event) {
     const target = event.target;
@@ -679,7 +661,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     if (preset.color) updates['system.color'] = preset.color;
     const defaultFields = ['displayStyle', 'visibility', 'allDay', 'reminderType', 'reminderOffset', 'reminderUnit', 'hasDuration', 'duration', 'macro'];
     for (const field of defaultFields) if (noteData[field] !== this.document.system[field]) updates[`system.${field}`] = noteData[field];
-    if (noteData.remindUsers?.length && noteData.remindUsers.length !== (this.document.system.remindUsers?.length ?? 0)) updates['system.remindUsers'] = noteData.remindUsers;
+    if (noteData.reminderUsers?.length && noteData.reminderUsers.length !== (this.document.system.reminderUsers?.length ?? 0)) updates['system.reminderUsers'] = noteData.reminderUsers;
     if (Object.keys(updates).length === 0) return;
     await this.document.update(updates);
   }

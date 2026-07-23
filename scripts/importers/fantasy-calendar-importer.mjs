@@ -206,9 +206,9 @@ export default class FantasyCalendarImporter extends BaseImporter {
       return aDay - bDay;
     });
     return sortedSeasons.map((season, index) => {
-      const dayStart = (monthDayStarts[season.timespan] ?? 0) + (season.day ?? 0);
+      const dayStart = (monthDayStarts[season.timespan] ?? 0) + Math.max(0, (season.day ?? 1) - 1);
       const nextSeason = sortedSeasons[(index + 1) % sortedSeasons.length];
-      let dayEnd = (monthDayStarts[nextSeason.timespan] ?? 0) + (nextSeason.day ?? 0) - 1;
+      let dayEnd = (monthDayStarts[nextSeason.timespan] ?? 0) + Math.max(0, (nextSeason.day ?? 1) - 1) - 1;
       if (dayEnd < 0) dayEnd = totalDays - 1;
       if (dayEnd < dayStart) dayEnd += totalDays;
       return { name: season.name, dayStart, dayEnd: dayEnd >= totalDays ? dayEnd - totalDays : dayEnd, color: season.color?.[0] || null };
@@ -723,7 +723,7 @@ export default class FantasyCalendarImporter extends BaseImporter {
     if (ti <= 6) {
       const ops = ['==', '!=', '>=', '<=', '>', '<', '%'];
       const op = ops[ti] || '==';
-      if (op === '%') return [{ field: 'day', op: '%', value, offset: parseInt(values?.[1]) || 0 }];
+      if (op === '%') return [{ field: 'epoch', op: '%', value, offset: parseInt(values?.[1]) || 0 }];
       return [{ field: 'day', op, value }];
     }
     if (ti >= 7 && ti <= 13) {
@@ -1011,7 +1011,7 @@ export default class FantasyCalendarImporter extends BaseImporter {
           conditions: note.conditions || [],
           visibility: note.visibility || 'visible'
         };
-        const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData, calendarId, openSheet: false });
+        const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData: this._convertForeignRecurrence(noteData), calendarId, openSheet: false });
         if (page) {
           count++;
           if (note.originalId) fcIdToPage.set(String(note.originalId), page.id);

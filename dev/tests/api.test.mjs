@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CalendariaAPI, createGlobalNamespace } from '../../scripts/api.mjs';
+import { BigCal } from '../../scripts/applications/calendar/big-cal.mjs';
 import { MiniCal } from '../../scripts/applications/calendar/mini-cal.mjs';
 import { isBundledCalendar } from '../../scripts/calendar/calendar-loader.mjs';
 import CalendarManager from '../../scripts/calendar/calendar-manager.mjs';
@@ -10,7 +11,7 @@ import NoteManager from '../../scripts/notes/note-manager.mjs';
 import { getNextOccurrences, getOccurrencesInRange, isRecurringMatch } from '../../scripts/notes/recurrence.mjs';
 import TimeClock from '../../scripts/time/time-clock.mjs';
 import { PRESET_FORMATTERS, formatCustom, getAvailableTokens, resolveFormatString, timeSince } from '../../scripts/utils/formatting/format-utils.mjs';
-import { getConvergencesInRange, getMoonPhasePosition, getNextConvergence, getNextFullMoon, isMoonFull } from '../../scripts/utils/formatting/moon-utils.mjs';
+import { getConvergencesInRange, getMoonPhasePosition, getNextConvergence, getNextFullMoon, isMoonFull, isMoonVisible } from '../../scripts/utils/formatting/moon-utils.mjs';
 import { canAddNotes, canChangeActiveCalendar, canChangeDateTime, canEditCalendars, canViewWeatherForecast } from '../../scripts/utils/permissions.mjs';
 import SearchManager from '../../scripts/utils/search-manager.mjs';
 import { CalendariaSocket } from '../../scripts/utils/socket.mjs';
@@ -107,7 +108,7 @@ vi.mock('../../scripts/utils/formatting/format-utils.mjs', () => ({
   resolveFormatString: vi.fn((s) => s),
   timeSince: vi.fn(() => '3 days ago')
 }));
-vi.mock('../../scripts/utils/formatting/moon-utils.mjs', () => ({ getMoonPhasePosition: vi.fn(() => 0.5), isMoonFull: vi.fn(() => false), getNextConvergence: vi.fn(() => null), getNextFullMoon: vi.fn(() => null), getConvergencesInRange: vi.fn(() => []) }));
+vi.mock('../../scripts/utils/formatting/moon-utils.mjs', () => ({ getMoonPhasePosition: vi.fn(() => 0.5), isMoonFull: vi.fn(() => false), isMoonVisible: vi.fn(() => true), getNextConvergence: vi.fn(() => null), getNextFullMoon: vi.fn(() => null), getConvergencesInRange: vi.fn(() => []) }));
 vi.mock('../../scripts/notes/date-utils.mjs', () => ({
   addDays: vi.fn((d) => d),
   addHours: vi.fn((d) => d),
@@ -350,7 +351,14 @@ describe('moon phases', () => {
   it('getAllMoonPhases delegates to CalendarManager', () => {
     const phases = [{ name: 'Full' }, { name: 'New' }];
     CalendarManager.getAllCurrentMoonPhases.mockReturnValue(phases);
-    expect(CalendariaAPI.getAllMoonPhases()).toBe(phases);
+    expect(CalendariaAPI.getAllMoonPhases()).toStrictEqual(phases);
+  });
+  it('getAllMoonPhases nulls hidden moons for the current user', () => {
+    CalendarManager.getActiveCalendar.mockReturnValue({ moonsArray: [{ visibility: 'hidden' }, { visibility: 'visible' }] });
+    CalendarManager.getAllCurrentMoonPhases.mockReturnValue([{ moonIndex: 0, name: 'Full' }, { moonIndex: 1, name: 'New' }]);
+    isMoonVisible.mockImplementation((m) => m?.visibility !== 'hidden');
+    expect(CalendariaAPI.getAllMoonPhases()).toStrictEqual([null, { moonIndex: 1, name: 'New' }]);
+    isMoonVisible.mockImplementation(() => true);
   });
   it('getMoonPhasePosition passes date or defaults to components', () => {
     const moon = { cycleLength: 28 };
@@ -388,10 +396,9 @@ describe('moon phases', () => {
 });
 
 describe('getCurrentSeason', () => {
-  it('returns the season at the current season index', () => {
+  it('returns the calendar-resolved current season', () => {
     const seasons = [{ name: 'Spring' }, { name: 'Summer' }];
-    CalendarManager.getActiveCalendar.mockReturnValue({ seasons: true, seasonsArray: seasons });
-    game.time.components.season = 1;
+    CalendarManager.getActiveCalendar.mockReturnValue({ seasons: true, seasonsArray: seasons, getCurrentSeason: () => seasons[1] });
     expect(CalendariaAPI.getCurrentSeason()).toEqual({ name: 'Summer' });
   });
   it('returns null when no calendar is active', () => {
@@ -399,8 +406,7 @@ describe('getCurrentSeason', () => {
     expect(CalendariaAPI.getCurrentSeason()).toBeNull();
   });
   it('returns null when seasonsArray is empty', () => {
-    CalendarManager.getActiveCalendar.mockReturnValue({ seasons: true, seasonsArray: [] });
-    game.time.components.season = 0;
+    CalendarManager.getActiveCalendar.mockReturnValue({ seasons: true, seasonsArray: [], getCurrentSeason: () => null });
     expect(CalendariaAPI.getCurrentSeason()).toBeNull();
   });
   it('returns null when calendar has no seasons', () => {
@@ -1294,16 +1300,37 @@ describe('navigateToNote', () => {
     await CalendariaAPI.navigateToNote('missing');
     expect(ui.notifications.warn).toHaveBeenCalled();
   });
-  it('shows BigCal, sets viewed/selected date, and opens note sheet', async () => {
+  it('navigates within an already-open BigCal and opens note sheet', async () => {
     const startDate = { year: 1, month: 5, dayOfMonth: 14 };
     NoteManager.getNote.mockReturnValue({ id: '1', flagData: { startDate } });
     const render = vi.fn();
     NoteManager.getFullNote.mockReturnValue({ sheet: { render } });
+    const open = { rendered: true, selectDate: vi.fn(), render: vi.fn() };
+    BigCal.instance = open;
     await CalendariaAPI.navigateToNote('1');
-    const instance = BigCalMock._lastInstance;
-    expect(instance.viewedDate).toEqual({ year: 1, month: 5, dayOfMonth: 14 });
-    expect(instance._selectedDate).toEqual({ year: 1, month: 5, dayOfMonth: 14 });
+    expect(open.selectDate).toHaveBeenCalledWith({ year: 1, month: 5, dayOfMonth: 14 });
     expect(render).toHaveBeenCalledWith(true, { mode: 'view' });
+    BigCal.instance = null;
+  });
+  it('does not open a calendar when none is rendered, but still opens the note sheet', async () => {
+    BigCalMock._lastInstance = null;
+    BigCal.instance = null;
+    MiniCal.instance = null;
+    NoteManager.getNote.mockReturnValue({ id: '1', flagData: { startDate: { year: 1, month: 5, dayOfMonth: 14 } } });
+    const render = vi.fn();
+    NoteManager.getFullNote.mockReturnValue({ sheet: { render } });
+    await CalendariaAPI.navigateToNote('1');
+    expect(BigCalMock._lastInstance).toBeNull();
+    expect(render).toHaveBeenCalledWith(true, { mode: 'view' });
+  });
+  it('force-opens BigCal when context is explicit', async () => {
+    BigCalMock._lastInstance = null;
+    BigCal.instance = null;
+    MiniCal.instance = null;
+    NoteManager.getNote.mockReturnValue({ id: '1', flagData: { startDate: { year: 1, month: 5, dayOfMonth: 14 } } });
+    NoteManager.getFullNote.mockReturnValue({ sheet: { render: vi.fn() } });
+    await CalendariaAPI.navigateToNote('1', { context: 'bigcal' });
+    expect(BigCalMock._lastInstance).not.toBeNull();
   });
   it('opens note sheet in edit mode when specified', async () => {
     const startDate = { year: 1, month: 0, dayOfMonth: 0 };
@@ -1321,6 +1348,13 @@ describe('navigateToNote', () => {
     await CalendariaAPI.navigateToNote('1');
     expect(BigCalMock._lastInstance).toBeNull();
     expect(render).not.toHaveBeenCalled();
+  });
+});
+
+describe('navigateToDate', () => {
+  it('does not throw when BigCal cannot be opened', async () => {
+    vi.spyOn(BigCal, 'show').mockReturnValue(null);
+    await expect(CalendariaAPI.navigateToDate(1, 6, 15)).resolves.toBeUndefined();
   });
 });
 

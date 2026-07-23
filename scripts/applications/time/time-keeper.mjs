@@ -492,14 +492,12 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Get time components, using predicted world time when clock is running.
+   * Get time components from predicted world time, which includes any uncommitted seconds.
    * @returns {object} Time components
    */
   #getComponents() {
-    if (TimeClock.running) {
-      const cal = game.time?.calendar;
-      if (cal) return cal.timeToComponents(TimeClock.predictedWorldTime);
-    }
+    const cal = game.time?.calendar;
+    if (cal) return cal.timeToComponents(TimeClock.predictedWorldTime);
     return game.time.components;
   }
 

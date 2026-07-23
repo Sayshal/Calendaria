@@ -1,9 +1,9 @@
 import { CalendarManager, CalendarRegistry, isBundledCalendar, preLocalizeCalendar } from '../../calendar/_module.mjs';
-import { ASSETS, DEFAULT_MOON_PHASES, HOOKS, TEMPLATES } from '../../constants.mjs';
+import { ASSETS, DEFAULT_MOON_PHASES, HOOKS, MOON_VISIBILITY, TEMPLATES } from '../../constants.mjs';
 import { FestivalManager } from '../../festivals/_module.mjs';
 import { createImporter } from '../../importers/_module.mjs';
 import { isLuxonSyncRequired } from '../../integrations/luxon-sync.mjs';
-import { NoteManager, summarizeConditionTree } from '../../notes/_module.mjs';
+import { NoteManager, repairMoonIndexReferences, summarizeConditionTree } from '../../notes/_module.mjs';
 import { RangeSlider, serializeNotes, validateFormatString } from '../../utils/_module.mjs';
 import { CLIMATE_ZONE_TEMPLATES, getBlankZoneConfig, getClimateTemplateOptions, getDefaultZoneConfig, getPresetAlias, setPresetAlias } from '../../weather/_module.mjs';
 import { ClimateEditor, TokenReferenceDialog } from '../_module.mjs';
@@ -128,6 +128,9 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {object} The working calendar data */
   #calendarData = null;
 
+  /** @type {string[]|null} Moon keys as of the last load or save, for reference repair on save. */
+  #savedMoonKeys = null;
+
   /** @type {boolean} Flag indicating if we're editing an existing calendar */
   #isEditing = false;
 
@@ -210,6 +213,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         secondsPerMinute: 60
       },
       secondsPerRound: 6,
+      epochDayOffset: 0,
       seasons: { type: 'dated', offset: 0, values: {} },
       eras: {},
       festivals: {},
@@ -257,6 +261,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       if (calObj.days?.values) this.#calendarData.days.values = calObj.days.values;
       if (calObj.seasons?.values) this.#calendarData.seasons.values = calObj.seasons.values;
       preLocalizeCalendar(this.#calendarData);
+      this.#savedMoonKeys = Object.keys(this.#calendarData.moons ?? {});
     } else {
       this.#initializeBlankCalendar();
     }
@@ -419,14 +424,18 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       { value: 'none', label: 'CALENDARIA.Common.None', selected: currentRule === 'none' },
       { value: 'simple', label: 'CALENDARIA.Editor.LeapRule.Simple', selected: currentRule === 'simple' },
       { value: 'gregorian', label: 'CALENDARIA.Common.Gregorian', selected: currentRule === 'gregorian' },
+      { value: 'cycle', label: 'CALENDARIA.Editor.LeapRule.Cycle', selected: currentRule === 'cycle' },
       { value: 'custom', label: 'CALENDARIA.Common.Custom', selected: currentRule === 'custom' }
     ];
     context.showLeapSimple = currentRule === 'simple';
     context.showLeapGregorian = currentRule === 'gregorian';
     context.showLeapCustom = currentRule === 'custom';
+    context.showLeapCycle = currentRule === 'cycle';
     context.leapInterval = leapYearConfig?.interval ?? legacyLeapYear?.leapInterval ?? 4;
     context.leapStart = leapYearConfig?.start ?? legacyLeapYear?.leapStart ?? 0;
     context.leapPattern = leapYearConfig?.pattern ?? '';
+    context.leapCyclePeriod = currentRule === 'cycle' ? (leapYearConfig?.interval ?? 30) : 30;
+    context.leapCycleOffsets = currentRule === 'cycle' ? (leapYearConfig?.pattern ?? '') : '';
     const yearNames = this.#calendarData.years.names || [];
     context.namedYears = yearNames.map((entry, idx) => ({ ...entry, index: idx }));
     const moonsArr = Object.entries(this.#calendarData.moons);
@@ -444,6 +453,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         isCustomEclipse: moon.eclipseMode === 'custom',
         isNoEclipse: !moon.eclipseMode || moon.eclipseMode === 'never',
         apparentSizeDisplay: moon.apparentSize ?? 1.0,
+        isHidden: moon.visibility === MOON_VISIBILITY.HIDDEN,
         eclipseModeOptions: [
           { value: 'never', label: _loc('CALENDARIA.Common.None'), selected: (moon.eclipseMode ?? 'never') === 'never' },
           { value: 'rare', label: _loc('CALENDARIA.Editor.Eclipse.Rare'), selected: moon.eclipseMode === 'rare' },
@@ -490,6 +500,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       { value: 'dated', label: 'CALENDARIA.Editor.Season.Type.Dated' },
       { value: 'periodic', label: 'CALENDARIA.Editor.Season.Type.Periodic' }
     ];
+    if (!this.#calendarData.seasons) this.#calendarData.seasons = { type: 'dated', offset: 0, values: {} };
     context.seasonType = this.#calendarData.seasons.type || 'dated';
     context.seasonOffset = this.#calendarData.seasons.offset ?? 0;
     context.seasonTypeOptions = seasonTypeOptions.map((opt) => ({ ...opt, selected: opt.value === context.seasonType }));
@@ -967,6 +978,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       } else if (leapRule === 'custom') {
         leapConfig.pattern = data['leapYearConfig.pattern'] || '';
         this.#calendarData.years.leapYear = null;
+      } else if (leapRule === 'cycle') {
+        leapConfig.interval = parseInt(data['leapYearConfig.cyclePeriod']) || 30;
+        leapConfig.pattern = data['leapYearConfig.cycleOffsets'] || '';
+        this.#calendarData.years.leapYear = null;
       } else if (leapRule === 'gregorian') {
         this.#calendarData.years.leapYear = { leapStart: leapConfig.start, leapInterval: 4 };
       }
@@ -978,6 +993,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#calendarData.days.secondsPerMinute = parseInt(data['days.secondsPerMinute']) || 60;
     const spr = parseInt(data.secondsPerRound);
     this.#calendarData.secondsPerRound = Number.isFinite(spr) ? spr : 6;
+    const edo = parseInt(data.epochDayOffset);
+    this.#calendarData.epochDayOffset = Number.isFinite(edo) ? edo : 0;
     if (!this.#calendarData.daylight) this.#calendarData.daylight = {};
     this.#calendarData.daylight.enabled = data['daylight.enabled'] ?? false;
     const shortRaw = parseFloat(data['daylight.shortestDay']);
@@ -1268,7 +1285,13 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         eclipseMode,
         nodalPeriod: eclipseMode === 'custom' ? (this.#parseOptionalInt(data[`moons.${mKey}.nodalPeriod`]) ?? existingMoon?.nodalPeriod ?? null) : (existingMoon?.nodalPeriod ?? null),
         apparentSize: parseFloat(data[`moons.${mKey}.apparentSize`]) || (existingMoon?.apparentSize ?? 1.0),
-        moonBrightnessMax: Number.isFinite(parseFloat(data[`moons.${mKey}.moonBrightnessMax`])) ? parseFloat(data[`moons.${mKey}.moonBrightnessMax`]) : (existingMoon?.moonBrightnessMax ?? null)
+        moonBrightnessMax: Number.isFinite(parseFloat(data[`moons.${mKey}.moonBrightnessMax`])) ? parseFloat(data[`moons.${mKey}.moonBrightnessMax`]) : (existingMoon?.moonBrightnessMax ?? null),
+        visibility:
+          data[`moons.${mKey}.hideFromPlayers`] !== undefined
+            ? data[`moons.${mKey}.hideFromPlayers`]
+              ? MOON_VISIBILITY.HIDDEN
+              : MOON_VISIBILITY.VISIBLE
+            : (existingMoon?.visibility ?? MOON_VISIBILITY.VISIBLE)
       };
     }
     this.#calendarData.moons = newMoons;
@@ -1855,7 +1878,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       cycleVariance: 0,
       anchorPhases: {},
       phases: foundry.utils.deepClone(DEFAULT_MOON_PHASES),
-      referenceDate: { year: 0, month: 0, dayOfMonth: 0 }
+      referenceDate: { year: 0, month: 0, dayOfMonth: 0 },
+      visibility: MOON_VISIBILITY.VISIBLE
     };
     this.#isDirty = true;
     this.render();
@@ -1868,6 +1892,13 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static async #onRemoveMoon(_event, target) {
     const key = target.dataset.key;
+    const moon = this.#calendarData.moons[key];
+    const confirmed = await foundry.applications.api.DialogV2.confirm({
+      window: { title: _loc('CALENDARIA.Editor.RemoveMoonTitle') },
+      content: `<p>${_loc('CALENDARIA.Editor.RemoveMoonContent', { name: _loc(moon?.name ?? '') })}</p>`,
+      rejectClose: false
+    });
+    if (!confirmed) return;
     delete this.#calendarData.moons[key];
     this.#isDirty = true;
     this.render();
@@ -2422,14 +2453,19 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
             .replace(/[^\da-z]/g, '-')
             .replace(/-+/g, '-');
         calendar = await CalendarManager.createCustomCalendar(id, this.#calendarData);
-        if (calendar) {
-          calendarId = calendar.metadata?.id;
-          this.#calendarId = calendarId;
-          this.#isEditing = true;
-        }
+        if (!calendar) throw new Error(`Failed to create calendar: ${id}`);
+        calendarId = calendar.metadata?.id;
+        this.#calendarId = calendarId;
+        this.#isEditing = true;
       }
       if (calendar) {
         this.#isDirty = false;
+        if (calendarId && this.#savedMoonKeys) {
+          const newKeys = Object.keys(this.#calendarData.moons ?? {});
+          const mapping = this.#savedMoonKeys.map((k) => newKeys.indexOf(k));
+          if (mapping.some((v, i) => v !== i)) await repairMoonIndexReferences(calendarId, mapping);
+        }
+        this.#savedMoonKeys = Object.keys(this.#calendarData.moons ?? {});
         if (calendarId) await FestivalManager.seedFestivalNotes(calendarId, calendar);
         ATLAS.log(3, `Checking for pending notes: ${this.#pendingNotes?.length || 0}, importerId: ${this.#pendingImporterId}, calendarId: ${calendarId}`);
         if (this.#pendingNotes?.length > 0 && this.#pendingImporterId && calendarId) {

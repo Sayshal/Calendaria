@@ -176,8 +176,8 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
     const calendarIdSet = new Set(calendarIds);
     context.notes = this._allFilteredNotes.slice(0, this._renderedCount);
     const calendarScoped = calendarIdSet.size ? allNotes.filter((n) => calendarIdSet.has(n.calendarId)) : allNotes;
-    // Non-GMs must not see hidden notes counted, or the total leaks their existence.
-    const visibleTotal = isGM ? calendarScoped : calendarScoped.filter((n) => n.visible && (n.flagData.visibility || NOTE_VISIBILITY.VISIBLE) === NOTE_VISIBILITY.VISIBLE);
+    // Non-GMs must not see secret notes counted, or the total leaks their existence.
+    const visibleTotal = isGM ? calendarScoped : calendarScoped.filter((n) => n.visible && (n.flagData.visibility || NOTE_VISIBILITY.VISIBLE) !== NOTE_VISIBILITY.SECRET);
     context.totalNotes = visibleTotal.length;
     context.shownCount = filteredNotes.length;
     context.hasActiveFilters = this.#hasActiveFilters();

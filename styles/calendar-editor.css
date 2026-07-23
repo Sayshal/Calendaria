@@ -325,7 +325,6 @@
         align-items: center;
 
         label {
-          color: var(--atlas-text-secondary, rgb(170 170 170));
           font-weight: normal;
           font-size: var(--font-size-12);
         }
@@ -345,13 +344,11 @@
     }
 
     .computed-value {
-      color: var(--atlas-text, rgb(224 224 224));
       font-weight: 600;
       font-size: var(--font-size-16);
     }
 
     .leap-days-note {
-      color: var(--atlas-text-secondary, rgb(170 170 170));
       font-size: var(--font-size-13);
       white-space: nowrap;
     }
@@ -377,7 +374,6 @@
       display: flex;
       align-items: center;
       padding: 0.25rem 0.5rem;
-      color: var(--atlas-text-secondary, rgb(170 170 170));
       font-weight: 600;
       font-size: var(--font-size-14);
 
@@ -618,7 +614,6 @@
             position: absolute;
             top: -1.125rem;
             left: 50%;
-            color: var(--atlas-text-dim, rgb(153 153 153));
             font-size: var(--font-size-13);
             white-space: nowrap;
             cursor: pointer;
@@ -680,7 +675,6 @@
           align-items: center;
 
           label {
-            color: var(--atlas-text-secondary, rgb(170 170 170));
             font-weight: 600;
             font-size: var(--font-size-14);
             text-align: center;
@@ -742,7 +736,6 @@
       padding: 2rem;
       border: 0.0625rem dashed var(--atlas-border, rgb(74 74 74));
       border-radius: 0.25rem;
-      color: var(--atlas-text-secondary, rgb(170 170 170));
       font-style: italic;
       text-align: center;
       background: var(--atlas-surface-dim-50, rgb(45 45 45 / 50%));

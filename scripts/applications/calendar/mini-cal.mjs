@@ -21,7 +21,9 @@ import {
   buildWeatherPillData,
   canChangeDateTime,
   canChangeWeather,
+  canViewBigCal,
   canViewMiniCal,
+  canViewMoons,
   canViewNotes,
   checkStickyZones,
   cleanupSnapIndicator,
@@ -315,7 +317,8 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     context.showSeason = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_SEASON);
     context.showEra = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_ERA);
     context.showCycles = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_CYCLES);
-    context.showMoonPhases = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_MOON_PHASES);
+    context.showMoonPhases = canViewMoons();
+    context.canViewBigCal = canViewBigCal();
     context.weatherDisplayMode = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_WEATHER_DISPLAY_MODE);
     context.seasonDisplayMode = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SEASON_DISPLAY_MODE);
     context.eraDisplayMode = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_ERA_DISPLAY_MODE);
@@ -452,7 +455,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const daysInWeek = calendar.daysInWeek;
     const weeks = [];
     let currentWeek = [];
-    const showMoons = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_MOON_PHASES) && calendar.moonsArray.length;
+    const showMoons = canViewMoons() && calendar.moonsArray.length;
     const hasFixedStart = monthData?.startingWeekday != null;
     const rawStartDayOfWeek = hasFixedStart ? monthData.startingWeekday : dayOfWeek({ year, month, dayOfMonth: 0 });
     const weekStartIdx = getWeekStartIndex(calendar);
@@ -967,6 +970,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     container?.addEventListener('dblclick', (e) => {
       if (e.target.closest('button, a, input, select, .note-badge')) return;
       e.preventDefault();
+      if (!canViewBigCal()) return;
       this.close();
       BigCal.show();
     });
@@ -1394,7 +1398,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @returns {object} Time components
    */
   #getPredictedComponents() {
-    if (TimeClock.running && game.time?.calendar) return game.time?.calendar.timeToComponents(TimeClock.predictedWorldTime);
+    if (game.time?.calendar) return game.time.calendar.timeToComponents(TimeClock.predictedWorldTime);
     return game.time.components;
   }
 
@@ -1612,6 +1616,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {HTMLElement} _target - The clicked element
    */
   static async _onOpenFull(_event, _target) {
+    if (!canViewBigCal()) return;
     await this.close();
     BigCal.show();
   }

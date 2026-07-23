@@ -13,6 +13,7 @@ import {
   canViewBigCal,
   canViewHUD,
   canViewMiniCal,
+  canViewMoons,
   canViewNotes,
   checkStickyZones,
   cleanupSnapIndicator,
@@ -32,6 +33,7 @@ import {
   hideSnapIndicator,
   isBottomAnchored,
   isCombatBlocked,
+  isMoonVisible,
   previewSnippet,
   registerForZoneUpdates,
   renderCycleIndicator,
@@ -158,7 +160,17 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    * @returns {boolean} True if position is locked
    */
   get isLocked() {
+    if (!game.user.isGM && game.settings.get(MODULE.ID, SETTINGS.FORCE_HUD_LOCK)) return true;
     return this.#stickyPosition || game.settings.get(MODULE.ID, SETTINGS.CALENDAR_HUD_LOCKED);
+  }
+
+  /**
+   * The zone a non-GM is forced into, or null.
+   * @returns {string|null} Forced zone ID
+   */
+  get forcedZone() {
+    if (game.user.isGM) return null;
+    return game.settings.get(MODULE.ID, SETTINGS.FORCE_HUD_ZONE) || null;
   }
 
   /**
@@ -594,12 +606,15 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
         }
       });
     }
-    items.push({ label: 'CALENDARIA.Common.ResetPosition', icon: '<i class="fas fa-arrows-to-dot"></i>', onClick: () => HUD.resetPosition() });
-    items.push({
-      label: this.#stickyPosition ? 'CALENDARIA.Common.UnlockPosition' : 'CALENDARIA.Common.LockPosition',
-      icon: this.#stickyPosition ? '<i class="fas fa-lock-open"></i>' : '<i class="fas fa-lock"></i>',
-      onClick: () => this._toggleStickyPosition()
-    });
+    const worldLocked = !game.user.isGM && game.settings.get(MODULE.ID, SETTINGS.FORCE_HUD_LOCK);
+    if (!worldLocked) {
+      items.push({ label: 'CALENDARIA.Common.ResetPosition', icon: '<i class="fas fa-arrows-to-dot"></i>', onClick: () => HUD.resetPosition() });
+      items.push({
+        label: this.#stickyPosition ? 'CALENDARIA.Common.UnlockPosition' : 'CALENDARIA.Common.LockPosition',
+        icon: this.#stickyPosition ? '<i class="fas fa-lock-open"></i>' : '<i class="fas fa-lock"></i>',
+        onClick: () => this._toggleStickyPosition()
+      });
+    }
     items.push({
       label: this.isCompact ? 'CALENDARIA.HUD.ContextMenu.FullsizeMode' : 'CALENDARIA.HUD.ContextMenu.CompactMode',
       icon: this.isCompact ? '<i class="fas fa-expand"></i>' : '<i class="fas fa-compress"></i>',
@@ -609,7 +624,9 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       }
     });
     items.push(buildOpenAppsMenuItem());
-    items.push({ label: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', onClick: () => HUD.hide() });
+    if (game.user.isGM || !game.settings.get(MODULE.ID, SETTINGS.FORCE_HUD)) {
+      items.push({ label: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', onClick: () => HUD.hide() });
+    }
     return items;
   }
 
@@ -672,10 +689,42 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     pinBtn.classList.toggle('sticky-position', this.#stickyPosition);
   }
 
+  /** Re-run position restoration on the live HUD, e.g. after a GM changes the forced lock or zone. */
+  static reapplyPosition() {
+    const hud = this.instance;
+    if (hud?.rendered) hud.#restorePosition();
+  }
+
+  /**
+   * Dock the HUD into a GM-forced zone, ignoring the user's saved position.
+   * @param {string} zoneId - Forced zone ID
+   * @returns {boolean} True if the zone was applied
+   * @private
+   */
+  #applyForcedZone(zoneId) {
+    this.#snappedZoneId = zoneId;
+    if (restorePinnedState(this.element, zoneId)) {
+      registerForZoneUpdates(this, zoneId);
+      return true;
+    }
+    const rect = this.element.getBoundingClientRect();
+    const barEl = this.element.querySelector('.bar');
+    const barHeight = barEl ? barEl.getBoundingClientRect().bottom - rect.top : rect.height;
+    const zonePos = getRestorePosition(zoneId, rect.width, barHeight);
+    if (!zonePos) {
+      this.#snappedZoneId = null;
+      return false;
+    }
+    this.setPosition({ left: zonePos.left, top: zonePos.top });
+    registerForZoneUpdates(this, zoneId);
+    return true;
+  }
+
   /**
    * Restore saved position from settings.
    */
   #restorePosition() {
+    if (this.forcedZone && this.#applyForcedZone(this.forcedZone)) return;
     const savedPos = game.settings.get(MODULE.ID, SETTINGS.CALENDAR_HUD_POSITION);
     if (savedPos && typeof savedPos.top === 'number' && typeof savedPos.left === 'number') {
       this.#snappedZoneId = savedPos.zoneId || null;
@@ -937,7 +986,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
         const barEl = this.element.querySelector('.bar');
         if (barEl) posData.anchorY = barEl.getBoundingClientRect().bottom;
       }
-      await game.settings.set(MODULE.ID, SETTINGS.CALENDAR_HUD_POSITION, posData);
+      if (!this.forcedZone) await game.settings.set(MODULE.ID, SETTINGS.CALENDAR_HUD_POSITION, posData);
     };
   }
 
@@ -986,9 +1035,9 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const starAlpha = computeStarAlpha(hour, sunrise, sunset);
     const moons = [];
     const calendar = this.calendar;
-    if (calendar) {
+    if (calendar && canViewMoons()) {
       const showAll = game.settings.get(MODULE.ID, SETTINGS.HUD_SHOW_ALL_MOONS);
-      const sortedMoons = [...(calendar.moonsArray ?? [])].sort((a, b) => _loc(a.name).localeCompare(_loc(b.name)));
+      const sortedMoons = (calendar.moonsArray ?? []).filter(isMoonVisible).sort((a, b) => _loc(a.name).localeCompare(_loc(b.name)));
       const moonList = showAll ? sortedMoons : sortedMoons.slice(0, 1);
       for (let mi = 0; mi < moonList.length; mi++) {
         const moon = moonList[mi];
@@ -1052,10 +1101,8 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
    * @returns {object} Time components
    */
   #getPredictedComponents() {
-    if (TimeClock.running) {
-      const cal = game.time?.calendar;
-      if (cal) return cal.timeToComponents(TimeClock.predictedWorldTime);
-    }
+    const cal = game.time?.calendar;
+    if (cal) return cal.timeToComponents(TimeClock.predictedWorldTime);
     return game.time.components;
   }
 

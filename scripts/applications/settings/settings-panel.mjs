@@ -669,7 +669,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.CHRONICLE_ENTRY_DEPTH]: { tab: 'chronicle', label: 'CALENDARIA.Chronicle.Settings.EntryDepth.Name' },
     [SETTINGS.CHRONICLE_SHOW_EMPTY]: { tab: 'chronicle', label: 'CALENDARIA.Chronicle.Settings.ShowEmpty.Name' },
     [SETTINGS.CHRONICLE_SHOW_WEATHER]: { tab: 'chronicle', label: 'CALENDARIA.Common.ShowWeather' },
-    [SETTINGS.CHRONICLE_SHOW_MOON_PHASES]: { tab: 'chronicle', label: 'CALENDARIA.Common.ShowMoonPhases' },
     [SETTINGS.CHRONICLE_SHOW_SEASON_CHANGES]: { tab: 'chronicle', label: 'CALENDARIA.Chronicle.Settings.ShowSeasonChanges.Name' },
     [SETTINGS.CHAT_TIMESTAMP_MODE]: { tab: 'chat', label: 'CALENDARIA.Settings.ChatTimestampMode.Name' },
     [SETTINGS.CHAT_TIMESTAMP_SHOW_TIME]: { tab: 'chat', label: 'CALENDARIA.Settings.ChatTimestampShowTime.Name' },
@@ -713,6 +712,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.HUD_WEATHER_FX_MODE]: { tab: 'hud', label: 'CALENDARIA.Settings.HUDWeatherFxMode.Name' },
     [SETTINGS.HUD_DOME_BELOW]: { tab: 'hud', label: 'CALENDARIA.Settings.HUDDomeBelow.Name' },
     [SETTINGS.HUD_DOME_AUTO_HIDE]: { tab: 'hud', label: 'CALENDARIA.Settings.DomeAutoHide.Name' },
+    [SETTINGS.HIDE_MOONS_FROM_PLAYERS]: { tab: 'permissions', label: 'CALENDARIA.Settings.HideMoonsFromPlayers.Name' },
     [SETTINGS.HUD_SHOW_ALL_MOONS]: { tab: 'hud', label: 'CALENDARIA.Settings.HUDShowAllMoons.Name' },
     [SETTINGS.HUD_AUTO_FADE]: { tab: 'hud', label: 'CALENDARIA.Settings.AutoFade.Name' },
     [SETTINGS.HUD_IDLE_OPACITY]: { tab: 'hud', label: 'CALENDARIA.Settings.IdleOpacity.Name' },
@@ -742,7 +742,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.MINI_CAL_SHOW_SEASON]: { tab: 'miniCal', label: 'CALENDARIA.Common.ShowSeason' },
     [SETTINGS.MINI_CAL_SHOW_ERA]: { tab: 'miniCal', label: 'CALENDARIA.Common.ShowEra' },
     [SETTINGS.MINI_CAL_SHOW_CYCLES]: { tab: 'miniCal', label: 'CALENDARIA.Common.ShowCycles' },
-    [SETTINGS.MINI_CAL_SHOW_MOON_PHASES]: { tab: 'miniCal', label: 'CALENDARIA.Common.ShowMoonPhases' },
     [SETTINGS.MINI_CAL_WEATHER_DISPLAY_MODE]: { tab: 'miniCal', label: 'CALENDARIA.Common.WeatherDisplay' },
     [SETTINGS.MINI_CAL_SEASON_DISPLAY_MODE]: { tab: 'miniCal', label: 'CALENDARIA.Common.SeasonDisplay' },
     [SETTINGS.MINI_CAL_ERA_DISPLAY_MODE]: { tab: 'miniCal', label: 'CALENDARIA.Common.EraDisplay' },
@@ -758,7 +757,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.BIG_CAL_SHOW_SEASON]: { tab: 'bigcal', label: 'CALENDARIA.Common.ShowSeason' },
     [SETTINGS.BIG_CAL_SHOW_ERA]: { tab: 'bigcal', label: 'CALENDARIA.Common.ShowEra' },
     [SETTINGS.BIG_CAL_SHOW_CYCLES]: { tab: 'bigcal', label: 'CALENDARIA.Common.ShowCycles' },
-    [SETTINGS.BIG_CAL_SHOW_MOON_PHASES]: { tab: 'bigcal', label: 'CALENDARIA.Common.ShowMoonPhases' },
     [SETTINGS.BIG_CAL_WEATHER_DISPLAY_MODE]: { tab: 'bigcal', label: 'CALENDARIA.Common.WeatherDisplay' },
     [SETTINGS.BIG_CAL_SEASON_DISPLAY_MODE]: { tab: 'bigcal', label: 'CALENDARIA.Common.SeasonDisplay' },
     [SETTINGS.BIG_CAL_ERA_DISPLAY_MODE]: { tab: 'bigcal', label: 'CALENDARIA.Common.EraDisplay' },
@@ -810,6 +808,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     'hud-display': [
       SETTINGS.SHOW_CALENDAR_HUD,
       SETTINGS.FORCE_HUD,
+      SETTINGS.FORCE_HUD_LOCK,
+      SETTINGS.FORCE_HUD_ZONE,
       SETTINGS.CALENDAR_HUD_MODE,
       SETTINGS.HUD_CALENDAR_BUTTON,
       SETTINGS.HUD_DIAL_STYLE,
@@ -855,8 +855,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       SETTINGS.MINI_CAL_SHOW_ERA,
       SETTINGS.MINI_CAL_ERA_DISPLAY_MODE,
       SETTINGS.MINI_CAL_SHOW_CYCLES,
-      SETTINGS.MINI_CAL_CYCLES_DISPLAY_MODE,
-      SETTINGS.MINI_CAL_SHOW_MOON_PHASES
+      SETTINGS.MINI_CAL_CYCLES_DISPLAY_MODE
     ],
     'minical-sticky': [SETTINGS.MINI_CAL_STICKY_STATES],
     'minical-time-jumps': [SETTINGS.MINI_CAL_TIME_JUMPS],
@@ -869,8 +868,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       SETTINGS.BIG_CAL_SHOW_ERA,
       SETTINGS.BIG_CAL_ERA_DISPLAY_MODE,
       SETTINGS.BIG_CAL_SHOW_CYCLES,
-      SETTINGS.BIG_CAL_CYCLES_DISPLAY_MODE,
-      SETTINGS.BIG_CAL_SHOW_MOON_PHASES
+      SETTINGS.BIG_CAL_CYCLES_DISPLAY_MODE
     ],
     'timekeeper-display': [SETTINGS.SHOW_TIME_KEEPER, SETTINGS.FORCE_TIME_KEEPER, SETTINGS.TIMEKEEPER_AUTO_FADE, SETTINGS.TIMEKEEPER_IDLE_OPACITY, SETTINGS.TIMEKEEPER_COMBAT_MODE],
     'timekeeper-sticky': [SETTINGS.TIMEKEEPER_STICKY_STATES],
@@ -918,9 +916,10 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     ],
     fxmaster: [SETTINGS.FXMASTER_ENABLED, SETTINGS.FXMASTER_TOP_DOWN, SETTINGS.FXMASTER_FORCE_DOWNWARD, SETTINGS.FXMASTER_BELOW_TOKENS, SETTINGS.FXMASTER_SOUND_FX, SETTINGS.FXMASTER_SPLASH],
     'module-sync': [SETTINGS.PRIMARY_GM],
-    'module-integration': [SETTINGS.SHOW_TOOLBAR_BUTTON, SETTINGS.TOOLBAR_APPS, SETTINGS.SHOW_JOURNAL_FOOTER],
+    'module-integration': [SETTINGS.SHOW_TOOLBAR_BUTTON, SETTINGS.TOOLBAR_APPS, SETTINGS.SHOW_JOURNAL_FOOTER, SETTINGS.ENRICHER_CLICK_TARGET],
     'module-debugging': [SETTINGS.DEV_MODE],
     permissions: [SETTINGS.PERMISSIONS],
+    'player-visibility': [SETTINGS.HIDE_MOONS_FROM_PLAYERS],
     'chronicle-visibility': [
       SETTINGS.SHOW_CHRONICLE,
       SETTINGS.FORCE_CHRONICLE,
@@ -930,7 +929,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       SETTINGS.CHRONICLE_HUD_BUTTON
     ],
     'chronicle-display': [SETTINGS.CHRONICLE_ENTRY_DEPTH, SETTINGS.CHRONICLE_SHOW_EMPTY, SETTINGS.CHRONICLE_EMPTY_CONTENT_TYPES],
-    'chronicle-content': [SETTINGS.CHRONICLE_SHOW_WEATHER, SETTINGS.CHRONICLE_SHOW_MOON_PHASES, SETTINGS.CHRONICLE_SHOW_SEASON_CHANGES],
+    'chronicle-content': [SETTINGS.CHRONICLE_SHOW_WEATHER, SETTINGS.CHRONICLE_SHOW_SEASON_CHANGES],
     'fog-of-war': [SETTINGS.FOG_OF_WAR_ENABLED, SETTINGS.FOG_OF_WAR_CONFIG, SETTINGS.FOG_OF_WAR_START_DATE, SETTINGS.FOG_OF_WAR_REVEAL_INTERMEDIATE, SETTINGS.FOG_OF_WAR_NAV_MODE],
     'cinematic-behavior': [SETTINGS.CINEMATIC_ENABLED, SETTINGS.CINEMATIC_THRESHOLD, SETTINGS.CINEMATIC_THRESHOLD_UNIT, SETTINGS.CINEMATIC_ON_REST],
     'cinematic-animation': [SETTINGS.CINEMATIC_PANEL_DURATION],
@@ -1067,7 +1066,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.miniCalShowSeason = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_SEASON);
     context.miniCalShowEra = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_ERA);
     context.miniCalShowCycles = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_CYCLES);
-    context.miniCalShowMoonPhases = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_MOON_PHASES);
     context.miniCalHeaderShowSelected = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_HEADER_SHOW_SELECTED);
     const miniCalWeatherDisplayMode = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_WEATHER_DISPLAY_MODE);
     context.miniCalWeatherDisplayModeOptions = [
@@ -1112,6 +1110,14 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.calendarHUDLocked = game.settings.get(MODULE.ID, SETTINGS.CALENDAR_HUD_LOCKED);
     context.showCalendarHUD = game.settings.get(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD);
     context.forceHUD = game.settings.get(MODULE.ID, SETTINGS.FORCE_HUD);
+    context.forceHUDLock = game.settings.get(MODULE.ID, SETTINGS.FORCE_HUD_LOCK);
+    const forcedZone = game.settings.get(MODULE.ID, SETTINGS.FORCE_HUD_ZONE);
+    context.forceHUDZoneOptions = [
+      { value: '', label: 'CALENDARIA.Settings.ForceHUDZone.None', selected: !forcedZone },
+      { value: 'top-center', label: 'CALENDARIA.HUD.Zone.TopCenter', selected: forcedZone === 'top-center' },
+      { value: 'above-hotbar', label: 'CALENDARIA.HUD.Zone.AboveHotbar', selected: forcedZone === 'above-hotbar' },
+      { value: 'below-controls', label: 'CALENDARIA.HUD.Zone.BelowControls', selected: forcedZone === 'below-controls' }
+    ];
     const hudMode = game.settings.get(MODULE.ID, SETTINGS.CALENDAR_HUD_MODE);
     context.hudModeOptions = [
       { value: 'fullsize', label: _loc('CALENDARIA.Settings.CalendarHUDMode.Fullsize'), selected: hudMode === 'fullsize' },
@@ -1203,7 +1209,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.bigCalShowSeason = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SHOW_SEASON);
     context.bigCalShowEra = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SHOW_ERA);
     context.bigCalShowCycles = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SHOW_CYCLES);
-    context.bigCalShowMoonPhases = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SHOW_MOON_PHASES);
     context.bigCalHeaderShowSelected = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_HEADER_SHOW_SELECTED);
     const bigCalWeatherDisplayMode = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_WEATHER_DISPLAY_MODE);
     context.bigCalWeatherDisplayModeOptions = [
@@ -1411,7 +1416,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       { value: 'season', label: _loc('CALENDARIA.Common.Seasons'), checked: emptyContentTypes.has('season') }
     ];
     context.chronicleShowWeather = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_SHOW_WEATHER);
-    context.chronicleShowMoonPhases = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_SHOW_MOON_PHASES);
     context.chronicleShowSeasonChanges = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_SHOW_SEASON_CHANGES);
     context.chronicleBigCalButton = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_BIG_CAL_BUTTON);
     context.chronicleHudButton = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_HUD_BUTTON);
@@ -1709,6 +1713,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     for (const [key, defaultVal] of Object.entries(defaults)) {
       context.permissions[key] = { player: saved[key]?.player ?? defaultVal.player, trusted: saved[key]?.trusted ?? defaultVal.trusted, assistant: saved[key]?.assistant ?? defaultVal.assistant };
     }
+    context.hideMoonsFromPlayers = game.settings.get(MODULE.ID, SETTINGS.HIDE_MOONS_FROM_PLAYERS);
   }
 
   /**
@@ -1763,7 +1768,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       await game.settings.set(MODULE.ID, SETTINGS.CHRONICLE_EMPTY_CONTENT_TYPES, new Set(types));
     }
     if ('chronicleShowWeather' in data) await game.settings.set(MODULE.ID, SETTINGS.CHRONICLE_SHOW_WEATHER, data.chronicleShowWeather);
-    if ('chronicleShowMoonPhases' in data) await game.settings.set(MODULE.ID, SETTINGS.CHRONICLE_SHOW_MOON_PHASES, data.chronicleShowMoonPhases);
     if ('chronicleShowSeasonChanges' in data) await game.settings.set(MODULE.ID, SETTINGS.CHRONICLE_SHOW_SEASON_CHANGES, data.chronicleShowSeasonChanges);
     if ('chronicleBigCalButton' in data) await game.settings.set(MODULE.ID, SETTINGS.CHRONICLE_BIG_CAL_BUTTON, data.chronicleBigCalButton);
     if ('chronicleHudButton' in data) await game.settings.set(MODULE.ID, SETTINGS.CHRONICLE_HUD_BUTTON, data.chronicleHudButton);
@@ -1793,6 +1797,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('showMiniCal' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_MINI_CAL, data.showMiniCal);
     if ('showCalendarHUD' in data) await game.settings.set(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD, data.showCalendarHUD);
     if ('forceHUD' in data) await game.settings.set(MODULE.ID, SETTINGS.FORCE_HUD, data.forceHUD);
+    if ('forceHUDLock' in data) await game.settings.set(MODULE.ID, SETTINGS.FORCE_HUD_LOCK, data.forceHUDLock);
+    if ('forceHUDZone' in data) await game.settings.set(MODULE.ID, SETTINGS.FORCE_HUD_ZONE, data.forceHUDZone);
     if ('forceMiniCal' in data) await game.settings.set(MODULE.ID, SETTINGS.FORCE_MINI_CAL, data.forceMiniCal);
     if ('calendarHUDMode' in data) {
       const oldMode = game.settings.get(MODULE.ID, SETTINGS.CALENDAR_HUD_MODE);
@@ -1958,7 +1964,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('miniCalShowSeason' in data) await game.settings.set(MODULE.ID, SETTINGS.MINI_CAL_SHOW_SEASON, data.miniCalShowSeason);
     if ('miniCalShowEra' in data) await game.settings.set(MODULE.ID, SETTINGS.MINI_CAL_SHOW_ERA, data.miniCalShowEra);
     if ('miniCalShowCycles' in data) await game.settings.set(MODULE.ID, SETTINGS.MINI_CAL_SHOW_CYCLES, data.miniCalShowCycles);
-    if ('miniCalShowMoonPhases' in data) await game.settings.set(MODULE.ID, SETTINGS.MINI_CAL_SHOW_MOON_PHASES, data.miniCalShowMoonPhases);
     if ('miniCalHeaderShowSelected' in data) await game.settings.set(MODULE.ID, SETTINGS.MINI_CAL_HEADER_SHOW_SELECTED, data.miniCalHeaderShowSelected);
     if ('miniCalWeatherDisplayMode' in data) await game.settings.set(MODULE.ID, SETTINGS.MINI_CAL_WEATHER_DISPLAY_MODE, data.miniCalWeatherDisplayMode);
     if ('miniCalSeasonDisplayMode' in data) await game.settings.set(MODULE.ID, SETTINGS.MINI_CAL_SEASON_DISPLAY_MODE, data.miniCalSeasonDisplayMode);
@@ -1968,7 +1973,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('bigCalShowSeason' in data) await game.settings.set(MODULE.ID, SETTINGS.BIG_CAL_SHOW_SEASON, data.bigCalShowSeason);
     if ('bigCalShowEra' in data) await game.settings.set(MODULE.ID, SETTINGS.BIG_CAL_SHOW_ERA, data.bigCalShowEra);
     if ('bigCalShowCycles' in data) await game.settings.set(MODULE.ID, SETTINGS.BIG_CAL_SHOW_CYCLES, data.bigCalShowCycles);
-    if ('bigCalShowMoonPhases' in data) await game.settings.set(MODULE.ID, SETTINGS.BIG_CAL_SHOW_MOON_PHASES, data.bigCalShowMoonPhases);
     if ('bigCalHeaderShowSelected' in data) await game.settings.set(MODULE.ID, SETTINGS.BIG_CAL_HEADER_SHOW_SELECTED, data.bigCalHeaderShowSelected);
     if ('bigCalWeatherDisplayMode' in data) await game.settings.set(MODULE.ID, SETTINGS.BIG_CAL_WEATHER_DISPLAY_MODE, data.bigCalWeatherDisplayMode);
     if ('bigCalSeasonDisplayMode' in data) await game.settings.set(MODULE.ID, SETTINGS.BIG_CAL_SEASON_DISPLAY_MODE, data.bigCalSeasonDisplayMode);
@@ -2020,6 +2024,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     if ('primaryGM' in data) await game.settings.set(MODULE.ID, SETTINGS.PRIMARY_GM, data.primaryGM || '');
     if ('devMode' in data) await game.settings.set(MODULE.ID, SETTINGS.DEV_MODE, data.devMode);
+    if ('hideMoonsFromPlayers' in data) await game.settings.set(MODULE.ID, SETTINGS.HIDE_MOONS_FROM_PLAYERS, data.hideMoonsFromPlayers);
     if (data.permissions) {
       const permissionKeys = [
         'viewBigCal',
@@ -2197,7 +2202,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       'miniCalEraDisplayMode',
       'miniCalShowCycles',
       'miniCalCyclesDisplayMode',
-      'miniCalShowMoonPhases',
       'miniCalCompactMode'
     ];
     if (miniCalKeys.some((k) => k in data)) foundry.applications.instances.get('calendaria-mini-cal')?.render();
@@ -2209,8 +2213,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       'bigCalShowEra',
       'bigCalEraDisplayMode',
       'bigCalShowCycles',
-      'bigCalCyclesDisplayMode',
-      'bigCalShowMoonPhases'
+      'bigCalCyclesDisplayMode'
     ];
     if (bigCalKeys.some((k) => k in data)) foundry.applications.instances.get('calendaria')?.render();
     const afterSnapshot = SettingsPanel.#snapshotSettings();
@@ -2301,10 +2304,23 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {PointerEvent} _event - The click event
    * @param {HTMLElement} target - The clicked element
    */
+  /**
+   * The section's setting keys the current user is allowed to write.
+   * @param {string} sectionId - Section identifier from SECTION_SETTINGS
+   * @returns {string[]} Writable setting keys
+   */
+  static #resettableKeys(sectionId) {
+    const sectionKeys = SettingsPanel.SECTION_SETTINGS[sectionId] ?? [];
+    return sectionKeys.filter((key) => {
+      const setting = game.settings.settings.get(`${MODULE.ID}.${key}`);
+      return setting && (game.user.isGM || setting.scope !== 'world');
+    });
+  }
+
   static async #onResetSection(_event, target) {
     const sectionId = target.dataset.section;
-    const settingKeys = SettingsPanel.SECTION_SETTINGS[sectionId];
-    if (!settingKeys?.length) return;
+    const settingKeys = SettingsPanel.#resettableKeys(sectionId);
+    if (!settingKeys.length) return;
     const settingLabels = settingKeys
       .map((key) => {
         const meta = SettingsPanel.SETTING_METADATA[key];

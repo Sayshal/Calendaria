@@ -246,6 +246,7 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     let defaultLongestDay = '';
     const lockSunTimes = zoneSunriseOverride !== '' && zoneSunsetOverride !== '';
     const hasManualDaylight = zoneShortestDay !== '' || zoneLongestDay !== '' || lockSunTimes;
+    const darknessSyncOff = !game.settings.get(MODULE.ID, SETTINGS.DARKNESS_SYNC);
     let shortestDayDate = '';
     let longestDayDate = '';
     if (isZoneMode) {
@@ -327,6 +328,7 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       zoneId: this.#data.id,
       latitude: latitude ?? '',
       hasManualDaylight,
+      darknessSyncOff,
       lockSunTimes,
       hoursPerDay,
       zoneShortestDay,

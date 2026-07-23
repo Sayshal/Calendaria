@@ -13,6 +13,14 @@
     </div>
 
     <div class="form-group">
+      <label for="editor-epoch-day-offset">{{localize "CALENDARIA.Editor.Field.EpochDayOffset"}}</label>
+      <div class="form-fields">
+        <input type="number" id="editor-epoch-day-offset" name="epochDayOffset" value="{{calendar.epochDayOffset}}" step="1">
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Editor.Hint.EpochDayOffset"}}</p>
+    </div>
+
+    <div class="form-group">
       <label for="editor-first-weekday">{{localize "CALENDARIA.Editor.Field.YearZeroWeekday"}}</label>
       <div class="form-fields">
         <select id="editor-first-weekday" name="years.firstWeekday">
@@ -101,6 +109,24 @@
     <div class="standard-form" data-leap-rule="gregorian" {{#unless showLeapGregorian}}style="display: none;"
       {{/unless}}>
       <p class="hint gregorian-explanation">{{localize "CALENDARIA.Editor.Hint.LeapGregorian"}}</p>
+    </div>
+
+    <div class="standard-form" data-leap-rule="cycle" {{#unless showLeapCycle}}style="display: none;" {{/unless}}>
+      <div class="form-group">
+        <label for="editor-leap-cycle-period">{{localize "CALENDARIA.Editor.Field.LeapCyclePeriod"}}</label>
+        <div class="form-fields">
+          <input type="number" id="editor-leap-cycle-period" name="leapYearConfig.cyclePeriod" value="{{leapCyclePeriod}}" step="1" min="1">
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Editor.Hint.LeapCyclePeriod"}}</p>
+      </div>
+
+      <div class="form-group">
+        <label for="editor-leap-cycle-offsets">{{localize "CALENDARIA.Editor.Field.LeapCycleOffsets"}}</label>
+        <div class="form-fields">
+          <input type="text" id="editor-leap-cycle-offsets" name="leapYearConfig.cycleOffsets" value="{{leapCycleOffsets}}" placeholder="2,5,7,10,13,16,18,21,24,26,29">
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Editor.Hint.LeapCycleOffsets"}}</p>
+      </div>
     </div>
   </fieldset>
 

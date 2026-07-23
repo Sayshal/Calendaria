@@ -21,14 +21,17 @@
       </div>
     </fieldset>
 
-    <fieldset data-section="module-integration">
-      <legend>
-        {{localize "CALENDARIA.SettingsPanel.Section.Integration"}}
-        <button type="button" class="reset-section" data-action="resetSection" data-section="module-integration"
-          data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
-            class="fas fa-undo"></i></button>
-      </legend>
+  {{/if}}
 
+  <fieldset data-section="module-integration">
+    <legend>
+      {{localize "CALENDARIA.SettingsPanel.Section.Integration"}}
+      <button type="button" class="reset-section" data-action="resetSection" data-section="module-integration"
+        data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
+          class="fas fa-undo"></i></button>
+    </legend>
+
+    {{#if isGM}}
       <div class="form-group">
         <label for="showToolbarButton">{{localize "CALENDARIA.Settings.ShowToolbarButton.Name"}}</label>
         <div class="form-fields">
@@ -61,30 +64,30 @@
         </div>
         <p class="hint">{{localize "CALENDARIA.Settings.ShowJournalFooter.Hint"}}</p>
       </div>
+    {{/if}}
 
-      <div class="form-group">
-        <label for="enricherClickTarget">{{localize "CALENDARIA.Settings.EnricherClickTarget.Name"}}</label>
-        <div class="form-fields">
-          <select id="enricherClickTarget" name="enricherClickTarget">
-            {{#each enricherClickTargetOptions}}
-              <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
-            {{/each}}
-          </select>
-        </div>
-        <p class="hint">{{localize "CALENDARIA.Settings.EnricherClickTarget.Hint"}}</p>
+    <div class="form-group">
+      <label for="enricherClickTarget">{{localize "CALENDARIA.Settings.EnricherClickTarget.Name"}}</label>
+      <div class="form-fields">
+        <select id="enricherClickTarget" name="enricherClickTarget">
+          {{#each enricherClickTargetOptions}}
+            <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+          {{/each}}
+        </select>
       </div>
-    </fieldset>
-  {{/if}}
+      <p class="hint">{{localize "CALENDARIA.Settings.EnricherClickTarget.Hint"}}</p>
+    </div>
+  </fieldset>
 
-  <fieldset data-section="module-debugging">
-    <legend>
-      {{localize "CALENDARIA.SettingsPanel.Section.Debugging"}}
-      <button type="button" class="reset-section" data-action="resetSection" data-section="module-debugging"
-        data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
-          class="fas fa-undo"></i></button>
-    </legend>
+  {{#if isGM}}
+    <fieldset data-section="module-debugging">
+      <legend>
+        {{localize "CALENDARIA.SettingsPanel.Section.Debugging"}}
+        <button type="button" class="reset-section" data-action="resetSection" data-section="module-debugging"
+          data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
+            class="fas fa-undo"></i></button>
+      </legend>
 
-    {{#if isGM}}
       <div class="form-group">
         <label for="devMode">{{localize "CALENDARIA.SettingsPanel.DevMode.Name"}}</label>
         <div class="form-fields">
@@ -92,10 +95,8 @@
         </div>
         <p class="hint">{{localize "CALENDARIA.SettingsPanel.DevMode.Hint"}}</p>
       </div>
-    {{/if}}
-  </fieldset>
+    </fieldset>
 
-  {{#if isGM}}
     <fieldset data-section="module-data">
       <legend>{{localize "CALENDARIA.SettingsPanel.Section.Data"}}</legend>
 

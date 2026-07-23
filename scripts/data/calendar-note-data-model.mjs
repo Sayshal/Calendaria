@@ -31,7 +31,7 @@ export class CalendarNoteDataModel extends foundry.abstract.TypeDataModel {
         { nullable: true }
       ),
       allDay: new fields.BooleanField({ initial: false }),
-      repeat: new fields.StringField({ choices: ['never', 'daily', 'weekly', 'monthly', 'yearly', 'moon', 'random', 'linked', 'seasonal', 'weekOfMonth', 'range', 'computed'], initial: 'never' }),
+      repeat: new fields.StringField({ choices: ['never', 'computed'], initial: 'never' }),
       repeatInterval: new fields.NumberField({ integer: true, min: 1, initial: 1 }),
       repeatEndDate: new fields.SchemaField(
         { year: new fields.NumberField({ integer: true }), month: new fields.NumberField({ integer: true, min: 0 }), dayOfMonth: new fields.NumberField({ integer: true, min: 0 }) },
@@ -125,6 +125,7 @@ export class CalendarNoteDataModel extends foundry.abstract.TypeDataModel {
    * @returns {object} Migrated source data
    */
   static migrateData(source) {
+    if (source.repeat && source.repeat !== 'never' && source.repeat !== 'computed') source.repeat = 'never';
     for (const field of ['startDate', 'endDate', 'repeatEndDate']) {
       if (source[field]?.day != null && source[field]?.dayOfMonth == null) {
         source[field].dayOfMonth = (source[field].day ?? 1) - 1;
