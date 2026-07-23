@@ -22,7 +22,14 @@ export class ComputedEventBuilder extends HandlebarsApplicationMixin(Application
    */
   constructor(options = {}) {
     super(options);
-    if (options.config) this.#config = foundry.utils.deepClone(options.config);
+    if (options.config) {
+      this.#config = foundry.utils.deepClone(options.config);
+      for (const override of Object.values(this.#config.yearOverrides ?? {})) {
+        if (!override) continue;
+        if (override.day == null && override.dayOfMonth != null) override.day = override.dayOfMonth + 1;
+        delete override.dayOfMonth;
+      }
+    }
     if (options.onChange) this.#onChange = options.onChange;
   }
 
