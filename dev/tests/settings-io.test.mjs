@@ -207,7 +207,7 @@ describe('importSettings()', () => {
   });
   it('imports settings from valid file when dialog confirmed', async () => {
     const mockInput = createMockInput();
-    const importData = { version: '1.0.0', settings: { activeCalendar: 'gregorian', themeMode: 'dark' } };
+    const importData = { version: '1.0.0', settings: { activeCalendar: 'gregorian', darknessSync: true } };
     foundry.utils.readTextFromFile.mockResolvedValue(JSON.stringify(importData));
     foundry.applications.api.DialogV2.wait.mockImplementation(async ({ render }) => {
       if (render) render(null, { element: { querySelector: vi.fn(() => null) } });
@@ -217,12 +217,12 @@ describe('importSettings()', () => {
     await importSettings(onComplete);
     await triggerFileChange(mockInput, { name: 'settings.json' });
     expect(game.settings.set).toHaveBeenCalledWith('calendaria', 'activeCalendar', 'gregorian');
-    expect(game.settings.set).toHaveBeenCalledWith('calendaria', 'themeMode', 'dark');
+    expect(game.settings.set).toHaveBeenCalledWith('calendaria', 'darknessSync', true);
     expect(onComplete).toHaveBeenCalled();
   });
   it('skips settings not in EXPORTABLE_SETTINGS list', async () => {
     const mockInput = createMockInput();
-    const importData = { version: '1.0.0', settings: { themeMode: 'dark', bogusKey: 'ignored' } };
+    const importData = { version: '1.0.0', settings: { darknessSync: true, bogusKey: 'ignored', themeMode: 'dark' } };
     foundry.utils.readTextFromFile.mockResolvedValue(JSON.stringify(importData));
     foundry.applications.api.DialogV2.wait.mockImplementation(async ({ render }) => {
       if (render) render(null, { element: { querySelector: vi.fn(() => null) } });
@@ -230,8 +230,9 @@ describe('importSettings()', () => {
     });
     await importSettings();
     await triggerFileChange(mockInput, { name: 'settings.json' });
-    expect(game.settings.set).toHaveBeenCalledWith('calendaria', 'themeMode', 'dark');
+    expect(game.settings.set).toHaveBeenCalledWith('calendaria', 'darknessSync', true);
     expect(game.settings.set).not.toHaveBeenCalledWith('calendaria', 'bogusKey', expect.anything());
+    expect(game.settings.set).not.toHaveBeenCalledWith('calendaria', 'themeMode', expect.anything());
   });
   it('imports calendar data when present and selected', async () => {
     const mockInput = createMockInput();
