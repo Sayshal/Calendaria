@@ -356,7 +356,7 @@ export const CalendariaAPI = {
    * Add a new calendar.
    * @param {string} id - Unique calendar ID
    * @param {object} definition - Calendar definition object
-   * @returns {Promise<object|null>} The created calendar or null if the ID already exists
+   * @returns {Promise<object|null>} The registered calendar, the existing one when the id is already registered, or null on failure
    */
   async addCalendar(id, definition) {
     return CalendarManager.addCalendar(id, definition);

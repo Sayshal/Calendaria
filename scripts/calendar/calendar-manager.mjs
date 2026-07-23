@@ -664,13 +664,12 @@ export default class CalendarManager {
    * Add a new calendar.
    * @param {string} id  Calendar ID
    * @param {object} definition  Calendar definition
-   * @returns {Promise<CalendariaCalendar|null>}  The created calendar or null
+   * @returns {Promise<CalendariaCalendar|null>}  The registered calendar, the existing one when the id is already registered, or null on failure
    */
   static async addCalendar(id, definition) {
     if (CalendarRegistry.has(id)) {
-      ATLAS.log(2, `Cannot add calendar: ${id} already exists`);
-      ui.notifications.error(_loc('CALENDARIA.Error.CalendarAlreadyExists', { id }));
-      return null;
+      ATLAS.log(2, `Calendar ${id} already registered, returning existing`);
+      return CalendarRegistry.get(id);
     }
     try {
       const calendar = CalendarRegistry.register(id, definition);
