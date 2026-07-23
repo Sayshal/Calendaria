@@ -404,7 +404,7 @@ export default class TimeTracker {
     const config = this.#getMacroConfig();
     const seasonTriggers = config.season || [];
     if (!seasonTriggers.length) return;
-    const currentSeasonIndex = data.currentComponents?.season;
+    const currentSeasonIndex = data.current?.season;
     if (currentSeasonIndex === undefined) return;
     const matchingTriggers = seasonTriggers.filter((t) => t.seasonIndex === -1 || t.seasonIndex === currentSeasonIndex);
     for (const trigger of matchingTriggers) executeMacroById(trigger.macroId, { trigger: 'seasonChange', ...data });

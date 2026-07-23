@@ -2850,22 +2850,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         });
       }
     }
-    if (partId === 'permissions') {
-      const permissionRows = htmlElement.querySelectorAll('.permission-row');
-      permissionRows.forEach((row) => {
-        const checkboxes = row.querySelectorAll('input[type="checkbox"][data-role-order]');
-        checkboxes.forEach((checkbox) => {
-          checkbox.addEventListener('change', (e) => {
-            if (!e.target.checked) return;
-            const currentOrder = parseInt(e.target.dataset.roleOrder);
-            checkboxes.forEach((cb) => {
-              const order = parseInt(cb.dataset.roleOrder);
-              if (order > currentOrder && !cb.disabled) cb.checked = true;
-            });
-          });
-        });
-      });
-    }
     if (partId === 'canvas') {
       const rangeInput = htmlElement.querySelector('input[name="defaultBrightnessMultiplier"]');
       const rangeGroup = rangeInput?.closest('.form-group');
