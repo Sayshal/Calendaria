@@ -1011,7 +1011,7 @@ export default class FantasyCalendarImporter extends BaseImporter {
           conditions: note.conditions || [],
           visibility: note.visibility || 'visible'
         };
-        const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData, calendarId, openSheet: false });
+        const page = await NoteManager.createNote({ name: note.name, content: note.content || '', noteData: this._convertForeignRecurrence(noteData), calendarId, openSheet: false });
         if (page) {
           count++;
           if (note.originalId) fcIdToPage.set(String(note.originalId), page.id);

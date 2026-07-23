@@ -402,11 +402,6 @@ export default class CalendariaSettings {
         onChange: () => BigCal.updateIdleOpacity()
       },
       intervalConditionFieldMigrationComplete: { name: 'Interval Condition Field Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
-      noteConditionTreeMigrationComplete: { name: 'Note Condition Tree Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
-      noteVisibilityMigrationComplete: { name: 'Note Visibility Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
-      presetSchemaV2MigrationComplete: { name: 'Preset Schema V2 Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
-      festivalPresetRemovalComplete: { name: 'Festival Preset Removal Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
-      limitedRepeatRemovalComplete: { name: 'Limited Repeat Removal Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.DARKNESS_SYNC]: {
         name: 'CALENDARIA.Settings.DarknessSync.Name',
         hint: 'CALENDARIA.Settings.DarknessSync.Hint',
@@ -1177,14 +1172,6 @@ export default class CalendariaSettings {
         config: false,
         type: new NumberField({ integer: true, min: 0, initial: 60 })
       },
-      restAdvanceModeMigrationComplete: { name: 'Rest Advance Mode Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
-      weatherFxFlagMigrationComplete: { name: 'Weather FX Flag Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
-      removedCalendarsMigrationComplete: { name: 'Removed Calendars Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
-      removedCalendarOverridesMigrationComplete: { name: 'Removed Calendar Overrides Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
-      zoneTempBlankInheritanceMigrationComplete: { name: 'Zone Temp Blank Inheritance Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
-      festivalNoteYearZeroMigrationComplete: { name: 'Festival Note Year Zero Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
-      noteDurationNormalizationMigrationComplete: { name: 'Note Duration Normalization Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
-      festivalNotesSourceOfTruthMigrationComplete: { name: 'Festival Notes Source Of Truth Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       themeAtlasMigrationComplete: { name: 'Theme ATLAS Migration Complete', scope: 'client', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.SEEDED_CALENDARS]: { name: 'Seeded Calendars', scope: 'world', config: false, type: new SetField(new StringField()) },
       [SETTINGS.CLOCK_LOCKED]: { name: 'Clock Locked', scope: 'world', config: false, type: new BooleanField({ initial: false }) },

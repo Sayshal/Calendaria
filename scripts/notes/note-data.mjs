@@ -142,59 +142,12 @@ export function validateNoteData(noteData, calendarId) {
   return { valid: errors.length === 0, errors };
 }
 
-/** Legacy `repeat` values that are superseded by conditionTree. `'computed'` is still functional via computedConfig. */
-const DEPRECATED_REPEAT_VALUES = new Set(['daily', 'weekly', 'monthly', 'yearly', 'moon', 'random', 'linked', 'seasonal', 'weekOfMonth', 'range']);
-
-/** Legacy `repeat` values that can be auto-migrated to an equivalent conditionTree. */
-const AUTO_MIGRATABLE_REPEAT_VALUES = new Set(['daily', 'weekly', 'monthly', 'yearly']);
-
-/**
- * Build an equivalent conditionTree for a legacy `repeat` value when possible.
- * @param {object} noteData  Raw note data with a legacy `repeat` field
- * @returns {object|null}  Condition tree, or null if migration isn't possible
- */
-function buildConditionTreeFromLegacyRepeat(noteData) {
-  const repeat = noteData?.repeat;
-  if (!AUTO_MIGRATABLE_REPEAT_VALUES.has(repeat)) return null;
-  const startDate = noteData.startDate ?? {};
-  if (repeat === 'daily') return { type: 'group', mode: 'and', children: [] };
-  if (repeat === 'weekly') {
-    const weekday = noteData.weekday;
-    if (weekday == null) return null;
-    return { type: 'group', mode: 'and', children: [{ type: 'condition', field: 'weekday', op: '==', value: weekday + 1 }] };
-  }
-  if (repeat === 'monthly') {
-    const dayOfMonth = startDate.dayOfMonth;
-    if (dayOfMonth == null) return null;
-    return { type: 'group', mode: 'and', children: [{ type: 'condition', field: 'day', op: '==', value: dayOfMonth + 1 }] };
-  }
-  if (repeat === 'yearly') {
-    const month = startDate.month;
-    const dayOfMonth = startDate.dayOfMonth;
-    if (month == null || dayOfMonth == null) return null;
-    return {
-      type: 'group',
-      mode: 'and',
-      children: [
-        { type: 'condition', field: 'month', op: '==', value: month + 1 },
-        { type: 'condition', field: 'day', op: '==', value: dayOfMonth + 1 }
-      ]
-    };
-  }
-  return null;
-}
-
 /**
  * Sanitize and normalize note data.
  * @param {object} noteData  Raw note data
  * @returns {object}  Sanitized note data
  */
 export function sanitizeNoteData(noteData) {
-  if (noteData?.repeat && DEPRECATED_REPEAT_VALUES.has(noteData.repeat)) {
-    const migrated = !noteData.conditionTree && AUTO_MIGRATABLE_REPEAT_VALUES.has(noteData.repeat) ? buildConditionTreeFromLegacyRepeat(noteData) : null;
-    if (migrated) noteData = { ...noteData, conditionTree: migrated, repeat: 'never' };
-    else foundry.utils.logCompatibilityWarning(`Calendaria: noteData.repeat ('${noteData.repeat}') is deprecated. Use noteData.conditionTree instead.`, { since: '1.0.0', until: '1.2.0', once: true });
-  }
   const defaults = getDefaultNoteData();
   return {
     startDate: noteData.startDate || defaults.startDate,
@@ -660,52 +613,35 @@ export function extractNoteMatchData(page) {
 }
 
 /**
- * Migrate the preset schema: seed built-in presets into settings, backfill missing fields on custom presets.
- * @since 1.0.0
- * @deprecated Remove in 1.2.0
- * @returns {Promise<boolean>}  True if migration was performed
+ * Detect notes referencing preset IDs that no longer exist and reconstruct stub presets.
+ * Protects against custom presets lost during module updates or carried in by imported notes.
+ * Permanent repair pass, run once per world load.
+ * @returns {Promise<void>}
  */
-export async function migratePresetSchema() {
-  if (!game.user?.isGM) return false;
-  const KEY = 'presetSchemaV2MigrationComplete';
-  if (game.settings.get(MODULE.ID, KEY)) return false;
+export async function recoverOrphanedPresets() {
+  if (!game.user?.isGM) return;
   const raw = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_PRESETS) || [];
-  const existingIds = new Set(raw.map((c) => c.id));
-  const seeds = getBuiltinPresetSeeds();
-  const migrated = [];
-  for (let i = 0; i < seeds.length; i++) {
-    const seed = seeds[i];
-    if (existingIds.has(seed.id)) {
-      const existing = raw.find((c) => c.id === seed.id);
-      migrated.push({
-        ...existing,
-        label: existing.label || existing.name || seed.label,
-        builtin: true,
-        sortOrder: existing.sortOrder ?? i,
-        playerUsable: existing.playerUsable ?? true,
-        defaults: existing.defaults || emptyDefaults()
-      });
-    } else {
-      migrated.push({ ...seed, builtin: true, sortOrder: i, playerUsable: true, defaults: emptyDefaults() });
+  const savedIds = new Set(raw.map((c) => c.id));
+  const builtinIds = new Set([DEFAULT_PRESET_ID, ...getBuiltinPresetSeeds().map((s) => s.id)]);
+  const orphanIds = new Map();
+  for (const journal of game.journal) {
+    for (const page of journal.pages) {
+      if (page.type !== 'calendaria.calendarnote') continue;
+      const cats = page.system?.categories;
+      if (!Array.isArray(cats)) continue;
+      for (const id of cats) {
+        if (savedIds.has(id) || builtinIds.has(id) || orphanIds.has(id)) continue;
+        orphanIds.set(id, { color: page.system.color, icon: page.system.icon });
+      }
     }
   }
-  const builtinIds = new Set(seeds.map((s) => s.id));
-  let customIndex = seeds.length;
-  for (const cat of raw) {
-    if (builtinIds.has(cat.id)) continue;
-    migrated.push({
-      id: cat.id,
-      label: cat.label || cat.name || 'Unnamed',
-      color: cat.color || '#868e96',
-      icon: cat.icon || 'fa-tag',
-      builtin: false,
-      sortOrder: cat.sortOrder ?? customIndex++,
-      playerUsable: cat.playerUsable ?? true,
-      defaults: cat.defaults || emptyDefaults()
-    });
+  if (!orphanIds.size) return;
+  let sortOrder = raw.reduce((max, c) => Math.max(max, c.sortOrder ?? 0), -1) + 1;
+  for (const [id, data] of orphanIds) {
+    raw.push({ id, label: id, color: data.color || '#868e96', icon: data.icon || 'fas fa-tag', builtin: false, sortOrder: sortOrder++, playerUsable: true, defaults: {} });
+    ATLAS.log(2, `Recovered orphaned preset "${id}" from note data`);
   }
   invalidatePresetCache();
-  await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_PRESETS, migrated);
-  await game.settings.set(MODULE.ID, KEY, true);
-  return true;
+  await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_PRESETS, raw);
+  ATLAS.log(2, `Recovered ${orphanIds.size} orphaned preset(s)`);
 }
