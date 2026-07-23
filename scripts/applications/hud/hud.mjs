@@ -11,9 +11,9 @@ import {
   canChangeDateTime,
   canChangeWeather,
   canViewBigCal,
-  canViewMoons,
   canViewHUD,
   canViewMiniCal,
+  canViewMoons,
   canViewNotes,
   checkStickyZones,
   cleanupSnapIndicator,
@@ -33,6 +33,7 @@ import {
   hideSnapIndicator,
   isBottomAnchored,
   isCombatBlocked,
+  isMoonVisible,
   previewSnippet,
   registerForZoneUpdates,
   renderCycleIndicator,
@@ -1036,7 +1037,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const calendar = this.calendar;
     if (calendar && canViewMoons()) {
       const showAll = game.settings.get(MODULE.ID, SETTINGS.HUD_SHOW_ALL_MOONS);
-      const sortedMoons = [...(calendar.moonsArray ?? [])].sort((a, b) => _loc(a.name).localeCompare(_loc(b.name)));
+      const sortedMoons = (calendar.moonsArray ?? []).filter(isMoonVisible).sort((a, b) => _loc(a.name).localeCompare(_loc(b.name)));
       const moonList = showAll ? sortedMoons : sortedMoons.slice(0, 1);
       for (let mi = 0; mi < moonList.length; mi++) {
         const moon = moonList[mi];

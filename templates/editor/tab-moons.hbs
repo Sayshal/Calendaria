@@ -46,6 +46,15 @@
             </div>
 
             <div class="moon-fields">
+              <div class="form-group">
+                <label
+                  for="editor-moon-{{this.index}}-hide">{{localize "CALENDARIA.Editor.Field.MoonVisibility"}}</label>
+                <div class="form-fields">
+                  <input type="checkbox" id="editor-moon-{{this.index}}-hide" name="moons.{{this.key}}.hideFromPlayers"
+                    {{#if this.isHidden}}checked{{/if}}>
+                </div>
+                <p class="hint">{{localize "CALENDARIA.Editor.Hint.MoonVisibility"}}</p>
+              </div>
               <fieldset class="moon-brightness standard-form">
                 <legend data-tooltip aria-label="{{localize 'CALENDARIA.Editor.Hint.MoonBrightness'}}">
                   {{localize "CALENDARIA.Editor.Section.MoonBrightness"}}

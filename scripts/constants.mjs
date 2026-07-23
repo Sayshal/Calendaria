@@ -471,6 +471,9 @@ export const DISPLAY_STYLES = { BANNER: 'banner', ICON: 'icon', PIP: 'pip' };
 /** @enum {string} Note visibility levels. */
 export const NOTE_VISIBILITY = { HIDDEN: 'hidden', SECRET: 'secret', VISIBLE: 'visible' };
 
+/** @type {Object<string, string>} Moon visibility states. Two-state by design; hidden moons render only for the GM. */
+export const MOON_VISIBILITY = { HIDDEN: 'hidden', VISIBLE: 'visible' };
+
 /** @enum {string} Custom hook names fired by the module */
 export const HOOKS = {
   CALENDAR_ADDED: 'calendaria.calendarAdded',

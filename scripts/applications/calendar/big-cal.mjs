@@ -41,6 +41,7 @@ import {
   isCombatBlocked,
   isFogEnabled,
   isMonthFullyFogged,
+  isMoonVisible,
   isRevealed,
   renderCycleIndicator,
   renderEraIndicator,
@@ -402,6 +403,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
         const dayWorldTime = calendar.componentsToTime(dayComponents);
         moonPhases = calendar.moonsArray
           .map((moon, index) => {
+            if (!isMoonVisible(moon)) return null;
             const phase = calendar.getMoonPhase(index, dayWorldTime);
             if (!phase) return null;
             return { moonName: _loc(moon.name), phaseName: phase.subPhaseName || _loc(phase.name), icon: phase.icon, color: moon.color || null };
@@ -595,6 +597,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
           const dayWorldTime = calendar.componentsToTime(dayComponents);
           moonPhases = calendar.moonsArray
             .map((moon, index) => {
+              if (!isMoonVisible(moon)) return null;
               const phase = calendar.getMoonPhase(index, dayWorldTime);
               if (!phase) return null;
               return { moonName: _loc(moon.name), phaseName: phase.subPhaseName || _loc(phase.name), icon: phase.icon, color: moon.color || null };

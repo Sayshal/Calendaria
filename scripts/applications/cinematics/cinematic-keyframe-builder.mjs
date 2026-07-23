@@ -1,5 +1,5 @@
 import { NoteManager } from '../../notes/_module.mjs';
-import { formatForLocation } from '../../utils/_module.mjs';
+import { formatForLocation, isMoonVisible } from '../../utils/_module.mjs';
 import { WeatherManager } from '../../weather/_module.mjs';
 
 /** @type {number} */
@@ -109,10 +109,12 @@ export default class CinematicKeyframeBuilder {
     if (settings.showMoons && calendar.moonsArray?.length) {
       for (let i = 0; i < calendar.moonsArray.length; i++) {
         const moonDef = calendar.moonsArray[i];
+        if (!isMoonVisible(moonDef)) continue;
         const phase = calendar.getMoonPhase(i, worldTime);
         if (!phase) continue;
         const phases = moonDef.phases ? Object.values(moonDef.phases) : [];
         moons.push({
+          moonIndex: i,
           name: _loc(moonDef.name),
           color: moonDef.color ?? '#cccccc',
           phaseName: phase.name ? _loc(phase.name) : '',

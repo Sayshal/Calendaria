@@ -1,5 +1,5 @@
 import { findFestivalDay as findFestivalDayViaNotes, getLeapYearDescription, intersectsYear, parseInterval, parsePattern } from '../calendar/_module.mjs';
-import { DEFAULT_MOON_PHASES } from '../constants.mjs';
+import { DEFAULT_MOON_PHASES, MOON_VISIBILITY } from '../constants.mjs';
 import { NoteManager } from '../notes/_module.mjs';
 import { resolveRandomizedPhase } from './_module.mjs';
 
@@ -476,7 +476,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
           }),
           eclipseMode: new StringField({ required: false, initial: 'never', choices: ['never', 'rare', 'occasional', 'frequent', 'custom'] }),
           nodalPeriod: new NumberField({ required: false, nullable: true, initial: null, min: 1 }),
-          apparentSize: new NumberField({ required: false, nullable: false, initial: 1.0, min: 0.1, max: 2.0 })
+          apparentSize: new NumberField({ required: false, nullable: false, initial: 1.0, min: 0.1, max: 2.0 }),
+          visibility: new StringField({ required: false, initial: MOON_VISIBILITY.VISIBLE, choices: Object.values(MOON_VISIBILITY) })
         })
       ),
       eras: new TypedObjectField(
@@ -1507,7 +1508,10 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    * @returns {Array<{name: string, icon: string, position: number}>} - All moon phase data
    */
   getAllMoonPhases(time = game.time.worldTime) {
-    return this.moonsArray.map((_moon, index) => this.getMoonPhase(index, time)).filter(Boolean);
+    return this.moonsArray.map((moon, index) => {
+      const phase = this.getMoonPhase(index, time);
+      return phase ? { moonIndex: index, moonName: moon.name ?? '', ...phase } : null;
+    });
   }
 
   /**

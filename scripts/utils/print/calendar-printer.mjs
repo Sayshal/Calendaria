@@ -1,6 +1,7 @@
 import { CalendarManager } from '../../calendar/_module.mjs';
 import { topologicalSortNotes } from '../../notes/event-dependency-resolver.mjs';
 import { isFogEnabled, isRevealed } from '../fog-of-war.mjs';
+import { isMoonVisible } from '../formatting/moon-utils.mjs';
 import { getCalendarNotes, getFestivalNoteForDay, getVisibleNotes } from '../ui/calendar-view-utils.mjs';
 
 const PRINT_CSS = `
@@ -75,6 +76,7 @@ function buildMonthGrid(calendar, year, month, notes) {
       const dayWorldTime = calendar.componentsToTime(dayComponents);
       moonIcons = moons
         .map((moon, idx) => {
+          if (!isMoonVisible(moon)) return null;
           const phase = calendar.getMoonPhase(idx, dayWorldTime);
           if (!phase?.icon) return null;
           return { icon: resolveAbsoluteIcon(phase.icon), color: moon.color || null };

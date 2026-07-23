@@ -199,6 +199,20 @@ describe('getFieldValue()', () => {
     it('returns null for invalid moon index', () => {
       expect(getFieldValue(CONDITION_FIELDS.MOON_PHASE, { year: 2024, month: 0, dayOfMonth: 0 }, 99)).toBeNull();
     });
+    it('evaluates identically for GM and player when the moon is hidden', () => {
+      const calendar = CalendarManager.getActiveCalendar();
+      const moon = calendar.moonsArray[0];
+      const prior = moon.visibility;
+      moon.visibility = 'hidden';
+      const date = { year: 2024, month: 0, dayOfMonth: 0 };
+      const asGM = getFieldValue(CONDITION_FIELDS.MOON_PHASE, date, 0);
+      game.user.isGM = false;
+      const asPlayer = getFieldValue(CONDITION_FIELDS.MOON_PHASE, date, 0);
+      game.user.isGM = true;
+      moon.visibility = prior;
+      expect(asPlayer).toBe(asGM);
+      expect(typeof asPlayer).toBe('number');
+    });
   });
 
   describe('moonPhaseIndex', () => {

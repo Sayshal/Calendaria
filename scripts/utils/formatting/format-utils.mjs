@@ -1,7 +1,8 @@
 import { resolveRandomizedPhase } from '../../data/_module.mjs';
+import WeatherManager from '../../weather/weather-manager.mjs';
 import { normalizeRawDoy } from '../calendar-math.mjs';
 import { canViewMoons } from '../permissions.mjs';
-import WeatherManager from '../../weather/weather-manager.mjs';
+import { isMoonVisible } from './moon-utils.mjs';
 
 /**
  * Resolve a convenience array getter from a calendar object.
@@ -627,6 +628,7 @@ function getMoonPhaseName(calendar, components, moonSelector) {
   const moons = resolveArray(calendar, 'moonsArray', 'moons');
   if (!moons.length) return '';
   let moonIndex = resolveMoonIndex(moons, moonSelector);
+  if (!isMoonVisible(moons[moonIndex])) return '';
   if (calendar.getMoonPhase && calendar.componentsToTime) {
     const yearZero = calendar.years?.yearZero ?? 0;
     const internalComponents = { ...components, year: components.year - yearZero };
@@ -655,7 +657,7 @@ function getMoonPhaseIcon(calendar, components, moonSelector) {
   if (!moons.length) return '';
   const moonIndex = resolveMoonIndex(moons, moonSelector);
   const moon = moons[moonIndex];
-  if (!moon) return '';
+  if (!moon || !isMoonVisible(moon)) return '';
   let phase;
   if (calendar.getMoonPhase && calendar.componentsToTime) {
     const yearZero = calendar.years?.yearZero ?? 0;

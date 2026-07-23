@@ -15,6 +15,7 @@ import {
   canViewWeatherForecast,
   formatCustom,
   isFogEnabled,
+  isMoonVisible,
   isRevealed,
   revealRange,
   toRomanNumeral
@@ -335,7 +336,10 @@ export function renderCycleIndicator({ cycleData, displayMode, cycleText }) {
  */
 export function getFirstMoonPhase(calendar, year, month, dayOfMonth) {
   if (!calendar?.moonsArray?.length) return null;
-  const sortedMoons = [...calendar.moonsArray].map((m, i) => ({ ...m, originalIndex: i })).sort((a, b) => _loc(a.name).localeCompare(_loc(b.name)));
+  const sortedMoons = [...calendar.moonsArray]
+    .map((m, i) => ({ ...m, originalIndex: i }))
+    .filter((m) => isMoonVisible(m))
+    .sort((a, b) => _loc(a.name).localeCompare(_loc(b.name)));
   let moon = sortedMoons[0];
   if (selectedMoonOverride) {
     const overrideMoon = sortedMoons.find((m) => _loc(m.name) === selectedMoonOverride);
@@ -365,6 +369,7 @@ export function getAllMoonPhases(calendar, year, month, dayOfMonth) {
   const dayWorldTime = calendar.componentsToTime(dayComponents);
   return calendar.moonsArray
     .map((moon, index) => {
+      if (!isMoonVisible(moon)) return null;
       const phase = calendar.getMoonPhase(index, dayWorldTime);
       if (!phase) return null;
       const color = moon.color || null;

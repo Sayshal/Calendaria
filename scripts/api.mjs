@@ -88,6 +88,7 @@ import {
   getWidgetByReplacement,
   isEclipseOnDate,
   isMoonFull,
+  isMoonVisible,
   refreshWidgets,
   registerWidget,
   resolveFormatString,
@@ -447,6 +448,8 @@ export const CalendariaAPI = {
    * @returns {object|null} Moon phase data with name, icon, position, and dayInCycle
    */
   getMoonPhase(moonIndex = 0) {
+    const moon = CalendarManager.getActiveCalendar()?.moonsArray?.[moonIndex];
+    if (moon && !isMoonVisible(moon)) return null;
     return CalendarManager.getCurrentMoonPhase(moonIndex);
   },
 
@@ -455,7 +458,8 @@ export const CalendariaAPI = {
    * @returns {Array<object>} Array of moon phase data
    */
   getAllMoonPhases() {
-    return CalendarManager.getAllCurrentMoonPhases();
+    const moons = CalendarManager.getActiveCalendar()?.moonsArray ?? [];
+    return CalendarManager.getAllCurrentMoonPhases().map((entry, i) => (entry && isMoonVisible(moons[entry.moonIndex ?? i]) ? entry : null));
   },
 
   /**

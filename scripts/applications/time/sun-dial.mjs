@@ -18,6 +18,7 @@ import {
   getSidebarBuffer,
   getSkyColorsRgb,
   isCombatBlocked,
+  isMoonVisible,
   registerForZoneUpdates,
   restorePinnedState,
   unpinFromZone,
@@ -362,7 +363,7 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     const moons = [];
     if (calendar && canViewMoons()) {
       const showAll = game.settings.get(MODULE.ID, SETTINGS.HUD_SHOW_ALL_MOONS);
-      const sortedMoons = [...(calendar.moonsArray ?? [])].sort((a, b) => _loc(a.name).localeCompare(_loc(b.name)));
+      const sortedMoons = (calendar.moonsArray ?? []).filter(isMoonVisible).sort((a, b) => _loc(a.name).localeCompare(_loc(b.name)));
       const moonList = showAll ? sortedMoons : sortedMoons.slice(0, 1);
       const components = game.time.components;
       for (let mi = 0; mi < moonList.length; mi++) {

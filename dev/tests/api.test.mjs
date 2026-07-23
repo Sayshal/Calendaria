@@ -11,7 +11,7 @@ import NoteManager from '../../scripts/notes/note-manager.mjs';
 import { getNextOccurrences, getOccurrencesInRange, isRecurringMatch } from '../../scripts/notes/recurrence.mjs';
 import TimeClock from '../../scripts/time/time-clock.mjs';
 import { PRESET_FORMATTERS, formatCustom, getAvailableTokens, resolveFormatString, timeSince } from '../../scripts/utils/formatting/format-utils.mjs';
-import { getConvergencesInRange, getMoonPhasePosition, getNextConvergence, getNextFullMoon, isMoonFull } from '../../scripts/utils/formatting/moon-utils.mjs';
+import { getConvergencesInRange, getMoonPhasePosition, getNextConvergence, getNextFullMoon, isMoonFull, isMoonVisible } from '../../scripts/utils/formatting/moon-utils.mjs';
 import { canAddNotes, canChangeActiveCalendar, canChangeDateTime, canEditCalendars, canViewWeatherForecast } from '../../scripts/utils/permissions.mjs';
 import SearchManager from '../../scripts/utils/search-manager.mjs';
 import { CalendariaSocket } from '../../scripts/utils/socket.mjs';
@@ -108,7 +108,7 @@ vi.mock('../../scripts/utils/formatting/format-utils.mjs', () => ({
   resolveFormatString: vi.fn((s) => s),
   timeSince: vi.fn(() => '3 days ago')
 }));
-vi.mock('../../scripts/utils/formatting/moon-utils.mjs', () => ({ getMoonPhasePosition: vi.fn(() => 0.5), isMoonFull: vi.fn(() => false), getNextConvergence: vi.fn(() => null), getNextFullMoon: vi.fn(() => null), getConvergencesInRange: vi.fn(() => []) }));
+vi.mock('../../scripts/utils/formatting/moon-utils.mjs', () => ({ getMoonPhasePosition: vi.fn(() => 0.5), isMoonFull: vi.fn(() => false), isMoonVisible: vi.fn(() => true), getNextConvergence: vi.fn(() => null), getNextFullMoon: vi.fn(() => null), getConvergencesInRange: vi.fn(() => []) }));
 vi.mock('../../scripts/notes/date-utils.mjs', () => ({
   addDays: vi.fn((d) => d),
   addHours: vi.fn((d) => d),
@@ -351,7 +351,14 @@ describe('moon phases', () => {
   it('getAllMoonPhases delegates to CalendarManager', () => {
     const phases = [{ name: 'Full' }, { name: 'New' }];
     CalendarManager.getAllCurrentMoonPhases.mockReturnValue(phases);
-    expect(CalendariaAPI.getAllMoonPhases()).toBe(phases);
+    expect(CalendariaAPI.getAllMoonPhases()).toStrictEqual(phases);
+  });
+  it('getAllMoonPhases nulls hidden moons for the current user', () => {
+    CalendarManager.getActiveCalendar.mockReturnValue({ moonsArray: [{ visibility: 'hidden' }, { visibility: 'visible' }] });
+    CalendarManager.getAllCurrentMoonPhases.mockReturnValue([{ moonIndex: 0, name: 'Full' }, { moonIndex: 1, name: 'New' }]);
+    isMoonVisible.mockImplementation((m) => m?.visibility !== 'hidden');
+    expect(CalendariaAPI.getAllMoonPhases()).toStrictEqual([null, { moonIndex: 1, name: 'New' }]);
+    isMoonVisible.mockImplementation(() => true);
   });
   it('getMoonPhasePosition passes date or defaults to components', () => {
     const moon = { cycleLength: 28 };

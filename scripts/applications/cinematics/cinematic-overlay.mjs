@@ -500,7 +500,7 @@ export default class CinematicOverlay {
     }
     for (let i = 0; i < kf.moons.length; i++) {
       const moon = kf.moons[i];
-      const prevMoon = prevKf?.moons?.[i];
+      const prevMoon = moon.moonIndex != null ? (prevKf?.moons?.find((m) => m.moonIndex === moon.moonIndex) ?? null) : prevKf?.moons?.[i];
       const container = strip.querySelector(`[data-moon-index="${i}"]`);
       if (!container) continue;
       const prevImg = container.querySelector('.cinematic-moon-img--prev');

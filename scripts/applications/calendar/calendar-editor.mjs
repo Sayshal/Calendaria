@@ -1,5 +1,5 @@
 import { CalendarManager, CalendarRegistry, isBundledCalendar, preLocalizeCalendar } from '../../calendar/_module.mjs';
-import { ASSETS, DEFAULT_MOON_PHASES, HOOKS, TEMPLATES } from '../../constants.mjs';
+import { ASSETS, DEFAULT_MOON_PHASES, HOOKS, MOON_VISIBILITY, TEMPLATES } from '../../constants.mjs';
 import { FestivalManager } from '../../festivals/_module.mjs';
 import { createImporter } from '../../importers/_module.mjs';
 import { isLuxonSyncRequired } from '../../integrations/luxon-sync.mjs';
@@ -449,6 +449,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         isCustomEclipse: moon.eclipseMode === 'custom',
         isNoEclipse: !moon.eclipseMode || moon.eclipseMode === 'never',
         apparentSizeDisplay: moon.apparentSize ?? 1.0,
+        isHidden: moon.visibility === MOON_VISIBILITY.HIDDEN,
         eclipseModeOptions: [
           { value: 'never', label: _loc('CALENDARIA.Common.None'), selected: (moon.eclipseMode ?? 'never') === 'never' },
           { value: 'rare', label: _loc('CALENDARIA.Editor.Eclipse.Rare'), selected: moon.eclipseMode === 'rare' },
@@ -1280,7 +1281,13 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         eclipseMode,
         nodalPeriod: eclipseMode === 'custom' ? (this.#parseOptionalInt(data[`moons.${mKey}.nodalPeriod`]) ?? existingMoon?.nodalPeriod ?? null) : (existingMoon?.nodalPeriod ?? null),
         apparentSize: parseFloat(data[`moons.${mKey}.apparentSize`]) || (existingMoon?.apparentSize ?? 1.0),
-        moonBrightnessMax: Number.isFinite(parseFloat(data[`moons.${mKey}.moonBrightnessMax`])) ? parseFloat(data[`moons.${mKey}.moonBrightnessMax`]) : (existingMoon?.moonBrightnessMax ?? null)
+        moonBrightnessMax: Number.isFinite(parseFloat(data[`moons.${mKey}.moonBrightnessMax`])) ? parseFloat(data[`moons.${mKey}.moonBrightnessMax`]) : (existingMoon?.moonBrightnessMax ?? null),
+        visibility:
+          data[`moons.${mKey}.hideFromPlayers`] !== undefined
+            ? data[`moons.${mKey}.hideFromPlayers`]
+              ? MOON_VISIBILITY.HIDDEN
+              : MOON_VISIBILITY.VISIBLE
+            : (existingMoon?.visibility ?? MOON_VISIBILITY.VISIBLE)
       };
     }
     this.#calendarData.moons = newMoons;
@@ -1867,7 +1874,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       cycleVariance: 0,
       anchorPhases: {},
       phases: foundry.utils.deepClone(DEFAULT_MOON_PHASES),
-      referenceDate: { year: 0, month: 0, dayOfMonth: 0 }
+      referenceDate: { year: 0, month: 0, dayOfMonth: 0 },
+      visibility: MOON_VISIBILITY.VISIBLE
     };
     this.#isDirty = true;
     this.render();
