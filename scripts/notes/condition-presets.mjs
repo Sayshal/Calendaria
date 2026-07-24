@@ -70,9 +70,10 @@ export function getConditionPresets(startDate) {
   const m = startDate?.month ?? 0;
   const diw = cal.daysInWeek ?? wd.length ?? 7;
   const wdi = startDate ? dayOfWeek(startDate) + 1 : 1;
-  const wn = Math.ceil(d / diw);
+  const internal = startDate ? { year: startDate.year - (cal.years?.yearZero ?? 0), month: m, dayOfMonth: startDate.dayOfMonth ?? 0 } : null;
+  const wn = (internal && cal.weekNumberInMonth?.(internal)) ?? Math.ceil(d / diw);
   const lastDay = startDate ? getLastDayOfMonth(startDate) : d;
-  const iwn = Math.floor((lastDay - d) / diw) + 1;
+  const iwn = (internal && cal.inverseWeekNumberInMonth?.(internal)) ?? Math.floor((lastDay - d) / diw) + 1;
   const wdName = wd[wdi - 1] ? _loc(wd[wdi - 1].name) : `Day ${wdi}`;
   const moName = mo[m] ? _loc(mo[m].name ?? '') : '';
   const L = 'CALENDARIA.Note.Preset.';

@@ -2,7 +2,7 @@ import { CalendarManager } from '../../calendar/_module.mjs';
 import { topologicalSortNotes } from '../../notes/event-dependency-resolver.mjs';
 import { isFogEnabled, isRevealed } from '../fog-of-war.mjs';
 import { isMoonVisible } from '../formatting/moon-utils.mjs';
-import { getCalendarNotes, getFestivalNoteForDay, getVisibleNotes } from '../ui/calendar-view-utils.mjs';
+import { buildCycleMonthPlan, getCalendarNotes, getFestivalNoteForDay, getVisibleNotes } from '../ui/calendar-view-utils.mjs';
 
 const PRINT_CSS = `
   @page { size: letter; margin: 0.4in; }
@@ -89,6 +89,11 @@ function buildMonthGrid(calendar, year, month, notes) {
     const cells = [];
     for (let d = 0; d < daysInMonth; d++) cells.push(buildCell(d));
     return { name: _loc(monthData.name), weekdays: [], rows: [cells], intercalary: true };
+  }
+  const cyclePlan = buildCycleMonthPlan(calendar, year, month);
+  if (cyclePlan) {
+    const rows = cyclePlan.rows.map((row) => row.map((d) => (d == null ? null : buildCell(d))));
+    return { name: _loc(monthData.name), weekdays, rows, intercalary: false };
   }
   const startWeekday = calendar._computeDayOfWeek({ year: internalYear, month, dayOfMonth: 0 });
   const cells = [];

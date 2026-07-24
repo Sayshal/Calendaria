@@ -1,7 +1,7 @@
 import { CalendarRegistry, getCurrentDateOn } from '../../calendar/_module.mjs';
 import { HOOKS, TEMPLATES } from '../../constants.mjs';
 import { dayOfWeek } from '../../notes/_module.mjs';
-import { formatCustom, getLeadingDays } from '../../utils/_module.mjs';
+import { buildCycleMonthPlan, formatCustom, getLeadingDays } from '../../utils/_module.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -115,10 +115,12 @@ export class SecondaryCalendar extends HandlebarsApplicationMixin(ApplicationV2)
     const todayDay = currentDate?.dayOfMonth;
     const hasFixedStart = monthData?.startingWeekday != null;
     const startDayOfWeek = hasFixedStart ? monthData.startingWeekday : dayOfWeek({ year, month, dayOfMonth: 0 }, calendar);
+    const cyclePlan = buildCycleMonthPlan(calendar, year, month);
+    const cycleCells = cyclePlan ? new Map() : null;
     const weeks = [];
     let currentWeek = [];
     const intercalaryDays = [];
-    if (startDayOfWeek > 0) {
+    if (!cyclePlan && startDayOfWeek > 0) {
       const prevDays = getLeadingDays(calendar, year, month, startDayOfWeek);
       for (const pd of prevDays) currentWeek.push({ day: pd.day, isFromOtherMonth: true, isToday: false });
     }
@@ -128,6 +130,8 @@ export class SecondaryCalendar extends HandlebarsApplicationMixin(ApplicationV2)
       const isIntercalary = festivalDay?.countsForWeekday === false;
       if (isIntercalary) {
         intercalaryDays.push({ day: d + 1, isToday, festivalName: festivalDay ? _loc(festivalDay.name) : '' });
+      } else if (cycleCells) {
+        cycleCells.set(d, { day: d + 1, isToday, isFromOtherMonth: false });
       } else {
         currentWeek.push({ day: d + 1, isToday, isFromOtherMonth: false });
         if (currentWeek.length === daysInWeek) {
@@ -136,7 +140,10 @@ export class SecondaryCalendar extends HandlebarsApplicationMixin(ApplicationV2)
         }
       }
     }
-    if (currentWeek.length > 0) {
+    if (cyclePlan) {
+      for (const row of cyclePlan.rows)
+        weeks.push(row.map((d) => (d == null ? { day: '', isFromOtherMonth: true, isToday: false } : (cycleCells.get(d) ?? { day: '', isFromOtherMonth: true, isToday: false }))));
+    } else if (currentWeek.length > 0) {
       while (currentWeek.length < daysInWeek) currentWeek.push({ day: '', isFromOtherMonth: true, isToday: false });
       weeks.push(currentWeek);
     }

@@ -1008,3 +1008,36 @@ export function getLeadingDays(calendar, year, month, startDayOfWeek) {
   }
   return prevDays;
 }
+
+/**
+ * Build a per-day grid plan for a month on a calendar with an active week cycle.
+ * @param {object} calendar - Calendar instance
+ * @param {number} year - Display year (with yearZero applied)
+ * @param {number} month - Month index (0-based)
+ * @returns {{rows: Array<Array<number|null>>, colByDay: Map<number, number>}|null} Grid rows of dayOfMonth values (null = void cell), or null when no cycle is active
+ */
+export function buildCycleMonthPlan(calendar, year, month) {
+  if (!calendar?._computeCyclePosition || !calendar.weekCycle || calendar.isMonthless) return null;
+  const yearZero = calendar.years?.yearZero ?? 0;
+  const internalYear = year - yearZero;
+  const daysInMonth = calendar.getDaysInMonth(month, internalYear);
+  const daysInWeek = calendar.daysInWeek;
+  const rows = [];
+  const colByDay = new Map();
+  let currentRow = null;
+  let prev = null;
+  for (let d = 0; d < daysInMonth; d++) {
+    const festivalDay = calendar.findFestivalDay({ year: internalYear, month, dayOfMonth: d });
+    if (festivalDay?.countsForWeekday === false) continue;
+    const pos = calendar._computeCyclePosition({ year: internalYear, month, dayOfMonth: d });
+    if (!pos) return null;
+    if (!currentRow || pos.cycleRow !== prev.cycleRow || pos.posInRow <= prev.posInRow) {
+      currentRow = new Array(daysInWeek).fill(null);
+      rows.push(currentRow);
+    }
+    currentRow[pos.weekdayIndex] = d;
+    colByDay.set(d, pos.weekdayIndex);
+    prev = pos;
+  }
+  return { rows, colByDay };
+}

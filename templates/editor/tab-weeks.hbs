@@ -63,6 +63,56 @@
   </fieldset>
 
   <fieldset>
+    <legend data-tooltip aria-label="{{localize 'CALENDARIA.Editor.Hint.WeekCycle'}}">
+      {{localize "CALENDARIA.Editor.Field.WeekCycle"}}
+    </legend>
+
+    {{#if weekCycleRows.length}}
+      <div class="items-list week-cycle-list" style="--cycle-days: {{weekCycleWeekdays.length}}">
+        <div class="list-header flexrow">
+          <span class="col-name">{{localize "CALENDARIA.Common.Name"}}</span>
+          {{#each weekCycleWeekdays}}
+            <span class="col-cycle-day">{{localize this}}</span>
+          {{/each}}
+          <span class="col-controls"></span>
+        </div>
+
+        {{#each weekCycleRows}}
+          <div class="item week-cycle-row flexrow" data-key="{{this.key}}">
+            <input type="text" name="weeks.cycle.{{this.key}}.name" value="{{this.name}}" class="col-name"
+              placeholder="{{localize 'CALENDARIA.Editor.Default.WeekName' num=this.displayNum}}">
+            {{#each this.cells}}
+              <label class="col-cycle-day checkbox">
+                <input type="checkbox" name="weeks.cycle.{{../key}}.days.{{this.wdKey}}" {{#if this.checked}}checked{{/if}}>
+              </label>
+            {{/each}}
+
+            <div class="item-controls col-controls">
+              <button type="button" data-action="addCycleRow" data-key="{{this.key}}" data-tooltip
+                aria-label="{{localize 'CALENDARIA.Editor.AddCycleRow'}}">
+                <i class="fas fa-plus"></i>
+              </button>
+              <button type="button" data-action="removeCycleRow" data-key="{{this.key}}" data-tooltip
+                aria-label="{{localize 'CALENDARIA.Common.Remove'}}">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        {{/each}}
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Editor.Hint.WeekCycle"}}</p>
+    {{else}}
+      <div class="empty-list">
+        <p>{{localize "CALENDARIA.Editor.NoWeekCycle"}}</p>
+        <button type="button" data-action="addCycleRow" data-key="null">
+          <i class="fas fa-plus"></i>
+          {{localize "CALENDARIA.Editor.AddCycleRow"}}
+        </button>
+      </div>
+    {{/if}}
+  </fieldset>
+
+  <fieldset>
     <legend data-tooltip aria-label="{{localize 'CALENDARIA.Editor.Hint.NamedWeeks'}}">
       {{localize "CALENDARIA.Common.NamedWeeks"}}
     </legend>

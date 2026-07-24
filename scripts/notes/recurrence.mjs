@@ -264,6 +264,16 @@ function resolveFirstAfter(startDate, condition, params, calendar) {
 function resolveWeekdayOnOrAfter(startDate, targetWeekday, calendar) {
   const currentWeekday = dayOfWeek(startDate);
   if (currentWeekday === targetWeekday) return { ...startDate };
+  const cycle = calendar?.weekCycle;
+  if (cycle) {
+    const cycleLength = cycle.reduce((sum, r) => sum + r.days.length, 0);
+    let date = { ...startDate };
+    for (let i = 0; i < cycleLength * 3; i++) {
+      date = addDays(date, 1);
+      if (dayOfWeek(date) === targetWeekday) return date;
+    }
+    return null;
+  }
   const daysInWeek = calendar?.daysInWeek ?? 7;
   const daysToAdd = (targetWeekday - currentWeekday + daysInWeek) % daysInWeek;
   return addDays(startDate, daysToAdd);
@@ -584,7 +594,7 @@ export function generateRandomOccurrences(noteData, targetYear) {
         if (occurrences.length >= maxOccurrences) break;
       }
     }
-    if (checkInterval === 'weekly') currentDate = addDays(currentDate, calendar?.daysInWeek ?? 7);
+    if (checkInterval === 'weekly') currentDate = addDays(currentDate, averageWeekLength(calendar));
     else if (checkInterval === 'monthly') currentDate = addMonths(currentDate, 1);
     else currentDate = addDays(currentDate, 1);
     iterations++;
@@ -608,8 +618,20 @@ export function needsRandomRegeneration(cachedData) {
   const currentDay = components.dayOfMonth ?? 0;
   const lastMonthIndex = calendar.monthsArray.length - 1;
   const lastMonthDays = calendar.monthsArray[lastMonthIndex]?.days || 30;
-  const daysInWeek = calendar?.daysInWeek ?? 7;
+  const daysInWeek = averageWeekLength(calendar);
   if (cachedData.year < currentYear) return true;
   if (currentMonth === lastMonthIndex && currentDay > lastMonthDays - daysInWeek - 1) return cachedData.year <= currentYear;
   return false;
+}
+
+/**
+ * Get the average week length in days, accounting for an active week cycle.
+ * @param {object} calendar - Calendar instance
+ * @returns {number} Days per week (rounded for cycled calendars)
+ */
+function averageWeekLength(calendar) {
+  const cycle = calendar?.weekCycle;
+  if (!cycle) return calendar?.daysInWeek ?? 7;
+  const cycleLength = cycle.reduce((sum, r) => sum + r.days.length, 0);
+  return Math.max(1, Math.round(cycleLength / cycle.length));
 }

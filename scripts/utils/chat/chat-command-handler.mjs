@@ -331,16 +331,16 @@ export async function cmdAdvance(args) {
   if (!baseUnit) return { content: _loc('CALENDARIA.ChatCommand.InvalidTimeFormat'), error: true };
   const cinematicOverride = match[3] ? match[3].toLowerCase() === 'true' : null;
   const dt = getCurrentDateTime();
-  const daysPerWeek = calendar.weeks?.values?.length ?? 7;
   const secondsPerRound = calendar.secondsPerRound ?? 6;
   const yearZero = calendar.years?.yearZero ?? 0;
+  const weekDelta = calendar.weekStepDays({ year: dt.year - yearZero, month: dt.month, dayOfMonth: dt.dayOfMonth }, value);
   const updates = {
     second: { second: (dt.second ?? 0) + value },
     round: { second: (dt.second ?? 0) + value * secondsPerRound },
     minute: { minute: dt.minute + value },
     hour: { hour: dt.hour + value },
     day: { dayOfMonth: dt.dayOfMonth + value },
-    week: { dayOfMonth: dt.dayOfMonth + value * daysPerWeek },
+    week: { dayOfMonth: dt.dayOfMonth + weekDelta },
     month: { month: dt.month + value },
     year: { year: dt.year + value }
   };

@@ -26,6 +26,29 @@ import { WeatherManager } from '../weather/_module.mjs';
 import { dayOfWeek } from './_module.mjs';
 
 /**
+ * Convert a display-year condition date to internal-year components.
+ * @param {object} calendar - Active calendar
+ * @param {object} date - Date with display year, month, dayOfMonth
+ * @returns {object} Internal-year components
+ */
+function toInternal(calendar, date) {
+  const yearZero = calendar?.years?.yearZero ?? 0;
+  return { year: date.year - yearZero, month: date.month, dayOfMonth: date.dayOfMonth ?? 0 };
+}
+
+/**
+ * Resolve a cycle-based week number via the named calendar method, or null when no cycle is active.
+ * @param {object} calendar - Active calendar
+ * @param {object} date - Date with display year, month, dayOfMonth
+ * @param {string} method - Calendar method name to invoke
+ * @returns {number|null} Week number, or null when no cycle is active
+ */
+function cycleWeekNumber(calendar, date, method) {
+  if (!calendar?.weekCycle) return null;
+  return calendar[method](toInternal(calendar, date));
+}
+
+/**
  * Registry for custom field handlers that bypass the standard getFieldValue path.
  * @type {Map<string, Function>}
  */
@@ -139,35 +162,49 @@ export function getFieldValue(field, date, value2 = null, epochCtx = null) {
     }
     case CONDITION_FIELDS.WEEKDAY:
       return cache('weekday', () => dayOfWeek(date) + 1);
-    case CONDITION_FIELDS.WEEK_NUMBER_IN_MONTH: {
+    case CONDITION_FIELDS.WEEK_NUMBER_IN_MONTH:
+    case CONDITION_FIELDS.WEEK_IN_MONTH: {
+      const cycled = cycleWeekNumber(calendar, date, 'weekNumberInMonth');
+      if (cycled != null) return cycled;
       const diw = calendar?.daysInWeek ?? 7;
       return Math.ceil((date.dayOfMonth + 1) / diw);
     }
     case CONDITION_FIELDS.INVERSE_WEEK_NUMBER: {
+      const cycled = cycleWeekNumber(calendar, date, 'inverseWeekNumberInMonth');
+      if (cycled != null) return cycled;
       const diw = calendar?.daysInWeek ?? 7;
       const lastDay = cache('lastDayOfMonth', () => getLastDayOfMonth(date));
       return Math.floor((lastDay - (date.dayOfMonth + 1)) / diw) + 1;
     }
-    case CONDITION_FIELDS.WEEK_IN_MONTH: {
-      const diw = calendar?.daysInWeek ?? 7;
-      return Math.ceil((date.dayOfMonth + 1) / diw);
-    }
     case CONDITION_FIELDS.WEEK_IN_YEAR: {
+      const cycled = cycleWeekNumber(calendar, date, 'weekNumberInYear');
+      if (cycled != null) return cycled;
       const diw = calendar?.daysInWeek ?? 7;
       const doy = cache('dayOfYear', () => getDayOfYear(date));
       return Math.ceil((doy + 1) / diw);
     }
     case CONDITION_FIELDS.TOTAL_WEEK: {
+      const cycled = cycleWeekNumber(calendar, date, 'weekIndexSinceEpoch');
+      if (cycled != null) return cycled;
       const diw = calendar?.daysInWeek ?? 7;
       const totalDays = cache('totalDays', () => getTotalDaysSinceEpoch(date));
       return Math.floor(totalDays / diw);
     }
     case CONDITION_FIELDS.WEEKS_BEFORE_MONTH_END: {
+      const cycled = cycleWeekNumber(calendar, date, 'inverseWeekNumberInMonth');
+      if (cycled != null) return cycled - 1;
       const diw = calendar?.daysInWeek ?? 7;
       const lastDay = cache('lastDayOfMonth', () => getLastDayOfMonth(date));
       return Math.floor((lastDay - (date.dayOfMonth + 1)) / diw);
     }
     case CONDITION_FIELDS.WEEKS_BEFORE_YEAR_END: {
+      if (calendar?.weekCycle) {
+        const c = toInternal(calendar, date);
+        const w = calendar.weekIndexSinceEpoch(c);
+        const lastMonth = calendar.monthsArray.length - 1;
+        const lastDom = calendar.getDaysInMonth(lastMonth, c.year) - 1;
+        return calendar.weekIndexSinceEpoch({ year: c.year, month: lastMonth, dayOfMonth: lastDom }) - w;
+      }
       const diw = calendar?.daysInWeek ?? 7;
       const totalDaysInYear = cache('totalDaysInYear', () => getTotalDaysInYear(date.year));
       const doy = cache('dayOfYear', () => getDayOfYear(date));

@@ -163,6 +163,17 @@
       --list-columns: 2fr 1fr 5rem auto;
     }
 
+    .week-cycle-list {
+      --list-columns: 8rem repeat(var(--cycle-days, 7), minmax(1.75rem, 1fr)) auto;
+
+      .col-cycle-day {
+        text-align: center;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+
     .named-weeks-list.no-week-number {
       --list-columns: 2fr 1fr auto;
     }

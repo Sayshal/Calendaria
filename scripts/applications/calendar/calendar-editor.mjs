@@ -60,6 +60,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       removeCanonicalHour: CalendarEditor.#onRemoveCanonicalHour,
       addNamedWeek: CalendarEditor.#onAddNamedWeek,
       removeNamedWeek: CalendarEditor.#onRemoveNamedWeek,
+      addCycleRow: CalendarEditor.#onAddCycleRow,
+      removeCycleRow: CalendarEditor.#onRemoveCycleRow,
       addNamedYear: CalendarEditor.#onAddNamedYear,
       removeNamedYear: CalendarEditor.#onRemoveNamedYear,
       duplicateCalendar: CalendarEditor.#onDuplicateCalendar,
@@ -586,6 +588,14 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       return acc;
     }, {});
     context.namedWeeksWithNav = weekNamesArr.map(([key, week]) => ({ ...week, key, duplicateWeekNumber: weekNumberCounts[week.weekNumber] > 1 }));
+    const cycleRowsArr = Object.entries(this.#calendarData.weeks?.cycle || {});
+    context.weekCycleWeekdays = daysArr.map(([, wd]) => wd.abbreviation || wd.name);
+    context.weekCycleRows = cycleRowsArr.map(([key, row], idx) => ({
+      key,
+      displayNum: idx + 1,
+      name: row.name || '',
+      cells: daysArr.map(([wdKey]) => ({ wdKey, checked: row.days?.[wdKey] !== false }))
+    }));
     const daylight = this.#calendarData.daylight || {};
     const winterSolstice = this.#dayOfYearToMonthDay(daylight.winterSolstice ?? 0);
     const summerSolstice = this.#dayOfYearToMonthDay(daylight.summerSolstice ?? Math.floor(context.calculatedDaysPerYear / 2));
@@ -1380,6 +1390,19 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       newNames[wKey] = { name: data[`weeks.names.${wKey}.name`] || '', abbreviation: data[`weeks.names.${wKey}.abbreviation`] || '', weekNumber };
     }
     this.#calendarData.weeks.names = newNames;
+    const cycleKeys = [];
+    for (const key of Object.keys(data)) {
+      const match = key.match(/^weeks\.cycle\.([^.]+)\.name$/);
+      if (match) cycleKeys.push(match[1]);
+    }
+    const weekdayKeys = Object.keys(this.#calendarData.days?.values ?? {});
+    const newCycle = {};
+    for (const cKey of cycleKeys) {
+      const days = {};
+      for (const wdKey of weekdayKeys) days[wdKey] = !!data[`weeks.cycle.${cKey}.days.${wdKey}`];
+      newCycle[cKey] = { name: data[`weeks.cycle.${cKey}.name`] || '', days };
+    }
+    this.#calendarData.weeks.cycle = newCycle;
   }
 
   /**
@@ -2164,6 +2187,34 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   static async #onRemoveNamedWeek(_event, target) {
     const key = target.dataset.key;
     delete this.#calendarData.weeks.names[key];
+    this.#isDirty = true;
+    this.render();
+  }
+
+  /**
+   * Add a week-cycle row.
+   * @param {Event} _event - Click event
+   * @param {HTMLElement} target - Target element
+   */
+  static async #onAddCycleRow(_event, target) {
+    if (!this.#calendarData.weeks) this.#calendarData.weeks = { type: 'year-based', repeat: false, names: {} };
+    if (!this.#calendarData.weeks.cycle) this.#calendarData.weeks.cycle = {};
+    const afterKey = target.dataset.key;
+    const newKey = foundry.utils.randomID();
+    const newRow = { name: '', days: {} };
+    if (afterKey && afterKey !== 'null') this.#calendarData.weeks.cycle = this.#insertAfterKey(this.#calendarData.weeks.cycle, afterKey, newKey, newRow);
+    else this.#calendarData.weeks.cycle[newKey] = newRow;
+    this.#isDirty = true;
+    this.render();
+  }
+
+  /**
+   * Remove a week-cycle row.
+   * @param {Event} _event - Click event
+   * @param {HTMLElement} target - Target element
+   */
+  static async #onRemoveCycleRow(_event, target) {
+    delete this.#calendarData.weeks.cycle[target.dataset.key];
     this.#isDirty = true;
     this.render();
   }

@@ -87,7 +87,8 @@ export function dateFormattingParts(calendar, components) {
   const intercalaryFromPriorYears = calendar?.countIntercalaryDaysBeforeYear?.(internalYear) ?? 0;
   const nonCountingTotal = nonCountingFestivalsFromPriorYears + nonCountingFestivalsInYear + intercalaryFromPriorYears + intercalaryInYear;
   const countingDays = totalDays - nonCountingTotal;
-  const weekday = weekdays.length > 0 ? (((countingDays + firstWeekday) % weekdays.length) + weekdays.length) % weekdays.length : 0;
+  const cyclePos = calendar?.resolveCyclePosition?.(countingDays);
+  const weekday = cyclePos ? cyclePos.weekdayIndex : weekdays.length > 0 ? (((countingDays + firstWeekday) % weekdays.length) + weekdays.length) % weekdays.length : 0;
   const weekdayData = weekdays[weekday];
   const weekdayName = weekdayData?.name ? _loc(weekdayData.name) : '';
   const weekdayAbbr = weekdayData?.abbreviation ? _loc(weekdayData.abbreviation) : weekdayName.slice(0, 3);
@@ -129,8 +130,9 @@ export function dateFormattingParts(calendar, components) {
     seasonIndex = allSeasons.indexOf(rawSeason);
   }
   const daysPerWeek = weekdays.length || 7;
-  const weekOfYear = Math.ceil((dayOfYear + 1) / daysPerWeek);
-  const weekOfMonth = Math.ceil((dayOfMonth + 1) / daysPerWeek);
+  const cycleComponents = { year: internalYear, month, dayOfMonth };
+  const weekOfYear = calendar?.weekNumberInYear?.(cycleComponents) ?? Math.ceil((dayOfYear + 1) / daysPerWeek);
+  const weekOfMonth = calendar?.weekNumberInMonth?.(cycleComponents) ?? Math.ceil((dayOfMonth + 1) / daysPerWeek);
   let namedWeek = '';
   let namedWeekAbbr = '';
   let currentWeek = null;

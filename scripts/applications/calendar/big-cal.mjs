@@ -18,6 +18,7 @@ import { TimeClock } from '../../time/_module.mjs';
 import {
   CalendariaSocket,
   attachWidgetListeners,
+  buildCycleMonthPlan,
   buildOpenAppsMenuItem,
   buildWeatherLookup,
   buildWeatherPillData,
@@ -375,14 +376,16 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const internalYear = year - yearZero;
     const daysInMonth = calendar.getDaysInMonth(month, internalYear);
     const daysInWeek = calendar.daysInWeek;
+    const cyclePlan = buildCycleMonthPlan(calendar, year, month);
+    const cycleCells = cyclePlan ? new Map() : null;
     const weeks = [];
     let currentWeek = [];
     const showMoons = canViewMoons() && calendar.moonsArray.length;
     const hasFixedStart = monthData?.startingWeekday != null;
     const rawStartDayOfWeek = hasFixedStart ? monthData.startingWeekday : dayOfWeek({ year, month, dayOfMonth: 0 });
-    const weekStartIdx = getWeekStartIndex(calendar);
+    const weekStartIdx = cyclePlan ? 0 : getWeekStartIndex(calendar);
     const startDayOfWeek = (((rawStartDayOfWeek - weekStartIdx) % daysInWeek) + daysInWeek) % daysInWeek;
-    if (startDayOfWeek > 0) {
+    if (!cyclePlan && startDayOfWeek > 0) {
       const prevDays = getLeadingDays(calendar, year, month, startDayOfWeek);
       for (const pd of prevDays) currentWeek.push({ ...pd, isToday: this._isToday(pd.year, pd.month, pd.dayOfMonth) });
     }
@@ -438,9 +441,10 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
           ...buildWeatherPillData(isFogged ? null : wd)
         });
       } else {
-        const weekdayData = calendar.weekdaysArray[(currentWeek.length + weekStartIdx) % calendar.weekdaysArray.length];
+        const cycleCol = cyclePlan ? cyclePlan.colByDay.get(dayOfMonth) : undefined;
+        const weekdayData = calendar.weekdaysArray[cycleCol ?? (currentWeek.length + weekStartIdx) % calendar.weekdaysArray.length];
         const wd = !isFogged && weatherLookup ? getDayWeather(year, month, dayOfMonth, weatherLookup, weatherLookup.lookup) : null;
-        currentWeek.push({
+        const cell = {
           day: displayDay,
           dayOfMonth,
           year,
@@ -461,14 +465,19 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
           isRestDay: weekdayData?.isRestDay || false,
           moonPhases,
           ...buildWeatherPillData(isFogged ? null : wd)
-        });
-        dayIndex++;
-        if (currentWeek.length === daysInWeek) {
-          weeks.push(currentWeek);
-          currentWeek = [];
+        };
+        if (cycleCells) cycleCells.set(dayOfMonth, cell);
+        else {
+          currentWeek.push(cell);
+          if (currentWeek.length === daysInWeek) {
+            weeks.push(currentWeek);
+            currentWeek = [];
+          }
         }
+        dayIndex++;
       }
     }
+    if (cyclePlan) for (const row of cyclePlan.rows) weeks.push(row.map((d) => (d == null ? { empty: true } : (cycleCells.get(d) ?? { empty: true }))));
     const lastRegularWeekLength = currentWeek.length;
     if (currentWeek.length > 0) {
       weeks.push(currentWeek);
@@ -479,7 +488,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       currentWeek = [];
     }
     const lastRegularWeek = weeks.filter((w) => !w.isIntercalaryRow).pop();
-    const needsNextMonth = intercalaryDays.length > 0 || (lastRegularWeek && lastRegularWeek.length < daysInWeek);
+    const needsNextMonth = !cyclePlan && (intercalaryDays.length > 0 || (lastRegularWeek && lastRegularWeek.length < daysInWeek));
     if (needsNextMonth) {
       const totalMonths = calendar.monthsArray.length ?? 12;
       const startPosition = intercalaryDays.length > 0 ? lastRegularWeekLength : lastRegularWeek?.length || 0;
@@ -521,7 +530,9 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       if (intercalaryDays.length > 0) weeks.push(currentWeek);
       else if (lastRegularWeek) lastRegularWeek.push(...currentWeek);
     }
-    const allMultiDayEvents = this._findMultiDayEvents(notes, year, month, startDayOfWeek, daysInWeek, daysInMonth);
+    const allMultiDayEvents = cyclePlan
+      ? this._findCycleMultiDayEvents(notes, year, month, daysInMonth, cyclePlan)
+      : this._findMultiDayEvents(notes, year, month, startDayOfWeek, daysInWeek, daysInMonth);
     weeks.forEach((week, weekIndex) => {
       week.multiDayEvents = allMultiDayEvents.filter((e) => e.weekIndex === weekIndex);
     });
@@ -954,19 +965,15 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Find multi-day events and calculate their visual representation
+   * Collect multi-day events for a month, independent of grid layout.
    * @param {Array} notes - All note pages
    * @param {number} year - Current year
    * @param {number} month - Current month
-   * @param {number} startDayOfWeek - Offset for first day of month
-   * @param {number} daysInWeek - Number of days in a week
    * @param {number} daysInMonth - Number of days in this month
-   * @returns {Array} Array of event bar data
+   * @returns {Array} Sorted multi-day event descriptors
    * @private
    */
-  _findMultiDayEvents(notes, year, month, startDayOfWeek, daysInWeek, daysInMonth) {
-    const events = [];
-    const rows = [];
+  _collectMultiDayEvents(notes, year, month, daysInMonth) {
     const multiDayEvents = [];
     for (const note of notes) {
       const start = note.system.startDate;
@@ -1024,6 +1031,24 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       }
     }
     multiDayEvents.sort((a, b) => a.startDayOfMonth - b.startDayOfMonth || a.priority - b.priority);
+    return multiDayEvents;
+  }
+
+  /**
+   * Find multi-day events and calculate their visual representation on a uniform grid.
+   * @param {Array} notes - All note pages
+   * @param {number} year - Current year
+   * @param {number} month - Current month
+   * @param {number} startDayOfWeek - Offset for first day of month
+   * @param {number} daysInWeek - Number of days in a week
+   * @param {number} daysInMonth - Number of days in this month
+   * @returns {Array} Array of event bar data
+   * @private
+   */
+  _findMultiDayEvents(notes, year, month, startDayOfWeek, daysInWeek, daysInMonth) {
+    const events = [];
+    const rows = [];
+    const multiDayEvents = this._collectMultiDayEvents(notes, year, month, daysInMonth);
     const singleDayWidth = (1 / daysInWeek) * 100;
     const BAR_HEIGHT = 1;
     const CONDENSED_HEIGHT = 0.375;
@@ -1176,6 +1201,159 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
             isSecret
           });
         }
+      }
+    });
+    const hasOverlaps = rows.length > 1;
+    for (const event of events) {
+      if (hasOverlaps) {
+        event.isCondensed = true;
+        event.top = BAR_OFFSET + event.row * (CONDENSED_HEIGHT + CONDENSED_GAP);
+      } else {
+        event.top = BAR_OFFSET + event.row * BAR_HEIGHT;
+      }
+    }
+    return events;
+  }
+
+  /**
+   * Find multi-day events and lay them out on a week-cycle grid with void cells.
+   * Days map to (weekIndex, col) through the cycle plan; bars segment per grid row.
+   * @param {Array} notes - All note pages
+   * @param {number} year - Current year
+   * @param {number} month - Current month
+   * @param {number} daysInMonth - Number of days in this month
+   * @param {object} cyclePlan - Grid plan from buildCycleMonthPlan
+   * @returns {Array} Array of event bar data
+   * @private
+   */
+  _findCycleMultiDayEvents(notes, year, month, daysInMonth, cyclePlan) {
+    const events = [];
+    const rows = [];
+    const multiDayEvents = this._collectMultiDayEvents(notes, year, month, daysInMonth);
+    const daysInWeek = cyclePlan.rows[0]?.length ?? this.calendar.daysInWeek;
+    const singleDayWidth = (1 / daysInWeek) * 100;
+    const BAR_HEIGHT = 1;
+    const CONDENSED_HEIGHT = 0.375;
+    const CONDENSED_GAP = 0.125;
+    const BAR_OFFSET = 1.625;
+    const dayToCell = new Map();
+    cyclePlan.rows.forEach((row, weekIndex) => row.forEach((d, col) => d != null && dayToCell.set(d, { weekIndex, col })));
+    const cal = CalendarManager.getActiveCalendar();
+    const hoursPerDay = cal?.days?.hoursPerDay ?? 24;
+    const minutesPerHour = cal?.days?.minutesPerHour ?? 60;
+    const dayFraction = (hour, minute) => Math.max(0, Math.min(1, (hour * minutesPerHour + (minute ?? 0)) / (hoursPerDay * minutesPerHour)));
+    const nearestDay = (d, dir) => {
+      let x = d;
+      while (x >= 0 && x < daysInMonth && !dayToCell.has(x)) x += dir;
+      return dayToCell.has(x) ? x : null;
+    };
+    multiDayEvents.forEach(({ note, start, end, startDayOfMonth, endDayOfMonth, isContinuation }) => {
+      const endsInMonth = end.month === month && end.year === year;
+      const isAllDay = start.hour == null || note.system.allDay;
+      const rawEnd = note.system.endDate;
+      const endHour = rawEnd?.hour ?? end.hour;
+      const endMinute = rawEnd?.minute ?? end.minute;
+      const startFrac = !isAllDay && !isContinuation && start.hour != null ? dayFraction(start.hour, start.minute) : 0;
+      const endFrac = !isAllDay && endsInMonth && endHour != null ? dayFraction(endHour, endMinute) : 1;
+      const resolved = resolveNoteDisplayProps(note);
+      const isHidden = resolved.visibility === 'hidden';
+      const isSecret = resolved.visibility === 'secret';
+      const showBookends = note.system.showBookends || false;
+      const sDay = nearestDay(startDayOfMonth, 1);
+      const eDay = nearestDay(endDayOfMonth, -1);
+      if (sDay == null || eDay == null || eDay < sDay) return;
+      let eventRow = rows.length;
+      for (let r = 0; r < rows.length; r++)
+        if (!rows[r].some((ex) => !(eDay < ex.start || sDay > ex.end))) {
+          eventRow = r;
+          break;
+        }
+      if (eventRow >= rows.length) rows.push([]);
+      rows[eventRow].push({ start: sDay, end: eDay });
+      const baseProps = {
+        name: note.name,
+        color: resolved.color,
+        icon: resolved.icon,
+        iconType: resolved.iconType,
+        iconIsImage: resolved.iconIsImage,
+        iconIsSvg: resolved.iconIsSvg,
+        displayStyle: resolved.displayStyle,
+        isHidden,
+        isSecret
+      };
+      if (showBookends) {
+        if (!isContinuation) {
+          const c = dayToCell.get(sDay);
+          events.push({
+            ...baseProps,
+            id: `${note.id}-bk-start`,
+            showBookends,
+            weekIndex: c.weekIndex,
+            left: (c.col / daysInWeek) * 100,
+            width: singleDayWidth,
+            row: 0,
+            top: BAR_OFFSET,
+            isCondensed: false,
+            isContinuation: false,
+            isStart: true,
+            isEnd: false
+          });
+        }
+        if (endsInMonth) {
+          const c = dayToCell.get(eDay);
+          events.push({
+            ...baseProps,
+            id: `${note.id}-bk-end`,
+            showBookends,
+            weekIndex: c.weekIndex,
+            left: (c.col / daysInWeek) * 100,
+            width: singleDayWidth,
+            row: 0,
+            top: BAR_OFFSET,
+            isCondensed: false,
+            isContinuation: false,
+            isStart: false,
+            isEnd: true
+          });
+        }
+        return;
+      }
+      const rowsCovered = new Map();
+      for (let d = sDay; d <= eDay; d++) {
+        const c = dayToCell.get(d);
+        if (!c) continue;
+        const cur = rowsCovered.get(c.weekIndex);
+        if (!cur) rowsCovered.set(c.weekIndex, { min: c.col, max: c.col });
+        else {
+          cur.min = Math.min(cur.min, c.col);
+          cur.max = Math.max(cur.max, c.col);
+        }
+      }
+      const startCell = dayToCell.get(sDay);
+      const endCell = dayToCell.get(eDay);
+      const weekIndices = [...rowsCovered.keys()].sort((a, b) => a - b);
+      const multi = weekIndices.length > 1;
+      for (const weekIndex of weekIndices) {
+        const { min, max } = rowsCovered.get(weekIndex);
+        const isFirst = weekIndex === startCell.weekIndex;
+        const isLast = weekIndex === endCell.weekIndex;
+        const leftTrim = isFirst ? startFrac * singleDayWidth : 0;
+        const rightTrim = isLast ? (1 - endFrac) * singleDayWidth : 0;
+        events.push({
+          ...baseProps,
+          id: multi ? `${note.id}-week-${weekIndex}` : note.id,
+          weekIndex,
+          left: (min / daysInWeek) * 100 + leftTrim,
+          width: ((max - min + 1) / daysInWeek) * 100 - leftTrim - rightTrim,
+          row: eventRow,
+          top: 0,
+          isCondensed: false,
+          isSegment: multi,
+          isContinuation: isContinuation && isFirst,
+          isStart: isFirst && !isContinuation,
+          isEnd: isLast && endsInMonth,
+          showBookends: false
+        });
       }
     });
     const hasOverlaps = rows.length > 1;

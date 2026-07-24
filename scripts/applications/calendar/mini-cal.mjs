@@ -41,6 +41,7 @@ import {
   getEquivalentDateTooltip,
   getFestivalNoteForDay,
   getFirstMoonPhase,
+  buildCycleMonthPlan,
   getLeadingDays,
   getRestorePosition,
   getSelectedMoon,
@@ -453,14 +454,16 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const internalYear = year - yearZero;
     const daysInMonth = calendar.getDaysInMonth(month, internalYear);
     const daysInWeek = calendar.daysInWeek;
+    const cyclePlan = buildCycleMonthPlan(calendar, year, month);
+    const cycleCells = cyclePlan ? new Map() : null;
     const weeks = [];
     let currentWeek = [];
     const showMoons = canViewMoons() && calendar.moonsArray.length;
     const hasFixedStart = monthData?.startingWeekday != null;
     const rawStartDayOfWeek = hasFixedStart ? monthData.startingWeekday : dayOfWeek({ year, month, dayOfMonth: 0 });
-    const weekStartIdx = getWeekStartIndex(calendar);
+    const weekStartIdx = cyclePlan ? 0 : getWeekStartIndex(calendar);
     const startDayOfWeek = (((rawStartDayOfWeek - weekStartIdx) % daysInWeek) + daysInWeek) % daysInWeek;
-    if (startDayOfWeek > 0) {
+    if (!cyclePlan && startDayOfWeek > 0) {
       const prevDays = getLeadingDays(calendar, year, month, startDayOfWeek);
       for (const pd of prevDays) currentWeek.push({ ...pd, isToday: isToday(pd.year, pd.month, pd.dayOfMonth, calendar) });
     }
@@ -513,7 +516,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
           isForecast: wd?.isForecast ?? false
         });
       } else {
-        currentWeek.push({
+        const cell = {
           day: displayDay,
           dayOfMonth,
           year,
@@ -539,13 +542,18 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
           weatherColor: wd?.color ?? null,
           weatherTooltipHtml: buildWeatherPillData(wd).weatherTooltipHtml,
           isForecast: wd?.isForecast ?? false
-        });
-        if (currentWeek.length === daysInWeek) {
-          weeks.push(currentWeek);
-          currentWeek = [];
+        };
+        if (cycleCells) cycleCells.set(dayOfMonth, cell);
+        else {
+          currentWeek.push(cell);
+          if (currentWeek.length === daysInWeek) {
+            weeks.push(currentWeek);
+            currentWeek = [];
+          }
         }
       }
     }
+    if (cyclePlan) for (const row of cyclePlan.rows) weeks.push(row.map((d) => (d == null ? { empty: true } : (cycleCells.get(d) ?? { empty: true }))));
     const lastRegularWeekLength = currentWeek.length;
     if (currentWeek.length > 0) {
       weeks.push(currentWeek);
@@ -556,7 +564,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       currentWeek = [];
     }
     const lastRegularWeek = weeks.filter((w) => !w.isIntercalaryRow).pop();
-    const needsNextMonth = intercalaryDays.length > 0 || (lastRegularWeek && lastRegularWeek.length < daysInWeek);
+    const needsNextMonth = !cyclePlan && (intercalaryDays.length > 0 || (lastRegularWeek && lastRegularWeek.length < daysInWeek));
     if (needsNextMonth) {
       const totalMonths = calendar.monthsArray.length ?? 12;
       const startPosition = intercalaryDays.length > 0 ? lastRegularWeekLength : lastRegularWeek?.length || 0;
