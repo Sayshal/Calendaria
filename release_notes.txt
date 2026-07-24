@@ -2,7 +2,7 @@
 
 - getAllMoonPhases now returns one entry per moon slot with moonIndex and moonName, with hidden moons returned as null for players
 - Legacy note repeat modes (daily, weekly, monthly, yearly, moon, seasonal, and the rest) are retired; notes still storing one load as non-repeating, with condition trees and computed events as the only repeat systems
-- One-time data migrations from pre-1.2.0 versions are removed; worlds on very old versions should update through 1.2.x before 1.3.0
+- One-time data migrations from pre-1.0.x versions are removed; worlds on very old versions should update through 1.0.x before 1.3.x
 - The per-user moon phase toggles for the mini calendar, big calendar, and chronicle were removed in favor of the world-scoped setting
 
 ## New Features
