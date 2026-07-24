@@ -1,4 +1,5 @@
 import { BigCal, CalendarEditor, Chronicle, HUD, ImporterApp, MiniCal, SettingsPanel, Stopwatch, SunDial, TimeKeeper } from './applications/_module.mjs';
+import { CalendarManager } from './calendar/_module.mjs';
 import { MODULE, SETTINGS } from './constants.mjs';
 import { syncWeatherToScene } from './integrations/fxmaster.mjs';
 import { invalidatePresetCache } from './notes/_module.mjs';
