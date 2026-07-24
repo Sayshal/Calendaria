@@ -7,76 +7,12 @@
 
 ## New Features
 
-- A new world setting on the permissions tab lets the GM hide moons from players across the mini calendar, big calendar, chronicle, HUD, sun dial, and formatted dates
-- Computed date chains gain an on-or-after toggle for first-after steps, a fixed-date anchor, anchors on other notes' occurrences, and negative day offsets that count backward
-- Hidden moons keep working: conditions, recurrence, eclipses, and darkness contributions still fire, and moon indices never shift
-- Moons have a new Hide from Players checkbox in the calendar editor; hidden moons disappear from player-facing calendars, HUD, sun dial, chronicle, print, chat commands, cinematics, enrichers, and format tokens while staying visible to the GM
-- New bundled Islamic (Hijri) calendar: twelve alternating 30/29-day months, a 30-year tabular leap cycle, and First of Ramadan, Eid al-Fitr, and Eid al-Adha festivals; its name, description, and era labels are translatable like the other bundled calendars
-- New Epoch Day Offset field on the editor's Years tab shifts a calendar along the shared world timeline to align a secondary calendar with a real date
-- New Fixed Cycle leap year rule marks leap years at fixed offsets within a repeating period, such as the Islamic 30-year cycle
-- New Force HUD Dock For Players world setting docks every player's HUD into a fixed zone: top center, above the hotbar, or below the scene controls
-- New Lock HUD Position For Players world setting pins every player's HUD in place and removes their move, lock, and reset position controls
-- New Month in Another Calendar and Day in Another Calendar note conditions test what the current date converts to in another registered calendar; both pick the target calendar from a dropdown of other registered calendars and only appear when more than one calendar exists
-- The computed event builder previews the next three resolved occurrences live and shows when a chain does not resolve
-- The condition builder now offers a Computed Date field with a button that opens the computed event builder
-- The GM's own HUD position and controls are unaffected by the forced lock and dock settings
-- The Gregorian calendar now includes Easter as a computed festival, resolved each year as the first Sunday after the first full moon following the spring equinox; dates match church computus exactly from 1990 through 2060, with year overrides covering the four years where the astronomical chain diverges
-- Year overrides can now target any year with an editable year per row, and override days no longer land one day late
+- Added variable-length weeks: a calendar can define a repeating cycle of weeks with differing weekday counts, set up in a new week cycle table on the editor's weekdays tab
+- Calendar grids (big, mini, secondary, and print) render cycle weeks with blank cells for absent weekdays, and multi-day event bars stay visible across skipped days
+- When a week cycle is active, the editor disables the per-month starting weekday and week-start selectors, since the cycle controls weekday flow
 
 ## Bug Fixes
 
-- A phase whose true day falls before the search start is skipped, since it belongs to the previous lunation
-- A scene climate zone override pointing at a zone the active calendar does not have is now ignored instead of silently switching weather to the calendar's first zone
-- addPreset now accepts playerUsable and sortOrder, matching updatePreset
-- Calling addCalendar with an already registered id now returns the existing calendar instead of showing an error notification
-- Changing clock speed or advance interval commits accumulated seconds instead of discarding them
-- Computed events stepping to the first moon phase after an anchor now resolve to the day nearest the true phase point instead of the first day of a multi-day phase band
-- Day and night progress return 0 instead of dividing by zero on days with no daylight or no night
-- Displayed time no longer dips while a time advance is being saved to the server
-- Every-N-days recurrences now count actual days instead of day of the month, so intervals no longer collapse onto the same date each month
-- Existing notes with a single every-N-days condition are migrated automatically; notes mixing it with other conditions are listed in a whisper for manual review
-- Fantasy Calendar imports with day-interval rules now produce correctly spaced recurrences
-- Festival year overrides saved with an older data format now display their day correctly in the computed event builder, and editing them no longer leaves stale data behind
-- Festivals marked leap-year-only now appear on leap years instead of never occurring
-- Fixed the HUD dome rendering transparent or invisible when the Dome Below Bar setting is enabled, including after window resizes
-- Imported calendars get correct season dates, imported seasonal repeats now produce conditions that actually fire, and computed dates with year overrides no longer return another event's cached result
-- Importing or saving a calendar whose ID matches an existing one now creates it with a numbered suffix instead of failing
-- Moon phase steps match by phase key as well as name, so calendars with renamed or translated phase names still resolve
-- navigateToNote no longer opens the big calendar when no calendar is open; it navigates within an already-open calendar, or just opens the note sheet, and the context option still force-opens a target
-- Night progress now tracks the actual night length on calendars where daylight is not half the day, so sunset-to-sunrise timing no longer runs fast or slow
-- Note owners can now switch their own notes between visible and hidden; the secret option stays GM-only
-- Notes referencing a deleted or missing preset now get a stub preset rebuilt automatically on world load, keeping their color and icon
-- Per-user reminder recipients are no longer dropped when a note is saved
-- Players can no longer set a note's visibility to secret; a warning is shown instead
-- Players can now see their own hidden notes on the calendar instead of only GMs seeing them
-- Players no longer see an empty Debugging section on the Module settings tab
-- Players without big calendar view permission can no longer open it through the mini calendar, date links, chat enrichers, the Open submenu, or the API
-- Preset default ownership no longer applies to hidden or secret notes, which could expose them to players
-- Preset syncs skip hidden and secret notes when retro-applying default ownership
-- Reminders for hidden or secret notes now reach the note's author in addition to GMs
-- Saving a calendar after reordering or deleting moons remaps moon references in note conditions, computed date chains, and moon phase macro triggers
-- Season boundaries corrected to canon on the Barovia, Drakkenheim, Harptos, and both Krynn calendars; Renescara's winter solstice fixed; earthlike calendars gain explicit equinox dates so equinox conditions fire on the real days
-- Seasons, solstices, and equinoxes stay on their authored dates in leap years instead of shifting after the leap day, and the displayed season now matches season conditions
-- Section reset buttons in the settings panel now reset only the settings the current user can write, so a player reset covers their own client settings instead of failing on the first world-scoped one
-- Stale or unknown zone ids warn once in the log instead of repeating every world tick
-- Stopping the clock no longer snaps the HUD, timekeeper, or mini calendar backward to the last committed time
-- The Base Environment and Darkness Environment section headings in the weather editor no longer show raw localization keys on Foundry v14
-- The calendar editor now shows an error when a calendar fails to create instead of failing silently
-- The confirmation dialog for a section reset lists only the settings that will actually be reset
-- The current season now resolves correctly in the API, almanac enricher, and season chat command instead of always reporting the first season
-- The editor no longer errors when opening a calendar that has no seasons defined
-- The mini calendar hides its expand button for players who lack big calendar permission
-- The Open context submenu now lists only the apps each user has permission to view
-- The Renescara calendar now selects its Valdris climate zone by default instead of leaving no active zone
-- The running clock no longer jumps backward or double-counts time at advance intervals above one second; committed batches land exactly once
-- The settings panel, calendar editor, and climate editor no longer force dark-theme text colors, so labels and hints stay readable under light UI themes; weather weight pills and hover highlights use translucent tints that blend with either theme
-- With Force Display on, players no longer see the Close option in the HUD context menu
-
-## Changes
-
-- Condition summaries now distinguish "every N days" from "every Nth day of the month"
-- Deleting a moon in the calendar editor now asks for confirmation and suggests hiding it instead
-- Importers now translate foreign recurrence rules straight into condition trees
-- Notes whose referenced moon was deleted are flagged with a warning listing them by name
-- Players can now change the enricher click target setting, which is stored per client
-- The Integration section reset button stays visible to players and now also resets the enricher click target setting
+- Announcement, reminder, release, and forecast chat cards no longer render unreadable text and links on light themes
+- Saving HUD settings no longer throws a ReferenceError
+- Season-change macro triggers now fire when the active season changes
