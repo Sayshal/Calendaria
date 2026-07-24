@@ -7,13 +7,13 @@
     <div class="form-group">
       <label for="editor-week-start">{{localize "CALENDARIA.Editor.Field.WeekStart"}}</label>
       <div class="form-fields">
-        <select id="editor-week-start" name="years.weekStartWeekdayId">
+        <select id="editor-week-start" name="years.weekStartWeekdayId" {{#if hasActiveCycle}}disabled{{/if}}>
           {{#each weekStartOptions}}
             <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{localize this.label}}</option>
           {{/each}}
         </select>
       </div>
-      <p class="hint">{{localize "CALENDARIA.Editor.Hint.WeekStart"}}</p>
+      <p class="hint">{{#if hasActiveCycle}}{{localize "CALENDARIA.Editor.Hint.WeekStartCycleDisabled"}}{{else}}{{localize "CALENDARIA.Editor.Hint.WeekStart"}}{{/if}}</p>
     </div>
 
     <div class="items-list weekdays-list">

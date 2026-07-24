@@ -596,6 +596,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       name: row.name || '',
       cells: daysArr.map(([wdKey]) => ({ wdKey, checked: row.days?.[wdKey] !== false }))
     }));
+    context.hasActiveCycle = context.weekCycleRows.length > 1 || (context.weekCycleRows.length === 1 && context.weekCycleRows[0].cells.some((c) => !c.checked));
     const daylight = this.#calendarData.daylight || {};
     const winterSolstice = this.#dayOfYearToMonthDay(daylight.winterSolstice ?? 0);
     const summerSolstice = this.#dayOfYearToMonthDay(daylight.summerSolstice ?? Math.floor(context.calculatedDaysPerYear / 2));

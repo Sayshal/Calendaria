@@ -59,7 +59,8 @@
             <input type="number" id="editor-month-{{this.index}}-leap" name="months.{{this.key}}.leapDays"
               value="{{this.leapDays}}" min="0" class="col-leap">
             <select id="editor-month-{{this.index}}-weekday" name="months.{{this.key}}.startingWeekday"
-              class="col-start-weekday">
+              class="col-start-weekday" {{#if @root.hasActiveCycle}}disabled data-tooltip
+              aria-label="{{localize 'CALENDARIA.Editor.Tooltip.StartingWeekdayCycleDisabled'}}"{{/if}}>
               <option value="" {{#unless this.hasStartingWeekday}}selected{{/unless}}>
                 {{localize "CALENDARIA.Editor.StartingWeekday.Auto"}}
               </option>
