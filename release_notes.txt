@@ -1,18 +1,17 @@
-## Breaking Changes
-
-- getAllMoonPhases now returns one entry per moon slot with moonIndex and moonName, with hidden moons returned as null for players
-- Legacy note repeat modes (daily, weekly, monthly, yearly, moon, seasonal, and the rest) are retired; notes still storing one load as non-repeating, with condition trees and computed events as the only repeat systems
-- One-time data migrations from pre-1.0.x versions are removed; worlds on very old versions should update through 1.0.x before 1.3.x
-- The per-user moon phase toggles for the mini calendar, big calendar, and chronicle were removed in favor of the world-scoped setting
-
-## New Features
-
-- Added variable-length weeks: a calendar can define a repeating cycle of weeks with differing weekday counts, set up in a new week cycle table on the editor's weekdays tab
-- Calendar grids (big, mini, secondary, and print) render cycle weeks with blank cells for absent weekdays, and multi-day event bars stay visible across skipped days
-- When a week cycle is active, the editor disables the per-month starting weekday and week-start selectors, since the cycle controls weekday flow
-
 ## Bug Fixes
 
-- Announcement, reminder, release, and forecast chat cards no longer render unreadable text and links on light themes
-- Saving HUD settings no longer throws a ReferenceError
-- Season-change macro triggers now fire when the active season changes
+- Calendar exports store the current year relative to year zero, so re-importing no longer shifts the date by year zero twice
+- Edits to preset calendars now persist across reloads; deletions of preset entries (eras, months, moons, festivals) were previously dropped when the saved override was cleaned on save
+- Exports of monthless calendars can now be imported; the format check and NoMonths validation accept calendars that define days per year without months
+- Macro dropdowns in the note sheet, weather picker, weather editor, and preset manager now list only macros the user can see; a stored selection stays listed even if hidden
+- One-time caveat: preset overrides saved before this fix already lost their deletion markers, so entries deleted from a preset calendar may reappear once and must be deleted again
+- Saving a preset calendar override now shows an error notification when it fails instead of failing silently
+- The import preview shows a day-year date for monthless calendars and counts days from days per year
+- The note sheet hides its macro field entirely when no macros are selectable
+
+## Changes
+
+- Note macros now check the author's execute permission at run time; a macro is skipped when its non-GM author cannot execute it, unless it is a GM-configured preset default macro
+- The Preset Manager now opens only for GMs, and the Macros settings tab no longer loads macro data for non-GM users
+- The note sheet rejects macro assignments from non-GM users who lack permission to execute the chosen macro
+- Verified compatibility bumped to Foundry 14.365
