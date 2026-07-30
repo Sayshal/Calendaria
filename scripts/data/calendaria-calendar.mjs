@@ -506,6 +506,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
           description: new StringField({ required: false }),
           author: new StringField({ required: false }),
           system: new StringField({ required: false }),
+          hasOverride: new foundry.data.fields.BooleanField({ required: false, initial: false }),
+          isCustom: new foundry.data.fields.BooleanField({ required: false, initial: false }),
           luxonSync: new SchemaField(
             { theme: new StringField({ required: false, nullable: true, blank: false, choices: ['AR', 'IC', 'AG', 'AD', 'CE'], initial: null }) },
             { required: false, nullable: true, initial: null }

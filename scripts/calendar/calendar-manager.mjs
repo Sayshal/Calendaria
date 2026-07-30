@@ -227,7 +227,6 @@ export default class CalendarManager {
         const bundledData = this.#bundledData.get(id);
         if (data._isDelta && bundledData) {
           CalendarManager.#stripStaleDefaults(data, bundledData);
-          CalendarManager.#reconstructOperators(data);
           const calendarData = foundry.utils.mergeObject(foundry.utils.deepClone(bundledData), data, { applyOperators: true });
           delete calendarData._isDelta;
           const calendar = new CalendariaCalendar(calendarData);
@@ -235,7 +234,6 @@ export default class CalendarManager {
           ATLAS.log(3, `Applied delta override for bundled calendar: ${id}`);
         } else if (bundledData) {
           if (CalendarManager.#alignOverrideKeys(data, bundledData)) needsSave = true;
-          CalendarManager.#reconstructOperators(data);
           const merged = foundry.utils.mergeObject(foundry.utils.deepClone(bundledData), data, { applyOperators: true });
           const calendar = new CalendariaCalendar(merged);
           CalendarRegistry.register(id, calendar);
@@ -389,118 +387,14 @@ export default class CalendarManager {
 
   /**
    * Compute a delta between bundled and override calendar data.
+   * Bidirectional diffing emits ForcedDeletion operators for bundled entries absent from the override.
    * @param {object} bundledData - Pristine bundled calendar data
    * @param {object} overrideData - Current override calendar data
-   * @param {object|null} [previousDelta] - Previous delta to detect user-added entry deletions
    * @returns {object} Delta object with `_isDelta: true`
    * @private
    */
-  static #computeOverrideDelta(bundledData, overrideData, previousDelta = null) {
-    const delta = foundry.utils.diffObject(bundledData, overrideData);
-    for (const key of ['festivals', 'eras', 'moons', 'cycles', 'canonicalHours']) {
-      if (bundledData[key]) {
-        for (const entryKey of Object.keys(bundledData[key])) {
-          if (!overrideData[key]?.[entryKey]) {
-            if (!delta[key]) delta[key] = {};
-            delta[key][entryKey] = _del;
-          }
-        }
-      }
-      if (previousDelta?.[key]) {
-        for (const entryKey of Object.keys(previousDelta[key])) {
-          if (CalendarManager.#isDeletionMarker(entryKey, previousDelta[key][entryKey])) continue;
-          if (!overrideData[key]?.[entryKey]) {
-            if (!delta[key]) delta[key] = {};
-            delta[key][entryKey] = _del;
-          }
-        }
-      }
-    }
-    for (const [parent, child] of [
-      ['months', 'values'],
-      ['days', 'values'],
-      ['seasons', 'values'],
-      ['weather', 'zones'],
-      ['weeks', 'names']
-    ]) {
-      const bCol = bundledData[parent]?.[child];
-      const oCol = overrideData[parent]?.[child];
-      if (bCol && oCol) {
-        for (const entryKey of Object.keys(bCol)) {
-          if (!(entryKey in oCol)) {
-            if (!delta[parent]) delta[parent] = {};
-            if (!delta[parent][child]) delta[parent][child] = {};
-            delta[parent][child][entryKey] = _del;
-          }
-        }
-      }
-      const pCol = previousDelta?.[parent]?.[child];
-      if (pCol) {
-        for (const entryKey of Object.keys(pCol)) {
-          if (CalendarManager.#isDeletionMarker(entryKey, pCol[entryKey])) continue;
-          if (!overrideData[parent]?.[child]?.[entryKey]) {
-            if (!delta[parent]) delta[parent] = {};
-            if (!delta[parent][child]) delta[parent][child] = {};
-            delta[parent][child][entryKey] = _del;
-          }
-        }
-      }
-    }
-    const deepDeletionCheck = (bParent, oParent, deltaRef, childKey) => {
-      if (!bParent || !oParent) return;
-      for (const [pKey, pVal] of Object.entries(bParent)) {
-        if (!pVal?.[childKey] || !oParent[pKey]?.[childKey]) continue;
-        for (const cKey of Object.keys(pVal[childKey])) {
-          if (!(cKey in oParent[pKey][childKey])) {
-            if (!deltaRef[pKey]) deltaRef[pKey] = {};
-            if (!deltaRef[pKey][childKey]) deltaRef[pKey][childKey] = {};
-            deltaRef[pKey][childKey][cKey] = _del;
-          }
-        }
-      }
-    };
-    if (bundledData.moons && overrideData.moons) {
-      if (!delta.moons) delta.moons = {};
-      deepDeletionCheck(bundledData.moons, overrideData.moons, delta.moons, 'phases');
-    }
-    if (previousDelta?.moons) {
-      if (!delta.moons) delta.moons = {};
-      deepDeletionCheck(previousDelta.moons, overrideData.moons ?? {}, delta.moons, 'phases');
-    }
-    if (delta.moons && !Object.keys(delta.moons).length) delete delta.moons;
-    if (bundledData.cycles && overrideData.cycles) {
-      if (!delta.cycles) delta.cycles = {};
-      deepDeletionCheck(bundledData.cycles, overrideData.cycles, delta.cycles, 'stages');
-    }
-    if (previousDelta?.cycles) {
-      if (!delta.cycles) delta.cycles = {};
-      deepDeletionCheck(previousDelta.cycles, overrideData.cycles ?? {}, delta.cycles, 'stages');
-    }
-    if (delta.cycles && !Object.keys(delta.cycles).length) delete delta.cycles;
-    if (bundledData.weather?.zones && overrideData.weather?.zones) {
-      if (!delta.weather) delta.weather = {};
-      if (!delta.weather.zones) delta.weather.zones = {};
-      deepDeletionCheck(bundledData.weather.zones, overrideData.weather.zones, delta.weather.zones, 'presets');
-    }
-    if (previousDelta?.weather?.zones) {
-      if (!delta.weather) delta.weather = {};
-      if (!delta.weather.zones) delta.weather.zones = {};
-      deepDeletionCheck(previousDelta.weather.zones, overrideData.weather?.zones ?? {}, delta.weather.zones, 'presets');
-    }
-    if (delta.weather?.zones && !Object.keys(delta.weather.zones).length) delete delta.weather.zones;
-    if (delta.weather && !Object.keys(delta.weather).length) delete delta.weather;
-    if (bundledData.months?.values && overrideData.months?.values) {
-      if (!delta.months) delta.months = {};
-      if (!delta.months.values) delta.months.values = {};
-      deepDeletionCheck(bundledData.months.values, overrideData.months.values, delta.months.values, 'weekdays');
-    }
-    if (previousDelta?.months?.values) {
-      if (!delta.months) delta.months = {};
-      if (!delta.months.values) delta.months.values = {};
-      deepDeletionCheck(previousDelta.months.values, overrideData.months?.values ?? {}, delta.months.values, 'weekdays');
-    }
-    if (delta.months?.values && !Object.keys(delta.months.values).length) delete delta.months.values;
-    if (delta.months && !Object.keys(delta.months).length) delete delta.months;
+  static #computeOverrideDelta(bundledData, overrideData) {
+    const delta = foundry.utils.diffObject(bundledData, overrideData, { bidirectional: true });
     CalendarManager.#stripStaleDefaults(delta, bundledData);
     delta._isDelta = true;
     return delta;
@@ -524,29 +418,6 @@ export default class CalendarManager {
   }
 
   /**
-   * Rehydrate serialized ForcedDeletion markers in a stored delta into live operator instances.
-   * Settings JSON round-trips a ForcedDeletion into a plain `{__$OPERATOR$__}` object; reconstructing it
-   * lets mergeObject's `applyOperators` enact the deletion. Legacy `-=key` markers are handled by mergeObject.
-   * @param {object} obj - Stored delta object (mutated in place)
-   * @private
-   */
-  static #reconstructOperators(obj) {
-    if (!obj || typeof obj !== 'object') return;
-    if (Array.isArray(obj)) {
-      for (const item of obj) CalendarManager.#reconstructOperators(item);
-      return;
-    }
-    const { OPERATOR_IDENTIFIER, reconstructOperator } = foundry.data.operators;
-    for (const [key, val] of Object.entries(obj)) {
-      if (val && typeof val === 'object' && !Array.isArray(val) && val[OPERATOR_IDENTIFIER]) {
-        obj[key] = reconstructOperator(val);
-        continue;
-      }
-      CalendarManager.#reconstructOperators(val);
-    }
-  }
-
-  /**
    * Recursively strip empty-string values from a delta.
    * @param {object} delta - Delta object (mutated in place)
    * @param {object} bundled - Pristine bundled data to compare against
@@ -554,8 +425,8 @@ export default class CalendarManager {
    */
   static #stripStaleDefaults(delta, bundled) {
     for (const key of Object.keys(delta)) {
-      if (key.startsWith('-=')) continue;
       const dVal = delta[key];
+      if (CalendarManager.#isDeletionMarker(key, dVal)) continue;
       const bVal = bundled?.[key];
       if (dVal !== null && typeof dVal === 'object' && !Array.isArray(dVal) && bVal !== null && typeof bVal === 'object' && !Array.isArray(bVal)) {
         CalendarManager.#stripStaleDefaults(dVal, bVal);
@@ -977,6 +848,7 @@ export default class CalendarManager {
   static async saveDefaultOverride(id, data) {
     if (!isBundledCalendar(id) && !this.hasDefaultOverride(id)) {
       ATLAS.log(2, `Cannot save override: ${id} is not a bundled calendar`);
+      ui.notifications.error(_loc('CALENDARIA.Error.CalendarUpdateFailed', { message: `${id} is not a bundled calendar` }));
       return null;
     }
     try {
@@ -986,12 +858,8 @@ export default class CalendarManager {
       const calendar = new CalendariaCalendar(data);
       const overrides = game.settings.get(MODULE.ID, SETTINGS.DEFAULT_OVERRIDES) || {};
       const bundledData = this.#bundledData.get(id);
-      if (bundledData) {
-        const previousDelta = overrides[id] || null;
-        overrides[id] = CalendarManager.#computeOverrideDelta(bundledData, calendar.toObject(), previousDelta);
-      } else {
-        overrides[id] = calendar.toObject();
-      }
+      if (bundledData) overrides[id] = CalendarManager.#computeOverrideDelta(bundledData, calendar.toObject());
+      else overrides[id] = calendar.toObject();
       await game.settings.set(MODULE.ID, SETTINGS.DEFAULT_OVERRIDES, overrides);
       CalendarRegistry.register(id, calendar);
       if (CalendarRegistry.getActiveId() === id) {
@@ -1006,6 +874,7 @@ export default class CalendarManager {
       return calendar;
     } catch (error) {
       ATLAS.log(1, `Error saving override for ${id}:`, error);
+      ui.notifications.error(_loc('CALENDARIA.Error.CalendarUpdateFailed', { message: error.message }));
       return null;
     }
   }

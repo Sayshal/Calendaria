@@ -40,9 +40,25 @@ users.find = (fn) => Array.prototype.find.call(users, fn);
 const scenes = { active: null, filter: vi.fn(() => []) };
 const macros = { get: vi.fn(() => null) };
 globalThis.game = { i18n, user, users, time, settings, scenes, macros, modules: { get: vi.fn() }, system: { id: 'dnd5e' }, world: { id: 'test-world' }, audio: { locked: false } };
-// v14 core globals: _loc binds i18n.localize (data arg covers format); _del is the ForcedDeletion sentinel.
+// v14 core globals: _loc binds i18n.localize (data arg covers format); _del is a singleton ForcedDeletion.
+// Mirrors foundry/common/data/operators.mjs: payload on a Symbol key, zero enumerable keys.
+const OPERATOR_VALUE = Symbol('DataFieldOperatorValue');
+const OPERATOR_IDENTIFIER = '__$OPERATOR$__';
+class DataFieldOperator {
+  constructor(value) {
+    this[OPERATOR_VALUE] = value;
+  }
+  toJSON() {
+    return { [OPERATOR_IDENTIFIER]: this.constructor.name };
+  }
+}
+class ForcedDeletion extends DataFieldOperator {
+  constructor(_value) {
+    super();
+  }
+}
 globalThis._loc = (key, data) => (data ? i18n.format(key, data) : i18n.localize(key));
-globalThis._del = Symbol('ForcedDeletion');
+globalThis._del = new ForcedDeletion();
 globalThis.ATLAS = { log: vi.fn(), register: vi.fn() };
 globalThis.ui = { notifications: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } };
 globalThis.Hooks = { on: vi.fn(), once: vi.fn(), off: vi.fn(), call: vi.fn(), callAll: vi.fn() };
@@ -124,6 +140,13 @@ globalThis.foundry = {
     fields: {
       BooleanField: class BooleanField { constructor(opts) { this.initial = opts?.initial; } },
       ObjectField: class ObjectField { constructor(opts) { this.initial = opts?.initial; } }
+    },
+    operators: {
+      OPERATOR_VALUE,
+      OPERATOR_IDENTIFIER,
+      DataFieldOperator,
+      ForcedDeletion,
+      reconstructOperator: (obj) => (obj?.[OPERATOR_IDENTIFIER] === 'ForcedDeletion' ? new ForcedDeletion() : obj)
     },
     CalendarData: class CalendarData {}
   },
