@@ -1599,6 +1599,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {object} context - The context object
    */
   async #prepareMacrosContext(context) {
+    if (!game.user.isGM) return;
     const config = game.settings.get(MODULE.ID, SETTINGS.MACRO_TRIGGERS);
     context.macros = game.macros.contents.map((m) => ({ id: m.id, name: m.name }));
     context.macros.sort((a, b) => a.name.localeCompare(b.name, game.i18n.lang));
@@ -2290,6 +2291,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    * Open the Preset Manager application.
    */
   static async #onOpenPresetManager() {
+    if (!game.user.isGM) return;
     new PresetManager().render(true);
   }
 

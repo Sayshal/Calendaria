@@ -19,7 +19,7 @@ import {
   wrapInRootGroup
 } from '../../notes/_module.mjs';
 import { daysBetween } from '../../notes/date-utils.mjs';
-import { CalendariaSocket, formatForLocation } from '../../utils/_module.mjs';
+import { CalendariaSocket, formatForLocation, getAvailableMacros } from '../../utils/_module.mjs';
 import { CalendarEditor, ConditionBuilderDialog } from '../_module.mjs';
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
@@ -398,7 +398,8 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       const availableCats = game.user.isGM ? allCats : allCats.filter((c) => c.playerUsable || selectedCategories.includes(c.id));
       context.presetOptions = availableCats.map((cat) => ({ ...cat, selected: selectedCategories.includes(cat.id) }));
       const currentMacro = this.document.system.macro || '';
-      context.availableMacros = game.macros.contents.map((m) => ({ id: m.id, name: m.name, selected: m.id === currentMacro }));
+      context.availableMacros = getAvailableMacros({ includeId: currentMacro }).map((m) => ({ id: m.id, name: m.name, selected: m.id === currentMacro }));
+      context.showMacroField = context.availableMacros.length > 0;
       const flatPresets = getConditionPresets(this.document.system.startDate);
       context.presets = flatPresets;
       context.presetGroups = groupPresets(flatPresets);

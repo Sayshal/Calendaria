@@ -1,4 +1,5 @@
 import { DISPLAY_STYLES, MODULE, NOTE_VISIBILITY } from '../../constants.mjs';
+import { getAvailableMacros } from '../../utils/_module.mjs';
 import { DEFAULT_PRESET_ID, NoteManager, getAllPresetsIncludingHidden, getBuiltinPresetSeeds, saveAllPresets } from '../../notes/_module.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -65,7 +66,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
     const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
     const displayStyleOptions = Object.values(DISPLAY_STYLES).map((v) => ({ value: v, label: _loc(`CALENDARIA.Note.DisplayStyle.${capitalize(v)}`) }));
     const visibilityOptions = Object.values(NOTE_VISIBILITY).map((v) => ({ value: v, label: _loc(`CALENDARIA.Note.Visibility.${capitalize(v)}`) }));
-    const macroOptions = game.macros?.contents?.map((m) => ({ value: m.id, label: m.name })) || [];
+    const macroOptions = getAvailableMacros().map((m) => ({ value: m.id, label: m.name }));
     const presets = this._presets
       .filter((c) => !c.hidden)
       .map((c) => ({ ...c, selected: c.id === this._selectedId, isDefault: c.id === DEFAULT_PRESET_ID }))

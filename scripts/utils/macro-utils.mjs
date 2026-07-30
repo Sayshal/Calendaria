@@ -12,9 +12,11 @@ export async function executeMacroById(macroId, context = {}) {
 }
 
 /**
- * Get all available macros for selection UI.
+ * Get macros visible to the current user for selection UI.
+ * @param {object} [options] - Filter options
+ * @param {string} [options.includeId] - Macro ID to retain even when not visible, so a stored selection is not dropped
  * @returns {Array<{id: string, name: string, type: string}>} Array of macro options
  */
-export function getAvailableMacros() {
-  return game.macros.contents.map((m) => ({ id: m.id, name: m.name, type: m.type }));
+export function getAvailableMacros({ includeId } = {}) {
+  return (game.macros?.contents ?? []).filter((m) => m.visible || m.id === includeId).map((m) => ({ id: m.id, name: m.name, type: m.type }));
 }

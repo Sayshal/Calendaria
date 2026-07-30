@@ -245,7 +245,7 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
     }
     context.soundFx = this.#soundFx !== null ? this.#soundFx : (currentWeather?.soundFx ?? '');
     const currentFxMacro = this.#fxMacro !== null ? this.#fxMacro : (currentWeather?.fxMacro ?? '');
-    const macros = getAvailableMacros();
+    const macros = getAvailableMacros({ includeId: currentFxMacro });
     context.fxMacroOptions = [
       { value: '', label: _loc('CALENDARIA.Common.None'), selected: !currentFxMacro },
       ...macros.map((m) => ({ value: m.id, label: m.name, selected: m.id === currentFxMacro }))

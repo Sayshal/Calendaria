@@ -69,16 +69,18 @@
           </label>
         </div>
       </fieldset>
-      <fieldset class="macro-fieldset">
-        <legend data-tooltip aria-label="{{localize 'CALENDARIA.Note.Tooltip.Macro'}}">{{localize
-            "CALENDARIA.Common.Macro"}}</legend>
-        <select name="system.macro" data-tooltip aria-label="{{localize 'CALENDARIA.UI.MacroTooltip'}}">
-          <option value="">{{localize "CALENDARIA.Common.None"}}</option>
-          {{#each availableMacros}}
-            <option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>
-          {{/each}}
-        </select>
-      </fieldset>
+      {{#if showMacroField}}
+        <fieldset class="macro-fieldset">
+          <legend data-tooltip aria-label="{{localize 'CALENDARIA.Note.Tooltip.Macro'}}">{{localize
+              "CALENDARIA.Common.Macro"}}</legend>
+          <select name="system.macro" data-tooltip aria-label="{{localize 'CALENDARIA.UI.MacroTooltip'}}">
+            <option value="">{{localize "CALENDARIA.Common.None"}}</option>
+            {{#each availableMacros}}
+              <option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>
+            {{/each}}
+          </select>
+        </fieldset>
+      {{/if}}
     </div>
     <fieldset class="reminder-fieldset">
       <legend data-tooltip aria-label="{{localize 'CALENDARIA.Note.Tooltip.Reminder'}}">{{localize

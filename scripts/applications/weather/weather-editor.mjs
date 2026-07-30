@@ -203,7 +203,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     context.preset.soundFx = isCustom ? preset.soundFx || '' : overrides.soundFx !== undefined ? overrides.soundFx || '' : builtinPreset?.soundFx || '';
     const currentFxMacro = isCustom ? preset.fxMacro || '' : overrides.fxMacro !== undefined ? overrides.fxMacro || '' : '';
     context.preset.fxMacro = currentFxMacro;
-    const macros = getAvailableMacros();
+    const macros = getAvailableMacros({ includeId: currentFxMacro });
     context.fxMacroOptions = [
       { value: '', label: _loc('CALENDARIA.Common.None'), selected: !currentFxMacro },
       ...macros.map((m) => ({ value: m.id, label: m.name, selected: m.id === currentFxMacro }))
