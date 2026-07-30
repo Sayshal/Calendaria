@@ -142,7 +142,8 @@ export default class BaseImporter {
     const errors = [];
     if (!data.name) errors.push(_loc('CALENDARIA.Importer.Error.MissingName'));
     const months = data.months?.values ? Object.values(data.months.values) : [];
-    if (!months.length) errors.push(_loc('CALENDARIA.Importer.Error.NoMonths'));
+    const isMonthless = !months.length && Number(data.days?.daysPerYear) > 0;
+    if (!months.length && !isMonthless) errors.push(_loc('CALENDARIA.Importer.Error.NoMonths'));
     if (!data.days) errors.push(_loc('CALENDARIA.Importer.Error.MissingTimeConfig'));
     if (data.days) {
       if (!data.days.hoursPerDay || data.days.hoursPerDay < 1) errors.push(_loc('CALENDARIA.Importer.Error.InvalidHoursPerDay'));
@@ -291,6 +292,7 @@ export default class BaseImporter {
    */
   #calculateDaysPerYear(data) {
     const months = data.months?.values ? Object.values(data.months.values) : [];
+    if (!months.length) return Number(data.days?.daysPerYear) || 0;
     return months.reduce((sum, month) => sum + (month.days || 0), 0);
   }
 

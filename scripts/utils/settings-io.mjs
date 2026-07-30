@@ -274,7 +274,7 @@ export async function exportSettings() {
     const refreshedCalendar = (calendarId && CalendarManager.getCalendar(calendarId)) || activeCalendar;
     const calendarData = refreshedCalendar.toObject();
     const currentDate = CalendarManager.getCurrentDateTime();
-    calendarData.currentDate = { year: currentDate.year - (refreshedCalendar.yearZero ?? 0), month: currentDate.month, dayOfMonth: currentDate.dayOfMonth };
+    calendarData.currentDate = { year: currentDate.year - (refreshedCalendar.years?.yearZero ?? 0), month: currentDate.month, dayOfMonth: currentDate.dayOfMonth };
     exportData.calendarData = calendarData;
     ATLAS.log(3, `Included active calendar data: ${calendarData.name}`);
     if (calendarId) {

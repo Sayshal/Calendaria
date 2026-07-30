@@ -104,8 +104,7 @@ export default class CalendariaImporter extends BaseImporter {
    */
   async transform(data) {
     const calendarData = this.#extractCalendarData(data);
-    const monthValues = calendarData.months?.values;
-    if (!calendarData.name || !monthValues || !Object.values(monthValues).length) throw new Error('Invalid Calendaria export format');
+    if (!calendarData.name || !calendarData.days) throw new Error('Invalid Calendaria export format');
     ATLAS.log(3, `Transforming Calendaria export: ${calendarData.name}`);
     this.#bundledCustomPresets = data.customPresets || data.settings?.[SETTINGS.CUSTOM_PRESETS] || [];
     const metadata = { ...calendarData.metadata };

@@ -158,7 +158,8 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
         const month = (currentDate.month ?? 0) + 1;
         const day = (currentDate.dayOfMonth ?? 0) + 1;
         const year = currentDate.year ?? 1;
-        this.#previewData.currentDate = `${month}/${day}/${year}`;
+        const isMonthless = !Object.values(this.#transformedData.months?.values ?? {}).length;
+        this.#previewData.currentDate = isMonthless ? `${day}-${year}` : `${month}/${day}/${year}`;
         this.#transformedData._pendingCurrentDate = currentDate;
       } else {
         this.#previewData.currentDate = '—';

@@ -795,7 +795,7 @@ export default class CalendarManager {
   static getCurrentDateTime() {
     const components = game.time.components;
     const calendar = this.getActiveCalendar();
-    const yearOffset = calendar?.yearZero ?? 0;
+    const yearOffset = calendar?.years?.yearZero ?? 0;
     return { year: components.year + yearOffset, month: components.month, dayOfMonth: components.dayOfMonth, hour: components.hour, minute: components.minute };
   }
 

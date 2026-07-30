@@ -2618,7 +2618,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     exportData.metadata.exportedAt = Date.now();
     exportData.metadata.version = game.modules.get('calendaria')?.version || '1.0.0';
     const activeCalendar = CalendarManager.getActiveCalendar();
-    if (activeCalendar && this.#calendarId && CalendarRegistry.getActiveId() === this.#calendarId) exportData.currentDate = activeCalendar.currentDate;
+    if (activeCalendar && this.#calendarId && CalendarRegistry.getActiveId() === this.#calendarId) {
+      const { year, month, dayOfMonth } = activeCalendar.currentDate;
+      exportData.currentDate = { year: year - (activeCalendar.years?.yearZero ?? 0), month, dayOfMonth };
+    }
     if (this.#calendarId && exportData.weather?.zones) {
       const presetAliases = {};
       for (const zoneKey of Object.keys(exportData.weather.zones)) {
