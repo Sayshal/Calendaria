@@ -316,6 +316,16 @@ export function getAllPresets() {
 }
 
 /**
+ * Check whether a macro ID is a GM-configured preset default macro.
+ * @param {string} macroId - Macro document ID
+ * @returns {boolean} True when any preset's defaults reference the macro
+ */
+export function isPresetDefaultMacro(macroId) {
+  if (!macroId) return false;
+  return getAllPresetsIncludingHidden().some((p) => p.defaults?.macro === macroId);
+}
+
+/**
  * Get all presets including hidden ones. Used by Preset Manager for editing.
  * @returns {object[]} Sorted array of all presets
  */

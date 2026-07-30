@@ -13,6 +13,7 @@ import {
   getRecurrenceDescription,
   groupPresets,
   isCustomPreset,
+  isPresetDefaultMacro,
   NoteManager,
   summarizeConditionTree,
   validateConditions,
@@ -737,6 +738,14 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
   /** @override */
   async _processSubmitData(event, form, submitData, options = {}) {
     this.#deriveEndDateInSubmit(submitData);
+    const requestedMacro = submitData.system?.macro;
+    if (requestedMacro && requestedMacro !== this.document.system.macro && !game.user.isGM) {
+      const macro = game.macros.get(requestedMacro);
+      if ((!macro || !macro.canUserExecute(game.user)) && !isPresetDefaultMacro(requestedMacro)) {
+        delete submitData.system.macro;
+        ATLAS.log(2, `Rejected macro assignment on ${this.document.name}: no permission to execute ${requestedMacro}`);
+      }
+    }
     const newCategories = submitData.system?.categories || [];
     const oldCategories = this.document.system.categories || [];
     const addedPreset = newCategories.find((id) => !oldCategories.includes(id));

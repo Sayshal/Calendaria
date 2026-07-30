@@ -1,6 +1,6 @@
 import { CalendarManager } from '../calendar/_module.mjs';
 import { HOOKS, MODULE, TEMPLATES } from '../constants.mjs';
-import { NoteManager, compareDates, generateRandomOccurrences, getCurrentDate, needsRandomRegeneration } from '../notes/_module.mjs';
+import { NoteManager, compareDates, generateRandomOccurrences, getCurrentDate, isPresetDefaultMacro, needsRandomRegeneration } from '../notes/_module.mjs';
 import { CalendariaSocket } from '../utils/_module.mjs';
 import { WeatherManager } from '../weather/_module.mjs';
 
@@ -144,6 +144,11 @@ export default class EventScheduler {
     if (!macroId) return;
     const macro = game.macros.get(macroId);
     if (!macro) return;
+    const author = note.flagData.author?._id ? game.users.get(note.flagData.author._id) : null;
+    if (author && !author.isGM && !macro.canUserExecute(author) && !isPresetDefaultMacro(macroId)) {
+      ATLAS.log(2, `Skipping macro for event ${note.name}: author ${author.name} lacks permission to execute ${macro.name}`);
+      return;
+    }
     ATLAS.log(3, `Executing macro for event ${note.name}: ${macro.name}`);
     const scope = { event: { id: note.id, name: note.name, flagData: note.flagData }, ...context };
     await macro.execute(scope);
