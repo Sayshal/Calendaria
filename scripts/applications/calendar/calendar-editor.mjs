@@ -777,11 +777,14 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       const formatStr = input.value.trim();
       if (!formatStr) {
         field.textContent = '';
-        field.classList.remove('error');
+        field.classList.remove('error', 'warning');
+        field.title = '';
         input.classList.remove('invalid');
         return;
       }
       const result = validateFormatString(formatStr, cal, components);
+      field.classList.toggle('warning', !!result.warning);
+      field.title = result.warning || '';
       if (result.valid) {
         field.textContent = result.preview || formatStr;
         field.classList.remove('error');

@@ -682,6 +682,12 @@ describe('validateFormatString()', () => {
     expect(result.valid).toBe(true);
     expect(result.preview).toBe('2024-01-15');
   });
+  it('warns on wrong-case year tokens', () => {
+    const result = validateFormatString('DDD-yyyy');
+    expect(result.valid).toBe(true);
+    expect(result.warning).toBeTruthy();
+  });
+  it('does not warn on bracketed literal text', () => { expect(validateFormatString('[Week] W [of] MMMM, Y').warning).toBeUndefined(); });
 });
 
 describe('hasMoonIconMarkers()', () => {

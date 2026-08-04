@@ -2302,11 +2302,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Reset a section's settings to their default values.
-   * @param {PointerEvent} _event - The click event
-   * @param {HTMLElement} target - The clicked element
-   */
-  /**
    * The section's setting keys the current user is allowed to write.
    * @param {string} sectionId - Section identifier from SECTION_SETTINGS
    * @returns {string[]} Writable setting keys
@@ -2319,6 +2314,11 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     });
   }
 
+  /**
+   * Reset a section's settings to their default values.
+   * @param {PointerEvent} _event - The click event
+   * @param {HTMLElement} target - The clicked element
+   */
   static async #onResetSection(_event, target) {
     const sectionId = target.dataset.section;
     const settingKeys = SettingsPanel.#resettableKeys(sectionId);
@@ -2993,10 +2993,13 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     const isStopwatch = locationId === 'stopwatchRealtime' || locationId === 'stopwatchGametime';
     if (isStopwatch) {
       previewSpan.textContent = formatStr;
-      previewSpan.classList.remove('error');
+      previewSpan.classList.remove('error', 'warning');
+      previewSpan.title = '';
       return;
     }
     const result = validateFormatString(formatStr, calendar, components);
+    previewSpan.classList.toggle('warning', !!result.warning);
+    previewSpan.title = result.warning || '';
     if (result.valid) {
       previewSpan.textContent = result.preview || formatStr;
       previewSpan.classList.remove('error');

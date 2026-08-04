@@ -606,6 +606,10 @@
         &.error {
           color: var(--atlas-error, rgb(244 67 54));
         }
+
+        &.warning {
+          color: var(--atlas-warning, rgb(255 193 7));
+        }
       }
     }
 

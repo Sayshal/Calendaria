@@ -410,6 +410,9 @@ export function formatApproximateDate(calendar, components) {
   return _loc(`CALENDARIA.Format.ApproxDate.${formatter}`, { season: seasonName });
 }
 
+/** Format tokens, longest-first per letter. */
+const TOKEN_REGEX = /\[([^\]]+)]|\{([^}]+)\}|YYYY|YY|Y|MMMM|MMM|MM|Mo|M|EEEEE|EEEE|EEE|EE|E|dddd|ddd|dd|Do|DDD|DD|D|d|e|GGGG|GGG|GG|G|QQQQ|QQQ|QQ|Q|zzzz|z|ww|w|W|HH|H|hh|h|mm|m|ss|s|A|a/g;
+
 /**
  * Format a date using a custom format string with tokens.
  * @param {object} calendar - Calendar data
@@ -498,7 +501,6 @@ export function formatCustom(calendar, components, formatStr) {
     if (token in customContext) return customContext[token];
     return token;
   };
-  const TOKEN_REGEX = /\[([^\]]+)]|\{([^}]+)\}|YYYY|YY|Y|MMMM|MMM|MM|Mo|M|EEEEE|EEEE|EEE|EE|E|dddd|ddd|dd|Do|DDD|DD|D|d|e|GGGG|GGG|GG|G|QQQQ|QQQ|QQ|Q|zzzz|z|ww|w|W|HH|H|hh|h|mm|m|ss|s|A|a/g;
   return formatStr.replace(TOKEN_REGEX, (match, bracketToken, curlyToken) => {
     const customToken = bracketToken ?? curlyToken;
     if (customToken) {
@@ -556,7 +558,7 @@ export function formatCustom(calendar, components, formatStr) {
  * @param {string} formatStr - The format string to validate
  * @param {object} [calendar] - Optional calendar data for preview
  * @param {object} [components] - Optional date components for preview
- * @returns {{valid: boolean, preview: string, error: string}} Validation result
+ * @returns {{valid: boolean, preview: string, error: string, warning: string}} Validation result
  */
 export function validateFormatString(formatStr, calendar, components) {
   if (!formatStr || typeof formatStr !== 'string') return { valid: true };
@@ -568,17 +570,30 @@ export function validateFormatString(formatStr, calendar, components) {
   const closeCurly = (formatStr.match(/}/g) || []).length;
   if (openCurly !== closeCurly) return { valid: false, error: 'CALENDARIA.Format.Error.UnclosedBracket' };
   if (/\{}/.test(formatStr)) return { valid: false, error: 'CALENDARIA.Format.Error.EmptyBracket' };
+  const warning = findUnknownTokens(formatStr);
   if (calendar && components) {
     try {
       const preview = formatCustom(calendar, components, formatStr);
       const cleanPreview = stripMoonIconMarkers(preview);
-      return { valid: true, preview: cleanPreview };
+      return { valid: true, preview: cleanPreview, ...(warning && { warning }) };
     } catch (e) {
       ATLAS.log(1, e);
       return { valid: false, error: 'CALENDARIA.Format.Error.Invalid' };
     }
   }
-  return { valid: true };
+  return { valid: true, ...(warning && { warning }) };
+}
+
+/**
+ * Detect letter runs that match no format token, the usual sign of a wrong-case token such as yyyy.
+ * @param {string} formatStr - Format string to scan
+ * @returns {string} Localized warning, or empty string when every letter is accounted for
+ */
+function findUnknownTokens(formatStr) {
+  const leftovers = formatStr.replace(/\[[^\]]*]|\{[^}]*\}/g, '').replace(TOKEN_REGEX, '');
+  const unknown = leftovers.match(/[A-Za-z]+/g);
+  if (!unknown) return '';
+  return _loc('CALENDARIA.Format.Warning.UnknownToken', { tokens: [...new Set(unknown)].join(', ') });
 }
 
 /**
