@@ -1272,6 +1272,7 @@ export default class CalendariaSettings {
       },
       [SETTINGS.WEATHER_DAY_INDEX_MIGRATED]: { name: 'Weather Day Index Migrated', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.WEATHER_YEAR_KEY_MIGRATED]: { name: 'Weather Year Key Migrated', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
+      [SETTINGS.WEATHER_MONTHLESS_PLAN_MIGRATED]: { name: 'Weather Monthless Plan Migrated', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.WEATHER_HISTORY]: { name: 'Weather History', scope: 'world', config: false, type: new ObjectField({ initial: {} }) },
       [SETTINGS.WEATHER_HISTORY_DAYS]: {
         name: 'CALENDARIA.Settings.WeatherHistoryDays.Name',

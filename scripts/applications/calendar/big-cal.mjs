@@ -577,6 +577,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const daysInYear = calendar.getDaysInYear(year - yearZero);
     const showMoons = canViewMoons() && calendar.moonsArray.length;
     const fogEnabled = isFogEnabled();
+    const weatherLookup = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SHOW_WEATHER) ? buildWeatherLookup() : null;
     const weekNumber = Math.floor(viewedDayOfMonth / daysInWeek);
     const totalWeeks = Math.ceil(daysInYear / daysInWeek);
     const weeks = [];
@@ -620,6 +621,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
         const weekdayData = calendar.weekdaysArray[i % daysInWeek];
         const festivalNoteId = this._getFestivalNoteId(festivalDay);
         const festivalIconIsImage = typeof festivalDay?.icon === 'string' && !festivalDay.icon.startsWith('fa') && (festivalDay.icon.includes('/') || festivalDay.icon.includes('.'));
+        const wd = !dayIsFogged && weatherLookup ? getDayWeather(dayYear, 0, dayOfMonth, weatherLookup, weatherLookup.lookup) : null;
+        const festivalInfo = festivalDay ? { name: _loc(festivalDay.name), description: festivalDay.description || '', color: festivalDay.color || '' } : null;
         const dayData = {
           day: dayNum,
           dayOfMonth,
@@ -635,10 +638,12 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
           festivalIconIsImage: !dayIsFogged && festivalIconIsImage,
           festivalIcon: !dayIsFogged && festivalDay?.icon ? (festivalIconIsImage ? festivalDay.icon : `fas ${festivalDay.icon}`) : '',
           festivalNoteId: dayIsFogged ? '' : festivalNoteId,
+          dayTooltip: dayIsFogged ? '' : generateDayTooltip(calendar, dayYear, 0, dayOfMonth, festivalInfo, wd, dayNotes),
           moonPhases,
           isRestDay: weekdayData?.isRestDay || false,
           isFromOtherWeek: weekOffset !== 0,
-          isIntercalary
+          isIntercalary,
+          ...buildWeatherPillData(wd)
         };
         currentWeek.push(dayData);
       }

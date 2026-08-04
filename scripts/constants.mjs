@@ -216,6 +216,7 @@ export const SETTINGS = {
   WEATHER_HISTORY_DAYS: 'weatherHistoryDays',
   WEATHER_HISTORY: 'weatherHistory',
   WEATHER_INERTIA: 'weatherInertia',
+  WEATHER_MONTHLESS_PLAN_MIGRATED: 'weatherMonthlessPlanMigrated',
   WEATHER_PRESET_ALIASES: 'weatherPresetAliases',
   WEATHER_SEED: 'weatherSeed',
   WEATHER_SOUND_FX: 'weatherSoundFx',

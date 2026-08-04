@@ -5,7 +5,7 @@ import { executeMacroById } from '../utils/macro-utils.mjs';
 import { canChangeWeather } from '../utils/permissions.mjs';
 import { CalendariaSocket } from '../utils/socket.mjs';
 import { CLIMATE_ZONE_TEMPLATES } from './data/climate-data.mjs';
-import { ALL_PRESETS, resolveWeatherSoundPath, getAllPresets, getPreset, WEATHER_CATEGORIES } from './data/weather-presets.mjs';
+import { ALL_PRESETS, getAllPresets, getPreset, resolveWeatherSoundPath, WEATHER_CATEGORIES } from './data/weather-presets.mjs';
 import { applyForecastVariance, applyTempModifier, dateSeed, generateForecast, generateIntradayWeather, generateWeather, mergeClimateConfig, seededRandom } from './weather-generator.mjs';
 
 /**
@@ -170,6 +170,11 @@ export default class WeatherManager {
       await game.settings.set(MODULE.ID, SETTINGS.WEATHER_HISTORY, {});
       await game.settings.set(MODULE.ID, SETTINGS.WEATHER_YEAR_KEY_MIGRATED, true);
       ATLAS.log(3, 'Cleared weather history and forecast plan for year key migration');
+    }
+    if (CalendariaSocket.isPrimaryGM() && !game.settings.get(MODULE.ID, SETTINGS.WEATHER_MONTHLESS_PLAN_MIGRATED) && CalendarManager.getActiveCalendar()?.isMonthless) {
+      await game.settings.set(MODULE.ID, SETTINGS.WEATHER_FORECAST_PLAN, {});
+      await game.settings.set(MODULE.ID, SETTINGS.WEATHER_MONTHLESS_PLAN_MIGRATED, true);
+      ATLAS.log(3, 'Cleared forecast plan corrupted by monthless date advancement');
     }
     if (CalendariaSocket.isPrimaryGM()) {
       const calendar = CalendarManager.getActiveCalendar();
@@ -1454,8 +1459,8 @@ export default class WeatherManager {
    * @private
    */
   static #makeDaysInMonth(calendar) {
-    const fn = (month, year) => calendar.getDaysInMonth?.(month, year) ?? 30;
-    fn._monthsPerYear = calendar.monthsArray?.length ?? 12;
+    const fn = (month, year) => (calendar.isMonthless ? calendar.getDaysInYear(year) : (calendar.getDaysInMonth?.(month, year) ?? 30));
+    fn._monthsPerYear = calendar.isMonthless ? 1 : (calendar.monthsArray?.length ?? 12);
     return fn;
   }
 

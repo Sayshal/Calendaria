@@ -663,6 +663,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const weekNumber = Math.floor(viewedDayOfMonth / daysInWeek);
     const totalWeeks = Math.ceil(daysInYear / daysInWeek);
     const fogEnabled = isFogEnabled();
+    const weatherLookup = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_WEATHER) ? buildWeatherLookup() : null;
     const weeks = [];
     for (let weekOffset = -1; weekOffset <= 1; weekOffset++) {
       const targetWeek = weekNumber + weekOffset;
@@ -687,6 +688,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
         const noteTextColor = noteColor ? MiniCal._getContrastTextColor(noteColor) : null;
         const festivalDay = dayIsFogged ? null : calendar.findFestivalDay({ year: dayYear - yearZero, month: 0, dayOfMonth });
         const moonData = !dayIsFogged ? getFirstMoonPhase(calendar, dayYear, 0, dayOfMonth) : null;
+        const wd = !dayIsFogged && weatherLookup ? getDayWeather(dayYear, 0, dayOfMonth, weatherLookup, weatherLookup.lookup) : null;
         const isIntercalary = festivalDay?.countsForWeekday === false;
         const festivalNameStr = festivalDay ? _loc(festivalDay.name) : null;
         const festivalInfo = festivalDay ? { name: festivalNameStr, description: festivalDay.description || '', color: festivalDay.color || '' } : null;
@@ -708,11 +710,15 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
           festivalName: dayIsFogged ? null : festivalNameStr,
           festivalColor: dayIsFogged ? '' : festivalDay?.color || '',
           festivalDescription: dayIsFogged ? '' : festivalDay?.description || '',
-          dayTooltip: dayIsFogged ? '' : generateDayTooltip(calendar, dayYear, 0, dayOfMonth, festivalInfo),
+          dayTooltip: dayIsFogged ? '' : generateDayTooltip(calendar, dayYear, 0, dayOfMonth, festivalInfo, wd, noteInfo.enriched),
           moonIcon: moonData?.icon ?? null,
           moonPhase: moonData?.tooltip ?? null,
           moonColor: moonData?.color ?? null,
-          isFromOtherWeek: weekOffset !== 0
+          isFromOtherWeek: weekOffset !== 0,
+          weatherIcon: wd?.icon ?? null,
+          weatherColor: wd?.color ?? null,
+          weatherTooltipHtml: buildWeatherPillData(wd).weatherTooltipHtml,
+          isForecast: wd?.isForecast ?? false
         };
         if (isIntercalary) dayData.isIntercalary = true;
         currentWeek.push(dayData);
