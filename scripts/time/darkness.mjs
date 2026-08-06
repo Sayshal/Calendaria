@@ -1,5 +1,5 @@
 import { MODULE, SCENE_FLAGS, SETTINGS, SOCKET_TYPES } from '../constants.mjs';
-import { CalendariaSocket, getMoonPhasePosition } from '../utils/_module.mjs';
+import { CalendariaSocket, ECLIPSE_TYPES, getEclipseAtDate, getMoonPhasePosition, isLunarEclipse, isSolarEclipse } from '../utils/_module.mjs';
 import { WeatherManager } from '../weather/_module.mjs';
 
 /** @type {number|null} Last hour we calculated darkness for */
@@ -7,6 +7,15 @@ let lastHour = null;
 
 /** @type {number|null} Last minute we calculated darkness for */
 let lastMinute = null;
+
+/** @type {Object<string, number>} Moonlight multipliers applied while a lunar eclipse is in progress. */
+const LUNAR_ECLIPSE_DIMMING = { totalLunar: 0.05, partialLunar: 0.4, penumbralLunar: 0.8 };
+
+/** @type {Object<string, number>} Minimum darkness levels imposed by a solar eclipse. */
+const SOLAR_ECLIPSE_DARKNESS = { totalSolar: 0.9, annularSolar: 0.6, partialSolar: 0.35 };
+
+/** @type {number[]} HSL tint applied to the moon glow during lunar totality. */
+const BLOOD_MOON_HSL = [0, 0.9, 0.5];
 
 /**
  * Calculate darkness level based on time of day, shaped by sunrise and sunset.
@@ -73,7 +82,8 @@ export function calculateAdjustedDarkness(baseDarkness, scene) {
   const moonSync = resolveSceneSync(scene, SCENE_FLAGS.DARKNESS_MOON_SYNC, SETTINGS.DARKNESS_MOON_SYNC);
   if (moonSync) {
     const moonResult = calculateMoonIllumination(adjustedDarkness);
-    adjustedDarkness -= moonResult.reduction;
+    adjustedDarkness = Math.min(adjustedDarkness, 1 - moonResult.illumination);
+    adjustedDarkness = Math.max(adjustedDarkness, calculateSolarEclipseDarkness());
   }
   const weatherSync = resolveSceneSync(scene, SCENE_FLAGS.DARKNESS_WEATHER_SYNC, SETTINGS.DARKNESS_WEATHER_SYNC);
   if (weatherSync) {
@@ -87,23 +97,23 @@ export function calculateAdjustedDarkness(baseDarkness, scene) {
 /**
  * Calculate moon illumination factor for the current night.
  * @param {number} baseDarkness - Current darkness level (0-1)
- * @returns {{ reduction: number, hue: number|null, intensity: number|null, luminosity: number|null }} Moon illumination data
+ * @returns {{ illumination: number, hue: number|null, intensity: number|null, luminosity: number|null }} Moon illumination data
  */
 export function calculateMoonIllumination(baseDarkness) {
-  if (baseDarkness < 0.5) return { reduction: 0, hue: null, intensity: null, luminosity: null };
+  if (baseDarkness < 0.5) return { illumination: 0, hue: null, intensity: null, luminosity: null };
   const calendar = game.time.calendar;
-  if (!calendar?.moonsArray?.length) return { reduction: 0, hue: null, intensity: null, luminosity: null };
-  let totalReduction = 0;
+  if (!calendar?.moonsArray?.length) return { illumination: 0, hue: null, intensity: null, luminosity: null };
   let totalIllumination = 0;
   const coloredMoons = [];
   for (const moon of calendar.moonsArray) {
     const position = getMoonPhasePosition(moon, game.time.components, calendar);
-    const illumination = (1 - Math.cos(position * 2 * Math.PI)) / 2;
+    const litFraction = (1 - Math.cos(position * 2 * Math.PI)) / 2;
+    const { type } = getEclipseAtDate(moon, game.time.components, calendar);
+    const illumination = litFraction * (isLunarEclipse(type) ? LUNAR_ECLIPSE_DIMMING[type] : 1);
     const moonMax = moon.moonBrightnessMax ?? 0.15;
-    const nightFactor = (baseDarkness - 0.5) / 0.5;
-    totalReduction += illumination * moonMax * nightFactor;
     totalIllumination += illumination * moonMax;
-    if (illumination > 0.3 && moon.color) {
+    if (type === ECLIPSE_TYPES.TOTAL_LUNAR && litFraction > 0.3) coloredMoons.push({ hsl: BLOOD_MOON_HSL, illumination: litFraction });
+    else if (illumination > 0.3 && moon.color) {
       const rgb = foundry.utils.Color.from(moon.color);
       const hsl = rgb.hsl;
       if (hsl[1] > 0.1) coloredMoons.push({ hsl, illumination });
@@ -128,7 +138,22 @@ export function calculateMoonIllumination(baseDarkness) {
     intensity = Math.min(0.5, (weightedSat / totalWeight) * 0.55);
   }
   const luminosity = Math.min(0.25, totalIllumination * 0.5);
-  return { reduction: Math.min(0.3, totalReduction), hue, intensity, luminosity };
+  return { illumination: Math.min(0.3, totalIllumination), hue, intensity, luminosity };
+}
+
+/**
+ * Determine the minimum darkness imposed by any in-progress solar eclipse.
+ * @returns {number} Darkness floor between 0.0 (no eclipse) and 1.0
+ */
+export function calculateSolarEclipseDarkness() {
+  const calendar = game.time.calendar;
+  if (!calendar?.moonsArray?.length) return 0;
+  let darkness = 0;
+  for (const moon of calendar.moonsArray) {
+    const { type } = getEclipseAtDate(moon, game.time.components, calendar);
+    if (isSolarEclipse(type)) darkness = Math.max(darkness, SOLAR_ECLIPSE_DARKNESS[type] ?? 0);
+  }
+  return darkness;
 }
 
 /**
