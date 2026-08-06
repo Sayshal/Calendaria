@@ -273,6 +273,34 @@ export function rollPresetTemperature({ presetId, seasonClimate, zoneConfig, sea
 }
 
 /**
+ * Score a Celsius temperature against fixed heat/cold extreme bands.
+ * @param {number|null} temperature - Temperature in Celsius
+ * @returns {number} Extremity score 0-5
+ */
+function temperatureScore(temperature) {
+  if (temperature == null || !Number.isFinite(temperature)) return 0;
+  if (temperature >= 45 || temperature <= -30) return 5;
+  if (temperature >= 40 || temperature <= -20) return 4;
+  if (temperature >= 35 || temperature <= -10) return 3;
+  if (temperature >= 30 || temperature <= -5) return 2;
+  if (temperature >= 27 || temperature <= 0) return 1;
+  return 0;
+}
+
+/**
+ * Derive a 0-5 hazard severity as the worst of wind speed, precipitation intensity, temperature extremity, and darkness penalty.
+ * @param {object} [weather] - Weather state { wind, precipitation, temperature, darknessPenalty }
+ * @returns {number} Severity 0-5
+ */
+export function computeWeatherSeverity(weather) {
+  const windScore = weather?.wind?.speed ?? 0;
+  const precipScore = Math.ceil((weather?.precipitation?.intensity ?? 0) * 5);
+  const darknessScore = Math.ceil((weather?.darknessPenalty ?? 0) * 5);
+  const worst = Math.max(windScore, precipScore, temperatureScore(weather?.temperature), darknessScore);
+  return Math.max(0, Math.min(5, Math.round(worst)));
+}
+
+/**
  * Generate weather for all 4 intraday periods with chained inertia.
  * Period order: night → morning → afternoon → evening.
  * @param {object} options - Generation options

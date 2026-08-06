@@ -4,7 +4,7 @@ vi.mock('../../scripts/utils/logger.mjs', () => ({ log: vi.fn() }));
 vi.mock('../../scripts/utils/localization.mjs', () => ({ format: (k) => k, localize: (k) => k }));
 vi.mock('../../scripts/utils/macro-utils.mjs', () => ({ executeMacroById: vi.fn() }));
 vi.mock('../../scripts/utils/permissions.mjs', () => ({ canChangeWeather: () => true }));
-vi.mock('../../scripts/utils/socket.mjs', () => ({ CalendariaSocket: { emit: vi.fn() } }));
+vi.mock('../../scripts/utils/socket.mjs', () => ({ CalendariaSocket: { emit: vi.fn(), isPrimaryGM: () => false } }));
 vi.mock('../../scripts/calendar/calendar-manager.mjs', () => ({ default: { getActiveCalendar: () => null } }));
 vi.mock('../../scripts/calendar/calendar-loader.mjs', () => ({ isBundledCalendar: () => false }));
 vi.mock('../../scripts/weather/weather-generator.mjs', () => ({
@@ -15,7 +15,8 @@ vi.mock('../../scripts/weather/weather-generator.mjs', () => ({
   generateIntradayWeather: vi.fn(),
   generateWeather: vi.fn(),
   mergeClimateConfig: vi.fn(),
-  seededRandom: vi.fn()
+  seededRandom: vi.fn(),
+  computeWeatherSeverity: () => 3
 }));
 vi.mock('../../scripts/weather/data/climate-data.mjs', () => ({ CLIMATE_ZONE_TEMPLATES: {} }));
 vi.mock('../../scripts/weather/data/weather-presets.mjs', () => ({
@@ -72,5 +73,32 @@ describe('WeatherManager.applySeasonAlias', () => {
     const result = WeatherManager.applySeasonAlias(baseSeason, zone);
     expect(result.name).toBe('High Sun');
     expect(result.color).toBe('#87ceeb');
+  });
+});
+
+describe('WeatherManager.getCurrentWeather', () => {
+  const stored = {
+    _default: {
+      id: 'fog',
+      temperature: 10,
+      wind: { speed: 0 },
+      precipitation: { type: 'rain', intensity: 0.1 },
+      darknessPenalty: 0.05,
+      periods: { night: { id: 'clear', temperature: 8, wind: { speed: 0 }, precipitation: { type: null, intensity: 0 }, darknessPenalty: 0 } }
+    }
+  };
+
+  it('attaches derived severity to the weather and its periods without persisting it', async () => {
+    game.settings.get = vi.fn((_module, key) => (key === 'currentWeather' ? stored : undefined));
+    await WeatherManager.initialize();
+    const weather = WeatherManager.getCurrentWeather('_default');
+    expect(weather.severity).toBe(3);
+    expect(weather.periods.night.severity).toBe(3);
+    expect(stored._default.severity).toBeUndefined();
+    expect(stored._default.periods.night.severity).toBeUndefined();
+  });
+
+  it('returns null for a zone with no stored weather', () => {
+    expect(WeatherManager.getCurrentWeather('missing-zone')).toBeNull();
   });
 });

@@ -6,7 +6,17 @@ import { canChangeWeather } from '../utils/permissions.mjs';
 import { CalendariaSocket } from '../utils/socket.mjs';
 import { CLIMATE_ZONE_TEMPLATES } from './data/climate-data.mjs';
 import { ALL_PRESETS, getAllPresets, getPreset, resolveWeatherSoundPath, WEATHER_CATEGORIES } from './data/weather-presets.mjs';
-import { applyForecastVariance, applyTempModifier, dateSeed, generateForecast, generateIntradayWeather, generateWeather, mergeClimateConfig, seededRandom } from './weather-generator.mjs';
+import {
+  applyForecastVariance,
+  applyTempModifier,
+  computeWeatherSeverity,
+  dateSeed,
+  generateForecast,
+  generateIntradayWeather,
+  generateWeather,
+  mergeClimateConfig,
+  seededRandom
+} from './weather-generator.mjs';
 
 /**
  * Weather Manager.
@@ -224,14 +234,21 @@ export default class WeatherManager {
   }
 
   /**
-   * Get the current weather for a zone.
+   * Get the current weather for a zone, with severity derived at read time rather than persisted.
    * @param {string} [zoneId] - Zone ID (resolves from active scene if omitted)
    * @param {object} [scene] - Scene to resolve zone from
-   * @returns {object|null} Current weather state
+   * @returns {object|null} Current weather state, with a derived 0-5 severity
    */
   static getCurrentWeather(zoneId, scene) {
     const resolvedZoneId = zoneId ?? this.getActiveZone(null, scene ?? game.scenes?.active)?.id ?? this.DEFAULT_ZONE;
-    return this.#currentWeatherByZone[resolvedZoneId] ?? null;
+    const weather = this.#currentWeatherByZone[resolvedZoneId];
+    if (!weather) return null;
+    const result = { ...weather, severity: computeWeatherSeverity(weather) };
+    if (weather.periods) {
+      result.periods = {};
+      for (const [periodId, periodWeather] of Object.entries(weather.periods)) result.periods[periodId] = { ...periodWeather, severity: computeWeatherSeverity(periodWeather) };
+    }
+    return result;
   }
 
   /**

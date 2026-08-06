@@ -3,6 +3,7 @@ import {
   applyForecastVariance,
   applyTempModifier,
   applyWeatherInertia,
+  computeWeatherSeverity,
   dateSeed,
   generateForecast,
   generateIntradayWeather,
@@ -643,5 +644,46 @@ describe('generateForecast() — intraday', () => {
     // Day 2 exists and has period data
     expect(forecast[1].periods).toBeDefined();
     expect(forecast[1].periods.night).toBeDefined();
+  });
+});
+
+describe('computeWeatherSeverity', () => {
+  const clear = { temperature: 20, wind: { speed: 0 }, precipitation: { type: null, intensity: 0 }, darknessPenalty: 0 };
+
+  it('scores calm mild weather as 0', () => {
+    expect(computeWeatherSeverity(clear)).toBe(0);
+  });
+
+  it('scores missing or empty input as 0', () => {
+    expect(computeWeatherSeverity()).toBe(0);
+    expect(computeWeatherSeverity({})).toBe(0);
+  });
+
+  it('scores fog above zero from its drizzle intensity', () => {
+    expect(computeWeatherSeverity({ ...clear, temperature: 12, precipitation: { type: 'rain', intensity: 0.1 } })).toBe(1);
+  });
+
+  it('scores calm fog above zero from its darkness penalty alone', () => {
+    expect(computeWeatherSeverity({ ...clear, temperature: 8, darknessPenalty: 0.05 })).toBe(1);
+  });
+
+  it('scores a heat wave above zero from temperature alone', () => {
+    expect(computeWeatherSeverity({ ...clear, temperature: 42 })).toBe(4);
+  });
+
+  it('scores extreme cold from temperature alone', () => {
+    expect(computeWeatherSeverity({ ...clear, temperature: -35 })).toBe(5);
+  });
+
+  it('scores full precipitation intensity as 5', () => {
+    expect(computeWeatherSeverity({ ...clear, precipitation: { type: 'rain', intensity: 0.95 } })).toBe(5);
+  });
+
+  it('scores top-of-scale wind as 5', () => {
+    expect(computeWeatherSeverity({ ...clear, wind: { speed: 5 } })).toBe(5);
+  });
+
+  it('takes the worst term rather than a sum', () => {
+    expect(computeWeatherSeverity({ temperature: 42, wind: { speed: 2 }, precipitation: { intensity: 0.4 }, darknessPenalty: 0.1 })).toBe(4);
   });
 });

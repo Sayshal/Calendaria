@@ -1630,9 +1630,9 @@ export const CalendariaAPI = {
   },
 
   /**
-   * Get the current weather.
+   * Get the current weather, including a severity derived at read time from wind, precipitation, temperature, and darkness penalty.
    * @param {string} [zoneId] - Zone ID (resolves from active scene if omitted)
-   * @returns {object|null} Current weather state with id, label, icon, color, temperature
+   * @returns {object|null} Current weather state with id, label, icon, color, temperature, and severity (0-5)
    */
   getCurrentWeather(zoneId) {
     return WeatherManager.getCurrentWeather(zoneId);
@@ -1651,7 +1651,7 @@ export const CalendariaAPI = {
    * Get weather for a specific intraday period from the current day.
    * @param {string} periodName - Period ID: 'night', 'morning', 'afternoon', or 'evening'
    * @param {string} [zoneId] - Zone ID (resolves from active scene if omitted)
-   * @returns {object|null} Weather data for the requested period, or null if intraday is disabled
+   * @returns {object|null} Weather data for the requested period including a derived severity (0-5), or null if intraday is disabled
    */
   getWeatherForPeriod(periodName, zoneId) {
     const weather = WeatherManager.getCurrentWeather(zoneId);
