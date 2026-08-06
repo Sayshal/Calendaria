@@ -660,6 +660,7 @@ export default class WeatherManager {
    * @param {number} [options.days] - Number of days
    * @param {string} [options.zoneId] - Zone ID override
    * @param {number} [options.accuracy] - Forecast accuracy 0-100 (default: from setting)
+   * @param {boolean} [options.playerView] - Force player-grade output (accuracy variance, no periods) for a GM caller
    * @returns {object[]} Forecast array
    */
   static getForecast(options = {}) {
@@ -669,7 +670,7 @@ export default class WeatherManager {
     const maxDays = game.settings.get(MODULE.ID, SETTINGS.FORECAST_DAYS) ?? 7;
     const days = Math.min(options.days || maxDays, maxDays);
     const accuracy = options.accuracy ?? game.settings.get(MODULE.ID, SETTINGS.FORECAST_ACCURACY) ?? 70;
-    const isGM = game.user.isGM;
+    const isGM = options.playerView ? false : game.user.isGM;
     const customPresets = this.getCustomPresets();
     const fullPlan = game.settings.get(MODULE.ID, SETTINGS.WEATHER_FORECAST_PLAN) || {};
     const plan = zoneId ? (fullPlan[zoneId] ?? {}) : {};
@@ -756,7 +757,7 @@ export default class WeatherManager {
       getDaysInMonth: this.#makeDaysInMonth(calendar)
     });
     this.#legacyForecastCache = { key: cacheKey, forecast };
-    if (!game.user.isGM) return forecast.map(({ periods: _, ...rest }) => rest);
+    if (options.playerView || !game.user.isGM) return forecast.map(({ periods: _, ...rest }) => rest);
     return forecast;
   }
 

@@ -107,6 +107,14 @@ export default class CalendariaSettings {
       [SETTINGS.CHRONICLE_SHOW_WEATHER]: { name: 'Chronicle Show Weather', scope: 'client', config: false, type: new BooleanField({ initial: true }) },
       [SETTINGS.CHRONICLE_SHOW_SEASON_CHANGES]: { name: 'Chronicle Show Season Changes', scope: 'client', config: false, type: new BooleanField({ initial: true }) },
       [SETTINGS.CHRONICLE_VIEW_MODE]: { name: 'Chronicle View Mode', scope: 'client', config: false, type: new StringField({ initial: 'scroll' }) },
+      [SETTINGS.WEEKLY_ALMANAC]: {
+        name: 'CALENDARIA.Settings.WeeklyAlmanac.Name',
+        hint: 'CALENDARIA.Settings.WeeklyAlmanac.Hint',
+        scope: 'world',
+        config: false,
+        type: new BooleanField({ initial: false })
+      },
+      [SETTINGS.ALMANAC_LAST_WEEK]: { name: 'Almanac Last Published Week', scope: 'world', config: false, type: new StringField({ initial: '' }) },
       [SETTINGS.CHRONICLE_POSITION]: { name: 'Chronicle Position', scope: 'user', config: false, type: new ObjectField({ nullable: true, initial: null }) },
       [SETTINGS.SUN_DIAL_CRANK_MODE]: { name: 'Sun Dial Crank Mode', scope: 'user', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.SUN_DIAL_STICKY_STATES]: { name: 'Sun Dial Sticky States', scope: 'user', config: false, type: new ObjectField({ initial: { position: false } }) },

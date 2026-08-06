@@ -24,6 +24,7 @@ export const SETTINGS = {
   ADVANCE_BASTION_ORDERS: 'advanceBastionOrders',
   ADVANCE_TIME_ON_REST: 'advanceTimeOnRest',
   ALLOW_SIDEBAR_OVERLAP: 'allowSidebarOverlap',
+  ALMANAC_LAST_WEEK: 'almanacLastWeek',
   AMBIENCE_INTENSITY: 'ambienceIntensity',
   AMBIENCE_SYNC: 'ambienceSync',
   AUTO_GENERATE_WEATHER: 'autoGenerateWeather',
@@ -224,6 +225,7 @@ export const SETTINGS = {
   WEATHER_SUPPRESS_MUFFLE: 'weatherSuppressMuffle',
   WEATHER_VISUAL_OVERRIDES: 'weatherVisualOverrides',
   WEATHER_YEAR_KEY_MIGRATED: 'weatherYearKeyMigrated',
+  WEEKLY_ALMANAC: 'weeklyAlmanac',
   WIND_SPEED_UNIT: 'windSpeedUnit'
 };
 

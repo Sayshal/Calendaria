@@ -15,6 +15,7 @@ import {
   onRenderChatMessageHTML,
   onRenderDocumentDirectory,
   patchTooltipActivate,
+  publishWeeklyAlmanac,
   registerWidgetCombatHooks
 } from './utils/_module.mjs';
 
@@ -83,6 +84,7 @@ export function registerHooks() {
   Hooks.on('updateWorldTime', TimeClock.onUpdateWorldTime.bind(TimeClock));
   Hooks.on(HOOKS.DAY_CHANGE, autoRevealCurrentDay);
   Hooks.on(HOOKS.DAY_CHANGE, onDayChangeForBastions);
+  Hooks.on(HOOKS.DAY_CHANGE, publishWeeklyAlmanac);
   Hooks.on(HOOKS.MOON_PHASE_CHANGE, onMoonPhaseChange);
   Hooks.on(HOOKS.WEATHER_CHANGE, onWeatherChange);
   Hooks.once('ready', () => Stopwatch.restore());

@@ -670,6 +670,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.CHRONICLE_SHOW_EMPTY]: { tab: 'chronicle', label: 'CALENDARIA.Chronicle.Settings.ShowEmpty.Name' },
     [SETTINGS.CHRONICLE_SHOW_WEATHER]: { tab: 'chronicle', label: 'CALENDARIA.Common.ShowWeather' },
     [SETTINGS.CHRONICLE_SHOW_SEASON_CHANGES]: { tab: 'chronicle', label: 'CALENDARIA.Chronicle.Settings.ShowSeasonChanges.Name' },
+    [SETTINGS.WEEKLY_ALMANAC]: { tab: 'chronicle', label: 'CALENDARIA.Settings.WeeklyAlmanac.Name' },
     [SETTINGS.CHAT_TIMESTAMP_MODE]: { tab: 'chat', label: 'CALENDARIA.Settings.ChatTimestampMode.Name' },
     [SETTINGS.CHAT_TIMESTAMP_SHOW_TIME]: { tab: 'chat', label: 'CALENDARIA.Settings.ChatTimestampShowTime.Name' },
     [SETTINGS.PERMISSIONS]: { tab: 'permissions', label: 'CALENDARIA.SettingsPanel.Tab.Permissions' },
@@ -930,6 +931,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     ],
     'chronicle-display': [SETTINGS.CHRONICLE_ENTRY_DEPTH, SETTINGS.CHRONICLE_SHOW_EMPTY, SETTINGS.CHRONICLE_EMPTY_CONTENT_TYPES],
     'chronicle-content': [SETTINGS.CHRONICLE_SHOW_WEATHER, SETTINGS.CHRONICLE_SHOW_SEASON_CHANGES],
+    'chronicle-almanac': [SETTINGS.WEEKLY_ALMANAC],
     'fog-of-war': [SETTINGS.FOG_OF_WAR_ENABLED, SETTINGS.FOG_OF_WAR_CONFIG, SETTINGS.FOG_OF_WAR_START_DATE, SETTINGS.FOG_OF_WAR_REVEAL_INTERMEDIATE, SETTINGS.FOG_OF_WAR_NAV_MODE],
     'cinematic-behavior': [SETTINGS.CINEMATIC_ENABLED, SETTINGS.CINEMATIC_THRESHOLD, SETTINGS.CINEMATIC_THRESHOLD_UNIT, SETTINGS.CINEMATIC_ON_REST],
     'cinematic-animation': [SETTINGS.CINEMATIC_PANEL_DURATION],
@@ -1417,6 +1419,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     ];
     context.chronicleShowWeather = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_SHOW_WEATHER);
     context.chronicleShowSeasonChanges = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_SHOW_SEASON_CHANGES);
+    context.weeklyAlmanac = game.settings.get(MODULE.ID, SETTINGS.WEEKLY_ALMANAC);
     context.chronicleBigCalButton = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_BIG_CAL_BUTTON);
     context.chronicleHudButton = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_HUD_BUTTON);
     context.chronicleMiniCalButton = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_MINI_CAL_BUTTON);
@@ -1770,6 +1773,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     if ('chronicleShowWeather' in data) await game.settings.set(MODULE.ID, SETTINGS.CHRONICLE_SHOW_WEATHER, data.chronicleShowWeather);
     if ('chronicleShowSeasonChanges' in data) await game.settings.set(MODULE.ID, SETTINGS.CHRONICLE_SHOW_SEASON_CHANGES, data.chronicleShowSeasonChanges);
+    if ('weeklyAlmanac' in data) await game.settings.set(MODULE.ID, SETTINGS.WEEKLY_ALMANAC, data.weeklyAlmanac);
     if ('chronicleBigCalButton' in data) await game.settings.set(MODULE.ID, SETTINGS.CHRONICLE_BIG_CAL_BUTTON, data.chronicleBigCalButton);
     if ('chronicleHudButton' in data) await game.settings.set(MODULE.ID, SETTINGS.CHRONICLE_HUD_BUTTON, data.chronicleHudButton);
     if ('chronicleMiniCalButton' in data) await game.settings.set(MODULE.ID, SETTINGS.CHRONICLE_MINI_CAL_BUTTON, data.chronicleMiniCalButton);

@@ -111,6 +111,7 @@ globalThis.foundry = {
       return flat;
     }),
     deepClone: vi.fn((obj) => JSON.parse(JSON.stringify(obj))),
+    escapeHTML: vi.fn((str) => String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')),
     Color: {
       from: vi.fn((hex) => {
         const r = parseInt(hex.slice(1, 3), 16) / 255;

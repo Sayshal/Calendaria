@@ -1,7 +1,7 @@
 import { BigCal, Chronicle, MiniCal } from '../applications/_module.mjs';
 import { CalendarManager, CalendarRegistry } from '../calendar/_module.mjs';
 import { COMPASS_DIRECTIONS, HOOKS, MODULE, SETTINGS, WIND_SPEEDS } from '../constants.mjs';
-import { NoteManager, addDays, addMonths, addYears, daysBetween, getNextOccurrences, monthsBetween } from '../notes/_module.mjs';
+import { NoteManager, addDays, addMonths, addYears, compareDates, daysBetween, getNextOccurrences, monthsBetween } from '../notes/_module.mjs';
 import TimeClock, { getTimeIncrements } from '../time/time-clock.mjs';
 import {
   ECLIPSE_TYPES,
@@ -1643,6 +1643,38 @@ function enrichEvent(config, label) {
 }
 
 /**
+ * Notes as clickable links for a date or `from to` range. Renders nothing when no notes match.
+ * @param {object} config - Parsed enricher config
+ * @param {object} calendar - Resolved calendar instance
+ * @param {object} components - Resolved time components
+ * @returns {HTMLElement} Enricher element
+ */
+function buildNoteLinks(config, calendar, components) {
+  const range = parseTwoDates(config.values);
+  const start = range ? range.date1 : config.values.length ? parseDateFromValues(config.values) : getCurrentDateTime(calendar, components);
+  const end = range ? range.date2 : start;
+  if (!start || !end) return createErrorElement('CALENDARIA.Enricher.Error.InvalidDate');
+  const container = document.createElement('span');
+  container.classList.add('calendaria-enricher', 'calendaria-enricher--notes');
+  const last = { year: end.year, month: end.month - 1, dayOfMonth: end.day - 1 };
+  let date = { year: start.year, month: start.month - 1, dayOfMonth: start.day - 1 };
+  for (let guard = 0; guard < 366 && compareDates(date, last) <= 0; guard++) {
+    const dateStr = range ? formatDate({ year: date.year, month: date.month + 1, day: date.dayOfMonth + 1 }, 'dateLong', calendar) : null;
+    for (const note of NoteManager.getNotesForDate(date.year, date.month, date.dayOfMonth)) {
+      if (container.childNodes.length) container.append(', ');
+      if (dateStr) {
+        const dateEl = document.createElement('strong');
+        dateEl.textContent = `${dateStr}: `;
+        container.appendChild(dateEl);
+      }
+      container.appendChild(createContentLink('event', note.name, { calPageId: note.id }, 'fa-calendar-day', _loc('CALENDARIA.Enricher.Tooltip.Notes', { value: note.name })));
+    }
+    date = addDays(date, 1);
+  }
+  return container;
+}
+
+/**
  * Notes for a date.
  * @param {object} config - Parsed enricher config
  * @param {string|null} label - Custom label override
@@ -1650,6 +1682,7 @@ function enrichEvent(config, label) {
  */
 function enrichNotes(config, label) {
   const { calendar, components } = resolveCalendar(config);
+  if (config.links) return buildNoteLinks(config, calendar, components);
   if (config.count) {
     const current = getCurrentDateTime(calendar, components);
     const scope = config.scope?.toLowerCase();

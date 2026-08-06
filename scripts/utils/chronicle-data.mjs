@@ -12,7 +12,7 @@ import { canViewMoons } from './permissions.mjs';
  * @param {object} w - Weather data object
  * @returns {string|null} Formatted weather sentence or null
  */
-function buildWeatherSentence(w) {
+export function buildWeatherSentence(w) {
   if (!w) return null;
   const label = w.label ? _loc(w.label) : null;
   const temp = w.temperature != null ? WeatherManager.formatTemperature(w.temperature) : null;
