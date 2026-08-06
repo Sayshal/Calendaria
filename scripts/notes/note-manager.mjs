@@ -602,6 +602,16 @@ export default class NoteManager {
   }
 
   /**
+   * Get all unique subject UUIDs referenced by notes.
+   * @returns {string[]}  Array of document UUIDs
+   */
+  static getAllUsedSubjects() {
+    const subjects = new Set();
+    for (const stub of this.#noteIndex.values()) if (stub.flagData.subjects) stub.flagData.subjects.forEach((uuid) => subjects.add(uuid));
+    return Array.from(subjects);
+  }
+
+  /**
    * Get predefined preset definitions.
    * @returns {object[]}  Array of preset definitions
    */

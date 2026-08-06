@@ -80,11 +80,13 @@ function compassLabel(degrees) {
  * @param {boolean} [options.showEmpty] - Include days with no events
  * @param {string} [options.entryDepth] - Content depth: title, excerpt, full, collapsible
  * @param {string[]} [options.categoryFilter] - Preset IDs to include; empty/missing = no filter
+ * @param {string[]} [options.subjectFilter] - Subject document UUIDs to include; empty/missing = no filter
  * @returns {object[]} Array of day entry objects
  */
 export function buildScrollEntries(startDate, endDate, options = {}) {
-  const { calendarId = null, showEmpty = false, entryDepth = 'excerpt', categoryFilter = [] } = options;
+  const { calendarId = null, showEmpty = false, entryDepth = 'excerpt', categoryFilter = [], subjectFilter = [] } = options;
   const categoryFilterSet = Array.isArray(categoryFilter) && categoryFilter.length > 0 ? new Set(categoryFilter) : null;
+  const subjectFilterSet = Array.isArray(subjectFilter) && subjectFilter.length > 0 ? new Set(subjectFilter) : null;
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return [];
   const fogEnabled = isFogEnabled();
@@ -127,7 +129,7 @@ export function buildScrollEntries(startDate, endDate, options = {}) {
     const isPastOrToday = compareDates(current, today) <= 0;
     const internalComponents = { year: year - yearZero, month, dayOfMonth };
     const banners = [];
-    const filterActiveSuppressBanners = !!categoryFilterSet;
+    const filterActiveSuppressBanners = !!categoryFilterSet || !!subjectFilterSet;
     if (showSeasons && !filterActiveSuppressBanners) {
       const season = WeatherManager.applySeasonAlias(calendar.getCurrentSeason?.(internalComponents), aliasZone);
       const seasonName = season?.name ? _loc(season.name) : null;
@@ -159,7 +161,8 @@ export function buildScrollEntries(startDate, endDate, options = {}) {
       }
     }
     const stubsAll = NoteManager.getNotesForDate(year, month, dayOfMonth, calendarId);
-    const stubs = categoryFilterSet ? stubsAll.filter((stub) => Array.isArray(stub.flagData?.categories) && stub.flagData.categories.some((c) => categoryFilterSet.has(c))) : stubsAll;
+    let stubs = categoryFilterSet ? stubsAll.filter((stub) => Array.isArray(stub.flagData?.categories) && stub.flagData.categories.some((c) => categoryFilterSet.has(c))) : stubsAll;
+    if (subjectFilterSet) stubs = stubs.filter((stub) => Array.isArray(stub.flagData?.subjects) && stub.flagData.subjects.some((uuid) => subjectFilterSet.has(uuid)));
     const notes = stubs.map((stub) => {
       const props = resolveStubDisplayProps(stub);
       const iconStr = props.icon ?? '';

@@ -45,7 +45,9 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       setScheduleMode: this._onSetScheduleMode,
       clearRepeatEndDate: this._onClearRepeatEndDate,
       openConditionBuilder: this._onOpenConditionBuilder,
-      openFestivalEditor: this._onOpenFestivalEditor
+      openFestivalEditor: this._onOpenFestivalEditor,
+      openSubject: this._onOpenSubject,
+      removeSubject: this._onRemoveSubject
     },
     form: { submitOnChange: true, closeOnSubmit: false }
   };
@@ -246,6 +248,11 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     this.element.classList.toggle('edit-mode', this.isEditMode);
     this.element.classList.remove('dnd5e2', 'dnd5e-journal');
     for (const select of this.element.querySelectorAll('select[data-ownership-user]')) select.addEventListener('change', (e) => this.#onOwnershipChange(e));
+    const dropzone = this.element.querySelector('.subjects-dropzone');
+    if (dropzone) {
+      dropzone.addEventListener('dragover', (event) => event.preventDefault());
+      dropzone.addEventListener('drop', (event) => this.#onDropSubject(event));
+    }
     for (const input of this.element.querySelectorAll('.time-inputs input[type="text"]')) {
       input.addEventListener('blur', () => {
         input.value = String(parseInt(input.value) || 0).padStart(2, '0');
@@ -388,6 +395,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     context.isGM = game.user.isGM;
     context.canEdit = this.document.isOwner;
     context.canSetVisibility = game.user.isGM || this.document.isOwner;
+    context.subjectEntries = (this.document.system.subjects || []).map((uuid) => ({ uuid, name: fromUuidSync(uuid)?.name || uuid }));
     if (this.isEditMode) {
       const { ungroupedTabs, tabGroups } = this.#prepareTabGroups();
       context.ungroupedTabs = ungroupedTabs;
@@ -826,6 +834,41 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     } finally {
       NoteManager.disableSuppressOwnershipRebuild();
     }
+  }
+
+  /**
+   * Add a dropped document to the note's subject list.
+   * @param {DragEvent} event - The drop event
+   */
+  async #onDropSubject(event) {
+    event.preventDefault();
+    const data = foundry.applications.ux.TextEditor.implementation.getDragEventData(event);
+    if (!data?.uuid) return;
+    const subjects = this.document.system.subjects || [];
+    if (subjects.includes(data.uuid)) return;
+    await this.document.update({ 'system.subjects': [...subjects, data.uuid] });
+  }
+
+  /**
+   * Open the sheet of a referenced subject document.
+   * @param {PointerEvent} event - The click event
+   * @param {HTMLElement} target - The clicked element
+   */
+  static async _onOpenSubject(event, target) {
+    event.preventDefault();
+    const doc = await fromUuid(target.dataset.uuid);
+    doc?.sheet?.render(true);
+  }
+
+  /**
+   * Remove a subject reference from the note.
+   * @param {PointerEvent} event - The click event
+   * @param {HTMLElement} target - The clicked element
+   */
+  static async _onRemoveSubject(event, target) {
+    event.preventDefault();
+    const uuid = target.dataset.uuid;
+    await this.document.update({ 'system.subjects': (this.document.system.subjects || []).filter((u) => u !== uuid) });
   }
 
   /**

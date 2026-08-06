@@ -111,20 +111,24 @@
       }
     }
 
-    .category-filter {
+    .category-filter,
+    .subject-filter {
       position: relative;
     }
 
-    .category-filter-toggle {
+    .category-filter-toggle,
+    .subject-filter-toggle {
       position: relative;
 
-      &.category-filter-toggle--active {
+      &.category-filter-toggle--active,
+      &.subject-filter-toggle--active {
         color: var(--atlas-bg, rgb(31 31 31));
         background: var(--atlas-accent, var(--atlas-button-hover, rgb(74 74 74)));
       }
     }
 
-    .category-filter-badge {
+    .category-filter-badge,
+    .subject-filter-badge {
       position: absolute;
       top: -0.25rem;
       right: -0.25rem;
@@ -140,7 +144,8 @@
       background: var(--atlas-accent, rgb(240 62 62));
     }
 
-    .category-filter-menu {
+    .category-filter-menu,
+    .subject-filter-menu {
       z-index: 100;
       position: absolute;
       top: calc(100% + 0.25rem);
@@ -161,17 +166,20 @@
       font-size: 0.75rem;
     }
 
-    .category-filter-list {
+    .category-filter-list,
+    .subject-filter-list {
       margin: 0;
       padding: 0.25rem 0;
       list-style: none;
     }
 
-    .category-filter-item {
+    .category-filter-item,
+    .subject-filter-item {
       padding: 0;
     }
 
-    .category-filter-option {
+    .category-filter-option,
+    .subject-filter-option {
       gap: 0.5rem;
       display: flex;
       justify-content: flex-start;
@@ -191,7 +199,8 @@
         background: var(--atlas-button-hover, rgb(74 74 74));
       }
 
-      &.category-filter-option--active {
+      &.category-filter-option--active,
+      &.subject-filter-option--active {
         color: var(--atlas-text, rgb(224 224 224));
         font-weight: 600;
         background: color-mix(in srgb, var(--atlas-accent, var(--atlas-button-hover, rgb(74 74 74))) 30%, transparent);
@@ -202,11 +211,13 @@
       }
     }
 
-    .category-filter-menu-footer {
+    .category-filter-menu-footer,
+    .subject-filter-menu-footer {
       padding: 0.25rem;
       border-top: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
 
-      .category-filter-clear {
+      .category-filter-clear,
+      .subject-filter-clear {
         gap: 0.375rem;
         display: flex;
         justify-content: center;

@@ -39,6 +39,7 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
     this._viewMode = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_VIEW_MODE) || 'scroll';
     this._categoryFilterOverride = Array.isArray(options.categoryFilter) ? [...options.categoryFilter] : null;
     this._categoryFilter = this._categoryFilterOverride ?? Array.from(game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_CATEGORY_FILTER) ?? []);
+    this._subjectFilter = Array.isArray(options.subjectFilter) ? [...options.subjectFilter] : [];
     this._hooks = [];
     this._entries = [];
     this._loading = false;
@@ -84,7 +85,7 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Show the chronicle.
-   * @param {object} [options] - Options { startDate, endDate, calendarId, theme }
+   * @param {object} [options] - Options { startDate, endDate, calendarId, theme, categoryFilter, subjectFilter }
    * @returns {Chronicle} The chronicle instance
    */
   static show(options = {}) {
@@ -105,6 +106,8 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
       instance._categoryFilterOverride = null;
       instance._categoryFilter = Array.from(game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_CATEGORY_FILTER) ?? []);
     }
+    if (Array.isArray(options.subjectFilter)) instance._subjectFilter = [...options.subjectFilter];
+    else if (options.subjectFilter === null) instance._subjectFilter = [];
     instance.render({ force: true });
     return instance;
   }
@@ -140,7 +143,8 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
       calendarId: this._calendarId,
       showEmpty: this._showEmpty,
       entryDepth: this._entryDepth,
-      categoryFilter: this._categoryFilter
+      categoryFilter: this._categoryFilter,
+      subjectFilter: this._subjectFilter
     });
     const canAdd = canAddNotes();
     for (const entry of this._entries) {
@@ -175,6 +179,11 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
     context.hasCategoryFilter = this._categoryFilter.length > 0;
     context.categorySelectedCount = this._categoryFilter.length;
     context.categoryFilterLocked = !!this._categoryFilterOverride;
+    const subjectSelectedSet = new Set(this._subjectFilter);
+    const subjectUuids = Array.from(new Set([...NoteManager.getAllUsedSubjects(), ...this._subjectFilter]));
+    context.subjectOptions = subjectUuids.map((uuid) => ({ uuid, label: fromUuidSync(uuid)?.name || uuid, active: subjectSelectedSet.has(uuid) })).sort((a, b) => a.label.localeCompare(b.label));
+    context.hasSubjectFilter = this._subjectFilter.length > 0;
+    context.subjectSelectedCount = this._subjectFilter.length;
     context.lockedRange = this._lockedRange;
     if (this._lockedRange) {
       const calendar = CalendarManager.getActiveCalendar();
@@ -307,29 +316,8 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
       await game.settings.set(MODULE.ID, SETTINGS.CHRONICLE_VIEW_MODE, this._viewMode);
       await this.render();
     });
-    const toggle = el.querySelector('.category-filter-toggle');
-    const menu = el.querySelector('.category-filter-menu');
-    if (toggle && menu) {
-      const closeMenu = () => {
-        menu.hidden = true;
-        toggle.setAttribute('aria-expanded', 'false');
-        document.removeEventListener('mousedown', this._categoryFilterOutsideHandler, true);
-      };
-      const openMenu = () => {
-        menu.hidden = false;
-        toggle.setAttribute('aria-expanded', 'true');
-        this._categoryFilterOutsideHandler = (ev) => {
-          if (!menu.contains(ev.target) && !toggle.contains(ev.target)) closeMenu();
-        };
-        document.addEventListener('mousedown', this._categoryFilterOutsideHandler, true);
-      };
-      toggle.addEventListener('click', (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        if (menu.hidden) openMenu();
-        else closeMenu();
-      });
-    }
+    this.#bindFilterMenu(el, 'category');
+    this.#bindFilterMenu(el, 'subject');
     el.querySelectorAll('.category-filter-option').forEach((btn) => {
       btn.addEventListener('click', async (event) => {
         event.preventDefault();
@@ -353,6 +341,57 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
       this._restoreScrollTop = this.element?.querySelector('.scroll-container')?.scrollTop ?? null;
       await game.settings.set(MODULE.ID, SETTINGS.CHRONICLE_CATEGORY_FILTER, []);
       await this.render();
+    });
+    el.querySelectorAll('.subject-filter-option').forEach((btn) => {
+      btn.addEventListener('click', async (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const uuid = btn.dataset.subjectUuid;
+        if (!uuid) return;
+        const current = new Set(this._subjectFilter);
+        if (current.has(uuid)) current.delete(uuid);
+        else current.add(uuid);
+        this._subjectFilter = Array.from(current);
+        this._restoreScrollTop = this.element?.querySelector('.scroll-container')?.scrollTop ?? null;
+        await this.render();
+      });
+    });
+    el.querySelector('.subject-filter-clear')?.addEventListener('click', async (event) => {
+      event.preventDefault();
+      this._subjectFilter = [];
+      this._restoreScrollTop = this.element?.querySelector('.scroll-container')?.scrollTop ?? null;
+      await this.render();
+    });
+  }
+
+  /**
+   * Wire the open/close behaviour for a toolbar filter dropdown.
+   * @param {HTMLElement} root - The application root element
+   * @param {string} name - Filter name prefix matching the toggle and menu class names
+   */
+  #bindFilterMenu(root, name) {
+    const toggle = root.querySelector(`.${name}-filter-toggle`);
+    const menu = root.querySelector(`.${name}-filter-menu`);
+    if (!toggle || !menu) return;
+    const handlerKey = `_${name}FilterOutsideHandler`;
+    const closeMenu = () => {
+      menu.hidden = true;
+      toggle.setAttribute('aria-expanded', 'false');
+      document.removeEventListener('mousedown', this[handlerKey], true);
+    };
+    const openMenu = () => {
+      menu.hidden = false;
+      toggle.setAttribute('aria-expanded', 'true');
+      this[handlerKey] = (ev) => {
+        if (!menu.contains(ev.target) && !toggle.contains(ev.target)) closeMenu();
+      };
+      document.addEventListener('mousedown', this[handlerKey], true);
+    };
+    toggle.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (menu.hidden) openMenu();
+      else closeMenu();
     });
   }
 
@@ -465,7 +504,8 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
       calendarId: this._calendarId,
       showEmpty: this._showEmpty,
       entryDepth: this._entryDepth,
-      categoryFilter: this._categoryFilter
+      categoryFilter: this._categoryFilter,
+      subjectFilter: this._subjectFilter
     });
     if (batch.length > 0) {
       this._entries = [...batch, ...this._entries];
@@ -495,7 +535,8 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
       calendarId: this._calendarId,
       showEmpty: this._showEmpty,
       entryDepth: this._entryDepth,
-      categoryFilter: this._categoryFilter
+      categoryFilter: this._categoryFilter,
+      subjectFilter: this._subjectFilter
     });
     if (batch.length > 0) {
       this._entries = [...this._entries, ...batch];

@@ -54,6 +54,16 @@
           <span>{{moonConditionsDisplay}}</span>
         </div>
       {{/if}}
+      {{#if subjectEntries.length}}
+        <div class="metadata-row">
+          <i class="fas fa-user-tag"></i>
+          <span class="note-subjects">
+            {{#each subjectEntries}}
+              <a data-action="openSubject" data-uuid="{{this.uuid}}">{{this.name}}</a>
+            {{/each}}
+          </span>
+        </div>
+      {{/if}}
       {{#if equivalentDates.length}}
         <div class="equivalent-dates">
           {{#each equivalentDates}}

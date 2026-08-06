@@ -850,10 +850,35 @@ export const CalendariaAPI = {
    * @param {string} [options.color] - Event color (hex)
    * @param {string} [options.visibility] - Visibility level: 'visible', 'hidden', 'secret' (default 'visible')
    * @param {string} [options.displayStyle] - Display style: 'icon', 'pip', 'banner' (default 'label')
+   * @param {string[]} [options.subjects] - Document UUIDs this note is about (actors, journals, items)
+   * @param {string} [options.reminderType] - Reminder delivery: 'none', 'toast', 'chat', 'dialog'
+   * @param {string} [options.reminderTargets] - Reminder audience: 'all', 'gm', 'author', 'specific', 'viewers'
+   * @param {string[]} [options.reminderUsers] - User IDs notified when reminderTargets is 'specific'
+   * @param {number} [options.reminderOffset] - How far ahead of the note the reminder fires
+   * @param {string} [options.reminderUnit] - Offset unit: 'hour', 'day', 'week', 'month', 'year'
    * @param {false|'edit'|'view'} [options.openSheet] - Open the note sheet after creation in the given mode, or false to skip (default 'edit')
    * @returns {Promise<object>} Created note page
    */
-  async createNote({ name, content = '', startDate, endDate, allDay = true, conditionTree, categories = [], icon, color, visibility = 'visible', displayStyle, openSheet = 'edit' }) {
+  async createNote({
+    name,
+    content = '',
+    startDate,
+    endDate,
+    allDay = true,
+    conditionTree,
+    categories = [],
+    icon,
+    color,
+    visibility = 'visible',
+    displayStyle,
+    subjects = [],
+    reminderType,
+    reminderTargets,
+    reminderUsers,
+    reminderOffset,
+    reminderUnit,
+    openSheet = 'edit'
+  }) {
     if (!canAddNotes()) {
       ui.notifications.error('CALENDARIA.Permissions.NoAccess', { localize: true });
       return null;
@@ -867,8 +892,14 @@ export const CalendariaAPI = {
       icon: icon || 'fas fa-calendar-day',
       color: color || '#4a90e2',
       visibility,
-      displayStyle: displayStyle || DISPLAY_STYLES.ICON
+      displayStyle: displayStyle || DISPLAY_STYLES.ICON,
+      subjects
     };
+    if (reminderType !== undefined) noteData.reminderType = reminderType;
+    if (reminderTargets !== undefined) noteData.reminderTargets = reminderTargets;
+    if (reminderUsers !== undefined) noteData.reminderUsers = reminderUsers;
+    if (reminderOffset !== undefined) noteData.reminderOffset = reminderOffset;
+    if (reminderUnit !== undefined) noteData.reminderUnit = reminderUnit;
     return await NoteManager.createNote({ name, content, noteData, openSheet });
   },
 
@@ -883,6 +914,7 @@ export const CalendariaAPI = {
    * @param {object} [updates.conditionTree] - New condition tree for recurrence
    * @param {string[]} [updates.categories] - New preset IDs
    * @param {string} [updates.displayStyle] - New display style: 'icon', 'pip', 'banner'
+   * @param {string[]} [updates.subjects] - New subject document UUIDs
    * @returns {Promise<object>} Updated note page
    */
   async updateNote(pageId, updates) {
@@ -901,6 +933,7 @@ export const CalendariaAPI = {
     if (updates.color !== undefined) noteData.color = updates.color;
     if (updates.visibility !== undefined) noteData.visibility = updates.visibility;
     if (updates.displayStyle !== undefined) noteData.displayStyle = updates.displayStyle;
+    if (updates.subjects !== undefined) noteData.subjects = updates.subjects;
     return await NoteManager.updateNote(pageId, { name: updates.name, noteData: Object.keys(noteData).length > 0 ? noteData : undefined });
   },
 
@@ -1147,6 +1180,8 @@ export const CalendariaAPI = {
    * @param {object} [options.endDate] - End date
    * @param {string} [options.calendarId] - Calendar ID
    * @param {string} [options.theme] - Theme: parchment, logbook, arcane, modern
+   * @param {string[]|null} [options.categoryFilter] - Preset IDs to restrict the view to; null restores the saved filter
+   * @param {string[]|null} [options.subjectFilter] - Subject document UUIDs to restrict the view to; null clears it
    * @returns {Chronicle} The instance
    */
   showChronicle(options = {}) {

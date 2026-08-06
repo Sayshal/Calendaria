@@ -99,6 +99,7 @@ export class CalendarNoteDataModel extends foundry.abstract.TypeDataModel {
       macro: new fields.StringField({ nullable: true, blank: true }),
       sceneId: new fields.StringField({ nullable: true, blank: true }),
       playlistId: new fields.StringField({ nullable: true, blank: true }),
+      subjects: new fields.ArrayField(new fields.DocumentUUIDField(), { initial: [] }),
       hasDuration: new fields.BooleanField({ initial: false }),
       duration: new fields.NumberField({ integer: true, min: 1, initial: 1 }),
       showBookends: new fields.BooleanField({ initial: false }),
