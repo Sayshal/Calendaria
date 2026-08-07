@@ -576,13 +576,14 @@ export const CalendariaAPI = {
   },
 
   /**
-   * Get the current season.
+   * Get the season containing a given time.
+   * @param {number} [timestamp] - World time in seconds. Defaults to the current world time.
    * @returns {object|null} Season data with name and other properties
    */
-  getCurrentSeason() {
+  getCurrentSeason(timestamp) {
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar?.seasons) return null;
-    return calendar.getCurrentSeason() ?? null;
+    return calendar.getCurrentSeason(timestamp ?? game.time.worldTime) ?? null;
   },
 
   /**
