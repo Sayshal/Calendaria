@@ -909,6 +909,7 @@ export const CalendariaAPI = {
    * @param {string} pageId - Journal entry page ID
    * @param {object} updates - Updates to apply
    * @param {string} [updates.name] - New name
+   * @param {string} [updates.content] - New content (HTML)
    * @param {object} [updates.startDate] - New start date
    * @param {object} [updates.endDate] - New end date
    * @param {boolean} [updates.allDay] - New all-day setting
@@ -935,7 +936,7 @@ export const CalendariaAPI = {
     if (updates.visibility !== undefined) noteData.visibility = updates.visibility;
     if (updates.displayStyle !== undefined) noteData.displayStyle = updates.displayStyle;
     if (updates.subjects !== undefined) noteData.subjects = updates.subjects;
-    return await NoteManager.updateNote(pageId, { name: updates.name, noteData: Object.keys(noteData).length > 0 ? noteData : undefined });
+    return await NoteManager.updateNote(pageId, { name: updates.name, content: updates.content, noteData: Object.keys(noteData).length > 0 ? noteData : undefined });
   },
 
   /**
