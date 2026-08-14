@@ -112,13 +112,21 @@
         </div>
         <div class="form-group-stacked">
           <label>{{localize "CALENDARIA.Note.ReminderUnit.Label"}}</label>
-          <select name="system.reminderUnit" data-tooltip aria-label="{{localize 'CALENDARIA.Note.ReminderUnitTooltip'}}"
+          <select name="system.reminderUnit" data-tooltip
+            aria-label="{{localize 'CALENDARIA.Note.ReminderUnitTooltip'}}"
             {{#unless showReminderOptions}}disabled{{/unless}}>
             {{#each reminderUnitOptions}}
               <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
             {{/each}}
           </select>
         </div>
+        {{#if showPersistToDo}}
+          <label class="persist-todo" data-tooltip aria-label="{{localize 'CALENDARIA.Note.PersistToDoTooltip'}}">
+            <input type="checkbox" name="system.persistToDo" {{checked system.persistToDo}}
+              {{#unless showReminderOptions}}disabled{{/unless}}>
+            {{localize "CALENDARIA.Note.PersistToDo"}}
+          </label>
+        {{/if}}
         {{#if showReminderUsers}}
           <div class="form-group-stacked reminder-users">
             <label>{{localize "CALENDARIA.Note.ReminderUsers"}}</label>

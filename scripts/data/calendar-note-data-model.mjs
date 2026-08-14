@@ -96,6 +96,7 @@ export class CalendarNoteDataModel extends foundry.abstract.TypeDataModel {
       reminderType: new fields.StringField({ choices: ['none', 'toast', 'chat', 'dialog'], initial: 'toast' }),
       reminderTargets: new fields.StringField({ choices: ['all', 'gm', 'author', 'specific', 'viewers'], initial: 'all' }),
       reminderUsers: new fields.ArrayField(new fields.StringField(), { initial: [] }),
+      persistToDo: new fields.BooleanField({ initial: false }),
       macro: new fields.StringField({ nullable: true, blank: true }),
       sceneId: new fields.StringField({ nullable: true, blank: true }),
       playlistId: new fields.StringField({ nullable: true, blank: true }),

@@ -6,7 +6,7 @@ import { CalendarNoteDataModel, CalendariaCalendar } from './scripts/data/_modul
 import { FestivalManager } from './scripts/festivals/_module.mjs';
 import { registerHooks } from './scripts/hooks.mjs';
 import { initializeImporters } from './scripts/importers/_module.mjs';
-import { initializeChatCommander, initializeFXMaster } from './scripts/integrations/_module.mjs';
+import { initializeChatCommander, initializeDontForget, initializeFXMaster } from './scripts/integrations/_module.mjs';
 import { NoteManager, recoverOrphanedPresets } from './scripts/notes/_module.mjs';
 import CalendariaSettings from './scripts/settings-handler.mjs';
 import { EventScheduler, ReminderScheduler, TimeClock, TimeTracker } from './scripts/time/_module.mjs';
@@ -164,6 +164,7 @@ Hooks.once('ready', async () => {
   Hooks.on('renderHotbar', () => updateZonePositions('above-hotbar'));
   initializeChatCommander();
   initializeFXMaster();
+  initializeDontForget();
   initializeWeatherSound();
   Hooks.callAll(HOOKS.READY, { api: CalendariaAPI, calendar: CalendarManager.getActiveCalendar(), version: game.modules.get('calendaria')?.version });
   if (game.settings.get(MODULE.ID, SETTINGS.SHOW_TIME_KEEPER) && canViewTimeKeeper()) TimeKeeper.show({ silent: true });

@@ -1,5 +1,6 @@
 import { CalendarManager, CalendarRegistry } from '../calendar/_module.mjs';
 import { HOOKS, MODULE, SOCKET_TYPES } from '../constants.mjs';
+import { mirrorReminder } from '../integrations/dont-forget.mjs';
 import { NoteManager, getCurrentDate, isRecurringMatch } from '../notes/_module.mjs';
 import { CalendariaSocket } from '../utils/_module.mjs';
 
@@ -270,6 +271,7 @@ export default class ReminderScheduler {
         this.#sendChatReminder(note, message, targets);
         break;
     }
+    mirrorReminder(note, message, targets);
     Hooks.callAll(HOOKS.EVENT_TRIGGERED, { id: note.id, name: note.name, flagData: note.flagData, reminderType, isReminder: true });
   }
 

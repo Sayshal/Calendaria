@@ -1,5 +1,6 @@
 import { CalendarManager, CalendarRegistry, getEquivalentDates } from '../../calendar/_module.mjs';
 import { MODULE, SETTINGS, SOCKET_TYPES, TEMPLATES } from '../../constants.mjs';
+import { isDontForgetActive } from '../../integrations/dont-forget.mjs';
 import {
   addCustomPreset,
   applyPresetDefaultsToNoteData,
@@ -434,6 +435,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       const currentReminderUnit = this.document.system.reminderUnit || 'hour';
       context.reminderUnitOptions = ['hour', 'day', 'week', 'month', 'year'].map((u) => ({ value: u, label: _loc(`CALENDARIA.Note.ReminderUnit.${u}`), selected: currentReminderUnit === u }));
       context.showReminderUsers = currentReminderTargets === 'specific';
+      context.showPersistToDo = isDontForgetActive();
       const selectedReminderUsers = this.document.system.reminderUsers || [];
       context.userOptions = game.users.contents.map((u) => ({ id: u.id, name: u.name, selected: selectedReminderUsers.includes(u.id) }));
       context.ownershipEntries = this.#prepareOwnershipEntries();
@@ -641,9 +643,11 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     }
     if (target?.name === 'system.reminderType') {
       const disabled = target.value === 'none';
-      this.element.querySelector('select[name="system.reminderTargets"]')?.setAttribute('disabled', disabled);
-      this.element.querySelector('input[name="system.reminderOffset"]')?.setAttribute('disabled', disabled);
-      this.element.querySelector('select[name="system.reminderUnit"]')?.setAttribute('disabled', disabled);
+      const names = ['system.reminderTargets', 'system.reminderOffset', 'system.reminderUnit', 'system.persistToDo'];
+      for (const name of names) {
+        const field = this.element.querySelector(`[name="${name}"]`);
+        if (field) field.disabled = disabled;
+      }
     }
   }
 

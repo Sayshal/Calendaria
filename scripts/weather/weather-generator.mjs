@@ -288,16 +288,13 @@ function temperatureScore(temperature) {
 }
 
 /**
- * Weights applied to the hazards in descending order of their own 0-5 score. The worst counts in full and the rest
- * at diminishing weight, which puts the 0-10 ceiling within reach only when every hazard is at its own maximum.
+ * Weights applied to the hazards in descending order of their own 0-5 score.
  * @type {number[]}
  */
 const SEVERITY_WEIGHTS = [1, 0.5, 0.25, 0.25];
 
 /**
- * Derive a 0-10 hazard severity from wind speed, precipitation intensity, temperature extremity, and darkness penalty.
- * Each hazard is scored 0-5 on its own, then the scores stack by descending weight, so compound weather always
- * outranks any single condition driving it.
+ * Derive a 0-10 hazard severity by stacking wind, precipitation, temperature, and darkness scores in descending weight.
  * @param {object} [weather] - Weather state { wind, precipitation, temperature, darknessPenalty }
  * @returns {number} Severity 0-10
  */

@@ -555,8 +555,8 @@
 
       .subjects-empty {
         color: var(--atlas-text-dim, rgb(153 153 153));
-        font-size: var(--font-size-11);
         font-style: italic;
+        font-size: var(--font-size-11);
       }
     }
 
@@ -582,8 +582,8 @@
       width: 2rem;
       height: 2rem;
       border-radius: 50%;
-      cursor: pointer;
       overflow: hidden;
+      cursor: pointer;
 
       &:hover .icon-preview {
         opacity: 0.8;
@@ -602,9 +602,9 @@
     }
 
     color-picker.color-input {
+      align-items: stretch;
       width: 10.5rem;
       background: transparent;
-      align-items: stretch;
 
       input[type='text'] {
         flex: 1;
@@ -713,18 +713,18 @@
       align-items: center;
 
       .clear-btn {
+        display: flex;
+        flex: 0 0 auto;
+        justify-content: center;
+        align-items: center;
         width: 1.75rem;
         height: 1.75rem;
         padding: 0;
-        flex: 0 0 auto;
-        display: flex;
-        align-items: center;
-        justify-content: center;
         border: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
         border-radius: 0.25rem;
-        background: var(--atlas-input-bg, rgb(48 48 48));
         color: var(--atlas-text, rgb(224 224 224));
         cursor: pointer;
+        background: var(--atlas-input-bg, rgb(48 48 48));
       }
 
       .clear-btn:hover {
@@ -743,17 +743,17 @@
 
       .mode-option {
         gap: 0.5rem;
-        flex: 1;
-        padding: 0.5rem 0.75rem;
         display: flex;
-        align-items: center;
+        flex: 1;
         justify-content: center;
-        font-size: var(--font-size-12);
+        align-items: center;
+        padding: 0.5rem 0.75rem;
         border: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
         border-radius: 0.25rem;
-        background: var(--atlas-input-bg, rgb(48 48 48));
         color: var(--atlas-text, rgb(224 224 224));
+        font-size: var(--font-size-12);
         cursor: pointer;
+        background: var(--atlas-input-bg, rgb(48 48 48));
         transition:
           background 0.15s,
           border-color 0.15s;
@@ -765,8 +765,8 @@
 
       .mode-option.active {
         border-color: var(--atlas-accent, rgb(168 144 96));
-        background: color-mix(in srgb, var(--atlas-accent, rgb(168 144 96)) 15%, transparent);
         color: var(--atlas-accent, rgb(168 144 96));
+        background: color-mix(in srgb, var(--atlas-accent, rgb(168 144 96)) 15%, transparent);
       }
 
       .mode-option:disabled {
@@ -1166,6 +1166,17 @@
             font-size: var(--font-size-10);
           }
         }
+      }
+
+      .persist-todo {
+        gap: 0.25rem;
+        display: flex;
+        flex: 0 0 auto;
+        align-items: center;
+        align-self: flex-end;
+        height: 2rem;
+        font-size: var(--font-size-11);
+        cursor: pointer;
       }
 
       .reminder-users {
