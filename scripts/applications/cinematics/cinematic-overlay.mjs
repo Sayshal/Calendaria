@@ -46,10 +46,17 @@ export default class CinematicOverlay {
   static #shootingStars = [];
   static #activeEventCards = [];
   static #lastVisualDayKey = null;
+  static #paused = false;
+  static #pausedAt = 0;
 
   /** @returns {boolean} Whether a cinematic is currently playing. */
   static get active() {
     return this.#active;
+  }
+
+  /** @returns {boolean} Whether the playing cinematic is paused. */
+  static get paused() {
+    return this.#paused;
   }
 
   /**
@@ -171,6 +178,30 @@ export default class CinematicOverlay {
     });
   }
 
+  /** Freeze playback, leaving the overlay and its ambient effects on screen. */
+  static pause() {
+    if (!this.#active || this.#paused || !this.#animationId) return;
+    cancelAnimationFrame(this.#animationId);
+    this.#animationId = null;
+    this.#paused = true;
+    this.#pausedAt = performance.now();
+    ATLAS.log(3, 'Cinematic paused');
+    if (game.user.isGM) CalendariaSocket.emitCinematicPause();
+    Hooks.callAll(HOOKS.CINEMATIC_PAUSE, this.#payload);
+  }
+
+  /** Continue playback, discounting the paused span from elapsed time. */
+  static resume() {
+    if (!this.#active || !this.#paused) return;
+    this.#paused = false;
+    this.#startRealTime += performance.now() - this.#pausedAt;
+    this.#pausedAt = 0;
+    this.#animationId = requestAnimationFrame((ts) => this.#animate(ts));
+    ATLAS.log(3, 'Cinematic resumed');
+    if (game.user.isGM) CalendariaSocket.emitCinematicResume();
+    Hooks.callAll(HOOKS.CINEMATIC_RESUME, this.#payload);
+  }
+
   /** Abort the cinematic and clean up. */
   static abort() {
     if (!this.#active) return;
@@ -251,6 +282,8 @@ export default class CinematicOverlay {
     this.#destroyDOM();
     this.#clearEventStage();
     this.#lastVisualDayKey = null;
+    this.#paused = false;
+    this.#pausedAt = 0;
     this.#active = false;
     this.#payload = null;
     this.#currentFrame = -1;

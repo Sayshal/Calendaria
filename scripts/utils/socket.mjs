@@ -108,6 +108,22 @@ export class CalendariaSocket {
   }
 
   /**
+   * Broadcast cinematic pause to all clients.
+   */
+  static emitCinematicPause() {
+    if (!this.isPrimaryGM()) return;
+    this.emit(SOCKET_TYPES.CINEMATIC_PAUSE, {});
+  }
+
+  /**
+   * Broadcast cinematic resume to all clients.
+   */
+  static emitCinematicResume() {
+    if (!this.isPrimaryGM()) return;
+    this.emit(SOCKET_TYPES.CINEMATIC_RESUME, {});
+  }
+
+  /**
    * Handle incoming socket messages and route to appropriate handlers.
    * @private
    * @param {object} message - The incoming socket message
@@ -159,6 +175,12 @@ export class CalendariaSocket {
       case SOCKET_TYPES.CINEMATIC_ABORT:
         this.#handleCinematicAbort();
         break;
+      case SOCKET_TYPES.CINEMATIC_PAUSE:
+        this.#handleCinematicPause();
+        break;
+      case SOCKET_TYPES.CINEMATIC_RESUME:
+        this.#handleCinematicResume();
+        break;
       case SOCKET_TYPES.BIG_CAL_VISIBILITY:
         this.#handleBigCalVisibility(data);
         break;
@@ -202,6 +224,24 @@ export class CalendariaSocket {
   static #handleCinematicAbort() {
     ATLAS.log(3, 'Handling remote cinematic abort');
     CinematicOverlay.abort();
+  }
+
+  /**
+   * Handle remote cinematic pause command.
+   * @private
+   */
+  static #handleCinematicPause() {
+    ATLAS.log(3, 'Handling remote cinematic pause');
+    CinematicOverlay.pause();
+  }
+
+  /**
+   * Handle remote cinematic resume command.
+   * @private
+   */
+  static #handleCinematicResume() {
+    ATLAS.log(3, 'Handling remote cinematic resume');
+    CinematicOverlay.resume();
   }
 
   /**

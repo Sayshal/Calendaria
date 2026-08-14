@@ -2470,6 +2470,28 @@ export const CalendariaAPI = {
   },
 
   /**
+   * Check whether the playing cinematic is paused.
+   * @returns {boolean}
+   */
+  isCinematicPaused() {
+    return CinematicOverlay.paused;
+  },
+
+  /**
+   * Pause the currently playing cinematic.
+   */
+  pauseCinematic() {
+    CinematicOverlay.pause();
+  },
+
+  /**
+   * Resume a paused cinematic.
+   */
+  resumeCinematic() {
+    CinematicOverlay.resume();
+  },
+
+  /**
    * Build a cinematic payload without playing it.
    * @param {number} startTime - Start world time (seconds)
    * @param {number} endTime - End world time (seconds)
