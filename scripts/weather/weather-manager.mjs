@@ -1,6 +1,6 @@
 import { isBundledCalendar } from '../calendar/calendar-loader.mjs';
 import CalendarManager from '../calendar/calendar-manager.mjs';
-import { COMPASS_DIRECTIONS, HOOKS, MODULE, SCENE_FLAGS, SETTINGS, WEATHER_PERIODS, WIND_SPEEDS } from '../constants.mjs';
+import { COMPASS_DIRECTIONS, HOOKS, MODULE, SCENE_FLAGS, SETTINGS, SEVERITY_LEVELS, WEATHER_PERIODS, WIND_SPEEDS } from '../constants.mjs';
 import { executeMacroById } from '../utils/macro-utils.mjs';
 import { canChangeWeather } from '../utils/permissions.mjs';
 import { CalendariaSocket } from '../utils/socket.mjs';
@@ -237,7 +237,7 @@ export default class WeatherManager {
    * Get the current weather for a zone, with severity derived at read time rather than persisted.
    * @param {string} [zoneId] - Zone ID (resolves from active scene if omitted)
    * @param {object} [scene] - Scene to resolve zone from
-   * @returns {object|null} Current weather state, with a derived 0-5 severity
+   * @returns {object|null} Current weather state, with a derived 0-10 severity
    */
   static getCurrentWeather(zoneId, scene) {
     const resolvedZoneId = zoneId ?? this.getActiveZone(null, scene ?? game.scenes?.active)?.id ?? this.DEFAULT_ZONE;
@@ -2020,6 +2020,35 @@ export default class WeatherManager {
   }
 
   /**
+   * Resolve a weather state's 0-10 hazard severity, using the stamped value when present.
+   * @param {object} weather - Weather state
+   * @returns {number} Severity 0-10
+   */
+  static getSeverity(weather) {
+    return weather?.severity ?? computeWeatherSeverity(weather);
+  }
+
+  /**
+   * Resolve the named band a severity value falls into.
+   * @param {number} severity - Severity on the 0-10 scale
+   * @returns {object|null} Band descriptor { id, min, label }, or null for a missing value
+   */
+  static getSeverityLevel(severity) {
+    if (severity == null) return null;
+    return Object.values(SEVERITY_LEVELS).findLast((level) => severity >= level.min) ?? null;
+  }
+
+  /**
+   * Get the localized label for a hazard severity value.
+   * @param {number} severity - Severity on the 0-10 scale
+   * @returns {string} Localized severity label
+   */
+  static getSeverityLabel(severity) {
+    const level = this.getSeverityLevel(severity);
+    return level ? _loc(level.label) : '';
+  }
+
+  /**
    * Normalize a wind direction input to degrees.
    * @param {number|string|null|undefined} value - Raw direction input
    * @returns {number|null} Direction in degrees wrapped to 0-360, or null for unrecognized/missing input
@@ -2195,9 +2224,10 @@ export default class WeatherManager {
    * @param {number|null} [options.windDirection] - Wind direction in degrees
    * @param {string|null} [options.precipType] - Precipitation type key
    * @param {number} [options.precipIntensity] - Precipitation intensity (0-1)
+   * @param {number} [options.severity] - Hazard severity (0-10); the row is omitted at 0
    * @returns {string} HTML-encoded string for data-tooltip-html
    */
-  static buildWeatherTooltip({ label, description, temp, windSpeed, windKph, windDirection, precipType, precipIntensity }) {
+  static buildWeatherTooltip({ label, description, temp, windSpeed, windKph, windDirection, precipType, precipIntensity, severity }) {
     const esc = (s) => (s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     const rows = [];
     const desc = description && description !== label ? esc(description) : '';
@@ -2215,6 +2245,7 @@ export default class WeatherManager {
       const rate = this.formatPrecipitation((precipIntensity ?? 0) * 10);
       rows.push(`<div class="row"><i class="fas fa-droplet"></i> ${esc(precipLabel)}${rate ? ` · ${esc(rate)}` : ''}</div>`);
     }
+    if (severity > 0) rows.push(`<div class="row"><i class="fas fa-triangle-exclamation"></i> ${esc(this.getSeverityLabel(severity))}</div>`);
     const html = `<div class="calendaria"><div class="weather-tooltip">${rows.join('')}</div></div>`;
     return html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
@@ -2245,6 +2276,7 @@ export default class WeatherManager {
       const rate = this.formatPrecipitation((mainTooltipArgs.precipIntensity ?? 0) * 10);
       rows.push(`<div class="row"><i class="fas fa-droplet"></i> ${esc(precipLabel)}${rate ? ` · ${esc(rate)}` : ''}</div>`);
     }
+    if (mainTooltipArgs.severity > 0) rows.push(`<div class="row"><i class="fas fa-triangle-exclamation"></i> ${esc(this.getSeverityLabel(mainTooltipArgs.severity))}</div>`);
     rows.push('<hr>');
     for (const period of Object.values(WEATHER_PERIODS)) {
       const pw = periods[period.id];

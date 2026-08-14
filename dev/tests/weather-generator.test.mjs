@@ -671,19 +671,30 @@ describe('computeWeatherSeverity', () => {
     expect(computeWeatherSeverity({ ...clear, temperature: 42 })).toBe(4);
   });
 
-  it('scores extreme cold from temperature alone', () => {
+  it('scores a lone top-of-scale hazard at its own value, halfway up the scale', () => {
     expect(computeWeatherSeverity({ ...clear, temperature: -35 })).toBe(5);
-  });
-
-  it('scores full precipitation intensity as 5', () => {
     expect(computeWeatherSeverity({ ...clear, precipitation: { type: 'rain', intensity: 0.95 } })).toBe(5);
-  });
-
-  it('scores top-of-scale wind as 5', () => {
     expect(computeWeatherSeverity({ ...clear, wind: { speed: 5 } })).toBe(5);
   });
 
-  it('takes the worst term rather than a sum', () => {
-    expect(computeWeatherSeverity({ temperature: 42, wind: { speed: 2 }, precipitation: { intensity: 0.4 }, darknessPenalty: 0.1 })).toBe(4);
+  it('ranks a hazard paired with a second one above that hazard alone', () => {
+    const windAlone = computeWeatherSeverity({ ...clear, wind: { speed: 5 } });
+    const windAndHail = computeWeatherSeverity({ ...clear, wind: { speed: 5 }, precipitation: { type: 'hail', intensity: 0.6 } });
+    expect(windAndHail).toBeGreaterThan(windAlone);
+    expect(windAndHail).toBe(7);
+  });
+
+  it('reserves the top of the scale for every hazard at once', () => {
+    expect(computeWeatherSeverity({ temperature: -35, wind: { speed: 5 }, precipitation: { intensity: 1 }, darknessPenalty: 1 })).toBe(10);
+  });
+
+  it('stacks lesser hazards at diminishing weight', () => {
+    expect(computeWeatherSeverity({ temperature: 42, wind: { speed: 2 }, precipitation: { intensity: 0.4 }, darknessPenalty: 0.1 })).toBe(6);
+    expect(computeWeatherSeverity({ ...clear, temperature: 28, wind: { speed: 1 }, precipitation: { intensity: 0.2 }, darknessPenalty: 0.2 })).toBe(2);
+  });
+
+  it('never scores lower when a hazard is added', () => {
+    const base = { ...clear, wind: { speed: 3 } };
+    expect(computeWeatherSeverity({ ...base, precipitation: { type: 'rain', intensity: 0.5 } })).toBeGreaterThanOrEqual(computeWeatherSeverity(base));
   });
 });

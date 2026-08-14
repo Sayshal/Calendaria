@@ -221,6 +221,14 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
     ];
     context.precipIntensity = this.#precipIntensity ?? currentWeather?.precipitation?.intensity ?? 0;
     context.precipIntensityLabel = getPrecipIntensityLabel(context.precipIntensity);
+    const pendingTemp = context.customTemp === '' ? (currentWeather?.temperature ?? null) : fromDisplayUnit(Number(context.customTemp));
+    const pendingSeverity = WeatherManager.getSeverity({
+      wind: { speed: context.windSpeedRandom ? 0 : activeWindSpeed },
+      precipitation: { intensity: context.precipTypeRandom ? 0 : context.precipIntensity },
+      temperature: pendingTemp,
+      darknessPenalty: WeatherManager.getPreset(this.#selectedPresetId)?.darknessPenalty ?? currentWeather?.darknessPenalty ?? 0
+    });
+    context.severityLabel = WeatherManager.getSeverityLabel(pendingSeverity);
     context.hasFXMaster = isFXMasterActive();
     if (context.hasFXMaster) {
       const currentFxPreset = this.#fxPreset !== null ? this.#fxPreset : (currentWeather?.fxPreset ?? '');
@@ -294,6 +302,26 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
         if (label) label.textContent = getPrecipIntensityLabel(parseFloat(precipSlider.value));
       });
     }
+    for (const field of this.element.querySelectorAll('[name="customTemp"], [name="windSpeed"], [name="precipType"], [name="precipIntensity"]')) {
+      field.addEventListener('input', () => this.#refreshSeverity());
+      field.addEventListener('change', () => this.#refreshSeverity());
+    }
+  }
+
+  /** Recompute the severity readout from the current form values. */
+  #refreshSeverity() {
+    const readout = this.element.querySelector('.severity-value');
+    if (!readout) return;
+    const value = (name) => this.element.querySelector(`[name="${name}"]`)?.value;
+    const temp = value('customTemp');
+    const windSpeed = value('windSpeed');
+    const severity = WeatherManager.getSeverity({
+      wind: { speed: windSpeed === 'random' ? 0 : Number(windSpeed) },
+      precipitation: { intensity: value('precipType') === 'random' ? 0 : parseFloat(value('precipIntensity')) },
+      temperature: temp === '' ? null : fromDisplayUnit(Number(temp)),
+      darknessPenalty: WeatherManager.getPreset(this.#selectedPresetId)?.darknessPenalty ?? 0
+    });
+    readout.textContent = WeatherManager.getSeverityLabel(severity);
   }
 
   /**

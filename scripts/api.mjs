@@ -31,6 +31,7 @@ import {
   NOTE_VISIBILITY,
   REPLACEABLE_ELEMENTS,
   SETTINGS,
+  SEVERITY_LEVELS,
   SOCKET_TYPES,
   TEMPLATES,
   WIDGET_POINTS
@@ -1634,10 +1635,36 @@ export const CalendariaAPI = {
   /**
    * Get the current weather, including a severity derived at read time from wind, precipitation, temperature, and darkness penalty.
    * @param {string} [zoneId] - Zone ID (resolves from active scene if omitted)
-   * @returns {object|null} Current weather state with id, label, icon, color, temperature, and severity (0-5)
+   * @returns {object|null} Current weather state with id, label, icon, color, temperature, and severity (0-10)
    */
   getCurrentWeather(zoneId) {
     return WeatherManager.getCurrentWeather(zoneId);
+  },
+
+  /**
+   * Get the localized label for a weather severity value, the 0-10 scale returned by getCurrentWeather.
+   * @param {number} severity - Severity 0-10
+   * @returns {string} Localized severity label, or an empty string for a missing value
+   */
+  getWeatherSeverityLabel(severity) {
+    return WeatherManager.getSeverityLabel(severity);
+  },
+
+  /**
+   * Get the named severity band a value falls into.
+   * @param {number} severity - Severity 0-10
+   * @returns {{id: string, min: number, label: string}|null} Band descriptor, or null for a missing value
+   */
+  getWeatherSeverityLevel(severity) {
+    return WeatherManager.getSeverityLevel(severity);
+  },
+
+  /**
+   * Get every named severity band in ascending order, for modules mapping their own values onto the scale.
+   * @returns {Array<{id: string, min: number, label: string}>} Band descriptors
+   */
+  getWeatherSeverityLevels() {
+    return Object.values(SEVERITY_LEVELS);
   },
 
   /**
@@ -1653,7 +1680,7 @@ export const CalendariaAPI = {
    * Get weather for a specific intraday period from the current day.
    * @param {string} periodName - Period ID: 'night', 'morning', 'afternoon', or 'evening'
    * @param {string} [zoneId] - Zone ID (resolves from active scene if omitted)
-   * @returns {object|null} Weather data for the requested period including a derived severity (0-5), or null if intraday is disabled
+   * @returns {object|null} Weather data for the requested period including a derived severity (0-10), or null if intraday is disabled
    */
   getWeatherForPeriod(periodName, zoneId) {
     const weather = WeatherManager.getCurrentWeather(zoneId);

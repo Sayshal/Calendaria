@@ -232,7 +232,8 @@ export function buildWeatherPillData(wd) {
     windKph: wd.wind?.kph ?? null,
     windDirection: wd.wind?.direction,
     precipType: wd.precipitation?.type ?? null,
-    precipIntensity: wd.precipitation?.intensity
+    precipIntensity: wd.precipitation?.intensity,
+    severity: WeatherManager.getSeverity(wd)
   };
   const tooltipHtml = wd.periods ? WeatherManager.buildWeatherTooltipWithPeriods(tooltipArgs, wd.periods, wd.activePeriod) : WeatherManager.buildWeatherTooltip(tooltipArgs);
   return { weatherIcon: wd.icon, weatherColor: wd.color, weatherLabel: wd.label, weatherTemp: temp, weatherWindDir: windDir, weatherTooltipHtml: tooltipHtml, isForecast: wd.isForecast ?? false };

@@ -2095,7 +2095,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       windKph,
       windDirection,
       precipType,
-      precipIntensity: weather.precipitation?.intensity
+      precipIntensity: weather.precipitation?.intensity,
+      severity: WeatherManager.getSeverity(weather)
     });
     return { id: weather.id, label, icon: weather.icon, color: weather.color, temperature: temp, tooltipHtml, windSpeed, windKph, windDirection, precipType };
   }

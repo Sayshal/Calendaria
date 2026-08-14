@@ -383,6 +383,16 @@ export const WIND_SPEEDS = {
   EXTREME: { id: 'extreme', value: 5, label: 'CALENDARIA.Weather.Wind.Extreme', kph: 250 }
 };
 
+/** @type {Object<string, object>} Named bands over the 0-10 severity scale derived by computeWeatherSeverity, each starting at min */
+export const SEVERITY_LEVELS = {
+  NONE: { id: 'none', min: 0, label: 'CALENDARIA.Weather.Severity.None' },
+  LIGHT: { id: 'light', min: 1, label: 'CALENDARIA.Weather.Severity.Light' },
+  MODERATE: { id: 'moderate', min: 2, label: 'CALENDARIA.Weather.Severity.Moderate' },
+  HEAVY: { id: 'heavy', min: 4, label: 'CALENDARIA.Weather.Severity.Heavy' },
+  SEVERE: { id: 'severe', min: 6, label: 'CALENDARIA.Weather.Severity.Severe' },
+  EXTREME: { id: 'extreme', min: 8, label: 'CALENDARIA.Weather.Severity.Extreme' }
+};
+
 /** @enum {string|null} Precipitation type identifiers */
 export const PRECIPITATION_TYPES = { NONE: null, DRIZZLE: 'drizzle', RAIN: 'rain', SNOW: 'snow', SLEET: 'sleet', HAIL: 'hail' };
 

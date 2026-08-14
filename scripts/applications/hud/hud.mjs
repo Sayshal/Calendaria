@@ -1278,7 +1278,8 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       windKph,
       windDirection,
       precipType,
-      precipIntensity: weather.precipitation?.intensity
+      precipIntensity: weather.precipitation?.intensity,
+      severity: WeatherManager.getSeverity(weather)
     };
     const tooltipHtml = weather.periods ? WeatherManager.buildWeatherTooltipWithPeriods(tooltipArgs, weather.periods, weather.activePeriod) : WeatherManager.buildWeatherTooltip(tooltipArgs);
     return { id: weather.id, label, icon, color: weather.color, temp, tooltipHtml, windSpeed, windKph, windDirection, precipType };

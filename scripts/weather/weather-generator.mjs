@@ -288,16 +288,25 @@ function temperatureScore(temperature) {
 }
 
 /**
- * Derive a 0-5 hazard severity as the worst of wind speed, precipitation intensity, temperature extremity, and darkness penalty.
+ * Weights applied to the hazards in descending order of their own 0-5 score. The worst counts in full and the rest
+ * at diminishing weight, which puts the 0-10 ceiling within reach only when every hazard is at its own maximum.
+ * @type {number[]}
+ */
+const SEVERITY_WEIGHTS = [1, 0.5, 0.25, 0.25];
+
+/**
+ * Derive a 0-10 hazard severity from wind speed, precipitation intensity, temperature extremity, and darkness penalty.
+ * Each hazard is scored 0-5 on its own, then the scores stack by descending weight, so compound weather always
+ * outranks any single condition driving it.
  * @param {object} [weather] - Weather state { wind, precipitation, temperature, darknessPenalty }
- * @returns {number} Severity 0-5
+ * @returns {number} Severity 0-10
  */
 export function computeWeatherSeverity(weather) {
-  const windScore = weather?.wind?.speed ?? 0;
-  const precipScore = Math.ceil((weather?.precipitation?.intensity ?? 0) * 5);
-  const darknessScore = Math.ceil((weather?.darknessPenalty ?? 0) * 5);
-  const worst = Math.max(windScore, precipScore, temperatureScore(weather?.temperature), darknessScore);
-  return Math.max(0, Math.min(5, Math.round(worst)));
+  const scores = [weather?.wind?.speed ?? 0, Math.ceil((weather?.precipitation?.intensity ?? 0) * 5), temperatureScore(weather?.temperature), Math.ceil((weather?.darknessPenalty ?? 0) * 5)].sort(
+    (a, b) => b - a
+  );
+  const stacked = scores.reduce((total, score, index) => total + score * SEVERITY_WEIGHTS[index], 0);
+  return Math.max(0, Math.min(10, Math.round(stacked)));
 }
 
 /**
