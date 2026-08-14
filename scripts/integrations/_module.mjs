@@ -4,3 +4,4 @@ export * from './dont-forget.mjs';
 export * from './fxmaster.mjs';
 export * from './luxon-sync.mjs';
 export * from './rest-time.mjs';
+export * from './vgmusic.mjs';

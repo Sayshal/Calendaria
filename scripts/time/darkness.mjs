@@ -369,7 +369,7 @@ export async function updateDarknessFromWorldTime(worldTime, dt) {
  * @param {object} scene - The scene to check
  * @returns {boolean} True if darkness should be synced
  */
-function shouldSyncSceneDarkness(scene) {
+export function shouldSyncSceneDarkness(scene) {
   return resolveSceneSync(scene, SCENE_FLAGS.DARKNESS_SYNC, SETTINGS.DARKNESS_SYNC);
 }
 
