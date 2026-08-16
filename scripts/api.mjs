@@ -911,8 +911,8 @@ export const CalendariaAPI = {
    * @param {object} updates - Updates to apply
    * @param {string} [updates.name] - New name
    * @param {string} [updates.content] - New content (HTML)
-   * @param {object} [updates.startDate] - New start date
-   * @param {object} [updates.endDate] - New end date
+   * @param {object} [updates.startDate] - New start date {year, month (1-indexed), day (1-indexed), hour?, minute?}
+   * @param {object} [updates.endDate] - New end date {year, month (1-indexed), day (1-indexed), hour?, minute?}
    * @param {boolean} [updates.allDay] - New all-day setting
    * @param {object} [updates.conditionTree] - New condition tree for recurrence
    * @param {string[]} [updates.categories] - New preset IDs
@@ -927,8 +927,8 @@ export const CalendariaAPI = {
       return null;
     }
     const noteData = {};
-    if (updates.startDate) noteData.startDate = { ...updates.startDate };
-    if (updates.endDate) noteData.endDate = { ...updates.endDate };
+    if (updates.startDate) noteData.startDate = toInternal(updates.startDate);
+    if (updates.endDate) noteData.endDate = toInternal(updates.endDate);
     if (updates.allDay !== undefined) noteData.allDay = updates.allDay;
     if (updates.conditionTree !== undefined) noteData.conditionTree = updates.conditionTree;
     if (updates.categories !== undefined) noteData.categories = updates.categories;
