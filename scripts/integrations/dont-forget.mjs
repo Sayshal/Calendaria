@@ -9,14 +9,8 @@ export function isDontForgetActive() {
   return game.modules.get('dont-forget')?.active ?? false;
 }
 
-/**
- * Build the Don't Forget `source` tag identifying to-dos mirrored from a given note.
- * @param {string} noteId - The calendar note id
- * @returns {string} Source tag
- */
-function sourceForNote(noteId) {
-  return `calendaria:${noteId}`;
-}
+/** @type {string} Producer id declared on every to-do this integration creates. */
+const SOURCE = 'calendaria';
 
 /**
  * Collect every mirrored to-do created from a note, across all users.
@@ -24,8 +18,7 @@ function sourceForNote(noteId) {
  * @returns {object[]} Matching reminder records
  */
 function findMirrored(noteId) {
-  const source = sourceForNote(noteId);
-  return Object.values(DONTFORGET.api.getAllReminders()).filter((r) => r.source === source);
+  return DONTFORGET.api.findReminders({ source: SOURCE, ref: noteId });
 }
 
 /**
@@ -37,12 +30,11 @@ function findMirrored(noteId) {
  */
 export async function mirrorReminder(note, message, targets) {
   if (!isDontForgetActive() || !note.flagData.persistToDo) return;
-  const source = sourceForNote(note.id);
   const existing = findMirrored(note.id);
   const label = message.replace(/<[^>]+>/g, '');
   for (const userId of targets) {
     if (existing.some((r) => r.userId === userId && !r.isDone)) continue;
-    await DONTFORGET.api.createReminder(userId, { label, source });
+    await DONTFORGET.api.createReminder(userId, { label, source: SOURCE, ref: note.id });
   }
   ATLAS.log(3, `Mirrored reminder for note ${note.id} to ${targets.length} user(s)`);
 }
@@ -54,8 +46,7 @@ export async function mirrorReminder(note, message, targets) {
  */
 export async function clearMirroredToDos(noteId) {
   if (!isDontForgetActive()) return;
-  const source = sourceForNote(noteId);
-  for (const reminder of findMirrored(noteId)) await DONTFORGET.api.deleteReminder(reminder.id, reminder.userId, source);
+  for (const reminder of findMirrored(noteId)) await DONTFORGET.api.deleteReminder(reminder.id, reminder.userId, SOURCE);
 }
 
 /**
