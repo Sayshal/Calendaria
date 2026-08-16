@@ -216,6 +216,14 @@
       outline-offset: 0.0625rem;
     }
 
+    &.calendaria-widget {
+      color: var(--widget-color, var(--atlas-text-dim, rgb(153 153 153)));
+
+      &:hover {
+        color: var(--widget-color, var(--atlas-text, rgb(224 224 224)));
+      }
+    }
+
     i {
       font-size: var(--font-size-13, 0.8125rem);
     }
@@ -389,7 +397,8 @@
     .weather-indicator,
     .season-indicator,
     .era-indicator,
-    .cycle-indicator {
+    .cycle-indicator,
+    .calendaria-widget-indicator {
       font-size: clamp(var(--font-size-10, 0.625rem), calc(var(--font-size-12, 0.75rem) * var(--hud-width-scale, 1)), var(--font-size-12, 0.75rem));
       cursor: default;
     }
