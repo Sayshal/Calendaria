@@ -411,7 +411,7 @@ export function formatApproximateDate(calendar, components) {
 }
 
 /** Format tokens, longest-first per letter. */
-const TOKEN_REGEX = /\[([^\]]+)]|\{([^}]+)\}|YYYY|YY|Y|MMMM|MMM|MM|Mo|M|EEEEE|EEEE|EEE|EE|E|dddd|ddd|dd|Do|DDD|DD|D|d|e|GGGG|GGG|GG|G|QQQQ|QQQ|QQ|Q|zzzz|z|ww|w|W|HH|H|hh|h|mm|m|ss|s|A|a/g;
+const TOKEN_REGEX = /\[([^\]]+)]|{([^}]+)}|YYYY|YY|Y|MMMM|MMM|MM|Mo|M|EEEEE|EEEE|EEE|EE|E|dddd|ddd|dd|Do|DDD|DD|D|d|e|GGGG|GGG|GG|G|QQQQ|QQQ|QQ|Q|zzzz|z|ww|w|W|HH|H|hh|h|mm|m|ss|s|A|a/g;
 
 /**
  * Format a date using a custom format string with tokens.
@@ -566,10 +566,10 @@ export function validateFormatString(formatStr, calendar, components) {
   const closeBrackets = (formatStr.match(/]/g) || []).length;
   if (openBrackets !== closeBrackets) return { valid: false, error: 'CALENDARIA.Format.Error.UnclosedBracket' };
   if (/\[]/.test(formatStr)) return { valid: false, error: 'CALENDARIA.Format.Error.EmptyBracket' };
-  const openCurly = (formatStr.match(/\{/g) || []).length;
+  const openCurly = (formatStr.match(/{/g) || []).length;
   const closeCurly = (formatStr.match(/}/g) || []).length;
   if (openCurly !== closeCurly) return { valid: false, error: 'CALENDARIA.Format.Error.UnclosedBracket' };
-  if (/\{}/.test(formatStr)) return { valid: false, error: 'CALENDARIA.Format.Error.EmptyBracket' };
+  if (/{}/.test(formatStr)) return { valid: false, error: 'CALENDARIA.Format.Error.EmptyBracket' };
   const warning = findUnknownTokens(formatStr);
   if (calendar && components) {
     try {
@@ -590,7 +590,7 @@ export function validateFormatString(formatStr, calendar, components) {
  * @returns {string} Localized warning, or empty string when every letter is accounted for
  */
 function findUnknownTokens(formatStr) {
-  const leftovers = formatStr.replace(/\[[^\]]*]|\{[^}]*\}/g, '').replace(TOKEN_REGEX, '');
+  const leftovers = formatStr.replace(/\[[^\]]*]|{[^}]*}/g, '').replace(TOKEN_REGEX, '');
   const unknown = leftovers.match(/[A-Za-z]+/g);
   if (!unknown) return '';
   return _loc('CALENDARIA.Format.Warning.UnknownToken', { tokens: [...new Set(unknown)].join(', ') });

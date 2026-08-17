@@ -2151,7 +2151,7 @@ async function navigateToDate(year, month, day) {
 /** Register enrichers with Foundry. */
 export function registerEnrichers() {
   CONFIG.TextEditor.enrichers.push({
-    pattern: /\[\[cal\.(?<type>\w+)(?:\s+(?<config>[^\]]*?))?]](?:\{(?<label>[^}]+)\})?/gi,
+    pattern: /\[\[cal\.(?<type>\w+)(?:\s+(?<config>[^\]]*?))?]](?:{(?<label>[^}]+)})?/gi,
     enricher: enrichCalendaria
   });
   document.body.addEventListener('click', (e) => {
