@@ -127,11 +127,17 @@ describe('intersectsYear()', () => {
     expect(intersectsYear(undefined, 2020, true)).toBe(false);
   });
   it('returns true when more allows than denies', () => {
-    const intervals = [ { interval: 4, subtracts: false, offset: 0 },{ interval: 100, subtracts: true, offset: 0 } ];
+    const intervals = [
+      { interval: 4, subtracts: false, offset: 0 },
+      { interval: 100, subtracts: true, offset: 0 }
+    ];
     expect(intersectsYear(intervals, 2020, true)).toBe(true);
   });
   it('returns false when more denies than allows', () => {
-    const intervals = [ { interval: 4, subtracts: false, offset: 0 }, { interval: 100, subtracts: true, offset: 0 } ];
+    const intervals = [
+      { interval: 4, subtracts: false, offset: 0 },
+      { interval: 100, subtracts: true, offset: 0 }
+    ];
     expect(intersectsYear(intervals, 1900, true)).toBe(false);
   });
   it('handles Gregorian pattern correctly', () => {

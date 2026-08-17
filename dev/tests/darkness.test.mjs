@@ -1,11 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import {
-  calculateAdjustedDarkness,
-  calculateDarknessFromTime,
-  calculateMoonIllumination,
-  calculateSolarEclipseDarkness,
-  calculateTimeOfDayColor
-} from '../../scripts/time/darkness.mjs';
+import { calculateAdjustedDarkness, calculateDarknessFromTime, calculateMoonIllumination, calculateSolarEclipseDarkness, calculateTimeOfDayColor } from '../../scripts/time/darkness.mjs';
 import { ECLIPSE_TYPES, getEclipseAtDate } from '../../scripts/utils/eclipse-calculator.mjs';
 import { getMoonPhasePosition } from '../../scripts/utils/formatting/moon-utils.mjs';
 import WeatherManager from '../../scripts/weather/weather-manager.mjs';
@@ -13,7 +7,8 @@ import WeatherManager from '../../scripts/weather/weather-manager.mjs';
 vi.mock('../../scripts/utils/logger.mjs', () => ({ log: vi.fn() }));
 vi.mock('../../scripts/utils/socket.mjs', () => ({ CalendariaSocket: { isPrimaryGM: vi.fn(() => true), emit: vi.fn() } }));
 vi.mock('../../scripts/weather/weather-manager.mjs', () => ({ default: { getActiveZone: vi.fn(() => null), getCurrentWeather: vi.fn(() => null), getCalendarZones: vi.fn(() => []) } }));
-vi.mock('../../scripts/constants.mjs', async (importOriginal) => ({ ...(await importOriginal()),
+vi.mock('../../scripts/constants.mjs', async (importOriginal) => ({
+  ...(await importOriginal()),
   MODULE: { ID: 'calendaria' },
   SETTINGS: {
     DEFAULT_BRIGHTNESS_MULTIPLIER: 'defaultBrightnessMultiplier',
@@ -24,7 +19,13 @@ vi.mock('../../scripts/constants.mjs', async (importOriginal) => ({ ...(await im
     DARKNESS_SYNC: 'darknessSync',
     DARKNESS_SYNC_ALL_SCENES: 'darknessSyncAllScenes'
   },
-  SCENE_FLAGS: { BRIGHTNESS_MULTIPLIER: 'brightnessMultiplier', DARKNESS_SYNC: 'darknessSync', HUD_HIDE_FOR_PLAYERS: 'hudHideForPlayers', CLIMATE_ZONE_OVERRIDE: 'climateZoneOverride', WEATHER_FX_DISABLED: 'weatherFxDisabled' },
+  SCENE_FLAGS: {
+    BRIGHTNESS_MULTIPLIER: 'brightnessMultiplier',
+    DARKNESS_SYNC: 'darknessSync',
+    HUD_HIDE_FOR_PLAYERS: 'hudHideForPlayers',
+    CLIMATE_ZONE_OVERRIDE: 'climateZoneOverride',
+    WEATHER_FX_DISABLED: 'weatherFxDisabled'
+  },
   SOCKET_TYPES: { HUD_VISIBILITY: 'hudVisibility' }
 }));
 vi.mock('../../scripts/utils/formatting/moon-utils.mjs', () => ({ getMoonPhasePosition: vi.fn(() => 0.5) }));
@@ -169,7 +170,10 @@ describe('calculateAdjustedDarkness()', () => {
       if (key === 'defaultBrightnessMultiplier') return 1.0;
       return null;
     });
-    game.time.calendar = { moonsArray: [{ name: 'Luna', cycleLength: 29.5, moonBrightnessMax: 0.15, referenceDate: { year: 2000, month: 0, dayOfMonth: 5 } }], days: { hoursPerDay: 24, minutesPerHour: 60 } };
+    game.time.calendar = {
+      moonsArray: [{ name: 'Luna', cycleLength: 29.5, moonBrightnessMax: 0.15, referenceDate: { year: 2000, month: 0, dayOfMonth: 5 } }],
+      days: { hoursPerDay: 24, minutesPerHour: 60 }
+    };
     game.time.components = { year: 1, month: 0, dayOfMonth: 0, hour: 0, minute: 0 };
     const scene = { getFlag: vi.fn(() => null) };
     const baseDarkness = 0.8;

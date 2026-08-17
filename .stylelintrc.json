@@ -1,13 +1,17 @@
 {
   "extends": ["stylelint-config-standard"],
   "ignoreFiles": ["coverage/**", "dist/**", "dnd5e/**", "foundry/**", "todo/**", "node_modules/**"],
-  "rules"  : {
+  "rules": {
     "color-function-notation": "modern",
     "color-named": "never",
     "color-no-hex": true,
     "comment-empty-line-before": null,
     "custom-property-pattern": null,
-    "declaration-property-unit-allowed-list": { "/^padding|^gap|^margin/": ["rem", "em"], "font-size": ["rem", "em"], "line-height": ["rem", "em"] },
+    "declaration-property-unit-allowed-list": {
+      "/^padding|^gap|^margin/": ["rem", "em"],
+      "font-size": ["rem", "em"],
+      "line-height": ["rem", "em"]
+    },
     "function-disallowed-list": ["hex"],
     "function-url-quotes": "always",
     "max-nesting-depth": null,

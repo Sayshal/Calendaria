@@ -11,7 +11,7 @@ vi.mock('../../scripts/utils/localization.mjs', () => ({
     return result;
   })
 }));
-vi.mock('../../scripts/constants.mjs', async (importOriginal) => ({ ...(await importOriginal()), MODULE: { ID: 'calendaria' }, SETTINGS: { CUSTOM_PRESETS: 'customPresets' }}));
+vi.mock('../../scripts/constants.mjs', async (importOriginal) => ({ ...(await importOriginal()), MODULE: { ID: 'calendaria' }, SETTINGS: { CUSTOM_PRESETS: 'customPresets' } }));
 vi.mock('../../scripts/utils/ui/calendar-view-utils.mjs', () => ({ stripSecrets: vi.fn((html) => html ?? '') }));
 vi.mock('../../scripts/calendar/calendar-manager.mjs', () => ({
   default: {
@@ -30,9 +30,9 @@ vi.mock('../../scripts/notes/note-data.mjs', () => ({
   getAllPresets: vi.fn(() => [
     { id: 'quest', label: 'Quest', color: '#4a9eff', icon: 'fa-scroll' },
     { id: 'holiday', label: 'Holiday', color: '#ff6b6b', icon: 'fa-gift' }
-  ]),
+  ])
 }));
-const makeNote = (id, name, flagData = {}) => ({id,name,visible: true,flagData: { startDate: { year: 1, month: 0, day: 1 }, ...flagData },journalId: `journal-${id}`});
+const makeNote = (id, name, flagData = {}) => ({ id, name, visible: true, flagData: { startDate: { year: 1, month: 0, day: 1 }, ...flagData }, journalId: `journal-${id}` });
 
 beforeEach(() => {
   NoteManager.getAllNotes.mockReturnValue([]);

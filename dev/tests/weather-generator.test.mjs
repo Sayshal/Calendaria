@@ -601,7 +601,10 @@ describe('generateIntradayWeather()', () => {
     for (let day = 0; day < 20; day++) {
       const result = generateIntradayWeather({ seasonClimate: climate, zoneConfig, year: 2024, month: 5, dayOfMonth: day, carryOverChance: 0 });
       const ids = Object.values(result.periods).map((p) => p.preset.id);
-      if (new Set(ids).size > 1) { anyDiffer = true; break; }
+      if (new Set(ids).size > 1) {
+        anyDiffer = true;
+        break;
+      }
     }
     expect(anyDiffer).toBe(true);
   });
@@ -613,7 +616,11 @@ describe('generateForecast() — intraday', () => {
 
   it('includes periods when intraday=true', () => {
     const forecast = generateForecast({
-      zoneConfig, startYear: 2024, startMonth: 5, startDayOfMonth: 10, days: 3,
+      zoneConfig,
+      startYear: 2024,
+      startMonth: 5,
+      startDayOfMonth: 10,
+      days: 3,
       getSeasonForDate: () => ({ name: 'Summer', climate }),
       intraday: true
     });
@@ -626,7 +633,11 @@ describe('generateForecast() — intraday', () => {
 
   it('does not include periods when intraday=false', () => {
     const forecast = generateForecast({
-      zoneConfig, startYear: 2024, startMonth: 5, startDayOfMonth: 10, days: 3,
+      zoneConfig,
+      startYear: 2024,
+      startMonth: 5,
+      startDayOfMonth: 10,
+      days: 3,
       getSeasonForDate: () => ({ name: 'Summer', climate }),
       intraday: false
     });
@@ -637,7 +648,11 @@ describe('generateForecast() — intraday', () => {
 
   it('chains cross-day via evening→night', () => {
     const forecast = generateForecast({
-      zoneConfig, startYear: 2024, startMonth: 5, startDayOfMonth: 10, days: 2,
+      zoneConfig,
+      startYear: 2024,
+      startMonth: 5,
+      startDayOfMonth: 10,
+      days: 2,
       getSeasonForDate: () => ({ name: 'Summer', climate }),
       intraday: true
     });

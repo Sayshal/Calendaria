@@ -2,14 +2,62 @@ import { vi } from 'vitest';
 
 export function addCalendarGetters(cal) {
   Object.defineProperties(cal, {
-    monthsArray: { get() { return this.months?.values ? Object.values(this.months.values) : []; }, configurable: true, enumerable: true },
-    weekdaysArray: { get() { return this.days?.values ? Object.values(this.days.values) : []; }, configurable: true, enumerable: true },
-    seasonsArray: { get() { return this.seasons?.values ? Object.values(this.seasons.values) : []; }, configurable: true, enumerable: true },
-    moonsArray: { get() { return this.moons ? Object.values(this.moons) : []; }, configurable: true, enumerable: true },
-    cyclesArray: { get() { return this.cycles ? Object.values(this.cycles) : []; }, configurable: true, enumerable: true },
-    erasArray: { get() { return this.eras ? Object.values(this.eras) : []; }, configurable: true, enumerable: true },
-    festivalsArray: { get() { return this.festivals ? Object.values(this.festivals) : []; }, configurable: true, enumerable: true },
-    daysInWeek: { get() { return this.weekdaysArray?.length || 7; }, configurable: true, enumerable: true }
+    monthsArray: {
+      get() {
+        return this.months?.values ? Object.values(this.months.values) : [];
+      },
+      configurable: true,
+      enumerable: true
+    },
+    weekdaysArray: {
+      get() {
+        return this.days?.values ? Object.values(this.days.values) : [];
+      },
+      configurable: true,
+      enumerable: true
+    },
+    seasonsArray: {
+      get() {
+        return this.seasons?.values ? Object.values(this.seasons.values) : [];
+      },
+      configurable: true,
+      enumerable: true
+    },
+    moonsArray: {
+      get() {
+        return this.moons ? Object.values(this.moons) : [];
+      },
+      configurable: true,
+      enumerable: true
+    },
+    cyclesArray: {
+      get() {
+        return this.cycles ? Object.values(this.cycles) : [];
+      },
+      configurable: true,
+      enumerable: true
+    },
+    erasArray: {
+      get() {
+        return this.eras ? Object.values(this.eras) : [];
+      },
+      configurable: true,
+      enumerable: true
+    },
+    festivalsArray: {
+      get() {
+        return this.festivals ? Object.values(this.festivals) : [];
+      },
+      configurable: true,
+      enumerable: true
+    },
+    daysInWeek: {
+      get() {
+        return this.weekdaysArray?.length || 7;
+      },
+      configurable: true,
+      enumerable: true
+    }
   });
   return cal;
 }

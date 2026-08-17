@@ -1,7 +1,6 @@
-**/*.handlebars
 **/*.hbs
-**/*.json
-dev
-dist
-dnd5e
-foundry
+**/*.handlebars
+/foundry
+/dnd5e
+/dist
+/todo

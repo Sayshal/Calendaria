@@ -206,7 +206,17 @@ describe('resolveWeatherSoundPath()', () => {
     expect(resolveWeatherSoundPath(fullPath)).toBe(fullPath);
   });
   it('expands all legacy SOUND_FX keys correctly', () => {
-    const legacyKeys = ['rain-acid-rain-blood-rain', 'sunshower-drizzle', 'thunderstorm', 'sleet-hail', 'blizzard-ice-storm', 'snow-frost', 'hurricane-monsoon-tornado', 'sandstorm-dust-devil', 'wind'];
+    const legacyKeys = [
+      'rain-acid-rain-blood-rain',
+      'sunshower-drizzle',
+      'thunderstorm',
+      'sleet-hail',
+      'blizzard-ice-storm',
+      'snow-frost',
+      'hurricane-monsoon-tornado',
+      'sandstorm-dust-devil',
+      'wind'
+    ];
     for (const key of legacyKeys) {
       const result = resolveWeatherSoundPath(key);
       expect(result).toBe(`modules/calendaria/assets/sound/${key}.ogg`);

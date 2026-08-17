@@ -10,7 +10,12 @@ export function registerNoteProperties(quench) {
       before(async function () {
         api = CALENDARIA.api;
         const dt = api.getCurrentDateTime();
-        const page = await api.createNote({ name: `${TEST_NOTE_PREFIX} Properties`, content: 'Test note content for property checks', startDate: { year: dt.year, month: dt.month, day: dt.day + 1 }, categories: ['event'] });
+        const page = await api.createNote({
+          name: `${TEST_NOTE_PREFIX} Properties`,
+          content: 'Test note content for property checks',
+          startDate: { year: dt.year, month: dt.month, day: dt.day + 1 },
+          categories: ['event']
+        });
         createdPageId = page?.id;
       });
 

@@ -23,7 +23,10 @@ export function registerDateMath(quench) {
         it('addDays wraps month', function () {
           const cal = api.getActiveCalendar();
           const months = cal?.monthsArray;
-          if (!months?.length) { this.skip(); return; }
+          if (!months?.length) {
+            this.skip();
+            return;
+          }
           const daysInFirst = months[0].days;
           const result = api.addDays({ year: 2024, month: 1, day: daysInFirst }, 1);
           assert.strictEqual(result.month, 2);

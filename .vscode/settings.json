@@ -7,6 +7,7 @@
   },
   "css.format.maxPreserveNewLines": 1,
   "diffEditor.ignoreTrimWhitespace": false,
+  "editor.autoIndentOnPaste": true,
   "editor.bracketPairColorization.enabled": true,
   "editor.codeActionsOnSave": {
     "source.fixAll": "explicit",
@@ -15,7 +16,6 @@
     "source.fixAll.stylelint": "explicit",
     "source.organizeImports": "explicit"
   },
-  "editor.autoIndentOnPaste": true,
   "editor.codeLens": true,
   "editor.cursorSurroundingLines": 2,
   "editor.cursorSurroundingLinesStyle": "all",
@@ -72,11 +72,12 @@
     }
   },
   "eslint.run": "onSave",
-  "eslint.validate": [
-    "javascript",
-    "javascriptreact",
-    "typescript",
-    "typescriptreact"
+  "eslint.useFlatConfig": true,
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
+  "eslint.workingDirectories": [
+    {
+      "pattern": "."
+    }
   ],
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.patterns": {
@@ -113,40 +114,33 @@
   "html.format.maxPreserveNewLines": 1,
   "html.format.templating": true,
   "i18n-ally.customFrameworkConfig": ".vscode/i18n-ally-custom-framework.yml",
-  "i18n-ally.enabledFrameworks": [
-    "custom"
-  ],
-  "i18n-ally.enabledParsers": [
-    "json"
-  ],
+  "i18n-ally.enabledFrameworks": ["custom"],
+  "i18n-ally.enabledParsers": ["json"],
   "i18n-ally.extract.autoDetect": true,
   "i18n-ally.extract.ignoredByFiles": {},
   "i18n-ally.extract.keyMaxLength": 80,
   "i18n-ally.fullReloadOnChanged": true,
   "i18n-ally.keepFulfilled": true,
   "i18n-ally.keystyle": "flat",
-  "i18n-ally.localesPaths": [
-    "lang"
-  ],
+  "i18n-ally.localesPaths": ["../3ds-atlas/lang", "dnd5e/lang", "foundry/public/lang"],
   "i18n-ally.pathMatcher": "{locale}.json",
   "i18n-ally.refactor.templates": [],
   "i18n-ally.review.enabled": true,
   "i18n-ally.review.removeCommentOnResolved": false,
   "i18n-ally.sourceLanguage": "en",
   "i18n-ally.usage.derivedKeyRules": [],
-  "i18n-ally.usage.scanningIgnore": [
-    "**/node_modules/**",
-    "**/dist/**",
-    "**/coverage/**"
-  ],
-  "javascript.format.semicolons": "insert",
-  "javascript.inlayHints.parameterNames.enabled": "none",
-  "javascript.preferences.quoteStyle": "single",
-  "javascript.suggest.completeJSDocs": true,
-  "javascript.suggest.names": true,
-  "javascript.suggest.paths": true,
-  "javascript.suggestionActions.enabled": true,
-  "javascript.updateImportsOnFileMove.enabled": "always",
+  "i18n-ally.usage.scanningIgnore": ["**/node_modules/**", "**/dist/**", "**/coverage/**"],
+  "js/ts.format.semicolons": "insert",
+  "js/ts.inlayHints.functionLikeReturnTypes.enabled": true,
+  "js/ts.inlayHints.parameterNames.enabled": "none",
+  "js/ts.preferences.importModuleSpecifier": "relative",
+  "js/ts.preferences.preferTypeOnlyAutoImports": true,
+  "js/ts.preferences.quoteStyle": "single",
+  "js/ts.suggest.jsdoc.enabled": true,
+  "js/ts.suggest.names": true,
+  "js/ts.suggest.paths": true,
+  "js/ts.suggestionActions.enabled": true,
+  "js/ts.updateImportsOnFileMove.enabled": "always",
   "npm.packageManager": "npm",
   "prettier.configPath": ".prettierrc",
   "prettier.experimentalTernaries": true,
@@ -159,12 +153,6 @@
     "**/node_modules": true
   },
   "stylelint.enable": true,
-  "typescript.inlayHints.functionLikeReturnTypes.enabled": true,
-  "typescript.inlayHints.parameterNames.enabled": "literals",
-  "typescript.preferences.importModuleSpecifier": "relative",
-  "typescript.preferences.preferTypeOnlyAutoImports": true,
-  "typescript.suggest.completeJSDocs": true,
-  "typescript.updateImportsOnFileMove.enabled": "always",
   "vs-code-prettier-eslint.prettierLast": false,
   "workbench.colorCustomizations": {
     "[Night Owl (No Italics)]": {

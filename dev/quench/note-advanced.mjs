@@ -13,7 +13,11 @@ export function registerNoteAdvanced(quench) {
 
       after(async function () {
         if (testNoteId) {
-          try { await api.deleteNote(testNoteId); } catch (_) { /* ignore */ }
+          try {
+            await api.deleteNote(testNoteId);
+          } catch (_) {
+            /* ignore */
+          }
         }
       });
 
@@ -25,26 +29,38 @@ export function registerNoteAdvanced(quench) {
         it('getNoteDocument returns page for valid note', async function () {
           const dt = api.getCurrentDateTime();
           const note = await api.createNote({ name: '[Quench Test] Doc Test', startDate: { year: dt.year, month: dt.month, day: dt.day } });
-          if (!note) { this.skip(); return; }
+          if (!note) {
+            this.skip();
+            return;
+          }
           testNoteId = note.id;
           const doc = api.getNoteDocument(note.id);
           assert.isNotNull(doc);
           assert.property(doc, 'name');
         });
         it('setNoteVisibility changes visibility', async function () {
-          if (!testNoteId) { this.skip(); return; }
+          if (!testNoteId) {
+            this.skip();
+            return;
+          }
           const updated = await api.setNoteVisibility(testNoteId, 'hidden');
           assert.isNotNull(updated);
           const note = api.getNote(testNoteId);
           assert.strictEqual(note?.flagData?.visibility, 'hidden');
         });
         it('setNoteVisibility rejects invalid value', async function () {
-          if (!testNoteId) { this.skip(); return; }
+          if (!testNoteId) {
+            this.skip();
+            return;
+          }
           const result = await api.setNoteVisibility(testNoteId, 'nonsense');
           assert.isNull(result);
         });
         it('setNoteDisplayStyle changes style', async function () {
-          if (!testNoteId) { this.skip(); return; }
+          if (!testNoteId) {
+            this.skip();
+            return;
+          }
           const updated = await api.setNoteDisplayStyle(testNoteId, 'banner');
           assert.isNotNull(updated);
         });
@@ -57,7 +73,10 @@ export function registerNoteAdvanced(quench) {
         });
         it('getFestivals returns array', function () {
           const cal = api.getActiveCalendar();
-          if (!cal) { this.skip(); return; }
+          if (!cal) {
+            this.skip();
+            return;
+          }
           const result = api.getFestivals(cal.id);
           assert.isArray(result);
         });
@@ -73,7 +92,10 @@ export function registerNoteAdvanced(quench) {
           const dt = api.getCurrentDateTime();
           const pastDate = api.addDays(dt, -30);
           const result = api.timeSince(pastDate);
-          if (!result) { this.skip(); return; }
+          if (!result) {
+            this.skip();
+            return;
+          }
           assert.typeOf(result, 'string');
         });
       });
@@ -81,14 +103,20 @@ export function registerNoteAdvanced(quench) {
       describe('Notes — Calendar Helpers', function () {
         it('isBundledCalendar returns boolean', function () {
           const cal = api.getActiveCalendar();
-          if (!cal) { this.skip(); return; }
+          if (!cal) {
+            this.skip();
+            return;
+          }
           const calId = cal.metadata?.id ?? cal.id;
           const result = api.isBundledCalendar(calId);
           assert.typeOf(result, 'boolean');
         });
         it('getCalendar returns calendar by id', function () {
           const cal = api.getActiveCalendar();
-          if (!cal) { this.skip(); return; }
+          if (!cal) {
+            this.skip();
+            return;
+          }
           const calId = cal.metadata?.id ?? cal.id;
           const result = api.getCalendar(calId);
           assert.isNotNull(result);

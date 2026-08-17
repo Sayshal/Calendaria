@@ -7,18 +7,35 @@ vi.mock('../../scripts/utils/localization.mjs', () => ({
   localize: vi.fn((key) => key),
   format: vi.fn((key, _data) => key)
 }));
-vi.mock('../../scripts/constants.mjs', async (importOriginal) => ({ ...(await importOriginal()),
+vi.mock('../../scripts/constants.mjs', async (importOriginal) => ({
+  ...(await importOriginal()),
   MODULE: { ID: 'calendaria' },
   SETTINGS: { CUSTOM_PRESETS: 'customPresets' },
   NOTE_VISIBILITY: { VISIBLE: 'visible', HIDDEN: 'hidden', SECRET: 'secret' },
   DISPLAY_STYLES: { ICON: 'icon', PIP: 'pip', BANNER: 'banner' },
   CONDITION_FIELDS: {},
-  CONDITION_OPERATORS: { EQUAL: '==', NOT_EQUAL: '!=', GREATER_EQUAL: '>=', LESS_EQUAL: '<=', GREATER: '>', LESS: '<', MODULO: '%', DAYS_AGO: 'daysAgo', DAYS_FROM_NOW: 'daysFromNow', WITHIN_LAST: 'withinLast', WITHIN_NEXT: 'withinNext' }
+  CONDITION_OPERATORS: {
+    EQUAL: '==',
+    NOT_EQUAL: '!=',
+    GREATER_EQUAL: '>=',
+    LESS_EQUAL: '<=',
+    GREATER: '>',
+    LESS: '<',
+    MODULO: '%',
+    DAYS_AGO: 'daysAgo',
+    DAYS_FROM_NOW: 'daysFromNow',
+    WITHIN_LAST: 'withinLast',
+    WITHIN_NEXT: 'withinNext'
+  }
 }));
 vi.mock('../../scripts/calendar/calendar-manager.mjs', () => ({
   default: {
     getActiveCalendar: vi.fn(() => ({
-      monthsArray: [{ name: 'January', days: 31 }, { name: 'February', days: 28 }, { name: 'March', days: 31 }],
+      monthsArray: [
+        { name: 'January', days: 31 },
+        { name: 'February', days: 28 },
+        { name: 'March', days: 31 }
+      ],
       years: { yearZero: 0 },
       isMonthless: false,
       daysInWeek: 7,
@@ -50,14 +67,31 @@ vi.mock('../../scripts/notes/date-utils.mjs', () => ({
     let month = date.month;
     let year = date.year;
     const daysPerMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-    while (totalDays >= daysPerMonth[month]) { totalDays -= daysPerMonth[month]; month++; if (month >= 12) { month = 0; year++; } }
-    while (totalDays < 0) { month--; if (month < 0) { month = 11; year--; } totalDays += daysPerMonth[month]; }
+    while (totalDays >= daysPerMonth[month]) {
+      totalDays -= daysPerMonth[month];
+      month++;
+      if (month >= 12) {
+        month = 0;
+        year++;
+      }
+    }
+    while (totalDays < 0) {
+      month--;
+      if (month < 0) {
+        month = 11;
+        year--;
+      }
+      totalDays += daysPerMonth[month];
+    }
     return { year, month, dayOfMonth: totalDays, hour: date.hour, minute: date.minute };
   }),
   addMonths: vi.fn((date, months) => {
     let m = date.month + months;
     let y = date.year;
-    while (m >= 12) { m -= 12; y++; }
+    while (m >= 12) {
+      m -= 12;
+      y++;
+    }
     return { year: y, month: m, dayOfMonth: date.dayOfMonth };
   }),
   addYears: vi.fn((date, years) => ({ ...date, year: date.year + years })),
@@ -82,7 +116,15 @@ vi.mock('../../scripts/notes/date-utils.mjs', () => ({
 beforeEach(() => {
   game.settings.get.mockReturnValue([]);
   game.settings.set.mockResolvedValue(true);
-  globalThis.CONFIG = { JournalEntryPage: { dataModels: { 'calendaria.calendarnote': { schema: { fields: { repeat: { choices: ['never', 'daily', 'weekly', 'monthly', 'yearly', 'moon', 'random', 'linked', 'seasonal', 'weekOfMonth', 'range', 'computed'] } } } } } } };
+  globalThis.CONFIG = {
+    JournalEntryPage: {
+      dataModels: {
+        'calendaria.calendarnote': {
+          schema: { fields: { repeat: { choices: ['never', 'daily', 'weekly', 'monthly', 'yearly', 'moon', 'random', 'linked', 'seasonal', 'weekOfMonth', 'range', 'computed'] } } }
+        }
+      }
+    }
+  };
 });
 
 describe('getEffectiveDuration()', () => {
@@ -113,8 +155,21 @@ describe('isRecurringMatch with hasDuration', () => {
     const { evaluateEntry } = await import('../../scripts/notes/condition-engine.mjs');
     evaluateEntry.mockImplementation((_tree, date) => date.dayOfMonth === 0);
     const noteData = {
-      startDate: { year: 1, month: 0, dayOfMonth: 0 }, endDate: null, repeat: 'yearly', repeatInterval: 1, hasDuration: true, duration: 3,
-      repeatEndDate: null, maxOccurrences: 0, moonConditions: [], randomConfig: null, linkedEvent: null, weekday: null, weekNumber: null, seasonalConfig: null, conditions: [],
+      startDate: { year: 1, month: 0, dayOfMonth: 0 },
+      endDate: null,
+      repeat: 'yearly',
+      repeatInterval: 1,
+      hasDuration: true,
+      duration: 3,
+      repeatEndDate: null,
+      maxOccurrences: 0,
+      moonConditions: [],
+      randomConfig: null,
+      linkedEvent: null,
+      weekday: null,
+      weekNumber: null,
+      seasonalConfig: null,
+      conditions: [],
       conditionTree: { type: 'entry', field: 'day', op: '==', value: 1 }
     };
     // duration: 3 = 3 total days (start + 2 more)

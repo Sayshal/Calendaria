@@ -17,31 +17,17 @@
   "documentTypes": {
     "JournalEntryPage": {
       "calendarnote": {
-        "htmlFields": [
-          "text.content"
-        ]
+        "htmlFields": ["text.content"]
       }
     }
   },
   "download": "",
-  "esmodules": [
-    "calendaria.mjs"
-  ],
-  "styles": [
-    "styles/calendaria.css"
-  ],
+  "esmodules": ["calendaria.mjs"],
+  "styles": ["styles/calendaria.css"],
   "flags": {
     "hotReload": {
-      "extensions": [
-        "css",
-        "html",
-        "hbs",
-        "json"
-      ],
-      "paths": [
-        "styles",
-        "templates"
-      ]
+      "extensions": ["css", "html", "hbs", "json"],
+      "paths": ["styles", "templates"]
     }
   },
   "id": "calendaria",

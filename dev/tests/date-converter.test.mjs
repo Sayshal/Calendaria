@@ -30,7 +30,9 @@ function extractLeapMonthDays(json) {
   return sorted.map((m) => m.leapDays ?? m.days);
 }
 
-function isGregorianLeapYear(displayYear) { return (displayYear % 4 === 0 && displayYear % 100 !== 0) || displayYear % 400 === 0; }
+function isGregorianLeapYear(displayYear) {
+  return (displayYear % 4 === 0 && displayYear % 100 !== 0) || displayYear % 400 === 0;
+}
 function createMockFromJson(json) {
   const monthDays = extractMonthDays(json);
   const leapMonthDays = extractLeapMonthDays(json);
@@ -100,7 +102,9 @@ vi.mock('../../scripts/calendar/calendar-registry.mjs', () => ({
   default: {
     get: vi.fn((id) => bundledCalendars.get(id) ?? null),
     getAllIds: vi.fn(() => Array.from(bundledCalendars.keys())),
-    get size() { return bundledCalendars.size; }
+    get size() {
+      return bundledCalendars.size;
+    }
   }
 }));
 

@@ -139,8 +139,16 @@ globalThis.foundry = {
   },
   data: {
     fields: {
-      BooleanField: class BooleanField { constructor(opts) { this.initial = opts?.initial; } },
-      ObjectField: class ObjectField { constructor(opts) { this.initial = opts?.initial; } }
+      BooleanField: class BooleanField {
+        constructor(opts) {
+          this.initial = opts?.initial;
+        }
+      },
+      ObjectField: class ObjectField {
+        constructor(opts) {
+          this.initial = opts?.initial;
+        }
+      }
     },
     operators: {
       OPERATOR_VALUE,
@@ -196,7 +204,9 @@ globalThis.foundry = {
         }
       },
       FormDataExtended: class FormDataExtended {
-        constructor() { this.object = {}; }
+        constructor() {
+          this.object = {};
+        }
       },
       TextEditor: {
         implementation: {

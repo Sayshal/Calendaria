@@ -5,24 +5,12 @@
     "moduleResolution": "bundler",
     "baseUrl": ".",
     "paths": {
-      "@client/*": [
-        "./foundry/client/*"
-      ],
-      "@common/*": [
-        "./foundry/common/*"
-      ]
+      "@client/*": ["./foundry/client/*"],
+      "@common/*": ["./foundry/common/*"]
     },
     "checkJs": false,
     "noEmit": true
   },
-  "include": [
-    "./foundry/client/**/*",
-    "./foundry/common/**/*",
-    "./scripts/**/*",
-    "./calendaria.mjs"
-  ],
-  "exclude": [
-    "node_modules",
-    "coverage"
-  ]
+  "include": ["./foundry/client/**/*", "./foundry/common/**/*", "./scripts/**/*", "./calendaria.mjs"],
+  "exclude": ["node_modules", "coverage"]
 }

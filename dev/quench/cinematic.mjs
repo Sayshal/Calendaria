@@ -24,7 +24,10 @@ export function registerCinematic(quench) {
           const future = api.addDays(dt, 7);
           const ts2 = api.dateToTimestamp(future);
           const result = api.buildCinematicPayload(ts1, ts2);
-          if (!result) { this.skip(); return; }
+          if (!result) {
+            this.skip();
+            return;
+          }
           assert.typeOf(result, 'object');
         });
         it('isCinematicPaused returns boolean', function () {
@@ -40,7 +43,10 @@ export function registerCinematic(quench) {
           const ts1 = api.dateToTimestamp(dt);
           const ts2 = api.dateToTimestamp(api.addDays(dt, 3));
           const payload = api.buildCinematicPayload(ts1, ts2);
-          if (!payload?.keyframes?.length) { this.skip(); return; }
+          if (!payload?.keyframes?.length) {
+            this.skip();
+            return;
+          }
           const playback = api.playCinematic(payload);
           api.pauseCinematic();
           assert.isTrue(api.isCinematicPaused());
