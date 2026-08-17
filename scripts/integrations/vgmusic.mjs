@@ -16,9 +16,9 @@ const STORM_SEVERITY = SEVERITY_LEVELS.SEVERE.min;
 
 /** Weather sections to register, `id` doubling as the context VGMusic stores the playlist under. */
 const WEATHER_SECTIONS = [
-  { id: 'calendariaRain', section: 'rain', label: 'CALENDARIA.Music.Section.Rain' },
-  { id: 'calendariaSnow', section: 'snow', label: 'CALENDARIA.Music.Section.Snow' },
-  { id: 'calendariaStorm', section: 'storm', label: 'CALENDARIA.Music.Section.Storm' }
+  { id: 'calendariaRain', section: 'rain', label: 'CALENDARIA.Music.Section.Rain', hint: 'CALENDARIA.Music.Section.Hint.Rain' },
+  { id: 'calendariaSnow', section: 'snow', label: 'CALENDARIA.Music.Section.Snow', hint: 'CALENDARIA.Music.Section.Hint.Snow' },
+  { id: 'calendariaStorm', section: 'storm', label: 'CALENDARIA.Music.Section.Storm', hint: 'CALENDARIA.Music.Section.Hint.Storm' }
 ];
 
 /** @type {string|null} Last evaluated section state, used to skip redundant playlist refreshes. */
@@ -88,9 +88,16 @@ function onWeatherChange({ visualOnly } = {}) {
 export function initializeVGMusic() {
   if (!isVGMusicActive()) return;
   ATLAS.log(3, 'VGMusic detected, registering night and weather playlist sections');
-  VGMUSIC.registerSection({ id: 'calendariaNight', label: 'CALENDARIA.Music.Section.Night', priority: NIGHT_PRIORITY, types: ['Scene'], predicate: isNight });
-  for (const { id, section, label } of WEATHER_SECTIONS) {
-    VGMUSIC.registerSection({ id, label, priority: WEATHER_PRIORITY, types: ['Scene'], predicate: () => getWeatherSection() === section });
+  VGMUSIC.registerSection({
+    id: 'calendariaNight',
+    label: 'CALENDARIA.Music.Section.Night',
+    hint: 'CALENDARIA.Music.Section.Hint.Night',
+    priority: NIGHT_PRIORITY,
+    types: ['Scene'],
+    predicate: isNight
+  });
+  for (const { id, section, label, hint } of WEATHER_SECTIONS) {
+    VGMUSIC.registerSection({ id, label, hint, priority: WEATHER_PRIORITY, types: ['Scene'], predicate: () => getWeatherSection() === section });
   }
   Hooks.on(HOOKS.WEATHER_CHANGE, onWeatherChange);
   Hooks.on(HOOKS.SUNRISE, refreshSections);
