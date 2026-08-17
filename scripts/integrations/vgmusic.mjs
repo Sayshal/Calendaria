@@ -69,7 +69,7 @@ function refreshSections() {
   const state = `${game.scenes?.active?.id}:${isNight()}:${getWeatherSection()}`;
   if (state === lastState) return;
   lastState = state;
-  VGMUSIC.musicController.playCurrentTrack();
+  VGMUSIC.refreshSections();
 }
 
 /**
