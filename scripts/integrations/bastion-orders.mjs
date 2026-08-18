@@ -1,7 +1,6 @@
 import { CalendarManager } from '../calendar/_module.mjs';
 import { MODULE, SETTINGS } from '../constants.mjs';
 import { TimeClock } from '../time/_module.mjs';
-import { CalendariaSocket } from '../utils/_module.mjs';
 
 /** @type {Function|null} Cached reference to dnd5e's original confirmAdvance method. */
 let originalConfirmAdvance = null;
@@ -35,7 +34,7 @@ function getSecondsPerDay(calendar) {
  */
 export async function onDayChangeForBastions() {
   if (TimeClock.locked) return;
-  if (!CalendariaSocket.isPrimaryGM()) return;
+  if (!ATLAS.isPrimaryGM) return;
   if (!game.settings.get(MODULE.ID, SETTINGS.ADVANCE_BASTION_ORDERS)) return;
   if (!isBastionSystemActive()) return;
   const calendar = CalendarManager.getActiveCalendar();

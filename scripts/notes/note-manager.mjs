@@ -52,7 +52,7 @@ export default class NoteManager {
    */
   static async initialize() {
     await this.#buildIndex();
-    if (game.user.isGM) {
+    if (ATLAS.isPrimaryGM) {
       await this.getCalendarNotesFolder();
       await this.#initializeActiveCalendarFolder();
     }
@@ -190,7 +190,7 @@ export default class NoteManager {
         Hooks.callAll(HOOKS.NOTE_DELETED, page.id);
       }
     }
-    if (game.user.isGM && page.getFlag(MODULE.ID, 'isDescriptionPage')) NoteManager.#syncDescriptionToCalendar(page);
+    if (ATLAS.isPrimaryGM && page.getFlag(MODULE.ID, 'isDescriptionPage')) NoteManager.#syncDescriptionToCalendar(page);
   }
 
   /**
@@ -250,7 +250,7 @@ export default class NoteManager {
         Hooks.callAll(HOOKS.NOTE_DELETED, page.id);
       }
     }
-    if (!game.user.isGM || NoteManager.#suppressOwnershipRebuild) return;
+    if (!ATLAS.isPrimaryGM || NoteManager.#suppressOwnershipRebuild) return;
     const page = journal.pages.contents[0];
     if (!page) return;
     const visibility = page.system?.visibility;
@@ -271,7 +271,7 @@ export default class NoteManager {
    * @param {object} calendar - The calendar that was switched to
    */
   static async onCalendarSwitched(calendarId, calendar) {
-    if (game.user.isGM && calendar) {
+    if (ATLAS.isPrimaryGM && calendar) {
       await NoteManager.getCalendarFolder(calendarId, calendar);
       ATLAS.log(3, `Ensured calendar folder exists for: ${calendarId}`);
     }

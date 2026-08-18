@@ -4,7 +4,7 @@ vi.mock('../../scripts/utils/logger.mjs', () => ({ log: vi.fn() }));
 vi.mock('../../scripts/utils/localization.mjs', () => ({ format: (k) => k, localize: (k) => k }));
 vi.mock('../../scripts/utils/macro-utils.mjs', () => ({ executeMacroById: vi.fn() }));
 vi.mock('../../scripts/utils/permissions.mjs', () => ({ canChangeWeather: () => true }));
-vi.mock('../../scripts/utils/socket.mjs', () => ({ CalendariaSocket: { emit: vi.fn(), isPrimaryGM: () => false } }));
+vi.mock('../../scripts/utils/socket.mjs', () => ({ CalendariaSocket: { emit: vi.fn() } }));
 vi.mock('../../scripts/calendar/calendar-manager.mjs', () => ({ default: { getActiveCalendar: () => null } }));
 vi.mock('../../scripts/calendar/calendar-loader.mjs', () => ({ isBundledCalendar: () => false }));
 vi.mock('../../scripts/weather/weather-generator.mjs', () => ({

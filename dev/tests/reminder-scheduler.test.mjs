@@ -14,7 +14,7 @@ vi.mock('../../scripts/utils/localization.mjs', () => ({
     return result;
   })
 }));
-vi.mock('../../scripts/utils/socket.mjs', () => ({ CalendariaSocket: { isPrimaryGM: vi.fn(() => true), emit: vi.fn() } }));
+vi.mock('../../scripts/utils/socket.mjs', () => ({ CalendariaSocket: { emit: vi.fn() } }));
 vi.mock('../../scripts/constants.mjs', async (importOriginal) => ({
   ...(await importOriginal()),
   MODULE: { ID: 'calendaria' },
@@ -85,7 +85,7 @@ const WT = () => worldTimeBase + ReminderScheduler.CHECK_INTERVAL + 1;
 
 beforeEach(() => {
   worldTimeBase += 1_000_000;
-  CalendariaSocket.isPrimaryGM.mockReturnValue(true);
+  ATLAS.isPrimaryGM = true;
   CalendariaSocket.emit.mockClear();
   NoteManager.isInitialized.mockReturnValue(true);
   NoteManager.getAllNotes.mockReturnValue([]);
@@ -103,7 +103,7 @@ beforeEach(() => {
 
 describe('ReminderScheduler.onUpdateWorldTime()', () => {
   it('does nothing when not primary GM', () => {
-    CalendariaSocket.isPrimaryGM.mockReturnValue(false);
+    ATLAS.isPrimaryGM = false;
     ReminderScheduler.onUpdateWorldTime(WT(), 300);
     expect(NoteManager.getAllNotes).not.toHaveBeenCalled();
   });

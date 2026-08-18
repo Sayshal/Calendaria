@@ -39,7 +39,7 @@ export function onPreRest(_actor, config) {
  * @returns {void}
  */
 export function onLongRest(actor, config) {
-  if (!game.user.isGM) return;
+  if (!ATLAS.isPrimaryGM) return;
   if (TimeClock.locked) return;
   const advanceTime = game.settings.get(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST);
   if (!advanceTime) return;
@@ -95,7 +95,7 @@ export function onLongRest(actor, config) {
  * @returns {void}
  */
 export function onShortRest(actor, config) {
-  if (!game.user.isGM) return;
+  if (!ATLAS.isPrimaryGM) return;
   if (TimeClock.locked) return;
   const advanceTime = game.settings.get(MODULE.ID, SETTINGS.ADVANCE_TIME_ON_REST);
   if (!advanceTime) return;
@@ -133,7 +133,7 @@ export function onShortRest(actor, config) {
  * @returns {void}
  */
 export function onPF2eRest() {
-  if (!game.user.isGM) return;
+  if (!ATLAS.isPrimaryGM) return;
   if (pf2eRestTimer) return;
   pf2eRestTimer = setTimeout(() => {
     pf2eRestTimer = null;
@@ -183,7 +183,7 @@ export function onPF2eRest() {
  * @returns {void}
  */
 export function onPF1eRest(_actor, options = {}) {
-  if (!game.user.isGM) return;
+  if (!ATLAS.isPrimaryGM) return;
   if (!options.hours) return;
   if (pf1eRestTimer) return;
   pf1eRestTimer = setTimeout(() => {

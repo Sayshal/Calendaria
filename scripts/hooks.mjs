@@ -51,7 +51,7 @@ export function registerHooks() {
     if (NoteManager.isInitialized()) NoteManager.onCalendarSwitched(...args);
   });
   Hooks.on(HOOKS.CALENDAR_SWITCHED, (calendarId, calendar) => {
-    if (NoteManager.isInitialized()) FestivalManager.seedFestivalNotes(calendarId, calendar);
+    if (ATLAS.isPrimaryGM && NoteManager.isInitialized()) FestivalManager.seedFestivalNotes(calendarId, calendar);
   });
   Hooks.on(HOOKS.CALENDAR_UPDATED, clearComputedDateCache);
   Hooks.on('chatMessage', onChatMessage);

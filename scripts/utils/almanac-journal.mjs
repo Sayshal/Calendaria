@@ -4,7 +4,6 @@ import { addDays, dayOfWeek } from '../notes/_module.mjs';
 import { WeatherManager } from '../weather/_module.mjs';
 import { buildWeatherSentence } from './chronicle-data.mjs';
 import { dateFormattingParts } from './formatting/format-utils.mjs';
-import { CalendariaSocket } from './socket.mjs';
 
 /** Journal flag marking the world's almanac journal. */
 const ALMANAC_JOURNAL_FLAG = 'isAlmanacJournal';
@@ -120,7 +119,7 @@ async function getAlmanacJournal() {
  * @param {object} hookData - DAY_CHANGE hook data with { current, previous, calendar }
  */
 export async function publishWeeklyAlmanac(hookData) {
-  if (!CalendariaSocket.isPrimaryGM()) return;
+  if (!ATLAS.isPrimaryGM) return;
   if (!game.settings.get(MODULE.ID, SETTINGS.WEEKLY_ALMANAC)) return;
   const calendar = hookData?.calendar ?? CalendarManager.getActiveCalendar();
   const current = hookData?.current;

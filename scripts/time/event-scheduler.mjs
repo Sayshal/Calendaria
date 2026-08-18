@@ -1,7 +1,6 @@
 import { CalendarManager } from '../calendar/_module.mjs';
 import { HOOKS, MODULE, TEMPLATES } from '../constants.mjs';
 import { NoteManager, compareDates, generateRandomOccurrences, getCurrentDate, isPresetDefaultMacro, needsRandomRegeneration } from '../notes/_module.mjs';
-import { CalendariaSocket } from '../utils/_module.mjs';
 import { WeatherManager } from '../weather/_module.mjs';
 
 /**
@@ -38,7 +37,7 @@ export default class EventScheduler {
    * @returns {void}
    */
   static async onUpdateWorldTime(_worldTime, _delta) {
-    if (!CalendariaSocket.isPrimaryGM()) return;
+    if (!ATLAS.isPrimaryGM) return;
     if (this.#skipNext) {
       this.#skipNext = false;
       this.#lastDate = getCurrentDate();

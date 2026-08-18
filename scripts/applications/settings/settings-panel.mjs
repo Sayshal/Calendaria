@@ -698,7 +698,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.COLOR_SHIFT_SYNC]: { tab: 'canvas', label: 'CALENDARIA.Settings.ColorShiftSync.Name' },
     [SETTINGS.DARKNESS_MOON_SYNC]: { tab: 'canvas', label: 'CALENDARIA.Settings.DarknessMoonSync.Name' },
     [SETTINGS.DEFAULT_BRIGHTNESS_MULTIPLIER]: { tab: 'canvas', label: 'CALENDARIA.Settings.DefaultBrightnessMultiplier.Name' },
-    [SETTINGS.PRIMARY_GM]: { tab: 'module', label: 'CALENDARIA.Settings.PrimaryGM.Name' },
     [SETTINGS.DEV_MODE]: { tab: 'module', label: 'CALENDARIA.SettingsPanel.DevMode.Name' },
     [SETTINGS.SHOW_TOOLBAR_BUTTON]: { tab: 'module', label: 'CALENDARIA.Settings.ShowToolbarButton.Name' },
     [SETTINGS.TOOLBAR_APPS]: { tab: 'module', label: 'CALENDARIA.Settings.ToolbarApps.Name' },
@@ -916,7 +915,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       SETTINGS.WEATHER_SUPPRESS_MUFFLE
     ],
     fxmaster: [SETTINGS.FXMASTER_ENABLED, SETTINGS.FXMASTER_TOP_DOWN, SETTINGS.FXMASTER_FORCE_DOWNWARD, SETTINGS.FXMASTER_BELOW_TOKENS, SETTINGS.FXMASTER_SOUND_FX, SETTINGS.FXMASTER_SPLASH],
-    'module-sync': [SETTINGS.PRIMARY_GM],
     'module-integration': [SETTINGS.SHOW_TOOLBAR_BUTTON, SETTINGS.TOOLBAR_APPS, SETTINGS.SHOW_JOURNAL_FOOTER, SETTINGS.ENRICHER_CLICK_TARGET],
     'module-debugging': [SETTINGS.DEV_MODE],
     permissions: [SETTINGS.PERMISSIONS],
@@ -1658,14 +1656,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {object} context - The context object
    */
   async #prepareModuleContext(context) {
-    const primaryGM = game.settings.get(MODULE.ID, SETTINGS.PRIMARY_GM);
-    context.primaryGMOptions = [{ value: '', label: _loc('CALENDARIA.Settings.PrimaryGM.Auto'), selected: !primaryGM }];
-    for (const user of game.users.filter((u) => u.isGM)) context.primaryGMOptions.push({ value: user.id, label: user.name, selected: user.id === primaryGM });
-    context.primaryGMOptions.sort((a, b) => {
-      if (a.value === '') return -1;
-      if (b.value === '') return 1;
-      return a.label.localeCompare(b.label, game.i18n.lang);
-    });
     context.devMode = game.settings.get(MODULE.ID, SETTINGS.DEV_MODE);
     context.moduleVersion = game.modules.get(MODULE.ID)?.version ?? 'Unknown';
     const moduleData = game.data.modules?.find((m) => m.id === MODULE.ID);
@@ -2027,7 +2017,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       await game.settings.set(MODULE.ID, SETTINGS.MINI_CAL_TIME_JUMPS, jumps);
       foundry.applications.instances.get('calendaria-mini-cal')?.render();
     }
-    if ('primaryGM' in data) await game.settings.set(MODULE.ID, SETTINGS.PRIMARY_GM, data.primaryGM || '');
     if ('devMode' in data) await game.settings.set(MODULE.ID, SETTINGS.DEV_MODE, data.devMode);
     if ('hideMoonsFromPlayers' in data) await game.settings.set(MODULE.ID, SETTINGS.HIDE_MOONS_FROM_PLAYERS, data.hideMoonsFromPlayers);
     if (data.permissions) {

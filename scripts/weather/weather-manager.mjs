@@ -162,7 +162,7 @@ export default class WeatherManager {
     if ('undefined' in this.#currentWeatherByZone) {
       this.#currentWeatherByZone[this.DEFAULT_ZONE] = this.#currentWeatherByZone['undefined'];
       delete this.#currentWeatherByZone['undefined'];
-      if (CalendariaSocket.isPrimaryGM()) {
+      if (ATLAS.isPrimaryGM) {
         await game.settings.set(MODULE.ID, SETTINGS.CURRENT_WEATHER, this.#currentWeatherByZone);
         ATLAS.log(3, 'Migrated stale "undefined" weather zone key to _default');
       }
@@ -173,20 +173,20 @@ export default class WeatherManager {
     Hooks.on(HOOKS.SUNRISE, () => this.#onPeriodThreshold(WEATHER_PERIODS.MORNING.id));
     Hooks.on(HOOKS.MIDDAY, () => this.#onPeriodThreshold(WEATHER_PERIODS.AFTERNOON.id));
     Hooks.on(HOOKS.SUNSET, () => this.#onPeriodThreshold(WEATHER_PERIODS.EVENING.id));
-    if (CalendariaSocket.isPrimaryGM() && !game.settings.get(MODULE.ID, SETTINGS.WEATHER_DAY_INDEX_MIGRATED)) await this.#migrateWeatherDayIndex();
-    if (CalendariaSocket.isPrimaryGM()) await this.#migrateLegacySoundKeys();
-    if (CalendariaSocket.isPrimaryGM() && !game.settings.get(MODULE.ID, SETTINGS.WEATHER_YEAR_KEY_MIGRATED)) {
+    if (ATLAS.isPrimaryGM && !game.settings.get(MODULE.ID, SETTINGS.WEATHER_DAY_INDEX_MIGRATED)) await this.#migrateWeatherDayIndex();
+    if (ATLAS.isPrimaryGM) await this.#migrateLegacySoundKeys();
+    if (ATLAS.isPrimaryGM && !game.settings.get(MODULE.ID, SETTINGS.WEATHER_YEAR_KEY_MIGRATED)) {
       await game.settings.set(MODULE.ID, SETTINGS.WEATHER_FORECAST_PLAN, {});
       await game.settings.set(MODULE.ID, SETTINGS.WEATHER_HISTORY, {});
       await game.settings.set(MODULE.ID, SETTINGS.WEATHER_YEAR_KEY_MIGRATED, true);
       ATLAS.log(3, 'Cleared weather history and forecast plan for year key migration');
     }
-    if (CalendariaSocket.isPrimaryGM() && !game.settings.get(MODULE.ID, SETTINGS.WEATHER_MONTHLESS_PLAN_MIGRATED) && CalendarManager.getActiveCalendar()?.isMonthless) {
+    if (ATLAS.isPrimaryGM && !game.settings.get(MODULE.ID, SETTINGS.WEATHER_MONTHLESS_PLAN_MIGRATED) && CalendarManager.getActiveCalendar()?.isMonthless) {
       await game.settings.set(MODULE.ID, SETTINGS.WEATHER_FORECAST_PLAN, {});
       await game.settings.set(MODULE.ID, SETTINGS.WEATHER_MONTHLESS_PLAN_MIGRATED, true);
       ATLAS.log(3, 'Cleared forecast plan corrupted by monthless date advancement');
     }
-    if (CalendariaSocket.isPrimaryGM()) {
+    if (ATLAS.isPrimaryGM) {
       const calendar = CalendarManager.getActiveCalendar();
       if (calendar?.weather?.autoGenerate !== undefined) if (calendar.metadata?.id) await game.settings.set(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER, !!calendar.weather.autoGenerate);
       const autoGenerate = game.settings.get(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER);
@@ -297,7 +297,7 @@ export default class WeatherManager {
    */
   static async #onPeriodThreshold(periodId) {
     if (!game.settings.get(MODULE.ID, SETTINGS.INTRADAY_WEATHER)) return;
-    if (!CalendariaSocket.isPrimaryGM()) return;
+    if (!ATLAS.isPrimaryGM) return;
     const zones = this.#getEffectiveZones();
     let anyChanged = false;
     for (const zone of zones) {
@@ -545,10 +545,10 @@ export default class WeatherManager {
     if (weather) this.#currentWeatherByZone[zoneId] = weather;
     else delete this.#currentWeatherByZone[zoneId];
     await game.settings.set(MODULE.ID, SETTINGS.CURRENT_WEATHER, this.#currentWeatherByZone);
-    if (weather && CalendariaSocket.isPrimaryGM()) await this.#recordWeatherHistory(weather, zoneId);
+    if (weather && ATLAS.isPrimaryGM) await this.#recordWeatherHistory(weather, zoneId);
     Hooks.callAll(HOOKS.WEATHER_CHANGE, { previous, current: weather, zoneId });
     if (broadcast) CalendariaSocket.emit('weatherChange', { weather, zoneId });
-    if (weather?.fxMacro && CalendariaSocket.isPrimaryGM()) executeMacroById(weather.fxMacro, { weather, previousWeather: previous, zoneId });
+    if (weather?.fxMacro && ATLAS.isPrimaryGM) executeMacroById(weather.fxMacro, { weather, previousWeather: previous, zoneId });
     ATLAS.log(3, `Weather changed for zone ${zoneId}:`, weather?.id ?? 'cleared');
   }
 
@@ -769,7 +769,7 @@ export default class WeatherManager {
    */
   static async #onSceneActivated(scene, change) {
     if (!change.active) return;
-    if (!CalendariaSocket.isPrimaryGM()) return;
+    if (!ATLAS.isPrimaryGM) return;
     const zone = this.getActiveZone(null, scene) ?? this.getActiveZone();
     const zoneId = zone?.id ?? this.DEFAULT_ZONE;
     const weather = this.#currentWeatherByZone[zoneId];
@@ -813,7 +813,7 @@ export default class WeatherManager {
    */
   static async #doDayChangeWork(data) {
     this.#legacyForecastCache = null;
-    if (!CalendariaSocket.isPrimaryGM()) return;
+    if (!ATLAS.isPrimaryGM) return;
     const calendar = CalendarManager.getActiveCalendar();
     const autoGenerate = game.settings.get(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER) ?? false;
     const zones = this.#getEffectiveZones();
@@ -1269,7 +1269,7 @@ export default class WeatherManager {
    * @private
    */
   static async #ensureForecastPlan() {
-    if (!CalendariaSocket.isPrimaryGM()) return;
+    if (!ATLAS.isPrimaryGM) return;
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return;
     const zones = this.#getEffectiveZones();

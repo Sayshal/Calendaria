@@ -1,28 +1,5 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
 
-  {{#if isGM}}
-    <fieldset data-section="module-sync">
-      <legend>
-        {{localize "CALENDARIA.SettingsPanel.Section.Sync"}}
-        <button type="button" class="reset-section" data-action="resetSection" data-section="module-sync" data-tooltip
-          aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i class="fas fa-undo"></i></button>
-      </legend>
-
-      <div class="form-group">
-        <label for="primaryGM">{{localize "CALENDARIA.Settings.PrimaryGM.Name"}}</label>
-        <div class="form-fields">
-          <select id="primaryGM" name="primaryGM">
-            {{#each primaryGMOptions}}
-              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
-            {{/each}}
-          </select>
-        </div>
-        <p class="hint">{{localize "CALENDARIA.Settings.PrimaryGM.Hint"}}</p>
-      </div>
-    </fieldset>
-
-  {{/if}}
-
   <fieldset data-section="module-integration">
     <legend>
       {{localize "CALENDARIA.SettingsPanel.Section.Integration"}}

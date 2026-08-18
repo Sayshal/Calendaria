@@ -14,7 +14,7 @@ vi.mock('../../scripts/calendar/_module.mjs', async () => {
 vi.mock('../../scripts/notes/_module.mjs', async () => await import('../../scripts/notes/date-utils.mjs'));
 vi.mock('../../scripts/weather/_module.mjs', () => ({ WeatherManager: { getWeatherForDate: vi.fn(() => null), getForecast: vi.fn(() => []) } }));
 vi.mock('../../scripts/utils/chronicle-data.mjs', () => ({ buildWeatherSentence: vi.fn((w) => (w ? 'Clear skies' : null)) }));
-vi.mock('../../scripts/utils/socket.mjs', () => ({ CalendariaSocket: { isPrimaryGM: vi.fn(() => true) } }));
+vi.mock('../../scripts/utils/socket.mjs', () => ({ CalendariaSocket: {} }));
 
 const { WeatherManager } = await import('../../scripts/weather/_module.mjs');
 

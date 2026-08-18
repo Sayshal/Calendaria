@@ -44,7 +44,7 @@ export default class ReminderScheduler {
    * @returns {void}
    */
   static onUpdateWorldTime(worldTime, _delta) {
-    if (!CalendariaSocket.isPrimaryGM()) return;
+    if (!ATLAS.isPrimaryGM) return;
     if (this.#skipNext) {
       this.#skipNext = false;
       this.#lastDate = getCurrentDate();

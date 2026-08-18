@@ -59,7 +59,7 @@ class ForcedDeletion extends DataFieldOperator {
 }
 globalThis._loc = (key, data) => (data ? i18n.format(key, data) : i18n.localize(key));
 globalThis._del = new ForcedDeletion();
-globalThis.ATLAS = { log: vi.fn(), register: vi.fn() };
+globalThis.ATLAS = { log: vi.fn(), register: vi.fn(), isPrimaryGM: true, primaryGM: { id: 'gm', isSelf: true } };
 globalThis.ui = { notifications: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } };
 globalThis.Hooks = { on: vi.fn(), once: vi.fn(), off: vi.fn(), call: vi.fn(), callAll: vi.fn() };
 globalThis.CONFIG = {};

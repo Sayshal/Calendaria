@@ -90,7 +90,7 @@ vi.mock('../../scripts/weather/weather-manager.mjs', () => ({
     getWeatherProbabilities: vi.fn(() => ({ zone: { id: '_default', name: 'Default' }, season: null, entries: [], tempRange: { min: 10, max: 22 } }))
   }
 }));
-vi.mock('../../scripts/utils/socket.mjs', () => ({ CalendariaSocket: { isPrimaryGM: vi.fn(() => true), emit: vi.fn() } }));
+vi.mock('../../scripts/utils/socket.mjs', () => ({ CalendariaSocket: { emit: vi.fn() } }));
 vi.mock('../../scripts/utils/permissions.mjs', () => ({
   canAddNotes: vi.fn(() => true),
   canChangeActiveCalendar: vi.fn(() => true),
@@ -1116,10 +1116,10 @@ describe('permission checks', () => {
     canAddNotes.mockReturnValue(true);
     expect(CalendariaAPI.canManageNotes()).toBe(true);
   });
-  it('isPrimaryGM delegates to CalendariaSocket.isPrimaryGM', () => {
-    CalendariaSocket.isPrimaryGM.mockReturnValue(false);
+  it('isPrimaryGM delegates to ATLAS', () => {
+    ATLAS.isPrimaryGM = false;
     expect(CalendariaAPI.isPrimaryGM()).toBe(false);
-    CalendariaSocket.isPrimaryGM.mockReturnValue(true);
+    ATLAS.isPrimaryGM = true;
     expect(CalendariaAPI.isPrimaryGM()).toBe(true);
   });
 });

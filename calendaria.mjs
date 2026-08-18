@@ -112,12 +112,11 @@ Hooks.once('dnd5e.setupCalendar', () => {
 });
 
 Hooks.once('ready', async () => {
-  CalendariaSettings.registerReadySettings();
   await CalendarManager.initialize();
   await runAllMigrations();
   await NoteManager.initialize();
   await recoverOrphanedPresets();
-  if (game.user.isGM) {
+  if (ATLAS.isPrimaryGM) {
     const activeCalendar = CalendarManager.getActiveCalendar();
     if (activeCalendar?.metadata?.id) await FestivalManager.seedFestivalNotes(activeCalendar.metadata.id, activeCalendar);
   }

@@ -1573,27 +1573,4 @@ export default class CalendariaSettings {
     for (const [key, config] of Object.entries(this.menus)) game.settings.registerMenu(MODULE.ID, key, config);
     ATLAS.log(3, 'Module settings registered.');
   }
-
-  /** Register settings that require game.users to be available (called during ready hook). */
-  static registerReadySettings() {
-    game.settings.register(MODULE.ID, SETTINGS.PRIMARY_GM, {
-      name: 'CALENDARIA.Settings.PrimaryGM.Name',
-      hint: 'CALENDARIA.Settings.PrimaryGM.Hint',
-      scope: 'world',
-      config: false,
-      type: new StringField({
-        blank: true,
-        choices: game.users
-          .filter((user) => user.isGM)
-          .reduce(
-            (acc, user) => {
-              acc[user.id] = user.name;
-              return acc;
-            },
-            { '': _loc('CALENDARIA.Settings.PrimaryGM.Auto') }
-          ),
-        initial: ''
-      })
-    });
-  }
 }

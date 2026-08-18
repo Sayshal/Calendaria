@@ -32,7 +32,7 @@ vi.mock('../../scripts/utils/permissions.mjs', () => ({
   canViewSunDial: vi.fn(() => true),
   canViewTimeKeeper: vi.fn(() => true)
 }));
-vi.mock('../../scripts/utils/socket.mjs', () => ({ CalendariaSocket: { executeAsGM: vi.fn(), isPrimaryGM: vi.fn(() => true) } }));
+vi.mock('../../scripts/utils/socket.mjs', () => ({ CalendariaSocket: { executeAsGM: vi.fn() } }));
 vi.mock('../../scripts/applications/_module.mjs', () => ({
   BigCal: { show: vi.fn(), hide: vi.fn(), toggle: vi.fn() },
   HUD: { show: vi.fn(), hide: vi.fn() },

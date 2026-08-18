@@ -1613,7 +1613,7 @@ export const CalendariaAPI = {
    * @returns {boolean} True if current user is primary GM
    */
   isPrimaryGM() {
-    return CalendariaSocket.isPrimaryGM();
+    return ATLAS.isPrimaryGM;
   },
 
   /**

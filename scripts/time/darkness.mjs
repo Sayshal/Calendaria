@@ -297,7 +297,7 @@ export function calculateEnvironmentLighting(scene) {
  * @returns {object|null} Update data object, or null if ambience sync is off or not primary GM
  */
 function buildEnvironmentUpdateData(scene, lighting) {
-  if (!CalendariaSocket.isPrimaryGM()) return null;
+  if (!ATLAS.isPrimaryGM) return null;
   const ambienceSync = resolveSceneSync(scene, SCENE_FLAGS.AMBIENCE_SYNC, SETTINGS.AMBIENCE_SYNC);
   if (!ambienceSync) return null;
   const base = lighting?.base ?? {};
@@ -349,7 +349,7 @@ function buildDarknessUpdates(components) {
  * @param {number} dt - The time delta in seconds
  */
 export async function updateDarknessFromWorldTime(worldTime, dt) {
-  if (!CalendariaSocket.isPrimaryGM()) return;
+  if (!ATLAS.isPrimaryGM) return;
   const calendar = game.time.calendar;
   const components = game.time.components ?? calendar?.timeToComponents(worldTime);
   const currentHour = components?.hour ?? 0;
@@ -402,7 +402,7 @@ function getDarknessScenes() {
  * Handle moon phase change to recalculate darkness across synced scenes.
  */
 export async function onMoonPhaseChange() {
-  if (!CalendariaSocket.isPrimaryGM()) return;
+  if (!ATLAS.isPrimaryGM) return;
   lastHour = null;
   lastMinute = null;
   await updateDarknessFromWorldTime(game.time.worldTime, 0);
@@ -413,7 +413,7 @@ export async function onMoonPhaseChange() {
  * Resets the hour/minute cache so settings changes take effect immediately.
  */
 export async function refreshEnvironmentLighting() {
-  if (!CalendariaSocket.isPrimaryGM()) return;
+  if (!ATLAS.isPrimaryGM) return;
   lastHour = null;
   lastMinute = null;
   await updateDarknessFromWorldTime(game.time.worldTime, 0);
@@ -423,7 +423,7 @@ export async function refreshEnvironmentLighting() {
  * Handle weather change to update scene darkness and environment lighting.
  */
 export async function onWeatherChange() {
-  if (!CalendariaSocket.isPrimaryGM()) return;
+  if (!ATLAS.isPrimaryGM) return;
   const components = game.time.components;
   const updates = buildDarknessUpdates(components);
   if (updates.length) await Scene.updateDocuments(updates).catch((error) => ATLAS.log(1, 'Weather darkness batch update failed:', error));
@@ -435,7 +435,7 @@ export async function onWeatherChange() {
  * @param {object} change - The change data
  */
 export async function onUpdateScene(scene, change) {
-  if (!CalendariaSocket.isPrimaryGM()) return;
+  if (!ATLAS.isPrimaryGM) return;
   if (!change.active) return;
   if (scene.getFlag(MODULE.ID, SCENE_FLAGS.HUD_HIDE_FOR_PLAYERS)) CalendariaSocket.emit(SOCKET_TYPES.HUD_VISIBILITY, { visible: false });
   else CalendariaSocket.emit(SOCKET_TYPES.HUD_VISIBILITY, { visible: true });

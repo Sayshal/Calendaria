@@ -61,7 +61,7 @@ export class CalendariaSocket {
    * @returns {void}
    */
   static emitDateChange(worldTime, delta) {
-    if (!this.isPrimaryGM()) return;
+    if (!ATLAS.isPrimaryGM) return;
     this.emit(SOCKET_TYPES.DATE_CHANGE, { worldTime, delta });
   }
 
@@ -86,7 +86,7 @@ export class CalendariaSocket {
    * @returns {void}
    */
   static emitClockUpdate(running, ratio = 1) {
-    if (!this.isPrimaryGM()) return;
+    if (!ATLAS.isPrimaryGM) return;
     this.emit(SOCKET_TYPES.CLOCK_UPDATE, { running, ratio });
   }
 
@@ -95,7 +95,7 @@ export class CalendariaSocket {
    * @param {object} payload - CinematicPayload
    */
   static emitCinematicPlay(payload) {
-    if (!this.isPrimaryGM()) return;
+    if (!ATLAS.isPrimaryGM) return;
     this.emit(SOCKET_TYPES.CINEMATIC_PLAY, payload);
   }
 
@@ -103,7 +103,7 @@ export class CalendariaSocket {
    * Broadcast cinematic abort to all clients.
    */
   static emitCinematicAbort() {
-    if (!this.isPrimaryGM()) return;
+    if (!ATLAS.isPrimaryGM) return;
     this.emit(SOCKET_TYPES.CINEMATIC_ABORT, {});
   }
 
@@ -111,7 +111,7 @@ export class CalendariaSocket {
    * Broadcast cinematic pause to all clients.
    */
   static emitCinematicPause() {
-    if (!this.isPrimaryGM()) return;
+    if (!ATLAS.isPrimaryGM) return;
     this.emit(SOCKET_TYPES.CINEMATIC_PAUSE, {});
   }
 
@@ -119,7 +119,7 @@ export class CalendariaSocket {
    * Broadcast cinematic resume to all clients.
    */
   static emitCinematicResume() {
-    if (!this.isPrimaryGM()) return;
+    if (!ATLAS.isPrimaryGM) return;
     this.emit(SOCKET_TYPES.CINEMATIC_RESUME, {});
   }
 
@@ -307,7 +307,7 @@ export class CalendariaSocket {
    * @param {object} data.ownership - Ownership updates {userId: level}
    */
   static async #handleOwnershipUpdate(data) {
-    if (!this.isPrimaryGM()) return;
+    if (!ATLAS.isPrimaryGM) return;
     const { journalId, ownership } = data;
     if (!journalId || !ownership) return;
     const journal = game.journal.get(journalId);
@@ -343,7 +343,7 @@ export class CalendariaSocket {
    * @returns {void}
    */
   static async #handleCreateNote(data) {
-    if (!this.isPrimaryGM()) return;
+    if (!ATLAS.isPrimaryGM) return;
     const { name, content, noteData, calendarId, journalData, requesterId } = data;
     ATLAS.log(3, `Primary GM handling note creation request: ${name}`);
     const noteDataWithAuthor = { ...noteData, author: requesterId };
@@ -393,7 +393,7 @@ export class CalendariaSocket {
    * @returns {void}
    */
   static async #handleWeatherRequest(data) {
-    if (!this.isPrimaryGM()) return;
+    if (!ATLAS.isPrimaryGM) return;
     const { action, presetId, options = {} } = data;
     ATLAS.log(3, `Primary GM handling weather request: ${action}`, data);
     switch (action) {
@@ -421,7 +421,7 @@ export class CalendariaSocket {
    * @returns {void}
    */
   static async #handleTimeRequest(data) {
-    if (!this.isPrimaryGM()) return;
+    if (!ATLAS.isPrimaryGM) return;
     const { action, delta, components, date, cinematicOverride = null } = data;
     ATLAS.log(3, `Primary GM handling time request: ${action}`, data);
     const runAdvance = async (seconds) => {
@@ -464,7 +464,7 @@ export class CalendariaSocket {
    * @returns {void}
    */
   static async #handleCalendarRequest(data) {
-    if (!this.isPrimaryGM()) return;
+    if (!ATLAS.isPrimaryGM) return;
     const { calendarId } = data;
     ATLAS.log(3, `Primary GM handling calendar switch request: ${calendarId}`);
     await CalendarManager.switchCalendar(calendarId);
@@ -584,31 +584,5 @@ export class CalendariaSocket {
     ATLAS.log(3, `Handling Sun Dial visibility: ${visible}`);
     if (visible && canViewSunDial()) SunDial.show({ silent: true });
     else if (!visible) SunDial.hide();
-  }
-
-  /**
-   * Determine if the current user is the primary GM.
-   * @returns {boolean} True if the current user is the primary GM
-   */
-  static isPrimaryGM() {
-    if (!game.user.isGM) return false;
-    const primaryGMOverride = game.settings.get(MODULE.ID, SETTINGS.PRIMARY_GM);
-    if (primaryGMOverride) return primaryGMOverride === game.user.id;
-    const activeGMs = game.users.filter((u) => u.isGM && u.active);
-    if (activeGMs.length === 0) return false;
-    const primaryGM = activeGMs.sort((a, b) => a.id.localeCompare(b.id))[0];
-    return primaryGM.id === game.user.id;
-  }
-
-  /**
-   * Get the current primary GM user.
-   * @returns {object|null} The primary GM user, or null if none active
-   */
-  static getPrimaryGM() {
-    const primaryGMOverride = game.settings.get(MODULE.ID, SETTINGS.PRIMARY_GM);
-    if (primaryGMOverride) return game.users.get(primaryGMOverride) ?? null;
-    const activeGMs = game.users.filter((u) => u.isGM && u.active);
-    if (activeGMs.length === 0) return null;
-    return activeGMs.sort((a, b) => a.id.localeCompare(b.id))[0];
   }
 }

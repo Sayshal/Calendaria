@@ -5,7 +5,7 @@ import { getMoonPhasePosition } from '../../scripts/utils/formatting/moon-utils.
 import WeatherManager from '../../scripts/weather/weather-manager.mjs';
 
 vi.mock('../../scripts/utils/logger.mjs', () => ({ log: vi.fn() }));
-vi.mock('../../scripts/utils/socket.mjs', () => ({ CalendariaSocket: { isPrimaryGM: vi.fn(() => true), emit: vi.fn() } }));
+vi.mock('../../scripts/utils/socket.mjs', () => ({ CalendariaSocket: { emit: vi.fn() } }));
 vi.mock('../../scripts/weather/weather-manager.mjs', () => ({ default: { getActiveZone: vi.fn(() => null), getCurrentWeather: vi.fn(() => null), getCalendarZones: vi.fn(() => []) } }));
 vi.mock('../../scripts/constants.mjs', async (importOriginal) => ({
   ...(await importOriginal()),

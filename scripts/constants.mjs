@@ -168,7 +168,6 @@ export const SETTINGS = {
   PERMISSIONS: 'permissions',
   POSITION_LOCKED: 'positionLocked',
   PRECIPITATION_UNIT: 'precipitationUnit',
-  PRIMARY_GM: 'primaryGM',
   REST_ADVANCE_MODE: 'restAdvanceMode',
   REST_FIXED_HOURS: 'restFixedHours',
   SAVED_TIMEPOINTS: 'savedTimepoints',

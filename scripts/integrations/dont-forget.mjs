@@ -1,5 +1,4 @@
 import { HOOKS } from '../constants.mjs';
-import { CalendariaSocket } from '../utils/_module.mjs';
 
 /**
  * Check if the Don't Forget module is installed and active.
@@ -66,9 +65,9 @@ export function initializeDontForget() {
   if (!isDontForgetActive()) return;
   ATLAS.log(3, "Don't Forget detected, registering reminder mirror cleanup");
   Hooks.on(HOOKS.NOTE_UPDATED, (note) => {
-    if (CalendariaSocket.isPrimaryGM()) onNoteUpdated(note);
+    if (ATLAS.isPrimaryGM) onNoteUpdated(note);
   });
   Hooks.on(HOOKS.NOTE_DELETED, (noteId) => {
-    if (CalendariaSocket.isPrimaryGM()) clearMirroredToDos(noteId);
+    if (ATLAS.isPrimaryGM) clearMirroredToDos(noteId);
   });
 }

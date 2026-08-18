@@ -59,7 +59,7 @@ async function migrateThemeToAtlas() {
  */
 async function migrateIntervalConditionField() {
   const KEY = 'intervalConditionFieldMigrationComplete';
-  if (!game.user?.isGM) return;
+  if (!ATLAS.isPrimaryGM) return;
   if (game.settings.get(MODULE.ID, KEY)) return;
   const isTarget = (node) => node?.type === 'condition' && node.field === CONDITION_FIELDS.DAY && node.op === CONDITION_OPERATORS.MODULO && node.value > 1;
   const containsTarget = (node) => {
@@ -129,6 +129,6 @@ async function migrateIntervalConditionField() {
  */
 export async function runAllMigrations() {
   await migrateThemeToAtlas();
-  if (!game.user?.isGM) return;
+  if (!ATLAS.isPrimaryGM) return;
   await migrateIntervalConditionField();
 }
