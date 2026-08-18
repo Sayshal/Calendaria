@@ -1941,6 +1941,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const page = journal?.pages.get(pageId);
     if (page) {
       const confirmed = await foundry.applications.api.DialogV2.confirm({
+        classes: ['calendaria'],
         window: { title: _loc('CALENDARIA.Common.DeleteNote') },
         content: `<p>${_loc('CALENDARIA.ContextMenu.DeleteConfirm', { name: page.name })}</p>`,
         rejectClose: false,

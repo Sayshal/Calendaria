@@ -214,6 +214,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
    */
   async #showDeletePresetMenu(_event, presetId, presetLabel) {
     const confirmed = await foundry.applications.api.DialogV2.confirm({
+      classes: ['calendaria'],
       window: { title: _loc('CALENDARIA.Common.DeletePreset') },
       content: `<p>${_loc('CALENDARIA.Note.DeletePresetConfirm', { label: presetLabel })}</p><p class="hint">${_loc('CALENDARIA.Note.DeletePresetHint')}</p>`,
       rejectClose: false,
@@ -662,6 +663,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const hasDefaults = preset.icon || preset.color || preset.defaults;
     if (!hasDefaults) return;
     const confirmed = await foundry.applications.api.DialogV2.confirm({
+      classes: ['calendaria'],
       window: { title: _loc('CALENDARIA.Note.ApplyPresetStyleTitle') },
       content: `<p style="text-align:center;font-size:2rem;margin:0.5rem 0"><i class="fas ${preset.icon}" style="color:${preset.color}"></i></p><p>${_loc('CALENDARIA.Note.ApplyPresetStyleConfirm', { label: preset.label })}</p>`,
       rejectClose: false,
@@ -685,6 +687,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const hasExisting = this.document.system.conditionTree?.children?.length > 0 || this.document.system.conditions?.length > 0;
     if (hasExisting) {
       const confirmed = await foundry.applications.api.DialogV2.confirm({
+        classes: ['calendaria'],
         window: { title: _loc('CALENDARIA.Note.Schedule.ClearConditionsTitle') },
         content: `<p>${_loc('CALENDARIA.Note.Schedule.ClearConditionsConfirm')}</p>`,
         rejectClose: false,
@@ -710,6 +713,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     let merge = false;
     if (hasExisting) {
       const result = await foundry.applications.api.DialogV2.wait({
+        classes: ['calendaria'],
         window: { title: _loc('CALENDARIA.Note.Preset.ReplaceTitle') },
         content: `<p>${_loc('CALENDARIA.Note.Preset.ReplaceConfirm')}</p>
           <label class="checkbox-label"><input type="checkbox" name="merge"> ${_loc('CALENDARIA.Note.Preset.MergeOption')}</label>`,
@@ -806,6 +810,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     if (this.document.system.linkedFestival) return;
     if (mode === 'once' && this.document.system.conditionTree) {
       const confirmed = await foundry.applications.api.DialogV2.confirm({
+        classes: ['calendaria'],
         window: { title: _loc('CALENDARIA.Note.Schedule.ConfirmSwitchToOnceTitle') },
         content: `<p>${_loc('CALENDARIA.Note.Schedule.ConfirmSwitchToOnce')}</p>`,
         rejectClose: false,
@@ -886,6 +891,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     if (iconType === 'fontawesome') {
       const currentIcon = target.querySelector('i')?.className.replace('icon-preview', '').trim() || '';
       const newIcon = await foundry.applications.api.DialogV2.prompt({
+        classes: ['calendaria'],
         window: { title: _loc('CALENDARIA.Note.FontAwesomeIconTitle') },
         content: `<div class="form-group"><label>${_loc('CALENDARIA.Note.FontAwesomeClasses')}</label><input type="text" name="icon-class" value="${currentIcon}" placeholder="fas fa-calendar" /><p class="hint">${_loc('CALENDARIA.Common.IconHint')}</p></div>`,
         ok: {
@@ -1044,6 +1050,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       currentDay
     });
     return foundry.applications.api.DialogV2.prompt({
+      classes: ['calendaria'],
       window: { title: _loc('CALENDARIA.Note.SelectDateTitle') },
       content,
       ok: {
@@ -1078,6 +1085,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
   static async _onDeleteNote(_event, _target) {
     if (!this.isAuthor && !game.user.isGM) return;
     const confirmed = await foundry.applications.api.DialogV2.confirm({
+      classes: ['calendaria'],
       window: { title: _loc('CALENDARIA.Common.DeleteNote') },
       content: `<p>${_loc('CALENDARIA.ContextMenu.DeleteConfirm', { name: this.document.name })}</p>`,
       rejectClose: false,

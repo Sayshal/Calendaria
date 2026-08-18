@@ -111,6 +111,7 @@
 
         &:hover {
           background: var(--atlas-bg-hover, rgb(53 53 53));
+          color: var(--atlas-text, rgb(224 224 224));
         }
 
         &:disabled {
@@ -338,6 +339,7 @@
 
       &:hover {
         background: var(--atlas-bg-hover, rgb(53 53 53));
+        color: var(--atlas-text, rgb(224 224 224));
       }
     }
 
@@ -444,7 +446,7 @@
         color 0.15s;
 
       &:hover {
-        color: var(--atlas-primary, rgb(74 144 226));
+        color: var(--atlas-text, rgb(224 224 224));
         background: var(--atlas-bg-hover, rgb(53 53 53));
       }
     }
@@ -499,6 +501,7 @@
 
       &:hover {
         background: var(--atlas-bg-hover, rgb(53 53 53));
+        color: var(--atlas-text, rgb(224 224 224));
       }
 
       &[disabled] {
@@ -597,6 +600,7 @@
 
       &:hover {
         background: var(--atlas-bg-hover, rgb(53 53 53));
+        color: var(--atlas-text, rgb(224 224 224));
       }
 
       &.empty {
@@ -613,6 +617,7 @@
         &:hover {
           opacity: 0.6;
           background: var(--atlas-bg-hover, rgb(53 53 53));
+          color: var(--atlas-text, rgb(224 224 224));
         }
 
         .minical-day-num {
@@ -852,7 +857,7 @@
         padding: 0;
         border: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
         border-radius: 0.25rem;
-        color: var(--atlas-text, rgb(224 224 224));
+        color: var(--atlas-button-text, rgb(224 224 224));
         cursor: pointer;
         background: var(--atlas-button-bg, rgb(58 58 58));
         transition:
@@ -890,7 +895,7 @@
         padding: 0 0.375rem;
         border: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
         border-radius: 0.25rem;
-        color: var(--atlas-text, rgb(224 224 224));
+        color: var(--atlas-button-text, rgb(224 224 224));
         font-size: 0.75rem;
         line-height: 1.625rem;
         text-align: center;

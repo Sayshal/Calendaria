@@ -871,28 +871,3 @@
     }
   }
 }
-
-.theme-light {
-  .calendaria {
-    &.calendar-editor {
-      footer.form-footer {
-        border-top-color: var(--atlas-border-light, rgb(58 58 58));
-        background: var(--atlas-bg-lighter, rgb(42 42 42));
-      }
-
-      .warning {
-        color: var(--atlas-error, rgb(244 67 54));
-      }
-
-      .item {
-        border-color: var(--atlas-border-light, rgb(58 58 58));
-        background: none;
-      }
-
-      .empty-list {
-        color: unset;
-        background: unset;
-      }
-    }
-  }
-}

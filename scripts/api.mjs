@@ -1292,7 +1292,8 @@ export const CalendariaAPI = {
             .join('');
         });
       },
-      rejectClose: false
+      rejectClose: false,
+      classes: ['calendaria']
     };
     if (options.position) dialogOptions.position = { left: options.position.x, top: options.position.y };
     const result = await foundry.applications.api.DialogV2.prompt(dialogOptions);

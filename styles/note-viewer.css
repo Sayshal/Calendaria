@@ -384,7 +384,7 @@
         font-size: var(--font-size-14, 0.875rem);
         cursor: pointer;
         background: var(--atlas-primary, rgb(74 144 226));
-        box-shadow: 0 0.125rem 0.5rem rgb(0 0 0 / 30%);
+        box-shadow: 0 0.125rem 0.5rem var(--atlas-shadow-color, rgb(0 0 0 / 30%));
         transition:
           background 0.15s ease,
           transform 0.15s ease;

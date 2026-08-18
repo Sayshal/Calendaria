@@ -222,7 +222,7 @@
 #context-menu.calendaria {
   .context-item {
     &.sticky-active {
-      color: var(--atlas-title-text, rgb(255 255 255));
+      color: var(--atlas-text-on-color, rgb(255 255 255));
       background: var(--atlas-primary, rgb(74 144 226));
 
       &:hover {

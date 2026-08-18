@@ -756,6 +756,13 @@ export class HudSceneRenderer {
     this.#applyFlip();
   }
 
+  /** Re-fit the canvas to its parent. PIXI's resizeTo only reacts to window resize, so manual resizes must call this. */
+  resize() {
+    if (this.#destroyed) return;
+    this.#app.resize();
+    this.#resizeSkySprites();
+  }
+
   /**
    * Apply the cached flip state against the current screen height.
    * @private

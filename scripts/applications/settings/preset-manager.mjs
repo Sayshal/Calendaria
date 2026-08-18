@@ -117,6 +117,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#flushFormData();
     if (this.#isDirty) {
       const confirmed = await foundry.applications.api.DialogV2.confirm({
+        classes: ['calendaria'],
         window: { title: _loc('CALENDARIA.Editor.UnsavedChanges') },
         content: `<p>${_loc('CALENDARIA.Editor.UnsavedChangesMessage')}</p>`,
         yes: { label: _loc('CALENDARIA.Editor.DiscardChanges'), icon: 'fas fa-trash' },
@@ -362,6 +363,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
       return;
     }
     const confirmed = await foundry.applications.api.DialogV2.confirm({
+      classes: ['calendaria'],
       window: { title: _loc('CALENDARIA.Common.DeletePreset') },
       content: `<p>${_loc('CALENDARIA.PresetManager.ConfirmDeleteMessage', { name: cat.label })}</p>`,
       yes: { default: false },
@@ -383,6 +385,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static async #onRestorePresets(_event, _target) {
     const confirmed = await foundry.applications.api.DialogV2.confirm({
+      classes: ['calendaria'],
       window: { title: _loc('CALENDARIA.PresetManager.RestorePresets') },
       content: `<p>${_loc('CALENDARIA.PresetManager.RestorePresetsMessage')}</p>`,
       rejectClose: false
@@ -503,6 +506,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
       });
       if (affectedNotes.length) {
         const confirmed = await foundry.applications.api.DialogV2.confirm({
+          classes: ['calendaria'],
           window: { title: _loc('CALENDARIA.PresetManager.UpdateNotesTitle') },
           content: `<p>${_loc('CALENDARIA.PresetManager.UpdateNotesContent', { count: affectedNotes.length })}</p>`,
           rejectClose: false,
@@ -538,6 +542,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
     const cat = this._presets.find((c) => c.id === this._selectedId);
     if (!cat) return;
     const confirmed = await foundry.applications.api.DialogV2.confirm({
+      classes: ['calendaria'],
       window: { title: _loc('CALENDARIA.Common.Reset') },
       content: `<p>${_loc('CALENDARIA.PresetManager.ResetPresetConfirm')}</p>`,
       yes: { label: _loc('CALENDARIA.Common.Reset'), icon: 'fas fa-undo' },
@@ -709,6 +714,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
       return;
     }
     const confirmed = await foundry.applications.api.DialogV2.confirm({
+      classes: ['calendaria'],
       window: { title: _loc('CALENDARIA.PresetManager.SyncTitle') },
       content: `<p>${_loc('CALENDARIA.PresetManager.SyncConfirm', { count: affected.length, name: preset.label })}</p>`,
       rejectClose: false,

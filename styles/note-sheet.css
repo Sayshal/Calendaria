@@ -160,10 +160,6 @@
       border-radius: 50%;
       background: color-mix(in srgb, var(--note-color, var(--atlas-primary, rgb(74 144 226))) 15%, var(--atlas-bg, rgb(31 31 31)));
 
-      .theme-light & {
-        background: color-mix(in srgb, var(--note-color, var(--atlas-primary, rgb(74 144 226))) 8%, var(--atlas-bg, rgb(31 31 31)));
-      }
-
       i {
         color: var(--note-color, var(--atlas-text, rgb(224 224 224)));
         font-size: 1.5rem;
@@ -220,10 +216,6 @@
       border: 0.0625rem solid color-mix(in srgb, var(--note-color, var(--atlas-primary, rgb(74 144 226))) 12%, var(--atlas-border, rgb(74 74 74)));
       border-radius: 0.375rem;
       background: color-mix(in srgb, var(--note-color, var(--atlas-primary, rgb(74 144 226))) 6%, var(--atlas-bg-lighter, var(--atlas-bg, rgb(31 31 31))));
-
-      .theme-light & {
-        background: color-mix(in srgb, var(--note-color, var(--atlas-primary, rgb(74 144 226))) 4%, var(--atlas-bg, rgb(31 31 31)));
-      }
     }
 
     .metadata-row {
@@ -477,10 +469,6 @@
       border-radius: 1rem;
       font-size: var(--font-size-11);
       background: var(--atlas-bg-hover, rgb(53 53 53));
-
-      .theme-light & {
-        background: color-mix(in srgb, var(--atlas-text, rgb(224 224 224)) 8%, transparent);
-      }
 
       .tag-value {
         overflow: hidden;
@@ -950,10 +938,6 @@
         border-radius: 0.25rem;
         background: var(--atlas-bg-hover, rgb(53 53 53));
 
-        .theme-light & {
-          background: unset;
-        }
-
         .group-mode {
           flex-shrink: 0;
           padding: 0.125rem 0.375rem;
@@ -963,10 +947,6 @@
           font-size: var(--font-size-10);
           text-transform: uppercase;
           background: var(--atlas-bg-hover, rgb(53 53 53));
-
-          .theme-light & {
-            background: unset;
-          }
         }
 
         .group-pills {
@@ -982,19 +962,11 @@
           font-size: var(--font-size-11);
           cursor: context-menu;
           background: var(--atlas-bg-hover, rgb(53 53 53));
-
-          .theme-light & {
-            background: rgb(0 0 0 / 10%);
-          }
         }
 
         .condition-group {
           border-style: dashed;
           background: var(--atlas-bg-hover, rgb(53 53 53));
-
-          .theme-light & {
-            background: unset;
-          }
         }
       }
     }
@@ -1027,10 +999,6 @@
           border-radius: 0.1875rem;
           font-size: var(--font-size-11);
           background: var(--atlas-bg-hover, rgb(53 53 53));
-
-          .theme-light & {
-            background: rgb(0 0 0 / 10%);
-          }
 
           i {
             color: var(--atlas-text-dim, rgb(153 153 153));
@@ -1201,10 +1169,6 @@
       padding: 0.375rem 0.5rem;
       border-radius: 0.25rem;
       background: var(--atlas-bg-hover, rgb(53 53 53));
-
-      .theme-light & {
-        background: color-mix(in srgb, var(--atlas-text, rgb(224 224 224)) 8%, transparent);
-      }
 
       .user-name {
         gap: 0.5rem;

@@ -783,6 +783,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
       </div>
     `;
     const result = await foundry.applications.api.DialogV2.wait({
+      classes: ['calendaria'],
       window: { title: _loc('CALENDARIA.Stopwatch.ConfigureNotification'), icon: 'fas fa-bell' },
       content,
       render: (_event, dialog) => {

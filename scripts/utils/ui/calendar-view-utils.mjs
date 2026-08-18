@@ -95,7 +95,7 @@ export async function showMoonPicker(anchor, moons, currentMoon, onSelect) {
   closeMoonPicker();
   if (!moons?.length) return;
   const tooltip = document.createElement('div');
-  tooltip.className = 'calendaria-moon-picker';
+  tooltip.className = 'calendaria calendaria-moon-picker';
   const radialSize = Math.min(250, Math.round(50 * Math.sqrt(moons.length) + 17 * (moons.length - 1)));
   const templateData = { moonCount: moons.length, radialSize, moons: moons.map((m) => ({ ...m, selected: m.moonName === currentMoon })) };
   tooltip.innerHTML = await foundry.applications.handlebars.renderTemplate(TEMPLATES.PARTIALS.MOON_PICKER, templateData);
@@ -894,6 +894,7 @@ export function setupDayContextMenu(container, selector, calendar, options = {})
               } else if (action === 'delete') {
                 ui.context?.close();
                 const confirmed = await foundry.applications.api.DialogV2.confirm({
+                  classes: ['calendaria'],
                   window: { title: _loc('CALENDARIA.Common.DeleteNote') },
                   content: `<p>${_loc('CALENDARIA.ContextMenu.DeleteConfirm', { name: note.name })}</p>`,
                   rejectClose: false,

@@ -824,6 +824,7 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
   #setSize(size) {
     const clamped = Math.max(150, Math.min(500, size));
     this.element.style.setProperty('--dial-size', `${clamped}px`);
+    this.#sceneRenderer?.resize();
   }
 
   /**

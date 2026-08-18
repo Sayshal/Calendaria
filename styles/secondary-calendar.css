@@ -89,7 +89,7 @@
           background: var(--atlas-primary, rgb(123 104 238));
 
           .day-number {
-            color: rgb(255 255 255);
+            color: var(--atlas-text-on-color, rgb(255 255 255));
             font-weight: 700;
           }
         }
@@ -126,7 +126,7 @@
         background: var(--atlas-bg-hover, rgb(40 40 70));
 
         &.today {
-          color: rgb(255 255 255);
+          color: var(--atlas-text-on-color, rgb(255 255 255));
           background: var(--atlas-primary, rgb(123 104 238));
         }
       }

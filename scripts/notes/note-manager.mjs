@@ -841,6 +841,7 @@ export default class NoteManager {
       </label>
     </div>`;
     const result = await foundry.applications.api.DialogV2.wait({
+      classes: ['calendaria'],
       window: { title: _loc('CALENDARIA.PresetDialog.Title') },
       content: html,
       buttons: [

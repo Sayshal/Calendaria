@@ -279,7 +279,7 @@
         transition: background 0.15s ease;
 
         &:hover {
-          background: rgb(128 128 128 / 15%);
+          background: var(--atlas-bg-hover, rgb(53 53 53));
         }
 
         .recent-time {
@@ -486,17 +486,17 @@
       align-items: center;
       padding: 0.5rem 0.75rem;
       border-radius: 0.375rem;
-      color: rgb(255 255 255);
+      color: var(--atlas-text-on-color, rgb(255 255 255));
       font-weight: 500;
       font-size: var(--font-size-14);
       text-decoration: none;
       white-space: nowrap;
-      background: rgb(255 94 91);
+      background: var(--atlas-error, rgb(255 94 91));
       transition: background 0.15s ease;
 
       &:hover {
-        color: rgb(255 255 255);
-        background: rgb(229 69 66);
+        color: var(--atlas-text-on-color, rgb(255 255 255));
+        background: color-mix(in srgb, var(--atlas-error, rgb(255 94 91)) 85%, rgb(0 0 0));
       }
     }
 
@@ -524,7 +524,7 @@
       border-radius: 0.25rem;
 
       &:hover {
-        background: rgb(128 128 128 / 15%);
+        background: var(--atlas-bg-hover, rgb(53 53 53));
       }
     }
 
@@ -892,7 +892,7 @@
       cursor: pointer;
 
       &:hover {
-        background: rgb(0 0 0 / 5%);
+        background: var(--atlas-surface-dim-10, rgb(0 0 0 / 5%));
       }
 
       &.active {
@@ -1006,8 +1006,9 @@
   max-height: 30rem;
   border-radius: 0.25rem;
   overflow: hidden auto;
+  border: 0.0625rem solid var(--atlas-border-light, rgb(58 58 58));
   background: var(--calendaria-ui-surface-dim);
-  box-shadow: 0 0.25rem 0.75rem rgb(0 0 0 / 20%);
+  box-shadow: 0 0.25rem 0.75rem var(--atlas-shadow-color, rgb(0 0 0 / 20%));
 
   .search-result {
     gap: 0.5rem;
@@ -1050,32 +1051,5 @@
     font-style: italic;
     font-size: var(--font-size-12);
     text-align: center;
-  }
-}
-
-.theme-light {
-  .calendaria-settings-search {
-    border: 0.0625rem solid var(--atlas-border-light, rgb(58 58 58));
-
-    .search-result:hover {
-      background: rgb(0 0 0 / 8%);
-    }
-  }
-
-  .calendaria {
-    &.settings-panel {
-      .settings-footer {
-        border-top-color: var(--atlas-border-light, rgb(58 58 58));
-        background: var(--atlas-bg-lighter, rgb(42 42 42));
-      }
-
-      .settings-footer .save-indicator {
-        color: rgb(21 128 61);
-      }
-
-      .recent-settings .recent-item:hover {
-        background: rgb(0 0 0 / 8%);
-      }
-    }
   }
 }

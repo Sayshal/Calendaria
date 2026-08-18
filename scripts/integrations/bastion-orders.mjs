@@ -80,6 +80,7 @@ export function patchBastionButton() {
     if (!calendar) return originalConfirmAdvance();
     const duration = Math.max(1, bastionConfig.duration ?? 7);
     const proceed = await foundry.applications.api.DialogV2.confirm({
+      classes: ['calendaria'],
       content: `<p>${_loc('CALENDARIA.Bastion.AdvanceConfirm', { days: duration })}</p>`,
       rejectClose: false,
       window: { icon: 'fa-solid fa-chess-rook', title: _loc('CALENDARIA.Bastion.AdvanceTitle') }

@@ -668,6 +668,7 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
             onClick: async () => {
               const stub = NoteManager.getNote(pageId);
               const confirmed = await foundry.applications.api.DialogV2.confirm({
+                classes: ['calendaria'],
                 window: { title: _loc('CALENDARIA.Common.DeleteNote') },
                 content: `<p>${stub?.name || 'this note'}</p>`,
                 yes: { default: false },
@@ -825,6 +826,7 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
       return false;
     }
     const confirmed = await foundry.applications.api.DialogV2.confirm({
+      classes: ['calendaria'],
       window: { title: _loc('CALENDARIA.NoteViewer.BulkDeleteTitle') },
       content: `<p>${countLabel}</p>`,
       yes: { default: false },
@@ -852,6 +854,7 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
     const options = presets.map((p) => `<option value="${p.id}">${_loc(p.label)}</option>`).join('');
     const content = `<div class="form-group"><label>${_loc('CALENDARIA.NoteViewer.Filter.Preset')}</label><select id="bulk-preset-select">${options}</select></div>`;
     const result = await foundry.applications.api.DialogV2.prompt({
+      classes: ['calendaria'],
       window: { title: _loc('CALENDARIA.NoteViewer.BulkAction.ChangePreset') },
       content,
       ok: { callback: (_event, button, _dialog) => button.form.elements['bulk-preset-select']?.value }
@@ -877,6 +880,7 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
         <option value="secret">${_loc('CALENDARIA.Note.Visibility.Secret')}</option>
       </select></div>`;
     const result = await foundry.applications.api.DialogV2.prompt({
+      classes: ['calendaria'],
       window: { title: _loc('CALENDARIA.NoteViewer.BulkAction.ChangeVisibility') },
       content,
       ok: { callback: (_event, button, _dialog) => button.form.elements['bulk-visibility-select']?.value }
@@ -901,6 +905,7 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
         <option value="banner">${_loc('CALENDARIA.Note.DisplayStyle.Banner')}</option>
       </select></div>`;
     const result = await foundry.applications.api.DialogV2.prompt({
+      classes: ['calendaria'],
       window: { title: _loc('CALENDARIA.NoteViewer.BulkAction.ChangeDisplayStyle') },
       content,
       ok: { callback: (_event, button, _dialog) => button.form.elements['bulk-style-select']?.value }

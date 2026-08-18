@@ -141,7 +141,7 @@
       padding: 0;
       border: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
       border-radius: 0.1875rem;
-      color: var(--atlas-text, rgb(224 224 224));
+      color: var(--atlas-button-text, rgb(224 224 224));
       cursor: pointer;
       background: var(--atlas-button-bg, rgb(58 58 58));
       transition: background 0.15s ease;
@@ -172,7 +172,7 @@
       padding: 0 0.375rem;
       border: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
       border-radius: 0.1875rem;
-      color: var(--atlas-text, rgb(224 224 224));
+      color: var(--atlas-button-text, rgb(224 224 224));
       font-size: 0.75rem;
       line-height: calc(1.75rem - 0.125rem);
       text-align: center;

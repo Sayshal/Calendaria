@@ -372,6 +372,7 @@ export default class ReminderScheduler {
   static async #showDialog(note, message) {
     const icon = this.#getIconHtml(note);
     const result = await foundry.applications.api.DialogV2.wait({
+      classes: ['calendaria'],
       window: { title: _loc('CALENDARIA.Reminder.Title'), icon: 'fas fa-bell' },
       content: `<p>${icon} ${message}</p>`,
       buttons: [
@@ -443,6 +444,7 @@ export default class ReminderScheduler {
       ui.notifications.info(`${iconHtml} ${data.message}`, { permanent: false });
     } else if (data.type === 'dialog') {
       foundry.applications.api.DialogV2.wait({
+        classes: ['calendaria'],
         window: { title: _loc('CALENDARIA.Reminder.Title'), icon: 'fas fa-bell' },
         content: `<p>${iconHtml} ${data.message}</p>`,
         buttons: [

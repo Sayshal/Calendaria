@@ -433,6 +433,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const presetId = this.tabGroups.primary;
     if (!presetId) return;
     const confirmed = await foundry.applications.api.DialogV2.confirm({
+      classes: ['calendaria'],
       window: { title: _loc('CALENDARIA.Common.Delete') },
       content: `<p>${_loc('CALENDARIA.WeatherEditor.DeleteConfirm')}</p>`,
       rejectClose: false

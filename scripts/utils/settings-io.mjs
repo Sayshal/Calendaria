@@ -252,6 +252,7 @@ export async function exportSettings() {
   }
   let dialogElement = null;
   const result = await foundry.applications.api.DialogV2.wait({
+    classes: ['calendaria'],
     window: { title: _loc('CALENDARIA.Common.ExportSettings') },
     content,
     buttons: [
@@ -356,6 +357,7 @@ export async function importSettings(onComplete) {
       }
       let dialogElement = null;
       const result = await foundry.applications.api.DialogV2.wait({
+        classes: ['calendaria'],
         window: { title: _loc('CALENDARIA.Common.ImportSettings') },
         content,
         buttons: [

@@ -311,6 +311,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   async _preClose(options) {
     if (this.#isDirty) {
       const confirmed = await foundry.applications.api.DialogV2.confirm({
+        classes: ['calendaria'],
         window: { title: _loc('CALENDARIA.Editor.UnsavedChanges') },
         content: `<p>${_loc('CALENDARIA.Editor.UnsavedChangesMessage')}</p>`,
         yes: { label: _loc('CALENDARIA.Editor.DiscardChanges'), icon: 'fas fa-trash' },
@@ -334,6 +335,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   async #confirmDiscard() {
     if (!this.#isDirty) return true;
     return foundry.applications.api.DialogV2.confirm({
+      classes: ['calendaria'],
       window: { title: _loc('CALENDARIA.Editor.UnsavedChanges') },
       content: `<p>${_loc('CALENDARIA.Editor.UnsavedChangesMessage')}</p>`,
       yes: { label: _loc('CALENDARIA.Editor.DiscardChanges'), icon: 'fas fa-trash' },
@@ -1873,6 +1875,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   static async #onResetFestivals(_event, _target) {
     if (!this.#calendarId) return;
     const confirmed = await foundry.applications.api.DialogV2.confirm({
+      classes: ['calendaria'],
       window: { title: _loc('CALENDARIA.Editor.Festival.ResetTitle') },
       content: `<p>${_loc('CALENDARIA.Editor.Festival.ResetConfirm')}</p>`,
       rejectClose: false,
@@ -1921,6 +1924,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const key = target.dataset.key;
     const moon = this.#calendarData.moons[key];
     const confirmed = await foundry.applications.api.DialogV2.confirm({
+      classes: ['calendaria'],
       window: { title: _loc('CALENDARIA.Editor.RemoveMoonTitle') },
       content: `<p>${_loc('CALENDARIA.Editor.RemoveMoonContent', { name: _loc(moon?.name ?? '') })}</p>`,
       rejectClose: false
@@ -2287,6 +2291,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       </form>
     `;
     const result = await foundry.applications.api.DialogV2.prompt({
+      classes: ['calendaria'],
       window: { title: _loc('CALENDARIA.Editor.Weather.Zone.Add') },
       content,
       ok: {
@@ -2409,6 +2414,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const zone = zonesObj[zoneKey];
     if (!zone) return;
     const confirm = await foundry.applications.api.DialogV2.confirm({
+      classes: ['calendaria'],
       window: { title: _loc('CALENDARIA.Editor.Weather.Zone.Delete') },
       content: `<p>${_loc('CALENDARIA.Editor.Weather.Zone.DeleteConfirm', { name: zone.name })}</p>`,
       rejectClose: false
@@ -2587,6 +2593,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     `;
     return new Promise((resolve) => {
       foundry.applications.api.DialogV2.prompt({
+        classes: ['calendaria'],
         window: { title: _loc('CALENDARIA.Common.Save') },
         content,
         ok: {
@@ -2676,6 +2683,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static async #onResetCalendar(_event, _target) {
     const confirmed = await foundry.applications.api.DialogV2.confirm({
+      classes: ['calendaria'],
       window: { title: _loc('CALENDARIA.Common.Reset') },
       content: `<p>${_loc('CALENDARIA.Editor.ConfirmReset')}</p>`,
       yes: { label: _loc('CALENDARIA.Common.Reset'), icon: 'fas fa-undo' },
@@ -2708,6 +2716,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     if (!isCustom && hasOverride) {
       const confirmed = await foundry.applications.api.DialogV2.confirm({
+        classes: ['calendaria'],
         window: { title: _loc('CALENDARIA.Editor.ResetToDefault') },
         content: `<p>${_loc('CALENDARIA.Editor.ConfirmResetToDefault')}</p>`,
         yes: { label: _loc('CALENDARIA.Editor.ResetToDefault'), icon: 'fas fa-history', callback: () => true },
@@ -2725,6 +2734,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       return;
     }
     const confirmed = await foundry.applications.api.DialogV2.confirm({
+      classes: ['calendaria'],
       window: { title: _loc('CALENDARIA.Common.DeleteCalendar') },
       content: `<p>${_loc('CALENDARIA.Editor.ConfirmDelete', { name: this.#calendarData.name })}</p>`,
       yes: { label: _loc('CALENDARIA.Common.DeleteCalendar'), icon: 'fas fa-trash', callback: () => true },

@@ -101,7 +101,7 @@
       height: 1.5rem;
       border: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
       border-radius: 0.25rem;
-      color: var(--atlas-text, rgb(224 224 224));
+      color: var(--atlas-button-text, rgb(224 224 224));
       cursor: pointer;
       background: var(--atlas-button-bg, rgb(58 58 58));
       transition: background 0.15s;
@@ -156,7 +156,7 @@
       border-radius: 0.375rem;
       overflow-y: auto;
       background: var(--atlas-bg-lighter, rgb(42 42 42));
-      box-shadow: 0 0.25rem 0.75rem rgb(0 0 0 / 25%);
+      box-shadow: 0 0.25rem 0.75rem var(--atlas-shadow-color, rgb(0 0 0 / 25%));
     }
 
     .category-filter-menu-header {
@@ -288,7 +288,7 @@
     .entry-today-badge {
       padding: 0 0.3125rem;
       border-radius: 0.5rem;
-      color: rgb(255 255 255);
+      color: var(--atlas-text-on-color, rgb(255 255 255));
       font-weight: 600;
       font-size: var(--font-size-10, 0.625rem);
       text-transform: uppercase;
@@ -351,6 +351,7 @@
 
       &:hover {
         background: var(--atlas-bg-hover, rgb(53 53 53));
+        color: var(--atlas-text, rgb(224 224 224));
       }
     }
 
@@ -436,7 +437,7 @@
       margin-top: 0.125rem;
       border: none;
       border-radius: 50%;
-      color: var(--atlas-text-dim, rgb(153 153 153));
+      color: var(--atlas-button-text, rgb(224 224 224));
       font-size: 0.5rem;
       cursor: pointer;
       background: var(--atlas-button-bg, rgb(58 58 58));
@@ -503,7 +504,7 @@
       color: var(--atlas-text-dim, rgb(153 153 153));
       font-style: italic;
       font-size: var(--font-size-11, 0.6875rem);
-      background: rgb(0 0 0 / 20%);
+      background: var(--atlas-surface-dim-25, rgb(0 0 0 / 20%));
 
       i {
         opacity: 0.5;
@@ -590,7 +591,7 @@
         border-radius: 0.5rem;
         overflow: hidden;
         background: color-mix(in srgb, var(--atlas-bg-lighter, var(--atlas-bg, rgb(31 31 31))) 95%, var(--atlas-accent, rgb(168 144 96)));
-        box-shadow: 0 0.125rem 0.5rem rgb(0 0 0 / 25%);
+        box-shadow: 0 0.125rem 0.5rem var(--atlas-shadow-color, rgb(0 0 0 / 25%));
       }
 
       .timeline-node {
@@ -668,7 +669,7 @@
       .timeline-today-badge {
         padding: 0.0625rem 0.375rem;
         border-radius: 0.5rem;
-        color: rgb(255 255 255);
+        color: var(--atlas-text-on-color, rgb(255 255 255));
         font-weight: 600;
         font-size: var(--font-size-10, 0.625rem);
         text-transform: uppercase;
@@ -687,7 +688,7 @@
         color: var(--atlas-text-dim, rgb(153 153 153));
         font-style: italic;
         font-size: var(--font-size-11, 0.6875rem);
-        background: rgb(0 0 0 / 20%);
+        background: var(--atlas-surface-dim-25, rgb(0 0 0 / 20%));
       }
 
       .timeline-entry--empty .timeline-card {
@@ -785,7 +786,7 @@
       }
 
       .entry-fog-overlay {
-        background: rgb(200 200 200 / 30%);
+        background: var(--atlas-surface-dim-50, rgb(200 200 200 / 30%));
       }
     }
   }

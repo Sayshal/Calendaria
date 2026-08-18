@@ -122,6 +122,7 @@ export class ConditionBuilderDialog extends HandlebarsApplicationMixin(Applicati
     const entry = parent.children[index];
     if (isGroup(entry) && entry.children?.length > 0) {
       const confirmed = await foundry.applications.api.DialogV2.confirm({
+        classes: ['calendaria'],
         window: { title: _loc('CALENDARIA.Condition.Builder.ConfirmDeleteTitle') },
         content: `<p>${_loc('CALENDARIA.Condition.Builder.ConfirmDeleteGroup')}</p>`,
         yes: { default: true },
