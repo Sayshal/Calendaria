@@ -158,6 +158,7 @@
     </div>
   </fieldset>
 
+  {{#if isGM}}
   <fieldset data-section="chronicle-almanac">
     <legend>
       {{localize "CALENDARIA.Almanac.JournalTitle"}}
@@ -174,5 +175,6 @@
       <p class="hint">{{localize "CALENDARIA.Settings.WeeklyAlmanac.Hint"}}</p>
     </div>
   </fieldset>
+  {{/if}}
 
 </section>
