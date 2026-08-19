@@ -18,11 +18,6 @@
     input[type='checkbox'],
     input[type='checkbox']:checked,
     input[type='checkbox']:indeterminate {
-      --checkbox-background-color: var(--atlas-input-bg, rgb(48 48 48));
-      --checkbox-border-color: var(--atlas-border, rgb(74 74 74));
-      --checkbox-checked-color: var(--atlas-primary, rgb(74 144 226));
-      --checkbox-checkmark-color: var(--atlas-text-on-color, rgb(255 255 255));
-
       width: var(--checkbox-size);
       height: var(--checkbox-size);
       border: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
