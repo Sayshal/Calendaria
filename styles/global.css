@@ -53,15 +53,21 @@
     }
   }
 
+  .weather-indicator,
+  .weather-btn,
+  .weather-weight-pill {
+    --weather-ink: color-mix(in srgb, var(--weather-color, var(--atlas-text-dim, rgb(153 153 153))) 35%, var(--atlas-text, rgb(224 224 224)));
+  }
+
   .weather-indicator {
     padding: 0.25rem 0.5rem;
-    border: 0.0625rem solid color-mix(in srgb, var(--weather-color, var(--atlas-text-dim, rgb(153 153 153))) 30%, transparent);
+    border: 0.0625rem solid color-mix(in srgb, var(--weather-ink) 35%, transparent);
     border-radius: 0.25rem;
     color: var(--atlas-text, rgb(224 224 224));
     background: color-mix(in srgb, var(--weather-color, var(--atlas-text-dim, rgb(153 153 153))) 15%, transparent);
 
     i {
-      color: var(--weather-color, var(--atlas-text-dim, rgb(153 153 153)));
+      color: var(--weather-ink);
     }
 
     &.clickable {
@@ -103,7 +109,7 @@
   }
 
   .season-indicator {
-    color: var(--season-color, var(--atlas-text-dim, rgb(153 153 153)));
+    color: var(--atlas-text, rgb(224 224 224));
 
     i {
       color: var(--season-color, var(--atlas-text-dim, rgb(153 153 153)));
