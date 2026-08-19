@@ -15,14 +15,19 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   /** @type {number|null} firstWeekday override computed during Luxon sync. */
   static #correctFirstWeekday = null;
 
+  /** @type {string|null} Calendar id the synced firstWeekday applies to. */
+  static #correctFirstWeekdayId = null;
+
   /**
    * Set epoch sync state from an external integration.
    * @param {number} offset - Epoch offset in seconds
    * @param {number|null} firstWeekday - Computed firstWeekday, or null to clear
+   * @param {string|null} [calendarId] - Calendar the firstWeekday applies to
    */
-  static setEpochSync(offset, firstWeekday) {
+  static setEpochSync(offset, firstWeekday, calendarId = null) {
     this.#epochOffset = offset;
     this.#correctFirstWeekday = firstWeekday;
+    this.#correctFirstWeekdayId = firstWeekday === null ? null : calendarId;
   }
 
   /** @returns {number} Current epoch offset */
@@ -33,6 +38,21 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   /** @returns {number|null} Computed firstWeekday for synced calendars, or null */
   static get correctFirstWeekday() {
     return this.#correctFirstWeekday;
+  }
+
+  /** @returns {string|null} Calendar id the synced firstWeekday applies to, or null */
+  static get correctFirstWeekdayId() {
+    return this.#correctFirstWeekdayId;
+  }
+
+  /**
+   * The firstWeekday to use for day-of-week math, preferring the Luxon-synced value for this calendar.
+   * @returns {number} Synced firstWeekday when this calendar is the synced one, otherwise the authored value
+   */
+  get effectiveFirstWeekday() {
+    const ctor = CalendariaCalendar;
+    if (ctor.correctFirstWeekday !== null && ctor.correctFirstWeekdayId === this.metadata?.id) return ctor.correctFirstWeekday;
+    return this.years?.firstWeekday ?? 0;
   }
 
   /**
@@ -1765,7 +1785,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     if (!cycle) return null;
     let cycleLength = 0;
     for (const r of cycle) cycleLength += r.days.length;
-    const firstWeekday = this.years?.firstWeekday ?? 0;
+    const firstWeekday = this.effectiveFirstWeekday;
     let pos = (((countingDays + firstWeekday) % cycleLength) + cycleLength) % cycleLength;
     for (let row = 0; row < cycle.length; row++) {
       const rowLength = cycle[row].days.length;
@@ -1813,7 +1833,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     if (!cycle) return null;
     let cycleLength = 0;
     for (const r of cycle) cycleLength += r.days.length;
-    const firstWeekday = this.years?.firstWeekday ?? 0;
+    const firstWeekday = this.effectiveFirstWeekday;
     const p = this._countingDaysFor(components) + firstWeekday;
     const completeCycles = Math.floor(p / cycleLength);
     let r = p - completeCycles * cycleLength;
@@ -1927,7 +1947,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       const nonCounting = (this.countNonWeekdayFestivalsBefore?.(ctx) ?? 0) + (this.countIntercalaryDaysBefore?.(ctx) ?? 0);
       return (monthData.startingWeekday + dayIndex - nonCounting + daysInWeek * 100) % daysInWeek;
     }
-    const firstWeekday = this.years?.firstWeekday ?? 0;
+    const firstWeekday = this.effectiveFirstWeekday;
     const countingDays = this._countingDaysFor(components);
     return (((countingDays + firstWeekday) % daysInWeek) + daysInWeek) % daysInWeek;
   }

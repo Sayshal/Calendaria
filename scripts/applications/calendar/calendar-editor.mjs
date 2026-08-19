@@ -1,5 +1,6 @@
 import { CalendarManager, CalendarRegistry, isBundledCalendar, preLocalizeCalendar } from '../../calendar/_module.mjs';
 import { ASSETS, DEFAULT_MOON_PHASES, HOOKS, MOON_VISIBILITY, TEMPLATES } from '../../constants.mjs';
+import CalendariaCalendar from '../../data/calendaria-calendar.mjs';
 import { FestivalManager } from '../../festivals/_module.mjs';
 import { createImporter } from '../../importers/_module.mjs';
 import { isLuxonSyncRequired } from '../../integrations/luxon-sync.mjs';
@@ -356,6 +357,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     context.calendarId = this.#calendarId;
     context.isCustom = this.#calendarId ? CalendarManager.isCustomCalendar(this.#calendarId) : true;
     context.luxonSyncAvailable = isLuxonSyncRequired();
+    context.luxonSyncManagesWeekday = isLuxonSyncRequired() && Boolean(this.#calendarData.metadata?.luxonSync?.theme);
     context.templates = CalendarManager.getCalendarTemplates();
     context.calculatedDaysPerYear = this.#calculateDaysPerYear();
     context.calculatedLeapDaysPerYear = this.#calculateDaysPerYear(true);
@@ -410,7 +412,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         conditionSummary
       };
     });
-    const currentFirstWeekday = this.#calendarData.years.firstWeekday ?? 0;
+    const syncedFirstWeekday = CalendariaCalendar.correctFirstWeekdayId === this.#calendarId ? CalendariaCalendar.correctFirstWeekday : null;
+    const currentFirstWeekday = syncedFirstWeekday ?? this.#calendarData.years.firstWeekday ?? 0;
     context.weekdayOptions = daysArr.map(([, day], idx) => ({ value: idx, label: day.name, selected: idx === currentFirstWeekday }));
     const currentWeekStartId = this.#calendarData.years.weekStartWeekdayId ?? '';
     context.weekStartOptions = [
@@ -956,12 +959,14 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const oldSeasonType = this.#calendarData.seasons?.type;
     const oldWeeksType = this.#calendarData.weeks?.type;
     const oldMoonModes = Object.fromEntries(Object.entries(this.#calendarData.moons).map(([k, m]) => [k, `${m.phaseMode}|${m.eclipseMode}`]));
+    const oldLuxonTheme = this.#calendarData.metadata?.luxonSync?.theme ?? null;
     this.#updateFromFormData(formData.object);
     this.#isDirty = true;
     const newSeasonType = this.#calendarData.seasons?.type;
     const newWeeksType = this.#calendarData.weeks?.type;
     if (oldSeasonType !== newSeasonType) this.render({ parts: ['seasons'] });
     if (oldWeeksType !== newWeeksType) this.render({ parts: ['weeks'] });
+    if (oldLuxonTheme !== (this.#calendarData.metadata?.luxonSync?.theme ?? null)) this.render({ parts: ['years'] });
     const moonModesChanged = Object.entries(this.#calendarData.moons).some(([k, m]) => oldMoonModes[k] !== `${m.phaseMode}|${m.eclipseMode}`);
     if (moonModesChanged) this.render({ parts: ['moons'] });
   }
@@ -978,7 +983,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const luxonTheme = data['metadata.luxonSync.theme'] || null;
     this.#calendarData.metadata.luxonSync = luxonTheme ? { theme: luxonTheme } : null;
     this.#calendarData.years.yearZero = parseInt(data['years.yearZero']) || 0;
-    this.#calendarData.years.firstWeekday = parseInt(data['years.firstWeekday']) || 0;
+    if (data['years.firstWeekday'] !== undefined) this.#calendarData.years.firstWeekday = parseInt(data['years.firstWeekday']) || 0;
     this.#calendarData.years.weekStartWeekdayId = data['years.weekStartWeekdayId'] || '';
     this.#calendarData.years.resetWeekdays = data['years.resetWeekdays'] ?? false;
     this.#calendarData.years.allowNegativeYears = data['years.allowNegativeYears'] ?? true;

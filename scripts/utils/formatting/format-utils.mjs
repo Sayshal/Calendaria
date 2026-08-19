@@ -80,7 +80,7 @@ export function dateFormattingParts(calendar, components) {
     else if (internalYear < 0) for (let y = -1; y >= internalYear; y--) totalDaysFromPriorYears -= calendar.getDaysInYear(y);
   }
   const totalDays = totalDaysFromPriorYears + dayOfYear;
-  const firstWeekday = calendar?.years?.firstWeekday ?? 0;
+  const firstWeekday = calendar?.effectiveFirstWeekday ?? calendar?.years?.firstWeekday ?? 0;
   const nonCountingFestivalsInYear = calendar?.countNonWeekdayFestivalsBefore?.({ year: internalYear, month, dayOfMonth }) ?? 0;
   const nonCountingFestivalsFromPriorYears = calendar?.countNonWeekdayFestivalsBeforeYear?.(internalYear) ?? 0;
   const intercalaryInYear = calendar?.countIntercalaryDaysBefore?.({ year: internalYear, month, dayOfMonth }) ?? 0;

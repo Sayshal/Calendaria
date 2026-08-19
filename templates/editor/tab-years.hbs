@@ -23,13 +23,17 @@
     <div class="form-group">
       <label for="editor-first-weekday">{{localize "CALENDARIA.Editor.Field.YearZeroWeekday"}}</label>
       <div class="form-fields">
-        <select id="editor-first-weekday" name="years.firstWeekday">
+        <select id="editor-first-weekday" name="years.firstWeekday" {{#if luxonSyncManagesWeekday}}disabled{{/if}}>
           {{#each weekdayOptions}}
             <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
           {{/each}}
         </select>
       </div>
-      <p class="hint">{{localize "CALENDARIA.Editor.Hint.YearZeroWeekday"}}</p>
+      {{#if luxonSyncManagesWeekday}}
+        <p class="hint">{{localize "CALENDARIA.Editor.Hint.YearZeroWeekdaySystemManaged"}}</p>
+      {{else}}
+        <p class="hint">{{localize "CALENDARIA.Editor.Hint.YearZeroWeekday"}}</p>
+      {{/if}}
     </div>
 
     <div class="form-group">
