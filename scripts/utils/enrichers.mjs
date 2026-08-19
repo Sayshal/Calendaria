@@ -1,19 +1,22 @@
 import { BigCal, Chronicle, MiniCal } from '../applications/_module.mjs';
 import { CalendarManager, CalendarRegistry } from '../calendar/_module.mjs';
 import { COMPASS_DIRECTIONS, HOOKS, MODULE, SETTINGS, WIND_SPEEDS } from '../constants.mjs';
-import { NoteManager, addDays, addMonths, addYears, compareDates, daysBetween, getNextOccurrences, monthsBetween } from '../notes/_module.mjs';
+import { NoteManager, addDays, addMonths, addYears, compareDates, compareDays, daysBetween, getNextOccurrences, monthsBetween } from '../notes/_module.mjs';
 import TimeClock, { getTimeIncrements } from '../time/time-clock.mjs';
 import {
   ECLIPSE_TYPES,
   PRESET_FORMATTERS,
+  canViewWeatherForecast,
   formatCustom,
   getEclipseAtDate,
   getMoonPhasePosition,
   getNextConvergence,
   getNextEclipse,
   getNextFullMoon,
+  isFogEnabled,
   isMoonFull,
   isMoonVisible,
+  isRevealed,
   resolveFormatString,
   timeSince
 } from '../utils/_module.mjs';
@@ -141,6 +144,88 @@ function resolveCalendar(config) {
     }
   }
   return { calendar: CalendarManager.getActiveCalendar(), components: game.time.components };
+}
+
+/**
+ * Resolve the date an enricher should render, in priority order.
+ * @param {object} config - Parsed enricher config
+ * @param {object|null} calendar - Resolved calendar instance
+ * @param {object} components - Current time components (internal, 0-indexed)
+ * @param {object} [options] - Resolution options
+ * @param {boolean} [options.positional] - Whether positional values may be read as a date
+ * @returns {{date: object, internal: object, isStatic: boolean, invalid: boolean|undefined}} Public date, internal components carrying the current data
+ */
+function resolveTargetDate(config, calendar, components, { positional = true } = {}) {
+  const yearZero = calendar?.years?.yearZero ?? 0;
+  const toResult = (date, isStatic) => ({ date, internal: { ...components, year: date.year - yearZero, month: date.month - 1, dayOfMonth: date.day - 1 }, isStatic });
+  const current = getCurrentDateTime(calendar, components);
+  if (config?.values?.some((v) => String(v).toLowerCase() === 'now')) return toResult(current, false);
+  let explicit = null;
+  let attempted = false;
+  if (config?.date != null) {
+    attempted = true;
+    explicit = parseDateFromValues(String(config.date).split(/\s+/));
+  } else if (positional && config?.values?.length) {
+    attempted = true;
+    explicit = parseDateFromValues(config.values);
+  }
+  if (explicit && isDateInRange(explicit, calendar)) return toResult(explicit, true);
+  if (attempted) return { ...toResult(current, false), invalid: true };
+  const start = config?._options?.relativeTo?.system?.startDate;
+  if (start) return toResult({ year: start.year + yearZero, month: (start.month ?? 0) + 1, day: (start.dayOfMonth ?? 0) + 1 }, true);
+  return toResult(current, false);
+}
+
+/**
+ * Whether the current user may read calendar data for a resolved date.
+ * @param {object} target - Result from resolveTargetDate
+ * @param {object} components - Current time components (internal, 0-indexed)
+ * @param {boolean} [forecastGated] - Whether future dates require the forecast permission
+ * @returns {boolean} Whether the date may be rendered
+ */
+function canViewTargetDate(target, components, forecastGated = false) {
+  if (!target.isStatic || game.user.isGM) return true;
+  const delta = compareDays(target.internal, components);
+  if (delta > 0) return !forecastGated || canViewWeatherForecast();
+  if (delta < 0 && isFogEnabled()) return isRevealed(target.date.year, target.date.month - 1, target.date.day - 1);
+  return true;
+}
+
+/**
+ * Whether a parsed date lands on a day the calendar actually has.
+ * @param {object} date - Public date {year, month, day}
+ * @param {object|null} calendar - Resolved calendar instance
+ * @returns {boolean} Whether the day exists in that month
+ */
+function isDateInRange(date, calendar) {
+  if (!calendar) return true;
+  const yearZero = calendar.years?.yearZero ?? 0;
+  const days = calendar.getDaysInMonth?.(date.month - 1, date.year - yearZero);
+  if (!days) return true;
+  return date.day >= 1 && date.day <= days;
+}
+
+/**
+ * The element to render instead of the enricher's own output, when the resolved date cannot be used.
+ * @param {object} target - Result from resolveTargetDate
+ * @param {object} components - Current time components (internal, 0-indexed)
+ * @param {boolean} [forecastGated] - Whether future dates require the forecast permission
+ * @returns {HTMLElement|null} Replacement element, or null when the date is usable
+ */
+function blockedElement(target, components, forecastGated = false) {
+  if (target.invalid) return createErrorElement('CALENDARIA.Enricher.Error.InvalidDate');
+  if (!canViewTargetDate(target, components, forecastGated)) return createUnavailableElement('CALENDARIA.Enricher.Error.DateNotRevealed');
+  return null;
+}
+
+/**
+ * Live-refresh config for a resolved date.
+ * @param {object} target - Result from resolveTargetDate
+ * @param {string} [configStr] - Config string to use when the element stays live
+ * @returns {{isLive: boolean, configStr: string}} Arguments for createElement
+ */
+function liveArgs(target, configStr = '') {
+  return target.isStatic ? { isLive: false, configStr: null } : { isLive: true, configStr };
 }
 
 /**
@@ -309,6 +394,21 @@ function createElement(type, content, configStr, isLive = false, iconClass = nul
 function createErrorElement(messageKey, data = {}) {
   const span = document.createElement('span');
   span.classList.add('calendaria-enricher', 'calendaria-enricher--error');
+  const message = Object.keys(data).length ? _loc(messageKey, data) : _loc(messageKey);
+  span.textContent = message;
+  span.dataset.tooltip = message;
+  return span;
+}
+
+/**
+ * Create a muted badge for a date whose data is absent rather than broken.
+ * @param {string} messageKey - Localization key for the badge text
+ * @param {object} [data] - Localization substitution data
+ * @returns {HTMLElement} The enricher span element
+ */
+function createUnavailableElement(messageKey, data = {}) {
+  const span = document.createElement('span');
+  span.classList.add('calendaria-enricher', 'calendaria-enricher--unavailable');
   const message = Object.keys(data).length ? _loc(messageKey, data) : _loc(messageKey);
   span.textContent = message;
   span.dataset.tooltip = message;
@@ -527,12 +627,16 @@ function enrichTime(config, label) {
  * @returns {HTMLElement} Enricher element
  */
 function enrichWeekday(config, label) {
-  const { calendar } = resolveCalendar(config);
-  const weekday = calendar?.getWeekdayForDate?.();
+  const { calendar, components } = resolveCalendar(config);
+  const target = resolveTargetDate(config, calendar, components);
+  const blocked = blockedElement(target, components);
+  if (blocked) return blocked;
+  const weekday = calendar?.getWeekdayForDate?.(target.internal);
   if (!weekday) return createErrorElement('CALENDARIA.Enricher.Error.NoCalendar');
   const text = label || weekday.name;
-  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.Weekday', { value: weekday.name });
-  return createElement('weekday', text, '', true, 'fa-calendar-week', tooltip);
+  const tooltip = dateTooltip('CALENDARIA.Enricher.Tooltip.Weekday', weekday.name, target, calendar);
+  const { isLive, configStr } = liveArgs(target, config.raw);
+  return createElement('weekday', text, configStr, isLive, 'fa-calendar-week', tooltip);
 }
 
 /**
@@ -543,12 +647,16 @@ function enrichWeekday(config, label) {
  */
 function enrichSeason(config, label) {
   const { calendar, components } = resolveCalendar(config);
-  const rawSeason = calendar?.getCurrentSeason?.(components);
-  const season = WeatherManager.applySeasonAlias(rawSeason, WeatherManager.getActiveZone?.(null, game.scenes?.active));
+  const target = resolveTargetDate(config, calendar, components);
+  const blocked = blockedElement(target, components);
+  if (blocked) return blocked;
+  const rawSeason = calendar?.getCurrentSeason?.(target.internal);
+  const season = WeatherManager.applySeasonAlias(rawSeason, resolveZone(config));
   if (!season) return createErrorElement('CALENDARIA.Enricher.Error.NoSeasons');
   const name = _loc(season.name);
-  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.Season', { value: name });
-  return createElement('season', label || name, '', true, season.icon || 'fa-leaf', tooltip);
+  const tooltip = dateTooltip('CALENDARIA.Enricher.Tooltip.Season', name, target, calendar);
+  const { isLive, configStr } = liveArgs(target, config.raw);
+  return createElement('season', label || name, configStr, isLive, season.icon || 'fa-leaf', tooltip);
 }
 
 /**
@@ -561,12 +669,15 @@ function enrichEra(config, label) {
   const { calendar, components } = resolveCalendar(config);
   const eras = calendar?.erasArray || [];
   if (!eras.length) return createErrorElement('CALENDARIA.Enricher.Error.NoEras');
-  const current = getCurrentDateTime(calendar, components);
-  const match = eras.find((e) => current.year >= e.startYear && (e.endYear == null || current.year <= e.endYear));
+  const target = resolveTargetDate(config, calendar, components);
+  const blocked = blockedElement(target, components);
+  if (blocked) return blocked;
+  const match = eras.find((e) => target.date.year >= e.startYear && (e.endYear == null || target.date.year <= e.endYear));
   if (!match) return createErrorElement('CALENDARIA.Enricher.Error.NoEras');
   const name = _loc(match.name);
-  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.Era', { value: name });
-  return createElement('era', label || name, '', true, 'fa-landmark', tooltip);
+  const tooltip = dateTooltip('CALENDARIA.Enricher.Tooltip.Era', name, target, calendar);
+  const { isLive, configStr } = liveArgs(target, config.raw);
+  return createElement('era', label || name, configStr, isLive, 'fa-landmark', tooltip);
 }
 
 /**
@@ -576,12 +687,16 @@ function enrichEra(config, label) {
  * @returns {HTMLElement} Enricher element
  */
 function enrichCycle(config, label) {
-  const { calendar } = resolveCalendar(config);
-  const result = calendar?.getCycleValues();
+  const { calendar, components } = resolveCalendar(config);
+  const target = resolveTargetDate(config, calendar, components);
+  const blocked = blockedElement(target, components);
+  if (blocked) return blocked;
+  const result = calendar?.getCycleValues(target.internal);
   if (!result) return createErrorElement('CALENDARIA.Enricher.Error.NoCycles');
   const text = result.values.map((v) => _loc(v.entryName)).join(', ');
-  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.Cycle', { value: text });
-  return createElement('cycle', label || text, '', true, 'fa-rotate', tooltip);
+  const tooltip = dateTooltip('CALENDARIA.Enricher.Tooltip.Cycle', text, target, calendar);
+  const { isLive, configStr } = liveArgs(target, config.raw);
+  return createElement('cycle', label || text, configStr, isLive, 'fa-rotate', tooltip);
 }
 
 /**
@@ -592,19 +707,22 @@ function enrichCycle(config, label) {
  */
 function enrichFestival(config, label) {
   const { calendar, components } = resolveCalendar(config);
-  const festival = calendar?.findFestivalDay?.();
+  const target = resolveTargetDate(config, calendar, components);
+  const blocked = blockedElement(target, components);
+  if (blocked) return blocked;
+  const { isLive, configStr } = liveArgs(target, config.raw);
+  const festival = calendar?.findFestivalDay?.(target.internal);
   if (!festival) {
     const text = label || _loc('CALENDARIA.Enricher.Label.NoFestival');
-    const tooltip = _loc('CALENDARIA.Enricher.Tooltip.Festival', { value: _loc('CALENDARIA.Enricher.Label.NoFestival') });
-    return createElement('festival', text, '', true, 'fa-champagne-glasses', tooltip);
+    const tooltip = dateTooltip('CALENDARIA.Enricher.Tooltip.Festival', _loc('CALENDARIA.Enricher.Label.NoFestival'), target, calendar);
+    return createElement('festival', text, configStr, isLive, 'fa-champagne-glasses', tooltip);
   }
   const name = _loc(festival.name);
-  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.Festival', { value: name });
+  const tooltip = dateTooltip('CALENDARIA.Enricher.Tooltip.Festival', name, target, calendar);
   const notes = searchNotes(name);
   const festivalNote = notes.find((n) => n.flagData?.linkedFestival);
-  if (festivalNote) return createContentLink('festival', label || name, { calPageId: festivalNote.id }, 'fa-champagne-glasses', tooltip, '');
-  const current = getCurrentDateTime(calendar, components);
-  return createContentLink('festival', label || name, { calYear: current.year, calMonth: current.month, calDay: current.day }, 'fa-champagne-glasses', tooltip, '');
+  if (festivalNote) return createContentLink('festival', label || name, { calPageId: festivalNote.id }, 'fa-champagne-glasses', tooltip, configStr);
+  return createContentLink('festival', label || name, { calYear: target.date.year, calMonth: target.date.month, calDay: target.date.day }, 'fa-champagne-glasses', tooltip, configStr);
 }
 
 /**
@@ -614,13 +732,17 @@ function enrichFestival(config, label) {
  * @returns {HTMLElement} Enricher element
  */
 function enrichRestDay(config, label) {
-  const { calendar } = resolveCalendar(config);
-  const weekday = calendar?.getWeekdayForDate?.();
+  const { calendar, components } = resolveCalendar(config);
+  const target = resolveTargetDate(config, calendar, components);
+  const blocked = blockedElement(target, components);
+  if (blocked) return blocked;
+  const weekday = calendar?.getWeekdayForDate?.(target.internal);
   const isRest = weekday?.isRestDay ?? false;
   const key = isRest ? 'CALENDARIA.Common.RestDay' : 'CALENDARIA.Enricher.Label.WorkDay';
   const text = _loc(key);
-  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.DayType', { value: text });
-  return createElement('restday', label || text, '', true, 'fa-couch', tooltip);
+  const tooltip = dateTooltip('CALENDARIA.Enricher.Tooltip.DayType', text, target, calendar);
+  const { isLive, configStr } = liveArgs(target, config.raw);
+  return createElement('restday', label || text, configStr, isLive, 'fa-couch', tooltip);
 }
 
 /**
@@ -864,12 +986,15 @@ function enrichCalName(config, label) {
 function enrichMonth(config, label) {
   const { calendar, components } = resolveCalendar(config);
   if (!calendar) return createErrorElement('CALENDARIA.Enricher.Error.NoCalendar');
-  const current = getCurrentDateTime(calendar, components);
+  const target = resolveTargetDate(config, calendar, components);
+  const blocked = blockedElement(target, components);
+  if (blocked) return blocked;
   const months = calendar.monthsArray || [];
-  const monthData = months[current.month - 1];
+  const monthData = months[target.date.month - 1];
   const name = monthData ? _loc(monthData.name) : '';
-  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.CurrentMonth', { value: name });
-  return createElement('month', label || name, '', true, 'fa-calendar', tooltip);
+  const tooltip = dateTooltip('CALENDARIA.Enricher.Tooltip.CurrentMonth', name, target, calendar);
+  const { isLive, configStr } = liveArgs(target, config.raw);
+  return createElement('month', label || name, configStr, isLive, 'fa-calendar', tooltip);
 }
 
 /**
@@ -880,10 +1005,13 @@ function enrichMonth(config, label) {
  */
 function enrichYear(config, label) {
   const { calendar, components } = resolveCalendar(config);
-  const current = getCurrentDateTime(calendar, components);
-  const text = String(current.year);
-  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.CurrentYear', { value: text });
-  return createElement('year', label || text, '', true, 'fa-calendar', tooltip);
+  const target = resolveTargetDate(config, calendar, components);
+  const blocked = blockedElement(target, components);
+  if (blocked) return blocked;
+  const text = String(target.date.year);
+  const tooltip = dateTooltip('CALENDARIA.Enricher.Tooltip.CurrentYear', text, target, calendar);
+  const { isLive, configStr } = liveArgs(target, config.raw);
+  return createElement('year', label || text, configStr, isLive, 'fa-calendar', tooltip);
 }
 
 /**
@@ -894,11 +1022,15 @@ function enrichYear(config, label) {
  */
 function enrichDayOfYear(config, label) {
   const { calendar, components } = resolveCalendar(config);
-  const dayOfYear = getDayOfYear(calendar, components);
+  const target = resolveTargetDate(config, calendar, components);
+  const blocked = blockedElement(target, components);
+  if (blocked) return blocked;
+  const dayOfYear = getDayOfYear(calendar, target.internal);
   if (dayOfYear == null) return createErrorElement('CALENDARIA.Enricher.Error.NoCalendar');
   const text = String(dayOfYear);
-  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.DayOfYear', { value: text });
-  return createElement('dayofyear', label || text, '', true, 'fa-calendar', tooltip);
+  const tooltip = dateTooltip('CALENDARIA.Enricher.Tooltip.DayOfYear', text, target, calendar);
+  const { isLive, configStr } = liveArgs(target, config.raw);
+  return createElement('dayofyear', label || text, configStr, isLive, 'fa-calendar', tooltip);
 }
 
 /**
@@ -910,14 +1042,16 @@ function enrichDayOfYear(config, label) {
 function enrichYearProgress(config, label) {
   const { calendar, components } = resolveCalendar(config);
   if (!calendar) return createErrorElement('CALENDARIA.Enricher.Error.NoCalendar');
-  const current = getCurrentDateTime(calendar, components);
-  const yearZero = calendar.years?.yearZero ?? 0;
-  const daysInYear = calendar.getDaysInYear?.(current.year - yearZero) ?? 365;
-  const dayOfYear = getDayOfYear(calendar, components);
+  const target = resolveTargetDate(config, calendar, components);
+  const blocked = blockedElement(target, components);
+  if (blocked) return blocked;
+  const daysInYear = calendar.getDaysInYear?.(target.internal.year) ?? 365;
+  const dayOfYear = getDayOfYear(calendar, target.internal);
   const progress = (dayOfYear ?? 1) / daysInYear;
-  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.YearProgress', { value: formatPercent(progress) });
-  if (label) return createElement('yearprogress', label, '', true, null, tooltip);
-  const el = createProgressElement('yearprogress', progress);
+  const tooltip = dateTooltip('CALENDARIA.Enricher.Tooltip.YearProgress', formatPercent(progress), target, calendar);
+  const { isLive, configStr } = liveArgs(target, config.raw);
+  if (label) return createElement('yearprogress', label, configStr, isLive, null, tooltip);
+  const el = createProgressElement('yearprogress', progress, target);
   el.dataset.tooltip = tooltip;
   return el;
 }
@@ -931,13 +1065,15 @@ function enrichYearProgress(config, label) {
 function enrichLeapYear(config, label) {
   const { calendar, components } = resolveCalendar(config);
   if (!calendar) return createErrorElement('CALENDARIA.Enricher.Error.NoCalendar');
-  const current = getCurrentDateTime(calendar, components);
-  const yearZero = calendar.years?.yearZero ?? 0;
-  const isLeap = calendar.isLeapYear?.(current.year - yearZero) ?? false;
+  const target = resolveTargetDate(config, calendar, components);
+  const blocked = blockedElement(target, components);
+  if (blocked) return blocked;
+  const isLeap = calendar.isLeapYear?.(target.internal.year) ?? false;
   const key = isLeap ? 'CALENDARIA.Editor.Section.LeapYear' : 'CALENDARIA.Enricher.Label.NotLeapYear';
   const text = _loc(key);
-  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.LeapYear', { value: text });
-  return createElement('leapyear', label || text, '', true, 'fa-calendar', tooltip);
+  const tooltip = dateTooltip('CALENDARIA.Enricher.Tooltip.LeapYear', text, target, calendar);
+  const { isLive, configStr } = liveArgs(target, config.raw);
+  return createElement('leapyear', label || text, configStr, isLive, 'fa-calendar', tooltip);
 }
 
 /**
@@ -949,14 +1085,17 @@ function enrichLeapYear(config, label) {
 function enrichIntercalary(config, label) {
   const { calendar, components } = resolveCalendar(config);
   if (!calendar) return createErrorElement('CALENDARIA.Enricher.Error.NoCalendar');
-  const current = getCurrentDateTime(calendar, components);
+  const target = resolveTargetDate(config, calendar, components);
+  const blocked = blockedElement(target, components);
+  if (blocked) return blocked;
   const months = calendar.monthsArray || [];
-  const monthData = months[current.month - 1];
+  const monthData = months[target.date.month - 1];
   const isIntercalary = monthData?.type === 'intercalary';
   const key = isIntercalary ? 'CALENDARIA.Editor.MonthType.Intercalary' : 'CALENDARIA.Common.Standard';
   const text = _loc(key);
-  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.MonthType', { value: text });
-  return createElement('intercalary', label || text, '', true, 'fa-calendar', tooltip);
+  const tooltip = dateTooltip('CALENDARIA.Enricher.Tooltip.MonthType', text, target, calendar);
+  const { isLive, configStr } = liveArgs(target, config.raw);
+  return createElement('intercalary', label || text, configStr, isLive, 'fa-calendar', tooltip);
 }
 
 /**
@@ -968,11 +1107,12 @@ function enrichIntercalary(config, label) {
 function enrichDaysInYear(config, label) {
   const { calendar, components } = resolveCalendar(config);
   if (!calendar) return createErrorElement('CALENDARIA.Enricher.Error.NoCalendar');
-  const current = getCurrentDateTime(calendar, components);
-  const yearZero = calendar.years?.yearZero ?? 0;
-  const days = calendar.getDaysInYear?.(current.year - yearZero) ?? 365;
+  const target = resolveTargetDate(config, calendar, components);
+  const blocked = blockedElement(target, components);
+  if (blocked) return blocked;
+  const days = calendar.getDaysInYear?.(target.internal.year) ?? 365;
   const text = String(days);
-  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.DaysInYear', { value: text });
+  const tooltip = dateTooltip('CALENDARIA.Enricher.Tooltip.DaysInYear', text, target, calendar);
   return createElement('daysinyear', label || text, null, false, 'fa-calendar', tooltip);
 }
 
@@ -997,14 +1137,18 @@ function getDayOfYear(calendar, components) {
  * Create progress bar element.
  * @param {string} type - Enricher type identifier
  * @param {number} progress - Progress value between 0 and 1
+ * @param {object} [target] - Result from resolveTargetDate; a pinned date suppresses live refresh
  * @returns {HTMLElement} Progress bar element
  */
-function createProgressElement(type, progress) {
+function createProgressElement(type, progress, target = null) {
   const clamped = Math.min(1, Math.max(0, progress));
   const span = document.createElement('span');
-  span.classList.add('calendaria-enricher', `calendaria-enricher--${type}`, 'calendaria-enricher--progress', 'calendaria-enricher--live');
-  span.dataset.calType = type;
-  span.dataset.calConfig = '';
+  span.classList.add('calendaria-enricher', `calendaria-enricher--${type}`, 'calendaria-enricher--progress');
+  if (!target?.isStatic) {
+    span.classList.add('calendaria-enricher--live');
+    span.dataset.calType = type;
+    span.dataset.calConfig = '';
+  }
   const bar = document.createElement('span');
   bar.classList.add('calendaria-enricher--progress-bar');
   const fill = document.createElement('span');
@@ -1019,19 +1163,45 @@ function createProgressElement(type, progress) {
 }
 
 /**
+ * Resolve the climate zone an enricher should read, preferring an explicit `zone=` token
+ * @param {object} config - Parsed enricher config
+ * @returns {object|undefined} Zone definition
+ */
+function resolveZone(config) {
+  return WeatherManager.getActiveZone?.(config?.zone || null, game.scenes?.active);
+}
+
+/**
+ * Build a tooltip for a sun enricher, naming the resolved date when it is pinned.
+ * @param {string} key - Localization key for the live form
+ * @param {string} value - Formatted value
+ * @param {object} target - Result from resolveTargetDate
+ * @param {object} calendar - Resolved calendar instance
+ * @returns {string} Tooltip text
+ */
+function dateTooltip(key, value, target, calendar) {
+  if (!target.isStatic) return _loc(key, { value });
+  return _loc('CALENDARIA.Enricher.Tooltip.OnDate', { value: _loc(key, { value }), date: formatDate(target.date, 'dateLong', calendar) });
+}
+
+/**
  * Sunrise time.
  * @param {object} config - Parsed enricher config
  * @param {string|null} label - Custom label override
  * @returns {HTMLElement} Enricher element
  */
 function enrichSunrise(config, label) {
-  const { calendar } = resolveCalendar(config);
-  const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
-  const sunrise = calendar?.sunrise(undefined, zone);
+  const { calendar, components } = resolveCalendar(config);
+  const target = resolveTargetDate(config, calendar, components);
+  const blocked = blockedElement(target, components);
+  if (blocked) return blocked;
+  const zone = resolveZone(config);
+  const sunrise = calendar?.sunrise(target.internal, zone);
   if (sunrise == null) return createErrorElement('CALENDARIA.Enricher.Error.NoSunData');
   const text = formatHoursToTime(sunrise);
-  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.Sunrise', { value: text });
-  return createElement('sunrise', label || text, '', true, 'fa-sun', tooltip);
+  const tooltip = dateTooltip('CALENDARIA.Enricher.Tooltip.Sunrise', text, target, calendar);
+  const { isLive, configStr } = liveArgs(target, config.raw);
+  return createElement('sunrise', label || text, configStr, isLive, 'fa-sun', tooltip);
 }
 
 /**
@@ -1041,13 +1211,17 @@ function enrichSunrise(config, label) {
  * @returns {HTMLElement} Enricher element
  */
 function enrichSunset(config, label) {
-  const { calendar } = resolveCalendar(config);
-  const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
-  const sunset = calendar?.sunset(undefined, zone);
+  const { calendar, components } = resolveCalendar(config);
+  const target = resolveTargetDate(config, calendar, components);
+  const blocked = blockedElement(target, components);
+  if (blocked) return blocked;
+  const zone = resolveZone(config);
+  const sunset = calendar?.sunset(target.internal, zone);
   if (sunset == null) return createErrorElement('CALENDARIA.Enricher.Error.NoSunData');
   const text = formatHoursToTime(sunset);
-  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.Sunset', { value: text });
-  return createElement('sunset', label || text, '', true, 'fa-sun', tooltip);
+  const tooltip = dateTooltip('CALENDARIA.Enricher.Tooltip.Sunset', text, target, calendar);
+  const { isLive, configStr } = liveArgs(target, config.raw);
+  return createElement('sunset', label || text, configStr, isLive, 'fa-sun', tooltip);
 }
 
 /**
@@ -1057,13 +1231,17 @@ function enrichSunset(config, label) {
  * @returns {HTMLElement} Enricher element
  */
 function enrichDaylight(config, label) {
-  const { calendar } = resolveCalendar(config);
-  const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
-  const hours = calendar?.daylightHours(undefined, zone);
+  const { calendar, components } = resolveCalendar(config);
+  const target = resolveTargetDate(config, calendar, components);
+  const blocked = blockedElement(target, components);
+  if (blocked) return blocked;
+  const zone = resolveZone(config);
+  const hours = calendar?.daylightHours(target.internal, zone);
   if (hours == null) return createErrorElement('CALENDARIA.Enricher.Error.NoSunData');
   const text = `${hours.toFixed(1)}h`;
-  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.DaylightHours', { value: text });
-  return createElement('daylight', label || text, '', true, 'fa-sun', tooltip);
+  const tooltip = dateTooltip('CALENDARIA.Enricher.Tooltip.DaylightHours', text, target, calendar);
+  const { isLive, configStr } = liveArgs(target, config.raw);
+  return createElement('daylight', label || text, configStr, isLive, 'fa-sun', tooltip);
 }
 
 /**
@@ -1075,19 +1253,23 @@ function enrichDaylight(config, label) {
 function enrichIsDaytime(config, label) {
   const { calendar, components } = resolveCalendar(config);
   if (!calendar) return createErrorElement('CALENDARIA.Enricher.Error.NoSunData');
-  const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
-  const sunrise = calendar.sunrise(undefined, zone);
-  const sunset = calendar.sunset(undefined, zone);
+  const target = resolveTargetDate(config, calendar, components);
+  const blocked = blockedElement(target, components);
+  if (blocked) return blocked;
+  const zone = resolveZone(config);
+  const sunrise = calendar.sunrise(target.internal, zone);
+  const sunset = calendar.sunset(target.internal, zone);
   let isDaytime = true;
   if (sunrise != null && sunset != null) {
     const minutesPerHour = calendar.days?.minutesPerHour ?? 60;
-    const currentHour = components.hour + components.minute / minutesPerHour;
+    const currentHour = target.internal.hour + target.internal.minute / minutesPerHour;
     isDaytime = currentHour >= sunrise && currentHour < sunset;
   }
   const key = isDaytime ? 'CALENDARIA.Enricher.Label.Daytime' : 'CALENDARIA.Enricher.Label.Nighttime';
   const text = _loc(key);
-  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.TimeOfDay', { value: text });
-  return createElement('isdaytime', label || text, '', true, 'fa-sun', tooltip);
+  const tooltip = dateTooltip('CALENDARIA.Enricher.Tooltip.TimeOfDay', text, target, calendar);
+  const { isLive, configStr } = liveArgs(target, config.raw);
+  return createElement('isdaytime', label || text, configStr, isLive, 'fa-sun', tooltip);
 }
 
 /**
@@ -1097,13 +1279,17 @@ function enrichIsDaytime(config, label) {
  * @returns {HTMLElement} Enricher element
  */
 function enrichDayProgress(config, label) {
-  const { calendar } = resolveCalendar(config);
-  const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
-  const progress = calendar?.progressDay(undefined, zone);
+  const { calendar, components } = resolveCalendar(config);
+  const target = resolveTargetDate(config, calendar, components);
+  const blocked = blockedElement(target, components);
+  if (blocked) return blocked;
+  const zone = resolveZone(config);
+  const progress = calendar?.progressDay(target.internal, zone);
   if (progress == null) return createErrorElement('CALENDARIA.Enricher.Error.NoSunData');
   const text = formatPercent(Math.min(1, Math.max(0, progress)));
-  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.DayProgress', { value: text });
-  return createElement('dayprogress', label || text, '', true, 'fa-sun', tooltip);
+  const tooltip = dateTooltip('CALENDARIA.Enricher.Tooltip.DayProgress', text, target, calendar);
+  const { isLive, configStr } = liveArgs(target, config.raw);
+  return createElement('dayprogress', label || text, configStr, isLive, 'fa-sun', tooltip);
 }
 
 /**
@@ -1113,13 +1299,17 @@ function enrichDayProgress(config, label) {
  * @returns {HTMLElement} Enricher element
  */
 function enrichNightProgress(config, label) {
-  const { calendar } = resolveCalendar(config);
-  const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
-  const progress = calendar?.progressNight(undefined, zone);
+  const { calendar, components } = resolveCalendar(config);
+  const target = resolveTargetDate(config, calendar, components);
+  const blocked = blockedElement(target, components);
+  if (blocked) return blocked;
+  const zone = resolveZone(config);
+  const progress = calendar?.progressNight(target.internal, zone);
   if (progress == null) return createErrorElement('CALENDARIA.Enricher.Error.NoSunData');
   const text = formatPercent(Math.min(1, Math.max(0, progress)));
-  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.NightProgress', { value: text });
-  return createElement('nightprogress', label || text, '', true, 'fa-moon', tooltip);
+  const tooltip = dateTooltip('CALENDARIA.Enricher.Tooltip.NightProgress', text, target, calendar);
+  const { isLive, configStr } = liveArgs(target, config.raw);
+  return createElement('nightprogress', label || text, configStr, isLive, 'fa-moon', tooltip);
 }
 
 /**
@@ -1130,11 +1320,15 @@ function enrichNightProgress(config, label) {
  */
 function enrichUntilSunrise(config, label) {
   const { calendar, components } = resolveCalendar(config);
-  const result = resolveTimeUntilTarget('sunrise', calendar, components);
+  const target = resolveTargetDate(config, calendar, components);
+  const blocked = blockedElement(target, components);
+  if (blocked) return blocked;
+  const result = resolveTimeUntilTarget('sunrise', calendar, target.internal);
   if (!result) return createErrorElement('CALENDARIA.Enricher.Error.NoSunData');
   const text = formatDuration(result);
-  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.TimeUntilSunrise', { value: text });
-  return createElement('untilsunrise', label || text, '', true, 'fa-sun', tooltip);
+  const tooltip = dateTooltip('CALENDARIA.Enricher.Tooltip.TimeUntilSunrise', text, target, calendar);
+  const { isLive, configStr } = liveArgs(target, config.raw);
+  return createElement('untilsunrise', label || text, configStr, isLive, 'fa-sun', tooltip);
 }
 
 /**
@@ -1145,11 +1339,15 @@ function enrichUntilSunrise(config, label) {
  */
 function enrichUntilSunset(config, label) {
   const { calendar, components } = resolveCalendar(config);
-  const result = resolveTimeUntilTarget('sunset', calendar, components);
+  const target = resolveTargetDate(config, calendar, components);
+  const blocked = blockedElement(target, components);
+  if (blocked) return blocked;
+  const result = resolveTimeUntilTarget('sunset', calendar, target.internal);
   if (!result) return createErrorElement('CALENDARIA.Enricher.Error.NoSunData');
   const text = formatDuration(result);
-  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.TimeUntilSunset', { value: text });
-  return createElement('untilsunset', label || text, '', true, 'fa-sun', tooltip);
+  const tooltip = dateTooltip('CALENDARIA.Enricher.Tooltip.TimeUntilSunset', text, target, calendar);
+  const { isLive, configStr } = liveArgs(target, config.raw);
+  return createElement('untilsunset', label || text, configStr, isLive, 'fa-sun', tooltip);
 }
 
 /**
@@ -1160,6 +1358,10 @@ function enrichUntilSunset(config, label) {
  */
 function enrichMoon(config, label) {
   const { calendar, components } = resolveCalendar(config);
+  const target = resolveTargetDate(config, calendar, components, { positional: false });
+  const blocked = blockedElement(target, components);
+  if (blocked) return blocked;
+  const { isLive, configStr } = liveArgs(target, config.raw || '');
   const moonIndex = config.values.length > 0 && !isNaN(config.values[0]) ? parseInt(config.values[0]) : 0;
   const targetDef = calendar?.moonsArray?.[moonIndex];
   if (targetDef && !isMoonVisible(targetDef)) return createErrorElement('CALENDARIA.Enricher.Error.MoonNotFound', { index: moonIndex });
@@ -1168,39 +1370,39 @@ function enrichMoon(config, label) {
     if (!moonsArr.length) return createErrorElement('CALENDARIA.Enricher.Error.NoMoons');
     const moon = moonsArr[moonIndex];
     if (!moon) return createErrorElement('CALENDARIA.Enricher.Error.MoonNotFound', { index: moonIndex });
-    const position = getMoonPhasePosition(moon, components);
+    const position = getMoonPhasePosition(moon, target.internal);
     const text = formatPercent(position);
-    const tooltip = _loc('CALENDARIA.Enricher.Tooltip.MoonCyclePosition', { value: text });
-    return createElement('moon', label || text, config.raw || '', true, 'fa-moon', tooltip);
+    const tooltip = dateTooltip('CALENDARIA.Enricher.Tooltip.MoonCyclePosition', text, target, calendar);
+    return createElement('moon', label || text, configStr, isLive, 'fa-moon', tooltip);
   }
   if (config.cycleday) {
-    const moon = calendar?.getMoonPhase?.(moonIndex);
+    const moon = calendar?.getMoonPhase?.(moonIndex, target.internal);
     if (!moon) return createErrorElement('CALENDARIA.Enricher.Error.NoMoons');
     const text = String(moon.dayInCycle ?? '');
-    const tooltip = _loc('CALENDARIA.Enricher.Tooltip.MoonCycleDay', { value: text });
-    return createElement('moon', label || text, config.raw || '', true, 'fa-moon', tooltip);
+    const tooltip = dateTooltip('CALENDARIA.Enricher.Tooltip.MoonCycleDay', text, target, calendar);
+    return createElement('moon', label || text, configStr, isLive, 'fa-moon', tooltip);
   }
   if (config.isfull) {
     const moonsArr = calendar?.moonsArray || [];
     if (!moonsArr.length) return createErrorElement('CALENDARIA.Enricher.Error.NoMoons');
     const moon = moonsArr[moonIndex];
     if (!moon) return createErrorElement('CALENDARIA.Enricher.Error.MoonNotFound', { index: moonIndex });
-    const isFull = isMoonFull(moon, components);
+    const isFull = isMoonFull(moon, target.internal);
     const key = isFull ? 'CALENDARIA.MoonPhase.FullMoon' : 'CALENDARIA.Enricher.Label.NotFullMoon';
     const text = _loc(key);
-    const tooltip = _loc('CALENDARIA.Enricher.Tooltip.FullMoon', { value: text });
-    return createElement('moon', label || text, config.raw || '', true, 'fa-moon', tooltip);
+    const tooltip = dateTooltip('CALENDARIA.Enricher.Tooltip.FullMoon', text, target, calendar);
+    return createElement('moon', label || text, configStr, isLive, 'fa-moon', tooltip);
   }
-  const moon = calendar?.getMoonPhase?.(moonIndex);
+  const moon = calendar?.getMoonPhase?.(moonIndex, target.internal);
   if (!moon) return createErrorElement('CALENDARIA.Enricher.Error.NoMoons');
   const moonDef = calendar?.moonsArray?.[moonIndex];
   const phaseName = _loc(moon.name);
-  const span = createElement('moon', '', config.raw || '', true);
+  const span = createElement('moon', '', configStr, isLive);
   span.classList.add('calendaria-enricher--badge');
   appendMoonIcon(span, moon.icon, moonDef?.color);
   if (!config.icon) span.append(label || phaseName);
   else if (label) span.append(label);
-  span.dataset.tooltip = _loc('CALENDARIA.Enricher.Tooltip.MoonPhase', { value: phaseName });
+  span.dataset.tooltip = dateTooltip('CALENDARIA.Enricher.Tooltip.MoonPhase', phaseName, target, calendar);
   return span;
 }
 
@@ -1211,8 +1413,11 @@ function enrichMoon(config, label) {
  * @returns {HTMLElement} Enricher element
  */
 function enrichMoons(config, label) {
-  const { calendar } = resolveCalendar(config);
-  const moons = calendar?.getAllMoonPhases?.();
+  const { calendar, components } = resolveCalendar(config);
+  const target = resolveTargetDate(config, calendar, components);
+  const blocked = blockedElement(target, components);
+  if (blocked) return blocked;
+  const moons = calendar?.getAllMoonPhases?.(target.internal);
   if (!moons?.length) return createErrorElement('CALENDARIA.Enricher.Error.NoMoons');
   const text = moons
     .filter((m, i) => m && isMoonVisible(calendar?.moonsArray?.[m.moonIndex ?? i]))
@@ -1222,8 +1427,9 @@ function enrichMoons(config, label) {
       return moonName !== phaseName ? `${moonName}: ${phaseName}` : phaseName;
     })
     .join(', ');
-  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.MoonPhases', { value: text });
-  return createElement('moons', label || text, '', true, 'fa-moon', tooltip);
+  const tooltip = dateTooltip('CALENDARIA.Enricher.Tooltip.MoonPhases', text, target, calendar);
+  const { isLive, configStr } = liveArgs(target, config.raw);
+  return createElement('moons', label || text, configStr, isLive, 'fa-moon', tooltip);
 }
 
 /**
@@ -1234,6 +1440,9 @@ function enrichMoons(config, label) {
  */
 function enrichNextFullMoon(config, label) {
   const { calendar, components } = resolveCalendar(config);
+  const target = resolveTargetDate(config, calendar, components, { positional: false });
+  const blocked = blockedElement(target, components);
+  if (blocked) return blocked;
   const moonsArr = calendar?.moonsArray || [];
   if (!moonsArr.length) return createErrorElement('CALENDARIA.Enricher.Error.NoMoons');
   const isCountdown = config.values.some((v) => v.toLowerCase() === 'countdown');
@@ -1241,19 +1450,19 @@ function enrichNextFullMoon(config, label) {
   const moonIndex = moonIdxVal != null ? parseInt(moonIdxVal) : 0;
   const targetMoon = moonsArr[moonIndex];
   if (!targetMoon || !isMoonVisible(targetMoon)) return createErrorElement('CALENDARIA.Enricher.Error.MoonNotFound', { index: moonIndex });
-  const nextFull = getNextFullMoon(targetMoon, components);
+  const nextFull = getNextFullMoon(targetMoon, target.internal);
   if (!nextFull) return createErrorElement('CALENDARIA.Common.NoConvergence');
   const nextDate = internalToPublic(nextFull, calendar);
+  const { isLive, configStr } = liveArgs(target, config.raw);
   if (isCountdown) {
-    const current = getCurrentDateTime(calendar, components);
-    const days = daysBetween(toInternal(current), toInternal(nextDate));
+    const days = daysBetween(toInternal(target.date), toInternal(nextDate));
     const text = formatCountdown(days);
-    const tooltip = _loc('CALENDARIA.Enricher.Tooltip.NextFullMoon', { value: text });
-    return createElement('nextfullmoon', label || text, config.raw, true, 'fa-moon', tooltip);
+    const tooltip = dateTooltip('CALENDARIA.Enricher.Tooltip.NextFullMoon', text, target, calendar);
+    return createElement('nextfullmoon', label || text, configStr, isLive, 'fa-moon', tooltip);
   }
   const dateText = formatDate(nextDate, 'dateLong', calendar);
-  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.NextFullMoon', { value: dateText });
-  return createContentLink('nextfullmoon', label || dateText, { calYear: nextDate.year, calMonth: nextDate.month, calDay: nextDate.day }, 'fa-moon', tooltip, config.raw);
+  const tooltip = dateTooltip('CALENDARIA.Enricher.Tooltip.NextFullMoon', dateText, target, calendar);
+  return createContentLink('nextfullmoon', label || dateText, { calYear: nextDate.year, calMonth: nextDate.month, calDay: nextDate.day }, 'fa-moon', tooltip, configStr);
 }
 
 /**
@@ -1264,20 +1473,24 @@ function enrichNextFullMoon(config, label) {
  */
 function enrichConvergence(config, label) {
   const { calendar, components } = resolveCalendar(config);
+  const target = resolveTargetDate(config, calendar, components);
+  const blocked = blockedElement(target, components);
+  if (blocked) return blocked;
   const moonsArr = (calendar?.moonsArray || []).filter(isMoonVisible);
   if (moonsArr.length < 2) return createErrorElement('CALENDARIA.Enricher.Error.NoMoons');
-  const result = getNextConvergence(moonsArr, components);
+  const result = getNextConvergence(moonsArr, target.internal);
   const moonNames = moonsArr.map((m) => _loc(m.name)).join(', ');
+  const { isLive, configStr } = liveArgs(target, config.raw);
   if (!result) {
     const noText = _loc('CALENDARIA.Common.NoConvergence');
     const tooltip = _loc('CALENDARIA.Enricher.Tooltip.NextConvergence', { moons: moonNames, phase: '', date: noText });
-    return createElement('convergence', label || noText, '', true, 'fa-moon', tooltip);
+    return createElement('convergence', label || noText, configStr, isLive, 'fa-moon', tooltip);
   }
   const date = internalToPublic(result, calendar);
   const dateText = formatDate(date, 'dateLong', calendar);
   const fullMoonLabel = _loc('CALENDARIA.MoonPhase.FullMoon');
   const tooltip = _loc('CALENDARIA.Enricher.Tooltip.NextConvergence', { moons: moonNames, phase: fullMoonLabel, date: dateText });
-  return createContentLink('convergence', label || dateText, { calYear: date.year, calMonth: date.month, calDay: date.day }, 'fa-moon', tooltip, '');
+  return createContentLink('convergence', label || dateText, { calYear: date.year, calMonth: date.month, calDay: date.day }, 'fa-moon', tooltip, configStr);
 }
 
 /**
@@ -1288,16 +1501,20 @@ function enrichConvergence(config, label) {
  */
 function enrichEclipse(config, label) {
   const { calendar, components } = resolveCalendar(config);
+  const target = resolveTargetDate(config, calendar, components, { positional: false });
+  const blocked = blockedElement(target, components);
+  if (blocked) return blocked;
   const moonsArr = calendar?.moonsArray || [];
   if (!moonsArr.length) return createErrorElement('CALENDARIA.Enricher.Error.NoMoons');
   const moonIdxVal = config.values.find((v) => !isNaN(v));
   const moonIndex = moonIdxVal != null ? parseInt(moonIdxVal) : 0;
   const targetMoon = moonsArr[moonIndex];
   if (!targetMoon || !isMoonVisible(targetMoon)) return createErrorElement('CALENDARIA.Enricher.Error.MoonNotFound', { index: moonIndex });
-  const result = getEclipseAtDate(targetMoon, components, calendar);
+  const result = getEclipseAtDate(targetMoon, target.internal, calendar);
   const text = result.type ? _loc(ECLIPSE_TYPE_LABELS[result.type] ?? result.type) : _loc('CALENDARIA.Eclipse.None');
-  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.Eclipse', { value: text });
-  return createElement('eclipse', label || text, config.raw, true, 'fa-sun', tooltip);
+  const tooltip = dateTooltip('CALENDARIA.Enricher.Tooltip.Eclipse', text, target, calendar);
+  const { isLive, configStr } = liveArgs(target, config.raw);
+  return createElement('eclipse', label || text, configStr, isLive, 'fa-sun', tooltip);
 }
 
 /**
@@ -1308,6 +1525,9 @@ function enrichEclipse(config, label) {
  */
 function enrichNextEclipse(config, label) {
   const { calendar, components } = resolveCalendar(config);
+  const target = resolveTargetDate(config, calendar, components, { positional: false });
+  const blocked = blockedElement(target, components);
+  if (blocked) return blocked;
   const moonsArr = calendar?.moonsArray || [];
   if (!moonsArr.length) return createErrorElement('CALENDARIA.Enricher.Error.NoMoons');
   const isCountdown = config.values.some((v) => v.toLowerCase() === 'countdown');
@@ -1315,101 +1535,141 @@ function enrichNextEclipse(config, label) {
   const moonIndex = moonIdxVal != null ? parseInt(moonIdxVal) : 0;
   const targetMoon = moonsArr[moonIndex];
   if (!targetMoon || !isMoonVisible(targetMoon)) return createErrorElement('CALENDARIA.Enricher.Error.MoonNotFound', { index: moonIndex });
-  const result = getNextEclipse(targetMoon, components, { calendar });
+  const result = getNextEclipse(targetMoon, target.internal, { calendar });
   if (!result) return createErrorElement('CALENDARIA.Enricher.Error.NoEclipseFound');
   const nextDate = internalToPublic(result.date, calendar);
   const typeLabel = _loc(ECLIPSE_TYPE_LABELS[result.type] ?? result.type);
+  const { isLive, configStr } = liveArgs(target, config.raw);
   if (isCountdown) {
-    const current = getCurrentDateTime(calendar, components);
-    const days = daysBetween(toInternal(current), toInternal(nextDate));
+    const days = daysBetween(toInternal(target.date), toInternal(nextDate));
     const text = formatCountdown(days);
     const tooltip = _loc('CALENDARIA.Enricher.Tooltip.NextEclipse', { type: typeLabel, value: text });
-    return createElement('nexteclipse', label || text, config.raw, true, 'fa-sun', tooltip);
+    return createElement('nexteclipse', label || text, configStr, isLive, 'fa-sun', tooltip);
   }
   const dateText = formatDate(nextDate, 'dateLong', calendar);
   const tooltip = _loc('CALENDARIA.Enricher.Tooltip.NextEclipse', { type: typeLabel, value: dateText });
-  return createContentLink('nexteclipse', label || dateText, { calYear: nextDate.year, calMonth: nextDate.month, calDay: nextDate.day }, 'fa-sun', tooltip, config.raw);
+  return createContentLink('nexteclipse', label || dateText, { calYear: nextDate.year, calMonth: nextDate.month, calDay: nextDate.day }, 'fa-sun', tooltip, configStr);
 }
 
 /**
- * Current weather.
- * @param {object} _config - Parsed enricher config
+ * Resolve the weather state an enricher should render.
+ * @param {object} config - Parsed enricher config
+ * @param {object|null} calendar - Resolved calendar instance
+ * @param {object} components - Current time components (internal, 0-indexed)
+ * @returns {{target: object, zoneId: string|undefined, weather: object|null, unavailable: HTMLElement|null, denied: boolean}} Resolved date, zone, weather state with a display-ready `labelText`, the badge
+ */
+function resolveWeatherAt(config, calendar, components) {
+  const target = resolveTargetDate(config, calendar, components);
+  const zone = resolveZone(config);
+  const blocked = blockedElement(target, components, true);
+  if (blocked) return { target, zoneId: zone?.id, weather: null, unavailable: blocked, denied: true };
+  if (!target.isStatic) {
+    const weather = WeatherManager.getCurrentWeather(zone?.id);
+    if (!weather) return { target, zoneId: zone?.id, weather: null, unavailable: null, denied: false };
+    return { target, zoneId: zone?.id, weather: { ...weather, labelText: _loc(weather.label) }, unavailable: null, denied: false };
+  }
+  let entry = WeatherManager.getWeatherForDate(target.internal.year, target.internal.month, target.internal.dayOfMonth, zone?.id);
+  if (config?.zone && entry && entry.zoneId !== zone?.id) entry = null;
+  if (!entry) {
+    const date = formatDate(target.date, 'dateLong', calendar);
+    return { target, zoneId: zone?.id, weather: null, unavailable: createUnavailableElement('CALENDARIA.Enricher.Error.NoHistoricalWeather', { date }), denied: false };
+  }
+  return { target, zoneId: zone?.id, weather: { ...entry, labelText: entry.label }, unavailable: null, denied: false };
+}
+
+/**
+ * Weather for the resolved date.
+ * @param {object} config - Parsed enricher config
  * @param {string|null} label - Custom label override
  * @returns {HTMLElement} Enricher element
  */
-function enrichWeather(_config, label) {
-  const weather = WeatherManager.getCurrentWeather();
+function enrichWeather(config, label) {
+  const { calendar, components } = resolveCalendar(config);
+  const { target, weather, unavailable } = resolveWeatherAt(config, calendar, components);
+  if (unavailable) return unavailable;
   if (!weather) return createErrorElement('CALENDARIA.Enricher.Error.NoWeather');
-  const weatherLabel = _loc(weather.label);
-  const span = createElement('weather', '', '', true);
+  const { isLive, configStr } = liveArgs(target, config.raw);
+  const span = createElement('weather', '', configStr, isLive);
   span.classList.add('calendaria-enricher--badge');
   appendWeatherIcon(span, weather.icon);
-  span.append(label || weatherLabel);
-  span.dataset.tooltip = _loc('CALENDARIA.Enricher.Tooltip.Weather', { value: weatherLabel });
+  span.append(label || weather.labelText);
+  span.dataset.tooltip = dateTooltip('CALENDARIA.Enricher.Tooltip.Weather', weather.labelText, target, calendar);
   return span;
 }
 
 /**
- * Current temperature.
- * @param {object} _config - Parsed enricher config
+ * Temperature for the resolved date.
+ * @param {object} config - Parsed enricher config
  * @param {string|null} label - Custom label override
  * @returns {HTMLElement} Enricher element
  */
-function enrichTemperature(_config, label) {
-  const temp = WeatherManager.getTemperature();
+function enrichTemperature(config, label) {
+  const { calendar, components } = resolveCalendar(config);
+  const { target, zoneId, weather, unavailable } = resolveWeatherAt(config, calendar, components);
+  if (unavailable) return unavailable;
+  const temp = target.isStatic ? weather?.temperature : WeatherManager.getTemperature(zoneId);
   if (temp == null) return createErrorElement('CALENDARIA.Enricher.Error.NoWeather');
   const text = WeatherManager.formatTemperature(temp);
-  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.Temperature', { value: text });
-  return createElement('temperature', label || text, '', true, 'fa-temperature-half', tooltip);
+  const tooltip = dateTooltip('CALENDARIA.Enricher.Tooltip.Temperature', text, target, calendar);
+  const { isLive, configStr } = liveArgs(target, config.raw);
+  return createElement('temperature', label || text, configStr, isLive, 'fa-temperature-half', tooltip);
 }
 
 /**
- * Current wind.
- * @param {object} _config - Parsed enricher config
+ * Wind for the resolved date.
+ * @param {object} config - Parsed enricher config
  * @param {string|null} label - Custom label override
  * @returns {HTMLElement} Enricher element
  */
-function enrichWind(_config, label) {
-  const weather = WeatherManager.getCurrentWeather();
+function enrichWind(config, label) {
+  const { calendar, components } = resolveCalendar(config);
+  const { target, weather, unavailable } = resolveWeatherAt(config, calendar, components);
+  if (unavailable) return unavailable;
   if (!weather) return createErrorElement('CALENDARIA.Enricher.Error.NoWeather');
   const speedLabel = getWindLabel(weather.wind?.speed ?? 0);
   const dir = weather.wind?.direction;
   const dirLabel = dir != null ? ` ${degreesToCompass(dir)}` : '';
   const text = `${speedLabel}${dirLabel}`;
-  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.Wind', { value: text });
-  return createElement('wind', label || text, '', true, 'fa-wind', tooltip);
+  const tooltip = dateTooltip('CALENDARIA.Enricher.Tooltip.Wind', text, target, calendar);
+  const { isLive, configStr } = liveArgs(target, config.raw);
+  return createElement('wind', label || text, configStr, isLive, 'fa-wind', tooltip);
 }
 
 /**
- * Current precipitation.
- * @param {object} _config - Parsed enricher config
+ * Precipitation for the resolved date.
+ * @param {object} config - Parsed enricher config
  * @param {string|null} label - Custom label override
  * @returns {HTMLElement} Enricher element
  */
-function enrichPrecipitation(_config, label) {
-  const weather = WeatherManager.getCurrentWeather();
+function enrichPrecipitation(config, label) {
+  const { calendar, components } = resolveCalendar(config);
+  const { target, weather, unavailable } = resolveWeatherAt(config, calendar, components);
+  if (unavailable) return unavailable;
   if (!weather) return createErrorElement('CALENDARIA.Enricher.Error.NoWeather');
   const precipType = weather.precipitation?.type;
   const text = precipType ? precipType.charAt(0).toUpperCase() + precipType.slice(1) : _loc('CALENDARIA.Common.None');
-  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.Precipitation', { value: text });
-  return createElement('precipitation', label || text, '', true, 'fa-cloud-rain', tooltip);
+  const tooltip = dateTooltip('CALENDARIA.Enricher.Tooltip.Precipitation', text, target, calendar);
+  const { isLive, configStr } = liveArgs(target, config.raw);
+  return createElement('precipitation', label || text, configStr, isLive, 'fa-cloud-rain', tooltip);
 }
 
 /**
- * Weather icon only.
- * @param {object} _config - Parsed enricher config
+ * Weather icon only, for the resolved date.
+ * @param {object} config - Parsed enricher config
  * @param {string|null} label - Custom label override
  * @returns {HTMLElement} Enricher element
  */
-function enrichWeatherIcon(_config, label) {
-  const weather = WeatherManager.getCurrentWeather();
+function enrichWeatherIcon(config, label) {
+  const { calendar, components } = resolveCalendar(config);
+  const { target, weather, unavailable } = resolveWeatherAt(config, calendar, components);
+  if (unavailable) return unavailable;
   if (!weather) return createErrorElement('CALENDARIA.Enricher.Error.NoWeather');
-  const span = createElement('weathericon', '', '', true);
+  const { isLive, configStr } = liveArgs(target, config.raw);
+  const span = createElement('weathericon', '', configStr, isLive);
   span.classList.add('calendaria-enricher--badge');
   appendWeatherIcon(span, weather.icon);
   if (label) span.append(label);
-  const weatherLabel = _loc(weather.label);
-  span.dataset.tooltip = _loc('CALENDARIA.Enricher.Tooltip.Weather', { value: weatherLabel });
+  span.dataset.tooltip = dateTooltip('CALENDARIA.Enricher.Tooltip.Weather', weather.labelText, target, calendar);
   return span;
 }
 
@@ -1434,23 +1694,29 @@ function enrichZone(_config, label) {
  * @returns {HTMLElement} Enricher element
  */
 function enrichForecast(config, label) {
-  const { calendar } = resolveCalendar(config);
+  const { calendar, components } = resolveCalendar(config);
+  const target = resolveTargetDate(config, calendar, components, { positional: false });
+  const blocked = blockedElement(target, components, true);
+  if (blocked) return blocked;
   const days = config.values.length > 0 && !isNaN(config.values[0]) ? parseInt(config.values[0]) : 3;
-  const forecast = WeatherManager.getForecast({ days });
+  const forecast = WeatherManager.getForecast({ days, start: target.internal, zoneId: resolveZone(config)?.id });
   if (!forecast?.length) return createErrorElement('CALENDARIA.Enricher.Error.NoWeather');
-  if (label) return createElement('forecast', label, '', true);
+  const { isLive, configStr } = liveArgs(target, config.raw || '');
+  if (label) return createElement('forecast', label, configStr, isLive);
   const currentWeather = WeatherManager.getCurrentWeather();
   if (currentWeather && forecast.length > 0) {
-    const today = game.time.components;
     const first = forecast[0];
-    if (first.year === today.year && first.month === today.month && first.dayOfMonth === today.dayOfMonth) {
+    if (first.year === components.year && first.month === components.month && first.dayOfMonth === components.dayOfMonth) {
       forecast[0] = { ...first, preset: currentWeather.preset ?? first.preset, temperature: currentWeather.temperature ?? first.temperature, wind: currentWeather.wind ?? first.wind };
     }
   }
   const container = document.createElement('span');
-  container.classList.add('calendaria-enricher', 'calendaria-enricher--almanac', 'calendaria-enricher--live');
-  container.dataset.calType = 'forecast';
-  container.dataset.calConfig = config.raw || '';
+  container.classList.add('calendaria-enricher', 'calendaria-enricher--almanac');
+  if (isLive) {
+    container.classList.add('calendaria-enricher--live');
+    container.dataset.calType = 'forecast';
+    container.dataset.calConfig = configStr;
+  }
   const lines = forecast.map((entry) => {
     const date = { year: entry.year, month: (entry.month ?? 0) + 1, day: (entry.dayOfMonth ?? 0) + 1 };
     const dateStr = formatDate(date, 'dateShort', calendar);
@@ -1822,16 +2088,17 @@ function enrichChronicle(config, label) {
  */
 function enrichSummary(config, label) {
   const { calendar, components } = resolveCalendar(config);
+  const { target, weather, unavailable, denied } = resolveWeatherAt(config, calendar, components);
+  if (denied) return unavailable;
   const parts = [];
-  parts.push(formatDate(null, 'dateLong', calendar));
-  const weather = WeatherManager.getCurrentWeather();
-  if (weather?.label) parts.push(_loc(weather.label));
-  const moon = calendar?.getCurrentMoonPhase?.(0);
+  parts.push(formatDate(target.isStatic ? target.date : null, 'dateLong', calendar));
+  if (weather?.labelText) parts.push(weather.labelText);
+  const moon = calendar?.getMoonPhase?.(0, target.internal);
   if (moon) parts.push(_loc(moon.name));
   const text = label || parts.join(' · ');
-  const current = getCurrentDateTime(calendar, components);
   const tooltip = _loc('CALENDARIA.Enricher.Tooltip.CalendarSummary');
-  return createContentLink('summary', text, { calYear: current.year, calMonth: current.month, calDay: current.day }, 'fa-calendar-days', tooltip, '');
+  const { configStr } = liveArgs(target, config.raw);
+  return createContentLink('summary', text, { calYear: target.date.year, calMonth: target.date.month, calDay: target.date.day }, 'fa-calendar-days', tooltip, configStr);
 }
 
 /**
@@ -1841,22 +2108,26 @@ function enrichSummary(config, label) {
  * @returns {HTMLElement} Enricher element
  */
 function enrichAlmanac(config, label) {
-  const { calendar } = resolveCalendar(config);
-  if (label) return createElement('almanac', label, '', true);
+  const { calendar, components } = resolveCalendar(config);
+  const { target, zoneId, weather, unavailable, denied } = resolveWeatherAt(config, calendar, components);
+  if (denied) return unavailable;
+  const { isLive, configStr } = liveArgs(target, config.raw);
+  if (label) return createElement('almanac', label, configStr, isLive);
   const container = document.createElement('span');
-  container.classList.add('calendaria-enricher', 'calendaria-enricher--almanac', 'calendaria-enricher--live');
-  container.dataset.calType = 'almanac';
-  container.dataset.calConfig = '';
+  container.classList.add('calendaria-enricher', 'calendaria-enricher--almanac');
+  if (isLive) {
+    container.classList.add('calendaria-enricher--live');
+    container.dataset.calType = 'almanac';
+    container.dataset.calConfig = configStr;
+  }
   const lines = [];
-  lines.push(formatDate(null, 'dateFull', calendar));
-  const season = calendar?.getCurrentSeason?.();
+  lines.push(formatDate(target.isStatic ? target.date : null, 'dateFull', calendar));
+  const season = calendar?.getCurrentSeason?.(target.internal);
   if (season) lines.push(`${_loc('CALENDARIA.Common.Season')}: ${_loc(season.name)}`);
-  const weather = WeatherManager.getCurrentWeather();
   if (weather) {
-    const weatherLabel = _loc(weather.label);
-    const temp = WeatherManager.getTemperature();
+    const temp = target.isStatic ? weather.temperature : WeatherManager.getTemperature(zoneId);
     const tempStr = temp != null ? ` ${WeatherManager.formatTemperature(temp)}` : '';
-    lines.push(`${_loc('CALENDARIA.Common.Weather')}: ${weatherLabel}${tempStr}`);
+    lines.push(`${_loc('CALENDARIA.Common.Weather')}: ${weather.labelText}${tempStr}`);
     const windSpeed = weather.wind?.speed;
     if (windSpeed != null) {
       const windLabel = getWindLabel(windSpeed);
@@ -1864,15 +2135,15 @@ function enrichAlmanac(config, label) {
       const dirStr = windDir != null ? ` ${degreesToCompass(windDir)}` : '';
       lines.push(`${_loc('CALENDARIA.Common.Wind')}: ${windLabel}${dirStr}`);
     }
-  }
-  const moon = calendar?.getCurrentMoonPhase?.(0);
+  } else if (unavailable) lines.push(`${_loc('CALENDARIA.Common.Weather')}: ${unavailable.textContent}`);
+  const moon = calendar?.getMoonPhase?.(0, target.internal);
   if (moon) {
     const phaseName = _loc(moon.name);
     lines.push(`${_loc('CALENDARIA.Common.Moon')}: ${phaseName}`);
   }
-  const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
-  const sunrise = calendar?.sunrise(undefined, zone);
-  const sunset = calendar?.sunset(undefined, zone);
+  const zone = resolveZone(config);
+  const sunrise = calendar?.sunrise(target.internal, zone);
+  const sunset = calendar?.sunset(target.internal, zone);
   if (sunrise != null && sunset != null) {
     const srLabel = _loc('CALENDARIA.Common.Sunrise');
     const ssLabel = _loc('CALENDARIA.Common.Sunset');
@@ -1890,10 +2161,27 @@ function enrichAlmanac(config, label) {
  * @returns {HTMLElement} Enricher element
  */
 function enrichFormat(config, label) {
-  const { calendar } = resolveCalendar(config);
-  const text = formatDate(null, config.raw, calendar);
+  const { calendar, components } = resolveCalendar(config);
+  const target = resolveTargetDate(config, calendar, components, { positional: false });
+  const blocked = blockedElement(target, components);
+  if (blocked) return blocked;
+  const formatStr = stripControlTokens(config.raw);
+  const text = formatDate(target.isStatic ? target.date : null, formatStr, calendar);
   const tooltip = _loc('CALENDARIA.Enricher.Tooltip.FormattedDate', { value: text });
-  return createElement('format', label || text, config.raw, true, 'fa-calendar', tooltip);
+  const { isLive, configStr } = liveArgs(target, config.raw);
+  return createElement('format', label || text, configStr, isLive, 'fa-calendar', tooltip);
+}
+
+/**
+ * Remove the control tokens from a raw config so what remains is the author's format string.
+ * @param {string} raw - Raw config string
+ * @returns {string} Format string with date, zone, and calendar tokens removed
+ */
+function stripControlTokens(raw) {
+  return (raw || '')
+    .replace(/\b(?:date|zone|cal)=(?:"[^"]*"|\S+)/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 /**
@@ -1926,7 +2214,10 @@ function enrichPeek(config, label) {
   const { calendar, components } = resolveCalendar(config);
   const ops = parseDateMath(config.raw);
   if (!ops.length) return createErrorElement('CALENDARIA.Enricher.Error.InvalidMath', { input: config.raw });
-  let date = getCurrentDateTime(calendar, components);
+  const target = resolveTargetDate(config, calendar, components, { positional: false });
+  const blocked = blockedElement(target, components);
+  if (blocked) return blocked;
+  let date = target.date;
   for (const op of ops) {
     switch (op.unit) {
       case 'd':

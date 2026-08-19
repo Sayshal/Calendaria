@@ -558,22 +558,38 @@ const ENRICHER_JOURNAL_FLAG = 'isEnricherReference';
 
 /** @type {Array<{label: string, keys: string[]}>} Enricher categories for the reference journal. */
 const ENRICHER_CATEGORIES = [
-  { label: 'CALENDARIA.Enricher.Category.DateTime', keys: ['date', 'time', 'weekday', 'season', 'era', 'cycle', 'festival', 'restday'] },
+  { label: 'CALENDARIA.Enricher.Category.DateTime', keys: ['date', 'time', 'weekday', 'season', 'era', 'cycle', 'festival', 'restday'], examples: { weekday: '5 3 1492' } },
   {
     label: 'CALENDARIA.Enricher.Category.TimeMath',
     keys: ['countdown', 'countup', 'between', 'timeuntil', 'datemath'],
     examples: { countdown: '1 1 2030 cal=gregorian', countup: '1 1 2020 cal=gregorian', between: '1 1 2020 to 1 6 2025 cal=gregorian', timeuntil: 'sunset', datemath: '+30d' }
   },
-  { label: 'CALENDARIA.Enricher.Category.Calendar', keys: ['calname', 'month', 'year', 'dayofyear', 'yearprogress', 'leapyear', 'intercalary', 'daysinyear'] },
-  { label: 'CALENDARIA.Enricher.Category.Sun', keys: ['sunrise', 'sunset', 'daylight', 'isdaytime', 'dayprogress', 'nightprogress', 'untilsunrise', 'untilsunset'] },
-  { label: 'CALENDARIA.Enricher.Category.Moon', keys: ['moon', 'moons', 'nextfullmoon', 'convergence', 'eclipse', 'nexteclipse'] },
-  { label: 'CALENDARIA.Enricher.Category.Weather', keys: ['weather', 'temperature', 'wind', 'precipitation', 'weathericon', 'zone', 'forecast'] },
+  {
+    label: 'CALENDARIA.Enricher.Category.Calendar',
+    keys: ['calname', 'month', 'year', 'dayofyear', 'yearprogress', 'leapyear', 'intercalary', 'daysinyear'],
+    examples: { month: '5 3 1492' }
+  },
+  {
+    label: 'CALENDARIA.Enricher.Category.Sun',
+    keys: ['sunrise', 'sunset', 'daylight', 'isdaytime', 'dayprogress', 'nightprogress', 'untilsunrise', 'untilsunset'],
+    examples: { sunrise: '5 3 1492', sunset: 'date="5 3 1492"' }
+  },
+  { label: 'CALENDARIA.Enricher.Category.Moon', keys: ['moon', 'moons', 'nextfullmoon', 'convergence', 'eclipse', 'nexteclipse'], examples: { moon: '0 date="5 3 1492"', moons: '5 3 1492' } },
+  {
+    label: 'CALENDARIA.Enricher.Category.Weather',
+    keys: ['weather', 'temperature', 'wind', 'precipitation', 'weathericon', 'zone', 'forecast'],
+    examples: { weather: '5 3 1492', temperature: 'date="5 3 1492"', forecast: '3 date="5 3 1492"' }
+  },
   {
     label: 'CALENDARIA.Enricher.Category.Notes',
     keys: ['event', 'notes', 'next', 'category', 'chronicle'],
     examples: { event: 'Winter Solstice', category: 'quest', chronicle: '1 1 1500 to 14 1 1500' }
   },
-  { label: 'CALENDARIA.Enricher.Category.Composite', keys: ['summary', 'almanac', 'format', 'compare', 'peek'], examples: { format: 'MMMM YYYY', compare: '1 1 2025 cal=gregorian', peek: '+7d' } },
+  {
+    label: 'CALENDARIA.Enricher.Category.Composite',
+    keys: ['summary', 'almanac', 'format', 'compare', 'peek'],
+    examples: { summary: 'date="5 3 1492"', almanac: 'date="5 3 1492"', format: 'MMMM YYYY', compare: '1 1 2025 cal=gregorian', peek: '+7d' }
+  },
   {
     label: 'CALENDARIA.Enricher.Category.Actions',
     keys: ['advancetotime', 'advanceinterval', 'advancetopreset', 'settime', 'jumptodate', 'toggleclock', 'setweather'],

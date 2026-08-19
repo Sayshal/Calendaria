@@ -661,6 +661,7 @@ export default class WeatherManager {
    * @param {string} [options.zoneId] - Zone ID override
    * @param {number} [options.accuracy] - Forecast accuracy 0-100 (default: from setting)
    * @param {boolean} [options.playerView] - Force player-grade output (accuracy variance, no periods) for a GM caller
+   * @param {object} [options.start] - Internal date {year, month, dayOfMonth} to forecast from (default: now)
    * @returns {object[]} Forecast array
    */
   static getForecast(options = {}) {
@@ -674,7 +675,7 @@ export default class WeatherManager {
     const customPresets = this.getCustomPresets();
     const fullPlan = game.settings.get(MODULE.ID, SETTINGS.WEATHER_FORECAST_PLAN) || {};
     const plan = zoneId ? (fullPlan[zoneId] ?? {}) : {};
-    const components = game.time.components;
+    const components = options.start ?? game.time.components;
     const getDaysInMonth = this.#makeDaysInMonth(calendar);
     const zoneConfig = this.getActiveZone(zoneId);
     const seasonResolver = this.#makeSeasonResolver(calendar);
@@ -732,7 +733,7 @@ export default class WeatherManager {
     const zoneId = 'zoneId' in options ? options.zoneId : (this.getActiveZone(null, game.scenes?.active)?.id ?? this.DEFAULT_ZONE);
     const maxDays = game.settings.get(MODULE.ID, SETTINGS.FORECAST_DAYS) ?? 7;
     const days = Math.min(options.days || maxDays, maxDays);
-    const components = game.time.components;
+    const components = options.start ?? game.time.components;
     const accuracy = options.accuracy ?? game.settings.get(MODULE.ID, SETTINGS.FORECAST_ACCURACY) ?? 70;
     const cacheKey = `${zoneId}|${components.year}|${components.month}|${components.dayOfMonth}|${days}|${accuracy}`;
     if (this.#legacyForecastCache?.key === cacheKey) return this.#legacyForecastCache.forecast;
@@ -1498,7 +1499,7 @@ export default class WeatherManager {
 
   /**
    * Get historical weather for a specific date.
-   * @param {number} year - Display year
+   * @param {number} year - Internal year, as written by #recordWeatherHistory
    * @param {number} month - Month (0-indexed)
    * @param {number} dayOfMonth - Day of month (0-indexed)
    * @param {string} [zoneId] - Zone ID filter (resolves from active scene if omitted)

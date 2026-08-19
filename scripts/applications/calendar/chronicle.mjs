@@ -149,7 +149,11 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
     const canAdd = canAddNotes();
     for (const entry of this._entries) {
       if (!entry.notes) continue;
-      for (const note of entry.notes) if (note.content) note.content = await foundry.applications.ux.TextEditor.implementation.enrichHTML(note.content);
+      for (const note of entry.notes) {
+        if (!note.content) continue;
+        const page = game.journal.get(note.journalId)?.pages.get(note.id);
+        note.content = await foundry.applications.ux.TextEditor.implementation.enrichHTML(note.content, page ? { relativeTo: page } : {});
+      }
     }
     context.entries = this._entries.map((e) => ({ ...e, canAdd }));
     context.entryDepth = this._entryDepth;
@@ -560,7 +564,11 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
     const template = this._viewMode === 'timeline' ? TEMPLATES.CHRONICLE_TIMELINE_ENTRY : TEMPLATES.CHRONICLE_ENTRY;
     for (const entry of entries) {
       if (!entry.notes) continue;
-      for (const note of entry.notes) if (note.content) note.content = await foundry.applications.ux.TextEditor.implementation.enrichHTML(note.content);
+      for (const note of entry.notes) {
+        if (!note.content) continue;
+        const page = game.journal.get(note.journalId)?.pages.get(note.id);
+        note.content = await foundry.applications.ux.TextEditor.implementation.enrichHTML(note.content, page ? { relativeTo: page } : {});
+      }
     }
     const parts = [];
     for (const entry of entries) {

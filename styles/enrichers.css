@@ -8,6 +8,12 @@
     cursor: help;
   }
 
+  &--unavailable {
+    color: var(--atlas-text-muted, rgb(150 150 150));
+    font-style: italic;
+    cursor: help;
+  }
+
   &--badge,
   &--link {
     gap: 0.25em;
