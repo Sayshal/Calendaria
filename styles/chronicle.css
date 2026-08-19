@@ -29,7 +29,7 @@
     }
 
     .toolbar-title {
-      color: var(--atlas-text, rgb(224 224 224));
+      color: var(--atlas-title-text, var(--atlas-text, rgb(224 224 224)));
       font-weight: 600;
       font-size: var(--font-size-13, 0.8125rem);
       pointer-events: none;

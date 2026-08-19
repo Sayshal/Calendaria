@@ -828,6 +828,7 @@
         border-radius: 0;
         font-size: var(--font-size-14);
         text-align: left;
+        text-shadow: none;
 
         > span:not(.notification-pip) {
           flex: 1;
@@ -844,7 +845,6 @@
 
         &.active {
           border-left-color: var(--group-color, var(--atlas-accent, rgb(168 144 96)));
-          background: color-mix(in srgb, var(--group-color, var(--atlas-accent, rgb(168 144 96))) 40%, transparent);
         }
       }
     }

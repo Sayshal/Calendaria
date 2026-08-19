@@ -897,7 +897,6 @@
 
       &.active {
         border-left-color: var(--atlas-accent, rgb(168 144 96));
-        background: color-mix(in srgb, var(--atlas-accent, rgb(168 144 96)) 40%, transparent);
       }
 
       .preset-icon-btn {
