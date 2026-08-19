@@ -2,10 +2,10 @@ import { vi } from 'vitest';
 
 /** Simple localization overrides so tests that depend on resolved text pass. */
 const LOCALIZE_OVERRIDES = {
-  'CALENDARIA.Format.Ordinal.st': 'st',
-  'CALENDARIA.Format.Ordinal.nd': 'nd',
-  'CALENDARIA.Format.Ordinal.rd': 'rd',
-  'CALENDARIA.Format.Ordinal.th': 'th',
+  'CALENDARIA.Format.Ordinal.St': 'st',
+  'CALENDARIA.Format.Ordinal.Nd': 'nd',
+  'CALENDARIA.Format.Ordinal.Rd': 'rd',
+  'CALENDARIA.Format.Ordinal.Th': 'th',
   'CALENDARIA.Format.OrdinalDate': '{day} of {month}'
 };
 

@@ -1400,8 +1400,8 @@ export default class CalendariaSettings {
         type: new NumberField({ initial: 1, min: 0, max: 1, step: 0.05 })
       },
       [SETTINGS.FXMASTER_SOUND_FX]: {
-        name: 'CALENDARIA.Settings.FXMaster.soundFX.Name',
-        hint: 'CALENDARIA.Settings.FXMaster.soundFX.Hint',
+        name: 'CALENDARIA.Settings.FXMaster.SoundFX.Name',
+        hint: 'CALENDARIA.Settings.FXMaster.SoundFX.Hint',
         scope: 'world',
         config: false,
         type: new BooleanField({ initial: false })

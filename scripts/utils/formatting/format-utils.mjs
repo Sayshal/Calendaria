@@ -23,7 +23,7 @@ function resolveArray(calendar, getter, path) {
  * @returns {string} - Number with ordinal suffix (1st, 2nd, 3rd, etc.)
  */
 export function ordinal(n) {
-  const s = [_loc('CALENDARIA.Format.Ordinal.th'), _loc('CALENDARIA.Format.Ordinal.st'), _loc('CALENDARIA.Format.Ordinal.nd'), _loc('CALENDARIA.Format.Ordinal.rd')];
+  const s = [_loc('CALENDARIA.Format.Ordinal.Th'), _loc('CALENDARIA.Format.Ordinal.St'), _loc('CALENDARIA.Format.Ordinal.Nd'), _loc('CALENDARIA.Format.Ordinal.Rd')];
   const v = n % 100;
   return n + (s[(v - 20) % 10] || s[v] || s[0]);
 }

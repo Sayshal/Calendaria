@@ -792,7 +792,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.FXMASTER_BELOW_TILES]: { tab: 'weather', label: 'CALENDARIA.Settings.FXMaster.BelowTiles.Name' },
     [SETTINGS.FXMASTER_BELOW_FOREGROUND]: { tab: 'weather', label: 'CALENDARIA.Settings.FXMaster.BelowForeground.Name' },
     [SETTINGS.FXMASTER_DARKNESS_ACTIVATION_ENABLED]: { tab: 'weather', label: 'CALENDARIA.Settings.FXMaster.DarknessActivation.Name' },
-    [SETTINGS.FXMASTER_SOUND_FX]: { tab: 'weather', label: 'CALENDARIA.Settings.FXMaster.soundFX.Name' },
+    [SETTINGS.FXMASTER_SOUND_FX]: { tab: 'weather', label: 'CALENDARIA.Settings.FXMaster.SoundFX.Name' },
     [SETTINGS.FXMASTER_SPLASH]: { tab: 'weather', label: 'CALENDARIA.Settings.FXMaster.Splash.Name' },
     [SETTINGS.WEATHER_INERTIA]: { tab: 'weather', label: 'CALENDARIA.Settings.WeatherInertia.Name' },
     [SETTINGS.WEATHER_HISTORY_DAYS]: { tab: 'weather', label: 'CALENDARIA.Settings.WeatherHistoryDays.Name' },

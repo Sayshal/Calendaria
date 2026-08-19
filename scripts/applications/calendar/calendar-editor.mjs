@@ -554,11 +554,11 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     context.erasWithNav = erasArr.map(([key, era]) => ({ ...era, key }));
     const basedOnOptions = [
       { value: 'year', label: 'CALENDARIA.Editor.Cycle.BasedOn.Year' },
-      { value: 'eraYear', label: 'CALENDARIA.Condition.Field.eraYear' },
+      { value: 'eraYear', label: 'CALENDARIA.Condition.Field.EraYear' },
       { value: 'month', label: 'CALENDARIA.Common.Month' },
       { value: 'monthDay', label: 'CALENDARIA.Editor.Cycle.BasedOn.MonthDay' },
       { value: 'day', label: 'CALENDARIA.Editor.Cycle.BasedOn.Day' },
-      { value: 'yearDay', label: 'CALENDARIA.Condition.Field.dayOfYear' }
+      { value: 'yearDay', label: 'CALENDARIA.Condition.Field.DayOfYear' }
     ];
     const cyclesArr = Object.entries(this.#calendarData.cycles || {});
     context.cyclesWithNav = cyclesArr.map(([cycleKey, cycle], idx) => {

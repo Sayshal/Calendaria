@@ -60,7 +60,7 @@ export class SetDateDialog extends HandlebarsApplicationMixin(ApplicationV2) {
       const daysInYear = calendar?.getDaysInYear?.(displayYear) ?? 365;
       context.days = Array.from({ length: daysInYear }, (_, i) => i + 1);
       context.currentDay = (components.dayOfMonth ?? 0) + 1;
-      context.dayLabel = _loc('CALENDARIA.Condition.Field.dayOfYear');
+      context.dayLabel = _loc('CALENDARIA.Condition.Field.DayOfYear');
     } else {
       const daysInMonth = calendar?.getDaysInMonth?.(components.month, displayYear) ?? 30;
       context.days = Array.from({ length: daysInMonth }, (_, i) => i + 1);

@@ -156,8 +156,8 @@ export class TokenReferenceDialog extends HandlebarsApplicationMixin(Application
       const stopwatchGroup = groups.find((g) => g.id === 'stopwatch');
       stopwatchGroup.tokens = [
         { token: 'HH', description: _loc('CALENDARIA.TokenReference.Stopwatch.HH'), highlighted: this.#contextType === 'stopwatch', isCustom: false },
-        { token: 'mm', description: _loc('CALENDARIA.TokenReference.Stopwatch.mm'), highlighted: this.#contextType === 'stopwatch', isCustom: false },
-        { token: 'ss', description: _loc('CALENDARIA.TokenReference.Stopwatch.ss'), highlighted: this.#contextType === 'stopwatch', isCustom: false },
+        { token: 'mm', description: _loc('CALENDARIA.TokenReference.Stopwatch.Mm'), highlighted: this.#contextType === 'stopwatch', isCustom: false },
+        { token: 'ss', description: _loc('CALENDARIA.TokenReference.Stopwatch.Ss'), highlighted: this.#contextType === 'stopwatch', isCustom: false },
         { token: 'SSS', description: _loc('CALENDARIA.TokenReference.Stopwatch.SSS'), highlighted: this.#contextType === 'stopwatch', isCustom: false }
       ];
     }
