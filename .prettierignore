@@ -1,6 +1,0 @@
-**/*.hbs
-**/*.handlebars
-/foundry
-/dnd5e
-/dist
-/todo
