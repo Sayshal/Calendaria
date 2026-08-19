@@ -73,7 +73,7 @@ export function patchBastionButton() {
     const bastionConfig = game.settings.get('dnd5e', 'bastionConfiguration');
     if (!bastionConfig?.enabled) return originalConfirmAdvance();
     if (TimeClock.locked) {
-      ui.notifications.warn(_loc('CALENDARIA.Bastion.ClockLocked'));
+      ui.notifications.warn('CALENDARIA.Bastion.ClockLocked', { localize: true });
       return;
     }
     const calendar = CalendarManager.getActiveCalendar();
@@ -83,7 +83,7 @@ export function patchBastionButton() {
       classes: ['calendaria'],
       content: `<p>${_loc('CALENDARIA.Bastion.AdvanceConfirm', { days: duration })}</p>`,
       rejectClose: false,
-      window: { icon: 'fa-solid fa-chess-rook', title: _loc('CALENDARIA.Bastion.AdvanceTitle') }
+      window: { icon: 'fa-solid fa-chess-rook', title: 'CALENDARIA.Bastion.AdvanceTitle' }
     });
     if (!proceed) return;
     const secondsPerDay = getSecondsPerDay(calendar);

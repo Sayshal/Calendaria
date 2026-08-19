@@ -373,11 +373,11 @@ export default class ReminderScheduler {
     const icon = this.#getIconHtml(note);
     const result = await foundry.applications.api.DialogV2.wait({
       classes: ['calendaria'],
-      window: { title: _loc('CALENDARIA.Reminder.Title'), icon: 'fas fa-bell' },
+      window: { title: 'CALENDARIA.Reminder.Title', icon: 'fas fa-bell' },
       content: `<p>${icon} ${message}</p>`,
       buttons: [
-        { action: 'open', label: _loc('CALENDARIA.Common.OpenNote'), icon: 'fas fa-book-open', callback: () => 'open' },
-        { action: 'dismiss', label: _loc('CALENDARIA.Reminder.Dismiss'), icon: 'fas fa-times', default: true, callback: () => 'dismiss' }
+        { action: 'open', label: 'CALENDARIA.Common.OpenNote', icon: 'fas fa-book-open', callback: () => 'open' },
+        { action: 'dismiss', label: 'CALENDARIA.Reminder.Dismiss', icon: 'fas fa-times', default: true, callback: () => 'dismiss' }
       ],
       rejectClose: false
     });
@@ -445,19 +445,19 @@ export default class ReminderScheduler {
     } else if (data.type === 'dialog') {
       foundry.applications.api.DialogV2.wait({
         classes: ['calendaria'],
-        window: { title: _loc('CALENDARIA.Reminder.Title'), icon: 'fas fa-bell' },
+        window: { title: 'CALENDARIA.Reminder.Title', icon: 'fas fa-bell' },
         content: `<p>${iconHtml} ${data.message}</p>`,
         buttons: [
           {
             action: 'open',
-            label: _loc('CALENDARIA.Common.OpenNote'),
+            label: 'CALENDARIA.Common.OpenNote',
             icon: 'fas fa-book-open',
             callback: () => {
               const page = NoteManager.getFullNote(data.noteId);
               if (page) page.sheet.render(true, { mode: 'view' });
             }
           },
-          { action: 'dismiss', label: _loc('CALENDARIA.Reminder.Dismiss'), icon: 'fas fa-times', default: true }
+          { action: 'dismiss', label: 'CALENDARIA.Reminder.Dismiss', icon: 'fas fa-times', default: true }
         ],
         rejectClose: false
       });

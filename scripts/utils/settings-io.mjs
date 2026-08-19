@@ -253,11 +253,11 @@ export async function exportSettings() {
   let dialogElement = null;
   const result = await foundry.applications.api.DialogV2.wait({
     classes: ['calendaria'],
-    window: { title: _loc('CALENDARIA.Common.ExportSettings') },
+    window: { title: 'CALENDARIA.Common.ExportSettings' },
     content,
     buttons: [
-      { action: 'export', label: _loc('CALENDARIA.Common.Export'), icon: 'fas fa-file-export', default: true },
-      { action: 'cancel', label: _loc('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' }
+      { action: 'export', label: 'CALENDARIA.Common.Export', icon: 'fas fa-file-export', default: true },
+      { action: 'cancel', label: 'CALENDARIA.Common.Cancel', icon: 'fas fa-times' }
     ],
     close: () => 'cancel',
     render: (_event, dialog) => {
@@ -358,11 +358,11 @@ export async function importSettings(onComplete) {
       let dialogElement = null;
       const result = await foundry.applications.api.DialogV2.wait({
         classes: ['calendaria'],
-        window: { title: _loc('CALENDARIA.Common.ImportSettings') },
+        window: { title: 'CALENDARIA.Common.ImportSettings' },
         content,
         buttons: [
-          { action: 'import', label: _loc('CALENDARIA.Common.Import'), icon: 'fas fa-file-import', default: true },
-          { action: 'cancel', label: _loc('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' }
+          { action: 'import', label: 'CALENDARIA.Common.Import', icon: 'fas fa-file-import', default: true },
+          { action: 'cancel', label: 'CALENDARIA.Common.Cancel', icon: 'fas fa-times' }
         ],
         close: () => 'cancel',
         render: (_event, dialog) => {

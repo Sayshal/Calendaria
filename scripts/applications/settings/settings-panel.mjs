@@ -1862,10 +1862,10 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         await game.settings.set(MODULE.ID, SETTINGS.ACTIVE_CALENDAR, data.activeCalendar);
         const confirmed = await foundry.applications.api.DialogV2.confirm({
           classes: ['calendaria'],
-          window: { title: _loc('CALENDARIA.SettingsPanel.ReloadRequired.Title') },
+          window: { title: 'CALENDARIA.SettingsPanel.ReloadRequired.Title' },
           content: `<p>${_loc('CALENDARIA.SettingsPanel.ReloadRequired.Content')}</p>`,
-          yes: { label: _loc('CALENDARIA.SettingsPanel.ReloadRequired.Reload') },
-          no: { label: _loc('CALENDARIA.SettingsPanel.ReloadRequired.Later') },
+          yes: { label: 'CALENDARIA.SettingsPanel.ReloadRequired.Reload' },
+          no: { label: 'CALENDARIA.SettingsPanel.ReloadRequired.Later' },
           rejectClose: false
         });
         if (confirmed) foundry.utils.debouncedReload();
@@ -2326,10 +2326,10 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     const listHtml = settingLabels.map((label) => `<li>${label}</li>`).join('');
     const confirmed = await foundry.applications.api.DialogV2.confirm({
       classes: ['calendaria'],
-      window: { title: _loc('CALENDARIA.SettingsPanel.ResetSection.Title'), contentClasses: ['calendaria', 'reset-section-dialog'] },
+      window: { title: 'CALENDARIA.SettingsPanel.ResetSection.Title', contentClasses: ['calendaria', 'reset-section-dialog'] },
       content: `<p>${_loc('CALENDARIA.SettingsPanel.ResetSection.Content')}</p><ul class="reset-list">${listHtml}</ul>`,
-      yes: { label: _loc('CALENDARIA.Common.Reset'), icon: 'fas fa-undo' },
-      no: { label: _loc('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' },
+      yes: { label: 'CALENDARIA.Common.Reset', icon: 'fas fa-undo' },
+      no: { label: 'CALENDARIA.Common.Cancel', icon: 'fas fa-times' },
       rejectClose: false
     });
     if (!confirmed) return;
@@ -2349,10 +2349,10 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   static async #onResetFogOfWar() {
     const confirmed = await foundry.applications.api.DialogV2.confirm({
       classes: ['calendaria'],
-      window: { title: _loc('CALENDARIA.Settings.FogOfWar.ResetRanges') },
+      window: { title: 'CALENDARIA.Settings.FogOfWar.ResetRanges' },
       content: `<p>${_loc('CALENDARIA.Settings.FogOfWar.ResetRangesConfirm')}</p>`,
-      yes: { label: _loc('CALENDARIA.Common.Reset'), icon: 'fas fa-undo' },
-      no: { label: _loc('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' },
+      yes: { label: 'CALENDARIA.Common.Reset', icon: 'fas fa-undo' },
+      no: { label: 'CALENDARIA.Common.Cancel', icon: 'fas fa-times' },
       rejectClose: false
     });
     if (!confirmed) return;
@@ -2376,7 +2376,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       }
     }
     await game.settings.set(MODULE.ID, SETTINGS.FOG_OF_WAR_RANGES, newRanges);
-    ui.notifications.info(_loc('CALENDARIA.Settings.FogOfWar.ResetRangesDone'));
+    ui.notifications.info('CALENDARIA.Settings.FogOfWar.ResetRangesDone', { localize: true });
   }
 
   /**
@@ -2638,13 +2638,13 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   static async #onRegenerateAllWeather() {
     const confirmed = await foundry.applications.api.DialogV2.confirm({
       classes: ['calendaria'],
-      window: { title: _loc('CALENDARIA.Settings.RegenerateWeather.Name') },
+      window: { title: 'CALENDARIA.Settings.RegenerateWeather.Name' },
       content: `<p>${_loc('CALENDARIA.Settings.RegenerateWeather.Confirm')}</p>`,
       rejectClose: false
     });
     if (!confirmed) return;
     await WeatherManager.regenerateAllWeather();
-    ui.notifications.info(_loc('CALENDARIA.Settings.RegenerateWeather.Done'));
+    ui.notifications.info('CALENDARIA.Settings.RegenerateWeather.Done', { localize: true });
   }
 
   /**

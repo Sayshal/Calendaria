@@ -842,12 +842,12 @@ export default class NoteManager {
     </div>`;
     const result = await foundry.applications.api.DialogV2.wait({
       classes: ['calendaria'],
-      window: { title: _loc('CALENDARIA.PresetDialog.Title') },
+      window: { title: 'CALENDARIA.PresetDialog.Title' },
       content: html,
       buttons: [
         {
           action: 'ok',
-          label: _loc('CALENDARIA.Common.Confirm'),
+          label: 'CALENDARIA.Common.Confirm',
           icon: 'fas fa-check',
           default: true,
           callback: (_event, button) => {
@@ -864,7 +864,7 @@ export default class NoteManager {
         },
         {
           action: 'cancel',
-          label: _loc('CALENDARIA.Common.Cancel'),
+          label: 'CALENDARIA.Common.Cancel',
           icon: 'fas fa-times'
         }
       ],

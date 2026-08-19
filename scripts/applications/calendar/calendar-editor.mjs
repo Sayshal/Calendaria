@@ -312,10 +312,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     if (this.#isDirty) {
       const confirmed = await foundry.applications.api.DialogV2.confirm({
         classes: ['calendaria'],
-        window: { title: _loc('CALENDARIA.Editor.UnsavedChanges') },
+        window: { title: 'CALENDARIA.Editor.UnsavedChanges' },
         content: `<p>${_loc('CALENDARIA.Editor.UnsavedChangesMessage')}</p>`,
-        yes: { label: _loc('CALENDARIA.Editor.DiscardChanges'), icon: 'fas fa-trash' },
-        no: { label: _loc('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' },
+        yes: { label: 'CALENDARIA.Editor.DiscardChanges', icon: 'fas fa-trash' },
+        no: { label: 'CALENDARIA.Common.Cancel', icon: 'fas fa-times' },
         rejectClose: false
       });
       if (!confirmed) throw new Error('Close cancelled by user. This is not a bug.');
@@ -336,10 +336,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!this.#isDirty) return true;
     return foundry.applications.api.DialogV2.confirm({
       classes: ['calendaria'],
-      window: { title: _loc('CALENDARIA.Editor.UnsavedChanges') },
+      window: { title: 'CALENDARIA.Editor.UnsavedChanges' },
       content: `<p>${_loc('CALENDARIA.Editor.UnsavedChangesMessage')}</p>`,
-      yes: { label: _loc('CALENDARIA.Editor.DiscardChanges'), icon: 'fas fa-trash' },
-      no: { label: _loc('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' },
+      yes: { label: 'CALENDARIA.Editor.DiscardChanges', icon: 'fas fa-trash' },
+      no: { label: 'CALENDARIA.Common.Cancel', icon: 'fas fa-times' },
       rejectClose: false
     });
   }
@@ -1538,7 +1538,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       buttons: [
         {
           action: 'disable',
-          label: _loc('CALENDARIA.Common.Reset'),
+          label: 'CALENDARIA.Common.Reset',
           icon: 'fas fa-undo',
           callback: () => {
             delete month.weekdays;
@@ -1548,7 +1548,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         },
         {
           action: 'save',
-          label: _loc('CALENDARIA.Common.Save'),
+          label: 'CALENDARIA.Common.Save',
           icon: 'fas fa-save',
           default: true,
           callback: (_event, _button, dialog) => {
@@ -1724,7 +1724,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       buttons: [
         {
           action: 'reset',
-          label: _loc('CALENDARIA.Common.Reset'),
+          label: 'CALENDARIA.Common.Reset',
           icon: 'fas fa-undo',
           callback: () => {
             season.icon = savedIcon;
@@ -1735,7 +1735,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         },
         {
           action: 'save',
-          label: _loc('CALENDARIA.Common.Save'),
+          label: 'CALENDARIA.Common.Save',
           icon: 'fas fa-save',
           default: true,
           callback: (_event, _button, dialog) => {
@@ -1876,7 +1876,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!this.#calendarId) return;
     const confirmed = await foundry.applications.api.DialogV2.confirm({
       classes: ['calendaria'],
-      window: { title: _loc('CALENDARIA.Editor.Festival.ResetTitle') },
+      window: { title: 'CALENDARIA.Editor.Festival.ResetTitle' },
       content: `<p>${_loc('CALENDARIA.Editor.Festival.ResetConfirm')}</p>`,
       rejectClose: false,
       modal: true
@@ -1925,7 +1925,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const moon = this.#calendarData.moons[key];
     const confirmed = await foundry.applications.api.DialogV2.confirm({
       classes: ['calendaria'],
-      window: { title: _loc('CALENDARIA.Editor.RemoveMoonTitle') },
+      window: { title: 'CALENDARIA.Editor.RemoveMoonTitle' },
       content: `<p>${_loc('CALENDARIA.Editor.RemoveMoonContent', { name: _loc(moon?.name ?? '') })}</p>`,
       rejectClose: false
     });
@@ -2292,7 +2292,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     `;
     const result = await foundry.applications.api.DialogV2.prompt({
       classes: ['calendaria'],
-      window: { title: _loc('CALENDARIA.Editor.Weather.Zone.Add') },
+      window: { title: 'CALENDARIA.Editor.Weather.Zone.Add' },
       content,
       ok: {
         callback: (_event, button, _dialog) => {
@@ -2415,7 +2415,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!zone) return;
     const confirm = await foundry.applications.api.DialogV2.confirm({
       classes: ['calendaria'],
-      window: { title: _loc('CALENDARIA.Editor.Weather.Zone.Delete') },
+      window: { title: 'CALENDARIA.Editor.Weather.Zone.Delete' },
       content: `<p>${_loc('CALENDARIA.Editor.Weather.Zone.DeleteConfirm', { name: zone.name })}</p>`,
       rejectClose: false
     });
@@ -2594,10 +2594,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     return new Promise((resolve) => {
       foundry.applications.api.DialogV2.prompt({
         classes: ['calendaria'],
-        window: { title: _loc('CALENDARIA.Common.Save') },
+        window: { title: 'CALENDARIA.Common.Save' },
         content,
         ok: {
-          label: _loc('CALENDARIA.Common.Save'),
+          label: 'CALENDARIA.Common.Save',
           icon: 'fas fa-save',
           callback: (_event, button, _dialog) => {
             const setActive = isGM ? (button.form.elements.setActive?.checked ?? false) : false;
@@ -2684,10 +2684,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   static async #onResetCalendar(_event, _target) {
     const confirmed = await foundry.applications.api.DialogV2.confirm({
       classes: ['calendaria'],
-      window: { title: _loc('CALENDARIA.Common.Reset') },
+      window: { title: 'CALENDARIA.Common.Reset' },
       content: `<p>${_loc('CALENDARIA.Editor.ConfirmReset')}</p>`,
-      yes: { label: _loc('CALENDARIA.Common.Reset'), icon: 'fas fa-undo' },
-      no: { label: _loc('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' },
+      yes: { label: 'CALENDARIA.Common.Reset', icon: 'fas fa-undo' },
+      no: { label: 'CALENDARIA.Common.Cancel', icon: 'fas fa-times' },
       rejectClose: false
     });
     if (confirmed) {
@@ -2717,10 +2717,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!isCustom && hasOverride) {
       const confirmed = await foundry.applications.api.DialogV2.confirm({
         classes: ['calendaria'],
-        window: { title: _loc('CALENDARIA.Editor.ResetToDefault') },
+        window: { title: 'CALENDARIA.Editor.ResetToDefault' },
         content: `<p>${_loc('CALENDARIA.Editor.ConfirmResetToDefault')}</p>`,
-        yes: { label: _loc('CALENDARIA.Editor.ResetToDefault'), icon: 'fas fa-history', callback: () => true },
-        no: { label: _loc('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' },
+        yes: { label: 'CALENDARIA.Editor.ResetToDefault', icon: 'fas fa-history', callback: () => true },
+        no: { label: 'CALENDARIA.Common.Cancel', icon: 'fas fa-times' },
         rejectClose: false
       });
       if (!confirmed) return;
@@ -2735,10 +2735,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     const confirmed = await foundry.applications.api.DialogV2.confirm({
       classes: ['calendaria'],
-      window: { title: _loc('CALENDARIA.Common.DeleteCalendar') },
+      window: { title: 'CALENDARIA.Common.DeleteCalendar' },
       content: `<p>${_loc('CALENDARIA.Editor.ConfirmDelete', { name: this.#calendarData.name })}</p>`,
-      yes: { label: _loc('CALENDARIA.Common.DeleteCalendar'), icon: 'fas fa-trash', callback: () => true },
-      no: { label: _loc('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' },
+      yes: { label: 'CALENDARIA.Common.DeleteCalendar', icon: 'fas fa-trash', callback: () => true },
+      no: { label: 'CALENDARIA.Common.Cancel', icon: 'fas fa-times' },
       rejectClose: false
     });
     if (!confirmed) return;

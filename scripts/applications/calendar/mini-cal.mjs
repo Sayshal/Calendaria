@@ -1753,7 +1753,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       const dateStr = this._formatSelectedDate();
       const confirmed = await foundry.applications.api.DialogV2.confirm({
         classes: ['calendaria'],
-        window: { title: _loc('CALENDARIA.MiniCal.SetCurrentDate') },
+        window: { title: 'CALENDARIA.MiniCal.SetCurrentDate' },
         content: `<p>${_loc('CALENDARIA.MiniCal.SetCurrentDateConfirm', { date: dateStr })}</p>`,
         rejectClose: false,
         modal: true
@@ -1830,9 +1830,9 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const content = `<form><div class="form-group"><label>${_loc('CALENDARIA.Common.Calendar')}</label><select name="calendarId">${options}</select></div></form>`;
     const result = await foundry.applications.api.DialogV2.prompt({
       classes: ['calendaria'],
-      window: { title: _loc('CALENDARIA.MiniCal.SecondaryCalendar') },
+      window: { title: 'CALENDARIA.MiniCal.SecondaryCalendar' },
       content,
-      ok: { label: _loc('CALENDARIA.Common.Open'), callback: (_event, button) => button.form.elements.calendarId.value }
+      ok: { label: 'CALENDARIA.Common.Open', callback: (_event, button) => button.form.elements.calendarId.value }
     });
     if (result) SecondaryCalendar.open(result);
   }

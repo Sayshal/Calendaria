@@ -79,19 +79,19 @@ export function onChatMessage(_chatLog, message, _chatData) {
  */
 async function handleCommand(cmd, match) {
   const arg = match[1]?.trim() || '';
-  const noCalMsg = () => ui.notifications.warn(_loc('CALENDARIA.ChatCommand.NoCalendar'));
+  const noCalMsg = () => ui.notifications.warn('CALENDARIA.ChatCommand.NoCalendar', { localize: true });
   const handlers = {
     date: () => sendResult(cmdDate(arg), noCalMsg),
     time: () => sendResult(cmdTime(arg), noCalMsg),
     datetime: () => sendResult(cmdDateTime(arg), noCalMsg),
     note: async () => {
-      if (!arg) return ui.notifications.warn(_loc('CALENDARIA.ChatCommand.NoteTitleRequired'));
+      if (!arg) return ui.notifications.warn('CALENDARIA.ChatCommand.NoteTitleRequired', { localize: true });
       try {
         const result = await cmdNote(arg);
         if (!result) return noCalMsg();
-        ui.notifications.info(_loc('CALENDARIA.ChatCommand.NoteCreated'));
+        ui.notifications.info('CALENDARIA.ChatCommand.NoteCreated', { localize: true });
       } catch {
-        ui.notifications.error(_loc('CALENDARIA.ChatCommand.NoteError'));
+        ui.notifications.error('CALENDARIA.ChatCommand.NoteError', { localize: true });
       }
     },
     weather: () => {
@@ -106,50 +106,50 @@ async function handleCommand(cmd, match) {
     sunrise: () => sendResult(cmdSunrise(arg), noCalMsg),
     sunset: () => sendResult(cmdSunset(arg), noCalMsg),
     advance: async () => {
-      if (!canChangeDateTime()) return ui.notifications.warn(_loc('CALENDARIA.ChatCommand.NoPermission'));
+      if (!canChangeDateTime()) return ui.notifications.warn('CALENDARIA.ChatCommand.NoPermission', { localize: true });
       try {
         const result = await cmdAdvance(match[1]);
         if (!result) return noCalMsg();
         if (result.error) return ui.notifications.warn(result.content);
         if (result.content) ui.notifications.info(result.content);
       } catch {
-        ui.notifications.error(_loc('CALENDARIA.ChatCommand.AdvanceError'));
+        ui.notifications.error('CALENDARIA.ChatCommand.AdvanceError', { localize: true });
       }
     },
     setdate: async () => {
-      if (!canChangeDateTime()) return ui.notifications.warn(_loc('CALENDARIA.ChatCommand.NoPermission'));
+      if (!canChangeDateTime()) return ui.notifications.warn('CALENDARIA.ChatCommand.NoPermission', { localize: true });
       try {
         const result = await cmdSetDate(match[1]);
         if (!result) return noCalMsg();
         if (result.error) return ui.notifications.warn(result.content);
         if (result.content) ui.notifications.info(result.content);
       } catch {
-        ui.notifications.error(_loc('CALENDARIA.ChatCommand.SetDateError'));
+        ui.notifications.error('CALENDARIA.ChatCommand.SetDateError', { localize: true });
       }
     },
     settime: async () => {
-      if (!canChangeDateTime()) return ui.notifications.warn(_loc('CALENDARIA.ChatCommand.NoPermission'));
+      if (!canChangeDateTime()) return ui.notifications.warn('CALENDARIA.ChatCommand.NoPermission', { localize: true });
       try {
         const result = await cmdSetTime(match[1]);
         if (!result) return noCalMsg();
         if (result.error) return ui.notifications.warn(result.content);
         if (result.content) ui.notifications.info(result.content);
       } catch {
-        ui.notifications.error(_loc('CALENDARIA.ChatCommand.SetTimeError'));
+        ui.notifications.error('CALENDARIA.ChatCommand.SetTimeError', { localize: true });
       }
     },
     calendar: () => sendResult(cmdCalendar(), noCalMsg),
     calendars: () => sendResult(cmdCalendars()),
     switchcal: async () => {
-      if (!canChangeActiveCalendar()) return ui.notifications.warn(_loc('CALENDARIA.ChatCommand.NoPermission'));
+      if (!canChangeActiveCalendar()) return ui.notifications.warn('CALENDARIA.ChatCommand.NoPermission', { localize: true });
       const calendarId = match[1]?.trim();
-      if (!calendarId) return ui.notifications.warn(_loc('CALENDARIA.ChatCommand.CalendarIdRequired'));
+      if (!calendarId) return ui.notifications.warn('CALENDARIA.ChatCommand.CalendarIdRequired', { localize: true });
       try {
         const result = await cmdSwitchCal(calendarId);
-        if (!result) return ui.notifications.warn(_loc('CALENDARIA.ChatCommand.CalendarNotFound'));
+        if (!result) return ui.notifications.warn('CALENDARIA.ChatCommand.CalendarNotFound', { localize: true });
         if (result.content) ui.notifications.info(result.content);
       } catch {
-        ui.notifications.error(_loc('CALENDARIA.ChatCommand.SwitchCalError'));
+        ui.notifications.error('CALENDARIA.ChatCommand.SwitchCalError', { localize: true });
       }
     },
     festival: () => sendResult(cmdFestival(), noCalMsg),

@@ -784,7 +784,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     `;
     const result = await foundry.applications.api.DialogV2.wait({
       classes: ['calendaria'],
-      window: { title: _loc('CALENDARIA.Stopwatch.ConfigureNotification'), icon: 'fas fa-bell' },
+      window: { title: 'CALENDARIA.Stopwatch.ConfigureNotification', icon: 'fas fa-bell' },
       content,
       render: (_event, dialog) => {
         const form = dialog.element.querySelector('form');
@@ -803,7 +803,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
       buttons: [
         {
           action: 'save',
-          label: _loc('CALENDARIA.Common.Save'),
+          label: 'CALENDARIA.Common.Save',
           icon: 'fas fa-save',
           callback: (_event, _button, dialog) => {
             const form = dialog.element.querySelector('form');
@@ -815,7 +815,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
         },
         {
           action: 'clear',
-          label: _loc('CALENDARIA.Common.ClearAction'),
+          label: 'CALENDARIA.Common.ClearAction',
           icon: 'fas fa-times',
           callback: () => ({ threshold: null, type: null, sound: null })
         }

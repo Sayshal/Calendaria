@@ -434,7 +434,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!presetId) return;
     const confirmed = await foundry.applications.api.DialogV2.confirm({
       classes: ['calendaria'],
-      window: { title: _loc('CALENDARIA.Common.Delete') },
+      window: { title: 'CALENDARIA.Common.Delete' },
       content: `<p>${_loc('CALENDARIA.WeatherEditor.DeleteConfirm')}</p>`,
       rejectClose: false
     });
@@ -453,7 +453,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const allOverrides = game.settings.get(MODULE.ID, SETTINGS.WEATHER_VISUAL_OVERRIDES) || {};
     delete allOverrides[presetId];
     await game.settings.set(MODULE.ID, SETTINGS.WEATHER_VISUAL_OVERRIDES, allOverrides);
-    ui.notifications.info(_loc('CALENDARIA.WeatherEditor.VisualsReset'));
+    ui.notifications.info('CALENDARIA.WeatherEditor.VisualsReset', { localize: true });
     this.render({ parts: [presetId] });
   }
 
