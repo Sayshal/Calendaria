@@ -7,12 +7,14 @@ import { refreshEnvironmentLighting } from './time/darkness.mjs';
 import { hideDebugZones, showDebugZones } from './utils/_module.mjs';
 import { invalidateCache as invalidateFogCache } from './utils/fog-of-war.mjs';
 import { FRAMEWORK_INITIAL_DISPLAY_FORMATS } from './utils/formatting/format-utils.mjs';
+import { refreshWeatherSound } from './weather/weather-sound.mjs';
 
 const { ArrayField, ObjectField, BooleanField, NumberField, SetField, StringField } = foundry.data.fields;
 const renderMiniCal = () => foundry.applications.instances.get('calendaria-mini-cal')?.render();
 const renderBigCal = () => foundry.applications.instances.get('calendaria-big-cal')?.render();
 const renderHUD = () => foundry.applications.instances.get('calendaria-hud')?.render();
 const renderHUDBar = () => foundry.applications.instances.get('calendaria-hud')?.render({ parts: ['bar'] });
+const refreshWeatherSoundDebounced = foundry.utils.debounce(refreshWeatherSound, 250);
 
 /**
  * Static class encapsulating all Calendaria module settings.
@@ -1427,14 +1429,16 @@ export default class CalendariaSettings {
         hint: 'CALENDARIA.Settings.Weather.SoundFx.Hint',
         scope: 'world',
         config: false,
-        type: new BooleanField({ initial: false })
+        type: new BooleanField({ initial: false }),
+        onChange: () => refreshWeatherSound()
       },
       [SETTINGS.WEATHER_SOUND_VOLUME]: {
         name: 'CALENDARIA.Settings.Weather.SoundVolume.Name',
         hint: 'CALENDARIA.Settings.Weather.SoundVolume.Hint',
         scope: 'world',
         config: false,
-        type: new NumberField({ initial: 0.5, min: 0, max: 1, step: 0.05 })
+        type: new NumberField({ initial: 0.5, min: 0, max: 1, step: 0.05 }),
+        onChange: () => refreshWeatherSoundDebounced()
       },
       [SETTINGS.WEATHER_SUPPRESS_MUFFLE]: {
         name: 'CALENDARIA.Settings.Weather.SuppressMuffle.Name',

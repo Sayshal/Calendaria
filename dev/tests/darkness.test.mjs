@@ -23,8 +23,7 @@ vi.mock('../../scripts/constants.mjs', async (importOriginal) => ({
     BRIGHTNESS_MULTIPLIER: 'brightnessMultiplier',
     DARKNESS_SYNC: 'darknessSync',
     HUD_HIDE_FOR_PLAYERS: 'hudHideForPlayers',
-    CLIMATE_ZONE_OVERRIDE: 'climateZoneOverride',
-    WEATHER_FX_DISABLED: 'weatherFxDisabled'
+    CLIMATE_ZONE_OVERRIDE: 'climateZoneOverride'
   },
   SOCKET_TYPES: { HUD_VISIBILITY: 'hudVisibility' }
 }));

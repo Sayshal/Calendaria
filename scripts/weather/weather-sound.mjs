@@ -43,10 +43,7 @@ export function initializeWeatherSound() {
   Hooks.on('refreshToken', onRefreshToken);
   rebuildSuppressRegions();
   rebuildOwnedTokens();
-  if (!isSoundDisabledForScene(canvas?.scene)) {
-    const weather = WeatherManager.getCurrentWeather();
-    playSound(weather || null);
-  }
+  playSound(WeatherManager.getCurrentWeather() || null);
   ATLAS.log(3, 'WeatherSound initialized');
 }
 
@@ -85,6 +82,16 @@ function isInsideSuppressWeatherRegion() {
 }
 
 /**
+ * Resolve the target playback volume, muffled while a relevant token sits in a suppress-weather region.
+ * @returns {number} Volume in the 0-1 range
+ */
+function targetVolume() {
+  const baseVolume = game.settings.get(MODULE.ID, SETTINGS.WEATHER_SOUND_VOLUME) ?? 0.5;
+  const muffle = game.settings.get(MODULE.ID, SETTINGS.WEATHER_SUPPRESS_MUFFLE) ?? 0;
+  return suppressedByRegion ? baseVolume * muffle : baseVolume;
+}
+
+/**
  * Refresh suppression state and fade the active sound to/from silence when it changes.
  */
 function applyRegionSuppression() {
@@ -92,9 +99,7 @@ function applyRegionSuppression() {
   const next = isInsideSuppressWeatherRegion();
   if (next === suppressedByRegion) return;
   suppressedByRegion = next;
-  const baseVolume = game.settings.get(MODULE.ID, SETTINGS.WEATHER_SOUND_VOLUME) ?? 0.5;
-  const muffle = game.settings.get(MODULE.ID, SETTINGS.WEATHER_SUPPRESS_MUFFLE) ?? 0;
-  activeSound.fade(next ? baseVolume * muffle : baseVolume, { duration: FADE_MS });
+  activeSound.fade(targetVolume(), { duration: FADE_MS });
 }
 
 /**
@@ -110,31 +115,19 @@ function onRefreshToken(token) {
 }
 
 /**
- * On scene update, re-sync sound if the weather disable flag changed or scene activated.
+ * On scene update, re-sync sound if the weather sound flag changed or scene activated.
  * @param {object} scene - Updated scene document
  * @param {object} change - Change data
  */
 function onSceneUpdate(scene, change) {
   if (change.active) {
-    if (isSoundDisabledForScene(scene)) {
-      stopSound();
-    } else {
-      const weather = WeatherManager.getCurrentWeather(null, scene);
-      playSound(weather || null);
-    }
+    playSound(WeatherManager.getCurrentWeather(null, scene) || null);
     return;
   }
   if (scene !== canvas?.scene) return;
-  const flat = foundry.utils.flattenObject(change);
-  const fxKey = `flags.${MODULE.ID}.${SCENE_FLAGS.WEATHER_FX_DISABLED}`;
   const soundKey = `flags.${MODULE.ID}.${SCENE_FLAGS.WEATHER_SOUND_DISABLED}`;
-  if (!(fxKey in flat) && !(soundKey in flat)) return;
-  if (isSoundDisabledForScene(scene)) {
-    stopSound();
-  } else {
-    const weather = WeatherManager.getCurrentWeather();
-    playSound(weather || null);
-  }
+  if (!(soundKey in foundry.utils.flattenObject(change))) return;
+  playSound(WeatherManager.getCurrentWeather() || null);
 }
 
 /**
@@ -144,14 +137,8 @@ function onCanvasReady() {
   rebuildSuppressRegions();
   rebuildOwnedTokens();
   suppressedByRegion = false;
-  const scene = canvas?.scene;
-  if (!scene) return;
-  if (isSoundDisabledForScene(scene)) {
-    stopSound();
-    return;
-  }
-  const weather = WeatherManager.getCurrentWeather();
-  playSound(weather || null);
+  if (!canvas?.scene) return;
+  playSound(WeatherManager.getCurrentWeather() || null);
 }
 
 /**
@@ -163,17 +150,7 @@ function onCanvasReady() {
  */
 function onWeatherChange({ current, bulk, visualOnly } = {}) {
   if (visualOnly) return;
-  if (bulk) {
-    const weather = WeatherManager.getCurrentWeather();
-    playSound(weather || null);
-    return;
-  }
-  const scene = game.scenes?.active;
-  if (isSoundDisabledForScene(scene)) {
-    stopSound();
-    return;
-  }
-  playSound(current || null);
+  playSound((bulk ? WeatherManager.getCurrentWeather() : current) || null);
 }
 
 /**
@@ -189,13 +166,13 @@ async function fadeOutAndStop(sound) {
 }
 
 /**
- * Check if weather sound is disabled for a scene (per-scene flag or FX disabled).
+ * Check if weather sound is disabled for a scene.
  * @param {object} [scene] - Scene document
  * @returns {boolean} Whether sound is disabled
  */
 function isSoundDisabledForScene(scene) {
   if (!scene) return false;
-  return scene.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_SOUND_DISABLED) || scene.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_OVERRIDE) === 'off';
+  return Boolean(scene.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_SOUND_DISABLED));
 }
 
 /**
@@ -203,7 +180,7 @@ function isSoundDisabledForScene(scene) {
  * @param {object|null} weather - Current weather state
  */
 async function playSound(weather) {
-  if (!game.settings.get(MODULE.ID, SETTINGS.WEATHER_SOUND_FX)) {
+  if (!game.settings.get(MODULE.ID, SETTINGS.WEATHER_SOUND_FX) || isSoundDisabledForScene(canvas?.scene)) {
     stopSound();
     return;
   }
@@ -221,10 +198,8 @@ async function playSound(weather) {
   if (!src) return;
   try {
     const sound = await game.audio.play(src, { loop: true, volume: 0, context: game.audio.environment });
-    const baseVolume = game.settings.get(MODULE.ID, SETTINGS.WEATHER_SOUND_VOLUME) ?? 0.5;
-    const muffle = game.settings.get(MODULE.ID, SETTINGS.WEATHER_SUPPRESS_MUFFLE) ?? 0;
     suppressedByRegion = isInsideSuppressWeatherRegion();
-    sound.fade(suppressedByRegion ? baseVolume * muffle : baseVolume, { duration: FADE_MS });
+    sound.fade(targetVolume(), { duration: FADE_MS });
     activeSound = sound;
     activeSoundKey = src;
     ATLAS.log(3, `Playing "${src}"${suppressedByRegion ? ' (suppressed by region)' : ''}`);
@@ -249,6 +224,12 @@ async function stopSound() {
       ATLAS.log(1, 'Weather sound stop failed:', error);
     }
   }
+}
+
+/** Re-apply the world sound settings to the current scene, starting, stopping, or re-levelling the ambience as needed. */
+export function refreshWeatherSound() {
+  if (activeSound) activeSound.fade(targetVolume(), { duration: FADE_MS });
+  playSound(WeatherManager.getCurrentWeather() || null);
 }
 
 /**
