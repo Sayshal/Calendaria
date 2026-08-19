@@ -842,8 +842,8 @@ export default class CalendariaSettings {
         onChange: renderHUD
       },
       [SETTINGS.HUD_STICKY_ZONES_ENABLED]: {
-        name: 'CALENDARIA.Settings.Name',
-        hint: 'CALENDARIA.Settings.Hint',
+        name: 'CALENDARIA.Settings.StickyZones.Name',
+        hint: 'CALENDARIA.Settings.StickyZones.Hint',
         scope: 'user',
         config: false,
         type: new BooleanField({ initial: true })
@@ -1488,7 +1488,7 @@ export default class CalendariaSettings {
         type: new ObjectField({ initial: { autoReveal: true, revealRadius: 0 } })
       },
       [SETTINGS.FOG_OF_WAR_NAV_MODE]: {
-        name: 'CALENDARIA.Settings.FogOfWar.NavMode',
+        name: 'CALENDARIA.Settings.FogOfWar.NavModeName',
         scope: 'world',
         config: false,
         type: new StringField({ choices: { skip: 'CALENDARIA.Settings.FogOfWar.NavModeSkip', normal: 'CALENDARIA.Settings.FogOfWar.NavModeNormal' }, initial: 'skip' })
