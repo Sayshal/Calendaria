@@ -784,6 +784,8 @@ export function generateDayTooltip(calendar, year, month, dayOfMonth, festival =
   };
   const rows = [];
   rows.push(`<div class="date"><strong>${escapeText(fullDate)}</strong></div>`);
+  const namedDay = calendar.getCurrentDayName?.(internalComponents);
+  if (namedDay?.dayName) rows.push(`<div class="named-day">${escapeText(namedDay.dayName)}</div>`);
   if (festival?.name) {
     const colorStyle = festival.color ? ` style="color: ${festival.color}"` : '';
     const prefix = festival.position ? `${_loc(`CALENDARIA.Note.Festival.${festival.position === 'starting' ? 'Starting' : 'Ending'}`)}: ` : '';

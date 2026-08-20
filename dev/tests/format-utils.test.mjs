@@ -440,6 +440,47 @@ describe('dateFormattingParts()', () => {
     });
   });
 
+  describe('Named day tokens', () => {
+    it('returns named day when getCurrentDayName is available', () => {
+      const dayCal = addCalendarGetters({ ...mockCalendar, getCurrentDayName: () => ({ dayName: 'Midsummer', dayAbbr: 'Mid' }) });
+      const parts = dateFormattingParts(dayCal, components);
+      expect(parts.namedDay).toBe('Midsummer');
+      expect(parts.namedDayAbbr).toBe('Mid');
+    });
+    it('abbreviates named day if no dayAbbr', () => {
+      const dayCal = addCalendarGetters({ ...mockCalendar, getCurrentDayName: () => ({ dayName: 'Jeseses' }) });
+      const parts = dateFormattingParts(dayCal, components);
+      expect(parts.namedDayAbbr).toBe('Jes');
+    });
+    it('resolves days.names by day number on plain-object calendars', () => {
+      const dayCal = addCalendarGetters({ ...mockCalendar, days: { ...mockCalendar.days, names: [{ name: 'Fifteenth', abbreviation: 'XV', dayNumber: 15 }] } });
+      const parts = dateFormattingParts(dayCal, components);
+      expect(parts.namedDay).toBe('Fifteenth');
+      expect(parts.namedDayAbbr).toBe('XV');
+    });
+    it('returns empty string when no day number matches and nameRepeat is off', () => {
+      const dayCal = addCalendarGetters({ ...mockCalendar, days: { ...mockCalendar.days, names: [{ name: 'First', dayNumber: 1 }] } });
+      const parts = dateFormattingParts(dayCal, components);
+      expect(parts.namedDay).toBe('');
+    });
+    it('cycles day names past the last day number when nameRepeat is on', () => {
+      const names = [1, 2, 3, 4, 5].map((n) => ({ name: `Day${n}`, dayNumber: n }));
+      const dayCal = addCalendarGetters({ ...mockCalendar, days: { ...mockCalendar.days, names, nameRepeat: true } });
+      const parts = dateFormattingParts(dayCal, components);
+      expect(parts.namedDay).toBe('Day5');
+    });
+    it('keys off day of month in month-based mode', () => {
+      const dayCal = addCalendarGetters({ ...mockCalendar, days: { ...mockCalendar.days, names: [{ name: 'Second', dayNumber: 2 }], nameMode: 'month-based' } });
+      const parts = dateFormattingParts(dayCal, { ...components, month: 2, dayOfMonth: 1 });
+      expect(parts.namedDay).toBe('Second');
+    });
+    it('returns empty string when no day names are defined', () => {
+      const parts = dateFormattingParts(mockCalendar, components);
+      expect(parts.namedDay).toBe('');
+      expect(parts.namedDayAbbr).toBe('');
+    });
+  });
+
   describe('Year name tokens', () => {
     it('returns year name when matching', () => {
       const yearNameCal = addCalendarGetters({ ...mockCalendar, years: { ...mockCalendar.years, names: [{ year: 2024, name: 'Year of the Dragon' }] } });

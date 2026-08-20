@@ -119,6 +119,11 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     return this.weeks?.names ? Object.values(this.weeks.names) : [];
   }
 
+  /** @returns {Array<object>} Named days in calendar order (from keyed `days.names` collection) */
+  get namedDaysArray() {
+    return this.days?.names ? Object.values(this.days.names) : [];
+  }
+
   /** @returns {Array<object>} Weather zones in calendar order (from keyed `weather.zones` collection) */
   get weatherZonesArray() {
     return this.weather?.zones ? Object.values(this.weather.zones) : [];
@@ -239,6 +244,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     if (source.seasons?.values && Array.isArray(source.seasons.values)) source.seasons.values = convert(source.seasons.values);
     if (source.weather?.zones && Array.isArray(source.weather.zones)) source.weather.zones = convert(source.weather.zones);
     if (source.weeks?.names && Array.isArray(source.weeks.names)) source.weeks.names = convert(source.weeks.names);
+    if (source.days?.names && Array.isArray(source.days.names)) source.days.names = convert(source.days.names);
     const convertNested = (parent, key) => {
       if (!parent || typeof parent !== 'object') return;
       for (const item of Object.values(parent)) if (item && Array.isArray(item[key])) item[key] = convert(item[key]);
@@ -417,6 +423,11 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
             isRestDay: new BooleanField({ required: false, initial: false })
           })
         ),
+        names: new TypedObjectField(
+          new SchemaField({ name: new StringField({ required: true }), abbreviation: new StringField({ required: false }), dayNumber: new NumberField({ required: false, integer: true, min: 1 }) })
+        ),
+        nameMode: new StringField({ required: false, initial: 'year-based', choices: ['month-based', 'year-based'] }),
+        nameRepeat: new BooleanField({ required: false, initial: false }),
         daysPerYear: new NumberField({ required: false, integer: true, min: 1 }),
         hoursPerDay: new NumberField({ required: false, integer: true, min: 1 }),
         minutesPerHour: new NumberField({ required: false, integer: true, min: 1 }),
@@ -1732,6 +1743,33 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     const weekName = _loc(entry.name);
     const weekAbbr = entry.abbreviation ? _loc(entry.abbreviation) : weekName.slice(0, 3);
     return { weekName, weekAbbr, weekNumber, index: weekNumber - 1 };
+  }
+
+  /**
+   * Get the current named day for a given time.
+   * @param {number|object} [time] Time to use. Defaults to current world time.
+   * @returns {{dayName: string, dayAbbr: string, dayNumber: number, index: number}|null} Current named day, or null if none is defined for this date.
+   */
+  getCurrentDayName(time = game.time.worldTime) {
+    const dayNames = this.namedDaysArray;
+    if (!dayNames.length) return null;
+    const components = typeof time === 'number' ? this.timeToComponents(time) : time;
+    const mode = this.days?.nameMode || 'year-based';
+    const dayIndex = mode === 'month-based' ? (components.dayOfMonth ?? 0) : this._calculateDayOfYear(components);
+    let dayNumber = dayIndex + 1;
+    let entry = dayNames.find((d) => Number(d.dayNumber) === dayNumber);
+    if (!entry && this.days?.nameRepeat) {
+      const maxDayNumber = dayNames.reduce((max, d) => Math.max(max, Number(d.dayNumber) || 0), 0);
+      if (maxDayNumber > 0) {
+        const cycled = ((dayNumber - 1) % maxDayNumber) + 1;
+        entry = dayNames.find((d) => Number(d.dayNumber) === cycled);
+        if (entry) dayNumber = cycled;
+      }
+    }
+    if (!entry) return null;
+    const dayName = _loc(entry.name);
+    const dayAbbr = entry.abbreviation ? _loc(entry.abbreviation) : dayName.slice(0, 3);
+    return { dayName, dayAbbr, dayNumber, index: dayNumber - 1 };
   }
 
   /**

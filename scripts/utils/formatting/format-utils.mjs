@@ -155,6 +155,28 @@ export function dateFormattingParts(calendar, components) {
     namedWeek = currentWeek.weekName || '';
     namedWeekAbbr = currentWeek.weekAbbr || namedWeek.slice(0, 3);
   }
+  let namedDay = '';
+  let namedDayAbbr = '';
+  let currentDayName = null;
+  if (typeof calendar?.getCurrentDayName === 'function') {
+    currentDayName = calendar.getCurrentDayName({ year: internalYear, month, dayOfMonth });
+  } else {
+    const dayNames = resolveArray(calendar, 'namedDaysArray', 'days.names');
+    if (dayNames.length) {
+      const dayIndex = (calendar?.days?.nameMode || 'year-based') === 'month-based' ? dayOfMonth : dayOfYear;
+      let dayNumber = dayIndex + 1;
+      let entry = dayNames.find((d) => Number(d.dayNumber) === dayNumber);
+      if (!entry && calendar?.days?.nameRepeat) {
+        const maxDayNumber = dayNames.reduce((max, d) => Math.max(max, Number(d.dayNumber) || 0), 0);
+        if (maxDayNumber > 0) entry = dayNames.find((d) => Number(d.dayNumber) === ((dayNumber - 1) % maxDayNumber) + 1);
+      }
+      if (entry) currentDayName = { dayName: _loc(entry.name), dayAbbr: entry.abbreviation ? _loc(entry.abbreviation) : _loc(entry.name).slice(0, 3) };
+    }
+  }
+  if (currentDayName) {
+    namedDay = currentDayName.dayName || '';
+    namedDayAbbr = currentDayName.dayAbbr || namedDay.slice(0, 3);
+  }
   let climateZoneName = '';
   let climateZoneAbbr = '';
   const activeZone = calendar?.getActiveClimateZone?.();
@@ -191,6 +213,8 @@ export function dateFormattingParts(calendar, components) {
     W: weekOfMonth,
     namedWeek: namedWeek,
     namedWeekAbbr: namedWeekAbbr,
+    namedDay: namedDay,
+    namedDayAbbr: namedDayAbbr,
     H: hour,
     HH: String(hour).padStart(2, '0'),
     h: hour12,
@@ -433,6 +457,8 @@ export function formatCustom(calendar, components, formatStr) {
     seasonAbbr: parts.seasonAbbr,
     namedWeek: parts.namedWeek,
     namedWeekAbbr: parts.namedWeekAbbr,
+    namedDay: parts.namedDay,
+    namedDayAbbr: parts.namedDayAbbr,
     ch: getCanonicalHour(calendar, components),
     chAbbr: getCanonicalHourAbbr(calendar, components),
     cycle: cycleNum,
@@ -1156,6 +1182,8 @@ export function getAvailableTokens() {
     { token: 'W', descriptionKey: 'CALENDARIA.Format.Token.W', type: 'standard' },
     { token: '[namedWeek]', descriptionKey: 'CALENDARIA.Format.Token.namedWeek', type: 'custom' },
     { token: '[namedWeekAbbr]', descriptionKey: 'CALENDARIA.Format.Token.namedWeekAbbr', type: 'custom' },
+    { token: '[namedDay]', descriptionKey: 'CALENDARIA.Format.Token.namedDay', type: 'custom' },
+    { token: '[namedDayAbbr]', descriptionKey: 'CALENDARIA.Format.Token.namedDayAbbr', type: 'custom' },
     { token: 'GGGG', descriptionKey: 'CALENDARIA.Format.Token.GGGG', type: 'standard' },
     { token: 'GGG', descriptionKey: 'CALENDARIA.Common.FormatEraShort', type: 'standard' },
     { token: 'GG', descriptionKey: 'CALENDARIA.Common.FormatEraShort', type: 'standard' },

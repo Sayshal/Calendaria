@@ -167,6 +167,10 @@
       --list-columns: 2fr 1fr 5rem auto;
     }
 
+    .named-days-list {
+      --list-columns: 2fr 1fr 5rem auto;
+    }
+
     .week-cycle-list {
       --list-columns: 8rem repeat(var(--cycle-days, 7), minmax(1.75rem, 1fr)) auto;
 

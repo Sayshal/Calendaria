@@ -61,6 +61,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       removeCanonicalHour: CalendarEditor.#onRemoveCanonicalHour,
       addNamedWeek: CalendarEditor.#onAddNamedWeek,
       removeNamedWeek: CalendarEditor.#onRemoveNamedWeek,
+      addNamedDay: CalendarEditor.#onAddNamedDay,
+      removeNamedDay: CalendarEditor.#onRemoveNamedDay,
       addCycleRow: CalendarEditor.#onAddCycleRow,
       removeCycleRow: CalendarEditor.#onRemoveCycleRow,
       addNamedYear: CalendarEditor.#onAddNamedYear,
@@ -593,6 +595,20 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       return acc;
     }, {});
     context.namedWeeksWithNav = weekNamesArr.map(([key, week]) => ({ ...week, key, duplicateWeekNumber: weekNumberCounts[week.weekNumber] > 1 }));
+    const currentDayNameMode = this.#calendarData.days?.nameMode || 'year-based';
+    context.isDayNameYearBased = currentDayNameMode === 'year-based';
+    context.dayNameModeOptions = [
+      { value: 'year-based', label: 'CALENDARIA.Editor.WeeksType.YearBased', selected: currentDayNameMode === 'year-based' },
+      { value: 'month-based', label: 'CALENDARIA.Editor.WeeksType.MonthBased', selected: currentDayNameMode === 'month-based' }
+    ];
+    context.maxNamedDays = context.isDayNameYearBased ? context.calculatedDaysPerYear : Math.max(...monthsArr.map(([, m]) => m.days || 1), 1);
+    const dayNamesArr = Object.entries(this.#calendarData.days?.names || {});
+    for (let i = 0; i < dayNamesArr.length; i++) if (dayNamesArr[i][1].dayNumber == null) dayNamesArr[i][1].dayNumber = i + 1;
+    const dayNumberCounts = dayNamesArr.reduce((acc, [, d]) => {
+      acc[d.dayNumber] = (acc[d.dayNumber] || 0) + 1;
+      return acc;
+    }, {});
+    context.namedDaysWithNav = dayNamesArr.map(([key, day]) => ({ ...day, key, duplicateDayNumber: dayNumberCounts[day.dayNumber] > 1 }));
     const cycleRowsArr = Object.entries(this.#calendarData.weeks?.cycle || {});
     context.weekCycleWeekdays = daysArr.map(([, wd]) => wd.abbreviation || wd.name);
     context.weekCycleRows = cycleRowsArr.map(([key, row], idx) => ({
@@ -1401,6 +1417,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       newNames[wKey] = { name: data[`weeks.names.${wKey}.name`] || '', abbreviation: data[`weeks.names.${wKey}.abbreviation`] || '', weekNumber };
     }
     this.#calendarData.weeks.names = newNames;
+    this.#updateNamedDaysFromFormData(data);
     const cycleKeys = [];
     for (const key of Object.keys(data)) {
       const match = key.match(/^weeks\.cycle\.([^.]+)\.name$/);
@@ -2166,6 +2183,35 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
+   * Update named days from form data.
+   * @param {object} data - Form data
+   * @private
+   */
+  #updateNamedDaysFromFormData(data) {
+    if (!this.#calendarData.days) this.#calendarData.days = {};
+    this.#calendarData.days.nameMode = data['days.nameMode'] || 'year-based';
+    this.#calendarData.days.nameRepeat = !!data['days.nameRepeat'];
+    const dKeys = new Set();
+    for (const key of Object.keys(data)) {
+      const match = key.match(/^days\.names\.([^.]+)\./);
+      if (match) dKeys.add(match[1]);
+    }
+    const newNames = {};
+    const usedNumbers = new Set();
+    for (const dKey of dKeys) {
+      let dayNumber = parseInt(data[`days.names.${dKey}.dayNumber`]) || 1;
+      if (usedNumbers.has(dayNumber)) {
+        let next = dayNumber + 1;
+        while (usedNumbers.has(next)) next++;
+        dayNumber = next;
+      }
+      usedNumbers.add(dayNumber);
+      newNames[dKey] = { name: data[`days.names.${dKey}.name`] || '', abbreviation: data[`days.names.${dKey}.abbreviation`] || '', dayNumber };
+    }
+    this.#calendarData.days.names = newNames;
+  }
+
+  /**
    * Add a new named week.
    * @param {Event} _event - Click event
    * @param {HTMLElement} target - Target element
@@ -2200,6 +2246,45 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   static async #onRemoveNamedWeek(_event, target) {
     const key = target.dataset.key;
     delete this.#calendarData.weeks.names[key];
+    this.#isDirty = true;
+    this.render();
+  }
+
+  /**
+   * Add a new named day.
+   * @param {Event} _event - Click event
+   * @param {HTMLElement} target - Target element
+   */
+  static async #onAddNamedDay(_event, target) {
+    if (!this.#calendarData.days) this.#calendarData.days = {};
+    if (!this.#calendarData.days.names) this.#calendarData.days.names = {};
+    const afterKey = target.dataset.key;
+    const namesObj = this.#calendarData.days.names;
+    const totalDays = Object.keys(namesObj).length;
+    const existingNumbers = Object.values(namesObj)
+      .map((d) => d.dayNumber)
+      .filter((n) => n != null);
+    const maxExisting = existingNumbers.length ? Math.max(...existingNumbers) : 0;
+    const newKey = foundry.utils.randomID();
+    const newDay = {
+      name: _loc('CALENDARIA.Editor.Default.DayName', { num: totalDays + 1 }),
+      abbreviation: '',
+      dayNumber: maxExisting + 1
+    };
+    if (afterKey) this.#calendarData.days.names = this.#insertAfterKey(namesObj, afterKey, newKey, newDay);
+    else namesObj[newKey] = newDay;
+    this.#isDirty = true;
+    this.render();
+  }
+
+  /**
+   * Remove a named day.
+   * @param {Event} _event - Click event
+   * @param {HTMLElement} target - Target element
+   */
+  static async #onRemoveNamedDay(_event, target) {
+    const key = target.dataset.key;
+    delete this.#calendarData.days.names[key];
     this.#isDirty = true;
     this.render();
   }
