@@ -159,6 +159,7 @@ export default class WeatherManager {
   static async initialize() {
     if (this.#initialized) return;
     this.#currentWeatherByZone = game.settings.get(MODULE.ID, SETTINGS.CURRENT_WEATHER) || {};
+    // Rename the stale literal 'undefined' zone key written before zones were keyed. @since 0.10.2 — remove in 1.0.0
     if ('undefined' in this.#currentWeatherByZone) {
       this.#currentWeatherByZone[this.DEFAULT_ZONE] = this.#currentWeatherByZone['undefined'];
       delete this.#currentWeatherByZone['undefined'];
@@ -173,8 +174,8 @@ export default class WeatherManager {
     Hooks.on(HOOKS.SUNRISE, () => this.#onPeriodThreshold(WEATHER_PERIODS.MORNING.id));
     Hooks.on(HOOKS.MIDDAY, () => this.#onPeriodThreshold(WEATHER_PERIODS.AFTERNOON.id));
     Hooks.on(HOOKS.SUNSET, () => this.#onPeriodThreshold(WEATHER_PERIODS.EVENING.id));
-    if (ATLAS.isPrimaryGM && !game.settings.get(MODULE.ID, SETTINGS.WEATHER_DAY_INDEX_MIGRATED)) await this.#migrateWeatherDayIndex();
-    if (ATLAS.isPrimaryGM) await this.#migrateLegacySoundKeys();
+    if (ATLAS.isPrimaryGM) await this.#normalizeSoundFxPaths();
+    // Destructive: wipes stored weather history and the forecast plan once, because their year keys were unrecoverable. @since 1.0.0 — remove in 1.2.0
     if (ATLAS.isPrimaryGM && !game.settings.get(MODULE.ID, SETTINGS.WEATHER_YEAR_KEY_MIGRATED)) {
       await game.settings.set(MODULE.ID, SETTINGS.WEATHER_FORECAST_PLAN, {});
       await game.settings.set(MODULE.ID, SETTINGS.WEATHER_HISTORY, {});
@@ -182,14 +183,13 @@ export default class WeatherManager {
       ATLAS.log(3, 'Cleared weather history and forecast plan for year key migration');
     }
     if (ATLAS.isPrimaryGM) await this.#migrateWeatherCalendarKey();
+    // Clear the forecast plan corrupted by monthless date advancement. @since 1.4.0 — remove in 1.6.0
     if (ATLAS.isPrimaryGM && !game.settings.get(MODULE.ID, SETTINGS.WEATHER_MONTHLESS_PLAN_MIGRATED) && CalendarManager.getActiveCalendar()?.isMonthless) {
       await game.settings.set(MODULE.ID, SETTINGS.WEATHER_FORECAST_PLAN, {});
       await game.settings.set(MODULE.ID, SETTINGS.WEATHER_MONTHLESS_PLAN_MIGRATED, true);
       ATLAS.log(3, 'Cleared forecast plan corrupted by monthless date advancement');
     }
     if (ATLAS.isPrimaryGM) {
-      const calendar = CalendarManager.getActiveCalendar();
-      if (calendar?.weather?.autoGenerate !== undefined) if (calendar.metadata?.id) await game.settings.set(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER, !!calendar.weather.autoGenerate);
       const autoGenerate = game.settings.get(MODULE.ID, SETTINGS.AUTO_GENERATE_WEATHER);
       if (Object.keys(this.#currentWeatherByZone).length) {
         const components = game.time.components;
@@ -1330,37 +1330,11 @@ export default class WeatherManager {
   }
 
   /**
-   * Migrate weather history and forecast plan day keys from 1-indexed to 0-indexed.
-   * @since 0.11.0
-   * @deprecated Remove in 1.1.0
-   * @private
-   */
-  static async #migrateWeatherDayIndex() {
-    let changed = false;
-    const history = game.settings.get(MODULE.ID, SETTINGS.WEATHER_HISTORY) || {};
-    if (Object.keys(history).length) {
-      const migrated = this.#shiftDayKeys(history);
-      await game.settings.set(MODULE.ID, SETTINGS.WEATHER_HISTORY, migrated);
-      changed = true;
-      ATLAS.log(3, 'Migrated weather history day keys from 1-indexed to 0-indexed');
-    }
-    const plan = game.settings.get(MODULE.ID, SETTINGS.WEATHER_FORECAST_PLAN) || {};
-    if (Object.keys(plan).length) {
-      await game.settings.set(MODULE.ID, SETTINGS.WEATHER_FORECAST_PLAN, {});
-      changed = true;
-      ATLAS.log(3, 'Cleared forecast plan for 0-indexed day migration');
-    }
-    if (changed) ATLAS.log(3, 'Weather day index migration complete');
-    await game.settings.set(MODULE.ID, SETTINGS.WEATHER_DAY_INDEX_MIGRATED, true);
-  }
-
-  /**
-   * Migrate legacy bare-key soundFx values to full paths in custom presets and current weather.
+   * Normalize bare soundFx keys to full paths in custom presets and current weather on every load.
    * @since 1.0.0
-   * @deprecated Remove in 1.2.0
    * @private
    */
-  static async #migrateLegacySoundKeys() {
+  static async #normalizeSoundFxPaths() {
     let changed = false;
     const customPresets = this.getCustomPresets();
     for (const preset of customPresets) {
@@ -1371,7 +1345,7 @@ export default class WeatherManager {
     }
     if (changed) {
       await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS, customPresets);
-      ATLAS.log(3, 'Migrated custom preset soundFx keys to full paths');
+      ATLAS.log(3, 'Normalized custom preset soundFx keys to full paths');
     }
     let weatherChanged = false;
     for (const weather of Object.values(this.#currentWeatherByZone)) {
@@ -1382,29 +1356,8 @@ export default class WeatherManager {
     }
     if (weatherChanged) {
       await game.settings.set(MODULE.ID, SETTINGS.CURRENT_WEATHER, this.#currentWeatherByZone);
-      ATLAS.log(3, 'Migrated current weather soundFx keys to full paths');
+      ATLAS.log(3, 'Normalized current weather soundFx keys to full paths');
     }
-  }
-
-  /**
-   * Shift all day-level keys in a nested year→month→day object by -1.
-   * @param {object} data - Nested object (year → month → day → value)
-   * @returns {object} New object with shifted day keys
-   * @private
-   */
-  static #shiftDayKeys(data) {
-    const result = {};
-    for (const [year, months] of Object.entries(data)) {
-      result[year] = {};
-      for (const [month, days] of Object.entries(months)) {
-        result[year][month] = {};
-        for (const [day, value] of Object.entries(days)) {
-          const newDay = Math.max(0, Number(day) - 1);
-          result[year][month][newDay] = value;
-        }
-      }
-    }
-    return result;
   }
 
   /**

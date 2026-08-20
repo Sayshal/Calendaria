@@ -218,20 +218,19 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    * @override
    */
   static migrateData(source) {
-    CalendariaCalendar.#migrateArraysToObjects(source);
-    CalendariaCalendar.#migrateDateIndexing(source);
-    CalendariaCalendar.#migrateFestivalIcons(source);
-    CalendariaCalendar.#migrateFestivalConditionTrees(source);
+    CalendariaCalendar.#normalizeArraysToObjects(source);
+    CalendariaCalendar.#normalizeDateIndexing(source);
+    CalendariaCalendar.#normalizeFestivalIcons(source);
+    CalendariaCalendar.#normalizeFestivalConditionTrees(source);
     return super.migrateData(source);
   }
 
   /**
-   * Convert legacy array-based collections to keyed objects.
+   * Keep every collection a keyed object, converting any array form the source still uses.
    * @param {object} source - Raw source data
    * @since 0.9.0
-   * @deprecated Remove in 1.1.0
    */
-  static #migrateArraysToObjects(source) {
+  static #normalizeArraysToObjects(source) {
     const convert = (arr) => {
       if (!Array.isArray(arr)) return arr;
       const obj = {};
@@ -259,11 +258,11 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   }
 
   /**
-   * Migrate date fields from 1-indexed to 0-indexed conventions.
-   * @deprecated since 0.10.4 — remove in 1.1.0
+   * Keep every date field 0-indexed, converting the 1-indexed form the source may still use.
+   * @since 0.10.4
    * @param {object} source - Raw source data
    */
-  static #migrateDateIndexing(source) {
+  static #normalizeDateIndexing(source) {
     const festivals = source.festivals ? Object.values(source.festivals) : [];
     const moons = source.moons ? Object.values(source.moons) : [];
     const hasOldFestival = festivals.some((f) => 'day' in f && !('dayOfMonth' in f));
@@ -295,12 +294,12 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   }
 
   /**
-   * Strip legacy `fas ` prefix from festival icons.
-   * @deprecated since 1.0.0 — remove in 1.2.0
+   * Keep festival icons stored bare, stripping any `fas ` or `fa-solid ` prefix the source carries.
+   * @since 1.0.0
    * @param {object} source - Raw source data
    * @private
    */
-  static #migrateFestivalIcons(source) {
+  static #normalizeFestivalIcons(source) {
     if (!source.festivals) return;
     for (const fest of Object.values(source.festivals)) {
       if (typeof fest.icon !== 'string') continue;
@@ -310,13 +309,12 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   }
 
   /**
-   * Populate conditionTree on festivals that only have month+day fields.
+   * Keep every festival backed by a conditionTree, building one from month+day fields when it is missing.
    * @param {object} source - Raw source data
    * @since 1.1.0
-   * @deprecated Remove in 1.2.0
    * @private
    */
-  static #migrateFestivalConditionTrees(source) {
+  static #normalizeFestivalConditionTrees(source) {
     if (!source.festivals) return;
     for (const fest of Object.values(source.festivals)) {
       if (fest.conditionTree != null) continue;

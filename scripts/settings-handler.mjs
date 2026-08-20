@@ -413,6 +413,7 @@ export default class CalendariaSettings {
         onChange: () => BigCal.updateIdleOpacity()
       },
       intervalConditionFieldMigrationComplete: { name: 'Interval Condition Field Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
+      festivalIconPrefixMigrationComplete: { name: 'Festival Icon Prefix Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.DARKNESS_SYNC]: {
         name: 'CALENDARIA.Settings.DarknessSync.Name',
         hint: 'CALENDARIA.Settings.DarknessSync.Hint',
@@ -1176,7 +1177,6 @@ export default class CalendariaSettings {
         config: false,
         type: new NumberField({ integer: true, min: 0, initial: 60 })
       },
-      themeAtlasMigrationComplete: { name: 'Theme ATLAS Migration Complete', scope: 'client', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.SEEDED_CALENDARS]: { name: 'Seeded Calendars', scope: 'world', config: false, type: new SetField(new StringField()) },
       [SETTINGS.CLOCK_LOCKED]: { name: 'Clock Locked', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.SYNC_CLOCK_PAUSE]: {
@@ -1273,7 +1273,6 @@ export default class CalendariaSettings {
         config: false,
         type: new StringField({ choices: { kph: 'CALENDARIA.Settings.WindSpeedUnit.Kph', mph: 'CALENDARIA.Settings.WindSpeedUnit.Mph' }, initial: 'kph' })
       },
-      [SETTINGS.WEATHER_DAY_INDEX_MIGRATED]: { name: 'Weather Day Index Migrated', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.WEATHER_YEAR_KEY_MIGRATED]: { name: 'Weather Year Key Migrated', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.WEATHER_MONTHLESS_PLAN_MIGRATED]: { name: 'Weather Monthless Plan Migrated', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.WEATHER_HISTORY]: { name: 'Weather History', scope: 'world', config: false, type: new ObjectField({ initial: {} }) },

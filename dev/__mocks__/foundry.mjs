@@ -132,6 +132,17 @@ globalThis.foundry = {
         return { hsl: [h, s, l] };
       })
     },
+    isNewerVersion: vi.fn((v1, v0) => {
+      const parts = (v) => String(v ?? '').split('.');
+      const a = parts(v1);
+      const b = parts(v0);
+      for (let i = 0; i < Math.max(a.length, b.length); i++) {
+        const x = Number(a[i] ?? 0);
+        const y = Number(b[i] ?? 0);
+        if (x !== y) return x > y;
+      }
+      return false;
+    }),
     randomID: vi.fn(() => 'mock-random-id'),
     saveDataToFile: vi.fn(),
     readTextFromFile: vi.fn(),

@@ -210,7 +210,6 @@ export const SETTINGS = {
   TIMEKEEPER_TIME_JUMPS: 'timeKeeperTimeJumps',
   TOOLBAR_APPS: 'toolbarApps',
   WEATHER_AMBIENCE_INTENSITY: 'weatherAmbienceIntensity',
-  WEATHER_DAY_INDEX_MIGRATED: 'weatherDayIndexMigrated',
   WEATHER_FORECAST_PLAN: 'weatherForecastPlan',
   WEATHER_HISTORY_DAYS: 'weatherHistoryDays',
   WEATHER_HISTORY: 'weatherHistory',

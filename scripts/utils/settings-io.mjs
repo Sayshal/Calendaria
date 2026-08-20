@@ -3,7 +3,9 @@ import { MODULE, SETTINGS } from '../constants.mjs';
 import { FestivalManager } from '../festivals/_module.mjs';
 import { getAllPresets, upsertBundledCustomPreset } from '../notes/_module.mjs';
 import NoteManager from '../notes/note-manager.mjs';
+import { resolveWeatherSoundPath } from '../weather/data/weather-presets.mjs';
 import { FRAMEWORK_INITIAL_DISPLAY_FORMATS } from './formatting/format-utils.mjs';
+import { stripFestivalIconPrefixes } from './migrations.mjs';
 
 /**
  * Overlay a deep-cloned defaults object with valid entries from `value`.
@@ -20,6 +22,26 @@ function sanitizeDisplayFormats(value) {
   }
   if (droppedKeys.length) ATLAS.log(2, `Dropped malformed displayFormats entries during import: ${droppedKeys.join(', ')}`);
   return defaults;
+}
+
+/** @type {string} Release the exported setting shapes settled on; older exports are normalized on import. */
+const SETTINGS_SHAPE_VERSION = '1.4.0';
+
+/**
+ * Bring an older export's setting values up to the current shapes, matching what a live world normalizes on load.
+ * Destructive one-shot migrations are deliberately not replayed here.
+ * @param {object} settings - Imported settings keyed by setting key, mutated in place
+ * @param {string} [version] - Version stamped on the export; a missing stamp is treated as the oldest
+ */
+function normalizeImportedSettings(settings, version) {
+  if (!foundry.utils.isNewerVersion(SETTINGS_SHAPE_VERSION, version || '0')) return;
+  const bareSound = (entry) => typeof entry?.soundFx === 'string' && entry.soundFx && !entry.soundFx.includes('/');
+  const presets = settings[SETTINGS.CUSTOM_WEATHER_PRESETS];
+  if (Array.isArray(presets)) for (const preset of presets) if (bareSound(preset)) preset.soundFx = resolveWeatherSoundPath(preset.soundFx);
+  const weatherByZone = settings[SETTINGS.CURRENT_WEATHER];
+  if (weatherByZone && typeof weatherByZone === 'object') for (const weather of Object.values(weatherByZone)) if (bareSound(weather)) weather.soundFx = resolveWeatherSoundPath(weather.soundFx);
+  for (const key of [SETTINGS.CUSTOM_CALENDARS, SETTINGS.DEFAULT_OVERRIDES]) stripFestivalIconPrefixes(settings[key]);
+  ATLAS.log(3, `Normalized imported settings from version ${version || 'unknown'} to the ${SETTINGS_SHAPE_VERSION} shapes`);
 }
 
 /** @type {string[]} List of settings keys to export. */
@@ -373,6 +395,7 @@ export async function importSettings(onComplete) {
       const setActive = dialogElement?.querySelector('input[name="setActive"]')?.checked ?? false;
       const doImportNotes = dialogElement?.querySelector('input[name="importNotes"]')?.checked ?? false;
       let imported = 0;
+      normalizeImportedSettings(importData.settings, importData.version);
       for (const [key, value] of Object.entries(importData.settings)) {
         if (EXPORTABLE_SETTINGS.includes(key)) {
           try {
