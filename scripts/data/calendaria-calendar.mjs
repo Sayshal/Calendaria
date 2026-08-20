@@ -353,6 +353,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       yearZero: new NumberField({ required: true, nullable: false, integer: true, initial: 0 }),
       firstWeekday: new NumberField({ required: true, nullable: false, min: 0, integer: true }),
       weekStartWeekdayId: new StringField({ required: false }),
+      resetWeekdays: new BooleanField({ required: false, initial: false }),
+      allowNegativeYears: new BooleanField({ required: false, initial: true }),
       leapYear: new SchemaField(
         { leapStart: new NumberField({ required: true, nullable: false, integer: true }), leapInterval: new NumberField({ required: true, nullable: false, min: 2, integer: true }) },
         { required: true, nullable: true, initial: null }
@@ -1834,21 +1836,19 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   }
 
   /**
-   * Compute counting days since epoch for decomposed time components.
+   * Compute counting days for decomposed time components.
    * @param {object} components - Components from timeToComponents ({year, month, dayOfMonth})
+   * @param {boolean} [sinceYearStart] - Count from the start of the year instead of the epoch
    * @returns {number} Counting days (non-weekday festivals and intercalary days excluded)
    */
-  _countingDaysFor(components) {
+  _countingDaysFor(components, sinceYearStart = false) {
     let dayOfYear = components.dayOfMonth ?? 0;
     for (let m = 0; m < components.month; m++) dayOfYear += this.getDaysInMonth(m, components.year);
-    const totalDays = this.totalDaysBeforeYear(components.year) + dayOfYear;
     const ctx = { year: components.year, month: components.month, dayOfMonth: components.dayOfMonth ?? 0 };
-    const totalNonCounting =
-      (this.countNonWeekdayFestivalsBeforeYear?.(components.year) ?? 0) +
-      (this.countNonWeekdayFestivalsBefore?.(ctx) ?? 0) +
-      (this.countIntercalaryDaysBeforeYear?.(components.year) ?? 0) +
-      (this.countIntercalaryDaysBefore?.(ctx) ?? 0);
-    return totalDays - totalNonCounting;
+    const withinYear = dayOfYear - ((this.countNonWeekdayFestivalsBefore?.(ctx) ?? 0) + (this.countIntercalaryDaysBefore?.(ctx) ?? 0));
+    if (sinceYearStart) return withinYear;
+    const beforeYear = this.totalDaysBeforeYear(components.year) - ((this.countNonWeekdayFestivalsBeforeYear?.(components.year) ?? 0) + (this.countIntercalaryDaysBeforeYear?.(components.year) ?? 0));
+    return beforeYear + withinYear;
   }
 
   /**
@@ -1986,7 +1986,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       return (monthData.startingWeekday + dayIndex - nonCounting + daysInWeek * 100) % daysInWeek;
     }
     const firstWeekday = this.effectiveFirstWeekday;
-    const countingDays = this._countingDaysFor(components);
+    const countingDays = this._countingDaysFor(components, this.years?.resetWeekdays === true);
     return (((countingDays + firstWeekday) % daysInWeek) + daysInWeek) % daysInWeek;
   }
 

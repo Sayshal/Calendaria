@@ -3,6 +3,7 @@ import { HOOKS, MODULE, REPLACEABLE_ELEMENTS, SETTINGS, SOCKET_TYPES, TEMPLATES,
 import {
   NoteManager,
   addDays,
+  clampViewedYear,
   clearDisplayPropsCache,
   dayOfWeek,
   daysBetween,
@@ -184,7 +185,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {object} date - The date to view
    */
   set viewedDate(date) {
-    this._viewedDate = date;
+    this._viewedDate = clampViewedYear(date, this.calendar);
   }
 
   /**

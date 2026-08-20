@@ -180,7 +180,7 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
       const mappedCustom = customPresets
         .map((p) => {
           const label = WeatherManager.resolveDisplayLabel(p.id, p.label, calendarId, selectedZoneId);
-          const description = p.description ? (p.description.startsWith('CALENDARIA.') ? _loc(p.description) : p.description) : label;
+          const description = p.description ? _loc(p.description) : label;
           const zoneEnabled = !hasZoneFilter || enabledPresetIds.has(p.id);
           const tooltip = zoneEnabled ? description : `${description} ${notActiveLabel}`;
           return { id: p.id, label, tooltip, icon: p.icon, color: p.color, selected: p.id === this.#selectedPresetId, zoneEnabled };
@@ -254,10 +254,7 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
     context.soundFx = this.#soundFx !== null ? this.#soundFx : (currentWeather?.soundFx ?? '');
     const currentFxMacro = this.#fxMacro !== null ? this.#fxMacro : (currentWeather?.fxMacro ?? '');
     const macros = getAvailableMacros({ includeId: currentFxMacro });
-    context.fxMacroOptions = [
-      { value: '', label: _loc('ATLAS.Common.None'), selected: !currentFxMacro },
-      ...macros.map((m) => ({ value: m.id, label: m.name, selected: m.id === currentFxMacro }))
-    ];
+    context.fxMacroOptions = [{ value: '', label: _loc('ATLAS.Common.None'), selected: !currentFxMacro }, ...macros.map((m) => ({ value: m.id, label: m.name, selected: m.id === currentFxMacro }))];
     return context;
   }
 

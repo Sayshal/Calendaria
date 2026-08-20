@@ -840,7 +840,7 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
         deleted++;
       } catch {}
     }
-    if (deleted > 0) ui.notifications.info(_loc('CALENDARIA.NoteViewer.BulkComplete').replace('{count}', deleted));
+    if (deleted > 0) ui.notifications.info(_loc('CALENDARIA.NoteViewer.BulkDeleted').replace('{count}', deleted));
     return true;
   }
 

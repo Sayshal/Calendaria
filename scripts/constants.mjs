@@ -46,7 +46,6 @@ export const SETTINGS = {
   CALENDAR_HUD_POSITION: 'calendarHUDPosition',
   CALENDAR_POSITION: 'calendarPosition',
   CHAT_TIMESTAMP_MODE: 'chatTimestampMode',
-  CHAT_TIMESTAMP_SHOW_TIME: 'chatTimestampShowTime',
   CHRONICLE_BIG_CAL_BUTTON: 'chronicleBigCalButton',
   CHRONICLE_CATEGORY_FILTER: 'chronicleCategoryFilter',
   CHRONICLE_COMBAT_MODE: 'chronicleCombatMode',

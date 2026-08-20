@@ -1108,13 +1108,6 @@ export default class CalendariaSettings {
           initial: 'disabled'
         })
       },
-      [SETTINGS.CHAT_TIMESTAMP_SHOW_TIME]: {
-        name: 'CALENDARIA.Settings.ChatTimestampShowTime.Name',
-        hint: 'CALENDARIA.Settings.ChatTimestampShowTime.Hint',
-        scope: 'world',
-        config: false,
-        type: new BooleanField({ initial: false })
-      },
       [SETTINGS.ENRICHER_CLICK_TARGET]: {
         name: 'CALENDARIA.Settings.EnricherClickTarget.Name',
         hint: 'CALENDARIA.Settings.EnricherClickTarget.Hint',

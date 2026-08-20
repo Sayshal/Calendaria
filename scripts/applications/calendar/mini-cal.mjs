@@ -2,6 +2,7 @@ import { CalendarManager, CalendarRegistry, getEquivalentDates } from '../../cal
 import { HOOKS, MODULE, REPLACEABLE_ELEMENTS, SETTINGS, SOCKET_TYPES, TEMPLATES, WIDGET_POINTS } from '../../constants.mjs';
 import {
   NoteManager,
+  clampViewedYear,
   clearDisplayPropsCache,
   dayOfWeek,
   enrichNoteForDisplay,
@@ -16,6 +17,7 @@ import { TimeClock, getTimeIncrements } from '../../time/_module.mjs';
 import {
   CalendariaSocket,
   attachWidgetListeners,
+  buildCycleMonthPlan,
   buildOpenAppsMenuItem,
   buildWeatherLookup,
   buildWeatherPillData,
@@ -41,7 +43,6 @@ import {
   getEquivalentDateTooltip,
   getFestivalNoteForDay,
   getFirstMoonPhase,
-  buildCycleMonthPlan,
   getLeadingDays,
   getRestorePosition,
   getSelectedMoon,
@@ -81,6 +82,7 @@ import { WeatherManager } from '../../weather/_module.mjs';
 import { BigCal, NoteViewer, SecondaryCalendar, SettingsPanel, WeatherPickerApp } from '../_module.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
+const ctxMenu = foundry.applications.ux.ContextMenu.implementation;
 
 /**
  * MiniCal widget combining mini month view with time controls.
@@ -214,7 +216,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {object} date - The date to view
    */
   set viewedDate(date) {
-    this._viewedDate = date;
+    this._viewedDate = clampViewedYear(date, this.calendar);
   }
 
   /**
@@ -993,7 +995,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       if (e.target.closest('#context-menu, .minical-day')) return;
       e.preventDefault();
       document.getElementById('context-menu')?.remove();
-      const menu = new foundry.applications.ux.ContextMenu.implementation(this.element, '.minical-container', this.#getContextMenuItems(), {
+      const menu = new ctxMenu(this.element, '.minical-container', this.#getContextMenuItems(), {
         fixed: true,
         jQuery: false,
         onOpen: () => document.getElementById('context-menu')?.classList.add('calendaria')
@@ -1109,16 +1111,11 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#hooks.push({ name: HOOKS.WEATHER_CHANGE, id: Hooks.on(HOOKS.WEATHER_CHANGE, () => debouncedRender()) });
     this.#hooks.push({ name: HOOKS.WIDGETS_REFRESH, id: Hooks.on(HOOKS.WIDGETS_REFRESH, () => this.render()) });
     this.#hooks.push({ name: HOOKS.DISPLAY_FORMATS_CHANGED, id: Hooks.on(HOOKS.DISPLAY_FORMATS_CHANGED, () => this.render()) });
-    new foundry.applications.ux.ContextMenu.implementation(
-      this.element,
-      '.minical-container',
-      [{ label: 'ATLAS.Common.Close', icon: '<i class="fas fa-times"></i>', onClick: () => MiniCal.hide() }],
-      {
-        fixed: true,
-        jQuery: false,
-        onOpen: () => document.getElementById('context-menu')?.classList.add('calendaria')
-      }
-    );
+    new ctxMenu(this.element, '.minical-container', [{ label: 'ATLAS.Common.Close', icon: '<i class="fas fa-times"></i>', onClick: () => MiniCal.hide() }], {
+      fixed: true,
+      jQuery: false,
+      onOpen: () => document.getElementById('context-menu')?.classList.add('calendaria')
+    });
   }
 
   /** @override */

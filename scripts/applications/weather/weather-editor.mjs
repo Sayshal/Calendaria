@@ -204,10 +204,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const currentFxMacro = isCustom ? preset.fxMacro || '' : overrides.fxMacro !== undefined ? overrides.fxMacro || '' : '';
     context.preset.fxMacro = currentFxMacro;
     const macros = getAvailableMacros({ includeId: currentFxMacro });
-    context.fxMacroOptions = [
-      { value: '', label: _loc('ATLAS.Common.None'), selected: !currentFxMacro },
-      ...macros.map((m) => ({ value: m.id, label: m.name, selected: m.id === currentFxMacro }))
-    ];
+    context.fxMacroOptions = [{ value: '', label: _loc('ATLAS.Common.None'), selected: !currentFxMacro }, ...macros.map((m) => ({ value: m.id, label: m.name, selected: m.id === currentFxMacro }))];
     context.visuals = {
       countMin: vo.count?.[0] ?? defCount[0],
       countMax: vo.count?.[1] ?? defCount[1],

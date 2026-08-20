@@ -680,7 +680,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.CHRONICLE_SHOW_SEASON_CHANGES]: { tab: 'chronicle', label: 'CALENDARIA.Chronicle.Settings.ShowSeasonChanges.Name' },
     [SETTINGS.WEEKLY_ALMANAC]: { tab: 'chronicle', label: 'CALENDARIA.Settings.WeeklyAlmanac.Name' },
     [SETTINGS.CHAT_TIMESTAMP_MODE]: { tab: 'chat', label: 'CALENDARIA.Settings.ChatTimestampMode.Name' },
-    [SETTINGS.CHAT_TIMESTAMP_SHOW_TIME]: { tab: 'chat', label: 'CALENDARIA.Settings.ChatTimestampShowTime.Name' },
     [SETTINGS.PERMISSIONS]: { tab: 'permissions', label: 'CALENDARIA.SettingsPanel.Tab.Permissions' },
     [SETTINGS.FOG_OF_WAR_ENABLED]: { tab: 'fogofwar', label: 'CALENDARIA.Settings.FogOfWar.Name' },
     [SETTINGS.FOG_OF_WAR_CONFIG]: { tab: 'fogofwar', label: 'CALENDARIA.Settings.FogOfWar.AutoReveal' },
@@ -903,7 +902,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       SETTINGS.SYNC_CLOCK_PAUSE,
       SETTINGS.CLOCK_RUN_DURING_COMBAT
     ],
-    'chat-timestamps': [SETTINGS.CHAT_TIMESTAMP_MODE, SETTINGS.CHAT_TIMESTAMP_SHOW_TIME],
+    'chat-timestamps': [SETTINGS.CHAT_TIMESTAMP_MODE],
     'canvas-sticky-zones': [SETTINGS.HUD_STICKY_ZONES_ENABLED, SETTINGS.ALLOW_SIDEBAR_OVERLAP],
     'canvas-scene-integration': [
       SETTINGS.DARKNESS_SYNC,
@@ -1045,7 +1044,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       { value: 'replace', label: _loc('CALENDARIA.Settings.ChatTimestampMode.Replace'), selected: chatMode === 'replace' },
       { value: 'augment', label: _loc('CALENDARIA.Settings.ChatTimestampMode.Augment'), selected: chatMode === 'augment' }
     ];
-    context.chatTimestampShowTime = game.settings.get(MODULE.ID, SETTINGS.CHAT_TIMESTAMP_SHOW_TIME);
     context.formatLocations = this.#prepareFormatLocationsForCategory('chat');
   }
 
@@ -1869,7 +1867,6 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('syncClockPause' in data) await SettingsPanel.#set(SETTINGS.SYNC_CLOCK_PAUSE, data.syncClockPause);
     if ('clockRunDuringCombat' in data) await SettingsPanel.#set(SETTINGS.CLOCK_RUN_DURING_COMBAT, data.clockRunDuringCombat);
     if ('chatTimestampMode' in data) await SettingsPanel.#set(SETTINGS.CHAT_TIMESTAMP_MODE, data.chatTimestampMode);
-    if ('chatTimestampShowTime' in data) await SettingsPanel.#set(SETTINGS.CHAT_TIMESTAMP_SHOW_TIME, data.chatTimestampShowTime);
     if ('equivalentDateCalendars' in data) {
       const ids = Array.isArray(data.equivalentDateCalendars) ? data.equivalentDateCalendars : data.equivalentDateCalendars ? [data.equivalentDateCalendars] : [];
       await SettingsPanel.#set(SETTINGS.EQUIVALENT_DATE_CALENDARS, new Set(ids));
