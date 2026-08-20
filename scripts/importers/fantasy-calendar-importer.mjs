@@ -82,7 +82,7 @@ export default class FantasyCalendarImporter extends BaseImporter {
       cycles: this.#transformCycles(staticData.cycles?.data),
       cycleFormat: staticData.cycles?.format || '',
       daylight: this.#transformDaylight(staticData.seasons?.data),
-      metadata: { description: _loc('CALENDARIA.Importer.ImportedFrom.FantasyCalendar'), system: data.name || _loc('CALENDARIA.Common.Unknown'), importedFrom: 'fantasy-calendar' },
+      metadata: { description: _loc('CALENDARIA.Importer.ImportedFrom.FantasyCalendar'), system: data.name || _loc('ATLAS.Common.Unknown'), importedFrom: 'fantasy-calendar' },
       currentDate: this.#transformCurrentDate(data.dynamic_data)
     };
   }

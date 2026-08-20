@@ -885,7 +885,7 @@ export function setupDayContextMenu(container, selector, calendar, options = {})
           if (isOwner) {
             const actions = document.createElement('span');
             actions.className = 'note-actions';
-            actions.innerHTML = `<i class="fas fa-pen-to-square" data-action="edit" data-tooltip="${_loc('CALENDARIA.Common.Edit')}"></i><i class="fas fa-trash" data-action="delete" data-tooltip="${_loc('CALENDARIA.Common.Delete')}"></i>`;
+            actions.innerHTML = `<i class="fas fa-pen-to-square" data-action="edit" data-tooltip="${_loc('ATLAS.Common.Edit')}"></i><i class="fas fa-trash" data-action="delete" data-tooltip="${_loc('ATLAS.Common.Delete')}"></i>`;
             nameSpan.appendChild(actions);
             actions.addEventListener('click', async (e) => {
               e.stopPropagation();

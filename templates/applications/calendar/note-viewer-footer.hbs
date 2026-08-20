@@ -9,12 +9,12 @@
   {{#if isGM}}
     <div class="bulk-controls">
       {{#if selectionMode}}
-        <input type="checkbox" class="select-all-checkbox" data-tooltip="{{localize 'CALENDARIA.NoteViewer.SelectAll'}}"
+        <input type="checkbox" class="select-all-checkbox" data-tooltip="{{localize 'ATLAS.Common.SelectAll'}}"
           data-tooltip-direction="UP" />
         <span class="selection-count">{{selectedCount}}</span>
         <div class="bulk-actions">
           <button type="button" class="bulk-btn" data-action="bulkAction" data-bulk="delete"
-            data-tooltip="{{localize 'CALENDARIA.Common.Delete'}}" data-tooltip-direction="UP"
+            data-tooltip="{{localize 'ATLAS.Common.Delete'}}" data-tooltip-direction="UP"
             {{#unless selectedCount}}disabled{{/unless}}>
             <i class="fas fa-trash"></i>
           </button>

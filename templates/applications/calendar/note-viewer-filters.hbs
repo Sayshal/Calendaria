@@ -1,9 +1,9 @@
 <div class="note-viewer-filters">
   <div class="filter-group">
-    <label class="filter-label">{{localize "CALENDARIA.NoteViewer.Filter.Preset"}}</label>
+    <label class="filter-label">{{localize "ATLAS.Common.Preset"}}</label>
     <multi-select class="filter-preset">
       <option value="__none__" {{#if selectedNone}}selected{{/if}}>
-        {{localize "CALENDARIA.NoteViewer.Filter.Uncategorized"}}
+        {{localize "ATLAS.Common.Uncategorized"}}
       </option>
       {{#each presets}}
         <option value="{{this.id}}" {{#if this.selected}}selected{{/if}} data-color="{{this.color}}">{{this.label}}
@@ -16,13 +16,13 @@
     <div class="filter-group">
       <label class="filter-label">{{localize "CALENDARIA.Common.Visibility"}}</label>
       <select class="filter-select filter-visibility">
-        <option value="all" {{#if (eq visibility "all")}}selected{{/if}}>{{localize "CALENDARIA.Common.All"}}
+        <option value="all" {{#if (eq visibility "all")}}selected{{/if}}>{{localize "ATLAS.Common.All"}}
         </option>
         <option value="visible" {{#if (eq visibility "visible")}}selected{{/if}}>
           {{localize "CALENDARIA.Note.Visibility.Visible"}}
         </option>
         <option value="hidden" {{#if (eq visibility "hidden")}}selected{{/if}}>
-          {{localize "CALENDARIA.Common.Hidden"}}
+          {{localize "ATLAS.Common.Hidden"}}
         </option>
         <option value="secret" {{#if (eq visibility "secret")}}selected{{/if}}>
           {{localize "CALENDARIA.Note.Visibility.Secret"}}
@@ -51,9 +51,9 @@
 
   {{#if isGM}}
     <div class="filter-group">
-      <label class="filter-label">{{localize "CALENDARIA.NoteViewer.Filter.Author"}}</label>
+      <label class="filter-label">{{localize "ATLAS.Common.Author"}}</label>
       <select class="filter-select filter-author">
-        <option value="all" {{#if (eq author "all")}}selected{{/if}}>{{localize "CALENDARIA.Common.All"}}
+        <option value="all" {{#if (eq author "all")}}selected{{/if}}>{{localize "ATLAS.Common.All"}}
         </option>
         {{#each authors}}
           <option value="{{this.id}}" {{#if this.selected}}selected{{/if}}>{{this.name}}</option>

@@ -55,8 +55,8 @@ export class CalendariaSceneConfig extends foundry.applications.sheets.SceneConf
         context.weatherFxOverride = weatherFxOverride;
         context.weatherFxOverrideOptions = [
           { value: 'inherit', label: 'CALENDARIA.SceneConfig.WeatherFxOverride.Inherit', selected: weatherFxOverride === 'inherit' },
-          { value: 'on', label: 'CALENDARIA.SceneConfig.WeatherFxOverride.On', selected: weatherFxOverride === 'on' },
-          { value: 'off', label: 'CALENDARIA.SceneConfig.WeatherFxOverride.Off', selected: weatherFxOverride === 'off' }
+          { value: 'on', label: 'ATLAS.Common.On', selected: weatherFxOverride === 'on' },
+          { value: 'off', label: 'ATLAS.Common.Off', selected: weatherFxOverride === 'off' }
         ];
         context.fxTopDownOverride = doc.getFlag(MODULE.ID, SCENE_FLAGS.FXMASTER_TOP_DOWN_OVERRIDE) ?? 'default';
         context.fxSplashOverride = doc.getFlag(MODULE.ID, SCENE_FLAGS.FXMASTER_SPLASH_OVERRIDE) ?? 'default';

@@ -65,7 +65,7 @@ export class SetDateDialog extends HandlebarsApplicationMixin(ApplicationV2) {
       const daysInMonth = calendar?.getDaysInMonth?.(components.month, displayYear) ?? 30;
       context.days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
       context.currentDay = (components.dayOfMonth ?? 0) + 1;
-      context.dayLabel = _loc('CALENDARIA.Common.Day');
+      context.dayLabel = _loc('ATLAS.Common.Day');
     }
     context.hour = components.hour ?? 0;
     context.minute = components.minute ?? 0;

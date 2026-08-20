@@ -1579,7 +1579,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
         }
       });
     }
-    items.push({ label: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', onClick: () => this.close() });
+    items.push({ label: 'ATLAS.Common.Close', icon: '<i class="fas fa-times"></i>', onClick: () => this.close() });
     return items;
   }
 

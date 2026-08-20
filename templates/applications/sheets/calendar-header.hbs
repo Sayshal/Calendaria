@@ -32,7 +32,7 @@
       aria-label="{{localize 'CALENDARIA.HUD.Settings.Name'}}" class="settings-btn">
       <i class="fas fa-gear"></i>
     </button>
-    <button type="button" data-action="closeBigCal" data-tooltip aria-label="{{localize 'CALENDARIA.Common.Close'}}"
+    <button type="button" data-action="closeBigCal" data-tooltip aria-label="{{localize 'ATLAS.Common.Close'}}"
       class="close-btn">
       <i class="fas fa-times"></i>
     </button>
@@ -54,10 +54,10 @@
   {{/if}}
   <div class="header-row header-row-bottom">
     <select class="view-select">
-      <option value="month" {{#if (eq displayMode 'month')}}selected{{/if}}>{{localize 'CALENDARIA.Common.Month'}}
+      <option value="month" {{#if (eq displayMode 'month')}}selected{{/if}}>{{localize 'ATLAS.Common.Month'}}
       </option>
       <option value="week" {{#if (eq displayMode 'week')}}selected{{/if}}>{{localize 'CALENDARIA.Common.Week'}}</option>
-      <option value="year" {{#if (eq displayMode 'year')}}selected{{/if}}>{{localize 'CALENDARIA.Common.Year'}}</option>
+      <option value="year" {{#if (eq displayMode 'year')}}selected{{/if}}>{{localize 'ATLAS.Common.Year'}}</option>
     </select>
     <div class="calendar-indicators">
       {{{widgets.weatherIndicator}}}

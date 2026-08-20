@@ -376,7 +376,7 @@ export function formatApproximateTime(calendar, components, zone = null) {
   else if (dayProgress >= 0.5 && dayProgress <= 0.85) formatter = 'Afternoon';
   else if (dayProgress > 0.85 && nightProgress < 0) formatter = 'Evening';
   else formatter = 'Night';
-  const COMMON_OVERRIDES = { Midnight: 'CALENDARIA.Common.Midnight', Night: 'CALENDARIA.Common.Night' };
+  const COMMON_OVERRIDES = { Midnight: 'ATLAS.Common.Midnight', Night: 'CALENDARIA.Common.Night' };
   return _loc(COMMON_OVERRIDES[formatter] ?? `CALENDARIA.Format.ApproxTime.${formatter}`);
 }
 
@@ -1135,16 +1135,16 @@ export function timeSince(targetDate, currentDate, simple = false) {
   const days = absDiff;
   let unit, count;
   if (years >= 1) {
-    unit = years === 1 ? _loc('CALENDARIA.Common.UnitYear') : _loc('CALENDARIA.Common.UnitYears');
+    unit = years === 1 ? _loc('CALENDARIA.Common.UnitYear') : _loc('ATLAS.Common.Years');
     count = years;
   } else if (months >= 1) {
-    unit = months === 1 ? _loc('CALENDARIA.Common.UnitMonth') : _loc('CALENDARIA.Common.UnitMonths');
+    unit = months === 1 ? _loc('CALENDARIA.Common.UnitMonth') : _loc('ATLAS.Common.Months');
     count = months;
   } else if (weeks >= 1) {
-    unit = weeks === 1 ? _loc('CALENDARIA.Common.UnitWeek') : _loc('CALENDARIA.Common.UnitWeeks');
+    unit = weeks === 1 ? _loc('CALENDARIA.Common.UnitWeek') : _loc('ATLAS.Common.Weeks');
     count = weeks;
   } else {
-    unit = days === 1 ? _loc('CALENDARIA.Common.UnitDay') : _loc('CALENDARIA.Common.UnitDays');
+    unit = days === 1 ? _loc('CALENDARIA.Common.UnitDay') : _loc('ATLAS.Common.Days');
     count = days;
   }
   if (simple) return String(count);

@@ -169,7 +169,7 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
     context.viewMode = this._viewMode;
     context.viewModes = [
       { id: 'scroll', label: _loc('CALENDARIA.Chronicle.ViewMode.Scroll'), active: this._viewMode === 'scroll' },
-      { id: 'timeline', label: _loc('CALENDARIA.Chronicle.ViewMode.Timeline'), active: this._viewMode === 'timeline' }
+      { id: 'timeline', label: _loc('ATLAS.Common.Timeline'), active: this._viewMode === 'timeline' }
     ];
     const usedCategoryIds = NoteManager.getAllUsedPresetIds();
     const selectedSet = new Set(this._categoryFilter);
@@ -451,7 +451,7 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
         }
       });
     }
-    items.push({ label: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', onClick: () => this.close() });
+    items.push({ label: 'ATLAS.Common.Close', icon: '<i class="fas fa-times"></i>', onClick: () => this.close() });
     return items;
   }
 

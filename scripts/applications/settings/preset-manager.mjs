@@ -118,10 +118,10 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
     if (this.#isDirty) {
       const confirmed = await foundry.applications.api.DialogV2.confirm({
         classes: ['calendaria'],
-        window: { title: 'CALENDARIA.Editor.UnsavedChanges' },
+        window: { title: 'ATLAS.Common.UnsavedChanges' },
         content: `<p>${_loc('CALENDARIA.Editor.UnsavedChangesMessage')}</p>`,
         yes: { label: 'CALENDARIA.Editor.DiscardChanges', icon: 'fas fa-trash' },
-        no: { label: 'CALENDARIA.Common.Cancel', icon: 'fas fa-times' },
+        no: { label: 'ATLAS.Common.Cancel', icon: 'fas fa-times' },
         rejectClose: false
       });
       if (!confirmed) throw new Error('Close cancelled by user. This is not a bug.');
@@ -197,14 +197,14 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
     };
     const reminderTargetOptions = [
       { value: 'all', label: _loc('CALENDARIA.Note.ReminderTargetAll') },
-      { value: 'gm', label: _loc('CALENDARIA.Common.GMOnly') },
+      { value: 'gm', label: _loc('ATLAS.Common.GMOnly') },
       { value: 'author', label: _loc('CALENDARIA.Note.ReminderTargetAuthor') },
       { value: 'viewers', label: _loc('CALENDARIA.Note.ReminderTargetViewers') }
     ];
     const ownershipOptions = [
-      { value: 0, label: _loc('CALENDARIA.PresetManager.OwnershipNone') },
+      { value: 0, label: _loc('ATLAS.Common.None') },
       { value: 2, label: _loc('CALENDARIA.PresetManager.OwnershipObserver') },
-      { value: 3, label: _loc('CALENDARIA.PresetManager.OwnershipOwner') }
+      { value: 3, label: _loc('ATLAS.Common.Owner') }
     ];
     return {
       content: [
@@ -237,7 +237,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
           inputHtml: selectHtml('visibility', defaults.visibility, visibilityOptions),
           hint: _loc('CALENDARIA.PresetManager.DefaultVisibilityHint')
         },
-        { key: 'silent', label: _loc('CALENDARIA.Note.Silent'), inputHtml: checkboxHtml('silent', defaults.silent), hint: _loc('CALENDARIA.PresetManager.DefaultSilentHint') },
+        { key: 'silent', label: _loc('ATLAS.Common.Silent'), inputHtml: checkboxHtml('silent', defaults.silent), hint: _loc('CALENDARIA.PresetManager.DefaultSilentHint') },
         {
           key: 'displayStyle',
           label: _loc('CALENDARIA.Note.DisplayStyleLabel'),
@@ -317,7 +317,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
     const maxSort = this._presets.reduce((max, c) => Math.max(max, c.sortOrder ?? 0), -1);
     this._presets.push({
       id,
-      label: _loc('CALENDARIA.Common.NewPreset'),
+      label: _loc('ATLAS.Common.NewPreset'),
       color: '#4a90e2',
       icon: 'fas fa-bookmark',
       builtin: false,
@@ -424,7 +424,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
         <p class="hint">${_loc('CALENDARIA.Common.IconHint')}</p>
       </div>
       <div class="form-group">
-        <label>${_loc('CALENDARIA.Common.Color')}</label>
+        <label>${_loc('ATLAS.Common.Color')}</label>
         <div class="form-fields">
           <color-picker name="color" value="${cat.color}"></color-picker>
         </div>
@@ -437,7 +437,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
       buttons: [
         {
           action: 'save',
-          label: 'CALENDARIA.Common.Save',
+          label: 'ATLAS.Common.Save',
           icon: 'fas fa-save',
           default: true,
           callback: (_event, _button, dialog) => {
@@ -543,10 +543,10 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!cat) return;
     const confirmed = await foundry.applications.api.DialogV2.confirm({
       classes: ['calendaria'],
-      window: { title: 'CALENDARIA.Common.Reset' },
+      window: { title: 'ATLAS.Common.Reset' },
       content: `<p>${_loc('CALENDARIA.PresetManager.ResetPresetConfirm')}</p>`,
-      yes: { label: 'CALENDARIA.Common.Reset', icon: 'fas fa-undo' },
-      no: { label: 'CALENDARIA.Common.Cancel', icon: 'fas fa-times' },
+      yes: { label: 'ATLAS.Common.Reset', icon: 'fas fa-undo' },
+      no: { label: 'ATLAS.Common.Cancel', icon: 'fas fa-times' },
       rejectClose: false
     });
     if (!confirmed) return;
@@ -558,7 +558,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
       cat.color = seed.color;
       cat.playerUsable = cat.id === DEFAULT_PRESET_ID ? true : (seed.playerUsable ?? true);
     } else {
-      cat.label = _loc('CALENDARIA.Common.NewPreset');
+      cat.label = _loc('ATLAS.Common.NewPreset');
       cat.icon = 'fas fa-bookmark';
       cat.color = '#4a90e2';
       cat.playerUsable = true;
@@ -637,7 +637,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
         }
         const raw = importData.preset;
         const newId = foundry.utils.randomID();
-        let label = raw.label || _loc('CALENDARIA.Common.NewPreset');
+        let label = raw.label || _loc('ATLAS.Common.NewPreset');
         if (manager._presets.some((c) => c.label === label)) label = `${label} (Imported)`;
         const maxSort = manager._presets.reduce((max, c) => Math.max(max, c.sortOrder ?? 0), -1);
         manager._presets.push({

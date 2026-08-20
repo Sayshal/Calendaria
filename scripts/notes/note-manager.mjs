@@ -847,7 +847,7 @@ export default class NoteManager {
       buttons: [
         {
           action: 'ok',
-          label: 'CALENDARIA.Common.Confirm',
+          label: 'ATLAS.Common.Confirm',
           icon: 'fas fa-check',
           default: true,
           callback: (_event, button) => {
@@ -864,7 +864,7 @@ export default class NoteManager {
         },
         {
           action: 'cancel',
-          label: 'CALENDARIA.Common.Cancel',
+          label: 'ATLAS.Common.Cancel',
           icon: 'fas fa-times'
         }
       ],

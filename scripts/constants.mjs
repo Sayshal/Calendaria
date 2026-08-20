@@ -375,7 +375,7 @@ export const MOON_PHASE_LABELS = [
 /** @type {Object<string, object>} Wind speed scale (0-5). Canonical values stored in kph; imperial conversion at display time. */
 export const WIND_SPEEDS = {
   CALM: { id: 'calm', value: 0, label: 'CALENDARIA.Weather.Wind.Calm', kph: 5 },
-  LIGHT: { id: 'light', value: 1, label: 'CALENDARIA.Common.Light', kph: 20 },
+  LIGHT: { id: 'light', value: 1, label: 'ATLAS.Common.Light', kph: 20 },
   MODERATE: { id: 'moderate', value: 2, label: 'CALENDARIA.Common.Moderate', kph: 40 },
   STRONG: { id: 'strong', value: 3, label: 'CALENDARIA.Weather.Wind.Strong', kph: 60 },
   SEVERE: { id: 'severe', value: 4, label: 'CALENDARIA.Common.Severe', kph: 90 },
@@ -385,7 +385,7 @@ export const WIND_SPEEDS = {
 /** @type {Object<string, object>} Named bands over the 0-10 severity scale derived by computeWeatherSeverity, each starting at min */
 export const SEVERITY_LEVELS = {
   NONE: { id: 'none', min: 0, label: 'CALENDARIA.Weather.Severity.None' },
-  LIGHT: { id: 'light', min: 1, label: 'CALENDARIA.Weather.Severity.Light' },
+  LIGHT: { id: 'light', min: 1, label: 'ATLAS.Common.Light' },
   MODERATE: { id: 'moderate', min: 2, label: 'CALENDARIA.Weather.Severity.Moderate' },
   HEAVY: { id: 'heavy', min: 4, label: 'CALENDARIA.Weather.Severity.Heavy' },
   SEVERE: { id: 'severe', min: 6, label: 'CALENDARIA.Weather.Severity.Severe' },

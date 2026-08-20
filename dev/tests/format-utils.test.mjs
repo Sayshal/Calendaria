@@ -615,10 +615,10 @@ describe('formatApproximateTime()', () => {
     expect(formatApproximateTime(mockCalendar, { hour: 2 })).toBe('CALENDARIA.Common.Night');
   });
   it('returns Midnight for middle of the night', () => {
-    expect(formatApproximateTime(mockCalendar, { hour: 0 })).toBe('CALENDARIA.Common.Midnight');
+    expect(formatApproximateTime(mockCalendar, { hour: 0 })).toBe('ATLAS.Common.Midnight');
   });
   it('defaults hour to 0 when missing', () => {
-    expect(formatApproximateTime(mockCalendar, {})).toBe('CALENDARIA.Common.Midnight');
+    expect(formatApproximateTime(mockCalendar, {})).toBe('ATLAS.Common.Midnight');
   });
   it('uses custom sunrise/sunset from calendar', () => {
     const customCal = addCalendarGetters({ ...mockCalendar, sunrise: () => 8, sunset: () => 20 });

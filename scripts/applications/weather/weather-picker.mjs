@@ -13,8 +13,8 @@ const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
  * @returns {string} Localized intensity label
  */
 function getPrecipIntensityLabel(value) {
-  if (value <= 0) return _loc('CALENDARIA.Common.None');
-  if (value <= 0.25) return _loc('CALENDARIA.Common.Light');
+  if (value <= 0) return _loc('ATLAS.Common.None');
+  if (value <= 0.25) return _loc('ATLAS.Common.Light');
   if (value <= 0.5) return _loc('CALENDARIA.Common.Moderate');
   if (value <= 0.75) return _loc('CALENDARIA.Weather.Precipitation.IntensityHeavy');
   return _loc('CALENDARIA.Weather.Precipitation.IntensityTorrential');
@@ -214,7 +214,7 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
     const activePrecipType = this.#precipType ?? currentWeather?.precipitation?.type ?? null;
     context.precipTypeRandom = this.#precipType === 'random';
     context.precipitationTypes = [
-      { value: '', label: _loc('CALENDARIA.Common.None'), selected: !context.precipTypeRandom && !activePrecipType },
+      { value: '', label: _loc('ATLAS.Common.None'), selected: !context.precipTypeRandom && !activePrecipType },
       ...Object.entries(PRECIPITATION_TYPES)
         .filter(([, v]) => v !== null)
         .map(([, v]) => ({ value: v, label: _loc(`CALENDARIA.Weather.Precipitation.${v.charAt(0).toUpperCase() + v.slice(1)}`), selected: !context.precipTypeRandom && activePrecipType === v }))
@@ -235,18 +235,18 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
       context.fxPreset = currentFxPreset;
       const fxPresets = getAvailableFxPresets();
       context.fxPresetOptions = [
-        { value: '', label: _loc('CALENDARIA.Common.None'), selected: !currentFxPreset },
+        { value: '', label: _loc('ATLAS.Common.None'), selected: !currentFxPreset },
         ...fxPresets.map((p) => ({ value: p.value, label: p.label, selected: p.value === currentFxPreset }))
       ];
       const fxLevels = ['very-low', 'low', 'medium', 'high', 'very-high'];
       const currentFxDensity = this.#fxDensity !== null ? this.#fxDensity : (currentWeather?.fxDensity ?? '');
       context.fxDensityOptions = [
-        { value: '', label: _loc('CALENDARIA.Common.Default'), selected: !currentFxDensity },
+        { value: '', label: _loc('ATLAS.Common.Default'), selected: !currentFxDensity },
         ...fxLevels.map((v) => ({ value: v, label: _loc(`CALENDARIA.FxParam.${v}`), selected: v === currentFxDensity }))
       ];
       const currentFxSpeed = this.#fxSpeed !== null ? this.#fxSpeed : (currentWeather?.fxSpeed ?? '');
       context.fxSpeedOptions = [
-        { value: '', label: _loc('CALENDARIA.Common.Default'), selected: !currentFxSpeed },
+        { value: '', label: _loc('ATLAS.Common.Default'), selected: !currentFxSpeed },
         ...fxLevels.map((v) => ({ value: v, label: _loc(`CALENDARIA.FxParam.${v}`), selected: v === currentFxSpeed }))
       ];
       context.fxColor = this.#fxColor !== null ? this.#fxColor : (currentWeather?.fxColor ?? '');
@@ -255,7 +255,7 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
     const currentFxMacro = this.#fxMacro !== null ? this.#fxMacro : (currentWeather?.fxMacro ?? '');
     const macros = getAvailableMacros({ includeId: currentFxMacro });
     context.fxMacroOptions = [
-      { value: '', label: _loc('CALENDARIA.Common.None'), selected: !currentFxMacro },
+      { value: '', label: _loc('ATLAS.Common.None'), selected: !currentFxMacro },
       ...macros.map((m) => ({ value: m.id, label: m.name, selected: m.id === currentFxMacro }))
     ];
     return context;

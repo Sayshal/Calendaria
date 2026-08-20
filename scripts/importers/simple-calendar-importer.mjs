@@ -259,7 +259,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
       daylight: this.#transformDaylight(calendar.seasons),
       metadata: {
         description: _loc('CALENDARIA.Importer.ImportedFrom.SimpleCalendar'),
-        system: calendar.name || _loc('CALENDARIA.Common.Unknown'),
+        system: calendar.name || _loc('ATLAS.Common.Unknown'),
         importedFrom: 'simple-calendar',
         originalId: calendar.id
       }

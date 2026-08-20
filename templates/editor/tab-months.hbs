@@ -32,17 +32,17 @@
       {{#if monthsWithNav.length}}
         <div class="list-header flexrow">
           <span class="col-name" data-tooltip
-            aria-label="{{localize 'CALENDARIA.Editor.Tooltip.MonthName'}}">{{localize "CALENDARIA.Common.Name"}}</span>
+            aria-label="{{localize 'CALENDARIA.Editor.Tooltip.MonthName'}}">{{localize "ATLAS.Common.Name"}}</span>
           <span class="col-abbr" data-tooltip
             aria-label="{{localize 'CALENDARIA.Editor.Tooltip.MonthAbbr'}}">{{localize "CALENDARIA.Common.Abbreviation"}}</span>
           <span class="col-days" data-tooltip
-            aria-label="{{localize 'CALENDARIA.Editor.Tooltip.MonthDays'}}">{{localize "CALENDARIA.Common.Days"}}</span>
+            aria-label="{{localize 'CALENDARIA.Editor.Tooltip.MonthDays'}}">{{localize "ATLAS.Common.Days"}}</span>
           <span class="col-leap" data-tooltip
             aria-label="{{localize 'CALENDARIA.Editor.Tooltip.MonthLeap'}}">{{localize "CALENDARIA.Editor.Column.Leap"}}</span>
           <span class="col-start-weekday" data-tooltip
             aria-label="{{localize 'CALENDARIA.Editor.Tooltip.StartingWeekday'}}">{{localize "CALENDARIA.Editor.Column.StartWeekday"}}</span>
           <span class="col-type" data-tooltip
-            aria-label="{{localize 'CALENDARIA.Editor.Tooltip.MonthType'}}">{{localize "CALENDARIA.Common.Type"}}</span>
+            aria-label="{{localize 'CALENDARIA.Editor.Tooltip.MonthType'}}">{{localize "ATLAS.Common.Type"}}</span>
           <span class="col-controls"></span>
         </div>
       {{/if}}
@@ -62,7 +62,7 @@
               class="col-start-weekday" {{#if @root.hasActiveCycle}}disabled data-tooltip
               aria-label="{{localize 'CALENDARIA.Editor.Tooltip.StartingWeekdayCycleDisabled'}}"{{/if}}>
               <option value="" {{#unless this.hasStartingWeekday}}selected{{/unless}}>
-                {{localize "CALENDARIA.Editor.StartingWeekday.Auto"}}
+                {{localize "ATLAS.Common.Auto"}}
               </option>
               {{#each this.startingWeekdayOptions}}
                 <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
@@ -117,7 +117,7 @@
     {{#unless monthsWithNav.length}}
       <div class="add-first-item">
         <button type="button" data-action="addMonth" data-key="-1" class="add-month-btn">
-          <i class="fas fa-plus"></i> {{localize "CALENDARIA.Common.Add"}} {{localize "CALENDARIA.Common.Month"}}
+          <i class="fas fa-plus"></i> {{localize "ATLAS.Common.Add"}} {{localize "ATLAS.Common.Month"}}
         </button>
       </div>
     {{/unless}}

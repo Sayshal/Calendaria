@@ -100,7 +100,7 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
         };
       }
     }
-    context.buttons = [{ type: 'submit', icon: 'fas fa-file-import', label: 'CALENDARIA.Common.Import', disabled: !context.hasData || this.#importing }];
+    context.buttons = [{ type: 'submit', icon: 'fas fa-file-import', label: 'ATLAS.Common.Import', disabled: !context.hasData || this.#importing }];
     return context;
   }
 

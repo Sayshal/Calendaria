@@ -71,9 +71,9 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
   static TABS = {
     primary: {
       tabs: [
-        { id: 'content', group: 'primary', label: 'CALENDARIA.Common.Content' },
+        { id: 'content', group: 'primary', label: 'ATLAS.Common.Content' },
         { id: 'schedule', group: 'primary', label: 'CALENDARIA.Note.Tab.Schedule' },
-        { id: 'settings', group: 'primary', label: 'CALENDARIA.Common.Settings' }
+        { id: 'settings', group: 'primary', label: 'ATLAS.Common.Settings' }
       ],
       initial: 'content'
     }
@@ -197,7 +197,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
         if (!path) return;
         ui.context.menuItems = [
           {
-            label: _loc('CALENDARIA.Common.Delete'),
+            label: _loc('ATLAS.Common.Delete'),
             icon: '<i class="fas fa-trash"></i>',
             onClick: () => this.#removeConditionAtPath(path)
           }
@@ -385,7 +385,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const visibility = this.document.system.visibility || 'visible';
     const visibilityConfig = {
       visible: { icon: 'fa-eye', label: 'CALENDARIA.Note.Visibility.Visible', badge: null },
-      hidden: { icon: 'fa-eye-slash', label: 'CALENDARIA.Common.Hidden', badge: _loc('CALENDARIA.Common.Hidden') },
+      hidden: { icon: 'fa-eye-slash', label: 'ATLAS.Common.Hidden', badge: _loc('ATLAS.Common.Hidden') },
       secret: { icon: 'fa-lock', label: 'CALENDARIA.Note.Visibility.Secret', badge: _loc('CALENDARIA.Note.Visibility.Secret') }
     };
     const vis = visibilityConfig[visibility] || visibilityConfig.visible;
@@ -419,7 +419,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       context.occurrences = this.#computeOccurrencePreview(calendar);
       const currentReminderType = this.document.system.reminderType || 'toast';
       context.reminderTypeOptions = [
-        { value: 'none', label: _loc('CALENDARIA.Common.None'), selected: currentReminderType === 'none' },
+        { value: 'none', label: _loc('ATLAS.Common.None'), selected: currentReminderType === 'none' },
         { value: 'toast', label: _loc('CALENDARIA.Note.ReminderTypeToast'), selected: currentReminderType === 'toast' },
         { value: 'chat', label: _loc('CALENDARIA.Note.ReminderTypeChat'), selected: currentReminderType === 'chat' },
         { value: 'dialog', label: _loc('CALENDARIA.Note.ReminderTypeDialog'), selected: currentReminderType === 'dialog' }
@@ -428,7 +428,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       const currentReminderTargets = this.document.system.reminderTargets || 'all';
       context.reminderTargetOptions = [
         { value: 'all', label: _loc('CALENDARIA.Note.ReminderTargetAll'), selected: currentReminderTargets === 'all' },
-        { value: 'gm', label: _loc('CALENDARIA.Common.GMOnly'), selected: currentReminderTargets === 'gm' },
+        { value: 'gm', label: _loc('ATLAS.Common.GMOnly'), selected: currentReminderTargets === 'gm' },
         { value: 'author', label: _loc('CALENDARIA.Note.ReminderTargetAuthor'), selected: currentReminderTargets === 'author' },
         { value: 'viewers', label: _loc('CALENDARIA.Note.ReminderTargetViewers'), selected: currentReminderTargets === 'viewers' },
         { value: 'specific', label: _loc('CALENDARIA.Note.ReminderTargetSpecific'), selected: currentReminderTargets === 'specific' }
@@ -722,14 +722,14 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
         buttons: [
           {
             action: 'apply',
-            label: 'CALENDARIA.Common.Apply',
+            label: 'ATLAS.Common.Apply',
             icon: 'fas fa-check',
             default: true,
             callback: (_event, button) => ({ merge: button.form.elements.merge?.checked ?? false })
           },
           {
             action: 'cancel',
-            label: 'CALENDARIA.Common.Cancel',
+            label: 'ATLAS.Common.Cancel',
             icon: 'fas fa-times'
           }
         ]
@@ -979,7 +979,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
    */
   _formatDateDisplay(calendar, year, month, day) {
     if (!calendar) return `${day} / ${month + 1} / ${year}`;
-    if (calendar.isMonthless) return `${_loc('CALENDARIA.Common.Day')} ${day}, ${year}`;
+    if (calendar.isMonthless) return `${_loc('ATLAS.Common.Day')} ${day}, ${year}`;
     return formatForLocation(calendar, { year, month, dayOfMonth: day - 1, hour: 12, minute: 0, second: 0 }, 'noteViewerDate');
   }
 
@@ -1190,9 +1190,9 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
   #getConditionDescription(condition, calendar) {
     const { field, op, value, offset } = condition;
     const fieldLabels = {
-      year: _loc('CALENDARIA.Common.Year'),
-      month: _loc('CALENDARIA.Common.Month'),
-      day: _loc('CALENDARIA.Common.Day'),
+      year: _loc('ATLAS.Common.Year'),
+      month: _loc('ATLAS.Common.Month'),
+      day: _loc('ATLAS.Common.Day'),
       dayOfYear: _loc('CALENDARIA.Note.Condition.DayInYear'),
       daysBeforeMonthEnd: _loc('CALENDARIA.Condition.Field.DaysBeforeMonthEnd'),
       weekday: _loc('CALENDARIA.Common.Weekday'),

@@ -256,8 +256,8 @@ export async function exportSettings() {
     window: { title: 'CALENDARIA.Common.ExportSettings' },
     content,
     buttons: [
-      { action: 'export', label: 'CALENDARIA.Common.Export', icon: 'fas fa-file-export', default: true },
-      { action: 'cancel', label: 'CALENDARIA.Common.Cancel', icon: 'fas fa-times' }
+      { action: 'export', label: 'ATLAS.Common.Export', icon: 'fas fa-file-export', default: true },
+      { action: 'cancel', label: 'ATLAS.Common.Cancel', icon: 'fas fa-times' }
     ],
     close: () => 'cancel',
     render: (_event, dialog) => {
@@ -361,8 +361,8 @@ export async function importSettings(onComplete) {
         window: { title: 'CALENDARIA.Common.ImportSettings' },
         content,
         buttons: [
-          { action: 'import', label: 'CALENDARIA.Common.Import', icon: 'fas fa-file-import', default: true },
-          { action: 'cancel', label: 'CALENDARIA.Common.Cancel', icon: 'fas fa-times' }
+          { action: 'import', label: 'ATLAS.Common.Import', icon: 'fas fa-file-import', default: true },
+          { action: 'cancel', label: 'ATLAS.Common.Cancel', icon: 'fas fa-times' }
         ],
         close: () => 'cancel',
         render: (_event, dialog) => {

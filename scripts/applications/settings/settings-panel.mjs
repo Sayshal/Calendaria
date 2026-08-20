@@ -140,15 +140,15 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     primary: {
       tabs: [
         { id: 'home', group: 'primary', icon: 'fas fa-house', label: 'CALENDARIA.SettingsPanel.Tab.Home', color: '#ff144f' },
-        { id: 'notes', group: 'primary', icon: 'fas fa-sticky-note', label: 'CALENDARIA.Common.Notes', tabGroup: 'calendar', gmOnly: true },
-        { id: 'time', group: 'primary', icon: 'fas fa-clock', label: 'CALENDARIA.Common.Time', tabGroup: 'calendar', gmOnly: true },
+        { id: 'notes', group: 'primary', icon: 'fas fa-sticky-note', label: 'ATLAS.Common.Notes', tabGroup: 'calendar', gmOnly: true },
+        { id: 'time', group: 'primary', icon: 'fas fa-clock', label: 'ATLAS.Common.Time', tabGroup: 'calendar', gmOnly: true },
         { id: 'weather', group: 'primary', icon: 'fas fa-cloud-sun', label: 'CALENDARIA.Common.Weather', tabGroup: 'calendar', gmOnly: true },
         { id: 'fogofwar', group: 'primary', icon: 'fas fa-eye-slash', label: 'CALENDARIA.SettingsPanel.Tab.FogOfWar', tabGroup: 'calendar', gmOnly: true },
         { id: 'macros', group: 'primary', icon: 'fas fa-bolt', label: 'CALENDARIA.SettingsPanel.Tab.Macros', tabGroup: 'technical', gmOnly: true },
         { id: 'chat', group: 'primary', icon: 'fas fa-comments', label: 'CALENDARIA.SettingsPanel.Tab.Chat', tabGroup: 'technical', gmOnly: true },
         { id: 'permissions', group: 'primary', icon: 'fas fa-user-shield', label: 'CALENDARIA.SettingsPanel.Tab.Permissions', tabGroup: 'technical', gmOnly: true },
         { id: 'canvas', group: 'primary', icon: 'fas fa-map', label: 'CALENDARIA.SettingsPanel.Tab.Canvas', tabGroup: 'technical', gmOnly: true },
-        { id: 'module', group: 'primary', icon: 'fas fa-tools', label: 'CALENDARIA.SettingsPanel.Tab.Module', tabGroup: 'technical' },
+        { id: 'module', group: 'primary', icon: 'fas fa-tools', label: 'ATLAS.Common.Module', tabGroup: 'technical' },
         { id: 'bigcal', group: 'primary', icon: 'fas fa-calendar-days', label: 'CALENDARIA.Common.BigCal', tabGroup: 'apps' },
         { id: 'miniCal', group: 'primary', icon: 'fas fa-compress', label: 'CALENDARIA.Common.MiniCal', tabGroup: 'apps' },
         { id: 'hud', group: 'primary', icon: 'fas fa-landmark-dome', label: 'CALENDARIA.SettingsPanel.Tab.HUD', tabGroup: 'apps' },
@@ -170,7 +170,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.tabGroups = tabGroups;
     context.ungroupedTabs = ungroupedTabs;
     context.showSearch = true;
-    context.searchPlaceholder = 'CALENDARIA.SettingsPanel.Search.Placeholder';
+    context.searchPlaceholder = 'ATLAS.Common.Search';
     context.searchLabel = 'CALENDARIA.SettingsPanel.Search.Label';
     return context;
   }
@@ -536,11 +536,11 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       round: _loc('CALENDARIA.Common.Round'),
       minute: _loc('CALENDARIA.Common.Minute'),
       hour: _loc('CALENDARIA.Common.Hour'),
-      day: _loc('CALENDARIA.Common.Day'),
+      day: _loc('ATLAS.Common.Day'),
       week: _loc('CALENDARIA.Common.Week'),
-      month: _loc('CALENDARIA.Common.Month'),
+      month: _loc('ATLAS.Common.Month'),
       season: _loc('CALENDARIA.Common.Season'),
-      year: _loc('CALENDARIA.Common.Year')
+      year: _loc('ATLAS.Common.Year')
     };
     const isMonthless = CalendarManager.getActiveCalendar()?.isMonthless ?? false;
     const keys = Object.keys(getTimeIncrements()).filter((key) => !isMonthless || key !== 'month');
@@ -688,7 +688,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.FOG_OF_WAR_REVEAL_INTERMEDIATE]: { tab: 'fogofwar', label: 'CALENDARIA.Settings.FogOfWar.RevealIntermediate' },
     [SETTINGS.FOG_OF_WAR_NAV_MODE]: { tab: 'fogofwar', label: 'CALENDARIA.Settings.FogOfWar.NavModeName' },
     [SETTINGS.CINEMATIC_ENABLED]: { tab: 'cinematics', label: 'CALENDARIA.Cinematic.Settings.Enabled.Name' },
-    [SETTINGS.CINEMATIC_THRESHOLD]: { tab: 'cinematics', label: 'CALENDARIA.Common.Threshold' },
+    [SETTINGS.CINEMATIC_THRESHOLD]: { tab: 'cinematics', label: 'ATLAS.Common.Threshold' },
     [SETTINGS.CINEMATIC_THRESHOLD_UNIT]: { tab: 'cinematics', label: 'CALENDARIA.Cinematic.Settings.ThresholdUnit.Name' },
     [SETTINGS.CINEMATIC_ON_REST]: { tab: 'cinematics', label: 'CALENDARIA.Cinematic.Settings.OnRest.Name' },
     [SETTINGS.CINEMATIC_PANEL_DURATION]: { tab: 'cinematics', label: 'CALENDARIA.Cinematic.Settings.PanelDuration.Name' },
@@ -792,7 +792,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.STOPWATCH_IDLE_OPACITY]: { tab: 'stopwatch', label: 'CALENDARIA.Settings.IdleOpacity.Name' },
     [SETTINGS.CUSTOM_PRESETS]: { tab: 'notes', label: 'CALENDARIA.SettingsPanel.Section.Presets' },
     [SETTINGS.MACRO_TRIGGERS]: { tab: 'macros', label: 'CALENDARIA.SettingsPanel.Tab.Macros' },
-    [SETTINGS.CUSTOM_WEATHER_PRESETS]: { tab: 'weather', label: 'CALENDARIA.SettingsPanel.Section.WeatherPresets' },
+    [SETTINGS.CUSTOM_WEATHER_PRESETS]: { tab: 'weather', label: 'ATLAS.Common.WeatherPresets' },
     [SETTINGS.FXMASTER_ENABLED]: { tab: 'weather', label: 'CALENDARIA.Settings.FXMaster.Enabled.Name' },
     [SETTINGS.FXMASTER_TOP_DOWN]: { tab: 'weather', label: 'CALENDARIA.Settings.FXMaster.TopDown.Name' },
     [SETTINGS.FXMASTER_FORCE_DOWNWARD]: { tab: 'weather', label: 'CALENDARIA.Settings.FXMaster.ForceDownward.Name' },
@@ -1005,9 +1005,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     ];
     const noteOpenMode = game.settings.get(MODULE.ID, SETTINGS.NOTE_OPEN_MODE);
     context.noteOpenModeOptions = [
-      { value: 'default', label: _loc('CALENDARIA.Settings.NoteOpenMode.Default'), selected: noteOpenMode === 'default' },
+      { value: 'default', label: _loc('ATLAS.Common.Default'), selected: noteOpenMode === 'default' },
       { value: 'edit', label: _loc('CALENDARIA.Settings.NoteOpenMode.Edit'), selected: noteOpenMode === 'edit' },
-      { value: 'view', label: _loc('CALENDARIA.Settings.NoteOpenMode.View'), selected: noteOpenMode === 'view' }
+      { value: 'view', label: _loc('ATLAS.Common.View'), selected: noteOpenMode === 'view' }
     ];
     context.formatLocations = this.#prepareFormatLocationsForCategory('notes');
   }
@@ -1041,7 +1041,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   async #prepareChatContext(context) {
     const chatMode = game.settings.get(MODULE.ID, SETTINGS.CHAT_TIMESTAMP_MODE);
     context.chatTimestampModeOptions = [
-      { value: 'disabled', label: _loc('CALENDARIA.Common.Disabled'), selected: chatMode === 'disabled' },
+      { value: 'disabled', label: _loc('ATLAS.Common.Disabled'), selected: chatMode === 'disabled' },
       { value: 'replace', label: _loc('CALENDARIA.Settings.ChatTimestampMode.Replace'), selected: chatMode === 'replace' },
       { value: 'augment', label: _loc('CALENDARIA.Settings.ChatTimestampMode.Augment'), selected: chatMode === 'augment' }
     ];
@@ -1097,7 +1097,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     ];
     const miniCalCyclesDisplayMode = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_CYCLES_DISPLAY_MODE);
     context.miniCalCyclesDisplayModeOptions = [
-      { value: 'name', label: _loc('CALENDARIA.Common.Name'), selected: miniCalCyclesDisplayMode === 'name' },
+      { value: 'name', label: _loc('ATLAS.Common.Name'), selected: miniCalCyclesDisplayMode === 'name' },
       { value: 'icon', label: _loc('CALENDARIA.Common.DisplayIconOnly'), selected: miniCalCyclesDisplayMode === 'icon' },
       { value: 'number', label: _loc('CALENDARIA.Settings.HUDCyclesDisplayMode.Number'), selected: miniCalCyclesDisplayMode === 'number' },
       { value: 'roman', label: _loc('CALENDARIA.Settings.HUDCyclesDisplayMode.Roman'), selected: miniCalCyclesDisplayMode === 'roman' }
@@ -1153,7 +1153,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.weatherFxModeOptions = [
       { value: 'full', label: _loc('CALENDARIA.Common.Full'), selected: weatherFxMode === 'full' },
       { value: 'reduced', label: _loc('CALENDARIA.Settings.HUDWeatherFxMode.Reduced'), selected: weatherFxMode === 'reduced' },
-      { value: 'off', label: _loc('CALENDARIA.Common.Off'), selected: weatherFxMode === 'off' }
+      { value: 'off', label: _loc('ATLAS.Common.Off'), selected: weatherFxMode === 'off' }
     ];
     context.hudBorderGlow = game.settings.get(MODULE.ID, SETTINGS.HUD_BORDER_GLOW);
     context.hudDomeBelow = game.settings.get(MODULE.ID, SETTINGS.HUD_DOME_BELOW);
@@ -1189,7 +1189,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.hudShowCycles = game.settings.get(MODULE.ID, SETTINGS.HUD_SHOW_CYCLES);
     const cyclesDisplayMode = game.settings.get(MODULE.ID, SETTINGS.HUD_CYCLES_DISPLAY_MODE);
     context.cyclesDisplayModeOptions = [
-      { value: 'name', label: _loc('CALENDARIA.Common.Name'), selected: cyclesDisplayMode === 'name' },
+      { value: 'name', label: _loc('ATLAS.Common.Name'), selected: cyclesDisplayMode === 'name' },
       { value: 'icon', label: _loc('CALENDARIA.Common.DisplayIconOnly'), selected: cyclesDisplayMode === 'icon' },
       { value: 'number', label: _loc('CALENDARIA.Settings.HUDCyclesDisplayMode.Number'), selected: cyclesDisplayMode === 'number' },
       { value: 'roman', label: _loc('CALENDARIA.Settings.HUDCyclesDisplayMode.Roman'), selected: cyclesDisplayMode === 'roman' }
@@ -1240,7 +1240,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     ];
     const bigCalCyclesDisplayMode = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_CYCLES_DISPLAY_MODE);
     context.bigCalCyclesDisplayModeOptions = [
-      { value: 'name', label: _loc('CALENDARIA.Common.Name'), selected: bigCalCyclesDisplayMode === 'name' },
+      { value: 'name', label: _loc('ATLAS.Common.Name'), selected: bigCalCyclesDisplayMode === 'name' },
       { value: 'icon', label: _loc('CALENDARIA.Common.DisplayIconOnly'), selected: bigCalCyclesDisplayMode === 'icon' },
       { value: 'number', label: _loc('CALENDARIA.Settings.BigCalCyclesDisplayMode.Number'), selected: bigCalCyclesDisplayMode === 'number' },
       { value: 'roman', label: _loc('CALENDARIA.Settings.BigCalCyclesDisplayMode.Roman'), selected: bigCalCyclesDisplayMode === 'roman' }
@@ -1267,7 +1267,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     const calendarDefaultLabel = _loc('CALENDARIA.Format.Preset.CalendarDefault', { calendar: calendarName });
     const presetOptions = [
       { value: 'calendarDefault', label: calendarDefaultLabel },
-      { value: 'custom', label: _loc('CALENDARIA.Common.Custom') },
+      { value: 'custom', label: _loc('ATLAS.Common.Custom') },
       { value: 'approxDate', label: _loc('CALENDARIA.Format.Preset.ApproxDate') },
       { value: 'approxDateTime', label: _loc('CALENDARIA.Format.Preset.ApproxDateTime') },
       { value: 'approxTime', label: _loc('CALENDARIA.Format.Preset.ApproxTime') },
@@ -1303,13 +1303,13 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       { value: 'stopwatchRealtimeNoMs', label: _loc('CALENDARIA.Format.Preset.StopwatchNoMs') },
       { value: 'stopwatchRealtimeMinSec', label: _loc('CALENDARIA.Format.Preset.StopwatchMinSec') },
       { value: 'stopwatchRealtimeSecOnly', label: _loc('CALENDARIA.Format.Preset.StopwatchSecOnly') },
-      { value: 'custom', label: _loc('CALENDARIA.Common.Custom') }
+      { value: 'custom', label: _loc('ATLAS.Common.Custom') }
     ];
     const stopwatchGametimePresets = [
       { value: 'stopwatchGametimeFull', label: _loc('CALENDARIA.Common.Full') },
       { value: 'stopwatchGametimeMinSec', label: _loc('CALENDARIA.Format.Preset.StopwatchMinSec') },
       { value: 'stopwatchGametimeSecOnly', label: _loc('CALENDARIA.Format.Preset.StopwatchSecOnly') },
-      { value: 'custom', label: _loc('CALENDARIA.Common.Custom') }
+      { value: 'custom', label: _loc('ATLAS.Common.Custom') }
     ];
     const stopwatchRealtimeKnown = ['stopwatchRealtimeFull', 'stopwatchRealtimeNoMs', 'stopwatchRealtimeMinSec', 'stopwatchRealtimeSecOnly'];
     const stopwatchGametimeKnown = ['stopwatchGametimeFull', 'stopwatchGametimeMinSec', 'stopwatchGametimeSecOnly'];
@@ -1352,7 +1352,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
           { value: 'time12Sec', label: _loc('CALENDARIA.Format.Preset.Time12Sec') },
           { value: 'time24', label: _loc('CALENDARIA.Format.Preset.Time24') },
           { value: 'time24Sec', label: _loc('CALENDARIA.Format.Preset.Time24Sec') },
-          { value: 'custom', label: _loc('CALENDARIA.Common.Custom') }
+          { value: 'custom', label: _loc('ATLAS.Common.Custom') }
         ];
         defaultFormat = 'time24';
       } else {
@@ -1390,7 +1390,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         ];
         locationPresets = [...presetOptions];
         defaultFormat = 'dateLong';
-        if (supportsOff.includes(loc.id)) locationPresets = [{ value: 'off', label: _loc('CALENDARIA.Common.Hidden') }, ...locationPresets];
+        if (supportsOff.includes(loc.id)) locationPresets = [{ value: 'off', label: _loc('ATLAS.Common.Hidden') }, ...locationPresets];
       }
       const formats = displayFormats[loc.id] || { gm: defaultFormat, player: defaultFormat };
       const isCustomGM = !knownPresets.includes(formats.gm);
@@ -1457,11 +1457,11 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     const unit = game.settings.get(MODULE.ID, SETTINGS.CINEMATIC_THRESHOLD_UNIT);
     context.thresholdUnits = [
       { value: 'hour', label: _loc('CALENDARIA.Common.Hour'), selected: unit === 'hour' },
-      { value: 'day', label: _loc('CALENDARIA.Common.Day'), selected: unit === 'day' },
+      { value: 'day', label: _loc('ATLAS.Common.Day'), selected: unit === 'day' },
       { value: 'week', label: _loc('CALENDARIA.Common.Week'), selected: unit === 'week' },
-      { value: 'month', label: _loc('CALENDARIA.Common.Month'), selected: unit === 'month' },
+      { value: 'month', label: _loc('ATLAS.Common.Month'), selected: unit === 'month' },
       { value: 'season', label: _loc('CALENDARIA.Common.Season'), selected: unit === 'season' },
-      { value: 'year', label: _loc('CALENDARIA.Common.Year'), selected: unit === 'year' }
+      { value: 'year', label: _loc('ATLAS.Common.Year'), selected: unit === 'year' }
     ];
     context.formatLocations = this.#prepareFormatLocationsForCategory('cinematics');
   }
@@ -1616,7 +1616,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       { key: 'dawn', label: 'CALENDARIA.MacroTrigger.Dawn' },
       { key: 'dusk', label: 'CALENDARIA.MacroTrigger.Dusk' },
       { key: 'midday', label: 'CALENDARIA.MacroTrigger.Midday' },
-      { key: 'midnight', label: 'CALENDARIA.Common.Midnight' },
+      { key: 'midnight', label: 'ATLAS.Common.Midnight' },
       { key: 'newDay', label: 'CALENDARIA.Common.NewDay' }
     ];
     context.globalTriggers = globalTriggers.map((trigger) => ({ ...trigger, label: _loc(trigger.label), macroId: config.global?.[trigger.key] || '' }));
@@ -2353,8 +2353,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       classes: ['calendaria'],
       window: { title: 'CALENDARIA.SettingsPanel.ResetSection.Title', contentClasses: ['calendaria', 'reset-section-dialog'] },
       content: `<p>${_loc('CALENDARIA.SettingsPanel.ResetSection.Content')}</p><ul class="reset-list">${listHtml}</ul>`,
-      yes: { label: 'CALENDARIA.Common.Reset', icon: 'fas fa-undo' },
-      no: { label: 'CALENDARIA.Common.Cancel', icon: 'fas fa-times' },
+      yes: { label: 'ATLAS.Common.Reset', icon: 'fas fa-undo' },
+      no: { label: 'ATLAS.Common.Cancel', icon: 'fas fa-times' },
       rejectClose: false
     });
     if (!confirmed) return;
@@ -2376,8 +2376,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       classes: ['calendaria'],
       window: { title: 'CALENDARIA.Settings.FogOfWar.ResetRanges' },
       content: `<p>${_loc('CALENDARIA.Settings.FogOfWar.ResetRangesConfirm')}</p>`,
-      yes: { label: 'CALENDARIA.Common.Reset', icon: 'fas fa-undo' },
-      no: { label: 'CALENDARIA.Common.Cancel', icon: 'fas fa-times' },
+      yes: { label: 'ATLAS.Common.Reset', icon: 'fas fa-undo' },
+      no: { label: 'ATLAS.Common.Cancel', icon: 'fas fa-times' },
       rejectClose: false
     });
     if (!confirmed) return;

@@ -317,7 +317,7 @@ export function getClimateTemplateOptions() {
   const templates = Object.values(CLIMATE_ZONE_TEMPLATES)
     .map((t) => ({ value: t.id, label: t.name }))
     .sort((a, b) => a.label.localeCompare(b.label));
-  return [{ value: 'custom', label: _loc('CALENDARIA.Weather.Climate.Custom') }, ...templates];
+  return [{ value: 'custom', label: _loc('ATLAS.Common.Custom') }, ...templates];
 }
 
 /**
@@ -333,7 +333,7 @@ export function getBlankZoneConfig(seasonNames = []) {
   }
   return {
     id: 'custom',
-    name: _loc('CALENDARIA.Weather.Climate.Custom'),
+    name: _loc('ATLAS.Common.Custom'),
     description: '',
     brightnessMultiplier: 1.0,
     environmentBase: null,

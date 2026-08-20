@@ -164,15 +164,15 @@ export class TokenReferenceDialog extends HandlebarsApplicationMixin(Application
     const context = await super._prepareContext(options);
     const tokens = getAvailableTokens();
     const groups = [
-      { id: 'year', label: _loc('CALENDARIA.Common.Year'), tokens: [] },
-      { id: 'month', label: _loc('CALENDARIA.Common.Month'), tokens: [] },
-      { id: 'day', label: _loc('CALENDARIA.Common.Day'), tokens: [] },
+      { id: 'year', label: _loc('ATLAS.Common.Year'), tokens: [] },
+      { id: 'month', label: _loc('ATLAS.Common.Month'), tokens: [] },
+      { id: 'day', label: _loc('ATLAS.Common.Day'), tokens: [] },
       { id: 'weekday', label: _loc('CALENDARIA.Common.Weekday'), tokens: [] },
       { id: 'week', label: _loc('CALENDARIA.Common.Week'), tokens: [] },
-      { id: 'time', label: _loc('CALENDARIA.Common.Time'), tokens: [] },
+      { id: 'time', label: _loc('ATLAS.Common.Time'), tokens: [] },
       { id: 'era', label: _loc('CALENDARIA.Common.Era'), tokens: [] },
       { id: 'season', label: _loc('CALENDARIA.TokenReference.Group.Season'), tokens: [] },
-      { id: 'fantasy', label: _loc('CALENDARIA.Common.Fantasy'), tokens: [] },
+      { id: 'fantasy', label: _loc('ATLAS.Common.Fantasy'), tokens: [] },
       { id: 'stopwatch', label: _loc('CALENDARIA.Common.StopWatch'), tokens: [] }
     ];
     const highlightedTokens = this.#getHighlightedTokens();

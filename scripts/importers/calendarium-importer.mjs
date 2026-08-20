@@ -76,7 +76,7 @@ export default class CalendariumImporter extends BaseImporter {
       metadata: {
         id: calendar.id || 'imported-calendarium',
         description: calendar.description || _loc('CALENDARIA.Importer.ImportedFrom.Calendarium'),
-        system: calendar.name || _loc('CALENDARIA.Common.Unknown'),
+        system: calendar.name || _loc('ATLAS.Common.Unknown'),
         importedFrom: 'calendarium'
       },
       currentDate: this.#transformCurrentDate(calendar.current)

@@ -42,7 +42,7 @@ const CATEGORY_LABELS = {
   moon: 'CALENDARIA.Common.Moon',
   cycle: 'CALENDARIA.Common.Cycle',
   era: 'CALENDARIA.Common.Era',
-  other: 'CALENDARIA.Common.Other'
+  other: 'ATLAS.Common.Other'
 };
 
 /** @type {string[]} Category display order */
@@ -50,7 +50,7 @@ const CATEGORY_ORDER = ['date', 'weekday', 'week', 'season', 'moon', 'cycle', 'e
 
 /** @type {Object<string, string>} Operator display labels */
 const OPERATOR_LABELS = {
-  [CONDITION_OPERATORS.EQUAL]: 'CALENDARIA.Condition.Operator.Equal',
+  [CONDITION_OPERATORS.EQUAL]: 'ATLAS.Common.Equals',
   [CONDITION_OPERATORS.NOT_EQUAL]: 'CALENDARIA.Condition.Operator.NotEqual',
   [CONDITION_OPERATORS.GREATER_EQUAL]: 'CALENDARIA.Condition.Operator.GreaterEqual',
   [CONDITION_OPERATORS.LESS_EQUAL]: 'CALENDARIA.Condition.Operator.LessEqual',
@@ -72,20 +72,20 @@ const FIELD_REGISTRY = {
     inputType: 'number',
     operators: ALL_OPS,
     category: 'date',
-    label: 'CALENDARIA.Common.Year'
+    label: 'ATLAS.Common.Year'
   },
   [CONDITION_FIELDS.MONTH]: {
     inputType: 'select',
     operators: COMPARE_OPS,
     category: 'date',
-    label: 'CALENDARIA.Common.Month',
+    label: 'ATLAS.Common.Month',
     getOptions: (cal) => (cal?.monthsArray ?? []).map((m, i) => ({ value: i + 1, label: _loc(m.name) }))
   },
   [CONDITION_FIELDS.DAY]: {
     inputType: 'number',
     operators: ALL_OPS,
     category: 'date',
-    label: 'CALENDARIA.Common.Day'
+    label: 'ATLAS.Common.Day'
   },
   [CONDITION_FIELDS.MONTH_IN_CALENDAR]: {
     inputType: 'select',
@@ -464,7 +464,7 @@ const FIELD_REGISTRY = {
     inputType: 'number',
     operators: EVENT_OPS,
     category: 'other',
-    label: 'CALENDARIA.Condition.Field.Event',
+    label: 'ATLAS.Common.Event',
     needsValue2: true,
     value2Label: 'CALENDARIA.Condition.Builder.EventNoteSelect',
     value2Hint: 'CALENDARIA.Condition.Builder.Tooltip.EventSelect',

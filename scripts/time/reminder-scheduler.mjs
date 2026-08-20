@@ -377,7 +377,7 @@ export default class ReminderScheduler {
       content: `<p>${icon} ${message}</p>`,
       buttons: [
         { action: 'open', label: 'CALENDARIA.Common.OpenNote', icon: 'fas fa-book-open', callback: () => 'open' },
-        { action: 'dismiss', label: 'CALENDARIA.Reminder.Dismiss', icon: 'fas fa-times', default: true, callback: () => 'dismiss' }
+        { action: 'dismiss', label: 'ATLAS.Common.Dismiss', icon: 'fas fa-times', default: true, callback: () => 'dismiss' }
       ],
       rejectClose: false
     });
@@ -457,7 +457,7 @@ export default class ReminderScheduler {
               if (page) page.sheet.render(true, { mode: 'view' });
             }
           },
-          { action: 'dismiss', label: 'CALENDARIA.Reminder.Dismiss', icon: 'fas fa-times', default: true }
+          { action: 'dismiss', label: 'ATLAS.Common.Dismiss', icon: 'fas fa-times', default: true }
         ],
         rejectClose: false
       });

@@ -37,7 +37,7 @@ export default class CalendariaSettings {
         type: new BooleanField({ initial: false })
       },
       [SETTINGS.CINEMATIC_THRESHOLD]: {
-        name: 'CALENDARIA.Common.Threshold',
+        name: 'ATLAS.Common.Threshold',
         hint: 'CALENDARIA.Cinematic.Settings.Threshold.Hint',
         scope: 'world',
         config: false,
@@ -127,7 +127,7 @@ export default class CalendariaSettings {
         scope: 'client',
         config: false,
         type: new StringField({
-          choices: { default: 'CALENDARIA.Settings.NoteOpenMode.Default', edit: 'CALENDARIA.Settings.NoteOpenMode.Edit', view: 'CALENDARIA.Settings.NoteOpenMode.View' },
+          choices: { default: 'ATLAS.Common.Default', edit: 'CALENDARIA.Settings.NoteOpenMode.Edit', view: 'ATLAS.Common.View' },
           initial: 'default'
         })
       },
@@ -280,7 +280,7 @@ export default class CalendariaSettings {
         config: false,
         type: new StringField({
           choices: {
-            name: 'CALENDARIA.Common.Name',
+            name: 'ATLAS.Common.Name',
             icon: 'CALENDARIA.Common.DisplayIconOnly',
             number: 'CALENDARIA.Settings.HUDCyclesDisplayMode.Number',
             roman: 'CALENDARIA.Settings.HUDCyclesDisplayMode.Roman'
@@ -379,7 +379,7 @@ export default class CalendariaSettings {
         config: false,
         type: new StringField({
           choices: {
-            name: 'CALENDARIA.Common.Name',
+            name: 'ATLAS.Common.Name',
             icon: 'CALENDARIA.Common.DisplayIconOnly',
             number: 'CALENDARIA.Settings.BigCalCyclesDisplayMode.Number',
             roman: 'CALENDARIA.Settings.BigCalCyclesDisplayMode.Roman'
@@ -686,7 +686,7 @@ export default class CalendariaSettings {
         config: false,
         type: new StringField({
           choices: {
-            none: 'CALENDARIA.Common.None',
+            none: 'ATLAS.Common.None',
             compactCombat: 'CALENDARIA.Settings.HUDCombatMode.CompactCombat',
             compactEncounter: 'CALENDARIA.Settings.HUDCombatMode.CompactEncounter',
             hideCombat: 'CALENDARIA.Common.HideOnCombatStart',
@@ -702,7 +702,7 @@ export default class CalendariaSettings {
         config: false,
         type: new StringField({
           choices: {
-            none: 'CALENDARIA.Common.None',
+            none: 'ATLAS.Common.None',
             hideCombat: 'CALENDARIA.Common.HideOnCombatStart',
             hideEncounter: 'CALENDARIA.Common.HideOnEncounter'
           },
@@ -716,7 +716,7 @@ export default class CalendariaSettings {
         config: false,
         type: new StringField({
           choices: {
-            none: 'CALENDARIA.Common.None',
+            none: 'ATLAS.Common.None',
             hideCombat: 'CALENDARIA.Common.HideOnCombatStart',
             hideEncounter: 'CALENDARIA.Common.HideOnEncounter'
           },
@@ -730,7 +730,7 @@ export default class CalendariaSettings {
         config: false,
         type: new StringField({
           choices: {
-            none: 'CALENDARIA.Common.None',
+            none: 'ATLAS.Common.None',
             hideCombat: 'CALENDARIA.Common.HideOnCombatStart',
             hideEncounter: 'CALENDARIA.Common.HideOnEncounter'
           },
@@ -744,7 +744,7 @@ export default class CalendariaSettings {
         config: false,
         type: new StringField({
           choices: {
-            none: 'CALENDARIA.Common.None',
+            none: 'ATLAS.Common.None',
             hideCombat: 'CALENDARIA.Common.HideOnCombatStart',
             hideEncounter: 'CALENDARIA.Common.HideOnEncounter'
           },
@@ -758,7 +758,7 @@ export default class CalendariaSettings {
         config: false,
         type: new StringField({
           choices: {
-            none: 'CALENDARIA.Common.None',
+            none: 'ATLAS.Common.None',
             hideCombat: 'CALENDARIA.Common.HideOnCombatStart',
             hideEncounter: 'CALENDARIA.Common.HideOnEncounter'
           },
@@ -772,7 +772,7 @@ export default class CalendariaSettings {
         config: false,
         type: new StringField({
           choices: {
-            none: 'CALENDARIA.Common.None',
+            none: 'ATLAS.Common.None',
             hideCombat: 'CALENDARIA.Common.HideOnCombatStart',
             hideEncounter: 'CALENDARIA.Common.HideOnEncounter'
           },
@@ -953,7 +953,7 @@ export default class CalendariaSettings {
         config: false,
         type: new StringField({
           choices: {
-            name: 'CALENDARIA.Common.Name',
+            name: 'ATLAS.Common.Name',
             icon: 'CALENDARIA.Common.DisplayIconOnly',
             number: 'CALENDARIA.Settings.HUDCyclesDisplayMode.Number',
             roman: 'CALENDARIA.Settings.HUDCyclesDisplayMode.Roman'
@@ -1104,7 +1104,7 @@ export default class CalendariaSettings {
         scope: 'world',
         config: false,
         type: new StringField({
-          choices: { disabled: 'CALENDARIA.Common.Disabled', replace: 'CALENDARIA.Settings.ChatTimestampMode.Replace', augment: 'CALENDARIA.Settings.ChatTimestampMode.Augment' },
+          choices: { disabled: 'ATLAS.Common.Disabled', replace: 'CALENDARIA.Settings.ChatTimestampMode.Replace', augment: 'CALENDARIA.Settings.ChatTimestampMode.Augment' },
           initial: 'disabled'
         })
       },

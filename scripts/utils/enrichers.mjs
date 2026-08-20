@@ -738,7 +738,7 @@ function enrichRestDay(config, label) {
   if (blocked) return blocked;
   const weekday = calendar?.getWeekdayForDate?.(target.internal);
   const isRest = weekday?.isRestDay ?? false;
-  const key = isRest ? 'CALENDARIA.Common.RestDay' : 'CALENDARIA.Enricher.Label.WorkDay';
+  const key = isRest ? 'ATLAS.Common.RestDay' : 'CALENDARIA.Enricher.Label.WorkDay';
   const text = _loc(key);
   const tooltip = dateTooltip('CALENDARIA.Enricher.Tooltip.DayType', text, target, calendar);
   const { isLive, configStr } = liveArgs(target, config.raw);
@@ -758,7 +758,7 @@ function enrichCountdown(config, label) {
   const current = getCurrentDateTime(calendar, components);
   const days = daysBetween(toInternal(current), toInternal(target));
   const abs = Math.abs(days);
-  const unit = abs === 1 ? _loc('CALENDARIA.Common.UnitDay') : _loc('CALENDARIA.Common.UnitDays');
+  const unit = abs === 1 ? _loc('CALENDARIA.Common.UnitDay') : _loc('ATLAS.Common.Days');
   const text = label || formatCountdown(days);
   const tooltip = _loc('CALENDARIA.Enricher.Tooltip.Countdown', { date: formatDate(target, 'dateLong', calendar), value: `${abs} ${unit}` });
   return createContentLink('countdown', text, { calYear: target.year, calMonth: target.month, calDay: target.day }, 'fa-hourglass-half', tooltip, config.raw);
@@ -814,7 +814,7 @@ function enrichCountup(config, label) {
   const tooltipDate = formatDate(isStatic ? endDate : target, 'dateLong', calendar);
   const formatTooltip = (value) =>
     isUntil ? _loc('CALENDARIA.Enricher.Tooltip.TimeUntil', { target: tooltipDate, value }) : _loc('CALENDARIA.Enricher.Tooltip.TimeSince', { date: tooltipDate, value });
-  const unit = absDays === 1 ? _loc('CALENDARIA.Common.UnitDay') : _loc('CALENDARIA.Common.UnitDays');
+  const unit = absDays === 1 ? _loc('CALENDARIA.Common.UnitDay') : _loc('ATLAS.Common.Days');
   const dataset = { calYear: target.year, calMonth: target.month, calDay: target.day };
   const liveConfig = isStatic ? null : config.raw;
   if (config.relative) {
@@ -839,7 +839,7 @@ function enrichBetween(config, label) {
   const useMonths = config.unit === 'months';
   if (useMonths) {
     const months = Math.abs(monthsBetween(toInternal(dates.date1), toInternal(dates.date2)));
-    const unit = months === 1 ? _loc('CALENDARIA.Common.UnitMonth') : _loc('CALENDARIA.Common.UnitMonths');
+    const unit = months === 1 ? _loc('CALENDARIA.Common.UnitMonth') : _loc('ATLAS.Common.Months');
     const tooltip = _loc('CALENDARIA.Enricher.Tooltip.DaysBetween', {
       value: `${months} ${unit}`,
       from: formatDate(dates.date1, 'dateLong', calendar),
@@ -848,7 +848,7 @@ function enrichBetween(config, label) {
     return createElement('between', label || `${months} ${unit}`, null, false, 'fa-ruler-horizontal', tooltip);
   }
   const days = Math.abs(daysBetween(toInternal(dates.date1), toInternal(dates.date2)));
-  const unit = days === 1 ? _loc('CALENDARIA.Common.UnitDay') : _loc('CALENDARIA.Common.UnitDays');
+  const unit = days === 1 ? _loc('CALENDARIA.Common.UnitDay') : _loc('ATLAS.Common.Days');
   const tooltip = _loc('CALENDARIA.Enricher.Tooltip.DaysBetween', {
     value: `${days} ${unit}`,
     from: formatDate(dates.date1, 'dateLong', calendar),
@@ -1647,7 +1647,7 @@ function enrichPrecipitation(config, label) {
   if (unavailable) return unavailable;
   if (!weather) return createErrorElement('CALENDARIA.Enricher.Error.NoWeather');
   const precipType = weather.precipitation?.type;
-  const text = precipType ? precipType.charAt(0).toUpperCase() + precipType.slice(1) : _loc('CALENDARIA.Common.None');
+  const text = precipType ? precipType.charAt(0).toUpperCase() + precipType.slice(1) : _loc('ATLAS.Common.None');
   const tooltip = dateTooltip('CALENDARIA.Enricher.Tooltip.Precipitation', text, target, calendar);
   const { isLive, configStr } = liveArgs(target, config.raw);
   return createElement('precipitation', label || text, configStr, isLive, 'fa-cloud-rain', tooltip);
@@ -2197,7 +2197,7 @@ function enrichCompare(config, label) {
   const yearZero = calendar?.years?.yearZero ?? 0;
   const timeSinceText = timeSince({ year: target.year - yearZero, month: target.month - 1, dayOfMonth: target.day - 1 }, components);
   const days = Math.abs(daysBetween(toInternal(target), toInternal(getCurrentDateTime(calendar, components))));
-  const unit = days === 1 ? _loc('CALENDARIA.Common.UnitDay') : _loc('CALENDARIA.Common.UnitDays');
+  const unit = days === 1 ? _loc('CALENDARIA.Common.UnitDay') : _loc('ATLAS.Common.Days');
   const text = `${timeSinceText} (${days} ${unit})`;
   const targetStr = formatDate(target, 'dateLong', calendar);
   const tooltip = _loc('CALENDARIA.Enricher.Tooltip.DateComparison', { value: targetStr });

@@ -803,7 +803,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
       buttons: [
         {
           action: 'save',
-          label: 'CALENDARIA.Common.Save',
+          label: 'ATLAS.Common.Save',
           icon: 'fas fa-save',
           callback: (_event, _button, dialog) => {
             const form = dialog.element.querySelector('form');
@@ -1174,7 +1174,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
       });
     }
     items.push(buildOpenAppsMenuItem());
-    items.push({ label: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', onClick: () => this.close() });
+    items.push({ label: 'ATLAS.Common.Close', icon: '<i class="fas fa-times"></i>', onClick: () => this.close() });
     return items;
   }
 

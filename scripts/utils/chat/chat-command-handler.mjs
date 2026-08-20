@@ -410,7 +410,7 @@ export function cmdCalendar() {
   if (!calendar) return null;
   const lines = [];
   lines.push(`<strong>${_loc('CALENDARIA.Common.Date')}:</strong> ${formatDate(null, 'dateLong')}`);
-  lines.push(`<strong>${_loc('CALENDARIA.Common.Time')}:</strong> ${formatDate(null, 'time24')}`);
+  lines.push(`<strong>${_loc('ATLAS.Common.Time')}:</strong> ${formatDate(null, 'time24')}`);
   const season = getCurrentSeason();
   if (season) lines.push(`<strong>${_loc('CALENDARIA.Common.Season')}:</strong> ${_loc(season.name)}`);
   const weather = WeatherManager.getCurrentWeather();
@@ -491,7 +491,7 @@ export function cmdWeekday() {
   if (!calendar) return null;
   const weekday = getCurrentWeekday();
   if (!weekday) return { content: _loc('CALENDARIA.ChatCommand.NoWeekday') };
-  const restDay = weekday.isRestDay ? ` (${_loc('CALENDARIA.Common.RestDay')})` : '';
+  const restDay = weekday.isRestDay ? ` (${_loc('ATLAS.Common.RestDay')})` : '';
   return { content: `<i class="fas fa-calendar-week"></i> <strong>${_loc(weekday.name)}</strong>${restDay}` };
 }
 
@@ -581,7 +581,7 @@ const ENRICHER_CATEGORIES = [
     examples: { weather: '5 3 1492', temperature: 'date="5 3 1492"', forecast: '3 date="5 3 1492"' }
   },
   {
-    label: 'CALENDARIA.Enricher.Category.Notes',
+    label: 'ATLAS.Common.Notes',
     keys: ['event', 'notes', 'next', 'category', 'chronicle'],
     examples: { event: 'Winter Solstice', category: 'quest', chronicle: '1 1 1500 to 14 1 1500' }
   },
@@ -591,7 +591,7 @@ const ENRICHER_CATEGORIES = [
     examples: { summary: 'date="5 3 1492"', almanac: 'date="5 3 1492"', format: 'MMMM YYYY', compare: '1 1 2025 cal=gregorian', peek: '+7d' }
   },
   {
-    label: 'CALENDARIA.Enricher.Category.Actions',
+    label: 'ATLAS.Common.Actions',
     keys: ['advancetotime', 'advanceinterval', 'advancetopreset', 'settime', 'jumptodate', 'toggleclock', 'setweather'],
     examples: { advancetotime: '18:00', advanceinterval: 'hour=1', advancetopreset: 'sunset', settime: '12:00', jumptodate: '1 1 2030', setweather: 'rain' }
   }

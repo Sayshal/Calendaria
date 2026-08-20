@@ -14,7 +14,7 @@
     <div class="settings-row">
       <fieldset>
         <legend
-          data-tooltip-html="<b>{{localize 'CALENDARIA.Note.Visibility.Visible'}}</b>: {{localize 'CALENDARIA.Note.Visibility.VisibleHint'}}<br><b>{{localize 'CALENDARIA.Common.Hidden'}}</b>: {{localize 'CALENDARIA.Note.Visibility.HiddenHint'}}<br><b>{{localize 'CALENDARIA.Note.Visibility.Secret'}}</b>: {{localize 'CALENDARIA.Note.Visibility.SecretHint'}}">
+          data-tooltip-html="<b>{{localize 'CALENDARIA.Note.Visibility.Visible'}}</b>: {{localize 'CALENDARIA.Note.Visibility.VisibleHint'}}<br><b>{{localize 'ATLAS.Common.Hidden'}}</b>: {{localize 'CALENDARIA.Note.Visibility.HiddenHint'}}<br><b>{{localize 'CALENDARIA.Note.Visibility.Secret'}}</b>: {{localize 'CALENDARIA.Note.Visibility.SecretHint'}}">
           {{localize "CALENDARIA.Common.Visibility"}}
         </legend>
         <div class="visibility-group">
@@ -24,7 +24,7 @@
                 {{localize "CALENDARIA.Note.Visibility.Visible"}}
               </option>
               <option value="hidden" {{#if (eq system.visibility "hidden")}}selected{{/if}}>
-                {{localize "CALENDARIA.Common.Hidden"}}
+                {{localize "ATLAS.Common.Hidden"}}
               </option>
               {{#if isGM}}
                 <option value="secret" {{#if (eq system.visibility "secret")}}selected{{/if}}>
@@ -41,7 +41,7 @@
           {{/if}}
           <label data-tooltip aria-label="{{localize 'CALENDARIA.UI.SilentTooltip'}}">
             <input type="checkbox" name="system.silent" {{checked system.silent}}>
-            {{localize "CALENDARIA.Note.Silent"}}
+            {{localize "ATLAS.Common.Silent"}}
           </label>
         </div>
       </fieldset>
@@ -74,7 +74,7 @@
           <legend data-tooltip aria-label="{{localize 'CALENDARIA.Note.Tooltip.Macro'}}">{{localize
               "CALENDARIA.Common.Macro"}}</legend>
           <select name="system.macro" data-tooltip aria-label="{{localize 'CALENDARIA.UI.MacroTooltip'}}">
-            <option value="">{{localize "CALENDARIA.Common.None"}}</option>
+            <option value="">{{localize "ATLAS.Common.None"}}</option>
             {{#each availableMacros}}
               <option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>
             {{/each}}
@@ -169,23 +169,23 @@
             </span>
             {{#if isGMEntry}}
               <select disabled>
-                <option selected>{{localize "CALENDARIA.Note.Ownership.Owner"}}</option>
+                <option selected>{{localize "ATLAS.Common.Owner"}}</option>
               </select>
             {{else if isAuthorEntry}}
               <select disabled>
-                <option selected>{{localize "CALENDARIA.Note.Ownership.Owner"}}</option>
+                <option selected>{{localize "ATLAS.Common.Owner"}}</option>
               </select>
             {{else}}
               <select data-ownership-user="{{userId}}" data-tooltip
                 aria-label="{{localize 'CALENDARIA.Note.Ownership.Level'}}">
                 <option value="-1" {{#if (eq level -1)}}selected{{/if}}>
-                  {{localize "CALENDARIA.Common.None"}}
+                  {{localize "ATLAS.Common.None"}}
                 </option>
                 <option value="2" {{#if (eq level 2)}}selected{{/if}}>
                   {{localize "CALENDARIA.Note.Ownership.Observer"}}
                 </option>
                 <option value="3" {{#if (eq level 3)}}selected{{/if}}>
-                  {{localize "CALENDARIA.Note.Ownership.Owner"}}
+                  {{localize "ATLAS.Common.Owner"}}
                 </option>
               </select>
             {{/if}}

@@ -1085,8 +1085,8 @@ export const WEATHER_CATEGORIES = {
   standard: { id: 'standard', label: 'CALENDARIA.Common.Standard' },
   severe: { id: 'severe', label: 'CALENDARIA.Common.Severe' },
   environmental: { id: 'environmental', label: 'CALENDARIA.Weather.Category.Environmental' },
-  fantasy: { id: 'fantasy', label: 'CALENDARIA.Common.Fantasy' },
-  custom: { id: 'custom', label: 'CALENDARIA.Common.Custom' }
+  fantasy: { id: 'fantasy', label: 'ATLAS.Common.Fantasy' },
+  custom: { id: 'custom', label: 'ATLAS.Common.Custom' }
 };
 
 /**

@@ -375,7 +375,7 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
       onClick: () => this._toggleStickyTray()
     });
     items.push(buildOpenAppsMenuItem());
-    items.push({ label: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', onClick: () => this.close() });
+    items.push({ label: 'ATLAS.Common.Close', icon: '<i class="fas fa-times"></i>', onClick: () => this.close() });
     return items;
   }
 
@@ -536,11 +536,11 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
       round: _loc('CALENDARIA.Common.Round'),
       minute: _loc('CALENDARIA.Common.Minute'),
       hour: _loc('CALENDARIA.Common.Hour'),
-      day: _loc('CALENDARIA.Common.Day'),
+      day: _loc('ATLAS.Common.Day'),
       week: _loc('CALENDARIA.Common.Week'),
-      month: _loc('CALENDARIA.Common.Month'),
+      month: _loc('ATLAS.Common.Month'),
       season: _loc('CALENDARIA.Common.Season'),
-      year: _loc('CALENDARIA.Common.Year')
+      year: _loc('ATLAS.Common.Year')
     };
     return labels[key] || key;
   }

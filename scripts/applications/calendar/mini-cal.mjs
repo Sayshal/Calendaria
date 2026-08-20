@@ -818,7 +818,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
           const endTime = this._formatTime(end?.hour, end?.minute);
           timeLabel = `${startTime} - ${endTime}`;
         }
-        const authorName = enriched.author || _loc('CALENDARIA.Common.Unknown');
+        const authorName = enriched.author || _loc('ATLAS.Common.Unknown');
         let repeatLabel = MiniCal._getRepeatLabel(page.system.repeat);
         if (!repeatLabel && page.system.conditionTree) {
           const calendar = CalendarManager.getActiveCalendar();
@@ -901,7 +901,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     lines.push(`<strong style="color: ${enriched.color}">${esc(enriched.name)}</strong>`);
     lines.push(`<span>${esc(timeLabel)}</span>`);
     if (enriched.visibility !== 'visible') {
-      const visKey = enriched.visibility === 'hidden' ? 'CALENDARIA.Common.Hidden' : 'CALENDARIA.Note.Visibility.Secret';
+      const visKey = enriched.visibility === 'hidden' ? 'ATLAS.Common.Hidden' : 'CALENDARIA.Note.Visibility.Secret';
       const visIcon = enriched.visibility === 'hidden' ? 'fa-eye-slash' : 'fa-lock';
       lines.push(`<span><i class="fas ${visIcon}"></i> ${esc(_loc(visKey))}</span>`);
     }
@@ -1112,7 +1112,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     new foundry.applications.ux.ContextMenu.implementation(
       this.element,
       '.minical-container',
-      [{ label: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', onClick: () => MiniCal.hide() }],
+      [{ label: 'ATLAS.Common.Close', icon: '<i class="fas fa-times"></i>', onClick: () => MiniCal.hide() }],
       {
         fixed: true,
         jQuery: false,
@@ -1323,7 +1323,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       onClick: () => this._toggleStickyPosition()
     });
     items.push(buildOpenAppsMenuItem());
-    items.push({ label: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', onClick: () => MiniCal.hide() });
+    items.push({ label: 'ATLAS.Common.Close', icon: '<i class="fas fa-times"></i>', onClick: () => MiniCal.hide() });
     return items;
   }
 
@@ -2013,11 +2013,11 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       round: _loc('CALENDARIA.Common.Round'),
       minute: _loc('CALENDARIA.Common.Minute'),
       hour: _loc('CALENDARIA.Common.Hour'),
-      day: _loc('CALENDARIA.Common.Day'),
+      day: _loc('ATLAS.Common.Day'),
       week: _loc('CALENDARIA.Common.Week'),
-      month: _loc('CALENDARIA.Common.Month'),
+      month: _loc('ATLAS.Common.Month'),
       season: _loc('CALENDARIA.Common.Season'),
-      year: _loc('CALENDARIA.Common.Year')
+      year: _loc('ATLAS.Common.Year')
     };
     return labels[key] || key;
   }

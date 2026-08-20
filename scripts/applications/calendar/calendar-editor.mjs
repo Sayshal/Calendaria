@@ -103,19 +103,19 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   /** Tab group definitions with colors */
   static TAB_GROUPS = [
     { id: 'structure', label: 'CALENDARIA.Editor.Group.Structure', tooltip: 'CALENDARIA.Editor.GroupTooltip.Structure', color: '#84cc16' },
-    { id: 'features', label: 'CALENDARIA.Editor.Group.Features', tooltip: 'CALENDARIA.Editor.GroupTooltip.Features', color: '#f97316' }
+    { id: 'features', label: 'ATLAS.Common.Features', tooltip: 'CALENDARIA.Editor.GroupTooltip.Features', color: '#f97316' }
   ];
 
   /** @override */
   static TABS = {
     primary: {
       tabs: [
-        { id: 'overview', group: 'primary', icon: 'fas fa-info-circle', label: 'CALENDARIA.Editor.Tab.Overview', color: '#ff144f' },
-        { id: 'display', group: 'primary', icon: 'fas fa-eye', label: 'CALENDARIA.Editor.Tab.Display', color: '#ff144f' },
+        { id: 'overview', group: 'primary', icon: 'fas fa-info-circle', label: 'ATLAS.Common.Overview', color: '#ff144f' },
+        { id: 'display', group: 'primary', icon: 'fas fa-eye', label: 'ATLAS.Common.Display', color: '#ff144f' },
         { id: 'months', group: 'primary', icon: 'fas fa-calendar', label: 'CALENDARIA.Common.Months', tabGroup: 'structure' },
         { id: 'weeks', group: 'primary', icon: 'fas fa-calendar-week', label: 'CALENDARIA.Common.Weeks', tabGroup: 'structure' },
         { id: 'years', group: 'primary', icon: 'fas fa-hashtag', label: 'CALENDARIA.Editor.Tab.Years', tabGroup: 'structure' },
-        { id: 'time', group: 'primary', icon: 'fas fa-clock', label: 'CALENDARIA.Common.Time', tabGroup: 'structure' },
+        { id: 'time', group: 'primary', icon: 'fas fa-clock', label: 'ATLAS.Common.Time', tabGroup: 'structure' },
         { id: 'festivals', group: 'primary', icon: 'fas fa-star', label: 'CALENDARIA.Common.Festivals', tabGroup: 'features' },
         { id: 'eras', group: 'primary', icon: 'fas fa-hourglass-half', label: 'CALENDARIA.Common.Eras', tabGroup: 'features' },
         { id: 'cycles', group: 'primary', icon: 'fas fa-arrows-rotate', label: 'CALENDARIA.Common.Cycles', tabGroup: 'features' },
@@ -315,10 +315,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     if (this.#isDirty) {
       const confirmed = await foundry.applications.api.DialogV2.confirm({
         classes: ['calendaria'],
-        window: { title: 'CALENDARIA.Editor.UnsavedChanges' },
+        window: { title: 'ATLAS.Common.UnsavedChanges' },
         content: `<p>${_loc('CALENDARIA.Editor.UnsavedChangesMessage')}</p>`,
         yes: { label: 'CALENDARIA.Editor.DiscardChanges', icon: 'fas fa-trash' },
-        no: { label: 'CALENDARIA.Common.Cancel', icon: 'fas fa-times' },
+        no: { label: 'ATLAS.Common.Cancel', icon: 'fas fa-times' },
         rejectClose: false
       });
       if (!confirmed) throw new Error('Close cancelled by user. This is not a bug.');
@@ -339,10 +339,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!this.#isDirty) return true;
     return foundry.applications.api.DialogV2.confirm({
       classes: ['calendaria'],
-      window: { title: 'CALENDARIA.Editor.UnsavedChanges' },
+      window: { title: 'ATLAS.Common.UnsavedChanges' },
       content: `<p>${_loc('CALENDARIA.Editor.UnsavedChangesMessage')}</p>`,
       yes: { label: 'CALENDARIA.Editor.DiscardChanges', icon: 'fas fa-trash' },
-      no: { label: 'CALENDARIA.Common.Cancel', icon: 'fas fa-times' },
+      no: { label: 'ATLAS.Common.Cancel', icon: 'fas fa-times' },
       rejectClose: false
     });
   }
@@ -400,7 +400,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       const tree = fd.conditionTree;
       let conditionSummary = tree ? summarizeConditionTree(tree, this.#calendarData) : '';
       const duration = fd.duration ?? 1;
-      if (conditionSummary && duration > 1) conditionSummary += ` (${duration} ${_loc('CALENDARIA.Common.UnitDays')})`;
+      if (conditionSummary && duration > 1) conditionSummary += ` (${duration} ${_loc('ATLAS.Common.Days')})`;
       const icon = fd.icon || '';
       const iconIsImage = typeof icon === 'string' && !icon.startsWith('fa') && (icon.includes('/') || icon.includes('.'));
       return {
@@ -430,11 +430,11 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     if (leapYearConfig?.rule && leapYearConfig.rule !== 'none') currentRule = leapYearConfig.rule;
     else if (legacyLeapYear?.leapInterval > 0) currentRule = 'simple';
     context.leapRuleOptions = [
-      { value: 'none', label: 'CALENDARIA.Common.None', selected: currentRule === 'none' },
+      { value: 'none', label: 'ATLAS.Common.None', selected: currentRule === 'none' },
       { value: 'simple', label: 'CALENDARIA.Editor.LeapRule.Simple', selected: currentRule === 'simple' },
       { value: 'gregorian', label: 'CALENDARIA.Common.Gregorian', selected: currentRule === 'gregorian' },
       { value: 'cycle', label: 'CALENDARIA.Editor.LeapRule.Cycle', selected: currentRule === 'cycle' },
-      { value: 'custom', label: 'CALENDARIA.Common.Custom', selected: currentRule === 'custom' }
+      { value: 'custom', label: 'ATLAS.Common.Custom', selected: currentRule === 'custom' }
     ];
     context.showLeapSimple = currentRule === 'simple';
     context.showLeapGregorian = currentRule === 'gregorian';
@@ -464,14 +464,14 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         apparentSizeDisplay: moon.apparentSize ?? 1.0,
         isHidden: moon.visibility === MOON_VISIBILITY.HIDDEN,
         eclipseModeOptions: [
-          { value: 'never', label: _loc('CALENDARIA.Common.None'), selected: (moon.eclipseMode ?? 'never') === 'never' },
+          { value: 'never', label: _loc('ATLAS.Common.None'), selected: (moon.eclipseMode ?? 'never') === 'never' },
           { value: 'rare', label: _loc('CALENDARIA.Editor.Eclipse.Rare'), selected: moon.eclipseMode === 'rare' },
           { value: 'occasional', label: _loc('CALENDARIA.Editor.Eclipse.Occasional'), selected: moon.eclipseMode === 'occasional' },
           { value: 'frequent', label: _loc('CALENDARIA.Editor.Eclipse.Frequent'), selected: moon.eclipseMode === 'frequent' },
-          { value: 'custom', label: _loc('CALENDARIA.Common.Custom'), selected: moon.eclipseMode === 'custom' }
+          { value: 'custom', label: _loc('ATLAS.Common.Custom'), selected: moon.eclipseMode === 'custom' }
         ],
         phaseModeOptions: [
-          { value: 'fixed', label: _loc('CALENDARIA.Editor.Moon.PhaseMode.Fixed'), selected: (moon.phaseMode ?? 'fixed') === 'fixed' },
+          { value: 'fixed', label: _loc('ATLAS.Common.Fixed'), selected: (moon.phaseMode ?? 'fixed') === 'fixed' },
           { value: 'randomized', label: _loc('CALENDARIA.Editor.Moon.PhaseMode.Randomized'), selected: moon.phaseMode === 'randomized' }
         ],
         anchorPhasesWithIndex: anchorsArr.map(([anchorKey, anchor]) => ({
@@ -515,7 +515,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     context.seasonTypeOptions = seasonTypeOptions.map((opt) => ({ ...opt, selected: opt.value === context.seasonType }));
     context.isPeriodic = context.seasonType === 'periodic';
     const seasonalTypeOptions = [
-      { value: '', label: 'CALENDARIA.Common.None' },
+      { value: '', label: 'ATLAS.Common.None' },
       { value: 'spring', label: 'CALENDARIA.Season.Spring' },
       { value: 'summer', label: 'CALENDARIA.Season.Summer' },
       { value: 'autumn', label: 'CALENDARIA.Common.Autumn' },
@@ -560,7 +560,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const basedOnOptions = [
       { value: 'year', label: 'CALENDARIA.Editor.Cycle.BasedOn.Year' },
       { value: 'eraYear', label: 'CALENDARIA.Condition.Field.EraYear' },
-      { value: 'month', label: 'CALENDARIA.Common.Month' },
+      { value: 'month', label: 'ATLAS.Common.Month' },
       { value: 'monthDay', label: 'CALENDARIA.Editor.Cycle.BasedOn.MonthDay' },
       { value: 'day', label: 'CALENDARIA.Editor.Cycle.BasedOn.Day' },
       { value: 'yearDay', label: 'CALENDARIA.Condition.Field.DayOfYear' }
@@ -629,9 +629,9 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     context.summerSolsticeMonthOptions = context.monthOptionsZeroIndexed.map((opt) => ({ ...opt, selected: opt.value === summerSolstice.month }));
     this.#prepareWeatherContext(context);
     context.buttons = [
-      { type: 'button', action: 'deleteCalendar', icon: 'fas fa-trash', label: 'CALENDARIA.Common.Delete', cssClass: 'delete-button' },
-      { type: 'button', action: 'resetCalendar', icon: 'fas fa-undo', label: 'CALENDARIA.Common.Reset' },
-      { type: 'button', action: 'exportCalendar', icon: 'fas fa-file-export', label: 'CALENDARIA.Common.Export' },
+      { type: 'button', action: 'deleteCalendar', icon: 'fas fa-trash', label: 'ATLAS.Common.Delete', cssClass: 'delete-button' },
+      { type: 'button', action: 'resetCalendar', icon: 'fas fa-undo', label: 'ATLAS.Common.Reset' },
+      { type: 'button', action: 'exportCalendar', icon: 'fas fa-file-export', label: 'ATLAS.Common.Export' },
       { type: 'button', action: 'saveCalendar', icon: 'fas fa-floppy-disk', label: 'SETTINGS.Save', cssClass: 'primary' }
     ];
     return context;
@@ -1535,7 +1535,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       .map(
         ([wdKey, wd]) => `
       <div class="custom-weekday-row">
-        <input type="text" name="weekday-${wdKey}-name" value="${wd.name}" placeholder="${_loc('CALENDARIA.Common.Name')}">
+        <input type="text" name="weekday-${wdKey}-name" value="${wd.name}" placeholder="${_loc('ATLAS.Common.Name')}">
         <input type="text" name="weekday-${wdKey}-abbr" value="${wd.abbreviation}" placeholder="${_loc('CALENDARIA.Common.Abbreviation')}">
         <input type="checkbox" name="weekday-${wdKey}-rest" ${wd.isRestDay ? 'checked' : ''}>
       </div>
@@ -1548,7 +1548,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         <div class="custom-weekday-header">
           <span>${_loc('CALENDARIA.Common.Weekday')}</span>
           <span>${_loc('CALENDARIA.Common.Abbreviation')}</span>
-          <span>${_loc('CALENDARIA.Common.RestDay')}</span>
+          <span>${_loc('ATLAS.Common.RestDay')}</span>
         </div>
         ${rows}
       </div>
@@ -1560,7 +1560,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       buttons: [
         {
           action: 'disable',
-          label: 'CALENDARIA.Common.Reset',
+          label: 'ATLAS.Common.Reset',
           icon: 'fas fa-undo',
           callback: () => {
             delete month.weekdays;
@@ -1570,7 +1570,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         },
         {
           action: 'save',
-          label: 'CALENDARIA.Common.Save',
+          label: 'ATLAS.Common.Save',
           icon: 'fas fa-save',
           default: true,
           callback: (_event, _button, dialog) => {
@@ -1733,7 +1733,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         <p class="hint">${_loc('CALENDARIA.Common.IconHint')}</p>
       </div>
       <div class="form-group">
-        <label>${_loc('CALENDARIA.Common.Color')}</label>
+        <label>${_loc('ATLAS.Common.Color')}</label>
         <div class="form-fields">
           <color-picker name="color" value="${season.color || '#808080'}"></color-picker>
         </div>
@@ -1746,7 +1746,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       buttons: [
         {
           action: 'reset',
-          label: 'CALENDARIA.Common.Reset',
+          label: 'ATLAS.Common.Reset',
           icon: 'fas fa-undo',
           callback: () => {
             season.icon = savedIcon;
@@ -1757,7 +1757,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         },
         {
           action: 'save',
-          label: 'CALENDARIA.Common.Save',
+          label: 'ATLAS.Common.Save',
           icon: 'fas fa-save',
           default: true,
           callback: (_event, _button, dialog) => {
@@ -2684,10 +2684,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     return new Promise((resolve) => {
       foundry.applications.api.DialogV2.prompt({
         classes: ['calendaria'],
-        window: { title: 'CALENDARIA.Common.Save' },
+        window: { title: 'ATLAS.Common.Save' },
         content,
         ok: {
-          label: 'CALENDARIA.Common.Save',
+          label: 'ATLAS.Common.Save',
           icon: 'fas fa-save',
           callback: (_event, button, _dialog) => {
             const setActive = isGM ? (button.form.elements.setActive?.checked ?? false) : false;
@@ -2774,10 +2774,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   static async #onResetCalendar(_event, _target) {
     const confirmed = await foundry.applications.api.DialogV2.confirm({
       classes: ['calendaria'],
-      window: { title: 'CALENDARIA.Common.Reset' },
+      window: { title: 'ATLAS.Common.Reset' },
       content: `<p>${_loc('CALENDARIA.Editor.ConfirmReset')}</p>`,
-      yes: { label: 'CALENDARIA.Common.Reset', icon: 'fas fa-undo' },
-      no: { label: 'CALENDARIA.Common.Cancel', icon: 'fas fa-times' },
+      yes: { label: 'ATLAS.Common.Reset', icon: 'fas fa-undo' },
+      no: { label: 'ATLAS.Common.Cancel', icon: 'fas fa-times' },
       rejectClose: false
     });
     if (confirmed) {
@@ -2807,10 +2807,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!isCustom && hasOverride) {
       const confirmed = await foundry.applications.api.DialogV2.confirm({
         classes: ['calendaria'],
-        window: { title: 'CALENDARIA.Editor.ResetToDefault' },
+        window: { title: 'ATLAS.Common.ResetToDefault' },
         content: `<p>${_loc('CALENDARIA.Editor.ConfirmResetToDefault')}</p>`,
-        yes: { label: 'CALENDARIA.Editor.ResetToDefault', icon: 'fas fa-history', callback: () => true },
-        no: { label: 'CALENDARIA.Common.Cancel', icon: 'fas fa-times' },
+        yes: { label: 'ATLAS.Common.ResetToDefault', icon: 'fas fa-history', callback: () => true },
+        no: { label: 'ATLAS.Common.Cancel', icon: 'fas fa-times' },
         rejectClose: false
       });
       if (!confirmed) return;
@@ -2828,7 +2828,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       window: { title: 'CALENDARIA.Common.DeleteCalendar' },
       content: `<p>${_loc('CALENDARIA.Editor.ConfirmDelete', { name: this.#calendarData.name })}</p>`,
       yes: { label: 'CALENDARIA.Common.DeleteCalendar', icon: 'fas fa-trash', callback: () => true },
-      no: { label: 'CALENDARIA.Common.Cancel', icon: 'fas fa-times' },
+      no: { label: 'ATLAS.Common.Cancel', icon: 'fas fa-times' },
       rejectClose: false
     });
     if (!confirmed) return;

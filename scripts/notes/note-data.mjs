@@ -290,7 +290,7 @@ export function getBuiltinPresetSeeds() {
     { id: 'birthday', label: _loc('CALENDARIA.Preset.Birthday'), color: '#ff6b6b', icon: 'fas fa-cake-candles', defaults: { displayStyle: 'pip', allDay: true } },
     { id: 'deadline', label: _loc('CALENDARIA.Preset.Deadline'), color: '#f03e3e', icon: 'fas fa-hourglass-end', defaults: { reminderType: 'toast', reminderOffset: 24 } },
     { id: 'reminder', label: _loc('CALENDARIA.Reminder.Label'), color: '#fcc419', icon: 'fas fa-bell', defaults: { reminderType: 'toast', reminderOffset: 1 } },
-    { id: 'downtime', label: _loc('CALENDARIA.Preset.Downtime'), color: '#74c0fc', icon: 'fas fa-couch', defaults: { duration: 7 } },
+    { id: 'downtime', label: _loc('ATLAS.Common.Downtime'), color: '#74c0fc', icon: 'fas fa-couch', defaults: { duration: 7 } },
     { id: 'lore', label: _loc('CALENDARIA.Preset.Lore'), color: '#a9845b', icon: 'fas fa-book', defaults: { displayStyle: 'pip', allDay: true } },
     {
       id: 'character-history',

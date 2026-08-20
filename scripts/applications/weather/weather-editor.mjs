@@ -196,7 +196,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       context.preset.fxPreset = currentFxPreset;
       const fxPresets = getAvailableFxPresets();
       context.fxPresetOptions = [
-        { value: '', label: _loc('CALENDARIA.Common.None'), selected: !currentFxPreset },
+        { value: '', label: _loc('ATLAS.Common.None'), selected: !currentFxPreset },
         ...fxPresets.map((p) => ({ value: p.value, label: p.label, selected: p.value === currentFxPreset }))
       ];
     }
@@ -205,7 +205,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     context.preset.fxMacro = currentFxMacro;
     const macros = getAvailableMacros({ includeId: currentFxMacro });
     context.fxMacroOptions = [
-      { value: '', label: _loc('CALENDARIA.Common.None'), selected: !currentFxMacro },
+      { value: '', label: _loc('ATLAS.Common.None'), selected: !currentFxMacro },
       ...macros.map((m) => ({ value: m.id, label: m.name, selected: m.id === currentFxMacro }))
     ];
     context.visuals = {
@@ -434,7 +434,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!presetId) return;
     const confirmed = await foundry.applications.api.DialogV2.confirm({
       classes: ['calendaria'],
-      window: { title: 'CALENDARIA.Common.Delete' },
+      window: { title: 'ATLAS.Common.Delete' },
       content: `<p>${_loc('CALENDARIA.WeatherEditor.DeleteConfirm')}</p>`,
       rejectClose: false
     });

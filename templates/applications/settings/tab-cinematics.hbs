@@ -1,7 +1,7 @@
 <section class="tab {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
   <fieldset data-section="cinematic-behavior">
     <legend>
-      {{localize "CALENDARIA.Cinematic.Settings.Fieldset.Behavior"}}
+      {{localize "ATLAS.Common.Behavior"}}
       <button type="button" class="reset-section" data-action="resetSection" data-section="cinematic-behavior"
         data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
           class="fas fa-undo"></i></button>
@@ -14,7 +14,7 @@
       <p class="hint">{{localize "CALENDARIA.Cinematic.Settings.Enabled.Hint"}}</p>
     </div>
     <div class="form-group" data-depends-on="cinematicEnabled">
-      <label for="cinematicThreshold">{{localize "CALENDARIA.Common.Threshold"}}</label>
+      <label for="cinematicThreshold">{{localize "ATLAS.Common.Threshold"}}</label>
       <div class="form-fields">
         <input type="number" id="cinematicThreshold" name="cinematicThreshold" value="{{cinematicThreshold}}" min="1"
           step="1" style="width: 4rem; flex: none">
@@ -62,7 +62,7 @@
   </fieldset>
   <fieldset data-section="cinematic-content" data-depends-on="cinematicEnabled">
     <legend>
-      {{localize "CALENDARIA.Common.Content"}}
+      {{localize "ATLAS.Common.Content"}}
       <button type="button" class="reset-section" data-action="resetSection" data-section="cinematic-content"
         data-tooltip aria-label="{{localize "CALENDARIA.SettingsPanel.ResetSection.Tooltip"}}"><i
           class="fas fa-undo"></i></button>
