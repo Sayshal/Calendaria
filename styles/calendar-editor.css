@@ -45,23 +45,23 @@
     }
 
     .warning {
-      color: var(--atlas-warning, rgb(255 193 7));
+      color: var(--atlas-warning);
     }
 
     .format-input.invalid {
-      border-color: var(--atlas-error, rgb(244 67 54));
-      outline: 0.0625rem solid var(--atlas-error, rgb(244 67 54));
+      border-color: var(--atlas-error);
+      outline: 0.0625rem solid var(--atlas-error);
     }
 
     .format-preview {
       font-style: italic;
 
       &.error {
-        color: var(--atlas-error, rgb(244 67 54));
+        color: var(--atlas-error);
       }
 
       &.warning {
-        color: var(--atlas-warning, rgb(255 193 7));
+        color: var(--atlas-warning);
       }
     }
 
@@ -100,18 +100,18 @@
       padding: 0.5rem 0.75rem;
       border-radius: 0.25rem;
       font-size: var(--font-size-14);
-      background: var(--atlas-surface-dim-50, rgb(45 45 45 / 50%));
+      background: var(--atlas-surface-dim-50);
 
       i {
-        color: var(--atlas-success, rgb(76 175 80));
+        color: var(--atlas-success);
       }
 
       &.warning i {
-        color: var(--atlas-warning, rgb(255 193 7));
+        color: var(--atlas-warning);
       }
 
       .mismatch {
-        color: var(--atlas-warning, rgb(255 193 7));
+        color: var(--atlas-warning);
       }
     }
 
@@ -150,8 +150,8 @@
       }
 
       input.duplicate {
-        border-color: var(--atlas-error, rgb(244 67 54));
-        color: var(--atlas-error, rgb(244 67 54));
+        border-color: var(--atlas-error);
+        color: var(--atlas-error);
       }
     }
 
@@ -280,14 +280,14 @@
         }
 
         &:hover:not(:disabled) {
-          --button-hover-text-color: var(--atlas-text, rgb(224 224 224));
+          --button-hover-text-color: var(--atlas-text);
         }
 
         &[data-action='toggleCustomWeekdays'] {
-          color: var(--atlas-warning, rgb(234 179 8));
+          color: var(--atlas-warning);
 
           &.toggled {
-            color: var(--atlas-success, rgb(76 175 80));
+            color: var(--atlas-success);
           }
         }
 
@@ -299,7 +299,7 @@
         &[data-action='removeMoonPhase'],
         &[data-action='removeEra'] {
           &:hover:not(:disabled) {
-            --button-hover-text-color: var(--atlas-error, rgb(244 67 54));
+            --button-hover-text-color: var(--atlas-error);
           }
         }
       }
@@ -412,7 +412,7 @@
     }
 
     .season-item {
-      border-left: 0.1875rem solid var(--season-color, var(--atlas-border, rgb(74 74 74)));
+      border-left: 0.1875rem solid var(--season-color, var(--atlas-border));
     }
 
     .season-icon-display {
@@ -555,7 +555,7 @@
 
       .moon-phase-slider {
         margin: 1.125rem 0 0.5rem;
-        border: 0.0625rem solid color-mix(in srgb, var(--atlas-bg-lighter, rgb(42 42 42)) 70%, transparent);
+        border: 0.0625rem solid color-mix(in srgb, var(--atlas-bg-lighter) 70%, transparent);
         border-radius: 0.25rem;
 
         .slider-track {
@@ -647,7 +647,7 @@
           height: calc(100% + 0.125rem);
           border-radius: 0.125rem;
           cursor: col-resize;
-          background: var(--atlas-accent, rgb(168 144 96));
+          background: var(--atlas-accent);
           transition:
             background 0.15s,
             box-shadow 0.15s;
@@ -655,8 +655,8 @@
 
           &:hover,
           &.dragging {
-            background: color-mix(in srgb, var(--atlas-accent, rgb(168 144 96)) 80%, rgb(255 255 255));
-            box-shadow: 0 0 0.5rem var(--atlas-accent, rgb(168 144 96));
+            background: color-mix(in srgb, var(--atlas-accent) 80%, rgb(255 255 255));
+            box-shadow: 0 0 0.5rem var(--atlas-accent);
           }
 
           &::before {
@@ -684,7 +684,7 @@
         grid-template-columns: 1fr 5rem 5rem 8.75rem auto;
         display: grid;
         padding-bottom: 0.5rem;
-        border-bottom: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
+        border-bottom: 0.0625rem solid var(--atlas-border);
 
         .grid-col {
           gap: 0.25rem;
@@ -752,11 +752,11 @@
       flex-direction: column;
       align-items: center;
       padding: 2rem;
-      border: 0.0625rem dashed var(--atlas-border, rgb(74 74 74));
+      border: 0.0625rem dashed var(--atlas-border);
       border-radius: 0.25rem;
       font-style: italic;
       text-align: center;
-      background: var(--atlas-surface-dim-50, rgb(45 45 45 / 50%));
+      background: var(--atlas-surface-dim-50);
     }
 
     footer.form-footer {
@@ -804,7 +804,7 @@
       height: 100%;
       padding: 0;
       border-top: none;
-      border-right: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
+      border-right: 0.0625rem solid var(--atlas-border);
       border-bottom: none;
 
       .tab-group {
@@ -848,7 +848,7 @@
         }
 
         &.active {
-          border-left-color: var(--group-color, var(--atlas-accent, rgb(168 144 96)));
+          border-left-color: var(--group-color, var(--atlas-accent));
         }
       }
     }

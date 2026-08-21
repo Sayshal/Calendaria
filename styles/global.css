@@ -12,7 +12,7 @@
   .range-value {
     flex: 0;
     min-width: 2.5em;
-    color: var(--atlas-text-secondary, rgb(170 170 170));
+    color: var(--atlas-text-secondary);
     font-size: var(--font-size-13);
     text-align: center;
   }
@@ -32,7 +32,7 @@
       span {
         width: 0.0625rem;
         height: 0.375rem;
-        background: var(--atlas-border-light, rgb(58 58 58));
+        background: var(--atlas-border-light);
       }
     }
   }
@@ -56,15 +56,15 @@
   .weather-indicator,
   .weather-btn,
   .weather-weight-pill {
-    --weather-ink: color-mix(in srgb, var(--weather-color, var(--atlas-text-dim, rgb(153 153 153))) 35%, var(--atlas-text, rgb(224 224 224)));
+    --weather-ink: color-mix(in srgb, var(--weather-color, var(--atlas-text-dim)) 35%, var(--atlas-text));
   }
 
   .weather-indicator {
     padding: 0.25rem 0.5rem;
     border: 0.0625rem solid color-mix(in srgb, var(--weather-ink) 35%, transparent);
     border-radius: 0.25rem;
-    color: var(--atlas-text, rgb(224 224 224));
-    background: color-mix(in srgb, var(--weather-color, var(--atlas-text-dim, rgb(153 153 153))) 15%, transparent);
+    color: var(--atlas-text);
+    background: color-mix(in srgb, var(--weather-color, var(--atlas-text-dim)) 15%, transparent);
 
     i {
       color: var(--weather-ink);
@@ -77,19 +77,19 @@
         border-color 0.15s ease;
 
       &:hover {
-        border-color: var(--weather-color, var(--atlas-text-dim, rgb(153 153 153)));
-        background: color-mix(in srgb, var(--weather-color, var(--atlas-text-dim, rgb(153 153 153))) 30%, transparent);
+        border-color: var(--weather-color, var(--atlas-text-dim));
+        background: color-mix(in srgb, var(--weather-color, var(--atlas-text-dim)) 30%, transparent);
       }
     }
 
     &.no-weather {
-      border: 0.0625rem dashed var(--atlas-border, rgb(74 74 74));
-      color: var(--atlas-text-dim, rgb(153 153 153));
+      border: 0.0625rem dashed var(--atlas-border);
+      color: var(--atlas-text-dim);
       background: transparent;
 
       &:hover {
-        border-color: var(--atlas-success, rgb(76 175 80));
-        background: color-mix(in srgb, var(--atlas-positive-bg, rgb(76 175 80 / 20%)) 20%, transparent);
+        border-color: var(--atlas-success);
+        background: color-mix(in srgb, var(--atlas-positive-bg) 20%, transparent);
       }
     }
 
@@ -97,7 +97,7 @@
       opacity: 0.8;
       margin-left: 0.15rem;
       padding-left: 0.25rem;
-      border-left: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
+      border-left: 0.0625rem solid var(--atlas-border);
       font-size: 0.85em;
     }
 
@@ -109,10 +109,10 @@
   }
 
   .season-indicator {
-    color: var(--atlas-text, rgb(224 224 224));
+    color: var(--atlas-text);
 
     i {
-      color: var(--season-color, var(--atlas-text-dim, rgb(153 153 153)));
+      color: var(--season-color, var(--atlas-text-dim));
     }
   }
 
@@ -140,10 +140,10 @@
   }
 
   .calendar-indicators .calendaria-widget-indicator {
-    color: var(--widget-color, var(--atlas-text-dim, rgb(153 153 153)));
+    color: var(--widget-color, var(--atlas-text-dim));
 
     i {
-      color: var(--widget-color, var(--atlas-text-dim, rgb(153 153 153)));
+      color: var(--widget-color, var(--atlas-text-dim));
     }
   }
 
@@ -162,7 +162,7 @@
       align-items: center;
       width: 100%;
       padding-top: 0.125rem;
-      border-top: 0.0625rem solid var(--atlas-border-light, rgb(58 58 58));
+      border-top: 0.0625rem solid var(--atlas-border-light);
 
       .calendaria-footer-btn {
         border: none;
@@ -193,10 +193,10 @@
   align-items: center;
   height: 2rem;
   padding: 0 0.75rem;
-  border: 0.125rem dashed var(--atlas-primary, rgb(74 144 226));
+  border: 0.125rem dashed var(--atlas-primary);
   border-radius: 0.375rem;
   pointer-events: none;
-  background: color-mix(in srgb, var(--atlas-primary, rgb(74 144 226)) 15%, transparent);
+  background: color-mix(in srgb, var(--atlas-primary) 15%, transparent);
   transition: opacity 0.15s ease;
 
   &.visible {
@@ -210,7 +210,7 @@
     height: 0.25rem;
     border-radius: 0.125rem;
     content: '';
-    background: var(--atlas-primary, rgb(74 144 226));
+    background: var(--atlas-primary);
   }
 }
 
@@ -228,11 +228,11 @@
 #context-menu.calendaria {
   .context-item {
     &.sticky-active {
-      color: var(--atlas-text-on-color, rgb(255 255 255));
-      background: var(--atlas-primary, rgb(74 144 226));
+      color: var(--atlas-text-on-color);
+      background: var(--atlas-primary);
 
       &:hover {
-        background: var(--atlas-primary, rgb(74 144 226));
+        background: var(--atlas-primary);
       }
     }
 
@@ -313,5 +313,56 @@ span.calendaria-moon-icon {
   img {
     width: auto;
     height: 100%;
+  }
+}
+
+.calendaria prose-mirror {
+  .editor-menu {
+    border-color: var(--atlas-border);
+    color: var(--atlas-text);
+    background: var(--atlas-bg-lighter);
+
+    button {
+      color: var(--atlas-text-dim);
+
+      &:hover,
+      &.active {
+        color: var(--atlas-text);
+        background: var(--atlas-bg-hover);
+      }
+    }
+
+    .pm-dropdown ul {
+      border: 0.0625rem solid var(--atlas-border);
+      color: var(--atlas-text);
+      background: var(--atlas-bg);
+
+      li {
+        color: var(--atlas-text);
+
+        &:hover {
+          background: var(--atlas-bg-hover);
+        }
+
+        &.divider {
+          border-color: var(--atlas-border-light);
+        }
+      }
+
+      ul {
+        border: 0.0625rem solid var(--atlas-border);
+        background: var(--atlas-bg);
+      }
+    }
+  }
+
+  .editor-container {
+    color: var(--atlas-text);
+    background: var(--atlas-input-bg);
+
+    textarea {
+      color: var(--atlas-text);
+      background: var(--atlas-input-bg);
+    }
   }
 }

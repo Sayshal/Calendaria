@@ -1,9 +1,9 @@
 .calendaria {
   &.condition-builder {
-    --cb-border-1: var(--atlas-today, rgb(230 180 34));
-    --cb-border-2: var(--atlas-error, rgb(217 72 72));
-    --cb-border-3: var(--atlas-primary, rgb(74 143 212));
-    --cb-border-4: var(--atlas-success, rgb(72 184 88));
+    --cb-border-1: var(--atlas-today);
+    --cb-border-2: var(--atlas-error);
+    --cb-border-3: var(--atlas-primary);
+    --cb-border-4: var(--atlas-success);
 
     min-width: 16.25rem;
     max-width: 80vw;

@@ -53,7 +53,7 @@
         width: 3.5rem;
         height: 1.125rem;
         padding: 0 0.25rem;
-        border: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
+        border: 0.0625rem solid var(--atlas-border);
         font-size: var(--font-size-14);
         text-align: right;
       }
@@ -104,7 +104,7 @@
     }
 
     .preset-header {
-      border-bottom: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
+      border-bottom: 0.0625rem solid var(--atlas-border);
       font-weight: 600;
       font-size: var(--font-size-14);
 
@@ -130,12 +130,12 @@
     }
 
     .modifier-relative {
-      color: var(--atlas-primary, rgb(74 144 226));
+      color: var(--atlas-primary);
     }
 
     .zero-weight-warning {
-      border-color: var(--atlas-warning, rgb(255 193 7));
-      box-shadow: 0 0 0.1875rem var(--atlas-warning, rgb(255 193 7));
+      border-color: var(--atlas-warning);
+      box-shadow: 0 0 0.1875rem var(--atlas-warning);
     }
 
     .wind-direction-grid {
@@ -147,7 +147,7 @@
     &.zone-mode .sheet-tabs.tabs {
       gap: 0;
       margin-bottom: 0.5rem;
-      border-bottom: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
+      border-bottom: 0.0625rem solid var(--atlas-border);
 
       a {
         gap: 0.4rem;
@@ -162,7 +162,7 @@
           border-color 0.15s ease;
 
         &.active {
-          border-bottom-color: var(--atlas-accent, rgb(168 144 96));
+          border-bottom-color: var(--atlas-accent);
         }
       }
     }
@@ -196,7 +196,7 @@
 
       th {
         padding: 0.25rem 0.5rem;
-        border-bottom: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
+        border-bottom: 0.0625rem solid var(--atlas-border);
         font-size: var(--font-size-11);
         text-align: center;
         white-space: nowrap;
@@ -208,7 +208,7 @@
       }
 
       tr:nth-child(even) {
-        background: color-mix(in srgb, var(--atlas-text, rgb(224 224 224)) 3%, transparent);
+        background: color-mix(in srgb, var(--atlas-text) 3%, transparent);
       }
 
       .preset-icon {
@@ -237,7 +237,7 @@
       height: 1.25rem;
       border-radius: 0.1875rem;
       overflow: hidden;
-      background: color-mix(in srgb, var(--atlas-text, rgb(224 224 224)) 5%, transparent);
+      background: color-mix(in srgb, var(--atlas-text) 5%, transparent);
     }
 
     .percent-bar {
@@ -261,7 +261,7 @@
     .temp-range-footer {
       margin-top: 0.5rem;
       padding: 0.5rem;
-      border-top: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
+      border-top: 0.0625rem solid var(--atlas-border);
       text-align: center;
 
       i {
@@ -285,12 +285,12 @@
 
   .form-fields.temperature .season-alias-toggle:hover,
   .form-fields.temperature .season-alias-toggle.has-alias {
-    color: var(--atlas-accent, rgb(168 144 96));
+    color: var(--atlas-accent);
   }
 
   fieldset.season-alias-row {
     margin: 0.25rem 0 0.75rem;
-    border-left: 0.1875rem solid var(--atlas-accent, rgb(168 144 96));
+    border-left: 0.1875rem solid var(--atlas-accent);
   }
 
   fieldset.season-alias-row .form-footer {

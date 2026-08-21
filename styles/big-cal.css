@@ -6,19 +6,19 @@
     flex-direction: column;
     border-radius: 0.75rem;
     overflow: hidden;
-    color: var(--atlas-text, rgb(224 224 224));
-    background: var(--atlas-bg, rgb(31 31 31));
+    color: var(--atlas-text);
+    background: var(--atlas-bg);
     box-shadow:
       0 0.5rem 2rem rgb(0 0 0 / 30%),
-      0 0 0 0.0625rem var(--atlas-border, rgb(74 74 74));
+      0 0 0 0.0625rem var(--atlas-border);
 
     .calendar-header {
       display: flex;
       position: relative;
       flex-direction: column;
-      border-bottom: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
+      border-bottom: 0.0625rem solid var(--atlas-border);
       cursor: grab;
-      background: var(--atlas-bg-lighter, rgb(42 42 42));
+      background: var(--atlas-bg-lighter);
     }
 
     .header-row {
@@ -44,7 +44,7 @@
     }
 
     .equivalent-date-subtitle {
-      color: var(--atlas-text-dim, rgb(153 153 153));
+      color: var(--atlas-text-dim);
       font-style: italic;
       font-size: 0.75rem;
       line-height: 1.4;
@@ -52,7 +52,7 @@
       transition: color 0.15s;
 
       &:hover {
-        color: var(--atlas-primary, rgb(74 144 226));
+        color: var(--atlas-primary);
       }
 
       i {
@@ -69,13 +69,13 @@
       height: 0.25rem;
       margin: 0 0.375rem;
       border-radius: 50%;
-      background: var(--atlas-text-dim, rgb(153 153 153));
+      background: var(--atlas-text-dim);
     }
 
     .calendar-title {
       flex: 1;
       margin: 0;
-      color: var(--atlas-title-text, rgb(255 255 255));
+      color: var(--atlas-title-text);
       font-weight: bold;
       font-size: 1rem;
       font-family: var(--font-body);
@@ -91,8 +91,8 @@
       align-items: center;
       min-width: 0;
       overflow: hidden;
-      color: var(--atlas-text-dim, rgb(153 153 153));
-      font-size: var(--font-size-12, 0.75rem);
+      color: var(--atlas-text-dim);
+      font-size: var(--font-size-12);
     }
 
     .calendar-actions {
@@ -105,18 +105,18 @@
     .header-divider {
       width: 0.0625rem;
       height: 1rem;
-      background: var(--atlas-border, rgb(74 74 74));
+      background: var(--atlas-border);
     }
 
     button:not(.add-note-btn) {
-      border-color: var(--atlas-border, rgb(74 74 74));
+      border-color: var(--atlas-border);
       border-radius: 0.25rem;
-      color: var(--atlas-button-text, rgb(224 224 224));
-      background: var(--atlas-button-bg, rgb(58 58 58));
+      color: var(--atlas-button-text);
+      background: var(--atlas-button-bg);
 
       &:hover {
-        background: var(--atlas-bg-hover, rgb(53 53 53));
-        color: var(--atlas-text, rgb(224 224 224));
+        background: var(--atlas-bg-hover);
+        color: var(--atlas-text);
       }
     }
 
@@ -141,18 +141,18 @@
       height: 1.5rem;
       margin: 0;
       padding: 0 0.375rem;
-      border: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
+      border: 0.0625rem solid var(--atlas-border);
       border-radius: 0.25rem;
-      color: var(--atlas-button-text, rgb(224 224 224));
+      color: var(--atlas-button-text);
       font-size: 0.75rem;
       line-height: 1.375rem;
       text-align: center;
       cursor: pointer;
-      background: var(--atlas-button-bg, rgb(58 58 58));
+      background: var(--atlas-button-bg);
       background-image: none;
 
       &:hover {
-        border-color: var(--atlas-primary, rgb(74 144 226));
+        border-color: var(--atlas-primary);
       }
 
       &:focus {
@@ -193,14 +193,14 @@
       margin: 0 calc(var(--calendaria-day-gap) / 2);
       border-radius: 0.25rem;
       overflow: hidden;
-      color: var(--atlas-weekday-header, rgb(224 224 224));
+      color: var(--atlas-weekday-header);
       font-size: 0.9rem;
       text-overflow: ellipsis;
       white-space: nowrap;
-      background: var(--atlas-bg-lighter, rgb(42 42 42));
+      background: var(--atlas-bg-lighter);
 
       &.rest-day {
-        color: var(--atlas-rest-day, rgb(139 157 195));
+        color: var(--atlas-rest-day);
       }
     }
 
@@ -240,24 +240,24 @@
       width: var(--calendaria-day-size);
       height: var(--calendaria-day-size);
       padding: 0.25rem;
-      border: 0.0625rem solid var(--atlas-border-light, rgb(58 58 58));
+      border: 0.0625rem solid var(--atlas-border-light);
       border-radius: 0.25rem;
       cursor: pointer;
-      background: var(--atlas-bg, rgb(31 31 31));
+      background: var(--atlas-bg);
       transition: background 0.2s ease;
 
       &:not(.empty):hover {
-        background: var(--atlas-bg-hover, rgb(53 53 53));
-        color: var(--atlas-text, rgb(224 224 224));
+        background: var(--atlas-bg-hover);
+        color: var(--atlas-text);
       }
 
       &.odd-day {
-        background: var(--atlas-surface-dim-25, rgb(0 0 0 / 20%));
+        background: var(--atlas-surface-dim-25);
       }
 
       &.empty {
         opacity: 0.3;
-        background: var(--atlas-bg-lighter, rgb(42 42 42));
+        background: var(--atlas-bg-lighter);
       }
 
       &.other-month,
@@ -268,20 +268,20 @@
 
         &:hover {
           opacity: 0.6;
-          background: var(--atlas-bg-hover, rgb(53 53 53));
-          color: var(--atlas-text, rgb(224 224 224));
+          background: var(--atlas-bg-hover);
+          color: var(--atlas-text);
         }
       }
 
       &.today {
         z-index: 1;
         position: relative;
-        border-color: var(--atlas-today, rgb(255 100 0));
-        background: color-mix(in srgb, var(--atlas-today, rgb(255 100 0)) 18%, var(--atlas-bg, rgb(31 31 31)));
-        box-shadow: 0 0 0.375rem var(--atlas-today, rgb(255 100 0));
+        border-color: var(--atlas-today);
+        background: color-mix(in srgb, var(--atlas-today) 18%, var(--atlas-bg));
+        box-shadow: 0 0 0.375rem var(--atlas-today);
 
         .day-number {
-          color: var(--atlas-today, rgb(255 100 0));
+          color: var(--atlas-today);
           font-weight: 700;
         }
       }
@@ -289,26 +289,26 @@
       &.selected {
         z-index: 1;
         position: relative;
-        border-color: var(--atlas-primary, rgb(74 144 226));
-        background: color-mix(in srgb, var(--atlas-primary, rgb(74 144 226)) 10%, var(--atlas-bg, rgb(31 31 31)));
+        border-color: var(--atlas-primary);
+        background: color-mix(in srgb, var(--atlas-primary) 10%, var(--atlas-bg));
         cursor: pointer;
-        box-shadow: 0 0 0.375rem var(--atlas-primary, rgb(74 144 226));
+        box-shadow: 0 0 0.375rem var(--atlas-primary);
       }
 
       &.today.selected {
         box-shadow:
-          0 0 0.375rem var(--atlas-primary, rgb(74 144 226)),
-          inset 0 0 0 0.125rem var(--atlas-today, rgb(255 100 0));
+          0 0 0.375rem var(--atlas-primary),
+          inset 0 0 0 0.125rem var(--atlas-today);
       }
 
       &.has-notes {
-        border-color: var(--atlas-border, rgb(74 74 74));
+        border-color: var(--atlas-border);
       }
 
       &.festival-day {
         position: relative;
-        border-color: var(--festival-color, var(--atlas-callout-border, rgb(212 175 55)));
-        background: color-mix(in srgb, var(--festival-color, var(--atlas-callout-border, rgb(212 175 55))) 15%, var(--atlas-bg, rgb(31 31 31)));
+        border-color: var(--festival-color, var(--atlas-callout-border));
+        background: color-mix(in srgb, var(--festival-color, var(--atlas-callout-border)) 15%, var(--atlas-bg));
 
         &::after {
           opacity: 0.6;
@@ -318,11 +318,11 @@
           left: 0;
           height: 0.1875rem;
           content: '';
-          background: linear-gradient(90deg, transparent, var(--festival-color, var(--atlas-callout-text, rgb(255 215 0))) 50%, transparent);
+          background: linear-gradient(90deg, transparent, var(--festival-color, var(--atlas-callout-text)) 50%, transparent);
         }
 
         .day-number {
-          color: var(--festival-color, var(--atlas-callout-text, rgb(255 215 0)));
+          color: var(--festival-color, var(--atlas-callout-text));
         }
       }
 
@@ -337,8 +337,8 @@
           45deg,
           transparent,
           transparent 0.25rem,
-          color-mix(in srgb, var(--atlas-text, rgb(224 224 224)) 8%, transparent) 0.25rem,
-          color-mix(in srgb, var(--atlas-text, rgb(224 224 224)) 8%, transparent) 0.5rem
+          color-mix(in srgb, var(--atlas-text) 8%, transparent) 0.25rem,
+          color-mix(in srgb, var(--atlas-text) 8%, transparent) 0.5rem
         );
 
         .day-notes,
@@ -354,7 +354,7 @@
       display: flex;
       align-items: center;
       margin-bottom: 0.25rem;
-      color: var(--atlas-text, rgb(224 224 224));
+      color: var(--atlas-text);
       font-weight: bold;
       font-size: var(--font-size-14);
     }
@@ -364,7 +364,7 @@
     }
 
     .festival-icon {
-      color: var(--festival-color, var(--atlas-callout-text, rgb(255 215 0)));
+      color: var(--festival-color, var(--atlas-callout-text));
       font-size: var(--font-size-12);
     }
 
@@ -460,11 +460,11 @@
 
       .note-banner-text {
         overflow: hidden;
-        color: var(--atlas-text-on-color, rgb(255 255 255));
+        color: var(--atlas-text-on-color);
         font-weight: 600;
         font-size: 0.625rem;
         text-overflow: ellipsis;
-        text-shadow: 0 0.0625rem 0.125rem var(--atlas-text-shadow-on-color, rgb(0 0 0 / 50%));
+        text-shadow: 0 0.0625rem 0.125rem var(--atlas-text-shadow-on-color);
         white-space: nowrap;
       }
 
@@ -488,7 +488,7 @@
       padding: 0;
       border: none;
       border-radius: 0;
-      color: var(--atlas-text-dim, rgb(153 153 153));
+      color: var(--atlas-text-dim);
       font-size: 0.875rem;
       cursor: pointer;
       pointer-events: auto;
@@ -556,10 +556,10 @@
       height: var(--font-size-12);
       padding: 0 0.1875rem;
       border-radius: 0.1875rem;
-      color: var(--atlas-text, rgb(224 224 224));
+      color: var(--atlas-text);
       font-weight: 600;
       font-size: 0.625rem;
-      background: var(--atlas-bg-lighter, rgb(42 42 42));
+      background: var(--atlas-bg-lighter);
     }
 
     .day-bottom {
@@ -578,7 +578,7 @@
       font-size: var(--font-size-10);
       line-height: 1;
       white-space: nowrap;
-      background: var(--atlas-surface-dim-10, rgb(255 255 255 / 6%));
+      background: var(--atlas-surface-dim-10);
 
       i,
       span {
@@ -630,7 +630,7 @@
     }
 
     .event-bar {
-      -webkit-text-stroke: 0.0313rem var(--atlas-shadow-light, rgb(0 0 0 / 20%));
+      -webkit-text-stroke: 0.0313rem var(--atlas-shadow-light);
       display: flex;
       z-index: 10;
       position: absolute;
@@ -639,10 +639,10 @@
       box-sizing: border-box;
       height: 1rem;
       padding: 0 0.625rem;
-      border: 0.0625rem solid var(--atlas-shadow-light, rgb(0 0 0 / 20%));
+      border: 0.0625rem solid var(--atlas-shadow-light);
       border-radius: 0.75rem;
       overflow: hidden;
-      color: var(--atlas-text-on-color, rgb(255 255 255));
+      color: var(--atlas-text-on-color);
       font-weight: 600;
 
       i,
@@ -654,15 +654,15 @@
       font-size: 0.625rem;
       text-overflow: ellipsis;
       text-shadow:
-        -0.0625rem -0.0625rem 0 var(--atlas-text-shadow-on-color, rgb(0 0 0 / 50%)),
-        0.0625rem -0.0625rem 0 var(--atlas-text-shadow-on-color, rgb(0 0 0 / 50%)),
-        -0.0625rem 0.0625rem 0 var(--atlas-text-shadow-on-color, rgb(0 0 0 / 50%)),
-        0.0625rem 0.0625rem 0 var(--atlas-text-shadow-on-color, rgb(0 0 0 / 50%)),
-        0 0.125rem 0.25rem var(--atlas-text-shadow-on-color, rgb(0 0 0 / 50%));
+        -0.0625rem -0.0625rem 0 var(--atlas-text-shadow-on-color),
+        0.0625rem -0.0625rem 0 var(--atlas-text-shadow-on-color),
+        -0.0625rem 0.0625rem 0 var(--atlas-text-shadow-on-color),
+        0.0625rem 0.0625rem 0 var(--atlas-text-shadow-on-color),
+        0 0.125rem 0.25rem var(--atlas-text-shadow-on-color);
       white-space: nowrap;
       cursor: pointer;
       pointer-events: auto;
-      box-shadow: 0 0.125rem 0.25rem var(--atlas-shadow-light, rgb(0 0 0 / 20%));
+      box-shadow: 0 0.125rem 0.25rem var(--atlas-shadow-light);
       transition:
         box-shadow 0.15s ease,
         filter 0.15s ease,
@@ -670,7 +670,7 @@
 
       &:hover {
         z-index: 20;
-        box-shadow: 0 0.25rem 0.5rem var(--atlas-shadow-color, rgb(0 0 0 / 40%));
+        box-shadow: 0 0.25rem 0.5rem var(--atlas-shadow-color);
         filter: brightness(1.1);
         transform: translateY(-0.125rem);
       }
@@ -680,9 +680,9 @@
         flex-shrink: 0;
         align-items: center;
         margin-right: 0.375rem;
-        color: var(--atlas-text-on-color, rgb(255 255 255));
+        color: var(--atlas-text-on-color);
         line-height: 1;
-        filter: drop-shadow(0 0.0625rem 0.125rem var(--atlas-text-shadow-on-color, rgb(0 0 0 / 50%)));
+        filter: drop-shadow(0 0.0625rem 0.125rem var(--atlas-text-shadow-on-color));
 
         &:is(img) {
           width: 0.875rem;
@@ -702,9 +702,9 @@
       .event-bar-continuation {
         flex-shrink: 0;
         margin-right: 0.375rem;
-        color: var(--atlas-text-on-color, rgb(255 255 255));
+        color: var(--atlas-text-on-color);
         font-size: 0.75rem;
-        filter: drop-shadow(0 0.0625rem 0.125rem var(--atlas-text-shadow-on-color, rgb(0 0 0 / 50%)));
+        filter: drop-shadow(0 0.0625rem 0.125rem var(--atlas-text-shadow-on-color));
       }
 
       &.event-bar-condensed {
@@ -731,7 +731,7 @@
           z-index: 30;
           height: 1rem;
           padding: 0 0.625rem;
-          box-shadow: 0 0.25rem 0.5rem var(--atlas-shadow-color, rgb(0 0 0 / 40%));
+          box-shadow: 0 0.25rem 0.5rem var(--atlas-shadow-color);
           filter: none;
           transform: none;
 
@@ -763,7 +763,7 @@
     .calendar-week-view {
       width: fit-content;
       height: fit-content;
-      background: var(--atlas-bg, rgb(31 31 31));
+      background: var(--atlas-bg);
     }
 
     .week-grid {
@@ -772,15 +772,15 @@
       display: grid;
       width: fit-content;
       height: fit-content;
-      border: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
+      border: 0.0625rem solid var(--atlas-border);
       border-radius: 0.25rem;
-      background: var(--atlas-border-light, rgb(58 58 58));
+      background: var(--atlas-border-light);
     }
 
     .week-corner-header {
-      border-right: 0.125rem solid var(--atlas-border, rgb(74 74 74));
-      border-bottom: 0.125rem solid var(--atlas-border, rgb(74 74 74));
-      background: var(--atlas-bg-lighter, rgb(42 42 42));
+      border-right: 0.125rem solid var(--atlas-border);
+      border-bottom: 0.125rem solid var(--atlas-border);
+      background: var(--atlas-bg-lighter);
     }
 
     .week-hour-label {
@@ -790,15 +790,15 @@
       align-items: center;
       margin: 0;
       padding: 0;
-      border-bottom: 0.125rem solid var(--atlas-border, rgb(74 74 74));
+      border-bottom: 0.125rem solid var(--atlas-border);
       overflow: hidden;
-      color: var(--atlas-text-dim, rgb(153 153 153));
+      color: var(--atlas-text-dim);
       font-weight: 600;
       font-size: 0.75rem;
       text-align: center;
       text-overflow: ellipsis;
       white-space: nowrap;
-      background: var(--atlas-bg-lighter, rgb(42 42 42));
+      background: var(--atlas-bg-lighter);
     }
 
     .week-day-header {
@@ -808,32 +808,32 @@
       left: 0;
       align-items: center;
       padding: 0.25rem 0.5rem;
-      border-right: 0.125rem solid var(--atlas-border, rgb(74 74 74));
+      border-right: 0.125rem solid var(--atlas-border);
       font-size: 0.85rem;
       white-space: nowrap;
-      background: var(--atlas-bg, rgb(31 31 31));
+      background: var(--atlas-bg);
 
       &.today {
-        border-right: 0.1875rem solid var(--atlas-today, rgb(255 100 0));
-        background: var(--atlas-highlight-bg, rgb(255 100 0 / 20%));
+        border-right: 0.1875rem solid var(--atlas-today);
+        background: var(--atlas-highlight-bg);
       }
 
       &.rest-day {
-        color: var(--atlas-rest-day, rgb(139 157 195));
+        color: var(--atlas-rest-day);
       }
     }
 
     .week-time-cell {
       position: relative;
-      border-right: 0.0625rem solid var(--atlas-border-light, rgb(58 58 58));
+      border-right: 0.0625rem solid var(--atlas-border-light);
       overflow: visible;
       cursor: pointer;
-      background: var(--atlas-bg, rgb(31 31 31));
+      background: var(--atlas-bg);
       transition: background 0.15s ease;
 
       &:hover {
-        background: var(--atlas-bg-hover, rgb(53 53 53));
-        color: var(--atlas-text, rgb(224 224 224));
+        background: var(--atlas-bg-hover);
+        color: var(--atlas-text);
 
         .add-note-btn {
           opacity: 1;
@@ -850,11 +850,11 @@
       }
 
       &.current-hour {
-        border: 0.05rem solid var(--atlas-today, rgb(255 100 0));
+        border: 0.05rem solid var(--atlas-today);
       }
 
       &.selected {
-        border: 0.05rem solid var(--atlas-primary, rgb(74 144 226));
+        border: 0.05rem solid var(--atlas-primary);
       }
     }
 
@@ -872,15 +872,15 @@
       align-items: center;
       width: calc(var(--hour-span) * 100% + (var(--hour-span) - 1) * 0.0625rem - 0.25rem);
       padding: 0.25rem 0.375rem;
-      border-top: 0.1875rem solid var(--atlas-shadow-color, rgb(0 0 0 / 40%));
+      border-top: 0.1875rem solid var(--atlas-shadow-color);
       border-radius: 0.25rem;
       overflow: hidden;
-      color: var(--atlas-text-on-color, rgb(255 255 255));
+      color: var(--atlas-text-on-color);
       font-size: 0.6875rem;
-      text-shadow: 0 0.0625rem 0.125rem var(--atlas-text-shadow-on-color, rgb(0 0 0 / 50%));
+      text-shadow: 0 0.0625rem 0.125rem var(--atlas-text-shadow-on-color);
       cursor: pointer;
       box-shadow:
-        0 0.125rem 0.25rem var(--atlas-shadow-light, rgb(0 0 0 / 20%)),
+        0 0.125rem 0.25rem var(--atlas-shadow-light),
         inset 0 0.0625rem 0 var(--calendaria-highlight);
       transition:
         box-shadow 0.15s ease,
@@ -907,7 +907,7 @@
       &:hover {
         z-index: 20;
         box-shadow:
-          0 0.25rem 0.5rem var(--atlas-shadow-color, rgb(0 0 0 / 40%)),
+          0 0.25rem 0.5rem var(--atlas-shadow-color),
           inset 0 0.0625rem 0 var(--calendaria-highlight);
         filter: brightness(1.15);
         transform: translateY(-0.125rem);
@@ -1004,23 +1004,23 @@
       height: fit-content;
       margin: -0.0625rem;
       padding: var(--calendaria-year-cell-padding);
-      border: 0.0625rem solid var(--atlas-border-light, rgb(58 58 58));
+      border: 0.0625rem solid var(--atlas-border-light);
       cursor: pointer;
-      background: var(--atlas-bg, rgb(31 31 31));
+      background: var(--atlas-bg);
       transition:
         border-color 0.2s,
         box-shadow 0.2s;
 
       &:hover {
         z-index: 1;
-        border-color: var(--atlas-border, rgb(74 74 74));
-        box-shadow: 0 0.125rem 0.5rem var(--atlas-shadow-light, rgb(0 0 0 / 20%));
+        border-color: var(--atlas-border);
+        box-shadow: 0 0.125rem 0.5rem var(--atlas-shadow-light);
       }
 
       &.current-year {
         z-index: 2;
-        border-color: var(--atlas-today, rgb(255 100 0));
-        box-shadow: 0 0 0.25rem var(--atlas-today, rgb(255 100 0));
+        border-color: var(--atlas-today);
+        box-shadow: 0 0 0.25rem var(--atlas-today);
       }
     }
 
@@ -1030,8 +1030,8 @@
       align-items: center;
       height: var(--calendaria-year-header-height);
       padding-bottom: 0.25rem;
-      border-bottom: 0.0625rem solid var(--atlas-border-light, rgb(58 58 58));
-      color: var(--atlas-title-text, rgb(255 255 255));
+      border-bottom: 0.0625rem solid var(--atlas-border-light);
+      color: var(--atlas-title-text);
       font-weight: bold;
       font-size: 1.2rem;
       text-align: center;
@@ -1053,17 +1053,17 @@
       border-radius: 0.125rem;
       font-size: 0.8rem;
       cursor: pointer;
-      background: var(--atlas-bg-lighter, rgb(42 42 42));
+      background: var(--atlas-bg-lighter);
       transition: background 0.2s;
 
       &:hover {
-        color: var(--atlas-text-on-color, rgb(255 255 255));
-        background: var(--atlas-primary, rgb(74 144 226));
+        color: var(--atlas-text-on-color);
+        background: var(--atlas-primary);
       }
 
       &.current-month {
-        border: 0.0625rem solid var(--atlas-today, rgb(255 100 0));
-        box-shadow: 0 0 0.25rem var(--atlas-today, rgb(255 100 0));
+        border: 0.0625rem solid var(--atlas-today);
+        box-shadow: 0 0 0.25rem var(--atlas-today);
       }
 
       &.no-days {

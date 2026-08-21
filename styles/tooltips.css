@@ -9,7 +9,7 @@
     }
 
     .festival {
-      color: var(--atlas-primary, rgb(74 158 255));
+      color: var(--atlas-primary);
       font-size: 0.85rem;
     }
 
@@ -29,18 +29,18 @@
       }
 
       .fa-sun {
-        color: var(--atlas-today, rgb(251 191 36));
+        color: var(--atlas-today);
       }
 
       .fa-moon {
-        color: var(--atlas-accent, rgb(167 139 250));
+        color: var(--atlas-accent);
       }
     }
 
     .equivalent-dates {
       margin-top: 0.25rem;
       padding-top: 0.25rem;
-      border-top: 0.0625rem solid var(--atlas-divider, rgb(255 255 255 / 10%));
+      border-top: 0.0625rem solid var(--atlas-divider);
       text-align: left;
     }
 
@@ -58,7 +58,7 @@
     .tooltip-notes {
       margin-top: 0.25rem;
       padding-top: 0.25rem;
-      border-top: 0.0625rem solid var(--atlas-divider, rgb(255 255 255 / 10%));
+      border-top: 0.0625rem solid var(--atlas-divider);
       text-align: left;
     }
 
@@ -120,11 +120,11 @@
   z-index: 100001;
   position: fixed;
   padding: 0.75rem;
-  border: 0.0625rem solid var(--atlas-border, rgb(58 58 94));
+  border: 0.0625rem solid var(--atlas-border);
   border-radius: 0.625rem;
   cursor: grab;
-  background: var(--atlas-bg, rgb(26 26 46));
-  box-shadow: 0 0.25rem 1.25rem var(--atlas-shadow-color, rgb(0 0 0 / 60%));
+  background: var(--atlas-bg);
+  box-shadow: 0 0.25rem 1.25rem var(--atlas-shadow-color);
 
   .radial {
     position: relative;
@@ -153,13 +153,13 @@
 
     &.selected {
       .radial-icon {
-        outline: 0.125rem solid var(--atlas-primary, rgb(123 104 238));
+        outline: 0.125rem solid var(--atlas-primary);
         outline-offset: 0.125rem;
       }
 
       .name {
         margin-bottom: 0.25rem;
-        color: var(--atlas-primary, rgb(123 104 238));
+        color: var(--atlas-primary);
       }
     }
   }
@@ -172,8 +172,8 @@
     height: 1.75rem;
     padding: 0.1875rem;
     border-radius: 50%;
-    background: var(--atlas-bg-hover, rgb(40 40 70));
-    box-shadow: 0 0.125rem 0.375rem var(--atlas-shadow-color, rgb(0 0 0 / 40%));
+    background: var(--atlas-bg-hover);
+    box-shadow: 0 0.125rem 0.375rem var(--atlas-shadow-color);
 
     &.tinted {
       background-color: color-mix(in srgb, var(--moon-color, transparent) 50%, rgb(40 40 70));
@@ -192,9 +192,9 @@
   }
 
   .name {
-    color: var(--atlas-text, rgb(224 224 224));
+    color: var(--atlas-text);
     font-weight: 500;
-    font-size: var(--font-size-10, 0.625rem);
+    font-size: var(--font-size-10);
     line-height: 1.2;
     text-align: center;
     white-space: nowrap;

@@ -16,50 +16,50 @@
 
 .calendaria {
   --calendaria-highlight: rgb(255 255 255 / 20%);
-  --calendaria-ui-accent: var(--atlas-accent, rgb(168 144 96));
-  --calendaria-ui-border: var(--atlas-border, rgb(74 74 74));
-  --calendaria-ui-error: var(--atlas-error, rgb(244 67 54));
-  --calendaria-ui-success: var(--atlas-success, rgb(136 204 136));
-  --calendaria-ui-surface: var(--atlas-surface-dim-75, rgb(42 42 42 / 75%));
-  --calendaria-ui-surface-50: var(--atlas-surface-dim-50, rgb(42 42 42 / 50%));
-  --calendaria-ui-surface-dim: var(--atlas-surface-dim, rgb(42 42 42));
-  --calendaria-ui-text-dim: var(--atlas-text-dim, rgb(153 153 153));
+  --calendaria-ui-accent: var(--atlas-accent);
+  --calendaria-ui-border: var(--atlas-border);
+  --calendaria-ui-error: var(--atlas-error);
+  --calendaria-ui-success: var(--atlas-success);
+  --calendaria-ui-surface: var(--atlas-surface-dim-75);
+  --calendaria-ui-surface-50: var(--atlas-surface-dim-50);
+  --calendaria-ui-surface-dim: var(--atlas-surface-dim);
+  --calendaria-ui-text-dim: var(--atlas-text-dim);
 }
 
 .calendaria.application {
-  --background: var(--atlas-bg, rgb(31 31 31));
-  --color-border: var(--atlas-border, rgb(74 74 74));
-  --color-data-background: var(--atlas-bg-lighter, rgb(42 42 42));
-  --color-data-border: var(--atlas-border, rgb(74 74 74));
-  --color-fieldset-border: var(--atlas-border, rgb(74 74 74));
-  --color-form-hint: var(--atlas-text-secondary, rgb(170 170 170));
-  --color-form-hint-hover: var(--atlas-text, rgb(224 224 224));
-  --color-form-label: var(--atlas-text, rgb(224 224 224));
-  --color-form-label-hover: var(--atlas-text-heading, rgb(238 238 238));
-  --color-tabs-border: var(--atlas-border, rgb(74 74 74));
-  --color-level-error: var(--atlas-error, rgb(244 67 54));
-  --color-level-success: var(--atlas-success, rgb(136 204 136));
-  --color-level-warning: var(--atlas-warning, rgb(255 193 7));
-  --color-scrollbar: var(--atlas-border, rgb(74 74 74));
-  --color-shadow-primary: var(--atlas-primary, rgb(74 144 226));
-  --color-text-accent: var(--atlas-accent, rgb(168 144 96));
-  --color-text-emphatic: var(--atlas-text-heading, rgb(238 238 238));
-  --color-text-primary: var(--atlas-text, rgb(224 224 224));
-  --color-text-secondary: var(--atlas-text-secondary, rgb(170 170 170));
-  --color-text-selection: var(--atlas-text-on-color, rgb(255 255 255));
-  --color-text-selection-bg: var(--atlas-primary, rgb(74 144 226));
-  --color-text-subtle: var(--atlas-text-secondary, rgb(170 170 170));
-  --button-background-color: var(--atlas-button-bg, rgb(58 58 58));
-  --button-border-color: var(--atlas-button-border, rgb(74 74 74));
-  --button-focus-outline-color: var(--atlas-primary, rgb(74 144 226));
-  --button-hover-background-color: var(--atlas-button-hover, rgb(74 74 74));
-  --button-hover-border-color: var(--atlas-primary, rgb(74 144 226));
-  --button-hover-text-color: var(--atlas-button-text, rgb(224 224 224));
-  --button-text-color: var(--atlas-button-text, rgb(224 224 224));
-  --content-link-background: var(--atlas-surface-dim-25, rgb(42 42 42 / 25%));
-  --content-link-border-color: var(--atlas-border, rgb(74 74 74));
-  --content-link-icon-color: var(--atlas-text-dim, rgb(153 153 153));
-  --content-link-text-color: var(--atlas-link, rgb(74 144 226));
+  --background: var(--atlas-bg);
+  --color-border: var(--atlas-border);
+  --color-data-background: var(--atlas-bg-lighter);
+  --color-data-border: var(--atlas-border);
+  --color-fieldset-border: var(--atlas-border);
+  --color-form-hint: var(--atlas-text-secondary);
+  --color-form-hint-hover: var(--atlas-text);
+  --color-form-label: var(--atlas-text);
+  --color-form-label-hover: var(--atlas-text-heading);
+  --color-tabs-border: var(--atlas-border);
+  --color-level-error: var(--atlas-error);
+  --color-level-success: var(--atlas-success);
+  --color-level-warning: var(--atlas-warning);
+  --color-scrollbar: var(--atlas-border);
+  --color-shadow-primary: var(--atlas-primary);
+  --color-text-accent: var(--atlas-accent);
+  --color-text-emphatic: var(--atlas-text-heading);
+  --color-text-primary: var(--atlas-text);
+  --color-text-secondary: var(--atlas-text-secondary);
+  --color-text-selection: var(--atlas-text-on-color);
+  --color-text-selection-bg: var(--atlas-primary);
+  --color-text-subtle: var(--atlas-text-secondary);
+  --button-background-color: var(--atlas-button-bg);
+  --button-border-color: var(--atlas-button-border);
+  --button-focus-outline-color: var(--atlas-primary);
+  --button-hover-background-color: var(--atlas-button-hover);
+  --button-hover-border-color: var(--atlas-primary);
+  --button-hover-text-color: var(--atlas-button-text);
+  --button-text-color: var(--atlas-button-text);
+  --content-link-background: var(--atlas-surface-dim-25);
+  --content-link-border-color: var(--atlas-border);
+  --content-link-icon-color: var(--atlas-text-dim);
+  --content-link-text-color: var(--atlas-link);
 
   input,
   select,
@@ -70,16 +70,16 @@
   file-picker,
   document-tags,
   string-tags {
-    --input-background-color: var(--atlas-input-bg, rgb(48 48 48));
-    --input-border-color: var(--atlas-border, rgb(74 74 74));
-    --input-focus-outline-color: var(--atlas-primary, rgb(74 144 226));
-    --input-focus-text-color: var(--atlas-text, rgb(224 224 224));
-    --input-placeholder-color: var(--atlas-text-dim, rgb(153 153 153));
-    --input-text-color: var(--atlas-text, rgb(224 224 224));
+    --input-background-color: var(--atlas-input-bg);
+    --input-border-color: var(--atlas-border);
+    --input-focus-outline-color: var(--atlas-primary);
+    --input-focus-text-color: var(--atlas-text);
+    --input-placeholder-color: var(--atlas-text-dim);
+    --input-text-color: var(--atlas-text);
   }
 
   select option {
-    color: var(--atlas-text, rgb(224 224 224));
-    background: var(--atlas-bg, rgb(31 31 31));
+    color: var(--atlas-text);
+    background: var(--atlas-bg);
   }
 }

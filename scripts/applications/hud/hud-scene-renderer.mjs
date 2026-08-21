@@ -1,5 +1,3 @@
-/* global PIXI */
-
 /** @type {object[]} Sky color keyframes for interpolation throughout the day. */
 export const SKY_KEYFRAMES = [
   { hour: 0, top: '#0a0a12', mid: '#0f0f1a', bottom: '#151525' },

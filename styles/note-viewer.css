@@ -9,18 +9,18 @@
     position: fixed;
     border-radius: 0.75rem;
     overflow: hidden;
-    color: var(--atlas-text, rgb(224 224 224));
-    background: var(--atlas-bg, rgb(31 31 31));
+    color: var(--atlas-text);
+    background: var(--atlas-bg);
     box-shadow:
       0 0.5rem 2rem rgb(0 0 0 / 30%),
-      0 0 0 0.0625rem var(--atlas-border, rgb(74 74 74));
+      0 0 0 0.0625rem var(--atlas-border);
 
     input[type='checkbox'],
     input[type='checkbox']:checked,
     input[type='checkbox']:indeterminate {
       width: var(--checkbox-size);
       height: var(--checkbox-size);
-      border: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
+      border: 0.0625rem solid var(--atlas-border);
       border-radius: 0.1875rem;
 
       &:checked,
@@ -35,9 +35,9 @@
       display: flex;
       align-items: center;
       padding: 0.5rem 0.75rem;
-      border-bottom: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
+      border-bottom: 0.0625rem solid var(--atlas-border);
       cursor: grab;
-      background: var(--atlas-bg-lighter, rgb(42 42 42));
+      background: var(--atlas-bg-lighter);
 
       .search-input-wrapper {
         gap: 0.375rem;
@@ -46,14 +46,14 @@
         align-items: center;
         height: 1.625rem;
         padding: 0 0.375rem;
-        border: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
+        border: 0.0625rem solid var(--atlas-border);
         border-radius: 0.25rem;
-        background: var(--atlas-bg, rgb(31 31 31));
+        background: var(--atlas-bg);
         overflow: hidden;
 
         .search-icon {
-          color: var(--atlas-text-dim, rgb(153 153 153));
-          font-size: var(--font-size-12, 0.75rem);
+          color: var(--atlas-text-dim);
+          font-size: var(--font-size-12);
         }
 
         input {
@@ -61,12 +61,12 @@
           padding: 0;
           border: none;
           outline: none;
-          color: var(--atlas-text, rgb(224 224 224));
-          font-size: var(--font-size-12, 0.75rem);
+          color: var(--atlas-text);
+          font-size: var(--font-size-12);
           background: transparent;
 
           &::placeholder {
-            color: var(--atlas-text-dim, rgb(153 153 153));
+            color: var(--atlas-text-dim);
           }
         }
 
@@ -80,13 +80,13 @@
           padding: 0;
           border: none;
           border-radius: 50%;
-          color: var(--atlas-text-dim, rgb(153 153 153));
+          color: var(--atlas-text-dim);
           cursor: pointer;
           background: transparent;
 
           &:hover {
-            color: var(--atlas-text, rgb(224 224 224));
-            background: var(--atlas-bg-hover, rgb(53 53 53));
+            color: var(--atlas-text);
+            background: var(--atlas-bg-hover);
           }
         }
       }
@@ -101,13 +101,13 @@
         padding: 0;
         border: none;
         border-radius: 0.25rem;
-        color: var(--atlas-text-dim, rgb(153 153 153));
+        color: var(--atlas-text-dim);
         cursor: pointer;
         background: transparent;
 
         &:hover {
-          color: var(--atlas-text, rgb(224 224 224));
-          background: var(--atlas-bg-hover, rgb(53 53 53));
+          color: var(--atlas-text);
+          background: var(--atlas-bg-hover);
         }
       }
     }
@@ -118,9 +118,9 @@
       display: flex;
       flex-direction: column;
       padding: 0.625rem;
-      border-right: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
+      border-right: 0.0625rem solid var(--atlas-border);
       overflow-y: auto;
-      background: var(--atlas-bg-lighter, rgb(42 42 42));
+      background: var(--atlas-bg-lighter);
 
       .filter-group {
         gap: 0.25rem;
@@ -129,24 +129,24 @@
       }
 
       .filter-label {
-        color: var(--atlas-text-dim, rgb(153 153 153));
+        color: var(--atlas-text-dim);
         font-weight: 600;
-        font-size: var(--font-size-11, 0.6875rem);
+        font-size: var(--font-size-11);
         text-transform: uppercase;
         letter-spacing: 0.03em;
       }
 
       .filter-select {
         padding: 0.25rem 0.375rem;
-        border: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
+        border: 0.0625rem solid var(--atlas-border);
         border-radius: 0.25rem;
-        color: var(--atlas-text, rgb(224 224 224));
-        font-size: var(--font-size-12, 0.75rem);
-        background: var(--atlas-bg, rgb(31 31 31));
+        color: var(--atlas-text);
+        font-size: var(--font-size-12);
+        background: var(--atlas-bg);
       }
 
       multi-select {
-        font-size: var(--font-size-12, 0.75rem);
+        font-size: var(--font-size-12);
 
         .tags {
           gap: 0.25rem;
@@ -158,38 +158,38 @@
         .tag {
           padding: 0.125rem 0.375rem;
           border-radius: 0.1875rem;
-          color: var(--atlas-text, rgb(224 224 224));
-          font-size: var(--font-size-10, 0.625rem);
+          color: var(--atlas-text);
+          font-size: var(--font-size-10);
           cursor: pointer;
-          background: color-mix(in srgb, var(--atlas-primary, rgb(74 144 226)) 20%, var(--atlas-bg, rgb(31 31 31)));
+          background: color-mix(in srgb, var(--atlas-primary) 20%, var(--atlas-bg));
 
           &:hover {
-            background: color-mix(in srgb, var(--atlas-primary, rgb(74 144 226)) 35%, var(--atlas-bg, rgb(31 31 31)));
+            background: color-mix(in srgb, var(--atlas-primary) 35%, var(--atlas-bg));
           }
         }
 
         select {
           padding: 0.125rem 0.375rem;
-          border: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
+          border: 0.0625rem solid var(--atlas-border);
           border-radius: 0.25rem;
-          color: var(--atlas-text, rgb(224 224 224));
-          font-size: var(--font-size-11, 0.6875rem);
-          background: var(--atlas-bg, rgb(31 31 31));
+          color: var(--atlas-text);
+          font-size: var(--font-size-11);
+          background: var(--atlas-bg);
         }
       }
 
       .filter-checkboxes {
         gap: 0.375rem;
         padding-top: 0.5rem;
-        border-top: 0.0625rem solid var(--atlas-border-light, rgb(58 58 58));
+        border-top: 0.0625rem solid var(--atlas-border-light);
       }
 
       .filter-checkbox {
         gap: 0.375rem;
         display: flex;
         align-items: center;
-        color: var(--atlas-text, rgb(224 224 224));
-        font-size: var(--font-size-12, 0.75rem);
+        color: var(--atlas-text);
+        font-size: var(--font-size-12);
         cursor: pointer;
       }
 
@@ -200,15 +200,15 @@
         align-items: center;
         margin-top: auto;
         padding: 0.25rem 0.5rem;
-        border: 0.0625rem solid var(--atlas-primary, rgb(74 144 226));
+        border: 0.0625rem solid var(--atlas-primary);
         border-radius: 0.25rem;
-        color: var(--atlas-primary, rgb(74 144 226));
-        font-size: var(--font-size-11, 0.6875rem);
+        color: var(--atlas-primary);
+        font-size: var(--font-size-11);
         cursor: pointer;
         background: transparent;
 
         &:hover {
-          background: color-mix(in srgb, var(--atlas-primary, rgb(74 144 226)) 15%, transparent);
+          background: color-mix(in srgb, var(--atlas-primary) 15%, transparent);
         }
       }
     }
@@ -226,7 +226,7 @@
 
       .note-group-header {
         padding: 0.4rem 0.75rem 0.2rem;
-        color: var(--atlas-text-dim, rgb(153 153 153));
+        color: var(--atlas-text-dim);
         font-size: var(--font-size-12);
         font-weight: 600;
         text-transform: uppercase;
@@ -238,16 +238,16 @@
         display: flex;
         align-items: center;
         padding: 0.5rem 0.75rem;
-        border-bottom: 0.0625rem solid var(--atlas-border-light, rgb(58 58 58));
+        border-bottom: 0.0625rem solid var(--atlas-border-light);
         cursor: pointer;
         transition: background 0.1s ease;
 
         &:hover {
-          background: var(--atlas-bg-hover, rgb(53 53 53));
+          background: var(--atlas-bg-hover);
         }
 
         &.selected {
-          background: color-mix(in srgb, var(--atlas-primary, rgb(74 144 226)) 12%, transparent);
+          background: color-mix(in srgb, var(--atlas-primary) 12%, transparent);
         }
 
         .note-select-checkbox {
@@ -266,7 +266,7 @@
           flex-shrink: 0;
           width: 1.25rem;
           height: 1.25rem;
-          color: var(--note-color, var(--atlas-text-dim, rgb(153 153 153)));
+          color: var(--note-color, var(--atlas-text-dim));
           font-size: 1.125rem;
           text-align: center;
         }
@@ -285,16 +285,16 @@
 
           .note-name {
             overflow: hidden;
-            color: var(--atlas-text, rgb(224 224 224));
+            color: var(--atlas-text);
             font-weight: 500;
-            font-size: var(--font-size-13, 0.8125rem);
+            font-size: var(--font-size-13);
             text-overflow: ellipsis;
             white-space: nowrap;
           }
 
           .note-date {
-            color: var(--atlas-text-dim, rgb(153 153 153));
-            font-size: var(--font-size-11, 0.6875rem);
+            color: var(--atlas-text-dim);
+            font-size: var(--font-size-11);
           }
         }
 
@@ -307,25 +307,25 @@
           i {
             display: inline-block;
             width: 0.75rem;
-            color: var(--atlas-text-dim, rgb(153 153 153));
+            color: var(--atlas-text-dim);
             font-size: 0.6875rem;
             text-align: center;
           }
 
           .tag-visibility {
-            color: var(--atlas-warning, rgb(255 193 7));
+            color: var(--atlas-warning);
           }
 
           .tag-duration {
-            color: var(--atlas-accent, rgb(168 144 96));
+            color: var(--atlas-accent);
           }
 
           .tag-recurrence {
-            color: var(--atlas-primary, rgb(74 144 226));
+            color: var(--atlas-primary);
           }
 
           .tag-festival {
-            color: var(--atlas-callout-text, rgb(255 215 0));
+            color: var(--atlas-callout-text);
           }
         }
       }
@@ -337,7 +337,7 @@
         justify-content: center;
         align-items: center;
         padding: 3rem 1.5rem;
-        color: var(--atlas-text-dim, rgb(153 153 153));
+        color: var(--atlas-text-dim);
         text-align: center;
 
         .empty-icon {
@@ -347,7 +347,7 @@
 
         p {
           margin: 0;
-          font-size: var(--font-size-13, 0.8125rem);
+          font-size: var(--font-size-13);
         }
       }
     }
@@ -359,8 +359,8 @@
       align-items: center;
       height: 2rem;
       padding: 0 0.75rem;
-      border-top: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
-      background: var(--atlas-bg-lighter, rgb(42 42 42));
+      border-top: 0.0625rem solid var(--atlas-border);
+      background: var(--atlas-bg-lighter);
 
       .create-note-fab {
         display: flex;
@@ -375,24 +375,24 @@
         padding: 0;
         border: none;
         border-radius: 50%;
-        color: var(--atlas-text-on-color, rgb(255 255 255));
-        font-size: var(--font-size-14, 0.875rem);
+        color: var(--atlas-text-on-color);
+        font-size: var(--font-size-14);
         cursor: pointer;
-        background: var(--atlas-primary, rgb(74 144 226));
-        box-shadow: 0 0.125rem 0.5rem var(--atlas-shadow-color, rgb(0 0 0 / 30%));
+        background: var(--atlas-primary);
+        box-shadow: 0 0.125rem 0.5rem var(--atlas-shadow-color);
         transition:
           background 0.15s ease,
           transform 0.15s ease;
 
         &:hover {
-          background: var(--atlas-primary-hover, color-mix(in srgb, var(--atlas-primary, rgb(74 144 226)) 85%, rgb(255 255 255)));
+          background: var(--atlas-primary-hover);
           transform: scale(1.1);
         }
       }
 
       .note-count {
-        color: var(--atlas-text-dim, rgb(153 153 153));
-        font-size: var(--font-size-11, 0.6875rem);
+        color: var(--atlas-text-dim);
+        font-size: var(--font-size-11);
         white-space: nowrap;
       }
 
@@ -412,14 +412,14 @@
         padding: 0;
         border: none;
         border-radius: 0.25rem;
-        color: var(--atlas-text-dim, rgb(153 153 153));
-        font-size: var(--font-size-12, 0.75rem);
+        color: var(--atlas-text-dim);
+        font-size: var(--font-size-12);
         cursor: pointer;
         background: transparent;
 
         &:hover {
-          color: var(--atlas-text, rgb(224 224 224));
-          background: var(--atlas-bg-hover, rgb(53 53 53));
+          color: var(--atlas-text);
+          background: var(--atlas-bg-hover);
         }
       }
 
@@ -429,8 +429,8 @@
 
       .selection-count {
         min-width: 1rem;
-        color: var(--atlas-text-dim, rgb(153 153 153));
-        font-size: var(--font-size-11, 0.6875rem);
+        color: var(--atlas-text-dim);
+        font-size: var(--font-size-11);
         text-align: center;
       }
 
@@ -440,7 +440,7 @@
         align-items: center;
         margin-left: 0.25rem;
         padding-left: 0.375rem;
-        border-left: 0.0625rem solid var(--atlas-border-light, rgb(58 58 58));
+        border-left: 0.0625rem solid var(--atlas-border-light);
       }
 
       .bulk-btn {
@@ -452,14 +452,14 @@
         padding: 0;
         border: none;
         border-radius: 0.25rem;
-        color: var(--atlas-text-dim, rgb(153 153 153));
-        font-size: var(--font-size-11, 0.6875rem);
+        color: var(--atlas-text-dim);
+        font-size: var(--font-size-11);
         cursor: pointer;
         background: transparent;
 
         &:hover:not(:disabled) {
-          color: var(--atlas-text, rgb(224 224 224));
-          background: var(--atlas-bg-hover, rgb(53 53 53));
+          color: var(--atlas-text);
+          background: var(--atlas-bg-hover);
         }
 
         &:disabled {
