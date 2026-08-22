@@ -30,7 +30,7 @@ function findMirrored(noteId) {
 export async function mirrorReminder(note, message, targets) {
   if (!isDontForgetActive() || !note.flagData.persistToDo) return;
   const existing = findMirrored(note.id);
-  const label = message.replace(/<[^>]+>/g, '');
+  const label = message.replace(/[<>]/g, '');
   for (const userId of targets) {
     if (existing.some((r) => r.userId === userId && !r.isDone)) continue;
     await DONTFORGET.api.createReminder(userId, { label, source: SOURCE, ref: note.id });
