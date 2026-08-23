@@ -61,7 +61,13 @@ describe('FestivalManager', () => {
 
   describe('createFestivalNote', () => {
     it('creates a note with month+dayOfMonth condition tree', async () => {
-      const calendar = { festivals: { fest1: { name: 'Midwinter', month: 0, dayOfMonth: 14, duration: 1 } }, metadata: { id: 'harptos' }, years: { yearZero: 0 }, monthsArray: [{ days: 31 }], getDaysInMonth: () => 31 };
+      const calendar = {
+        festivals: { fest1: { name: 'Midwinter', month: 0, dayOfMonth: 14, duration: 1 } },
+        metadata: { id: 'harptos' },
+        years: { yearZero: 0 },
+        monthsArray: [{ days: 31 }],
+        getDaysInMonth: () => 31
+      };
       await FestivalManager.createFestivalNote('harptos', 'fest1', calendar.festivals.fest1, calendar);
       const notes = NoteManager.getAllNotes();
       expect(notes).toHaveLength(1);
@@ -77,7 +83,13 @@ describe('FestivalManager', () => {
       });
     });
     it('creates a note with dayOfYear condition tree', async () => {
-      const calendar = { festivals: { fest1: { name: 'Spring Festival', dayOfYear: 79, duration: 1 } }, metadata: { id: 'test' }, years: { yearZero: 0 }, monthsArray: [{ days: 31 }, { days: 28 }, { days: 31 }], getDaysInMonth: (m) => [31, 28, 31][m] };
+      const calendar = {
+        festivals: { fest1: { name: 'Spring Festival', dayOfYear: 79, duration: 1 } },
+        metadata: { id: 'test' },
+        years: { yearZero: 0 },
+        monthsArray: [{ days: 31 }, { days: 28 }, { days: 31 }],
+        getDaysInMonth: (m) => [31, 28, 31][m]
+      };
       await FestivalManager.createFestivalNote('test', 'fest1', calendar.festivals.fest1, calendar);
       const notes = NoteManager.getAllNotes();
       expect(notes).toHaveLength(1);
@@ -85,7 +97,13 @@ describe('FestivalManager', () => {
       expect(tree).toEqual({ type: 'condition', field: CONDITION_FIELDS.DAY_OF_YEAR, op: '==', value: 80 });
     });
     it('wraps leapYearOnly festivals with isLeapYear condition', async () => {
-      const calendar = { festivals: { fest1: { name: 'Shieldmeet', dayOfYear: 213, duration: 1, leapYearOnly: true } }, metadata: { id: 'harptos' }, years: { yearZero: 0 }, monthsArray: [{ days: 31 }], getDaysInMonth: () => 31 };
+      const calendar = {
+        festivals: { fest1: { name: 'Shieldmeet', dayOfYear: 213, duration: 1, leapYearOnly: true } },
+        metadata: { id: 'harptos' },
+        years: { yearZero: 0 },
+        monthsArray: [{ days: 31 }],
+        getDaysInMonth: () => 31
+      };
       await FestivalManager.createFestivalNote('harptos', 'fest1', calendar.festivals.fest1, calendar);
       const notes = NoteManager.getAllNotes();
       expect(notes).toHaveLength(1);
@@ -173,7 +191,13 @@ describe('FestivalManager', () => {
 
   describe('note creation properties', () => {
     it('sets correct display properties', async () => {
-      const calendar = { festivals: { fest1: { name: 'Greengrass', month: 3, dayOfMonth: 0, color: '#22dd22', icon: 'fa-leaf', duration: 3 } }, metadata: { id: 'test' }, years: { yearZero: 0 }, monthsArray: [], getDaysInMonth: () => 30 };
+      const calendar = {
+        festivals: { fest1: { name: 'Greengrass', month: 3, dayOfMonth: 0, color: '#22dd22', icon: 'fa-leaf', duration: 3 } },
+        metadata: { id: 'test' },
+        years: { yearZero: 0 },
+        monthsArray: [],
+        getDaysInMonth: () => 30
+      };
       await FestivalManager.createFestivalNote('test', 'fest1', calendar.festivals.fest1, calendar);
       const noteData = NoteManager.getAllNotes()[0].flagData;
       expect(noteData.color).toBe('#22dd22');
@@ -210,7 +234,13 @@ describe('FestivalManager', () => {
 
   describe('seedFestivalNotes', () => {
     it('creates missing notes only (does not duplicate)', async () => {
-      const calendar = { festivals: { fest1: { name: 'Festival', month: 0, dayOfMonth: 0, duration: 1 } }, metadata: { id: 'test' }, years: { yearZero: 0 }, monthsArray: [], getDaysInMonth: () => 30 };
+      const calendar = {
+        festivals: { fest1: { name: 'Festival', month: 0, dayOfMonth: 0, duration: 1 } },
+        metadata: { id: 'test' },
+        years: { yearZero: 0 },
+        monthsArray: [],
+        getDaysInMonth: () => 30
+      };
       const created1 = await FestivalManager.seedFestivalNotes('test', calendar);
       expect(created1).toBe(1);
       expect(NoteManager.getAllNotes()).toHaveLength(1);
@@ -220,13 +250,25 @@ describe('FestivalManager', () => {
     });
     it('skips seeding when the calendar is already marked seeded', async () => {
       seededSet.add('test');
-      const calendar = { festivals: { fest1: { name: 'Festival A', month: 0, dayOfMonth: 0, duration: 1 } }, metadata: { id: 'test' }, years: { yearZero: 0 }, monthsArray: [], getDaysInMonth: () => 30 };
+      const calendar = {
+        festivals: { fest1: { name: 'Festival A', month: 0, dayOfMonth: 0, duration: 1 } },
+        metadata: { id: 'test' },
+        years: { yearZero: 0 },
+        monthsArray: [],
+        getDaysInMonth: () => 30
+      };
       const created = await FestivalManager.seedFestivalNotes('test', calendar);
       expect(created).toBe(0);
       expect(NoteManager.getAllNotes()).toHaveLength(0);
     });
     it('records the calendar in the seeded-calendars set', async () => {
-      const calendar = { festivals: { fest1: { name: 'Festival', month: 0, dayOfMonth: 0, duration: 1 } }, metadata: { id: 'test' }, years: { yearZero: 0 }, monthsArray: [], getDaysInMonth: () => 30 };
+      const calendar = {
+        festivals: { fest1: { name: 'Festival', month: 0, dayOfMonth: 0, duration: 1 } },
+        metadata: { id: 'test' },
+        years: { yearZero: 0 },
+        monthsArray: [],
+        getDaysInMonth: () => 30
+      };
       await FestivalManager.seedFestivalNotes('test', calendar);
       expect(seededSet.has('test')).toBe(true);
     });
@@ -342,7 +384,13 @@ describe('FestivalManager', () => {
 
   describe('dayOfYear to startDate conversion', () => {
     it('converts dayOfYear to correct month and dayOfMonth', async () => {
-      const calendar = { festivals: { fest1: { name: 'Test', dayOfYear: 31, duration: 1 } }, metadata: { id: 'test' }, years: { yearZero: 0 }, monthsArray: [{ days: 31 }, { days: 28 }], getDaysInMonth: (m) => [31, 28][m] || 30 };
+      const calendar = {
+        festivals: { fest1: { name: 'Test', dayOfYear: 31, duration: 1 } },
+        metadata: { id: 'test' },
+        years: { yearZero: 0 },
+        monthsArray: [{ days: 31 }, { days: 28 }],
+        getDaysInMonth: (m) => [31, 28][m] || 30
+      };
       await FestivalManager.createFestivalNote('test', 'fest1', calendar.festivals.fest1, calendar);
       const noteData = NoteManager.getAllNotes()[0].flagData;
       expect(noteData.startDate.month).toBe(1);

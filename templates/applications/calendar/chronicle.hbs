@@ -45,6 +45,38 @@
         </div>
       </div>
     {{/if}}
+    {{#if subjectOptions.length}}
+      <div class="subject-filter">
+        <button type="button"
+          class="toolbar-btn subject-filter-toggle{{#if hasSubjectFilter}} subject-filter-toggle--active{{/if}}"
+          aria-expanded="false" data-tooltip="{{localize 'CALENDARIA.Chronicle.SubjectFilter.Tooltip'}}">
+          <i class="fas fa-user-tag"></i>
+          {{#if hasSubjectFilter}}<span class="subject-filter-badge">{{subjectSelectedCount}}</span>{{/if}}
+        </button>
+        <div class="subject-filter-menu" hidden>
+          <ul class="subject-filter-list">
+            {{#each subjectOptions}}
+              <li class="subject-filter-item">
+                <button type="button"
+                  class="subject-filter-option{{#if this.active}} subject-filter-option--active{{/if}}"
+                  data-subject-uuid="{{this.uuid}}" aria-pressed="{{#if this.active}}true{{else}}false{{/if}}">
+                  <i class="fas fa-user"></i>
+                  <span>{{this.label}}</span>
+                </button>
+              </li>
+            {{/each}}
+          </ul>
+          {{#if hasSubjectFilter}}
+            <div class="subject-filter-menu-footer">
+              <button type="button" class="subject-filter-clear">
+                <i class="fas fa-filter-circle-xmark"></i>
+                {{localize 'CALENDARIA.Chronicle.SubjectFilter.Clear'}}
+              </button>
+            </div>
+          {{/if}}
+        </div>
+      </div>
+    {{/if}}
     <button type="button" class="toolbar-btn" data-action="toggleEmptyDays"
       data-tooltip="{{#if showEmpty}}{{localize 'CALENDARIA.Chronicle.Mode.EventsOnly'}}{{else}}{{localize 'CALENDARIA.Chronicle.Mode.FullChronicle'}}{{/if}}">
       <i class="fas {{#if showEmpty}}fa-eye{{else}}fa-eye-slash{{/if}}"></i>
@@ -56,7 +88,7 @@
       </button>
     {{/unless}}
     <button type="button" class="toolbar-btn close-btn" data-action="closeScroll"
-      data-tooltip="{{localize 'CALENDARIA.Common.Close'}}">
+      data-tooltip="{{localize 'ATLAS.Common.Close'}}">
       <i class="fas fa-times"></i>
     </button>
   </div>

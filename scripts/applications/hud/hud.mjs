@@ -625,7 +625,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     });
     items.push(buildOpenAppsMenuItem());
     if (game.user.isGM || !game.settings.get(MODULE.ID, SETTINGS.FORCE_HUD)) {
-      items.push({ label: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', onClick: () => HUD.hide() });
+      items.push({ label: 'ATLAS.Common.Close', icon: '<i class="fas fa-times"></i>', onClick: () => HUD.hide() });
     }
     return items;
   }
@@ -1243,11 +1243,11 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       round: _loc('CALENDARIA.Common.Round'),
       minute: _loc('CALENDARIA.Common.Minute'),
       hour: _loc('CALENDARIA.Common.Hour'),
-      day: _loc('CALENDARIA.Common.Day'),
+      day: _loc('ATLAS.Common.Day'),
       week: _loc('CALENDARIA.Common.Week'),
-      month: _loc('CALENDARIA.Common.Month'),
+      month: _loc('ATLAS.Common.Month'),
       season: _loc('CALENDARIA.Common.Season'),
-      year: _loc('CALENDARIA.Common.Year')
+      year: _loc('ATLAS.Common.Year')
     };
     return labels[key] || key;
   }
@@ -1278,7 +1278,8 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       windKph,
       windDirection,
       precipType,
-      precipIntensity: weather.precipitation?.intensity
+      precipIntensity: weather.precipitation?.intensity,
+      severity: WeatherManager.getSeverity(weather)
     };
     const tooltipHtml = weather.periods ? WeatherManager.buildWeatherTooltipWithPeriods(tooltipArgs, weather.periods, weather.activePeriod) : WeatherManager.buildWeatherTooltip(tooltipArgs);
     return { id: weather.id, label, icon, color: weather.color, temp, tooltipHtml, windSpeed, windKph, windDirection, precipType };

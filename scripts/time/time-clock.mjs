@@ -181,7 +181,7 @@ export default class TimeClock {
    * Auto-start clock if sync enabled and game unpaused.
    */
   static #autoStartIfSynced() {
-    if (!CalendariaSocket.isPrimaryGM()) return;
+    if (!ATLAS.isPrimaryGM) return;
     if (!game.settings.get(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE)) return;
     if (this.#locked || this.disabled || game.paused || this.#combatBlocks) return;
     this.start();
@@ -218,7 +218,7 @@ export default class TimeClock {
    */
   static #onPauseGame(paused) {
     if (!game.settings.get(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE)) return;
-    if (!CalendariaSocket.isPrimaryGM()) return;
+    if (!ATLAS.isPrimaryGM) return;
     if (paused) {
       if (this.#running) this.stop();
       ATLAS.log(3, 'Clock stopped: game paused');
@@ -233,7 +233,7 @@ export default class TimeClock {
    * @param {object} _combat - The combat that started
    */
   static #onCombatStart(_combat) {
-    if (!CalendariaSocket.isPrimaryGM()) return;
+    if (!ATLAS.isPrimaryGM) return;
     if (game.settings.get(MODULE.ID, SETTINGS.CLOCK_RUN_DURING_COMBAT)) return;
     if (this.#running) {
       this.stop();
@@ -246,7 +246,7 @@ export default class TimeClock {
    * @param {object} _combat - The combat that ended
    */
   static #onCombatEnd(_combat) {
-    if (!CalendariaSocket.isPrimaryGM()) return;
+    if (!ATLAS.isPrimaryGM) return;
     if (!game.settings.get(MODULE.ID, SETTINGS.SYNC_CLOCK_PAUSE)) return;
     if (!this.#locked && !this.disabled && !game.paused && !this.#running) {
       this.start();
@@ -286,7 +286,7 @@ export default class TimeClock {
     this.#pendingCommit = 0;
     this.#startIntervals();
     Hooks.callAll(HOOKS.CLOCK_START_STOP, { running: true, increment: this.#increment });
-    if (broadcast && CalendariaSocket.isPrimaryGM()) CalendariaSocket.emitClockUpdate(true, this.#increment);
+    if (broadcast && ATLAS.isPrimaryGM) CalendariaSocket.emitClockUpdate(true, this.#increment);
   }
 
   /**
@@ -301,7 +301,7 @@ export default class TimeClock {
     this.#stopIntervals();
     ATLAS.log(3, 'TimeClock stopped');
     Hooks.callAll(HOOKS.CLOCK_START_STOP, { running: false, increment: this.#increment });
-    if (broadcast && CalendariaSocket.isPrimaryGM()) CalendariaSocket.emitClockUpdate(false, this.#increment);
+    if (broadcast && ATLAS.isPrimaryGM) CalendariaSocket.emitClockUpdate(false, this.#increment);
   }
 
   /**
@@ -493,7 +493,7 @@ export default class TimeClock {
         if (!TimeClock.#running || TimeClock.#combatBlocks || advancing) return;
         advancing = true;
         try {
-          if (CalendariaSocket.isPrimaryGM()) await game.time.advance(speed);
+          if (ATLAS.isPrimaryGM) await game.time.advance(speed);
           Hooks.callAll(HOOKS.VISUAL_TICK, { predictedWorldTime: game.time.worldTime });
         } finally {
           advancing = false;
@@ -506,7 +506,7 @@ export default class TimeClock {
       this.#accumulatedSeconds += speed;
       const predicted = this.predictedWorldTime;
       Hooks.callAll(HOOKS.VISUAL_TICK, { predictedWorldTime: predicted });
-      if (!this.#committing && CalendariaSocket.isPrimaryGM() && this.#accumulatedSeconds > 0) {
+      if (!this.#committing && ATLAS.isPrimaryGM && this.#accumulatedSeconds > 0) {
         const cal = game.time?.calendar;
         if (cal) {
           const committed = cal.timeToComponents(game.time.worldTime);
@@ -519,7 +519,7 @@ export default class TimeClock {
     }, 1000);
     this.#advanceIntervalId = setInterval(async () => {
       if (!TimeClock.#running || TimeClock.#combatBlocks) return;
-      if (!CalendariaSocket.isPrimaryGM()) return;
+      if (!ATLAS.isPrimaryGM) return;
       await this.#commit(this.#accumulatedSeconds);
     }, intervalMs);
   }
@@ -578,7 +578,7 @@ export default class TimeClock {
    * @private
    */
   static async #flushAccumulated() {
-    if (!CalendariaSocket.isPrimaryGM()) return;
+    if (!ATLAS.isPrimaryGM) return;
     await this.#commit(this.#accumulatedSeconds);
   }
 

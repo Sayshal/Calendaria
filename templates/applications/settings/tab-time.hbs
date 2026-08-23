@@ -54,7 +54,7 @@
         <div class="form-fields">
           <select id="restAdvanceMode" name="restAdvanceMode">
             <option value="automatic" {{#if (eq restAdvanceMode "automatic")}}selected{{/if}}>
-              {{localize "CALENDARIA.Settings.RestAdvanceMode.Automatic"}}
+              {{localize "ATLAS.Common.Automatic"}}
             </option>
             <option value="newDay" {{#if (eq restAdvanceMode "newDay")}}selected{{/if}}>
               {{localize "CALENDARIA.Settings.RestAdvanceMode.NewDay"}}
@@ -63,7 +63,7 @@
               {{localize "CALENDARIA.Settings.RestAdvanceMode.Sunrise"}}
             </option>
             <option value="fixed" {{#if (eq restAdvanceMode "fixed")}}selected{{/if}}>
-              {{localize "CALENDARIA.Settings.RestAdvanceMode.Fixed"}}
+              {{localize "ATLAS.Common.Custom"}}
             </option>
           </select>
         </div>
@@ -83,10 +83,10 @@
         <div class="form-fields">
           <select id="shortRestAdvanceMode" name="shortRestAdvanceMode">
             <option value="automatic" {{#if (eq shortRestAdvanceMode "automatic")}}selected{{/if}}>
-              {{localize "CALENDARIA.Settings.RestAdvanceMode.Automatic"}}
+              {{localize "ATLAS.Common.Automatic"}}
             </option>
             <option value="fixed" {{#if (eq shortRestAdvanceMode "fixed")}}selected{{/if}}>
-              {{localize "CALENDARIA.Settings.RestAdvanceMode.Fixed"}}
+              {{localize "ATLAS.Common.Custom"}}
             </option>
           </select>
         </div>

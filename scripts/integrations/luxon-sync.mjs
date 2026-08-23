@@ -56,8 +56,7 @@ export function syncWithLuxon(calendar) {
   const internalTime = calendar.componentsToTime(components);
   const epochOffset = internalTime - game.time.worldTime;
   const firstWeekday = computeFirstWeekday(calendar, luxonNow, internalTime, components);
-  CalendariaCalendar.setEpochSync(epochOffset, firstWeekday);
-  if (calendar.years) calendar.years.firstWeekday = firstWeekday;
+  CalendariaCalendar.setEpochSync(epochOffset, firstWeekday, calendar.metadata?.id ?? null);
   return true;
 }
 

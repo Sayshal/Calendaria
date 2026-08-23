@@ -1,7 +1,6 @@
 import { CalendarManager } from '../calendar/_module.mjs';
 import { MODULE, SETTINGS } from '../constants.mjs';
 import { TimeClock } from '../time/_module.mjs';
-import { CalendariaSocket } from '../utils/_module.mjs';
 
 /** @type {Function|null} Cached reference to dnd5e's original confirmAdvance method. */
 let originalConfirmAdvance = null;
@@ -35,7 +34,7 @@ function getSecondsPerDay(calendar) {
  */
 export async function onDayChangeForBastions() {
   if (TimeClock.locked) return;
-  if (!CalendariaSocket.isPrimaryGM()) return;
+  if (!ATLAS.isPrimaryGM) return;
   if (!game.settings.get(MODULE.ID, SETTINGS.ADVANCE_BASTION_ORDERS)) return;
   if (!isBastionSystemActive()) return;
   const calendar = CalendarManager.getActiveCalendar();
@@ -74,16 +73,17 @@ export function patchBastionButton() {
     const bastionConfig = game.settings.get('dnd5e', 'bastionConfiguration');
     if (!bastionConfig?.enabled) return originalConfirmAdvance();
     if (TimeClock.locked) {
-      ui.notifications.warn(_loc('CALENDARIA.Bastion.ClockLocked'));
+      ui.notifications.warn('CALENDARIA.Bastion.ClockLocked', { localize: true });
       return;
     }
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return originalConfirmAdvance();
     const duration = Math.max(1, bastionConfig.duration ?? 7);
     const proceed = await foundry.applications.api.DialogV2.confirm({
+      classes: ['calendaria'],
       content: `<p>${_loc('CALENDARIA.Bastion.AdvanceConfirm', { days: duration })}</p>`,
       rejectClose: false,
-      window: { icon: 'fa-solid fa-chess-rook', title: _loc('CALENDARIA.Bastion.AdvanceTitle') }
+      window: { icon: 'fa-solid fa-chess-rook', title: 'CALENDARIA.Bastion.AdvanceTitle' }
     });
     if (!proceed) return;
     const secondsPerDay = getSecondsPerDay(calendar);

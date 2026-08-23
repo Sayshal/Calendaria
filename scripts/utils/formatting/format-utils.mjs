@@ -23,7 +23,7 @@ function resolveArray(calendar, getter, path) {
  * @returns {string} - Number with ordinal suffix (1st, 2nd, 3rd, etc.)
  */
 export function ordinal(n) {
-  const s = [_loc('CALENDARIA.Format.Ordinal.th'), _loc('CALENDARIA.Format.Ordinal.st'), _loc('CALENDARIA.Format.Ordinal.nd'), _loc('CALENDARIA.Format.Ordinal.rd')];
+  const s = [_loc('CALENDARIA.Format.Ordinal.Th'), _loc('CALENDARIA.Format.Ordinal.St'), _loc('CALENDARIA.Format.Ordinal.Nd'), _loc('CALENDARIA.Format.Ordinal.Rd')];
   const v = n % 100;
   return n + (s[(v - 20) % 10] || s[v] || s[0]);
 }
@@ -80,7 +80,7 @@ export function dateFormattingParts(calendar, components) {
     else if (internalYear < 0) for (let y = -1; y >= internalYear; y--) totalDaysFromPriorYears -= calendar.getDaysInYear(y);
   }
   const totalDays = totalDaysFromPriorYears + dayOfYear;
-  const firstWeekday = calendar?.years?.firstWeekday ?? 0;
+  const firstWeekday = calendar?.effectiveFirstWeekday ?? calendar?.years?.firstWeekday ?? 0;
   const nonCountingFestivalsInYear = calendar?.countNonWeekdayFestivalsBefore?.({ year: internalYear, month, dayOfMonth }) ?? 0;
   const nonCountingFestivalsFromPriorYears = calendar?.countNonWeekdayFestivalsBeforeYear?.(internalYear) ?? 0;
   const intercalaryInYear = calendar?.countIntercalaryDaysBefore?.({ year: internalYear, month, dayOfMonth }) ?? 0;
@@ -155,6 +155,28 @@ export function dateFormattingParts(calendar, components) {
     namedWeek = currentWeek.weekName || '';
     namedWeekAbbr = currentWeek.weekAbbr || namedWeek.slice(0, 3);
   }
+  let namedDay = '';
+  let namedDayAbbr = '';
+  let currentDayName = null;
+  if (typeof calendar?.getCurrentDayName === 'function') {
+    currentDayName = calendar.getCurrentDayName({ year: internalYear, month, dayOfMonth });
+  } else {
+    const dayNames = resolveArray(calendar, 'namedDaysArray', 'days.names');
+    if (dayNames.length) {
+      const dayIndex = (calendar?.days?.nameMode || 'year-based') === 'month-based' ? dayOfMonth : dayOfYear;
+      let dayNumber = dayIndex + 1;
+      let entry = dayNames.find((d) => Number(d.dayNumber) === dayNumber);
+      if (!entry && calendar?.days?.nameRepeat) {
+        const maxDayNumber = dayNames.reduce((max, d) => Math.max(max, Number(d.dayNumber) || 0), 0);
+        if (maxDayNumber > 0) entry = dayNames.find((d) => Number(d.dayNumber) === ((dayNumber - 1) % maxDayNumber) + 1);
+      }
+      if (entry) currentDayName = { dayName: _loc(entry.name), dayAbbr: entry.abbreviation ? _loc(entry.abbreviation) : _loc(entry.name).slice(0, 3) };
+    }
+  }
+  if (currentDayName) {
+    namedDay = currentDayName.dayName || '';
+    namedDayAbbr = currentDayName.dayAbbr || namedDay.slice(0, 3);
+  }
   let climateZoneName = '';
   let climateZoneAbbr = '';
   const activeZone = calendar?.getActiveClimateZone?.();
@@ -191,6 +213,8 @@ export function dateFormattingParts(calendar, components) {
     W: weekOfMonth,
     namedWeek: namedWeek,
     namedWeekAbbr: namedWeekAbbr,
+    namedDay: namedDay,
+    namedDayAbbr: namedDayAbbr,
     H: hour,
     HH: String(hour).padStart(2, '0'),
     h: hour12,
@@ -352,7 +376,7 @@ export function formatApproximateTime(calendar, components, zone = null) {
   else if (dayProgress >= 0.5 && dayProgress <= 0.85) formatter = 'Afternoon';
   else if (dayProgress > 0.85 && nightProgress < 0) formatter = 'Evening';
   else formatter = 'Night';
-  const COMMON_OVERRIDES = { Midnight: 'CALENDARIA.Common.Midnight', Night: 'CALENDARIA.Common.Night' };
+  const COMMON_OVERRIDES = { Midnight: 'ATLAS.Common.Midnight', Night: 'CALENDARIA.Common.Night' };
   return _loc(COMMON_OVERRIDES[formatter] ?? `CALENDARIA.Format.ApproxTime.${formatter}`);
 }
 
@@ -410,6 +434,9 @@ export function formatApproximateDate(calendar, components) {
   return _loc(`CALENDARIA.Format.ApproxDate.${formatter}`, { season: seasonName });
 }
 
+/** Format tokens, longest-first per letter. */
+const TOKEN_REGEX = /\[([^\]]+)]|{([^}]+)}|YYYY|YY|Y|MMMM|MMM|MM|Mo|M|EEEEE|EEEE|EEE|EE|E|dddd|ddd|dd|Do|DDD|DD|D|d|e|GGGG|GGG|GG|G|QQQQ|QQQ|QQ|Q|zzzz|z|ww|w|W|HH|H|hh|h|mm|m|ss|s|A|a/g;
+
 /**
  * Format a date using a custom format string with tokens.
  * @param {object} calendar - Calendar data
@@ -430,6 +457,8 @@ export function formatCustom(calendar, components, formatStr) {
     seasonAbbr: parts.seasonAbbr,
     namedWeek: parts.namedWeek,
     namedWeekAbbr: parts.namedWeekAbbr,
+    namedDay: parts.namedDay,
+    namedDayAbbr: parts.namedDayAbbr,
     ch: getCanonicalHour(calendar, components),
     chAbbr: getCanonicalHourAbbr(calendar, components),
     cycle: cycleNum,
@@ -498,7 +527,6 @@ export function formatCustom(calendar, components, formatStr) {
     if (token in customContext) return customContext[token];
     return token;
   };
-  const TOKEN_REGEX = /\[([^\]]+)]|\{([^}]+)\}|YYYY|YY|Y|MMMM|MMM|MM|Mo|M|EEEEE|EEEE|EEE|EE|E|dddd|ddd|dd|Do|DDD|DD|D|d|e|GGGG|GGG|GG|G|QQQQ|QQQ|QQ|Q|zzzz|z|ww|w|W|HH|H|hh|h|mm|m|ss|s|A|a/g;
   return formatStr.replace(TOKEN_REGEX, (match, bracketToken, curlyToken) => {
     const customToken = bracketToken ?? curlyToken;
     if (customToken) {
@@ -556,7 +584,7 @@ export function formatCustom(calendar, components, formatStr) {
  * @param {string} formatStr - The format string to validate
  * @param {object} [calendar] - Optional calendar data for preview
  * @param {object} [components] - Optional date components for preview
- * @returns {{valid: boolean, preview: string, error: string}} Validation result
+ * @returns {{valid: boolean, preview: string, error: string, warning: string}} Validation result
  */
 export function validateFormatString(formatStr, calendar, components) {
   if (!formatStr || typeof formatStr !== 'string') return { valid: true };
@@ -564,21 +592,34 @@ export function validateFormatString(formatStr, calendar, components) {
   const closeBrackets = (formatStr.match(/]/g) || []).length;
   if (openBrackets !== closeBrackets) return { valid: false, error: 'CALENDARIA.Format.Error.UnclosedBracket' };
   if (/\[]/.test(formatStr)) return { valid: false, error: 'CALENDARIA.Format.Error.EmptyBracket' };
-  const openCurly = (formatStr.match(/\{/g) || []).length;
+  const openCurly = (formatStr.match(/{/g) || []).length;
   const closeCurly = (formatStr.match(/}/g) || []).length;
   if (openCurly !== closeCurly) return { valid: false, error: 'CALENDARIA.Format.Error.UnclosedBracket' };
-  if (/\{}/.test(formatStr)) return { valid: false, error: 'CALENDARIA.Format.Error.EmptyBracket' };
+  if (/{}/.test(formatStr)) return { valid: false, error: 'CALENDARIA.Format.Error.EmptyBracket' };
+  const warning = findUnknownTokens(formatStr);
   if (calendar && components) {
     try {
       const preview = formatCustom(calendar, components, formatStr);
       const cleanPreview = stripMoonIconMarkers(preview);
-      return { valid: true, preview: cleanPreview };
+      return { valid: true, preview: cleanPreview, ...(warning && { warning }) };
     } catch (e) {
       ATLAS.log(1, e);
       return { valid: false, error: 'CALENDARIA.Format.Error.Invalid' };
     }
   }
-  return { valid: true };
+  return { valid: true, ...(warning && { warning }) };
+}
+
+/**
+ * Detect letter runs that match no format token, the usual sign of a wrong-case token such as yyyy.
+ * @param {string} formatStr - Format string to scan
+ * @returns {string} Localized warning, or empty string when every letter is accounted for
+ */
+function findUnknownTokens(formatStr) {
+  const leftovers = formatStr.replace(/\[[^\]]*]|{[^}]*}/g, '').replace(TOKEN_REGEX, '');
+  const unknown = leftovers.match(/[A-Za-z]+/g);
+  if (!unknown) return '';
+  return _loc('CALENDARIA.Format.Warning.UnknownToken', { tokens: [...new Set(unknown)].join(', ') });
 }
 
 /**
@@ -1094,16 +1135,16 @@ export function timeSince(targetDate, currentDate, simple = false) {
   const days = absDiff;
   let unit, count;
   if (years >= 1) {
-    unit = years === 1 ? _loc('CALENDARIA.Common.UnitYear') : _loc('CALENDARIA.Common.UnitYears');
+    unit = years === 1 ? _loc('CALENDARIA.Common.UnitYear') : _loc('ATLAS.Common.Years');
     count = years;
   } else if (months >= 1) {
-    unit = months === 1 ? _loc('CALENDARIA.Common.UnitMonth') : _loc('CALENDARIA.Common.UnitMonths');
+    unit = months === 1 ? _loc('CALENDARIA.Common.UnitMonth') : _loc('ATLAS.Common.Months');
     count = months;
   } else if (weeks >= 1) {
-    unit = weeks === 1 ? _loc('CALENDARIA.Common.UnitWeek') : _loc('CALENDARIA.Common.UnitWeeks');
+    unit = weeks === 1 ? _loc('CALENDARIA.Common.UnitWeek') : _loc('ATLAS.Common.Weeks');
     count = weeks;
   } else {
-    unit = days === 1 ? _loc('CALENDARIA.Common.UnitDay') : _loc('CALENDARIA.Common.UnitDays');
+    unit = days === 1 ? _loc('CALENDARIA.Common.UnitDay') : _loc('ATLAS.Common.Days');
     count = days;
   }
   if (simple) return String(count);
@@ -1141,6 +1182,8 @@ export function getAvailableTokens() {
     { token: 'W', descriptionKey: 'CALENDARIA.Format.Token.W', type: 'standard' },
     { token: '[namedWeek]', descriptionKey: 'CALENDARIA.Format.Token.namedWeek', type: 'custom' },
     { token: '[namedWeekAbbr]', descriptionKey: 'CALENDARIA.Format.Token.namedWeekAbbr', type: 'custom' },
+    { token: '[namedDay]', descriptionKey: 'CALENDARIA.Format.Token.namedDay', type: 'custom' },
+    { token: '[namedDayAbbr]', descriptionKey: 'CALENDARIA.Format.Token.namedDayAbbr', type: 'custom' },
     { token: 'GGGG', descriptionKey: 'CALENDARIA.Format.Token.GGGG', type: 'standard' },
     { token: 'GGG', descriptionKey: 'CALENDARIA.Common.FormatEraShort', type: 'standard' },
     { token: 'GG', descriptionKey: 'CALENDARIA.Common.FormatEraShort', type: 'standard' },

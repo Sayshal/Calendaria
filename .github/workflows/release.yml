@@ -20,14 +20,21 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Read module ID from module.json
+      - name: Get module ID
+        id: module_id
+        run: echo "id=$(jq -r '.id' module.json)" >> $GITHUB_OUTPUT
+
       # Extract version from tag (release-X.Y.Z -> X.Y.Z)
       - name: Set up variables
         id: get_vars
         run: |
           TAG=${GITHUB_REF/refs\/tags\//}
           VERSION=${TAG#release-}
+          MODULE_ID=${{ steps.module_id.outputs.id }}
           echo "TAG_NAME=$TAG" >> $GITHUB_ENV
           echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "MODULE_ID=$MODULE_ID" >> $GITHUB_ENV
           echo "ZIP_NAME=module.zip" >> $GITHUB_ENV
           echo "RELEASE_DOWNLOAD_URL=${{ env.REPO_URL }}/releases/download/$TAG/module.zip" >> $GITHUB_ENV
           echo "RELEASE_MANIFEST_URL=${{ env.REPO_URL }}/releases/download/$TAG/module.json" >> $GITHUB_ENV
@@ -35,6 +42,7 @@ jobs:
 
           echo "Tag: $TAG"
           echo "Version: $VERSION"
+          echo "Module ID: $MODULE_ID"
 
       # Build the module
       - name: Build
@@ -105,7 +113,7 @@ jobs:
           COMPAT_MAX=$(jq -r '.compatibility.maximum // empty' dist/module.json)
           echo "compat_max=$COMPAT_MAX" >> $GITHUB_OUTPUT
 
-      # Optional: Release to Foundry Package API (if you have the token)
+      # Release to Foundry Package API
       - name: Release Foundry Package
         run: |
           COMPAT_MAX="${{ steps.module.outputs.compat_max }}"
@@ -116,7 +124,7 @@ jobs:
           fi
 
           jq -n \
-            --arg id "calendaria" \
+            --arg id "${{ env.MODULE_ID }}" \
             --arg version "${{ env.VERSION }}" \
             --arg manifest "${{ env.RELEASE_MANIFEST_URL }}" \
             --arg download "${{ env.RELEASE_DOWNLOAD_URL }}" \
@@ -143,12 +151,13 @@ jobs:
           VERSION: ${{ env.VERSION }}
           COMPAT_MIN: ${{ steps.module.outputs.compat_min }}
           COMPAT_MAX: ${{ steps.module.outputs.compat_max }}
+          FOUNDRY_URL: https://foundryvtt.com/packages/${{ env.MODULE_ID }}
           RELEASE_PAGE: ${{ env.REPO_URL }}/releases/tag/${{ env.TAG_NAME }}
         run: |
           python3 -c "
-          import json, os, sys
+          import json, os
 
-          # Read curated release notes from file, fall back to release body
+          # Read curated release notes, fall back to the GitHub release body
           notes = ''
           if os.path.isfile('release_notes.txt') and os.path.getsize('release_notes.txt') > 0:
               with open('release_notes.txt', 'r', encoding='utf-8') as f:
@@ -156,7 +165,7 @@ jobs:
           if not notes:
               notes = os.environ.get('RELEASE_BODY', 'New release available!')
 
-          # Truncate to 2000 characters
+          # Discord embed description cap
           if len(notes) > 2000:
               notes = notes[:1997] + '...'
 

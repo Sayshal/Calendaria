@@ -142,7 +142,7 @@ export default class MiniCalendarImporter extends BaseImporter {
       weather: this.#transformWeather(data, rawWeather),
       metadata: {
         description: calendar.description || _loc('CALENDARIA.Importer.ImportedFrom.MiniCalendar'),
-        system: calendar.name || _loc('CALENDARIA.Common.Unknown'),
+        system: calendar.name || _loc('ATLAS.Common.Unknown'),
         importedFrom: 'mini-calendar',
         originalId: calendar.id
       }

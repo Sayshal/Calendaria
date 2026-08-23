@@ -410,7 +410,7 @@ export function cmdCalendar() {
   if (!calendar) return null;
   const lines = [];
   lines.push(`<strong>${_loc('CALENDARIA.Common.Date')}:</strong> ${formatDate(null, 'dateLong')}`);
-  lines.push(`<strong>${_loc('CALENDARIA.Common.Time')}:</strong> ${formatDate(null, 'time24')}`);
+  lines.push(`<strong>${_loc('ATLAS.Common.Time')}:</strong> ${formatDate(null, 'time24')}`);
   const season = getCurrentSeason();
   if (season) lines.push(`<strong>${_loc('CALENDARIA.Common.Season')}:</strong> ${_loc(season.name)}`);
   const weather = WeatherManager.getCurrentWeather();
@@ -491,7 +491,7 @@ export function cmdWeekday() {
   if (!calendar) return null;
   const weekday = getCurrentWeekday();
   if (!weekday) return { content: _loc('CALENDARIA.ChatCommand.NoWeekday') };
-  const restDay = weekday.isRestDay ? ` (${_loc('CALENDARIA.Common.RestDay')})` : '';
+  const restDay = weekday.isRestDay ? ` (${_loc('ATLAS.Common.RestDay')})` : '';
   return { content: `<i class="fas fa-calendar-week"></i> <strong>${_loc(weekday.name)}</strong>${restDay}` };
 }
 
@@ -558,24 +558,40 @@ const ENRICHER_JOURNAL_FLAG = 'isEnricherReference';
 
 /** @type {Array<{label: string, keys: string[]}>} Enricher categories for the reference journal. */
 const ENRICHER_CATEGORIES = [
-  { label: 'CALENDARIA.Enricher.Category.DateTime', keys: ['date', 'time', 'weekday', 'season', 'era', 'cycle', 'festival', 'restday'] },
+  { label: 'CALENDARIA.Enricher.Category.DateTime', keys: ['date', 'time', 'weekday', 'season', 'era', 'cycle', 'festival', 'restday'], examples: { weekday: '5 3 1492' } },
   {
     label: 'CALENDARIA.Enricher.Category.TimeMath',
     keys: ['countdown', 'countup', 'between', 'timeuntil', 'datemath'],
     examples: { countdown: '1 1 2030 cal=gregorian', countup: '1 1 2020 cal=gregorian', between: '1 1 2020 to 1 6 2025 cal=gregorian', timeuntil: 'sunset', datemath: '+30d' }
   },
-  { label: 'CALENDARIA.Enricher.Category.Calendar', keys: ['calname', 'month', 'year', 'dayofyear', 'yearprogress', 'leapyear', 'intercalary', 'daysinyear'] },
-  { label: 'CALENDARIA.Enricher.Category.Sun', keys: ['sunrise', 'sunset', 'daylight', 'isdaytime', 'dayprogress', 'nightprogress', 'untilsunrise', 'untilsunset'] },
-  { label: 'CALENDARIA.Enricher.Category.Moon', keys: ['moon', 'moons', 'nextfullmoon', 'convergence', 'eclipse', 'nexteclipse'] },
-  { label: 'CALENDARIA.Enricher.Category.Weather', keys: ['weather', 'temperature', 'wind', 'precipitation', 'weathericon', 'zone', 'forecast'] },
   {
-    label: 'CALENDARIA.Enricher.Category.Notes',
+    label: 'CALENDARIA.Enricher.Category.Calendar',
+    keys: ['calname', 'month', 'year', 'dayofyear', 'yearprogress', 'leapyear', 'intercalary', 'daysinyear'],
+    examples: { month: '5 3 1492' }
+  },
+  {
+    label: 'CALENDARIA.Enricher.Category.Sun',
+    keys: ['sunrise', 'sunset', 'daylight', 'isdaytime', 'dayprogress', 'nightprogress', 'untilsunrise', 'untilsunset'],
+    examples: { sunrise: '5 3 1492', sunset: 'date="5 3 1492"' }
+  },
+  { label: 'CALENDARIA.Enricher.Category.Moon', keys: ['moon', 'moons', 'nextfullmoon', 'convergence', 'eclipse', 'nexteclipse'], examples: { moon: '0 date="5 3 1492"', moons: '5 3 1492' } },
+  {
+    label: 'CALENDARIA.Enricher.Category.Weather',
+    keys: ['weather', 'temperature', 'wind', 'precipitation', 'weathericon', 'zone', 'forecast'],
+    examples: { weather: '5 3 1492', temperature: 'date="5 3 1492"', forecast: '3 date="5 3 1492"' }
+  },
+  {
+    label: 'ATLAS.Common.Notes',
     keys: ['event', 'notes', 'next', 'category', 'chronicle'],
     examples: { event: 'Winter Solstice', category: 'quest', chronicle: '1 1 1500 to 14 1 1500' }
   },
-  { label: 'CALENDARIA.Enricher.Category.Composite', keys: ['summary', 'almanac', 'format', 'compare', 'peek'], examples: { format: 'MMMM YYYY', compare: '1 1 2025 cal=gregorian', peek: '+7d' } },
   {
-    label: 'CALENDARIA.Enricher.Category.Actions',
+    label: 'CALENDARIA.Enricher.Category.Composite',
+    keys: ['summary', 'almanac', 'format', 'compare', 'peek'],
+    examples: { summary: 'date="5 3 1492"', almanac: 'date="5 3 1492"', format: 'MMMM YYYY', compare: '1 1 2025 cal=gregorian', peek: '+7d' }
+  },
+  {
+    label: 'ATLAS.Common.Actions',
     keys: ['advancetotime', 'advanceinterval', 'advancetopreset', 'settime', 'jumptodate', 'toggleclock', 'setweather'],
     examples: { advancetotime: '18:00', advanceinterval: 'hour=1', advancetopreset: 'sunset', settime: '12:00', jumptodate: '1 1 2030', setweather: 'rain' }
   }

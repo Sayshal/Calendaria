@@ -1,12 +1,23 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { addCustomPreset, deleteCustomPreset, getAllPresets, getDefaultNoteData, getPresetDefinition, invalidatePresetCache, isCustomPreset, sanitizeNoteData, validateNoteData } from '../../scripts/notes/note-data.mjs';
+import {
+  addCustomPreset,
+  deleteCustomPreset,
+  getAllPresets,
+  getDefaultNoteData,
+  getPresetDefinition,
+  invalidatePresetCache,
+  isCustomPreset,
+  sanitizeNoteData,
+  validateNoteData
+} from '../../scripts/notes/note-data.mjs';
 
 vi.mock('../../scripts/utils/logger.mjs', () => ({ log: vi.fn() }));
 vi.mock('../../scripts/utils/localization.mjs', () => ({
   localize: vi.fn((key) => key),
   format: vi.fn((key, _data) => key)
 }));
-vi.mock('../../scripts/constants.mjs', async (importOriginal) => ({ ...(await importOriginal()),
+vi.mock('../../scripts/constants.mjs', async (importOriginal) => ({
+  ...(await importOriginal()),
   MODULE: { ID: 'calendaria' },
   SETTINGS: { CUSTOM_PRESETS: 'customPresets' },
   NOTE_VISIBILITY: { VISIBLE: 'visible', HIDDEN: 'hidden', SECRET: 'secret' },
@@ -16,7 +27,11 @@ vi.mock('../../scripts/constants.mjs', async (importOriginal) => ({ ...(await im
 vi.mock('../../scripts/calendar/calendar-manager.mjs', () => ({
   default: {
     getActiveCalendar: vi.fn(() => ({
-      monthsArray: [{ name: 'January', days: 31 }, { name: 'February', days: 28 }, { name: 'March', days: 31 }],
+      monthsArray: [
+        { name: 'January', days: 31 },
+        { name: 'February', days: 28 },
+        { name: 'March', days: 31 }
+      ],
       years: { yearZero: 0 },
       isMonthless: false,
       getDaysInMonth: vi.fn((month) => [31, 28, 31][month] || 30),
@@ -40,7 +55,13 @@ beforeEach(() => {
   game.settings.get.mockReturnValue([]);
   game.settings.set.mockResolvedValue(true);
   globalThis.CONFIG = {
-    JournalEntryPage: { dataModels: { 'calendaria.calendarnote': { schema: { fields: { repeat: { choices: ['never', 'daily', 'weekly', 'monthly', 'yearly', 'moon', 'random', 'linked', 'seasonal', 'weekOfMonth', 'range', 'computed'] } } } } } }
+    JournalEntryPage: {
+      dataModels: {
+        'calendaria.calendarnote': {
+          schema: { fields: { repeat: { choices: ['never', 'daily', 'weekly', 'monthly', 'yearly', 'moon', 'random', 'linked', 'seasonal', 'weekOfMonth', 'range', 'computed'] } } }
+        }
+      }
+    }
   };
 });
 
@@ -290,7 +311,9 @@ describe('getAllPresets()', () => {
     }
   });
   it('includes expected built-in categories', () => {
-    const ids = getAllPresets().filter((c) => c.builtin).map((c) => c.id);
+    const ids = getAllPresets()
+      .filter((c) => c.builtin)
+      .map((c) => c.id);
     expect(ids).toContain('quest');
     expect(ids).toContain('session');
     expect(ids).toContain('birthday');

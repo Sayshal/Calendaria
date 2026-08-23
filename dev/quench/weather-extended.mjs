@@ -37,13 +37,22 @@ export function registerWeatherExtended(quench) {
       describe('Weather — Intraday Periods', function () {
         it('getCurrentWeatherPeriod returns string', function () {
           const result = api.getCurrentWeatherPeriod();
-          if (result == null) { this.skip(); return; }
+          if (result == null) {
+            this.skip();
+            return;
+          }
           assert.typeOf(result, 'string');
         });
         it('getWeatherForPeriod returns object or null', function () {
-          if (!hasZones) { this.skip(); return; }
+          if (!hasZones) {
+            this.skip();
+            return;
+          }
           const period = api.getCurrentWeatherPeriod();
-          if (!period) { this.skip(); return; }
+          if (!period) {
+            this.skip();
+            return;
+          }
           const result = api.getWeatherForPeriod(period);
           if (result) assert.property(result, 'name');
         });
@@ -55,13 +64,19 @@ export function registerWeatherExtended(quench) {
           assert.typeOf(result, 'object');
         });
         it('getWeatherForDate returns object or null', function () {
-          if (!hasZones) { this.skip(); return; }
+          if (!hasZones) {
+            this.skip();
+            return;
+          }
           const dt = api.getCurrentDateTime();
           const result = api.getWeatherForDate(dt.year, dt.month, dt.day);
           if (result) assert.property(result, 'name');
         });
         it('getWeatherProbabilities returns object', function () {
-          if (!hasZones) { this.skip(); return; }
+          if (!hasZones) {
+            this.skip();
+            return;
+          }
           const result = api.getWeatherProbabilities();
           assert.typeOf(result, 'object');
         });

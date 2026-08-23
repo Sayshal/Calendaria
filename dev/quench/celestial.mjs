@@ -15,18 +15,27 @@ export function registerCelestial(quench) {
 
       describe('Celestial — Moon Helpers', function () {
         it('isMoonFull returns boolean', function () {
-          if (!hasMoons) { this.skip(); return; }
+          if (!hasMoons) {
+            this.skip();
+            return;
+          }
           const cal = api.getActiveCalendar();
           const moon = cal.moonsArray[0];
           const result = api.isMoonFull(moon);
           assert.typeOf(result, 'boolean');
         });
         it('getNextFullMoon returns date object', function () {
-          if (!hasMoons) { this.skip(); return; }
+          if (!hasMoons) {
+            this.skip();
+            return;
+          }
           const cal = api.getActiveCalendar();
           const moon = cal.moonsArray[0];
           const result = api.getNextFullMoon(moon);
-          if (!result) { this.skip(); return; }
+          if (!result) {
+            this.skip();
+            return;
+          }
           assert.property(result, 'year');
           assert.property(result, 'month');
           assert.property(result, 'day');
@@ -34,7 +43,10 @@ export function registerCelestial(quench) {
         it('getNextConvergence returns date or null', function () {
           const cal = api.getActiveCalendar();
           const moons = cal?.moonsArray;
-          if (!moons || moons.length < 2) { this.skip(); return; }
+          if (!moons || moons.length < 2) {
+            this.skip();
+            return;
+          }
           const result = api.getNextConvergence(moons);
           if (result) {
             assert.property(result, 'year');
@@ -44,7 +56,10 @@ export function registerCelestial(quench) {
         it('getConvergencesInRange returns array', function () {
           const cal = api.getActiveCalendar();
           const moons = cal?.moonsArray;
-          if (!moons || moons.length < 2) { this.skip(); return; }
+          if (!moons || moons.length < 2) {
+            this.skip();
+            return;
+          }
           const dt = api.getCurrentDateTime();
           const start = { year: dt.year, month: dt.month, day: dt.day };
           const end = api.addYears(start, 1);
@@ -55,19 +70,28 @@ export function registerCelestial(quench) {
 
       describe('Celestial — Eclipses', function () {
         it('getEclipse returns object or null', function () {
-          if (!hasMoons) { this.skip(); return; }
+          if (!hasMoons) {
+            this.skip();
+            return;
+          }
           const result = api.getEclipse(0);
           if (result) {
             assert.property(result, 'type');
           }
         });
         it('isEclipse returns boolean', function () {
-          if (!hasMoons) { this.skip(); return; }
+          if (!hasMoons) {
+            this.skip();
+            return;
+          }
           const result = api.isEclipse();
           assert.typeOf(result, 'boolean');
         });
         it('getNextEclipse returns result or null', function () {
-          if (!hasMoons) { this.skip(); return; }
+          if (!hasMoons) {
+            this.skip();
+            return;
+          }
           const result = api.getNextEclipse(0);
           if (result) {
             assert.property(result, 'date');
@@ -76,7 +100,10 @@ export function registerCelestial(quench) {
           }
         });
         it('getEclipsesInRange returns array', function () {
-          if (!hasMoons) { this.skip(); return; }
+          if (!hasMoons) {
+            this.skip();
+            return;
+          }
           const dt = api.getCurrentDateTime();
           const start = { year: dt.year, month: dt.month, day: dt.day };
           const end = api.addYears(start, 2);
@@ -88,14 +115,20 @@ export function registerCelestial(quench) {
       describe('Celestial — Sun Cycle', function () {
         it('getDaylightHours returns number or null', function () {
           const result = api.getDaylightHours();
-          if (result == null) { this.skip(); return; }
+          if (result == null) {
+            this.skip();
+            return;
+          }
           assert.typeOf(result, 'number');
           assert.isAtLeast(result, 0);
           assert.isAtMost(result, 24);
         });
         it('getProgressDay returns number', function () {
           const result = api.getProgressDay();
-          if (result == null) { this.skip(); return; }
+          if (result == null) {
+            this.skip();
+            return;
+          }
           assert.typeOf(result, 'number');
           if (api.isDaytime()) {
             assert.isAtLeast(result, 0);
@@ -104,14 +137,20 @@ export function registerCelestial(quench) {
         });
         it('getProgressNight returns number 0-1', function () {
           const result = api.getProgressNight();
-          if (result == null) { this.skip(); return; }
+          if (result == null) {
+            this.skip();
+            return;
+          }
           assert.typeOf(result, 'number');
           assert.isAtLeast(result, 0);
           assert.isAtMost(result, 1);
         });
         it('getTimeUntilSunrise returns time object', function () {
           const result = api.getTimeUntilSunrise();
-          if (result == null) { this.skip(); return; }
+          if (result == null) {
+            this.skip();
+            return;
+          }
           assert.typeOf(result, 'object');
           assert.property(result, 'hours');
           assert.property(result, 'minutes');
@@ -119,7 +158,10 @@ export function registerCelestial(quench) {
         });
         it('getTimeUntilSunset returns time object', function () {
           const result = api.getTimeUntilSunset();
-          if (result == null) { this.skip(); return; }
+          if (result == null) {
+            this.skip();
+            return;
+          }
           assert.typeOf(result, 'object');
           assert.property(result, 'hours');
           assert.property(result, 'minutes');
@@ -148,12 +190,18 @@ export function registerCelestial(quench) {
       describe('Celestial — Season & Weekday', function () {
         it('getCurrentSeason returns object or null', function () {
           const result = api.getCurrentSeason();
-          if (!result) { this.skip(); return; }
+          if (!result) {
+            this.skip();
+            return;
+          }
           assert.property(result, 'name');
         });
         it('getCycleValues returns object', function () {
           const result = api.getCycleValues();
-          if (!result) { this.skip(); return; }
+          if (!result) {
+            this.skip();
+            return;
+          }
           assert.typeOf(result, 'object');
         });
         it('isRestDay returns boolean', function () {

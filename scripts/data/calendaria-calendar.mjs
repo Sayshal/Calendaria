@@ -15,14 +15,19 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   /** @type {number|null} firstWeekday override computed during Luxon sync. */
   static #correctFirstWeekday = null;
 
+  /** @type {string|null} Calendar id the synced firstWeekday applies to. */
+  static #correctFirstWeekdayId = null;
+
   /**
    * Set epoch sync state from an external integration.
    * @param {number} offset - Epoch offset in seconds
    * @param {number|null} firstWeekday - Computed firstWeekday, or null to clear
+   * @param {string|null} [calendarId] - Calendar the firstWeekday applies to
    */
-  static setEpochSync(offset, firstWeekday) {
+  static setEpochSync(offset, firstWeekday, calendarId = null) {
     this.#epochOffset = offset;
     this.#correctFirstWeekday = firstWeekday;
+    this.#correctFirstWeekdayId = firstWeekday === null ? null : calendarId;
   }
 
   /** @returns {number} Current epoch offset */
@@ -33,6 +38,21 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   /** @returns {number|null} Computed firstWeekday for synced calendars, or null */
   static get correctFirstWeekday() {
     return this.#correctFirstWeekday;
+  }
+
+  /** @returns {string|null} Calendar id the synced firstWeekday applies to, or null */
+  static get correctFirstWeekdayId() {
+    return this.#correctFirstWeekdayId;
+  }
+
+  /**
+   * The firstWeekday to use for day-of-week math, preferring the Luxon-synced value for this calendar.
+   * @returns {number} Synced firstWeekday when this calendar is the synced one, otherwise the authored value
+   */
+  get effectiveFirstWeekday() {
+    const ctor = CalendariaCalendar;
+    if (ctor.correctFirstWeekday !== null && ctor.correctFirstWeekdayId === this.metadata?.id) return ctor.correctFirstWeekday;
+    return this.years?.firstWeekday ?? 0;
   }
 
   /**
@@ -97,6 +117,11 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   /** @returns {Array<object>} Named weeks in calendar order (from keyed `weeks.names` collection) */
   get namedWeeksArray() {
     return this.weeks?.names ? Object.values(this.weeks.names) : [];
+  }
+
+  /** @returns {Array<object>} Named days in calendar order (from keyed `days.names` collection) */
+  get namedDaysArray() {
+    return this.days?.names ? Object.values(this.days.names) : [];
   }
 
   /** @returns {Array<object>} Weather zones in calendar order (from keyed `weather.zones` collection) */
@@ -193,20 +218,19 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    * @override
    */
   static migrateData(source) {
-    CalendariaCalendar.#migrateArraysToObjects(source);
-    CalendariaCalendar.#migrateDateIndexing(source);
-    CalendariaCalendar.#migrateFestivalIcons(source);
-    CalendariaCalendar.#migrateFestivalConditionTrees(source);
+    CalendariaCalendar.#normalizeArraysToObjects(source);
+    CalendariaCalendar.#normalizeDateIndexing(source);
+    CalendariaCalendar.#normalizeFestivalIcons(source);
+    CalendariaCalendar.#normalizeFestivalConditionTrees(source);
     return super.migrateData(source);
   }
 
   /**
-   * Convert legacy array-based collections to keyed objects.
+   * Keep every collection a keyed object, converting any array form the source still uses.
    * @param {object} source - Raw source data
    * @since 0.9.0
-   * @deprecated Remove in 1.1.0
    */
-  static #migrateArraysToObjects(source) {
+  static #normalizeArraysToObjects(source) {
     const convert = (arr) => {
       if (!Array.isArray(arr)) return arr;
       const obj = {};
@@ -219,6 +243,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     if (source.seasons?.values && Array.isArray(source.seasons.values)) source.seasons.values = convert(source.seasons.values);
     if (source.weather?.zones && Array.isArray(source.weather.zones)) source.weather.zones = convert(source.weather.zones);
     if (source.weeks?.names && Array.isArray(source.weeks.names)) source.weeks.names = convert(source.weeks.names);
+    if (source.days?.names && Array.isArray(source.days.names)) source.days.names = convert(source.days.names);
     const convertNested = (parent, key) => {
       if (!parent || typeof parent !== 'object') return;
       for (const item of Object.values(parent)) if (item && Array.isArray(item[key])) item[key] = convert(item[key]);
@@ -233,11 +258,11 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   }
 
   /**
-   * Migrate date fields from 1-indexed to 0-indexed conventions.
-   * @deprecated since 0.10.4 — remove in 1.1.0
+   * Keep every date field 0-indexed, converting the 1-indexed form the source may still use.
+   * @since 0.10.4
    * @param {object} source - Raw source data
    */
-  static #migrateDateIndexing(source) {
+  static #normalizeDateIndexing(source) {
     const festivals = source.festivals ? Object.values(source.festivals) : [];
     const moons = source.moons ? Object.values(source.moons) : [];
     const hasOldFestival = festivals.some((f) => 'day' in f && !('dayOfMonth' in f));
@@ -269,12 +294,12 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   }
 
   /**
-   * Strip legacy `fas ` prefix from festival icons.
-   * @deprecated since 1.0.0 — remove in 1.2.0
+   * Keep festival icons stored bare, stripping any `fas ` or `fa-solid ` prefix the source carries.
+   * @since 1.0.0
    * @param {object} source - Raw source data
    * @private
    */
-  static #migrateFestivalIcons(source) {
+  static #normalizeFestivalIcons(source) {
     if (!source.festivals) return;
     for (const fest of Object.values(source.festivals)) {
       if (typeof fest.icon !== 'string') continue;
@@ -284,13 +309,12 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   }
 
   /**
-   * Populate conditionTree on festivals that only have month+day fields.
+   * Keep every festival backed by a conditionTree, building one from month+day fields when it is missing.
    * @param {object} source - Raw source data
    * @since 1.1.0
-   * @deprecated Remove in 1.2.0
    * @private
    */
-  static #migrateFestivalConditionTrees(source) {
+  static #normalizeFestivalConditionTrees(source) {
     if (!source.festivals) return;
     for (const fest of Object.values(source.festivals)) {
       if (fest.conditionTree != null) continue;
@@ -327,6 +351,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       yearZero: new NumberField({ required: true, nullable: false, integer: true, initial: 0 }),
       firstWeekday: new NumberField({ required: true, nullable: false, min: 0, integer: true }),
       weekStartWeekdayId: new StringField({ required: false }),
+      resetWeekdays: new BooleanField({ required: false, initial: false }),
+      allowNegativeYears: new BooleanField({ required: false, initial: true }),
       leapYear: new SchemaField(
         { leapStart: new NumberField({ required: true, nullable: false, integer: true }), leapInterval: new NumberField({ required: true, nullable: false, min: 2, integer: true }) },
         { required: true, nullable: true, initial: null }
@@ -397,6 +423,11 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
             isRestDay: new BooleanField({ required: false, initial: false })
           })
         ),
+        names: new TypedObjectField(
+          new SchemaField({ name: new StringField({ required: true }), abbreviation: new StringField({ required: false }), dayNumber: new NumberField({ required: false, integer: true, min: 1 }) })
+        ),
+        nameMode: new StringField({ required: false, initial: 'year-based', choices: ['month-based', 'year-based'] }),
+        nameRepeat: new BooleanField({ required: false, initial: false }),
         daysPerYear: new NumberField({ required: false, integer: true, min: 1 }),
         hoursPerDay: new NumberField({ required: false, integer: true, min: 1 }),
         minutesPerHour: new NumberField({ required: false, integer: true, min: 1 }),
@@ -1715,6 +1746,33 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   }
 
   /**
+   * Get the current named day for a given time.
+   * @param {number|object} [time] Time to use. Defaults to current world time.
+   * @returns {{dayName: string, dayAbbr: string, dayNumber: number, index: number}|null} Current named day, or null if none is defined for this date.
+   */
+  getCurrentDayName(time = game.time.worldTime) {
+    const dayNames = this.namedDaysArray;
+    if (!dayNames.length) return null;
+    const components = typeof time === 'number' ? this.timeToComponents(time) : time;
+    const mode = this.days?.nameMode || 'year-based';
+    const dayIndex = mode === 'month-based' ? (components.dayOfMonth ?? 0) : this._calculateDayOfYear(components);
+    let dayNumber = dayIndex + 1;
+    let entry = dayNames.find((d) => Number(d.dayNumber) === dayNumber);
+    if (!entry && this.days?.nameRepeat) {
+      const maxDayNumber = dayNames.reduce((max, d) => Math.max(max, Number(d.dayNumber) || 0), 0);
+      if (maxDayNumber > 0) {
+        const cycled = ((dayNumber - 1) % maxDayNumber) + 1;
+        entry = dayNames.find((d) => Number(d.dayNumber) === cycled);
+        if (entry) dayNumber = cycled;
+      }
+    }
+    if (!entry) return null;
+    const dayName = _loc(entry.name);
+    const dayAbbr = entry.abbreviation ? _loc(entry.abbreviation) : dayName.slice(0, 3);
+    return { dayName, dayAbbr, dayNumber, index: dayNumber - 1 };
+  }
+
+  /**
    * Get weekday data for a specific month, falling back to calendar-level weekdays.
    * @param {number} monthIndex - 0-indexed month
    * @returns {Array<object>} Weekdays in month
@@ -1765,7 +1823,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     if (!cycle) return null;
     let cycleLength = 0;
     for (const r of cycle) cycleLength += r.days.length;
-    const firstWeekday = this.years?.firstWeekday ?? 0;
+    const firstWeekday = this.effectiveFirstWeekday;
     let pos = (((countingDays + firstWeekday) % cycleLength) + cycleLength) % cycleLength;
     for (let row = 0; row < cycle.length; row++) {
       const rowLength = cycle[row].days.length;
@@ -1776,21 +1834,19 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   }
 
   /**
-   * Compute counting days since epoch for decomposed time components.
+   * Compute counting days for decomposed time components.
    * @param {object} components - Components from timeToComponents ({year, month, dayOfMonth})
+   * @param {boolean} [sinceYearStart] - Count from the start of the year instead of the epoch
    * @returns {number} Counting days (non-weekday festivals and intercalary days excluded)
    */
-  _countingDaysFor(components) {
+  _countingDaysFor(components, sinceYearStart = false) {
     let dayOfYear = components.dayOfMonth ?? 0;
     for (let m = 0; m < components.month; m++) dayOfYear += this.getDaysInMonth(m, components.year);
-    const totalDays = this.totalDaysBeforeYear(components.year) + dayOfYear;
     const ctx = { year: components.year, month: components.month, dayOfMonth: components.dayOfMonth ?? 0 };
-    const totalNonCounting =
-      (this.countNonWeekdayFestivalsBeforeYear?.(components.year) ?? 0) +
-      (this.countNonWeekdayFestivalsBefore?.(ctx) ?? 0) +
-      (this.countIntercalaryDaysBeforeYear?.(components.year) ?? 0) +
-      (this.countIntercalaryDaysBefore?.(ctx) ?? 0);
-    return totalDays - totalNonCounting;
+    const withinYear = dayOfYear - ((this.countNonWeekdayFestivalsBefore?.(ctx) ?? 0) + (this.countIntercalaryDaysBefore?.(ctx) ?? 0));
+    if (sinceYearStart) return withinYear;
+    const beforeYear = this.totalDaysBeforeYear(components.year) - ((this.countNonWeekdayFestivalsBeforeYear?.(components.year) ?? 0) + (this.countIntercalaryDaysBeforeYear?.(components.year) ?? 0));
+    return beforeYear + withinYear;
   }
 
   /**
@@ -1813,7 +1869,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     if (!cycle) return null;
     let cycleLength = 0;
     for (const r of cycle) cycleLength += r.days.length;
-    const firstWeekday = this.years?.firstWeekday ?? 0;
+    const firstWeekday = this.effectiveFirstWeekday;
     const p = this._countingDaysFor(components) + firstWeekday;
     const completeCycles = Math.floor(p / cycleLength);
     let r = p - completeCycles * cycleLength;
@@ -1927,8 +1983,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       const nonCounting = (this.countNonWeekdayFestivalsBefore?.(ctx) ?? 0) + (this.countIntercalaryDaysBefore?.(ctx) ?? 0);
       return (monthData.startingWeekday + dayIndex - nonCounting + daysInWeek * 100) % daysInWeek;
     }
-    const firstWeekday = this.years?.firstWeekday ?? 0;
-    const countingDays = this._countingDaysFor(components);
+    const firstWeekday = this.effectiveFirstWeekday;
+    const countingDays = this._countingDaysFor(components, this.years?.resetWeekdays === true);
     return (((countingDays + firstWeekday) % daysInWeek) + daysInWeek) % daysInWeek;
   }
 

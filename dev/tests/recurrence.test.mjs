@@ -1,7 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import CalendarManager from '../../scripts/calendar/calendar-manager.mjs';
 import { dayOfWeek, daysBetween } from '../../scripts/notes/date-utils.mjs';
-import { clearComputedDateCache, generateRandomOccurrences, getNextOccurrences, getOccurrencesInRange, getRecurrenceDescription, isRecurringMatch, needsRandomRegeneration, resolveComputedDate } from '../../scripts/notes/recurrence.mjs';
+import {
+  clearComputedDateCache,
+  generateRandomOccurrences,
+  getNextOccurrences,
+  getOccurrencesInRange,
+  getRecurrenceDescription,
+  isRecurringMatch,
+  needsRandomRegeneration,
+  resolveComputedDate
+} from '../../scripts/notes/recurrence.mjs';
 
 vi.mock('../../scripts/utils/localization.mjs', () => ({
   localize: (key) => key,
@@ -92,13 +101,31 @@ describe('computed events', () => {
     expect(resolveComputedDate(config, 2024)).toEqual({ year: 2024, month: 2, dayOfMonth: 24 });
   });
   it('resolveComputedDate handles springEquinox anchor', () => {
-    CalendarManager._configure({ seasons: { values: [{ name: 'Spring', seasonalType: 'spring', dayStart: 80, dayEnd: 171 }, { name: 'Summer', seasonalType: 'summer', dayStart: 172, dayEnd: 264 }, { name: 'Autumn', seasonalType: 'autumn', dayStart: 265, dayEnd: 354 }, { name: 'Winter', seasonalType: 'winter', dayStart: 355, dayEnd: 79 }] } });
+    CalendarManager._configure({
+      seasons: {
+        values: [
+          { name: 'Spring', seasonalType: 'spring', dayStart: 80, dayEnd: 171 },
+          { name: 'Summer', seasonalType: 'summer', dayStart: 172, dayEnd: 264 },
+          { name: 'Autumn', seasonalType: 'autumn', dayStart: 265, dayEnd: 354 },
+          { name: 'Winter', seasonalType: 'winter', dayStart: 355, dayEnd: 79 }
+        ]
+      }
+    });
     const result = resolveComputedDate({ chain: [{ type: 'anchor', value: 'springEquinox' }] }, 2024);
     expect(result).not.toBe(null);
     expect(result.year).toBe(2024);
   });
   it('resolveComputedDate handles autumnEquinox anchor', () => {
-    CalendarManager._configure({ seasons: { values: [{ name: 'Spring', seasonalType: 'spring', dayStart: 80, dayEnd: 171 }, { name: 'Summer', seasonalType: 'summer', dayStart: 172, dayEnd: 264 }, { name: 'Autumn', seasonalType: 'autumn', dayStart: 265, dayEnd: 354 }, { name: 'Winter', seasonalType: 'winter', dayStart: 355, dayEnd: 79 }] } });
+    CalendarManager._configure({
+      seasons: {
+        values: [
+          { name: 'Spring', seasonalType: 'spring', dayStart: 80, dayEnd: 171 },
+          { name: 'Summer', seasonalType: 'summer', dayStart: 172, dayEnd: 264 },
+          { name: 'Autumn', seasonalType: 'autumn', dayStart: 265, dayEnd: 354 },
+          { name: 'Winter', seasonalType: 'winter', dayStart: 355, dayEnd: 79 }
+        ]
+      }
+    });
     const result = resolveComputedDate({ chain: [{ type: 'anchor', value: 'autumnEquinox' }] }, 2024);
     expect(result).not.toBe(null);
     expect(result.year).toBe(2024);
@@ -112,13 +139,33 @@ describe('computed events', () => {
     expect(resolveComputedDate({ chain: [{ type: 'anchor', value: 'winterSolstice' }] }, 2024)).not.toBe(null);
   });
   it('resolveComputedDate resolves summerSolstice via season midpoint when daylight config is absent', () => {
-    CalendarManager._configure({ daylight: {}, seasons: { values: [{ name: 'Spring', dayStart: 80, dayEnd: 171 }, { name: 'Summer', dayStart: 172, dayEnd: 264 }, { name: 'Autumn', dayStart: 265, dayEnd: 354 }, { name: 'Winter', dayStart: 355, dayEnd: 79 }] } });
+    CalendarManager._configure({
+      daylight: {},
+      seasons: {
+        values: [
+          { name: 'Spring', dayStart: 80, dayEnd: 171 },
+          { name: 'Summer', dayStart: 172, dayEnd: 264 },
+          { name: 'Autumn', dayStart: 265, dayEnd: 354 },
+          { name: 'Winter', dayStart: 355, dayEnd: 79 }
+        ]
+      }
+    });
     const result = resolveComputedDate({ chain: [{ type: 'anchor', value: 'summerSolstice' }] }, 2024);
     expect(result).not.toBe(null);
     expect(result.year).toBe(2024);
   });
   it('resolveComputedDate resolves winterSolstice via season midpoint when daylight config is absent', () => {
-    CalendarManager._configure({ daylight: {}, seasons: { values: [{ name: 'Spring', seasonalType: 'spring', dayStart: 80, dayEnd: 171 }, { name: 'Summer', seasonalType: 'summer', dayStart: 172, dayEnd: 264 }, { name: 'Autumn', seasonalType: 'autumn', dayStart: 265, dayEnd: 354 }, { name: 'Winter', seasonalType: 'winter', dayStart: 355, dayEnd: 79 }] } });
+    CalendarManager._configure({
+      daylight: {},
+      seasons: {
+        values: [
+          { name: 'Spring', seasonalType: 'spring', dayStart: 80, dayEnd: 171 },
+          { name: 'Summer', seasonalType: 'summer', dayStart: 172, dayEnd: 264 },
+          { name: 'Autumn', seasonalType: 'autumn', dayStart: 265, dayEnd: 354 },
+          { name: 'Winter', seasonalType: 'winter', dayStart: 355, dayEnd: 79 }
+        ]
+      }
+    });
     const result = resolveComputedDate({ chain: [{ type: 'anchor', value: 'winterSolstice' }] }, 2024);
     expect(result).not.toBe(null);
     expect(result.year).toBe(2024);
@@ -129,17 +176,32 @@ describe('computed events', () => {
   });
   it('resolveComputedDate handles daysAfter step', () => {
     CalendarManager._configure({ seasons: { values: [{ name: 'Spring', seasonalType: 'spring', dayStart: 80, dayEnd: 171 }] } });
-    const config = { chain: [{ type: 'anchor', value: 'springEquinox' }, { type: 'daysAfter', params: { days: 10 } }] };
+    const config = {
+      chain: [
+        { type: 'anchor', value: 'springEquinox' },
+        { type: 'daysAfter', params: { days: 10 } }
+      ]
+    };
     expect(resolveComputedDate(config, 2024)).not.toBe(null);
   });
   it('resolveComputedDate handles weekdayOnOrAfter step', () => {
     CalendarManager._configure({ seasons: { values: [{ name: 'Spring', seasonalType: 'spring', dayStart: 80, dayEnd: 171 }] } });
-    const config = { chain: [{ type: 'anchor', value: 'springEquinox' }, { type: 'weekdayOnOrAfter', params: { weekday: 0 } }] };
+    const config = {
+      chain: [
+        { type: 'anchor', value: 'springEquinox' },
+        { type: 'weekdayOnOrAfter', params: { weekday: 0 } }
+      ]
+    };
     expect(resolveComputedDate(config, 2024)).not.toBe(null);
   });
   it('resolveComputedDate handles firstAfter weekday condition', () => {
     CalendarManager._configure({ seasons: { values: [{ name: 'Spring', seasonalType: 'spring', dayStart: 80, dayEnd: 171 }] } });
-    const config = { chain: [{ type: 'anchor', value: 'springEquinox' }, { type: 'firstAfter', condition: 'weekday', params: { weekday: 0 } }] };
+    const config = {
+      chain: [
+        { type: 'anchor', value: 'springEquinox' },
+        { type: 'firstAfter', condition: 'weekday', params: { weekday: 0 } }
+      ]
+    };
     expect(resolveComputedDate(config, 2024)).not.toBe(null);
   });
 
@@ -161,7 +223,15 @@ describe('computed events', () => {
       CalendarManager._configure({ seasons: springSeasons });
       clearComputedDateCache();
       const anchor = resolveComputedDate(anchorOnly, 2024);
-      const shifted = resolveComputedDate({ chain: [{ type: 'anchor', value: 'springEquinox' }, { type: 'daysAfter', params: { days: 10 } }] }, 2024);
+      const shifted = resolveComputedDate(
+        {
+          chain: [
+            { type: 'anchor', value: 'springEquinox' },
+            { type: 'daysAfter', params: { days: 10 } }
+          ]
+        },
+        2024
+      );
       expect(daysBetween(anchor, shifted)).toBe(10);
     });
 
@@ -170,7 +240,15 @@ describe('computed events', () => {
       clearComputedDateCache();
       const anchor = resolveComputedDate(anchorOnly, 2024);
       const target = dayOfWeek(anchor);
-      const result = resolveComputedDate({ chain: [{ type: 'anchor', value: 'springEquinox' }, { type: 'firstAfter', condition: 'weekday', params: { weekday: target } }] }, 2024);
+      const result = resolveComputedDate(
+        {
+          chain: [
+            { type: 'anchor', value: 'springEquinox' },
+            { type: 'firstAfter', condition: 'weekday', params: { weekday: target } }
+          ]
+        },
+        2024
+      );
       expect(dayOfWeek(result)).toBe(target);
       expect(daysBetween(anchor, result)).toBeGreaterThan(0);
     });
@@ -180,7 +258,15 @@ describe('computed events', () => {
       clearComputedDateCache();
       const anchor = resolveComputedDate(anchorOnly, 2024);
       const target = dayOfWeek(anchor);
-      const result = resolveComputedDate({ chain: [{ type: 'anchor', value: 'springEquinox' }, { type: 'firstAfter', condition: 'weekday', params: { weekday: target, inclusive: true } }] }, 2024);
+      const result = resolveComputedDate(
+        {
+          chain: [
+            { type: 'anchor', value: 'springEquinox' },
+            { type: 'firstAfter', condition: 'weekday', params: { weekday: target, inclusive: true } }
+          ]
+        },
+        2024
+      );
       expect(result).toEqual(anchor);
     });
 
@@ -188,7 +274,15 @@ describe('computed events', () => {
       CalendarManager._configure({ seasons: springSeasons });
       clearComputedDateCache();
       const anchor = resolveComputedDate(anchorOnly, 2024);
-      const result = resolveComputedDate({ chain: [{ type: 'anchor', value: 'springEquinox' }, { type: 'weekdayOnOrAfter', params: { weekday: dayOfWeek(anchor) } }] }, 2024);
+      const result = resolveComputedDate(
+        {
+          chain: [
+            { type: 'anchor', value: 'springEquinox' },
+            { type: 'weekdayOnOrAfter', params: { weekday: dayOfWeek(anchor) } }
+          ]
+        },
+        2024
+      );
       expect(result).toEqual(anchor);
     });
   });
@@ -206,7 +300,14 @@ describe('evaluateConditionTree (via isRecurringMatch)', () => {
   it('matches AND tree correctly', () => {
     const noteData = {
       startDate: { year: 2024, month: 0, dayOfMonth: 0 },
-      conditionTree: { type: 'group', mode: 'and', children: [{ field: 'month', op: '==', value: 1 }, { field: 'day', op: '==', value: 15 }] }
+      conditionTree: {
+        type: 'group',
+        mode: 'and',
+        children: [
+          { field: 'month', op: '==', value: 1 },
+          { field: 'day', op: '==', value: 15 }
+        ]
+      }
     };
     expect(isRecurringMatch(noteData, { year: 2024, month: 0, dayOfMonth: 14 })).toBe(true);
     expect(isRecurringMatch(noteData, { year: 2024, month: 0, dayOfMonth: 13 })).toBe(false);
@@ -217,7 +318,11 @@ describe('evaluateConditionTree (via isRecurringMatch)', () => {
     expect(isRecurringMatch(noteData, { year: 2024, month: 0, dayOfMonth: 0 })).toBe(false);
   });
   it('rejects dates after repeatEndDate', () => {
-    const noteData = { startDate: { year: 2024, month: 0, dayOfMonth: 0 }, repeatEndDate: { year: 2024, month: 5, dayOfMonth: 29 }, conditionTree: { type: 'group', mode: 'and', children: [{ field: 'day', op: '==', value: 1 }] } };
+    const noteData = {
+      startDate: { year: 2024, month: 0, dayOfMonth: 0 },
+      repeatEndDate: { year: 2024, month: 5, dayOfMonth: 29 },
+      conditionTree: { type: 'group', mode: 'and', children: [{ field: 'day', op: '==', value: 1 }] }
+    };
     expect(isRecurringMatch(noteData, { year: 2024, month: 0, dayOfMonth: 0 })).toBe(true);
     expect(isRecurringMatch(noteData, { year: 2024, month: 11, dayOfMonth: 0 })).toBe(false);
   });
@@ -229,7 +334,11 @@ describe('evaluateConditionTree (via isRecurringMatch)', () => {
     expect(isRecurringMatch(noteData, { year: 2024, month: 3, dayOfMonth: 0 })).toBe(false);
   });
   it('ignores endDate span when a condition tree is present', () => {
-    const noteData = { startDate: { year: 2024, month: 0, dayOfMonth: 0 }, endDate: { year: 2024, month: 0, dayOfMonth: 4 }, conditionTree: { type: 'group', mode: 'and', children: [{ field: 'day', op: '==', value: 99 }] } };
+    const noteData = {
+      startDate: { year: 2024, month: 0, dayOfMonth: 0 },
+      endDate: { year: 2024, month: 0, dayOfMonth: 4 },
+      conditionTree: { type: 'group', mode: 'and', children: [{ field: 'day', op: '==', value: 99 }] }
+    };
     expect(isRecurringMatch(noteData, { year: 2024, month: 0, dayOfMonth: 0 })).toBe(false);
     expect(isRecurringMatch(noteData, { year: 2024, month: 0, dayOfMonth: 2 })).toBe(false);
     expect(isRecurringMatch(noteData, { year: 2024, month: 0, dayOfMonth: 4 })).toBe(false);
@@ -239,8 +348,10 @@ describe('evaluateConditionTree (via isRecurringMatch)', () => {
 describe('duration + condition tree', () => {
   it('multi-day event covers days after tree-match start via hasDuration', () => {
     const noteData = {
-      startDate: { year: 2024, month: 0, dayOfMonth: 0 }, endDate: { year: 2024, month: 0, dayOfMonth: 0 },
-      hasDuration: true, duration: 3,
+      startDate: { year: 2024, month: 0, dayOfMonth: 0 },
+      endDate: { year: 2024, month: 0, dayOfMonth: 0 },
+      hasDuration: true,
+      duration: 3,
       conditionTree: { type: 'group', mode: 'and', children: [{ field: 'day', op: '==', value: 15 }] }
     };
     expect(isRecurringMatch(noteData, { year: 2024, month: 0, dayOfMonth: 14 })).toBe(true);

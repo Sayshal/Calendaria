@@ -1,5 +1,6 @@
 import { CalendarManager, CalendarRegistry, getEquivalentDates } from '../../calendar/_module.mjs';
 import { MODULE, SETTINGS, SOCKET_TYPES, TEMPLATES } from '../../constants.mjs';
+import { isDontForgetActive } from '../../integrations/dont-forget.mjs';
 import {
   addCustomPreset,
   applyPresetDefaultsToNoteData,
@@ -45,7 +46,9 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       setScheduleMode: this._onSetScheduleMode,
       clearRepeatEndDate: this._onClearRepeatEndDate,
       openConditionBuilder: this._onOpenConditionBuilder,
-      openFestivalEditor: this._onOpenFestivalEditor
+      openFestivalEditor: this._onOpenFestivalEditor,
+      openSubject: this._onOpenSubject,
+      removeSubject: this._onRemoveSubject
     },
     form: { submitOnChange: true, closeOnSubmit: false }
   };
@@ -68,9 +71,9 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
   static TABS = {
     primary: {
       tabs: [
-        { id: 'content', group: 'primary', label: 'CALENDARIA.Common.Content' },
+        { id: 'content', group: 'primary', label: 'ATLAS.Common.Content' },
         { id: 'schedule', group: 'primary', label: 'CALENDARIA.Note.Tab.Schedule' },
-        { id: 'settings', group: 'primary', label: 'CALENDARIA.Common.Settings' }
+        { id: 'settings', group: 'primary', label: 'ATLAS.Common.Settings' }
       ],
       initial: 'content'
     }
@@ -194,7 +197,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
         if (!path) return;
         ui.context.menuItems = [
           {
-            label: _loc('CALENDARIA.Common.Delete'),
+            label: _loc('ATLAS.Common.Delete'),
             icon: '<i class="fas fa-trash"></i>',
             onClick: () => this.#removeConditionAtPath(path)
           }
@@ -211,7 +214,8 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
    */
   async #showDeletePresetMenu(_event, presetId, presetLabel) {
     const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: _loc('CALENDARIA.Common.DeletePreset') },
+      classes: ['calendaria'],
+      window: { title: 'CALENDARIA.Common.DeletePreset' },
       content: `<p>${_loc('CALENDARIA.Note.DeletePresetConfirm', { label: presetLabel })}</p><p class="hint">${_loc('CALENDARIA.Note.DeletePresetHint')}</p>`,
       rejectClose: false,
       modal: true
@@ -246,6 +250,11 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     this.element.classList.toggle('edit-mode', this.isEditMode);
     this.element.classList.remove('dnd5e2', 'dnd5e-journal');
     for (const select of this.element.querySelectorAll('select[data-ownership-user]')) select.addEventListener('change', (e) => this.#onOwnershipChange(e));
+    const dropzone = this.element.querySelector('.subjects-dropzone');
+    if (dropzone) {
+      dropzone.addEventListener('dragover', (event) => event.preventDefault());
+      dropzone.addEventListener('drop', (event) => this.#onDropSubject(event));
+    }
     for (const input of this.element.querySelectorAll('.time-inputs input[type="text"]')) {
       input.addEventListener('blur', () => {
         input.value = String(parseInt(input.value) || 0).padStart(2, '0');
@@ -376,7 +385,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const visibility = this.document.system.visibility || 'visible';
     const visibilityConfig = {
       visible: { icon: 'fa-eye', label: 'CALENDARIA.Note.Visibility.Visible', badge: null },
-      hidden: { icon: 'fa-eye-slash', label: 'CALENDARIA.Common.Hidden', badge: _loc('CALENDARIA.Common.Hidden') },
+      hidden: { icon: 'fa-eye-slash', label: 'ATLAS.Common.Hidden', badge: _loc('ATLAS.Common.Hidden') },
       secret: { icon: 'fa-lock', label: 'CALENDARIA.Note.Visibility.Secret', badge: _loc('CALENDARIA.Note.Visibility.Secret') }
     };
     const vis = visibilityConfig[visibility] || visibilityConfig.visible;
@@ -388,6 +397,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     context.isGM = game.user.isGM;
     context.canEdit = this.document.isOwner;
     context.canSetVisibility = game.user.isGM || this.document.isOwner;
+    context.subjectEntries = (this.document.system.subjects || []).map((uuid) => ({ uuid, name: fromUuidSync(uuid)?.name || uuid }));
     if (this.isEditMode) {
       const { ungroupedTabs, tabGroups } = this.#prepareTabGroups();
       context.ungroupedTabs = ungroupedTabs;
@@ -409,7 +419,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       context.occurrences = this.#computeOccurrencePreview(calendar);
       const currentReminderType = this.document.system.reminderType || 'toast';
       context.reminderTypeOptions = [
-        { value: 'none', label: _loc('CALENDARIA.Common.None'), selected: currentReminderType === 'none' },
+        { value: 'none', label: _loc('ATLAS.Common.None'), selected: currentReminderType === 'none' },
         { value: 'toast', label: _loc('CALENDARIA.Note.ReminderTypeToast'), selected: currentReminderType === 'toast' },
         { value: 'chat', label: _loc('CALENDARIA.Note.ReminderTypeChat'), selected: currentReminderType === 'chat' },
         { value: 'dialog', label: _loc('CALENDARIA.Note.ReminderTypeDialog'), selected: currentReminderType === 'dialog' }
@@ -418,7 +428,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       const currentReminderTargets = this.document.system.reminderTargets || 'all';
       context.reminderTargetOptions = [
         { value: 'all', label: _loc('CALENDARIA.Note.ReminderTargetAll'), selected: currentReminderTargets === 'all' },
-        { value: 'gm', label: _loc('CALENDARIA.Common.GMOnly'), selected: currentReminderTargets === 'gm' },
+        { value: 'gm', label: _loc('ATLAS.Common.GMOnly'), selected: currentReminderTargets === 'gm' },
         { value: 'author', label: _loc('CALENDARIA.Note.ReminderTargetAuthor'), selected: currentReminderTargets === 'author' },
         { value: 'viewers', label: _loc('CALENDARIA.Note.ReminderTargetViewers'), selected: currentReminderTargets === 'viewers' },
         { value: 'specific', label: _loc('CALENDARIA.Note.ReminderTargetSpecific'), selected: currentReminderTargets === 'specific' }
@@ -426,6 +436,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       const currentReminderUnit = this.document.system.reminderUnit || 'hour';
       context.reminderUnitOptions = ['hour', 'day', 'week', 'month', 'year'].map((u) => ({ value: u, label: _loc(`CALENDARIA.Note.ReminderUnit.${u}`), selected: currentReminderUnit === u }));
       context.showReminderUsers = currentReminderTargets === 'specific';
+      context.showPersistToDo = isDontForgetActive();
       const selectedReminderUsers = this.document.system.reminderUsers || [];
       context.userOptions = game.users.contents.map((u) => ({ id: u.id, name: u.name, selected: selectedReminderUsers.includes(u.id) }));
       context.ownershipEntries = this.#prepareOwnershipEntries();
@@ -633,9 +644,11 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     }
     if (target?.name === 'system.reminderType') {
       const disabled = target.value === 'none';
-      this.element.querySelector('select[name="system.reminderTargets"]')?.setAttribute('disabled', disabled);
-      this.element.querySelector('input[name="system.reminderOffset"]')?.setAttribute('disabled', disabled);
-      this.element.querySelector('select[name="system.reminderUnit"]')?.setAttribute('disabled', disabled);
+      const names = ['system.reminderTargets', 'system.reminderOffset', 'system.reminderUnit', 'system.persistToDo'];
+      for (const name of names) {
+        const field = this.element.querySelector(`[name="${name}"]`);
+        if (field) field.disabled = disabled;
+      }
     }
   }
 
@@ -650,7 +663,8 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const hasDefaults = preset.icon || preset.color || preset.defaults;
     if (!hasDefaults) return;
     const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: _loc('CALENDARIA.Note.ApplyPresetStyleTitle') },
+      classes: ['calendaria'],
+      window: { title: 'CALENDARIA.Note.ApplyPresetStyleTitle' },
       content: `<p style="text-align:center;font-size:2rem;margin:0.5rem 0"><i class="fas ${preset.icon}" style="color:${preset.color}"></i></p><p>${_loc('CALENDARIA.Note.ApplyPresetStyleConfirm', { label: preset.label })}</p>`,
       rejectClose: false,
       modal: true
@@ -673,7 +687,8 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const hasExisting = this.document.system.conditionTree?.children?.length > 0 || this.document.system.conditions?.length > 0;
     if (hasExisting) {
       const confirmed = await foundry.applications.api.DialogV2.confirm({
-        window: { title: _loc('CALENDARIA.Note.Schedule.ClearConditionsTitle') },
+        classes: ['calendaria'],
+        window: { title: 'CALENDARIA.Note.Schedule.ClearConditionsTitle' },
         content: `<p>${_loc('CALENDARIA.Note.Schedule.ClearConditionsConfirm')}</p>`,
         rejectClose: false,
         modal: true
@@ -681,7 +696,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       if (!confirmed) return;
     }
     await this.document.update({ 'system.conditionTree': null, 'system.conditions': [], 'system.connectedEvents': [] });
-    ui.notifications.info(_loc('CALENDARIA.Note.Schedule.ConditionsCleared'));
+    ui.notifications.info('CALENDARIA.Note.Schedule.ConditionsCleared', { localize: true });
     this.render();
   }
 
@@ -698,7 +713,8 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     let merge = false;
     if (hasExisting) {
       const result = await foundry.applications.api.DialogV2.wait({
-        window: { title: _loc('CALENDARIA.Note.Preset.ReplaceTitle') },
+        classes: ['calendaria'],
+        window: { title: 'CALENDARIA.Note.Preset.ReplaceTitle' },
         content: `<p>${_loc('CALENDARIA.Note.Preset.ReplaceConfirm')}</p>
           <label class="checkbox-label"><input type="checkbox" name="merge"> ${_loc('CALENDARIA.Note.Preset.MergeOption')}</label>`,
         rejectClose: false,
@@ -706,14 +722,14 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
         buttons: [
           {
             action: 'apply',
-            label: _loc('CALENDARIA.Common.Apply'),
+            label: 'ATLAS.Common.Apply',
             icon: 'fas fa-check',
             default: true,
             callback: (_event, button) => ({ merge: button.form.elements.merge?.checked ?? false })
           },
           {
             action: 'cancel',
-            label: _loc('CALENDARIA.Common.Cancel'),
+            label: 'ATLAS.Common.Cancel',
             icon: 'fas fa-times'
           }
         ]
@@ -794,7 +810,8 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     if (this.document.system.linkedFestival) return;
     if (mode === 'once' && this.document.system.conditionTree) {
       const confirmed = await foundry.applications.api.DialogV2.confirm({
-        window: { title: _loc('CALENDARIA.Note.Schedule.ConfirmSwitchToOnceTitle') },
+        classes: ['calendaria'],
+        window: { title: 'CALENDARIA.Note.Schedule.ConfirmSwitchToOnceTitle' },
         content: `<p>${_loc('CALENDARIA.Note.Schedule.ConfirmSwitchToOnce')}</p>`,
         rejectClose: false,
         modal: true
@@ -829,6 +846,41 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
   }
 
   /**
+   * Add a dropped document to the note's subject list.
+   * @param {DragEvent} event - The drop event
+   */
+  async #onDropSubject(event) {
+    event.preventDefault();
+    const data = foundry.applications.ux.TextEditor.implementation.getDragEventData(event);
+    if (!data?.uuid) return;
+    const subjects = this.document.system.subjects || [];
+    if (subjects.includes(data.uuid)) return;
+    await this.document.update({ 'system.subjects': [...subjects, data.uuid] });
+  }
+
+  /**
+   * Open the sheet of a referenced subject document.
+   * @param {PointerEvent} event - The click event
+   * @param {HTMLElement} target - The clicked element
+   */
+  static async _onOpenSubject(event, target) {
+    event.preventDefault();
+    const doc = await fromUuid(target.dataset.uuid);
+    doc?.sheet?.render(true);
+  }
+
+  /**
+   * Remove a subject reference from the note.
+   * @param {PointerEvent} event - The click event
+   * @param {HTMLElement} target - The clicked element
+   */
+  static async _onRemoveSubject(event, target) {
+    event.preventDefault();
+    const uuid = target.dataset.uuid;
+    await this.document.update({ 'system.subjects': (this.document.system.subjects || []).filter((u) => u !== uuid) });
+  }
+
+  /**
    * Handle icon selection (left-click)
    * @param {PointerEvent} event - The click event
    * @param {HTMLElement} target - The clicked element
@@ -839,7 +891,8 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     if (iconType === 'fontawesome') {
       const currentIcon = target.querySelector('i')?.className.replace('icon-preview', '').trim() || '';
       const newIcon = await foundry.applications.api.DialogV2.prompt({
-        window: { title: _loc('CALENDARIA.Note.FontAwesomeIconTitle') },
+        classes: ['calendaria'],
+        window: { title: 'CALENDARIA.Note.FontAwesomeIconTitle' },
         content: `<div class="form-group"><label>${_loc('CALENDARIA.Note.FontAwesomeClasses')}</label><input type="text" name="icon-class" value="${currentIcon}" placeholder="fas fa-calendar" /><p class="hint">${_loc('CALENDARIA.Common.IconHint')}</p></div>`,
         ok: {
           callback: (_event, button) => {
@@ -926,7 +979,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
    */
   _formatDateDisplay(calendar, year, month, day) {
     if (!calendar) return `${day} / ${month + 1} / ${year}`;
-    if (calendar.isMonthless) return `${_loc('CALENDARIA.Common.Day')} ${day}, ${year}`;
+    if (calendar.isMonthless) return `${_loc('ATLAS.Common.Day')} ${day}, ${year}`;
     return formatForLocation(calendar, { year, month, dayOfMonth: day - 1, hour: 12, minute: 0, second: 0 }, 'noteViewerDate');
   }
 
@@ -997,7 +1050,8 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       currentDay
     });
     return foundry.applications.api.DialogV2.prompt({
-      window: { title: _loc('CALENDARIA.Note.SelectDateTitle') },
+      classes: ['calendaria'],
+      window: { title: 'CALENDARIA.Note.SelectDateTitle' },
       content,
       ok: {
         callback: (_event, button) => {
@@ -1031,7 +1085,8 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
   static async _onDeleteNote(_event, _target) {
     if (!this.isAuthor && !game.user.isGM) return;
     const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: _loc('CALENDARIA.Common.DeleteNote') },
+      classes: ['calendaria'],
+      window: { title: 'CALENDARIA.Common.DeleteNote' },
       content: `<p>${_loc('CALENDARIA.ContextMenu.DeleteConfirm', { name: this.document.name })}</p>`,
       rejectClose: false,
       modal: true
@@ -1088,7 +1143,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       onChange: async (updated) => {
         const validation = validateConditions(updated);
         if (!validation.valid) {
-          ui.notifications.error(_loc('CALENDARIA.Condition.Builder.ValidationError'));
+          ui.notifications.error('CALENDARIA.Condition.Builder.ValidationError', { localize: true });
           ATLAS.log(2, 'Condition validation errors:', validation.errors);
           return;
         }
@@ -1098,7 +1153,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
         if (deps.length) {
           const { hasCycle } = detectCycles(this.document.id, deps);
           if (hasCycle) {
-            ui.notifications.error(_loc('CALENDARIA.Condition.Builder.CycleError'));
+            ui.notifications.error('CALENDARIA.Condition.Builder.CycleError', { localize: true });
             return;
           }
           updateData['system.connectedEvents'] = deps;
@@ -1135,32 +1190,32 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
   #getConditionDescription(condition, calendar) {
     const { field, op, value, offset } = condition;
     const fieldLabels = {
-      year: _loc('CALENDARIA.Common.Year'),
-      month: _loc('CALENDARIA.Common.Month'),
-      day: _loc('CALENDARIA.Common.Day'),
+      year: _loc('ATLAS.Common.Year'),
+      month: _loc('ATLAS.Common.Month'),
+      day: _loc('ATLAS.Common.Day'),
       dayOfYear: _loc('CALENDARIA.Note.Condition.DayInYear'),
-      daysBeforeMonthEnd: _loc('CALENDARIA.Condition.Field.daysBeforeMonthEnd'),
+      daysBeforeMonthEnd: _loc('CALENDARIA.Condition.Field.DaysBeforeMonthEnd'),
       weekday: _loc('CALENDARIA.Common.Weekday'),
       weekNumberInMonth: _loc('CALENDARIA.Note.Condition.WeekdayNumInMonth'),
       inverseWeekNumber: _loc('CALENDARIA.Note.Condition.InverseWeekNumber'),
-      weekInMonth: _loc('CALENDARIA.Condition.Field.weekInMonth'),
-      weekInYear: _loc('CALENDARIA.Condition.Field.weekInYear'),
+      weekInMonth: _loc('CALENDARIA.Condition.Field.WeekInMonth'),
+      weekInYear: _loc('CALENDARIA.Condition.Field.WeekInYear'),
       totalWeek: _loc('CALENDARIA.Note.Condition.TotalWeek'),
-      weeksBeforeMonthEnd: _loc('CALENDARIA.Condition.Field.weeksBeforeMonthEnd'),
-      weeksBeforeYearEnd: _loc('CALENDARIA.Condition.Field.weeksBeforeYearEnd'),
+      weeksBeforeMonthEnd: _loc('CALENDARIA.Condition.Field.WeeksBeforeMonthEnd'),
+      weeksBeforeYearEnd: _loc('CALENDARIA.Condition.Field.WeeksBeforeYearEnd'),
       season: _loc('CALENDARIA.Common.Season'),
       seasonPercent: _loc('CALENDARIA.Note.Condition.SeasonPercent'),
-      seasonDay: _loc('CALENDARIA.Condition.Field.seasonDay'),
-      isLongestDay: _loc('CALENDARIA.Condition.Field.isLongestDay'),
-      isShortestDay: _loc('CALENDARIA.Condition.Field.isShortestDay'),
-      isSpringEquinox: _loc('CALENDARIA.Condition.Field.isSpringEquinox'),
-      isAutumnEquinox: _loc('CALENDARIA.Condition.Field.isAutumnEquinox'),
+      seasonDay: _loc('CALENDARIA.Condition.Field.SeasonDay'),
+      isLongestDay: _loc('CALENDARIA.Condition.Field.IsLongestDay'),
+      isShortestDay: _loc('CALENDARIA.Condition.Field.IsShortestDay'),
+      isSpringEquinox: _loc('CALENDARIA.Condition.Field.IsSpringEquinox'),
+      isAutumnEquinox: _loc('CALENDARIA.Condition.Field.IsAutumnEquinox'),
       moonPhaseIndex: _loc('CALENDARIA.Common.MoonPhase'),
       moonPhaseCountMonth: _loc('CALENDARIA.Note.Condition.MoonPhaseCountMonth'),
       moonPhaseCountYear: _loc('CALENDARIA.Note.Condition.MoonPhaseCountYear'),
       cycle: _loc('CALENDARIA.Common.Cycle'),
       era: _loc('CALENDARIA.Common.Era'),
-      eraYear: _loc('CALENDARIA.Condition.Field.eraYear'),
+      eraYear: _loc('CALENDARIA.Condition.Field.EraYear'),
       intercalary: _loc('CALENDARIA.Note.Condition.IsIntercalaryDay')
     };
     const opLabels = {

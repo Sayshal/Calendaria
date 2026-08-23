@@ -21,9 +21,9 @@
   <div class="preset-editor-panel standard-form">
     {{#if selected}}
       <fieldset data-section="content">
-        <legend>{{localize "CALENDARIA.Common.Content"}}</legend>
+        <legend>{{localize "ATLAS.Common.Content"}}</legend>
         <div class="form-group">
-          <label for="preset-name">{{localize "CALENDARIA.Common.Name"}}</label>
+          <label for="preset-name">{{localize "ATLAS.Common.Name"}}</label>
           <div class="form-fields">
             <input type="text" id="preset-name" name="selected.label" value="{{selected.label}}"
               {{#if selected.isDefault}}disabled{{/if}}>
@@ -58,10 +58,10 @@
           </div>
         {{/each}}
         <div class="form-group stacked">
-          <label>{{localize "CALENDARIA.Common.Content"}}</label>
+          <label>{{localize "ATLAS.Common.Content"}}</label>
           <p class="hint">{{localize "CALENDARIA.PresetManager.ContentTemplateFieldHint"}}</p>
           <prose-mirror name="selected.defaults.content" value="{{selected.defaults.content}}"
-            aria-label="{{localize 'CALENDARIA.Common.Content'}}" compact></prose-mirror>
+            aria-label="{{localize 'ATLAS.Common.Content'}}" compact></prose-mirror>
         </div>
       </fieldset>
       <fieldset data-section="schedule">
@@ -77,7 +77,7 @@
         {{/each}}
       </fieldset>
       <fieldset data-section="settings">
-        <legend>{{localize "CALENDARIA.Common.Settings"}}</legend>
+        <legend>{{localize "ATLAS.Common.Settings"}}</legend>
         {{#each settingsFields}}
           <div class="form-group">
             <label for="cat-def-{{this.key}}">{{this.label}}</label>

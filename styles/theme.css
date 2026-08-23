@@ -1,17 +1,6 @@
 :root {
   --calendaria-day-gap: 0.125rem;
   --calendaria-day-size: 5.3125rem;
-  --calendaria-highlight: rgb(255 255 255 / 20%);
-  --calendaria-note-badge-bg: rgb(225 180 56);
-  --calendaria-note-badge-text: rgb(0 0 0);
-  --calendaria-ui-accent: var(--color-warm-1, rgb(238 155 58));
-  --calendaria-ui-border: var(--color-cool-4, rgb(48 40 49));
-  --calendaria-ui-error: var(--color-level-error, rgb(206 7 7));
-  --calendaria-ui-success: var(--color-level-success, rgb(38 178 49));
-  --calendaria-ui-surface: var(--color-cool-5-75, rgb(11 10 19 / 75%));
-  --calendaria-ui-surface-50: var(--color-cool-5-50, rgb(11 10 19 / 50%));
-  --calendaria-ui-surface-dim: var(--color-cool-5, rgb(11 10 19));
-  --calendaria-ui-text-dim: var(--color-text-light-6, rgb(153 153 153));
   --calendaria-week-day-width: 6.25rem;
   --calendaria-week-header-height: 1.5rem;
   --calendaria-week-hour-height: 1.5rem;
@@ -25,8 +14,72 @@
   --calendaria-year-month-width: 3.125rem;
 }
 
-.theme-light {
-  --calendaria-highlight: rgb(255 255 255 / 40%);
-  --calendaria-note-badge-bg: rgb(225 180 56);
-  --calendaria-note-badge-text: rgb(0 0 0);
+.calendaria {
+  --calendaria-highlight: rgb(255 255 255 / 20%);
+  --calendaria-ui-accent: var(--atlas-accent);
+  --calendaria-ui-border: var(--atlas-border);
+  --calendaria-ui-error: var(--atlas-error);
+  --calendaria-ui-success: var(--atlas-success);
+  --calendaria-ui-surface: var(--atlas-surface-dim-75);
+  --calendaria-ui-surface-50: var(--atlas-surface-dim-50);
+  --calendaria-ui-surface-dim: var(--atlas-surface-dim);
+  --calendaria-ui-text-dim: var(--atlas-text-dim);
+}
+
+.calendaria.application {
+  --background: var(--atlas-bg);
+  --color-border: var(--atlas-border);
+  --color-data-background: var(--atlas-bg-lighter);
+  --color-data-border: var(--atlas-border);
+  --color-fieldset-border: var(--atlas-border);
+  --color-form-hint: var(--atlas-text-secondary);
+  --color-form-hint-hover: var(--atlas-text);
+  --color-form-label: var(--atlas-text);
+  --color-form-label-hover: var(--atlas-text-heading);
+  --color-tabs-border: var(--atlas-border);
+  --color-level-error: var(--atlas-error);
+  --color-level-success: var(--atlas-success);
+  --color-level-warning: var(--atlas-warning);
+  --color-scrollbar: var(--atlas-border);
+  --color-shadow-primary: var(--atlas-primary);
+  --color-text-accent: var(--atlas-accent);
+  --color-text-emphatic: var(--atlas-text-heading);
+  --color-text-primary: var(--atlas-text);
+  --color-text-secondary: var(--atlas-text-secondary);
+  --color-text-selection: var(--atlas-text-on-color);
+  --color-text-selection-bg: var(--atlas-primary);
+  --color-text-subtle: var(--atlas-text-secondary);
+  --button-background-color: var(--atlas-button-bg);
+  --button-border-color: var(--atlas-button-border);
+  --button-focus-outline-color: var(--atlas-primary);
+  --button-hover-background-color: var(--atlas-button-hover);
+  --button-hover-border-color: var(--atlas-primary);
+  --button-hover-text-color: var(--atlas-button-text);
+  --button-text-color: var(--atlas-button-text);
+  --content-link-background: var(--atlas-surface-dim-25);
+  --content-link-border-color: var(--atlas-border);
+  --content-link-icon-color: var(--atlas-text-dim);
+  --content-link-text-color: var(--atlas-link);
+
+  input,
+  select,
+  textarea,
+  code-mirror,
+  formula-input,
+  color-picker,
+  file-picker,
+  document-tags,
+  string-tags {
+    --input-background-color: var(--atlas-input-bg);
+    --input-border-color: var(--atlas-border);
+    --input-focus-outline-color: var(--atlas-primary);
+    --input-focus-text-color: var(--atlas-text);
+    --input-placeholder-color: var(--atlas-text-dim);
+    --input-text-color: var(--atlas-text);
+  }
+
+  select option {
+    color: var(--atlas-text);
+    background: var(--atlas-bg);
+  }
 }

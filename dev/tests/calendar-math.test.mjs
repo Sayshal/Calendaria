@@ -116,7 +116,12 @@ describe('isInSeasonRange()', () => {
 });
 
 describe('getSeasonIndex()', () => {
-  const seasons = [ { name: 'Spring', dayStart: 80, dayEnd: 171 }, { name: 'Summer', dayStart: 172, dayEnd: 264 }, { name: 'Autumn', dayStart: 265, dayEnd: 354 }, { name: 'Winter', dayStart: 355, dayEnd: 79 } ];
+  const seasons = [
+    { name: 'Spring', dayStart: 80, dayEnd: 171 },
+    { name: 'Summer', dayStart: 172, dayEnd: 264 },
+    { name: 'Autumn', dayStart: 265, dayEnd: 354 },
+    { name: 'Winter', dayStart: 355, dayEnd: 79 }
+  ];
   it('returns 0 for spring day', () => {
     expect(getSeasonIndex(100, seasons)).toBe(0);
   });
@@ -214,7 +219,11 @@ describe('getCycleValue()', () => {
 });
 
 describe('getEraIndex()', () => {
-  const eras = [ { name: 'First Age', startYear: 1, endYear: 999 }, { name: 'Second Age', startYear: 1000, endYear: 1999 }, { name: 'Third Age', startYear: 2000 } ];
+  const eras = [
+    { name: 'First Age', startYear: 1, endYear: 999 },
+    { name: 'Second Age', startYear: 1000, endYear: 1999 },
+    { name: 'Third Age', startYear: 2000 }
+  ];
   it('returns 0 for year in first era', () => {
     expect(getEraIndex(500, eras)).toBe(0);
   });
@@ -230,7 +239,11 @@ describe('getEraIndex()', () => {
 });
 
 describe('getEraYear()', () => {
-  const eras = [ { name: 'First Age', startYear: 1, endYear: 999 }, { name: 'Second Age', startYear: 1000, endYear: 1999 }, { name: 'Third Age', startYear: 2000 } ];
+  const eras = [
+    { name: 'First Age', startYear: 1, endYear: 999 },
+    { name: 'Second Age', startYear: 1000, endYear: 1999 },
+    { name: 'Third Age', startYear: 2000 }
+  ];
   it('returns year within era', () => {
     expect(getEraYear(1000, eras)).toBe(1);
     expect(getEraYear(1005, eras)).toBe(6);
@@ -267,12 +280,7 @@ describe('findSeasonIndexByType()', () => {
     expect(findSeasonIndexByType(seasons, 'autumn')).toBe(-1);
   });
   it('returns -1 when seasonalType is missing (no regex/positional fallback)', () => {
-    const seasons = [
-      { name: 'Spring' },
-      { name: 'Summer' },
-      { name: 'Autumn' },
-      { name: 'Winter' }
-    ];
+    const seasons = [{ name: 'Spring' }, { name: 'Summer' }, { name: 'Autumn' }, { name: 'Winter' }];
     expect(findSeasonIndexByType(seasons, 'spring')).toBe(-1);
     expect(findSeasonIndexByType(seasons, 'autumn')).toBe(-1);
   });

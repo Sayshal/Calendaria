@@ -644,7 +644,7 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
         const editPage = NoteManager.getFullNote(pageId);
         if (game.user.isGM || editPage?.parent?.isOwner) {
           items.push({
-            label: _loc('CALENDARIA.Common.Edit'),
+            label: _loc('ATLAS.Common.Edit'),
             icon: '<i class="fas fa-pen-to-square"></i>',
             onClick: () => {
               if (editPage) editPage.sheet.render(true, { mode: 'edit', forceMode: 'edit' });
@@ -652,7 +652,7 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
           });
         }
         items.push({
-          label: _loc('CALENDARIA.NoteViewer.Context.JumpToDate'),
+          label: _loc('ATLAS.Common.JumpToDate'),
           icon: '<i class="fas fa-calendar-day"></i>',
           onClick: () => {
             const stub = NoteManager.getNote(pageId);
@@ -663,12 +663,13 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
         });
         if (isGM && canDeleteNotes()) {
           items.push({
-            label: _loc('CALENDARIA.Common.Delete'),
+            label: _loc('ATLAS.Common.Delete'),
             icon: '<i class="fas fa-trash"></i>',
             onClick: async () => {
               const stub = NoteManager.getNote(pageId);
               const confirmed = await foundry.applications.api.DialogV2.confirm({
-                window: { title: _loc('CALENDARIA.Common.DeleteNote') },
+                classes: ['calendaria'],
+                window: { title: 'CALENDARIA.Common.DeleteNote' },
                 content: `<p>${stub?.name || 'this note'}</p>`,
                 yes: { default: false },
                 rejectClose: false
@@ -821,11 +822,12 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
         ? `${_loc('CALENDARIA.NoteViewer.BulkDeleteConfirm').replace('{count}', deletableIds.length)} (${skipped} festival notes skipped)`
         : _loc('CALENDARIA.NoteViewer.BulkDeleteConfirm').replace('{count}', deletableIds.length);
     if (deletableIds.length === 0) {
-      ui.notifications.warn(_loc('CALENDARIA.NoteViewer.BulkDeleteAllFestivals'));
+      ui.notifications.warn('CALENDARIA.NoteViewer.BulkDeleteAllFestivals', { localize: true });
       return false;
     }
     const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: _loc('CALENDARIA.NoteViewer.BulkDeleteTitle') },
+      classes: ['calendaria'],
+      window: { title: 'CALENDARIA.NoteViewer.BulkDeleteTitle' },
       content: `<p>${countLabel}</p>`,
       yes: { default: false },
       rejectClose: false
@@ -838,7 +840,7 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
         deleted++;
       } catch {}
     }
-    if (deleted > 0) ui.notifications.info(_loc('CALENDARIA.NoteViewer.BulkComplete').replace('{count}', deleted));
+    if (deleted > 0) ui.notifications.info(_loc('CALENDARIA.NoteViewer.BulkDeleted').replace('{count}', deleted));
     return true;
   }
 
@@ -850,9 +852,10 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
   async #executeBulkChangePreset(ids) {
     const presets = getAllPresets();
     const options = presets.map((p) => `<option value="${p.id}">${_loc(p.label)}</option>`).join('');
-    const content = `<div class="form-group"><label>${_loc('CALENDARIA.NoteViewer.Filter.Preset')}</label><select id="bulk-preset-select">${options}</select></div>`;
+    const content = `<div class="form-group"><label>${_loc('ATLAS.Common.Preset')}</label><select id="bulk-preset-select">${options}</select></div>`;
     const result = await foundry.applications.api.DialogV2.prompt({
-      window: { title: _loc('CALENDARIA.NoteViewer.BulkAction.ChangePreset') },
+      classes: ['calendaria'],
+      window: { title: 'CALENDARIA.NoteViewer.BulkAction.ChangePreset' },
       content,
       ok: { callback: (_event, button, _dialog) => button.form.elements['bulk-preset-select']?.value }
     });
@@ -873,11 +876,12 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
     const content = `<div class="form-group"><label>${_loc('CALENDARIA.Common.Visibility')}</label>
       <select id="bulk-visibility-select">
         <option value="visible">${_loc('CALENDARIA.Note.Visibility.Visible')}</option>
-        <option value="hidden">${_loc('CALENDARIA.Common.Hidden')}</option>
+        <option value="hidden">${_loc('ATLAS.Common.Hidden')}</option>
         <option value="secret">${_loc('CALENDARIA.Note.Visibility.Secret')}</option>
       </select></div>`;
     const result = await foundry.applications.api.DialogV2.prompt({
-      window: { title: _loc('CALENDARIA.NoteViewer.BulkAction.ChangeVisibility') },
+      classes: ['calendaria'],
+      window: { title: 'CALENDARIA.NoteViewer.BulkAction.ChangeVisibility' },
       content,
       ok: { callback: (_event, button, _dialog) => button.form.elements['bulk-visibility-select']?.value }
     });
@@ -901,7 +905,8 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
         <option value="banner">${_loc('CALENDARIA.Note.DisplayStyle.Banner')}</option>
       </select></div>`;
     const result = await foundry.applications.api.DialogV2.prompt({
-      window: { title: _loc('CALENDARIA.NoteViewer.BulkAction.ChangeDisplayStyle') },
+      classes: ['calendaria'],
+      window: { title: 'CALENDARIA.NoteViewer.BulkAction.ChangeDisplayStyle' },
       content,
       ok: { callback: (_event, button, _dialog) => button.form.elements['bulk-style-select']?.value }
     });

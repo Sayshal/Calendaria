@@ -1,12 +1,12 @@
 .calendaria {
   &.calendar-note-sheet {
-    color: var(--atlas-text, rgb(224 224 224));
-    background: var(--atlas-bg, rgb(31 31 31));
+    color: var(--atlas-text);
+    background: var(--atlas-bg);
 
     .window-header {
-      border-color: var(--atlas-border, rgb(74 74 74));
-      color: var(--atlas-text, rgb(224 224 224));
-      background: var(--atlas-bg-lighter, rgb(42 42 42));
+      border-color: var(--atlas-border);
+      color: var(--atlas-text);
+      background: var(--atlas-bg-lighter);
     }
 
     .window-header .header-controls {
@@ -20,16 +20,16 @@
         width: 0.0625rem;
         height: 1rem;
         margin: 0 0.125rem;
-        background: var(--atlas-border, rgb(74 74 74));
+        background: var(--atlas-border);
       }
     }
 
     .window-header button.header-control {
-      --button-background-color: var(--atlas-bg, rgb(31 31 31));
+      --button-background-color: var(--atlas-bg);
       --button-focus-outline-color: none;
-      --button-hover-background-color: var(--atlas-bg-hover, rgb(53 53 53));
-      --button-hover-text-color: var(--atlas-text, rgb(224 224 224));
-      --button-text-color: var(--atlas-text-dim, rgb(153 153 153));
+      --button-hover-background-color: var(--atlas-bg-hover);
+      --button-hover-text-color: var(--atlas-text);
+      --button-text-color: var(--atlas-text-dim);
 
       display: flex;
       justify-content: center;
@@ -40,16 +40,16 @@
       padding: 0;
       border: none;
       border-radius: 0.25rem;
-      color: var(--atlas-text-dim, rgb(153 153 153));
-      font-size: var(--font-size-12, 0.75rem);
+      color: var(--atlas-text-dim);
+      font-size: var(--font-size-12);
       text-transform: none;
-      background: var(--atlas-bg, rgb(31 31 31));
+      background: var(--atlas-bg);
       box-shadow: none;
 
       &:hover,
       &:focus {
-        color: var(--atlas-text, rgb(224 224 224));
-        background: var(--atlas-bg-hover, rgb(53 53 53));
+        color: var(--atlas-text);
+        background: var(--atlas-bg-hover);
         box-shadow: none;
       }
     }
@@ -78,7 +78,7 @@
         max-width: unset;
         padding: 0;
         border-right: none;
-        border-bottom: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
+        border-bottom: 0.0625rem solid var(--atlas-border);
         overflow: hidden;
 
         .tab-group {
@@ -97,14 +97,14 @@
           padding: 0.5rem 0.25rem;
           border-bottom: 0.125rem solid transparent;
           border-radius: 0;
-          color: var(--atlas-text-dim, rgb(153 153 153));
+          color: var(--atlas-text-dim);
           font-size: var(--font-size-12);
           text-transform: uppercase;
           letter-spacing: 0.03em;
 
           &.active {
-            border-bottom-color: var(--atlas-accent, rgb(168 144 96));
-            color: var(--atlas-text, rgb(224 224 224));
+            border-bottom-color: var(--atlas-accent);
+            color: var(--atlas-text);
           }
         }
       }
@@ -158,14 +158,10 @@
       width: 3rem;
       height: 3rem;
       border-radius: 50%;
-      background: color-mix(in srgb, var(--note-color, var(--atlas-primary, rgb(74 144 226))) 15%, var(--atlas-bg, rgb(31 31 31)));
-
-      .theme-light & {
-        background: color-mix(in srgb, var(--note-color, var(--atlas-primary, rgb(74 144 226))) 8%, var(--atlas-bg, rgb(31 31 31)));
-      }
+      background: color-mix(in srgb, var(--note-color, var(--atlas-primary)) 15%, var(--atlas-bg));
 
       i {
-        color: var(--note-color, var(--atlas-text, rgb(224 224 224)));
+        color: var(--note-color, var(--atlas-text));
         font-size: 1.5rem;
       }
 
@@ -177,7 +173,7 @@
       }
 
       img.tinted {
-        filter: drop-shadow(0 62.5rem 0 var(--note-color, var(--atlas-text, rgb(224 224 224))));
+        filter: drop-shadow(0 62.5rem 0 var(--note-color, var(--atlas-text)));
         transform: translateY(-62.5rem);
       }
     }
@@ -192,7 +188,7 @@
     .note-title {
       margin: 0;
       overflow: hidden;
-      color: var(--atlas-text-heading, rgb(238 238 238));
+      color: var(--atlas-text-heading);
       font-weight: 700;
       font-size: 1.25rem;
       line-height: 1.2;
@@ -204,7 +200,7 @@
       gap: 0.25rem;
       display: inline-flex;
       align-items: center;
-      color: var(--atlas-text-dim, rgb(153 153 153));
+      color: var(--atlas-text-dim);
       font-size: var(--font-size-11);
 
       i {
@@ -217,13 +213,9 @@
       display: flex;
       flex-direction: column;
       padding: 0.625rem 0.75rem;
-      border: 0.0625rem solid color-mix(in srgb, var(--note-color, var(--atlas-primary, rgb(74 144 226))) 12%, var(--atlas-border, rgb(74 74 74)));
+      border: 0.0625rem solid color-mix(in srgb, var(--note-color, var(--atlas-primary)) 12%, var(--atlas-border));
       border-radius: 0.375rem;
-      background: color-mix(in srgb, var(--note-color, var(--atlas-primary, rgb(74 144 226))) 6%, var(--atlas-bg-lighter, var(--atlas-bg, rgb(31 31 31))));
-
-      .theme-light & {
-        background: color-mix(in srgb, var(--note-color, var(--atlas-primary, rgb(74 144 226))) 4%, var(--atlas-bg, rgb(31 31 31)));
-      }
+      background: color-mix(in srgb, var(--note-color, var(--atlas-primary)) 6%, var(--atlas-bg-lighter));
     }
 
     .metadata-row {
@@ -236,18 +228,18 @@
       > i:first-child {
         flex-shrink: 0;
         width: 1rem;
-        color: var(--note-color, var(--atlas-text-dim, rgb(153 153 153)));
+        color: var(--note-color, var(--atlas-text-dim));
         font-size: var(--font-size-12);
         text-align: center;
       }
 
       .meta-arrow {
-        color: var(--atlas-text-dim, rgb(153 153 153));
+        color: var(--atlas-text-dim);
         font-size: var(--font-size-10);
       }
 
       .time-separator {
-        color: var(--atlas-text-dim, rgb(153 153 153));
+        color: var(--atlas-text-dim);
       }
 
       &.equivalent {
@@ -258,6 +250,12 @@
       .calendar-name {
         font-weight: 600;
       }
+
+      .note-subjects {
+        gap: 0.375rem;
+        display: flex;
+        flex-wrap: wrap;
+      }
     }
 
     .equivalent-dates {
@@ -265,7 +263,7 @@
       display: flex;
       flex-direction: column;
       padding-top: 0.375rem;
-      border-top: 0.0625rem solid color-mix(in srgb, var(--note-color, var(--atlas-primary, rgb(74 144 226))) 10%, var(--atlas-border-light, rgb(58 58 58)));
+      border-top: 0.0625rem solid color-mix(in srgb, var(--note-color, var(--atlas-primary)) 10%, var(--atlas-border-light));
     }
 
     .note-presets {
@@ -278,10 +276,10 @@
         display: inline-flex;
         align-items: center;
         padding: 0.1875rem 0.625rem;
-        border: 0.0625rem solid color-mix(in srgb, var(--preset-color, var(--atlas-divider, rgb(65 65 65))) 25%, var(--atlas-border, rgb(74 74 74)));
+        border: 0.0625rem solid color-mix(in srgb, var(--preset-color, var(--atlas-divider)) 25%, var(--atlas-border));
         border-radius: 1rem;
         font-size: var(--font-size-12);
-        background: color-mix(in srgb, var(--preset-color, var(--atlas-primary, rgb(74 144 226))) 8%, var(--atlas-bg, rgb(31 31 31)));
+        background: color-mix(in srgb, var(--preset-color, var(--atlas-primary)) 8%, var(--atlas-bg));
       }
 
       .preset-dot {
@@ -289,18 +287,18 @@
         width: 0.5rem;
         height: 0.5rem;
         border-radius: 50%;
-        background: var(--preset-color, var(--atlas-primary, rgb(74 144 226)));
+        background: var(--preset-color, var(--atlas-primary));
       }
     }
 
     .note-content {
       flex: 1;
       padding-top: 0.75rem;
-      border-top: 0.0625rem solid var(--atlas-border-light, var(--atlas-border, rgb(74 74 74)));
+      border-top: 0.0625rem solid var(--atlas-border-light);
       line-height: 1.6;
 
       &:empty::before {
-        color: var(--atlas-text-dim, rgb(153 153 153));
+        color: var(--atlas-text-dim);
         font-style: italic;
         content: 'No content';
       }
@@ -325,27 +323,22 @@
     select,
     input[type='text'],
     input[type='number'] {
-      border-color: var(--atlas-border, rgb(74 74 74));
-      color: var(--atlas-text, rgb(224 224 224));
-      background: var(--atlas-input-bg, rgb(48 48 48));
+      border-color: var(--atlas-border);
+      color: var(--atlas-text);
+      background: var(--atlas-input-bg);
     }
 
     select option {
-      color: var(--atlas-text, rgb(224 224 224));
-      background: var(--atlas-bg, rgb(31 31 31));
+      color: var(--atlas-text);
+      background: var(--atlas-bg);
     }
 
     input[type='checkbox'],
     input[type='checkbox']:checked,
     input[type='checkbox']:indeterminate {
-      --checkbox-background-color: var(--atlas-input-bg, rgb(48 48 48));
-      --checkbox-border-color: var(--atlas-border, rgb(74 74 74));
-      --checkbox-checked-color: var(--atlas-primary, rgb(74 144 226));
-      --checkbox-checkmark-color: var(--atlas-text-on-color, rgb(255 255 255));
-
       width: var(--checkbox-size);
       height: var(--checkbox-size);
-      border: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
+      border: 0.0625rem solid var(--atlas-border);
       border-radius: 0.1875rem;
 
       &:checked,
@@ -360,11 +353,11 @@
       justify-content: center;
       margin: 0;
       padding: 0.5rem;
-      border: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
+      border: 0.0625rem solid var(--atlas-border);
       border-radius: 0.25rem;
 
       legend {
-        color: var(--atlas-text, rgb(224 224 224));
+        color: var(--atlas-text);
         font-weight: 600;
         font-size: var(--font-size-12);
       }
@@ -377,13 +370,13 @@
     }
 
     button:not(prose-mirror *) {
-      border: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
+      border: 0.0625rem solid var(--atlas-border);
       border-radius: 0.1875rem;
     }
 
     .hint {
       margin: 0 0 0.375rem;
-      color: var(--atlas-text-dim, rgb(153 153 153));
+      color: var(--atlas-text-dim);
       font-style: italic;
       font-size: var(--font-size-10);
     }
@@ -441,16 +434,16 @@
       width: 2rem;
       height: 2rem;
       padding: 0;
-      border: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
+      border: 0.0625rem solid var(--atlas-border);
       border-radius: 0.1875rem;
-      color: var(--atlas-text, rgb(224 224 224));
+      color: var(--atlas-text);
       font-size: var(--font-size-11);
       cursor: pointer;
-      background: var(--atlas-input-bg, rgb(48 48 48));
+      background: var(--atlas-input-bg);
 
       &:hover {
-        color: var(--atlas-text-heading, rgb(238 238 238));
-        background: var(--atlas-bg-hover, rgb(53 53 53));
+        color: var(--atlas-text-heading);
+        background: var(--atlas-bg-hover);
       }
     }
 
@@ -467,18 +460,14 @@
       align-items: center;
       max-width: 100%;
       padding: 0.25rem 0.5rem;
-      border: 0.0625rem solid var(--atlas-border-light, rgb(58 58 58));
+      border: 0.0625rem solid var(--atlas-border-light);
       border-radius: 1rem;
       font-size: var(--font-size-11);
-      background: var(--atlas-bg-hover, rgb(53 53 53));
-
-      .theme-light & {
-        background: color-mix(in srgb, var(--atlas-text, rgb(224 224 224)) 8%, transparent);
-      }
+      background: var(--atlas-bg-hover);
 
       .tag-value {
         overflow: hidden;
-        color: var(--atlas-text, rgb(224 224 224));
+        color: var(--atlas-text);
         text-overflow: ellipsis;
         white-space: nowrap;
       }
@@ -488,13 +477,13 @@
       margin: 0;
       padding: 0;
       border: none;
-      color: var(--atlas-text-dim, rgb(153 153 153));
+      color: var(--atlas-text-dim);
       line-height: 1;
       cursor: pointer;
       background: none;
 
       &:hover {
-        color: var(--atlas-error, rgb(244 67 54));
+        color: var(--atlas-error);
       }
 
       i {
@@ -508,16 +497,16 @@
       align-items: center;
       padding: 0.5rem 0.75rem;
       border-radius: 0.25rem;
-      color: var(--atlas-callout-text, rgb(255 215 0));
+      color: var(--atlas-callout-text);
       font-size: var(--font-size-11);
-      background: var(--atlas-callout-bg, rgb(212 175 55 / 15%));
+      background: var(--atlas-callout-bg);
 
       i {
-        color: var(--atlas-warning, rgb(255 193 7));
+        color: var(--atlas-warning);
       }
 
       a[data-action] {
-        color: var(--atlas-callout-text, rgb(255 215 0));
+        color: var(--atlas-callout-text);
         font-weight: 600;
         text-decoration: underline;
         cursor: pointer;
@@ -526,6 +515,34 @@
   }
 
   .note-tab-content {
+    .subjects-dropzone {
+      gap: 0.25rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      min-height: 1.75rem;
+      padding: 0.25rem;
+      border: 0.0625rem dashed var(--atlas-border);
+      border-radius: 0.25rem;
+
+      .subject-chip {
+        gap: 0.25rem;
+        display: inline-flex;
+        align-items: center;
+        padding: 0.125rem 0.375rem;
+        border: 0.0625rem solid var(--atlas-border);
+        border-radius: 0.1875rem;
+        font-size: var(--font-size-11);
+        background: var(--atlas-bg-lighter);
+      }
+
+      .subjects-empty {
+        color: var(--atlas-text-dim);
+        font-style: italic;
+        font-size: var(--font-size-11);
+      }
+    }
+
     flex: 1;
     min-height: 0;
 
@@ -548,8 +565,8 @@
       width: 2rem;
       height: 2rem;
       border-radius: 50%;
-      cursor: pointer;
       overflow: hidden;
+      cursor: pointer;
 
       &:hover .icon-preview {
         opacity: 0.8;
@@ -568,9 +585,9 @@
     }
 
     color-picker.color-input {
+      align-items: stretch;
       width: 10.5rem;
       background: transparent;
-      align-items: stretch;
 
       input[type='text'] {
         flex: 1;
@@ -609,9 +626,9 @@
         overflow: hidden;
 
         .editor-menu {
-          border-color: var(--atlas-border, rgb(74 74 74));
-          color: var(--atlas-text, rgb(224 224 224));
-          background: var(--atlas-bg-lighter, rgb(42 42 42));
+          border-color: var(--atlas-border);
+          color: var(--atlas-text);
+          background: var(--atlas-bg-lighter);
 
           /* Content auto-saves on tab/mode change and close, so the editor's own save button is redundant. */
           li:has(> button[data-action='save']) {
@@ -619,39 +636,39 @@
           }
 
           button {
-            color: var(--atlas-text-dim, rgb(153 153 153));
+            color: var(--atlas-text-dim);
 
             &:hover {
-              color: var(--atlas-text, rgb(224 224 224));
-              background: var(--atlas-bg-hover, rgb(53 53 53));
+              color: var(--atlas-text);
+              background: var(--atlas-bg-hover);
             }
 
             &.active {
-              color: var(--atlas-text, rgb(224 224 224));
-              background: var(--atlas-bg-hover, rgb(53 53 53));
+              color: var(--atlas-text);
+              background: var(--atlas-bg-hover);
             }
           }
 
           .pm-dropdown ul {
-            border: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
-            color: var(--atlas-text, rgb(224 224 224));
-            background: var(--atlas-bg, rgb(31 31 31));
+            border: 0.0625rem solid var(--atlas-border);
+            color: var(--atlas-text);
+            background: var(--atlas-bg);
 
             li {
-              color: var(--atlas-text, rgb(224 224 224));
+              color: var(--atlas-text);
 
               &:hover {
-                background: var(--atlas-bg-hover, rgb(53 53 53));
+                background: var(--atlas-bg-hover);
               }
 
               &.divider {
-                border-color: var(--atlas-border-light, rgb(58 58 58));
+                border-color: var(--atlas-border-light);
               }
             }
 
             ul {
-              border: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
-              background: var(--atlas-bg, rgb(31 31 31));
+              border: 0.0625rem solid var(--atlas-border);
+              background: var(--atlas-bg);
             }
           }
         }
@@ -660,12 +677,12 @@
           flex: 1;
           min-height: 28rem;
           overflow-y: auto;
-          color: var(--atlas-text, rgb(224 224 224));
-          background: var(--atlas-input-bg, rgb(48 48 48));
+          color: var(--atlas-text);
+          background: var(--atlas-input-bg);
 
           textarea {
-            color: var(--atlas-text, rgb(224 224 224));
-            background: var(--atlas-input-bg, rgb(48 48 48));
+            color: var(--atlas-text);
+            background: var(--atlas-input-bg);
           }
         }
       }
@@ -679,23 +696,23 @@
       align-items: center;
 
       .clear-btn {
+        display: flex;
+        flex: 0 0 auto;
+        justify-content: center;
+        align-items: center;
         width: 1.75rem;
         height: 1.75rem;
         padding: 0;
-        flex: 0 0 auto;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
+        border: 0.0625rem solid var(--atlas-border);
         border-radius: 0.25rem;
-        background: var(--atlas-input-bg, rgb(48 48 48));
-        color: var(--atlas-text, rgb(224 224 224));
+        color: var(--atlas-text);
         cursor: pointer;
+        background: var(--atlas-input-bg);
       }
 
       .clear-btn:hover {
-        border-color: var(--atlas-accent, rgb(168 144 96));
-        color: var(--atlas-accent, rgb(168 144 96));
+        border-color: var(--atlas-accent);
+        color: var(--atlas-accent);
       }
     }
 
@@ -709,30 +726,30 @@
 
       .mode-option {
         gap: 0.5rem;
-        flex: 1;
-        padding: 0.5rem 0.75rem;
         display: flex;
-        align-items: center;
+        flex: 1;
         justify-content: center;
-        font-size: var(--font-size-12);
-        border: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
+        align-items: center;
+        padding: 0.5rem 0.75rem;
+        border: 0.0625rem solid var(--atlas-border);
         border-radius: 0.25rem;
-        background: var(--atlas-input-bg, rgb(48 48 48));
-        color: var(--atlas-text, rgb(224 224 224));
+        color: var(--atlas-text);
+        font-size: var(--font-size-12);
         cursor: pointer;
+        background: var(--atlas-input-bg);
         transition:
           background 0.15s,
           border-color 0.15s;
       }
 
       .mode-option:hover:not(:disabled) {
-        border-color: var(--atlas-accent, rgb(168 144 96));
+        border-color: var(--atlas-accent);
       }
 
       .mode-option.active {
-        border-color: var(--atlas-accent, rgb(168 144 96));
-        background: color-mix(in srgb, var(--atlas-accent, rgb(168 144 96)) 15%, transparent);
-        color: var(--atlas-accent, rgb(168 144 96));
+        border-color: var(--atlas-accent);
+        color: var(--atlas-accent);
+        background: color-mix(in srgb, var(--atlas-accent) 15%, transparent);
       }
 
       .mode-option:disabled {
@@ -787,13 +804,13 @@
       min-width: 0;
       height: 2rem;
       padding: 0.125rem 0.375rem;
-      border: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
+      border: 0.0625rem solid var(--atlas-border);
       border-radius: 0.1875rem;
-      color: var(--atlas-text, rgb(224 224 224));
+      color: var(--atlas-text);
       font-size: var(--font-size-11);
       line-height: 1.4;
       cursor: pointer;
-      background: var(--atlas-input-bg, rgb(48 48 48));
+      background: var(--atlas-input-bg);
 
       &:disabled {
         opacity: 0.5;
@@ -802,7 +819,7 @@
       }
 
       &:hover:not(:disabled) {
-        background: var(--atlas-bg-hover, rgb(53 53 53));
+        background: var(--atlas-bg-hover);
       }
 
       i {
@@ -878,17 +895,17 @@
         display: inline-flex;
         align-items: center;
         padding: 0.375rem 0.625rem;
-        border: 0.0625rem solid var(--atlas-border, rgb(74 74 74));
+        border: 0.0625rem solid var(--atlas-border);
         border-radius: 0.25rem;
-        color: var(--atlas-text, rgb(224 224 224));
+        color: var(--atlas-text);
         font-size: var(--font-size-11);
         cursor: pointer;
         background: transparent;
 
         &:hover {
-          border-color: var(--atlas-primary, rgb(74 144 226));
-          color: var(--atlas-title-text, var(--atlas-text, rgb(224 224 224)));
-          background: var(--atlas-bg-hover, rgb(53 53 53));
+          border-color: var(--atlas-primary);
+          color: var(--atlas-title-text);
+          background: var(--atlas-bg-hover);
         }
       }
 
@@ -912,27 +929,19 @@
         align-items: center;
         width: fit-content;
         padding: 0.25rem 0.375rem;
-        border: 0.0625rem solid var(--atlas-border-light, rgb(58 58 58));
+        border: 0.0625rem solid var(--atlas-border-light);
         border-radius: 0.25rem;
-        background: var(--atlas-bg-hover, rgb(53 53 53));
-
-        .theme-light & {
-          background: unset;
-        }
+        background: var(--atlas-bg-hover);
 
         .group-mode {
           flex-shrink: 0;
           padding: 0.125rem 0.375rem;
           border-radius: 0.1875rem;
-          color: var(--atlas-title-text, var(--atlas-text, rgb(224 224 224)));
+          color: var(--atlas-title-text);
           font-weight: 600;
           font-size: var(--font-size-10);
           text-transform: uppercase;
-          background: var(--atlas-bg-hover, rgb(53 53 53));
-
-          .theme-light & {
-            background: unset;
-          }
+          background: var(--atlas-bg-hover);
         }
 
         .group-pills {
@@ -947,20 +956,12 @@
           border-radius: 1rem;
           font-size: var(--font-size-11);
           cursor: context-menu;
-          background: var(--atlas-bg-hover, rgb(53 53 53));
-
-          .theme-light & {
-            background: rgb(0 0 0 / 10%);
-          }
+          background: var(--atlas-bg-hover);
         }
 
         .condition-group {
           border-style: dashed;
-          background: var(--atlas-bg-hover, rgb(53 53 53));
-
-          .theme-light & {
-            background: unset;
-          }
+          background: var(--atlas-bg-hover);
         }
       }
     }
@@ -992,14 +993,10 @@
           padding: 0.25rem 0.5rem;
           border-radius: 0.1875rem;
           font-size: var(--font-size-11);
-          background: var(--atlas-bg-hover, rgb(53 53 53));
-
-          .theme-light & {
-            background: rgb(0 0 0 / 10%);
-          }
+          background: var(--atlas-bg-hover);
 
           i {
-            color: var(--atlas-text-dim, rgb(153 153 153));
+            color: var(--atlas-text-dim);
             font-size: var(--font-size-10);
           }
         }
@@ -1056,7 +1053,7 @@
           cursor: pointer;
 
           &:hover {
-            background: var(--atlas-border-light, rgb(58 58 58));
+            background: var(--atlas-border-light);
           }
         }
       }
@@ -1066,12 +1063,12 @@
         width: 10rem;
         padding: 0.125rem 0.375rem;
         border-radius: 0.1875rem;
-        color: var(--atlas-text, rgb(224 224 224));
+        color: var(--atlas-text);
         font-size: var(--font-size-11);
         line-height: 1.4;
 
         &::placeholder {
-          color: var(--atlas-text-dim, rgb(153 153 153));
+          color: var(--atlas-text-dim);
           font-style: italic;
         }
       }
@@ -1128,10 +1125,21 @@
           }
 
           .hint {
-            color: var(--atlas-text-dim, rgb(153 153 153));
+            color: var(--atlas-text-dim);
             font-size: var(--font-size-10);
           }
         }
+      }
+
+      .persist-todo {
+        gap: 0.25rem;
+        display: flex;
+        flex: 0 0 auto;
+        align-items: center;
+        align-self: flex-end;
+        height: 2rem;
+        font-size: var(--font-size-11);
+        cursor: pointer;
       }
 
       .reminder-users {
@@ -1155,11 +1163,7 @@
       align-items: center;
       padding: 0.375rem 0.5rem;
       border-radius: 0.25rem;
-      background: var(--atlas-bg-hover, rgb(53 53 53));
-
-      .theme-light & {
-        background: color-mix(in srgb, var(--atlas-text, rgb(224 224 224)) 8%, transparent);
-      }
+      background: var(--atlas-bg-hover);
 
       .user-name {
         gap: 0.5rem;
@@ -1178,7 +1182,7 @@
         gap: 0.25rem;
         display: flex;
         align-items: center;
-        color: var(--atlas-text-dim, rgb(153 153 153));
+        color: var(--atlas-text-dim);
         font-style: italic;
         font-size: var(--font-size-11);
 

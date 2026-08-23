@@ -111,7 +111,7 @@ function buildMonthGrid(calendar, year, month, notes) {
  * @returns {string} Escaped string safe for HTML interpolation
  */
 function esc(s) {
-  return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+  return String(s ?? '').replace(/["&'<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 }
 
 /**
@@ -147,7 +147,7 @@ function parseColorRgb(color) {
   document.body.appendChild(probe);
   const computed = getComputedStyle(probe).color;
   probe.remove();
-  const match = /rgba?\((\d+)[,\s]+(\d+)[,\s]+(\d+)/.exec(computed);
+  const match = /rgba?\((\d+)[\s,]+(\d+)[\s,]+(\d+)/.exec(computed);
   if (!match) return [1, 1, 1];
   return [Number(match[1]) / 255, Number(match[2]) / 255, Number(match[3]) / 255];
 }

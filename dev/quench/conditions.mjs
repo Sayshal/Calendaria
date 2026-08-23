@@ -13,7 +13,11 @@ export function registerConditions(quench) {
 
       after(async function () {
         if (testNoteId) {
-          try { await api.deleteNote(testNoteId); } catch (_) { /* ignore */ }
+          try {
+            await api.deleteNote(testNoteId);
+          } catch (_) {
+            /* ignore */
+          }
         }
       });
 
@@ -86,7 +90,10 @@ export function registerConditions(quench) {
         it('evaluateNote on one-time note', async function () {
           const dt = api.getCurrentDateTime();
           const note = await api.createNote({ name: '[Quench Test] Condition Eval', startDate: { year: dt.year, month: dt.month, day: dt.day } });
-          if (!note) { this.skip(); return; }
+          if (!note) {
+            this.skip();
+            return;
+          }
           testNoteId = note.id;
           const result = api.evaluateNote(note.id, dt);
           assert.isTrue(result, 'One-time note should match its own start date');
@@ -99,7 +106,10 @@ export function registerConditions(quench) {
           assert.isFalse(result);
         });
         it('getNextOccurrences returns array', async function () {
-          if (!testNoteId) { this.skip(); return; }
+          if (!testNoteId) {
+            this.skip();
+            return;
+          }
           const result = api.getNextOccurrences(testNoteId, 3);
           assert.isArray(result);
         });
@@ -109,7 +119,10 @@ export function registerConditions(quench) {
           assert.lengthOf(result, 0);
         });
         it('getNoteOccurrencesInRange returns array', async function () {
-          if (!testNoteId) { this.skip(); return; }
+          if (!testNoteId) {
+            this.skip();
+            return;
+          }
           const dt = api.getCurrentDateTime();
           const start = { year: dt.year, month: 1, day: 1 };
           const end = { year: dt.year, month: 12, day: 28 };

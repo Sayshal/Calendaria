@@ -14,7 +14,8 @@ vi.mock('../../scripts/utils/localization.mjs', () => ({
 vi.mock('../../scripts/utils/macro-utils.mjs', () => ({
   executeMacroById: vi.fn()
 }));
-vi.mock('../../scripts/constants.mjs', async (importOriginal) => ({ ...(await importOriginal()),
+vi.mock('../../scripts/constants.mjs', async (importOriginal) => ({
+  ...(await importOriginal()),
   MODULE: { ID: 'calendaria' },
   SETTINGS: { MACRO_TRIGGERS: 'macroTriggers' },
   HOOKS: {
@@ -34,7 +35,11 @@ vi.mock('../../scripts/constants.mjs', async (importOriginal) => ({ ...(await im
 vi.mock('../../scripts/calendar/calendar-manager.mjs', () => ({
   default: {
     getActiveCalendar: vi.fn(() => ({
-      monthsArray: [{ name: 'January', days: 31 }, { name: 'February', days: 28 }, { name: 'March', days: 31 }],
+      monthsArray: [
+        { name: 'January', days: 31 },
+        { name: 'February', days: 28 },
+        { name: 'March', days: 31 }
+      ],
       seasonsArray: [{ name: 'Spring' }, { name: 'Summer' }, { name: 'Autumn' }, { name: 'Winter' }],
       moonsArray: [],
       days: { hoursPerDay: 24, minutesPerHour: 60, secondsPerMinute: 60 },
@@ -191,7 +196,11 @@ describe('TimeTracker — skipNextHooks', () => {
 describe('TimeTracker — moon phase changes', () => {
   it('fires MOON_PHASE_CHANGE when phase changes', () => {
     const moonCalendar = {
-      monthsArray: [{ name: 'January', days: 31 }, { name: 'February', days: 28 }, { name: 'March', days: 31 }],
+      monthsArray: [
+        { name: 'January', days: 31 },
+        { name: 'February', days: 28 },
+        { name: 'March', days: 31 }
+      ],
       seasonsArray: [{ name: 'Spring' }, { name: 'Summer' }, { name: 'Autumn' }, { name: 'Winter' }],
       moonsArray: [{ name: 'Luna', phases: { 0: { name: 'New' }, 1: { name: 'Crescent' } } }],
       days: { hoursPerDay: 24, minutesPerHour: 60, secondsPerMinute: 60 },

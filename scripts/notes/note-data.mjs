@@ -32,6 +32,7 @@ export function getDefaultNoteData() {
     reminderTargets: game.user.isGM ? 'gm' : 'author',
     macro: null,
     sceneId: null,
+    subjects: [],
     author: null,
     hasDuration: false,
     duration: 1,
@@ -139,6 +140,10 @@ export function validateNoteData(noteData, calendarId) {
   if (noteData.reminderOffset !== undefined) if (typeof noteData.reminderOffset !== 'number') errors.push('reminderOffset must be a number');
   if (noteData.macro !== undefined && noteData.macro !== null) if (typeof noteData.macro !== 'string') errors.push('macro must be a string (macro ID) or null');
   if (noteData.sceneId !== undefined && noteData.sceneId !== null) if (typeof noteData.sceneId !== 'string') errors.push('sceneId must be a string (scene ID) or null');
+  if (noteData.subjects !== undefined) {
+    if (!Array.isArray(noteData.subjects)) errors.push('subjects must be an array');
+    else if (noteData.subjects.some((uuid) => typeof uuid !== 'string')) errors.push('subjects must be an array of document UUIDs (strings)');
+  }
   return { valid: errors.length === 0, errors };
 }
 
@@ -172,6 +177,7 @@ export function sanitizeNoteData(noteData) {
     reminderTargets: noteData.reminderTargets || defaults.reminderTargets,
     macro: noteData.macro || null,
     sceneId: noteData.sceneId || null,
+    subjects: Array.isArray(noteData.subjects) ? noteData.subjects.filter((uuid) => typeof uuid === 'string' && uuid) : defaults.subjects,
     author: noteData.author || null,
     hasDuration: noteData.hasDuration ?? defaults.hasDuration,
     duration: noteData.duration ?? defaults.duration,
@@ -284,8 +290,16 @@ export function getBuiltinPresetSeeds() {
     { id: 'birthday', label: _loc('CALENDARIA.Preset.Birthday'), color: '#ff6b6b', icon: 'fas fa-cake-candles', defaults: { displayStyle: 'pip', allDay: true } },
     { id: 'deadline', label: _loc('CALENDARIA.Preset.Deadline'), color: '#f03e3e', icon: 'fas fa-hourglass-end', defaults: { reminderType: 'toast', reminderOffset: 24 } },
     { id: 'reminder', label: _loc('CALENDARIA.Reminder.Label'), color: '#fcc419', icon: 'fas fa-bell', defaults: { reminderType: 'toast', reminderOffset: 1 } },
-    { id: 'downtime', label: _loc('CALENDARIA.Preset.Downtime'), color: '#74c0fc', icon: 'fas fa-couch', defaults: { duration: 7 } },
-    { id: 'lore', label: _loc('CALENDARIA.Preset.Lore'), color: '#a9845b', icon: 'fas fa-book', defaults: { displayStyle: 'pip', allDay: true } }
+    { id: 'downtime', label: _loc('ATLAS.Common.Downtime'), color: '#74c0fc', icon: 'fas fa-couch', defaults: { duration: 7 } },
+    { id: 'lore', label: _loc('CALENDARIA.Preset.Lore'), color: '#a9845b', icon: 'fas fa-book', defaults: { displayStyle: 'pip', allDay: true } },
+    {
+      id: 'character-history',
+      label: _loc('CALENDARIA.Preset.CharacterHistory'),
+      color: '#e599f7',
+      icon: 'fas fa-user-clock',
+      playerUsable: false,
+      defaults: { displayStyle: 'pip', allDay: true, visibility: 'visible', reminderType: 'none', defaultOwnership: 2 }
+    }
   ];
 }
 
@@ -334,7 +348,7 @@ export function getAllPresetsIncludingHidden() {
   const savedIds = new Set(raw.map((c) => c.id));
   const seeds = getBuiltinPresetSeeds()
     .filter((s) => !savedIds.has(s.id))
-    .map((c) => ({ ...c, builtin: true, playerUsable: true, defaults: { ...emptyDefaults(), ...c.defaults } }));
+    .map((c) => ({ ...c, builtin: true, playerUsable: c.playerUsable ?? true, defaults: { ...emptyDefaults(), ...c.defaults } }));
   return [...raw, ...seeds].map((c) => ({ ...c, icon: c.icon && !c.icon.includes(' ') ? `fas ${c.icon}` : c.icon })).sort((a, b) => (a.label || '').localeCompare(b.label || ''));
 }
 

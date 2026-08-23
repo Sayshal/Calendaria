@@ -2,10 +2,10 @@ import { vi } from 'vitest';
 
 /** Simple localization overrides so tests that depend on resolved text pass. */
 const LOCALIZE_OVERRIDES = {
-  'CALENDARIA.Format.Ordinal.st': 'st',
-  'CALENDARIA.Format.Ordinal.nd': 'nd',
-  'CALENDARIA.Format.Ordinal.rd': 'rd',
-  'CALENDARIA.Format.Ordinal.th': 'th',
+  'CALENDARIA.Format.Ordinal.St': 'st',
+  'CALENDARIA.Format.Ordinal.Nd': 'nd',
+  'CALENDARIA.Format.Ordinal.Rd': 'rd',
+  'CALENDARIA.Format.Ordinal.Th': 'th',
   'CALENDARIA.Format.OrdinalDate': '{day} of {month}'
 };
 
@@ -59,7 +59,7 @@ class ForcedDeletion extends DataFieldOperator {
 }
 globalThis._loc = (key, data) => (data ? i18n.format(key, data) : i18n.localize(key));
 globalThis._del = new ForcedDeletion();
-globalThis.ATLAS = { log: vi.fn(), register: vi.fn() };
+globalThis.ATLAS = { log: vi.fn(), register: vi.fn(), isPrimaryGM: true, primaryGM: { id: 'gm', isSelf: true } };
 globalThis.ui = { notifications: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } };
 globalThis.Hooks = { on: vi.fn(), once: vi.fn(), off: vi.fn(), call: vi.fn(), callAll: vi.fn() };
 globalThis.CONFIG = {};
@@ -111,6 +111,7 @@ globalThis.foundry = {
       return flat;
     }),
     deepClone: vi.fn((obj) => JSON.parse(JSON.stringify(obj))),
+    escapeHTML: vi.fn((str) => String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')),
     Color: {
       from: vi.fn((hex) => {
         const r = parseInt(hex.slice(1, 3), 16) / 255;
@@ -131,6 +132,17 @@ globalThis.foundry = {
         return { hsl: [h, s, l] };
       })
     },
+    isNewerVersion: vi.fn((v1, v0) => {
+      const parts = (v) => String(v ?? '').split('.');
+      const a = parts(v1);
+      const b = parts(v0);
+      for (let i = 0; i < Math.max(a.length, b.length); i++) {
+        const x = Number(a[i] ?? 0);
+        const y = Number(b[i] ?? 0);
+        if (x !== y) return x > y;
+      }
+      return false;
+    }),
     randomID: vi.fn(() => 'mock-random-id'),
     saveDataToFile: vi.fn(),
     readTextFromFile: vi.fn(),
@@ -138,8 +150,16 @@ globalThis.foundry = {
   },
   data: {
     fields: {
-      BooleanField: class BooleanField { constructor(opts) { this.initial = opts?.initial; } },
-      ObjectField: class ObjectField { constructor(opts) { this.initial = opts?.initial; } }
+      BooleanField: class BooleanField {
+        constructor(opts) {
+          this.initial = opts?.initial;
+        }
+      },
+      ObjectField: class ObjectField {
+        constructor(opts) {
+          this.initial = opts?.initial;
+        }
+      }
     },
     operators: {
       OPERATOR_VALUE,
@@ -195,7 +215,9 @@ globalThis.foundry = {
         }
       },
       FormDataExtended: class FormDataExtended {
-        constructor() { this.object = {}; }
+        constructor() {
+          this.object = {};
+        }
       },
       TextEditor: {
         implementation: {

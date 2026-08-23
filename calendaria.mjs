@@ -6,7 +6,7 @@ import { CalendarNoteDataModel, CalendariaCalendar } from './scripts/data/_modul
 import { FestivalManager } from './scripts/festivals/_module.mjs';
 import { registerHooks } from './scripts/hooks.mjs';
 import { initializeImporters } from './scripts/importers/_module.mjs';
-import { initializeChatCommander, initializeFXMaster } from './scripts/integrations/_module.mjs';
+import { initializeChatCommander, initializeDontForget, initializeFXMaster, initializeVGMusic } from './scripts/integrations/_module.mjs';
 import { NoteManager, recoverOrphanedPresets } from './scripts/notes/_module.mjs';
 import CalendariaSettings from './scripts/settings-handler.mjs';
 import { EventScheduler, ReminderScheduler, TimeClock, TimeTracker } from './scripts/time/_module.mjs';
@@ -112,12 +112,11 @@ Hooks.once('dnd5e.setupCalendar', () => {
 });
 
 Hooks.once('ready', async () => {
-  CalendariaSettings.registerReadySettings();
   await CalendarManager.initialize();
   await runAllMigrations();
   await NoteManager.initialize();
   await recoverOrphanedPresets();
-  if (game.user.isGM) {
+  if (ATLAS.isPrimaryGM) {
     const activeCalendar = CalendarManager.getActiveCalendar();
     if (activeCalendar?.metadata?.id) await FestivalManager.seedFestivalNotes(activeCalendar.metadata.id, activeCalendar);
   }
@@ -164,6 +163,8 @@ Hooks.once('ready', async () => {
   Hooks.on('renderHotbar', () => updateZonePositions('above-hotbar'));
   initializeChatCommander();
   initializeFXMaster();
+  initializeDontForget();
+  initializeVGMusic();
   initializeWeatherSound();
   Hooks.callAll(HOOKS.READY, { api: CalendariaAPI, calendar: CalendarManager.getActiveCalendar(), version: game.modules.get('calendaria')?.version });
   if (game.settings.get(MODULE.ID, SETTINGS.SHOW_TIME_KEEPER) && canViewTimeKeeper()) TimeKeeper.show({ silent: true });

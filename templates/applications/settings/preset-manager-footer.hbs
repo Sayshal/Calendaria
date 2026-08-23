@@ -3,20 +3,20 @@
     <button type="button" data-action="importPreset"
       data-tooltip="{{localize 'CALENDARIA.PresetManager.ImportPresetTooltip'}}">
       <i class="fas fa-file-import"></i>
-      {{localize "CALENDARIA.Common.Import"}}
+      {{localize "ATLAS.Common.Import"}}
     </button>
     {{#if selected}}
       <button type="button" data-action="exportPreset"
         data-tooltip="{{localize 'CALENDARIA.PresetManager.ExportPresetTooltip'}}">
         <i class="fas fa-file-export"></i>
-        {{localize "CALENDARIA.Common.Export"}}
+        {{localize "ATLAS.Common.Export"}}
       </button>
     {{/if}}
     {{#if selected}}
       <button type="button" data-action="resetPreset"
         data-tooltip="{{localize 'CALENDARIA.PresetManager.ResetPresetTooltip'}}">
         <i class="fas fa-undo"></i>
-        {{localize "CALENDARIA.Common.Reset"}}
+        {{localize "ATLAS.Common.Reset"}}
       </button>
       {{#unless selected.isDefault}}
         <button type="button" data-action="syncPreset"
@@ -26,7 +26,7 @@
         </button>
         <button type="button" data-action="removePreset" data-preset-id="{{selected.id}}">
           <i class="fas fa-trash"></i>
-          {{localize "CALENDARIA.Common.Delete"}}
+          {{localize "ATLAS.Common.Delete"}}
         </button>
       {{/unless}}
     {{/if}}
@@ -37,6 +37,6 @@
   </div>
   <button type="button" data-action="savePresets" class="save-btn">
     <i class="fas fa-save"></i>
-    {{localize "CALENDARIA.Common.Save"}}
+    {{localize "ATLAS.Common.Save"}}
   </button>
 </footer>

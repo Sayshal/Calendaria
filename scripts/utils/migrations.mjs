@@ -1,65 +1,14 @@
-import { CONDITION_FIELDS, CONDITION_OPERATORS, MODULE } from '../constants.mjs';
-
-/**
- * Read a legacy Calendaria setting directly from its stored Setting.
- * @param {string} key       Unprefixed setting key
- * @param {string} [userId]  Prefer a user-scoped entry belonging to this user id
- * @returns {*} Parsed value, or undefined when not stored
- */
-function readLegacyThemeSetting(key, userId) {
-  const fullKey = `${MODULE.ID}.${key}`;
-  const world = game.settings.storage.get('world');
-  const matches = world?.filter?.((s) => s.key === fullKey) ?? [];
-  const doc = (userId && matches.find((s) => s.user === userId)) || matches.find((s) => !s.user) || matches[0];
-  if (!doc) return undefined;
-  try {
-    return typeof doc.value === 'string' ? JSON.parse(doc.value) : doc.value;
-  } catch {
-    return doc.value;
-  }
-}
-
-/**
- * Carry this client's Calendaria theme selection into the ATLAS theme system.
- * @since 1.1.0
- * @deprecated Remove in 1.3.0
- * @returns {Promise<void>}
- */
-async function migrateThemeToAtlas() {
-  const KEY = 'themeAtlasMigrationComplete';
-  if (game.settings.get(MODULE.ID, KEY)) return;
-  const api = game.modules.get('3ds-atlas')?.api;
-  if (!api?.theme) return;
-  try {
-    const oldThemeMode = readLegacyThemeSetting('themeMode', game.user.id);
-    const oldCustomThemes = readLegacyThemeSetting('customThemeColors', game.user.id) || {};
-    const oldForced = readLegacyThemeSetting('forceTheme') || null;
-    const keyMap = {};
-    for (const [oldKey, entry] of Object.entries(oldCustomThemes)) {
-      if (!entry || typeof entry !== 'object' || !entry.colors) continue;
-      const newKey = await api.theme.createCustomTheme(entry.basePreset || 'dark', entry.name);
-      await api.theme.updateCustomTheme(newKey, entry.colors, entry.name);
-      keyMap[oldKey] = newKey;
-    }
-    const resolve = (k) => (k && keyMap[k]) || k;
-    if (oldThemeMode && oldThemeMode !== 'dark') await api.theme.setModuleTheme('calendaria', resolve(oldThemeMode));
-    if (oldForced && oldForced !== 'none') await api.theme.setForcedTheme('calendaria', resolve(oldForced));
-    ATLAS.log(3, 'Migrated Calendaria theme selection into ATLAS');
-  } catch (err) {
-    ATLAS.log(1, 'Theme ATLAS migration failed:', err);
-  }
-  await game.settings.set(MODULE.ID, KEY, true);
-}
+import { CONDITION_FIELDS, CONDITION_OPERATORS, MODULE, SETTINGS } from '../constants.mjs';
 
 /**
  * Rewrite lone `day % N` interval conditions to the absolute day counter so they space correctly across months.
- * @since 1.1.4
- * @deprecated Remove in 1.3.0
+ * @since 1.3.0
+ * @deprecated Remove in 1.5.0
  * @returns {Promise<void>}
  */
 async function migrateIntervalConditionField() {
   const KEY = 'intervalConditionFieldMigrationComplete';
-  if (!game.user?.isGM) return;
+  if (!ATLAS.isPrimaryGM) return;
   if (game.settings.get(MODULE.ID, KEY)) return;
   const isTarget = (node) => node?.type === 'condition' && node.field === CONDITION_FIELDS.DAY && node.op === CONDITION_OPERATORS.MODULO && node.value > 1;
   const containsTarget = (node) => {
@@ -124,11 +73,49 @@ async function migrateIntervalConditionField() {
 }
 
 /**
+ * Strip the legacy `fas ` / `fa-solid ` prefix from festival icons in a keyed map of calendar data.
+ * @param {object} calendars - Calendar data keyed by calendar id
+ * @returns {boolean} True when at least one icon was rewritten
+ */
+export function stripFestivalIconPrefixes(calendars) {
+  if (!calendars || typeof calendars !== 'object') return false;
+  let changed = false;
+  for (const data of Object.values(calendars)) {
+    for (const fest of Object.values(data?.festivals ?? {})) {
+      if (typeof fest?.icon !== 'string') continue;
+      if (fest.icon.startsWith('fas ')) fest.icon = fest.icon.slice(4);
+      else if (fest.icon.startsWith('fa-solid ')) fest.icon = fest.icon.slice(9);
+      else continue;
+      changed = true;
+    }
+  }
+  return changed;
+}
+
+/**
+ * Strip the legacy Font Awesome prefix from festival icons in stored custom calendars and default overrides.
+ * @since 1.4.0
+ * @deprecated Remove in 1.6.0
+ * @returns {Promise<void>}
+ */
+async function migrateStoredFestivalIcons() {
+  const KEY = 'festivalIconPrefixMigrationComplete';
+  if (game.settings.get(MODULE.ID, KEY)) return;
+  for (const setting of [SETTINGS.CUSTOM_CALENDARS, SETTINGS.DEFAULT_OVERRIDES]) {
+    const stored = game.settings.get(MODULE.ID, setting);
+    if (!stripFestivalIconPrefixes(stored)) continue;
+    await game.settings.set(MODULE.ID, setting, stored);
+    ATLAS.log(3, `Stripped legacy festival icon prefixes from ${setting}`);
+  }
+  await game.settings.set(MODULE.ID, KEY, true);
+}
+
+/**
  * Run all migrations.
  * @returns {Promise<void>}
  */
 export async function runAllMigrations() {
-  await migrateThemeToAtlas();
-  if (!game.user?.isGM) return;
+  if (!ATLAS.isPrimaryGM) return;
   await migrateIntervalConditionField();
+  await migrateStoredFestivalIcons();
 }

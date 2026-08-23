@@ -9,6 +9,13 @@ export default [
     files: ['**/*.{js,mjs,cjs}'],
     languageOptions: {
       globals: {
+        PIXI: 'readonly',
+        ATLAS: 'readonly',
+        CALENDARIA: 'readonly',
+        DONTFORGET: 'readonly',
+        JournalEntryPage: 'readonly',
+        Scene: 'readonly',
+        VGMUSIC: 'readonly',
         foundry: 'readonly',
         game: 'readonly',
         _loc: 'readonly',
@@ -80,6 +87,6 @@ export default [
     }
   },
   jsdoc.configs['flat/recommended'],
-  { files: ['**/*.mjs'], rules: { 'no-undef': 'off' } },
+  { files: ['**/*.mjs'], rules: { 'no-undef': 'error' } },
   { ignores: ['**/node_modules/*', '**/coverage/*', 'dev/**', 'foundry/**', 'dnd5e/**', 'dist/**'] }
 ];

@@ -196,7 +196,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       context.preset.fxPreset = currentFxPreset;
       const fxPresets = getAvailableFxPresets();
       context.fxPresetOptions = [
-        { value: '', label: _loc('CALENDARIA.Common.None'), selected: !currentFxPreset },
+        { value: '', label: _loc('ATLAS.Common.None'), selected: !currentFxPreset },
         ...fxPresets.map((p) => ({ value: p.value, label: p.label, selected: p.value === currentFxPreset }))
       ];
     }
@@ -204,10 +204,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const currentFxMacro = isCustom ? preset.fxMacro || '' : overrides.fxMacro !== undefined ? overrides.fxMacro || '' : '';
     context.preset.fxMacro = currentFxMacro;
     const macros = getAvailableMacros({ includeId: currentFxMacro });
-    context.fxMacroOptions = [
-      { value: '', label: _loc('CALENDARIA.Common.None'), selected: !currentFxMacro },
-      ...macros.map((m) => ({ value: m.id, label: m.name, selected: m.id === currentFxMacro }))
-    ];
+    context.fxMacroOptions = [{ value: '', label: _loc('ATLAS.Common.None'), selected: !currentFxMacro }, ...macros.map((m) => ({ value: m.id, label: m.name, selected: m.id === currentFxMacro }))];
     context.visuals = {
       countMin: vo.count?.[0] ?? defCount[0],
       countMax: vo.count?.[1] ?? defCount[1],
@@ -433,7 +430,8 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const presetId = this.tabGroups.primary;
     if (!presetId) return;
     const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: _loc('CALENDARIA.Common.Delete') },
+      classes: ['calendaria'],
+      window: { title: 'ATLAS.Common.Delete' },
       content: `<p>${_loc('CALENDARIA.WeatherEditor.DeleteConfirm')}</p>`,
       rejectClose: false
     });
@@ -452,7 +450,7 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const allOverrides = game.settings.get(MODULE.ID, SETTINGS.WEATHER_VISUAL_OVERRIDES) || {};
     delete allOverrides[presetId];
     await game.settings.set(MODULE.ID, SETTINGS.WEATHER_VISUAL_OVERRIDES, allOverrides);
-    ui.notifications.info(_loc('CALENDARIA.WeatherEditor.VisualsReset'));
+    ui.notifications.info('CALENDARIA.WeatherEditor.VisualsReset', { localize: true });
     this.render({ parts: [presetId] });
   }
 

@@ -492,7 +492,7 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
       return;
     }
     const sign = dayOffset > 0 ? '+' : '';
-    label.textContent = `${sign}${dayOffset} ${_loc('CALENDARIA.Common.UnitDays')}`;
+    label.textContent = `${sign}${dayOffset} ${_loc('ATLAS.Common.Days')}`;
   }
 
   /** Setup handle drag and time input interaction. */
@@ -726,7 +726,7 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
       });
     }
     items.push(buildOpenAppsMenuItem());
-    items.push({ label: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', onClick: () => this.close() });
+    items.push({ label: 'ATLAS.Common.Close', icon: '<i class="fas fa-times"></i>', onClick: () => this.close() });
     return items;
   }
 
@@ -824,6 +824,7 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
   #setSize(size) {
     const clamped = Math.max(150, Math.min(500, size));
     this.element.style.setProperty('--dial-size', `${clamped}px`);
+    this.#sceneRenderer?.resize();
   }
 
   /**

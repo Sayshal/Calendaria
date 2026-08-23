@@ -15,6 +15,7 @@ import {
   onRenderChatMessageHTML,
   onRenderDocumentDirectory,
   patchTooltipActivate,
+  publishWeeklyAlmanac,
   registerWidgetCombatHooks
 } from './utils/_module.mjs';
 
@@ -50,7 +51,7 @@ export function registerHooks() {
     if (NoteManager.isInitialized()) NoteManager.onCalendarSwitched(...args);
   });
   Hooks.on(HOOKS.CALENDAR_SWITCHED, (calendarId, calendar) => {
-    if (NoteManager.isInitialized()) FestivalManager.seedFestivalNotes(calendarId, calendar);
+    if (ATLAS.isPrimaryGM && NoteManager.isInitialized()) FestivalManager.seedFestivalNotes(calendarId, calendar);
   });
   Hooks.on(HOOKS.CALENDAR_UPDATED, clearComputedDateCache);
   Hooks.on('chatMessage', onChatMessage);
@@ -83,6 +84,7 @@ export function registerHooks() {
   Hooks.on('updateWorldTime', TimeClock.onUpdateWorldTime.bind(TimeClock));
   Hooks.on(HOOKS.DAY_CHANGE, autoRevealCurrentDay);
   Hooks.on(HOOKS.DAY_CHANGE, onDayChangeForBastions);
+  Hooks.on(HOOKS.DAY_CHANGE, publishWeeklyAlmanac);
   Hooks.on(HOOKS.MOON_PHASE_CHANGE, onMoonPhaseChange);
   Hooks.on(HOOKS.WEATHER_CHANGE, onWeatherChange);
   Hooks.once('ready', () => Stopwatch.restore());

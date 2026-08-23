@@ -14,8 +14,13 @@ vi.mock('../../scripts/utils/localization.mjs', () => ({
     return result;
   })
 }));
-vi.mock('../../scripts/utils/socket.mjs', () => ({CalendariaSocket: { isPrimaryGM: vi.fn(() => true), emit: vi.fn() }}));
-vi.mock('../../scripts/constants.mjs', async (importOriginal) => ({ ...(await importOriginal()),MODULE: { ID: 'calendaria' },HOOKS: {EVENT_TRIGGERED: 'calendaria.eventTriggered',REMINDER_RECEIVED: 'calendaria.reminderReceived'},SOCKET_TYPES: { REMINDER_NOTIFY: 'reminderNotify' }}));
+vi.mock('../../scripts/utils/socket.mjs', () => ({ CalendariaSocket: { emit: vi.fn() } }));
+vi.mock('../../scripts/constants.mjs', async (importOriginal) => ({
+  ...(await importOriginal()),
+  MODULE: { ID: 'calendaria' },
+  HOOKS: { EVENT_TRIGGERED: 'calendaria.eventTriggered', REMINDER_RECEIVED: 'calendaria.reminderReceived' },
+  SOCKET_TYPES: { REMINDER_NOTIFY: 'reminderNotify' }
+}));
 vi.mock('../../scripts/notes/date-utils.mjs', () => {
   let currentDate = { year: 1, month: 0, dayOfMonth: 0, hour: 12, minute: 0 };
   return {
@@ -80,7 +85,7 @@ const WT = () => worldTimeBase + ReminderScheduler.CHECK_INTERVAL + 1;
 
 beforeEach(() => {
   worldTimeBase += 1_000_000;
-  CalendariaSocket.isPrimaryGM.mockReturnValue(true);
+  ATLAS.isPrimaryGM = true;
   CalendariaSocket.emit.mockClear();
   NoteManager.isInitialized.mockReturnValue(true);
   NoteManager.getAllNotes.mockReturnValue([]);
@@ -98,7 +103,7 @@ beforeEach(() => {
 
 describe('ReminderScheduler.onUpdateWorldTime()', () => {
   it('does nothing when not primary GM', () => {
-    CalendariaSocket.isPrimaryGM.mockReturnValue(false);
+    ATLAS.isPrimaryGM = false;
     ReminderScheduler.onUpdateWorldTime(WT(), 300);
     expect(NoteManager.getAllNotes).not.toHaveBeenCalled();
   });
@@ -173,7 +178,7 @@ describe('ReminderScheduler — non-recurring timed events', () => {
 
 describe('ReminderScheduler — all-day non-recurring', () => {
   it('fires all-day reminder with 0 offset on event day', () => {
-    const note = makeNote('r1','Holiday',{ year: 1, month: 0, dayOfMonth: 0 },{allDay: true,reminderOffset: 0,endDate: null});
+    const note = makeNote('r1', 'Holiday', { year: 1, month: 0, dayOfMonth: 0 }, { allDay: true, reminderOffset: 0, endDate: null });
     NoteManager.getAllNotes.mockReturnValue([note]);
     _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 8, minute: 0 });
     ReminderScheduler.onUpdateWorldTime(WT(), ReminderScheduler.CHECK_INTERVAL);
@@ -183,7 +188,7 @@ describe('ReminderScheduler — all-day non-recurring', () => {
 describe('ReminderScheduler — recurring events', () => {
   it('fires recurring reminder when occursToday and within offset window', () => {
     isRecurringMatch.mockReturnValue(true);
-    const note = makeNote('r1','Weekly Meeting',{ year: 1, month: 0, dayOfMonth: 0, hour: 14, minute: 0 },{repeat: 'weekly',reminderOffset: 1});
+    const note = makeNote('r1', 'Weekly Meeting', { year: 1, month: 0, dayOfMonth: 0, hour: 14, minute: 0 }, { repeat: 'weekly', reminderOffset: 1 });
     NoteManager.getAllNotes.mockReturnValue([note]);
     _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 13, minute: 30 });
     ReminderScheduler.onUpdateWorldTime(WT(), ReminderScheduler.CHECK_INTERVAL);
@@ -191,7 +196,7 @@ describe('ReminderScheduler — recurring events', () => {
   });
   it('fires all-day recurring reminder with 0 offset', () => {
     isRecurringMatch.mockReturnValue(true);
-    const note = makeNote('r1','Monthly Holiday',{ year: 1, month: 0, dayOfMonth: 0 },{repeat: 'monthly',allDay: true,reminderOffset: 0});
+    const note = makeNote('r1', 'Monthly Holiday', { year: 1, month: 0, dayOfMonth: 0 }, { repeat: 'monthly', allDay: true, reminderOffset: 0 });
     NoteManager.getAllNotes.mockReturnValue([note]);
     _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 8, minute: 0 });
     ReminderScheduler.onUpdateWorldTime(WT(), ReminderScheduler.CHECK_INTERVAL);
@@ -199,7 +204,7 @@ describe('ReminderScheduler — recurring events', () => {
   });
   it('does not fire when recurring but does not occur today', () => {
     isRecurringMatch.mockReturnValue(false);
-    const note = makeNote('r1','Weekly',{ year: 1, month: 0, dayOfMonth: 2, hour: 14, minute: 0 },{repeat: 'weekly',reminderOffset: 1});
+    const note = makeNote('r1', 'Weekly', { year: 1, month: 0, dayOfMonth: 2, hour: 14, minute: 0 }, { repeat: 'weekly', reminderOffset: 1 });
     NoteManager.getAllNotes.mockReturnValue([note]);
     _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 13, minute: 0 });
     ReminderScheduler.onUpdateWorldTime(WT(), ReminderScheduler.CHECK_INTERVAL);
@@ -209,11 +214,11 @@ describe('ReminderScheduler — recurring events', () => {
 
 describe('ReminderScheduler.handleReminderNotify()', () => {
   it('shows toast for current user in targets', () => {
-    ReminderScheduler.handleReminderNotify({type: 'toast',noteId: 'n1',noteName: 'Event',message: 'Reminder!',targets: ['test-user'],icon: 'fas fa-bell',color: '#4a9eff'});
+    ReminderScheduler.handleReminderNotify({ type: 'toast', noteId: 'n1', noteName: 'Event', message: 'Reminder!', targets: ['test-user'], icon: 'fas fa-bell', color: '#4a9eff' });
     expect(ui.notifications.info).toHaveBeenCalled();
   });
   it('ignores if user not in targets', () => {
-    ReminderScheduler.handleReminderNotify({type: 'toast',noteId: 'n1',noteName: 'Event',message: 'Reminder!',targets: ['other-user']});
+    ReminderScheduler.handleReminderNotify({ type: 'toast', noteId: 'n1', noteName: 'Event', message: 'Reminder!', targets: ['other-user'] });
     expect(ui.notifications.info).not.toHaveBeenCalled();
   });
 });
@@ -284,9 +289,7 @@ describe('ReminderScheduler — multi-day offsets', () => {
 
 describe('ReminderScheduler — performance', () => {
   it('processes 5000 notes within 250ms', () => {
-    const notes = Array.from({ length: 5000 }, (_, i) =>
-      makeNote(`r${i}`, `Note ${i}`, { year: 1, month: 0, dayOfMonth: (i % 28) + 1, hour: 14, minute: 0 }, { reminderOffset: (i % 200) + 1 })
-    );
+    const notes = Array.from({ length: 5000 }, (_, i) => makeNote(`r${i}`, `Note ${i}`, { year: 1, month: 0, dayOfMonth: (i % 28) + 1, hour: 14, minute: 0 }, { reminderOffset: (i % 200) + 1 }));
     NoteManager.getAllNotes.mockReturnValue(notes);
     _setCurrentDate({ year: 1, month: 0, dayOfMonth: 0, hour: 13, minute: 0 });
     const start = performance.now();

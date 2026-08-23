@@ -6,7 +6,24 @@ import { isBundledCalendar } from '../../scripts/calendar/calendar-loader.mjs';
 import CalendarManager from '../../scripts/calendar/calendar-manager.mjs';
 import FestivalManager from '../../scripts/festivals/festival-manager.mjs';
 import { createGroup } from '../../scripts/notes/condition-engine.mjs';
-import { addDays, addHours, addMinutes, addMonths, addSeconds, addYears, compareDates, compareDays, dayOfWeek, daysBetween, hoursBetween, isSameDay, isValidDate, minutesBetween, monthsBetween, secondsBetween } from '../../scripts/notes/date-utils.mjs';
+import {
+  addDays,
+  addHours,
+  addMinutes,
+  addMonths,
+  addSeconds,
+  addYears,
+  compareDates,
+  compareDays,
+  dayOfWeek,
+  daysBetween,
+  hoursBetween,
+  isSameDay,
+  isValidDate,
+  minutesBetween,
+  monthsBetween,
+  secondsBetween
+} from '../../scripts/notes/date-utils.mjs';
 import NoteManager from '../../scripts/notes/note-manager.mjs';
 import { getNextOccurrences, getOccurrencesInRange, isRecurringMatch } from '../../scripts/notes/recurrence.mjs';
 import TimeClock from '../../scripts/time/time-clock.mjs';
@@ -73,12 +90,26 @@ vi.mock('../../scripts/weather/weather-manager.mjs', () => ({
     getWeatherProbabilities: vi.fn(() => ({ zone: { id: '_default', name: 'Default' }, season: null, entries: [], tempRange: { min: 10, max: 22 } }))
   }
 }));
-vi.mock('../../scripts/utils/socket.mjs', () => ({ CalendariaSocket: { isPrimaryGM: vi.fn(() => true), emit: vi.fn() } }));
-vi.mock('../../scripts/utils/permissions.mjs', () => ({ canAddNotes: vi.fn(() => true), canChangeActiveCalendar: vi.fn(() => true), canChangeDateTime: vi.fn(() => true), canEditCalendars: vi.fn(() => true), canViewWeatherForecast: vi.fn(() => true), canViewBigCal: vi.fn(() => true), canViewChronicle: vi.fn(() => true), canViewHUD: vi.fn(() => true), canViewMiniCal: vi.fn(() => true), canViewStopwatch: vi.fn(() => true), canViewSunDial: vi.fn(() => true), canViewTimeKeeper: vi.fn(() => true) }));
+vi.mock('../../scripts/utils/socket.mjs', () => ({ CalendariaSocket: { emit: vi.fn() } }));
+vi.mock('../../scripts/utils/permissions.mjs', () => ({
+  canAddNotes: vi.fn(() => true),
+  canChangeActiveCalendar: vi.fn(() => true),
+  canChangeDateTime: vi.fn(() => true),
+  canEditCalendars: vi.fn(() => true),
+  canViewWeatherForecast: vi.fn(() => true),
+  canViewBigCal: vi.fn(() => true),
+  canViewChronicle: vi.fn(() => true),
+  canViewHUD: vi.fn(() => true),
+  canViewMiniCal: vi.fn(() => true),
+  canViewStopwatch: vi.fn(() => true),
+  canViewSunDial: vi.fn(() => true),
+  canViewTimeKeeper: vi.fn(() => true)
+}));
 vi.mock('../../scripts/time/time-clock.mjs', () => ({ default: { running: false, realTimeSpeed: 1, start: vi.fn(), stop: vi.fn(), toggle: vi.fn(), gatedAdvance: vi.fn(async () => true) } }));
 vi.mock('../../scripts/time/time-tracker.mjs', () => ({ default: {} }));
 vi.mock('../../scripts/utils/search-manager.mjs', () => ({ default: { search: vi.fn(() => []) } }));
-vi.mock('../../scripts/constants.mjs', async (importOriginal) => ({ ...(await importOriginal()),
+vi.mock('../../scripts/constants.mjs', async (importOriginal) => ({
+  ...(await importOriginal()),
   MODULE: { ID: 'calendaria' },
   HOOKS: { DATE_TIME_CHANGE: 'calendaria.dateTimeChange', DAY_CHANGE: 'calendaria.dayChange', CONDITION_EVALUATED: 'calendaria.conditionEvaluated' },
   CONDITION_FIELDS: { YEAR: 'year', MONTH: 'month', DAY: 'day', WEEKDAY: 'weekday' },
@@ -108,7 +139,14 @@ vi.mock('../../scripts/utils/formatting/format-utils.mjs', () => ({
   resolveFormatString: vi.fn((s) => s),
   timeSince: vi.fn(() => '3 days ago')
 }));
-vi.mock('../../scripts/utils/formatting/moon-utils.mjs', () => ({ getMoonPhasePosition: vi.fn(() => 0.5), isMoonFull: vi.fn(() => false), isMoonVisible: vi.fn(() => true), getNextConvergence: vi.fn(() => null), getNextFullMoon: vi.fn(() => null), getConvergencesInRange: vi.fn(() => []) }));
+vi.mock('../../scripts/utils/formatting/moon-utils.mjs', () => ({
+  getMoonPhasePosition: vi.fn(() => 0.5),
+  isMoonFull: vi.fn(() => false),
+  isMoonVisible: vi.fn(() => true),
+  getNextConvergence: vi.fn(() => null),
+  getNextFullMoon: vi.fn(() => null),
+  getConvergencesInRange: vi.fn(() => [])
+}));
 vi.mock('../../scripts/notes/date-utils.mjs', () => ({
   addDays: vi.fn((d) => d),
   addHours: vi.fn((d) => d),
@@ -127,7 +165,12 @@ vi.mock('../../scripts/notes/date-utils.mjs', () => ({
   monthsBetween: vi.fn(() => 0),
   secondsBetween: vi.fn(() => 0)
 }));
-vi.mock('../../scripts/utils/widget-manager.mjs', () => ({ registerWidget: vi.fn(() => true), getRegisteredWidgets: vi.fn(() => []), getWidgetByReplacement: vi.fn(() => null), refreshWidgets: vi.fn() }));
+vi.mock('../../scripts/utils/widget-manager.mjs', () => ({
+  registerWidget: vi.fn(() => true),
+  getRegisteredWidgets: vi.fn(() => []),
+  getWidgetByReplacement: vi.fn(() => null),
+  refreshWidgets: vi.fn()
+}));
 vi.mock('../../scripts/data/calendaria-calendar.mjs', () => ({ default: class {} }));
 vi.mock('../../scripts/applications/calendar/big-cal.mjs', () => ({
   BigCal: class {
@@ -145,13 +188,17 @@ vi.mock('../../scripts/applications/calendar/big-cal.mjs', () => ({
       this._selectedDate = { year: date.year, month: date.month, dayOfMonth: date.dayOfMonth ?? 0 };
     }
 
-    async render() { return this; }
+    async render() {
+      return this;
+    }
   }
 }));
 const BigCalMock = { _lastInstance: null };
 vi.mock('../../scripts/applications/calendar/calendar-editor.mjs', () => ({
   CalendarEditor: class {
-    render() { return this; }
+    render() {
+      return this;
+    }
   }
 }));
 vi.mock('../../scripts/applications/calendar/chronicle.mjs', () => ({ Chronicle: { show: vi.fn(), hide: vi.fn(), toggle: vi.fn() } }));
@@ -160,7 +207,9 @@ vi.mock('../../scripts/applications/cinematics/cinematic-overlay.mjs', () => ({ 
 vi.mock('../../scripts/applications/calendar/mini-cal.mjs', () => ({ MiniCal: { show: vi.fn(), hide: vi.fn(), toggle: vi.fn() } }));
 vi.mock('../../scripts/applications/calendar/secondary-calendar.mjs', () => ({
   SecondaryCalendar: class {
-    render() { return this; }
+    render() {
+      return this;
+    }
   }
 }));
 vi.mock('../../scripts/applications/hud/hud.mjs', () => ({ HUD: {} }));
@@ -278,10 +327,7 @@ describe('jumpToDate', () => {
     CalendarManager.getActiveCalendar.mockReturnValue({});
     game.user.isGM = false;
     await CalendariaAPI.jumpToDate({ year: 1492, month: 1, day: 1 });
-    expect(CalendariaSocket.emit).toHaveBeenCalledWith(
-      'timeRequest',
-      expect.objectContaining({ action: 'jump', date: { year: 1492, month: 0, dayOfMonth: 0 } })
-    );
+    expect(CalendariaSocket.emit).toHaveBeenCalledWith('timeRequest', expect.objectContaining({ action: 'jump', date: { year: 1492, month: 0, dayOfMonth: 0 } }));
   });
   it('calls calendar.jumpToDate with 0-indexed month and dayOfMonth', async () => {
     canChangeDateTime.mockReturnValue(true);
@@ -355,7 +401,10 @@ describe('moon phases', () => {
   });
   it('getAllMoonPhases nulls hidden moons for the current user', () => {
     CalendarManager.getActiveCalendar.mockReturnValue({ moonsArray: [{ visibility: 'hidden' }, { visibility: 'visible' }] });
-    CalendarManager.getAllCurrentMoonPhases.mockReturnValue([{ moonIndex: 0, name: 'Full' }, { moonIndex: 1, name: 'New' }]);
+    CalendarManager.getAllCurrentMoonPhases.mockReturnValue([
+      { moonIndex: 0, name: 'Full' },
+      { moonIndex: 1, name: 'New' }
+    ]);
     isMoonVisible.mockImplementation((m) => m?.visibility !== 'hidden');
     expect(CalendariaAPI.getAllMoonPhases()).toStrictEqual([null, { moonIndex: 1, name: 'New' }]);
     isMoonVisible.mockImplementation(() => true);
@@ -774,10 +823,7 @@ describe('updateNote', () => {
     NoteManager.getFullNote.mockReturnValue({ parent: { isOwner: true } });
     NoteManager.updateNote.mockResolvedValue({ id: '1' });
     await CalendariaAPI.updateNote('1', { name: 'Updated', startDate: { year: 2 }, categories: ['quest'] });
-    expect(NoteManager.updateNote).toHaveBeenCalledWith(
-      '1',
-      expect.objectContaining({ name: 'Updated', noteData: expect.objectContaining({ startDate: { year: 2 }, categories: ['quest'] }) })
-    );
+    expect(NoteManager.updateNote).toHaveBeenCalledWith('1', expect.objectContaining({ name: 'Updated', noteData: expect.objectContaining({ startDate: { year: 2 }, categories: ['quest'] }) }));
   });
   it('passes undefined noteData when no note fields provided', async () => {
     NoteManager.getFullNote.mockReturnValue({ parent: { isOwner: true } });
@@ -1070,10 +1116,10 @@ describe('permission checks', () => {
     canAddNotes.mockReturnValue(true);
     expect(CalendariaAPI.canManageNotes()).toBe(true);
   });
-  it('isPrimaryGM delegates to CalendariaSocket.isPrimaryGM', () => {
-    CalendariaSocket.isPrimaryGM.mockReturnValue(false);
+  it('isPrimaryGM delegates to ATLAS', () => {
+    ATLAS.isPrimaryGM = false;
     expect(CalendariaAPI.isPrimaryGM()).toBe(false);
-    CalendariaSocket.isPrimaryGM.mockReturnValue(true);
+    ATLAS.isPrimaryGM = true;
     expect(CalendariaAPI.isPrimaryGM()).toBe(true);
   });
 });
@@ -1359,7 +1405,10 @@ describe('navigateToDate', () => {
 });
 
 describe('includeContent option', () => {
-  const stubs = [ { id: 'n1', name: 'Note 1', content: '<p>Content 1</p>' }, { id: 'n2', name: 'Note 2', content: '<p>Content 2</p>' } ];
+  const stubs = [
+    { id: 'n1', name: 'Note 1', content: '<p>Content 1</p>' },
+    { id: 'n2', name: 'Note 2', content: '<p>Content 2</p>' }
+  ];
   beforeEach(() => {
     BigCalMock._lastInstance = null;
     NoteManager.getNotesForDate.mockReturnValue(stubs);
@@ -1408,7 +1457,10 @@ describe('showDatePicker', () => {
       years: { yearZero: 0 },
       isMonthless: false,
       getDaysInMonth: vi.fn(() => 30),
-      monthsArray: [ { name: 'January', days: 31 }, { name: 'February', days: 28 } ],
+      monthsArray: [
+        { name: 'January', days: 31 },
+        { name: 'February', days: 28 }
+      ],
       days: { hoursPerDay: 24, minutesPerHour: 60 }
     };
     CalendarManager.getActiveCalendar.mockReturnValue(calendar);
@@ -1540,7 +1592,10 @@ describe('getNextOccurrences', () => {
     const stub = { flagData: { startDate: { year: 1, month: 0, dayOfMonth: 0 } } };
     NoteManager.getNote.mockReturnValue(stub);
     CalendarManager.getActiveCalendar.mockReturnValue({ years: { yearZero: 0 } });
-    getNextOccurrences.mockReturnValue([ { year: 1, month: 0, dayOfMonth: 0 }, { year: 1, month: 5, dayOfMonth: 14 } ]);
+    getNextOccurrences.mockReturnValue([
+      { year: 1, month: 0, dayOfMonth: 0 },
+      { year: 1, month: 5, dayOfMonth: 14 }
+    ]);
     const result = CalendariaAPI.getNextOccurrences('page1', 2);
     expect(getNextOccurrences).toHaveBeenCalledWith(stub.flagData, expect.any(Object), 2);
     expect(result).toHaveLength(2);
@@ -1607,7 +1662,18 @@ describe('createFestival', () => {
     NoteManager.createNote.mockResolvedValue({ id: 'page1' });
     await CalendariaAPI.createFestival('cal1', { name: 'Harvest Festival', startDate: { year: 1, month: 9, day: 21 } });
     expect(NoteManager.createNote).toHaveBeenCalledWith(
-      expect.objectContaining({ name: 'Harvest Festival', noteData: expect.objectContaining({ startDate: { year: 1, month: 8, dayOfMonth: 20, hour: 0, minute: 0 }, color: '#f0a500', icon: 'fas fa-masks-theater', visibility: 'visible', linkedFestival: expect.objectContaining({ calendarId: 'cal1' }) }), calendarId: 'cal1', openSheet: false })
+      expect.objectContaining({
+        name: 'Harvest Festival',
+        noteData: expect.objectContaining({
+          startDate: { year: 1, month: 8, dayOfMonth: 20, hour: 0, minute: 0 },
+          color: '#f0a500',
+          icon: 'fas fa-masks-theater',
+          visibility: 'visible',
+          linkedFestival: expect.objectContaining({ calendarId: 'cal1' })
+        }),
+        calendarId: 'cal1',
+        openSheet: false
+      })
     );
   });
 });
@@ -1637,9 +1703,7 @@ describe('createNote conditionTree support', () => {
     NoteManager.createNote.mockResolvedValue({});
     const tree = { type: 'group', mode: 'and', children: [{ field: 'month', operator: '==', value: 3 }] };
     await CalendariaAPI.createNote({ name: 'Test', startDate: { year: 1, month: 1, day: 1 }, conditionTree: tree });
-    expect(NoteManager.createNote).toHaveBeenCalledWith(
-      expect.objectContaining({ noteData: expect.objectContaining({ conditionTree: tree }) })
-    );
+    expect(NoteManager.createNote).toHaveBeenCalledWith(expect.objectContaining({ noteData: expect.objectContaining({ conditionTree: tree }) }));
   });
 });
 

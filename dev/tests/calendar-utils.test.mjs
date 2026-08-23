@@ -25,9 +25,17 @@ const { findFestivalDay, formatEraTemplate, formatMonthDay, formatMonthDayYear, 
 
 const mockCalendar = addCalendarGetters({
   metadata: { id: 'test-cal' },
-  months: { values: [ { name: 'January', abbreviation: 'Jan', days: 31 }, { name: 'February', abbreviation: 'Feb', days: 28 } ] },
+  months: {
+    values: [
+      { name: 'January', abbreviation: 'Jan', days: 31 },
+      { name: 'February', abbreviation: 'Feb', days: 28 }
+    ]
+  },
   years: { yearZero: 0 },
-  festivals: [ { name: 'New Year', month: 0, dayOfMonth: 0 }, { name: 'Festival Day', month: 1, dayOfMonth: 14 } ],
+  festivals: [
+    { name: 'New Year', month: 0, dayOfMonth: 0 },
+    { name: 'Festival Day', month: 1, dayOfMonth: 14 }
+  ],
   timeToComponents: vi.fn((_time) => ({ year: 2024, month: 0, dayOfMonth: 0, hour: 0, minute: 0, second: 0 }))
 });
 

@@ -1,5 +1,3 @@
-/* global PIXI */
-
 /** @type {object[]} Sky color keyframes for interpolation throughout the day. */
 export const SKY_KEYFRAMES = [
   { hour: 0, top: '#0a0a12', mid: '#0f0f1a', bottom: '#151525' },
@@ -754,6 +752,13 @@ export class HudSceneRenderer {
     if (this.#destroyed) return;
     this.#flipped = flipped;
     this.#applyFlip();
+  }
+
+  /** Re-fit the canvas to its parent. PIXI's resizeTo only reacts to window resize, so manual resizes must call this. */
+  resize() {
+    if (this.#destroyed) return;
+    this.#app.resize();
+    this.#resizeSkySprites();
   }
 
   /**

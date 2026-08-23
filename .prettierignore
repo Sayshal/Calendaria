@@ -1,7 +1,0 @@
-**/*.handlebars
-**/*.hbs
-**/*.json
-dev
-dist
-dnd5e
-foundry

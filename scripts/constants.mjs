@@ -24,6 +24,7 @@ export const SETTINGS = {
   ADVANCE_BASTION_ORDERS: 'advanceBastionOrders',
   ADVANCE_TIME_ON_REST: 'advanceTimeOnRest',
   ALLOW_SIDEBAR_OVERLAP: 'allowSidebarOverlap',
+  ALMANAC_LAST_WEEK: 'almanacLastWeek',
   AMBIENCE_INTENSITY: 'ambienceIntensity',
   AMBIENCE_SYNC: 'ambienceSync',
   AUTO_GENERATE_WEATHER: 'autoGenerateWeather',
@@ -45,7 +46,6 @@ export const SETTINGS = {
   CALENDAR_HUD_POSITION: 'calendarHUDPosition',
   CALENDAR_POSITION: 'calendarPosition',
   CHAT_TIMESTAMP_MODE: 'chatTimestampMode',
-  CHAT_TIMESTAMP_SHOW_TIME: 'chatTimestampShowTime',
   CHRONICLE_BIG_CAL_BUTTON: 'chronicleBigCalButton',
   CHRONICLE_CATEGORY_FILTER: 'chronicleCategoryFilter',
   CHRONICLE_COMBAT_MODE: 'chronicleCombatMode',
@@ -167,7 +167,6 @@ export const SETTINGS = {
   PERMISSIONS: 'permissions',
   POSITION_LOCKED: 'positionLocked',
   PRECIPITATION_UNIT: 'precipitationUnit',
-  PRIMARY_GM: 'primaryGM',
   REST_ADVANCE_MODE: 'restAdvanceMode',
   REST_FIXED_HOURS: 'restFixedHours',
   SAVED_TIMEPOINTS: 'savedTimepoints',
@@ -211,11 +210,11 @@ export const SETTINGS = {
   TIMEKEEPER_TIME_JUMPS: 'timeKeeperTimeJumps',
   TOOLBAR_APPS: 'toolbarApps',
   WEATHER_AMBIENCE_INTENSITY: 'weatherAmbienceIntensity',
-  WEATHER_DAY_INDEX_MIGRATED: 'weatherDayIndexMigrated',
   WEATHER_FORECAST_PLAN: 'weatherForecastPlan',
   WEATHER_HISTORY_DAYS: 'weatherHistoryDays',
   WEATHER_HISTORY: 'weatherHistory',
   WEATHER_INERTIA: 'weatherInertia',
+  WEATHER_MONTHLESS_PLAN_MIGRATED: 'weatherMonthlessPlanMigrated',
   WEATHER_PRESET_ALIASES: 'weatherPresetAliases',
   WEATHER_SEED: 'weatherSeed',
   WEATHER_SOUND_FX: 'weatherSoundFx',
@@ -223,6 +222,7 @@ export const SETTINGS = {
   WEATHER_SUPPRESS_MUFFLE: 'weatherSuppressMuffle',
   WEATHER_VISUAL_OVERRIDES: 'weatherVisualOverrides',
   WEATHER_YEAR_KEY_MIGRATED: 'weatherYearKeyMigrated',
+  WEEKLY_ALMANAC: 'weeklyAlmanac',
   WIND_SPEED_UNIT: 'windSpeedUnit'
 };
 
@@ -373,11 +373,21 @@ export const MOON_PHASE_LABELS = [
 /** @type {Object<string, object>} Wind speed scale (0-5). Canonical values stored in kph; imperial conversion at display time. */
 export const WIND_SPEEDS = {
   CALM: { id: 'calm', value: 0, label: 'CALENDARIA.Weather.Wind.Calm', kph: 5 },
-  LIGHT: { id: 'light', value: 1, label: 'CALENDARIA.Common.Light', kph: 20 },
+  LIGHT: { id: 'light', value: 1, label: 'ATLAS.Common.Light', kph: 20 },
   MODERATE: { id: 'moderate', value: 2, label: 'CALENDARIA.Common.Moderate', kph: 40 },
   STRONG: { id: 'strong', value: 3, label: 'CALENDARIA.Weather.Wind.Strong', kph: 60 },
   SEVERE: { id: 'severe', value: 4, label: 'CALENDARIA.Common.Severe', kph: 90 },
   EXTREME: { id: 'extreme', value: 5, label: 'CALENDARIA.Weather.Wind.Extreme', kph: 250 }
+};
+
+/** @type {Object<string, object>} Named bands over the 0-10 severity scale derived by computeWeatherSeverity, each starting at min */
+export const SEVERITY_LEVELS = {
+  NONE: { id: 'none', min: 0, label: 'CALENDARIA.Weather.Severity.None' },
+  LIGHT: { id: 'light', min: 1, label: 'ATLAS.Common.Light' },
+  MODERATE: { id: 'moderate', min: 2, label: 'CALENDARIA.Weather.Severity.Moderate' },
+  HEAVY: { id: 'heavy', min: 4, label: 'CALENDARIA.Weather.Severity.Heavy' },
+  SEVERE: { id: 'severe', min: 6, label: 'CALENDARIA.Weather.Severity.Severe' },
+  EXTREME: { id: 'extreme', min: 8, label: 'CALENDARIA.Weather.Severity.Extreme' }
 };
 
 /** @enum {string|null} Precipitation type identifiers */
@@ -482,6 +492,8 @@ export const HOOKS = {
   CALENDAR_UPDATED: 'calendaria.calendarUpdated',
   CINEMATIC_ABORT: 'calendaria.cinematicAbort',
   CINEMATIC_END: 'calendaria.cinematicEnd',
+  CINEMATIC_PAUSE: 'calendaria.cinematicPause',
+  CINEMATIC_RESUME: 'calendaria.cinematicResume',
   CINEMATIC_START: 'calendaria.cinematicStart',
   PRESETS_CHANGED: 'calendaria.presetsChanged',
   CLOCK_START_STOP: 'calendaria.clockStartStop',
@@ -540,7 +552,9 @@ export const SOCKET_TYPES = {
   CALENDAR_REQUEST: 'calendarRequest',
   CHRONICLE_VISIBILITY: 'chronicleVisibility',
   CINEMATIC_ABORT: 'cinematicAbort',
+  CINEMATIC_PAUSE: 'cinematicPause',
   CINEMATIC_PLAY: 'cinematicPlay',
+  CINEMATIC_RESUME: 'cinematicResume',
   CALENDAR_SWITCH: 'calendarSwitch',
   CLOCK_UPDATE: 'clockUpdate',
   CREATE_NOTE_COMPLETE: 'createNoteComplete',

@@ -96,9 +96,11 @@ export class CalendarNoteDataModel extends foundry.abstract.TypeDataModel {
       reminderType: new fields.StringField({ choices: ['none', 'toast', 'chat', 'dialog'], initial: 'toast' }),
       reminderTargets: new fields.StringField({ choices: ['all', 'gm', 'author', 'specific', 'viewers'], initial: 'all' }),
       reminderUsers: new fields.ArrayField(new fields.StringField(), { initial: [] }),
+      persistToDo: new fields.BooleanField({ initial: false }),
       macro: new fields.StringField({ nullable: true, blank: true }),
       sceneId: new fields.StringField({ nullable: true, blank: true }),
       playlistId: new fields.StringField({ nullable: true, blank: true }),
+      subjects: new fields.ArrayField(new fields.DocumentUUIDField(), { initial: [] }),
       hasDuration: new fields.BooleanField({ initial: false }),
       duration: new fields.NumberField({ integer: true, min: 1, initial: 1 }),
       showBookends: new fields.BooleanField({ initial: false }),
@@ -120,9 +122,12 @@ export class CalendarNoteDataModel extends foundry.abstract.TypeDataModel {
   }
 
   /**
-   * Migrate raw source data before schema initialization.
+   * Normalize raw source data before schema initialization. Runs on every instantiation, imported JSON
+   * included, so it stays permanently: it collapses foreign repeat values, converts 1-indexed `day` fields
+   * on the date schemas and on `rangePattern`, and folds the boolean `gmOnly` flag into `visibility`.
+   * @since 0.11.6
    * @param {object} source - Raw source data
-   * @returns {object} Migrated source data
+   * @returns {object} Normalized source data
    */
   static migrateData(source) {
     if (source.repeat && source.repeat !== 'never' && source.repeat !== 'computed') source.repeat = 'never';

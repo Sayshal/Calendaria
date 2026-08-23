@@ -1,6 +1,24 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import CalendarManager from '../../scripts/calendar/calendar-manager.mjs';
-import { addDays, addHours, addMinutes, addMonths, addSeconds, addYears, compareDates, compareDays, dayOfWeek, daysBetween, getCurrentDate, hoursBetween, isSameDay, isValidDate, minutesBetween, monthsBetween, secondsBetween } from '../../scripts/notes/date-utils.mjs';
+import {
+  addDays,
+  addHours,
+  addMinutes,
+  addMonths,
+  addSeconds,
+  addYears,
+  compareDates,
+  compareDays,
+  dayOfWeek,
+  daysBetween,
+  getCurrentDate,
+  hoursBetween,
+  isSameDay,
+  isValidDate,
+  minutesBetween,
+  monthsBetween,
+  secondsBetween
+} from '../../scripts/notes/date-utils.mjs';
 
 vi.mock('../../scripts/calendar/calendar-manager.mjs', async () => {
   const { default: CalendarManager, defaultCalendar } = await import('../__mocks__/calendar-manager.mjs');

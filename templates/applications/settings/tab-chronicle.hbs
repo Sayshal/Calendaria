@@ -75,7 +75,7 @@
       <div class="form-fields">
         <select id="chronicleCombatMode" name="chronicleCombatMode">
           <option value="none" {{#if (eq chronicleCombatMode "none")}}selected{{/if}}>
-            {{localize "CALENDARIA.Common.None"}}
+            {{localize "ATLAS.Common.None"}}
           </option>
           <option value="hideCombat" {{#if (eq chronicleCombatMode "hideCombat")}}selected{{/if}}>
             {{localize "CALENDARIA.Common.HideOnCombatStart"}}
@@ -132,7 +132,7 @@
 
   <fieldset data-section="chronicle-content">
     <legend>
-      {{localize "CALENDARIA.Common.Content"}}
+      {{localize "ATLAS.Common.Content"}}
       <button type="button" class="reset-section" data-action="resetSection" data-section="chronicle-content"
         data-tooltip aria-label="{{localize 'CALENDARIA.SettingsPanel.ResetSection.Tooltip'}}"><i
           class="fas fa-undo"></i></button>
@@ -147,7 +147,6 @@
       <p class="hint">{{localize "CALENDARIA.Chronicle.Settings.ShowWeather.Hint"}}</p>
     </div>
 
-
     <div class="form-group">
       <label
         for="chronicleShowSeasonChanges">{{localize "CALENDARIA.Chronicle.Settings.ShowSeasonChanges.Name"}}</label>
@@ -158,5 +157,24 @@
       <p class="hint">{{localize "CALENDARIA.Chronicle.Settings.ShowSeasonChanges.Hint"}}</p>
     </div>
   </fieldset>
+
+  {{#if isGM}}
+  <fieldset data-section="chronicle-almanac">
+    <legend>
+      {{localize "CALENDARIA.Almanac.JournalTitle"}}
+      <button type="button" class="reset-section" data-action="resetSection" data-section="chronicle-almanac"
+        data-tooltip aria-label="{{localize 'CALENDARIA.SettingsPanel.ResetSection.Tooltip'}}"><i
+          class="fas fa-undo"></i></button>
+    </legend>
+
+    <div class="form-group">
+      <label for="weeklyAlmanac">{{localize "CALENDARIA.Settings.WeeklyAlmanac.Name"}}</label>
+      <div class="form-fields">
+        <input type="checkbox" id="weeklyAlmanac" name="weeklyAlmanac" {{#if weeklyAlmanac}}checked{{/if}}>
+      </div>
+      <p class="hint">{{localize "CALENDARIA.Settings.WeeklyAlmanac.Hint"}}</p>
+    </div>
+  </fieldset>
+  {{/if}}
 
 </section>

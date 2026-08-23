@@ -1,5 +1,4 @@
 import { HOOKS, MODULE, SCENE_FLAGS, SETTINGS } from '../constants.mjs';
-import { CalendariaSocket } from '../utils/_module.mjs';
 import { WeatherManager } from '../weather/_module.mjs';
 
 /** FXMaster relative-level labels mapped to their numeric multipliers, matching FXMaster's RELATIVE_LEVEL_SCALE. */
@@ -102,7 +101,7 @@ function onCanvasReady() {
  * @param {object} change - Change data
  */
 function onSceneUpdate(scene, change) {
-  if (!CalendariaSocket.isPrimaryGM()) return;
+  if (!ATLAS.isPrimaryGM) return;
   if (change.active) {
     syncWeatherToScene(scene);
     return;
@@ -121,7 +120,7 @@ function onSceneUpdate(scene, change) {
  * @param {object} [sceneOverride] - Scene to sync for (defaults to canvas scene)
  */
 export function syncWeatherToScene(sceneOverride) {
-  if (!CalendariaSocket.isPrimaryGM()) return;
+  if (!ATLAS.isPrimaryGM) return;
   const scene = sceneOverride ?? canvas?.scene;
   if (!scene) return;
   if (!isFxEnabledForScene(scene)) {
@@ -142,7 +141,7 @@ export function syncWeatherToScene(sceneOverride) {
  */
 function onWeatherChange({ current, zoneId: _zoneId, bulk, visualOnly } = {}) {
   if (visualOnly) return;
-  if (!CalendariaSocket.isPrimaryGM()) return;
+  if (!ATLAS.isPrimaryGM) return;
   if (bulk) {
     const scene = game.scenes?.active;
     if (!isFxEnabledForScene(scene)) {

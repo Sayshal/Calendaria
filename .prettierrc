@@ -7,7 +7,7 @@
   "trailingComma": "none",
   "bracketSpacing": true,
   "arrowParens": "always",
-  "endOfLine": "lf",
+  "endOfLine": "crlf",
   "jsxSingleQuote": true,
   "proseWrap": "preserve",
   "embeddedLanguageFormatting": "auto",

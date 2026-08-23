@@ -32,6 +32,9 @@ usageMatchRegex:
   - "game\\.i18n\\.localize\\(['\"]({key})['\"]"
   - "game\\.i18n\\.format\\(['\"]({key})['\"]"
 
+  # v14 core global alias for game.i18n.localize: _loc('KEY')
+  - "\\b_loc\\(['\"]({key})['\"]"
+
   # Wrapper functions: localize('KEY') and format('KEY', data)
   - "\\blocalize\\(['\"]({key})['\"]"
   - "\\bformat\\(['\"]({key})['\"]"

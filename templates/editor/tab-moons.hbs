@@ -7,13 +7,13 @@
       <div class="items-list moons-list">
         <div class="list-header flexrow">
           <span class="col-name" data-tooltip aria-label="{{localize 'CALENDARIA.Editor.Tooltip.MoonName'}}">
-            {{localize "CALENDARIA.Common.Name"}}
+            {{localize "ATLAS.Common.Name"}}
           </span>
           <span class="col-cycle" data-tooltip aria-label="{{localize 'CALENDARIA.Editor.Tooltip.CycleLength'}}">
             {{localize "CALENDARIA.Editor.Field.CycleLength"}}
           </span>
           <span class="col-color" data-tooltip aria-label="{{localize 'CALENDARIA.Editor.Tooltip.MoonColor'}}">
-            {{localize "CALENDARIA.Common.Color"}}
+            {{localize "ATLAS.Common.Color"}}
           </span>
           <span class="col-controls"></span>
         </div>
@@ -48,7 +48,7 @@
             <div class="moon-fields">
               <div class="form-group">
                 <label
-                  for="editor-moon-{{this.index}}-hide">{{localize "CALENDARIA.Editor.Field.MoonVisibility"}}</label>
+                  for="editor-moon-{{this.index}}-hide">{{localize "ATLAS.Common.HideFromPlayers"}}</label>
                 <div class="form-fields">
                   <input type="checkbox" id="editor-moon-{{this.index}}-hide" name="moons.{{this.key}}.hideFromPlayers"
                     {{#if this.isHidden}}checked{{/if}}>
@@ -130,12 +130,12 @@
                   <div class="items-list anchors-list">
                     {{#if this.anchorPhasesWithIndex.length}}
                       <div class="list-header flexrow">
-                        <span class="col-year">{{localize "CALENDARIA.Common.Year"}}</span>
-                        <span class="col-month">{{localize "CALENDARIA.Common.Month"}}</span>
-                        <span class="col-day">{{localize "CALENDARIA.Common.Day"}}</span>
+                        <span class="col-year">{{localize "ATLAS.Common.Year"}}</span>
+                        <span class="col-month">{{localize "ATLAS.Common.Month"}}</span>
+                        <span class="col-day">{{localize "ATLAS.Common.Day"}}</span>
                         <span class="col-phase">{{localize "CALENDARIA.Editor.Column.Phase"}}</span>
                         <span class="col-reset" data-tooltip
-                          aria-label="{{localize 'CALENDARIA.Editor.Hint.AnchorResetCycle'}}">{{localize "CALENDARIA.Editor.Column.Reset"}}</span>
+                          aria-label="{{localize 'CALENDARIA.Editor.Hint.AnchorResetCycle'}}">{{localize "ATLAS.Common.Reset"}}</span>
                         <span class="col-controls"></span>
                       </div>
                       {{#each this.anchorPhasesWithIndex}}
@@ -187,14 +187,14 @@
                   {{localize "CALENDARIA.Common.ReferenceDate"}}
                 </legend>
                 <div class="form-group">
-                  <label for="editor-moon-{{this.index}}-ref-year">{{localize "CALENDARIA.Common.Year"}}</label>
+                  <label for="editor-moon-{{this.index}}-ref-year">{{localize "ATLAS.Common.Year"}}</label>
                   <div class="form-fields">
                     <input type="number" id="editor-moon-{{this.index}}-ref-year"
                       name="moons.{{this.key}}.referenceDate.year" value="{{this.referenceDate.year}}" step="1">
                   </div>
                 </div>
                 <div class="form-group">
-                  <label for="editor-moon-{{this.index}}-ref-month">{{localize "CALENDARIA.Common.Month"}}</label>
+                  <label for="editor-moon-{{this.index}}-ref-month">{{localize "ATLAS.Common.Month"}}</label>
                   <div class="form-fields">
                     <select id="editor-moon-{{this.index}}-ref-month" name="moons.{{this.key}}.referenceDate.month">
                       {{#each this.refMonthOptions}}
@@ -206,7 +206,7 @@
                   </div>
                 </div>
                 <div class="form-group">
-                  <label for="editor-moon-{{this.index}}-ref-day">{{localize "CALENDARIA.Common.Day"}}</label>
+                  <label for="editor-moon-{{this.index}}-ref-day">{{localize "ATLAS.Common.Day"}}</label>
                   <div class="form-fields">
                     <input type="number" id="editor-moon-{{this.index}}-ref-day"
                       name="moons.{{this.key}}.referenceDate.dayOfMonth" value="{{this.displayRefDay}}" min="1"
@@ -333,7 +333,7 @@
                       aria-label="{{localize 'CALENDARIA.Editor.Tooltip.FadingName'}}">{{localize "CALENDARIA.Common.Fading"}}</span>
                     {{#if this.isRandomized}}
                       <span class="col-weight" data-tooltip
-                        aria-label="{{localize 'CALENDARIA.Editor.Tooltip.PhaseWeight'}}">{{localize "CALENDARIA.Editor.Column.Weight"}}</span>
+                        aria-label="{{localize 'CALENDARIA.Editor.Tooltip.PhaseWeight'}}">{{localize "ATLAS.Common.Weight"}}</span>
                     {{else}}
                       <span class="col-start" data-tooltip
                         aria-label="{{localize 'CALENDARIA.Editor.Tooltip.PhaseStart'}}">{{localize "CALENDARIA.Editor.Column.StartPercent"}}</span>

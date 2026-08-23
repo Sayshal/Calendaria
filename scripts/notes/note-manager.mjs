@@ -52,7 +52,7 @@ export default class NoteManager {
    */
   static async initialize() {
     await this.#buildIndex();
-    if (game.user.isGM) {
+    if (ATLAS.isPrimaryGM) {
       await this.getCalendarNotesFolder();
       await this.#initializeActiveCalendarFolder();
     }
@@ -190,7 +190,7 @@ export default class NoteManager {
         Hooks.callAll(HOOKS.NOTE_DELETED, page.id);
       }
     }
-    if (game.user.isGM && page.getFlag(MODULE.ID, 'isDescriptionPage')) NoteManager.#syncDescriptionToCalendar(page);
+    if (ATLAS.isPrimaryGM && page.getFlag(MODULE.ID, 'isDescriptionPage')) NoteManager.#syncDescriptionToCalendar(page);
   }
 
   /**
@@ -250,7 +250,7 @@ export default class NoteManager {
         Hooks.callAll(HOOKS.NOTE_DELETED, page.id);
       }
     }
-    if (!game.user.isGM || NoteManager.#suppressOwnershipRebuild) return;
+    if (!ATLAS.isPrimaryGM || NoteManager.#suppressOwnershipRebuild) return;
     const page = journal.pages.contents[0];
     if (!page) return;
     const visibility = page.system?.visibility;
@@ -271,7 +271,7 @@ export default class NoteManager {
    * @param {object} calendar - The calendar that was switched to
    */
   static async onCalendarSwitched(calendarId, calendar) {
-    if (game.user.isGM && calendar) {
+    if (ATLAS.isPrimaryGM && calendar) {
       await NoteManager.getCalendarFolder(calendarId, calendar);
       ATLAS.log(3, `Ensured calendar folder exists for: ${calendarId}`);
     }
@@ -602,6 +602,16 @@ export default class NoteManager {
   }
 
   /**
+   * Get all unique subject UUIDs referenced by notes.
+   * @returns {string[]}  Array of document UUIDs
+   */
+  static getAllUsedSubjects() {
+    const subjects = new Set();
+    for (const stub of this.#noteIndex.values()) if (stub.flagData.subjects) stub.flagData.subjects.forEach((uuid) => subjects.add(uuid));
+    return Array.from(subjects);
+  }
+
+  /**
    * Get predefined preset definitions.
    * @returns {object[]}  Array of preset definitions
    */
@@ -831,12 +841,13 @@ export default class NoteManager {
       </label>
     </div>`;
     const result = await foundry.applications.api.DialogV2.wait({
-      window: { title: _loc('CALENDARIA.PresetDialog.Title') },
+      classes: ['calendaria'],
+      window: { title: 'CALENDARIA.PresetDialog.Title' },
       content: html,
       buttons: [
         {
           action: 'ok',
-          label: _loc('CALENDARIA.Common.Confirm'),
+          label: 'ATLAS.Common.Confirm',
           icon: 'fas fa-check',
           default: true,
           callback: (_event, button) => {
@@ -853,7 +864,7 @@ export default class NoteManager {
         },
         {
           action: 'cancel',
-          label: _loc('CALENDARIA.Common.Cancel'),
+          label: 'ATLAS.Common.Cancel',
           icon: 'fas fa-times'
         }
       ],

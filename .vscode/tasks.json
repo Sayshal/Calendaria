@@ -5,9 +5,7 @@
       "label": "Lint: ESLint",
       "type": "npm",
       "script": "lint",
-      "problemMatcher": [
-        "$eslint-stylish"
-      ],
+      "problemMatcher": ["$eslint-stylish"],
       "group": {
         "kind": "test",
         "isDefault": false
@@ -17,9 +15,7 @@
       "label": "Lint: ESLint (Fix)",
       "type": "npm",
       "script": "lint:fix",
-      "problemMatcher": [
-        "$eslint-stylish"
-      ]
+      "problemMatcher": ["$eslint-stylish"]
     },
     {
       "label": "Lint: Stylelint",
@@ -47,9 +43,7 @@
       "label": "Validate All",
       "type": "npm",
       "script": "validate",
-      "problemMatcher": [
-        "$eslint-stylish"
-      ],
+      "problemMatcher": ["$eslint-stylish"],
       "group": {
         "kind": "test",
         "isDefault": true

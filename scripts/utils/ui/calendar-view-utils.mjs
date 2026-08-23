@@ -95,7 +95,7 @@ export async function showMoonPicker(anchor, moons, currentMoon, onSelect) {
   closeMoonPicker();
   if (!moons?.length) return;
   const tooltip = document.createElement('div');
-  tooltip.className = 'calendaria-moon-picker';
+  tooltip.className = 'calendaria calendaria-moon-picker';
   const radialSize = Math.min(250, Math.round(50 * Math.sqrt(moons.length) + 17 * (moons.length - 1)));
   const templateData = { moonCount: moons.length, radialSize, moons: moons.map((m) => ({ ...m, selected: m.moonName === currentMoon })) };
   tooltip.innerHTML = await foundry.applications.handlebars.renderTemplate(TEMPLATES.PARTIALS.MOON_PICKER, templateData);
@@ -232,7 +232,8 @@ export function buildWeatherPillData(wd) {
     windKph: wd.wind?.kph ?? null,
     windDirection: wd.wind?.direction,
     precipType: wd.precipitation?.type ?? null,
-    precipIntensity: wd.precipitation?.intensity
+    precipIntensity: wd.precipitation?.intensity,
+    severity: WeatherManager.getSeverity(wd)
   };
   const tooltipHtml = wd.periods ? WeatherManager.buildWeatherTooltipWithPeriods(tooltipArgs, wd.periods, wd.activePeriod) : WeatherManager.buildWeatherTooltip(tooltipArgs);
   return { weatherIcon: wd.icon, weatherColor: wd.color, weatherLabel: wd.label, weatherTemp: temp, weatherWindDir: windDir, weatherTooltipHtml: tooltipHtml, isForecast: wd.isForecast ?? false };
@@ -783,6 +784,8 @@ export function generateDayTooltip(calendar, year, month, dayOfMonth, festival =
   };
   const rows = [];
   rows.push(`<div class="date"><strong>${escapeText(fullDate)}</strong></div>`);
+  const namedDay = calendar.getCurrentDayName?.(internalComponents);
+  if (namedDay?.dayName) rows.push(`<div class="named-day">${escapeText(namedDay.dayName)}</div>`);
   if (festival?.name) {
     const colorStyle = festival.color ? ` style="color: ${festival.color}"` : '';
     const prefix = festival.position ? `${_loc(`CALENDARIA.Note.Festival.${festival.position === 'starting' ? 'Starting' : 'Ending'}`)}: ` : '';
@@ -882,7 +885,7 @@ export function setupDayContextMenu(container, selector, calendar, options = {})
           if (isOwner) {
             const actions = document.createElement('span');
             actions.className = 'note-actions';
-            actions.innerHTML = `<i class="fas fa-pen-to-square" data-action="edit" data-tooltip="${_loc('CALENDARIA.Common.Edit')}"></i><i class="fas fa-trash" data-action="delete" data-tooltip="${_loc('CALENDARIA.Common.Delete')}"></i>`;
+            actions.innerHTML = `<i class="fas fa-pen-to-square" data-action="edit" data-tooltip="${_loc('ATLAS.Common.Edit')}"></i><i class="fas fa-trash" data-action="delete" data-tooltip="${_loc('ATLAS.Common.Delete')}"></i>`;
             nameSpan.appendChild(actions);
             actions.addEventListener('click', async (e) => {
               e.stopPropagation();
@@ -893,7 +896,8 @@ export function setupDayContextMenu(container, selector, calendar, options = {})
               } else if (action === 'delete') {
                 ui.context?.close();
                 const confirmed = await foundry.applications.api.DialogV2.confirm({
-                  window: { title: _loc('CALENDARIA.Common.DeleteNote') },
+                  classes: ['calendaria'],
+                  window: { title: 'CALENDARIA.Common.DeleteNote' },
                   content: `<p>${_loc('CALENDARIA.ContextMenu.DeleteConfirm', { name: note.name })}</p>`,
                   rejectClose: false,
                   modal: true

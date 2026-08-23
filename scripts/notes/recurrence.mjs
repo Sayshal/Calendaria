@@ -1,6 +1,6 @@
 import { CalendarManager } from '../calendar/_module.mjs';
 import { CONDITION_FIELDS, CONDITION_OPERATORS } from '../constants.mjs';
-import { findSeasonIndexByType, getCalendarMoonPhaseIndex, getDayOfYear, getMidpoint, getSeasonDayOfYearBounds, normalizeRawDoy, seededRandom } from '../utils/_module.mjs';
+import { findSeasonIndexByType, getDayOfYear, getMidpoint, getSeasonDayOfYearBounds, normalizeRawDoy, seededRandom } from '../utils/_module.mjs';
 import {
   EpochDataCache,
   NoteManager,
@@ -191,7 +191,7 @@ function cycleDistance(a, b) {
 
 /**
  * Whether a moon phase entry matches a target token, by key or localized name.
- * @param {[string, object]} entry - Phase entry from Object.entries(moon.phases)
+ * @param {Array} entry - Phase entry from Object.entries(moon.phases), as [key, phase]
  * @param {string} target - Lowercased target token, e.g. 'full'
  * @returns {boolean} True if the entry matches
  */

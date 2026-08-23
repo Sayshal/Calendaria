@@ -5,13 +5,13 @@
       <legend class="cb-group-legend">
         {{localize "CALENDARIA.Condition.Builder.MatchLabel"}}
         <select name="group.{{path}}.mode"
-          data-tooltip-html="<b>{{localize 'CALENDARIA.Common.All'}}</b>: {{localize 'CALENDARIA.Condition.Group.Mode.andHint'}}<br><b>{{localize 'CALENDARIA.Common.Any'}}</b>: {{localize 'CALENDARIA.Condition.Group.Mode.orHint'}}<br><b>{{localize 'CALENDARIA.Condition.Group.Mode.nand'}}</b>: {{localize 'CALENDARIA.Condition.Group.Mode.nandHint'}}<br><b>{{localize 'CALENDARIA.Condition.Group.Mode.xor'}}</b>: {{localize 'CALENDARIA.Condition.Group.Mode.xorHint'}}<br><b>{{localize 'CALENDARIA.Condition.Group.Mode.count'}}</b>: {{localize 'CALENDARIA.Condition.Group.Mode.countHint'}}">
+          data-tooltip-html="<b>{{localize 'ATLAS.Common.All'}}</b>: {{localize 'CALENDARIA.Condition.Group.Mode.andHint'}}<br><b>{{localize 'CALENDARIA.Common.Any'}}</b>: {{localize 'CALENDARIA.Condition.Group.Mode.orHint'}}<br><b>{{localize 'CALENDARIA.Condition.Group.Mode.nand'}}</b>: {{localize 'CALENDARIA.Condition.Group.Mode.nandHint'}}<br><b>{{localize 'CALENDARIA.Condition.Group.Mode.xor'}}</b>: {{localize 'CALENDARIA.Condition.Group.Mode.xorHint'}}<br><b>{{localize 'CALENDARIA.Condition.Group.Mode.count'}}</b>: {{localize 'CALENDARIA.Condition.Group.Mode.countHint'}}">
           {{#each modeOptions}}
             <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
           {{/each}}
         </select>
         {{#if isCountMode}}
-          {{localize "CALENDARIA.Common.Threshold"}}:
+          {{localize "ATLAS.Common.Threshold"}}:
           <input type="number" name="group.{{path}}.threshold" value="{{threshold}}" min="1" class="cb-threshold">
         {{/if}}
         {{#unless isRoot}}
@@ -44,7 +44,7 @@
   {{else}}
     <fieldset class="cb-condition" data-path="{{path}}">
       <legend class="cb-condition-legend">
-        {{localize "CALENDARIA.Condition.Builder.ConditionLabel"}} #{{conditionNumber}}
+        {{localize "ATLAS.Common.Condition"}} #{{conditionNumber}}
         <a class="cb-remove" data-action="removeEntry" data-path="{{path}}" data-tooltip
           aria-label="{{localize 'CALENDARIA.Condition.Builder.RemoveCondition'}}">
           <i class="fas fa-times"></i>
@@ -100,15 +100,15 @@
                 {{/each}}
               </select>
               <input type="number" name="condition.{{path}}.dateDay" value="{{dateDay}}" min="0" max="{{maxDay}}"
-                class="cb-date-day" placeholder="{{localize 'CALENDARIA.Common.Day'}}" data-tooltip
+                class="cb-date-day" placeholder="{{localize 'ATLAS.Common.Day'}}" data-tooltip
                 aria-label="{{localize 'CALENDARIA.Condition.Builder.Tooltip.DateDay'}}">
               <input type="number" name="condition.{{path}}.dateYear" value="{{dateYear}}" class="cb-date-year"
-                placeholder="{{localize 'CALENDARIA.Common.Year'}}" data-tooltip
+                placeholder="{{localize 'ATLAS.Common.Year'}}" data-tooltip
                 aria-label="{{localize 'CALENDARIA.Condition.Builder.Tooltip.DateYear'}}">
             </div>
           {{else}}
             <span class="cb-labeled-input">
-              <span class="cb-inline-label">{{localize "CALENDARIA.Condition.Builder.ValueLabel"}}</span>
+              <span class="cb-inline-label">{{localize "ATLAS.Common.Value"}}</span>
               <input type="number" name="condition.{{path}}.value" value="{{value}}" step="any" class="cb-value-input"
                 data-tooltip aria-label="{{localize 'CALENDARIA.Condition.Builder.Tooltip.Value'}}">
             </span>

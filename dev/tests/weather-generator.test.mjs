@@ -3,6 +3,7 @@ import {
   applyForecastVariance,
   applyTempModifier,
   applyWeatherInertia,
+  computeWeatherSeverity,
   dateSeed,
   generateForecast,
   generateIntradayWeather,
@@ -600,7 +601,10 @@ describe('generateIntradayWeather()', () => {
     for (let day = 0; day < 20; day++) {
       const result = generateIntradayWeather({ seasonClimate: climate, zoneConfig, year: 2024, month: 5, dayOfMonth: day, carryOverChance: 0 });
       const ids = Object.values(result.periods).map((p) => p.preset.id);
-      if (new Set(ids).size > 1) { anyDiffer = true; break; }
+      if (new Set(ids).size > 1) {
+        anyDiffer = true;
+        break;
+      }
     }
     expect(anyDiffer).toBe(true);
   });
@@ -612,7 +616,11 @@ describe('generateForecast() — intraday', () => {
 
   it('includes periods when intraday=true', () => {
     const forecast = generateForecast({
-      zoneConfig, startYear: 2024, startMonth: 5, startDayOfMonth: 10, days: 3,
+      zoneConfig,
+      startYear: 2024,
+      startMonth: 5,
+      startDayOfMonth: 10,
+      days: 3,
       getSeasonForDate: () => ({ name: 'Summer', climate }),
       intraday: true
     });
@@ -625,7 +633,11 @@ describe('generateForecast() — intraday', () => {
 
   it('does not include periods when intraday=false', () => {
     const forecast = generateForecast({
-      zoneConfig, startYear: 2024, startMonth: 5, startDayOfMonth: 10, days: 3,
+      zoneConfig,
+      startYear: 2024,
+      startMonth: 5,
+      startDayOfMonth: 10,
+      days: 3,
       getSeasonForDate: () => ({ name: 'Summer', climate }),
       intraday: false
     });
@@ -636,12 +648,68 @@ describe('generateForecast() — intraday', () => {
 
   it('chains cross-day via evening→night', () => {
     const forecast = generateForecast({
-      zoneConfig, startYear: 2024, startMonth: 5, startDayOfMonth: 10, days: 2,
+      zoneConfig,
+      startYear: 2024,
+      startMonth: 5,
+      startDayOfMonth: 10,
+      days: 2,
       getSeasonForDate: () => ({ name: 'Summer', climate }),
       intraday: true
     });
     // Day 2 exists and has period data
     expect(forecast[1].periods).toBeDefined();
     expect(forecast[1].periods.night).toBeDefined();
+  });
+});
+
+describe('computeWeatherSeverity', () => {
+  const clear = { temperature: 20, wind: { speed: 0 }, precipitation: { type: null, intensity: 0 }, darknessPenalty: 0 };
+
+  it('scores calm mild weather as 0', () => {
+    expect(computeWeatherSeverity(clear)).toBe(0);
+  });
+
+  it('scores missing or empty input as 0', () => {
+    expect(computeWeatherSeverity()).toBe(0);
+    expect(computeWeatherSeverity({})).toBe(0);
+  });
+
+  it('scores fog above zero from its drizzle intensity', () => {
+    expect(computeWeatherSeverity({ ...clear, temperature: 12, precipitation: { type: 'rain', intensity: 0.1 } })).toBe(1);
+  });
+
+  it('scores calm fog above zero from its darkness penalty alone', () => {
+    expect(computeWeatherSeverity({ ...clear, temperature: 8, darknessPenalty: 0.05 })).toBe(1);
+  });
+
+  it('scores a heat wave above zero from temperature alone', () => {
+    expect(computeWeatherSeverity({ ...clear, temperature: 42 })).toBe(4);
+  });
+
+  it('scores a lone top-of-scale hazard at its own value, halfway up the scale', () => {
+    expect(computeWeatherSeverity({ ...clear, temperature: -35 })).toBe(5);
+    expect(computeWeatherSeverity({ ...clear, precipitation: { type: 'rain', intensity: 0.95 } })).toBe(5);
+    expect(computeWeatherSeverity({ ...clear, wind: { speed: 5 } })).toBe(5);
+  });
+
+  it('ranks a hazard paired with a second one above that hazard alone', () => {
+    const windAlone = computeWeatherSeverity({ ...clear, wind: { speed: 5 } });
+    const windAndHail = computeWeatherSeverity({ ...clear, wind: { speed: 5 }, precipitation: { type: 'hail', intensity: 0.6 } });
+    expect(windAndHail).toBeGreaterThan(windAlone);
+    expect(windAndHail).toBe(7);
+  });
+
+  it('reserves the top of the scale for every hazard at once', () => {
+    expect(computeWeatherSeverity({ temperature: -35, wind: { speed: 5 }, precipitation: { intensity: 1 }, darknessPenalty: 1 })).toBe(10);
+  });
+
+  it('stacks lesser hazards at diminishing weight', () => {
+    expect(computeWeatherSeverity({ temperature: 42, wind: { speed: 2 }, precipitation: { intensity: 0.4 }, darknessPenalty: 0.1 })).toBe(6);
+    expect(computeWeatherSeverity({ ...clear, temperature: 28, wind: { speed: 1 }, precipitation: { intensity: 0.2 }, darknessPenalty: 0.2 })).toBe(2);
+  });
+
+  it('never scores lower when a hazard is added', () => {
+    const base = { ...clear, wind: { speed: 3 } };
+    expect(computeWeatherSeverity({ ...base, precipitation: { type: 'rain', intensity: 0.5 } })).toBeGreaterThanOrEqual(computeWeatherSeverity(base));
   });
 });

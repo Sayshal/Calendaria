@@ -45,6 +45,22 @@
       </fieldset>
     </div>
 
+    <fieldset class="subjects-fieldset">
+      <legend data-tooltip aria-label="{{localize 'CALENDARIA.Note.Tooltip.Subjects'}}">{{localize
+          "CALENDARIA.Note.Subjects"}}</legend>
+      <div class="subjects-dropzone" data-tooltip aria-label="{{localize 'CALENDARIA.Note.SubjectsHint'}}">
+        {{#each subjectEntries}}
+          <span class="subject-chip">
+            <a data-action="openSubject" data-uuid="{{this.uuid}}">{{this.name}}</a>
+            <a data-action="removeSubject" data-uuid="{{this.uuid}}" data-tooltip
+              aria-label="{{localize 'ATLAS.Common.Remove'}}"><i class="fas fa-times"></i></a>
+          </span>
+        {{else}}
+          <span class="subjects-empty">{{localize "CALENDARIA.Note.SubjectsEmpty"}}</span>
+        {{/each}}
+      </div>
+    </fieldset>
+
     <fieldset class="editor-fieldset">
       <legend data-tooltip aria-label="{{localize 'CALENDARIA.Note.Tooltip.Content'}}">
         {{localize "CALENDARIA.Note.Content"}}

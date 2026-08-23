@@ -117,10 +117,11 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#flushFormData();
     if (this.#isDirty) {
       const confirmed = await foundry.applications.api.DialogV2.confirm({
-        window: { title: _loc('CALENDARIA.Editor.UnsavedChanges') },
+        classes: ['calendaria'],
+        window: { title: 'ATLAS.Common.UnsavedChanges' },
         content: `<p>${_loc('CALENDARIA.Editor.UnsavedChangesMessage')}</p>`,
-        yes: { label: _loc('CALENDARIA.Editor.DiscardChanges'), icon: 'fas fa-trash' },
-        no: { label: _loc('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' },
+        yes: { label: 'CALENDARIA.Editor.DiscardChanges', icon: 'fas fa-trash' },
+        no: { label: 'ATLAS.Common.Cancel', icon: 'fas fa-times' },
         rejectClose: false
       });
       if (!confirmed) throw new Error('Close cancelled by user. This is not a bug.');
@@ -196,14 +197,14 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
     };
     const reminderTargetOptions = [
       { value: 'all', label: _loc('CALENDARIA.Note.ReminderTargetAll') },
-      { value: 'gm', label: _loc('CALENDARIA.Common.GMOnly') },
+      { value: 'gm', label: _loc('ATLAS.Common.GMOnly') },
       { value: 'author', label: _loc('CALENDARIA.Note.ReminderTargetAuthor') },
       { value: 'viewers', label: _loc('CALENDARIA.Note.ReminderTargetViewers') }
     ];
     const ownershipOptions = [
-      { value: 0, label: _loc('CALENDARIA.PresetManager.OwnershipNone') },
+      { value: 0, label: _loc('ATLAS.Common.None') },
       { value: 2, label: _loc('CALENDARIA.PresetManager.OwnershipObserver') },
-      { value: 3, label: _loc('CALENDARIA.PresetManager.OwnershipOwner') }
+      { value: 3, label: _loc('ATLAS.Common.Owner') }
     ];
     return {
       content: [
@@ -236,7 +237,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
           inputHtml: selectHtml('visibility', defaults.visibility, visibilityOptions),
           hint: _loc('CALENDARIA.PresetManager.DefaultVisibilityHint')
         },
-        { key: 'silent', label: _loc('CALENDARIA.Note.Silent'), inputHtml: checkboxHtml('silent', defaults.silent), hint: _loc('CALENDARIA.PresetManager.DefaultSilentHint') },
+        { key: 'silent', label: _loc('ATLAS.Common.Silent'), inputHtml: checkboxHtml('silent', defaults.silent), hint: _loc('CALENDARIA.PresetManager.DefaultSilentHint') },
         {
           key: 'displayStyle',
           label: _loc('CALENDARIA.Note.DisplayStyleLabel'),
@@ -316,7 +317,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
     const maxSort = this._presets.reduce((max, c) => Math.max(max, c.sortOrder ?? 0), -1);
     this._presets.push({
       id,
-      label: _loc('CALENDARIA.Common.NewPreset'),
+      label: _loc('ATLAS.Common.NewPreset'),
       color: '#4a90e2',
       icon: 'fas fa-bookmark',
       builtin: false,
@@ -362,7 +363,8 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
       return;
     }
     const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: _loc('CALENDARIA.Common.DeletePreset') },
+      classes: ['calendaria'],
+      window: { title: 'CALENDARIA.Common.DeletePreset' },
       content: `<p>${_loc('CALENDARIA.PresetManager.ConfirmDeleteMessage', { name: cat.label })}</p>`,
       yes: { default: false },
       rejectClose: false
@@ -383,7 +385,8 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static async #onRestorePresets(_event, _target) {
     const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: _loc('CALENDARIA.PresetManager.RestorePresets') },
+      classes: ['calendaria'],
+      window: { title: 'CALENDARIA.PresetManager.RestorePresets' },
       content: `<p>${_loc('CALENDARIA.PresetManager.RestorePresetsMessage')}</p>`,
       rejectClose: false
     });
@@ -421,7 +424,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
         <p class="hint">${_loc('CALENDARIA.Common.IconHint')}</p>
       </div>
       <div class="form-group">
-        <label>${_loc('CALENDARIA.Common.Color')}</label>
+        <label>${_loc('ATLAS.Common.Color')}</label>
         <div class="form-fields">
           <color-picker name="color" value="${cat.color}"></color-picker>
         </div>
@@ -429,12 +432,12 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
     `;
     const manager = this;
     new foundry.applications.api.DialogV2({
-      window: { title: _loc('CALENDARIA.SettingsPanel.Preset.EditIconColor'), contentClasses: ['calendaria', 'season-icon-dialog'] },
+      window: { title: 'CALENDARIA.SettingsPanel.Preset.EditIconColor', contentClasses: ['calendaria', 'season-icon-dialog'] },
       content,
       buttons: [
         {
           action: 'save',
-          label: _loc('CALENDARIA.Common.Save'),
+          label: 'ATLAS.Common.Save',
           icon: 'fas fa-save',
           default: true,
           callback: (_event, _button, dialog) => {
@@ -503,7 +506,8 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
       });
       if (affectedNotes.length) {
         const confirmed = await foundry.applications.api.DialogV2.confirm({
-          window: { title: _loc('CALENDARIA.PresetManager.UpdateNotesTitle') },
+          classes: ['calendaria'],
+          window: { title: 'CALENDARIA.PresetManager.UpdateNotesTitle' },
           content: `<p>${_loc('CALENDARIA.PresetManager.UpdateNotesContent', { count: affectedNotes.length })}</p>`,
           rejectClose: false,
           modal: true
@@ -526,7 +530,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
     this._originalPresets = structuredClone(this._presets);
     this.#isDirty = false;
     ui.notifications.clear();
-    ui.notifications.info(_loc('CALENDARIA.PresetManager.Saved'));
+    ui.notifications.info('CALENDARIA.PresetManager.Saved', { localize: true });
   }
 
   /**
@@ -538,10 +542,11 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
     const cat = this._presets.find((c) => c.id === this._selectedId);
     if (!cat) return;
     const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: _loc('CALENDARIA.Common.Reset') },
+      classes: ['calendaria'],
+      window: { title: 'ATLAS.Common.Reset' },
       content: `<p>${_loc('CALENDARIA.PresetManager.ResetPresetConfirm')}</p>`,
-      yes: { label: _loc('CALENDARIA.Common.Reset'), icon: 'fas fa-undo' },
-      no: { label: _loc('CALENDARIA.Common.Cancel'), icon: 'fas fa-times' },
+      yes: { label: 'ATLAS.Common.Reset', icon: 'fas fa-undo' },
+      no: { label: 'ATLAS.Common.Cancel', icon: 'fas fa-times' },
       rejectClose: false
     });
     if (!confirmed) return;
@@ -553,7 +558,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
       cat.color = seed.color;
       cat.playerUsable = cat.id === DEFAULT_PRESET_ID ? true : (seed.playerUsable ?? true);
     } else {
-      cat.label = _loc('CALENDARIA.Common.NewPreset');
+      cat.label = _loc('ATLAS.Common.NewPreset');
       cat.icon = 'fas fa-bookmark';
       cat.color = '#4a90e2';
       cat.playerUsable = true;
@@ -632,7 +637,7 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
         }
         const raw = importData.preset;
         const newId = foundry.utils.randomID();
-        let label = raw.label || _loc('CALENDARIA.Common.NewPreset');
+        let label = raw.label || _loc('ATLAS.Common.NewPreset');
         if (manager._presets.some((c) => c.label === label)) label = `${label} (Imported)`;
         const maxSort = manager._presets.reduce((max, c) => Math.max(max, c.sortOrder ?? 0), -1);
         manager._presets.push({
@@ -709,7 +714,8 @@ export class PresetManager extends HandlebarsApplicationMixin(ApplicationV2) {
       return;
     }
     const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: _loc('CALENDARIA.PresetManager.SyncTitle') },
+      classes: ['calendaria'],
+      window: { title: 'CALENDARIA.PresetManager.SyncTitle' },
       content: `<p>${_loc('CALENDARIA.PresetManager.SyncConfirm', { count: affected.length, name: preset.label })}</p>`,
       rejectClose: false,
       modal: true

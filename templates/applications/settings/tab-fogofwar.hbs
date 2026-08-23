@@ -18,16 +18,16 @@
     <div class="form-group">
       <label>{{localize "CALENDARIA.Settings.FogOfWar.StartDate"}}</label>
       <div class="form-fields">
-        <label class="inline-label">{{localize "CALENDARIA.Common.Year"}}</label>
+        <label class="inline-label">{{localize "ATLAS.Common.Year"}}</label>
         <input type="number" name="fogStartYear" value="{{fogStartYear}}" />
-        <label class="inline-label">{{localize "CALENDARIA.Common.Month"}}</label>
+        <label class="inline-label">{{localize "ATLAS.Common.Month"}}</label>
         <select name="fogStartMonth" data-action="fogStartMonthChanged">
           <option value="">—</option>
           {{#each fogStartMonths}}
             <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
           {{/each}}
         </select>
-        <label class="inline-label">{{localize "CALENDARIA.Common.Day"}}</label>
+        <label class="inline-label">{{localize "ATLAS.Common.Day"}}</label>
         <select name="fogStartDay">
           <option value="">—</option>
           {{#each fogStartDays}}
@@ -77,7 +77,7 @@
   </fieldset>
 
   <fieldset data-section="fog-of-war-reset">
-    <legend>{{localize "CALENDARIA.Common.Reset"}}</legend>
+    <legend>{{localize "ATLAS.Common.Reset"}}</legend>
     <div class="form-group">
       <label>{{localize "CALENDARIA.Settings.FogOfWar.ResetRanges"}}</label>
       <div class="form-fields">

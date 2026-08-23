@@ -10,9 +10,24 @@ export function registerNoteQueries(quench) {
       before(async function () {
         api = CALENDARIA.api;
         const dt = api.getCurrentDateTime();
-        const note1 = await api.createNote({ name: `${TEST_NOTE_PREFIX} Query A`, content: 'Alpha content for searching', startDate: { year: dt.year, month: dt.month, day: dt.day + 1 }, categories: ['event'] });
-        const note2 = await api.createNote({ name: `${TEST_NOTE_PREFIX} Query B`, content: 'Beta content unique', startDate: { year: dt.year, month: dt.month, day: dt.day + 2 }, categories: ['reminder'] });
-        const note3 = await api.createNote({ name: `${TEST_NOTE_PREFIX} Query C`, content: 'Alpha recurring text', startDate: { year: dt.year, month: dt.month, day: dt.day + 3 }, categories: ['event'] });
+        const note1 = await api.createNote({
+          name: `${TEST_NOTE_PREFIX} Query A`,
+          content: 'Alpha content for searching',
+          startDate: { year: dt.year, month: dt.month, day: dt.day + 1 },
+          categories: ['event']
+        });
+        const note2 = await api.createNote({
+          name: `${TEST_NOTE_PREFIX} Query B`,
+          content: 'Beta content unique',
+          startDate: { year: dt.year, month: dt.month, day: dt.day + 2 },
+          categories: ['reminder']
+        });
+        const note3 = await api.createNote({
+          name: `${TEST_NOTE_PREFIX} Query C`,
+          content: 'Alpha recurring text',
+          startDate: { year: dt.year, month: dt.month, day: dt.day + 3 },
+          categories: ['event']
+        });
         noteIds = [note1?.id, note2?.id, note3?.id].filter(Boolean);
       });
 

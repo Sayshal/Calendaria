@@ -1,5 +1,3 @@
-/* global PIXI */
-
 import { HOOKS, MODULE, SETTINGS, SOCKET_TYPES, TEMPLATES } from '../../constants.mjs';
 import { TimeClock } from '../../time/_module.mjs';
 import {
@@ -783,7 +781,8 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
       </div>
     `;
     const result = await foundry.applications.api.DialogV2.wait({
-      window: { title: _loc('CALENDARIA.Stopwatch.ConfigureNotification'), icon: 'fas fa-bell' },
+      classes: ['calendaria'],
+      window: { title: 'CALENDARIA.Stopwatch.ConfigureNotification', icon: 'fas fa-bell' },
       content,
       render: (_event, dialog) => {
         const form = dialog.element.querySelector('form');
@@ -802,7 +801,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
       buttons: [
         {
           action: 'save',
-          label: _loc('CALENDARIA.Common.Save'),
+          label: 'ATLAS.Common.Save',
           icon: 'fas fa-save',
           callback: (_event, _button, dialog) => {
             const form = dialog.element.querySelector('form');
@@ -814,7 +813,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
         },
         {
           action: 'clear',
-          label: _loc('CALENDARIA.Common.ClearAction'),
+          label: 'CALENDARIA.Common.ClearAction',
           icon: 'fas fa-times',
           callback: () => ({ threshold: null, type: null, sound: null })
         }
@@ -1173,7 +1172,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
       });
     }
     items.push(buildOpenAppsMenuItem());
-    items.push({ label: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', onClick: () => this.close() });
+    items.push({ label: 'ATLAS.Common.Close', icon: '<i class="fas fa-times"></i>', onClick: () => this.close() });
     return items;
   }
 

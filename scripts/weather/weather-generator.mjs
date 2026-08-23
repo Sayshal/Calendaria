@@ -273,6 +273,40 @@ export function rollPresetTemperature({ presetId, seasonClimate, zoneConfig, sea
 }
 
 /**
+ * Score a Celsius temperature against fixed heat/cold extreme bands.
+ * @param {number|null} temperature - Temperature in Celsius
+ * @returns {number} Extremity score 0-5
+ */
+function temperatureScore(temperature) {
+  if (temperature == null || !Number.isFinite(temperature)) return 0;
+  if (temperature >= 45 || temperature <= -30) return 5;
+  if (temperature >= 40 || temperature <= -20) return 4;
+  if (temperature >= 35 || temperature <= -10) return 3;
+  if (temperature >= 30 || temperature <= -5) return 2;
+  if (temperature >= 27 || temperature <= 0) return 1;
+  return 0;
+}
+
+/**
+ * Weights applied to the hazards in descending order of their own 0-5 score.
+ * @type {number[]}
+ */
+const SEVERITY_WEIGHTS = [1, 0.5, 0.25, 0.25];
+
+/**
+ * Derive a 0-10 hazard severity by stacking wind, precipitation, temperature, and darkness scores in descending weight.
+ * @param {object} [weather] - Weather state { wind, precipitation, temperature, darknessPenalty }
+ * @returns {number} Severity 0-10
+ */
+export function computeWeatherSeverity(weather) {
+  const scores = [weather?.wind?.speed ?? 0, Math.ceil((weather?.precipitation?.intensity ?? 0) * 5), temperatureScore(weather?.temperature), Math.ceil((weather?.darknessPenalty ?? 0) * 5)].sort(
+    (a, b) => b - a
+  );
+  const stacked = scores.reduce((total, score, index) => total + score * SEVERITY_WEIGHTS[index], 0);
+  return Math.max(0, Math.min(10, Math.round(stacked)));
+}
+
+/**
  * Generate weather for all 4 intraday periods with chained inertia.
  * Period order: night → morning → afternoon → evening.
  * @param {object} options - Generation options

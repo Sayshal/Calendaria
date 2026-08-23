@@ -14,7 +14,7 @@
     </div>
     {{#unless isMonthless}}
       <div class="form-group">
-        <label>{{localize "CALENDARIA.Common.Month"}}</label>
+        <label>{{localize "ATLAS.Common.Month"}}</label>
         <div class="form-fields">
           <select name="month">
             {{#each months}}
@@ -25,7 +25,7 @@
       </div>
     {{/unless}}
     <div class="form-group">
-      <label>{{localize "CALENDARIA.Common.Year"}}</label>
+      <label>{{localize "ATLAS.Common.Year"}}</label>
       <div class="form-fields">
         <input type="number" name="year" value="{{year}}" step="1">
       </div>
@@ -34,7 +34,7 @@
 
   {{!-- Time Section --}}
   <fieldset>
-    <legend>{{localize "CALENDARIA.Common.Time"}}</legend>
+    <legend>{{localize "ATLAS.Common.Time"}}</legend>
     <div class="form-group">
       <label>{{localize "CALENDARIA.Common.Hour"}}</label>
       <div class="form-fields">
@@ -76,7 +76,7 @@
                   <input type="text" class="timepoint-name-input" value="{{name}}" maxlength="50">
                 {{else}}
                   <div class="timepoint-info" data-action="editTimepointName" data-tooltip
-                    aria-label="{{localize 'CALENDARIA.SetDate.EditName'}}">
+                    aria-label="{{localize 'ATLAS.Common.ClickToRename'}}">
                     <span class="timepoint-name">{{name}}</span>
                     <span class="timepoint-date">{{formattedDate}} {{formattedTime}}</span>
                   </div>

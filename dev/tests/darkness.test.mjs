@@ -1,12 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { calculateAdjustedDarkness, calculateDarknessFromTime, calculateMoonIllumination, calculateTimeOfDayColor } from '../../scripts/time/darkness.mjs';
+import { calculateAdjustedDarkness, calculateDarknessFromTime, calculateMoonIllumination, calculateSolarEclipseDarkness, calculateTimeOfDayColor } from '../../scripts/time/darkness.mjs';
+import { ECLIPSE_TYPES, getEclipseAtDate } from '../../scripts/utils/eclipse-calculator.mjs';
 import { getMoonPhasePosition } from '../../scripts/utils/formatting/moon-utils.mjs';
 import WeatherManager from '../../scripts/weather/weather-manager.mjs';
 
 vi.mock('../../scripts/utils/logger.mjs', () => ({ log: vi.fn() }));
-vi.mock('../../scripts/utils/socket.mjs', () => ({ CalendariaSocket: { isPrimaryGM: vi.fn(() => true), emit: vi.fn() } }));
+vi.mock('../../scripts/utils/socket.mjs', () => ({ CalendariaSocket: { emit: vi.fn() } }));
 vi.mock('../../scripts/weather/weather-manager.mjs', () => ({ default: { getActiveZone: vi.fn(() => null), getCurrentWeather: vi.fn(() => null), getCalendarZones: vi.fn(() => []) } }));
-vi.mock('../../scripts/constants.mjs', async (importOriginal) => ({ ...(await importOriginal()),
+vi.mock('../../scripts/constants.mjs', async (importOriginal) => ({
+  ...(await importOriginal()),
   MODULE: { ID: 'calendaria' },
   SETTINGS: {
     DEFAULT_BRIGHTNESS_MULTIPLIER: 'defaultBrightnessMultiplier',
@@ -17,10 +19,16 @@ vi.mock('../../scripts/constants.mjs', async (importOriginal) => ({ ...(await im
     DARKNESS_SYNC: 'darknessSync',
     DARKNESS_SYNC_ALL_SCENES: 'darknessSyncAllScenes'
   },
-  SCENE_FLAGS: { BRIGHTNESS_MULTIPLIER: 'brightnessMultiplier', DARKNESS_SYNC: 'darknessSync', HUD_HIDE_FOR_PLAYERS: 'hudHideForPlayers', CLIMATE_ZONE_OVERRIDE: 'climateZoneOverride', WEATHER_FX_DISABLED: 'weatherFxDisabled' },
+  SCENE_FLAGS: {
+    BRIGHTNESS_MULTIPLIER: 'brightnessMultiplier',
+    DARKNESS_SYNC: 'darknessSync',
+    HUD_HIDE_FOR_PLAYERS: 'hudHideForPlayers',
+    CLIMATE_ZONE_OVERRIDE: 'climateZoneOverride'
+  },
   SOCKET_TYPES: { HUD_VISIBILITY: 'hudVisibility' }
 }));
 vi.mock('../../scripts/utils/formatting/moon-utils.mjs', () => ({ getMoonPhasePosition: vi.fn(() => 0.5) }));
+vi.mock('../../scripts/utils/eclipse-calculator.mjs', async (importOriginal) => ({ ...(await importOriginal()), getEclipseAtDate: vi.fn(() => ({ type: null })) }));
 
 describe('calculateDarknessFromTime()', () => {
   it('returns maximum darkness at midnight (hour 0) with no sunrise/sunset', () => {
@@ -128,6 +136,7 @@ describe('calculateAdjustedDarkness()', () => {
     game.settings.get.mockReturnValue(null);
     WeatherManager.getActiveZone.mockReturnValue(null);
     WeatherManager.getCurrentWeather.mockReturnValue(null);
+    getEclipseAtDate.mockReturnValue({ type: null });
   });
   it('returns clamped value between 0 and 1', () => {
     game.settings.get.mockReturnValue(1.0);
@@ -160,12 +169,50 @@ describe('calculateAdjustedDarkness()', () => {
       if (key === 'defaultBrightnessMultiplier') return 1.0;
       return null;
     });
-    game.time.calendar = { moonsArray: [{ name: 'Luna', cycleLength: 29.5, moonBrightnessMax: 0.15, referenceDate: { year: 2000, month: 0, dayOfMonth: 5 } }], days: { hoursPerDay: 24, minutesPerHour: 60 } };
+    game.time.calendar = {
+      moonsArray: [{ name: 'Luna', cycleLength: 29.5, moonBrightnessMax: 0.15, referenceDate: { year: 2000, month: 0, dayOfMonth: 5 } }],
+      days: { hoursPerDay: 24, minutesPerHour: 60 }
+    };
     game.time.components = { year: 1, month: 0, dayOfMonth: 0, hour: 0, minute: 0 };
     const scene = { getFlag: vi.fn(() => null) };
     const baseDarkness = 0.8;
     const result = calculateAdjustedDarkness(baseDarkness, scene);
     expect(result).toBeLessThanOrEqual(baseDarkness);
+  });
+  it('clamps deep night to the full-moon floor', () => {
+    getMoonPhasePosition.mockReturnValue(0.5);
+    game.settings.get.mockImplementation((_module, key) => {
+      if (key === 'darknessMoonSync') return true;
+      if (key === 'defaultBrightnessMultiplier') return 1.0;
+      return null;
+    });
+    game.time.calendar = { moonsArray: [{ name: 'Luna', cycleLength: 29.5, moonBrightnessMax: 0.15, referenceDate: { year: 0, month: 0, dayOfMonth: 0 } }] };
+    const result = calculateAdjustedDarkness(1.0, { getFlag: vi.fn(() => null) });
+    expect(result).toBeCloseTo(0.85, 5);
+  });
+  it('restores the uncapped night ramp during a total lunar eclipse', () => {
+    getMoonPhasePosition.mockReturnValue(0.5);
+    game.settings.get.mockImplementation((_module, key) => {
+      if (key === 'darknessMoonSync') return true;
+      if (key === 'defaultBrightnessMultiplier') return 1.0;
+      return null;
+    });
+    game.time.calendar = { moonsArray: [{ name: 'Luna', cycleLength: 29.5, moonBrightnessMax: 0.15, referenceDate: { year: 0, month: 0, dayOfMonth: 0 } }] };
+    getEclipseAtDate.mockReturnValue({ type: ECLIPSE_TYPES.TOTAL_LUNAR });
+    const result = calculateAdjustedDarkness(1.0, { getFlag: vi.fn(() => null) });
+    expect(result).toBeGreaterThan(0.98);
+  });
+  it('darkens daytime during a total solar eclipse', () => {
+    getMoonPhasePosition.mockReturnValue(0);
+    game.settings.get.mockImplementation((_module, key) => {
+      if (key === 'darknessMoonSync') return true;
+      if (key === 'defaultBrightnessMultiplier') return 1.0;
+      return null;
+    });
+    game.time.calendar = { moonsArray: [{ name: 'Luna', cycleLength: 29.5, moonBrightnessMax: 0.15, referenceDate: { year: 0, month: 0, dayOfMonth: 0 } }] };
+    getEclipseAtDate.mockReturnValue({ type: ECLIPSE_TYPES.TOTAL_SOLAR });
+    const result = calculateAdjustedDarkness(0.1, { getFlag: vi.fn(() => null) });
+    expect(result).toBeCloseTo(0.9, 5);
   });
   it('applies weather darkness penalty when weatherSync enabled', () => {
     game.settings.get.mockImplementation((_module, key) => {
@@ -202,32 +249,60 @@ describe('calculateMoonIllumination()', () => {
   beforeEach(() => {
     game.time.calendar = null;
     game.time.components = { year: 1, month: 0, dayOfMonth: 0, hour: 0, minute: 0, second: 0 };
+    getEclipseAtDate.mockReturnValue({ type: null });
   });
-  it('returns zero reduction when darkness < 0.5 (daytime)', () => {
+  it('returns zero illumination when darkness < 0.5 (daytime)', () => {
     const result = calculateMoonIllumination(0.3);
-    expect(result.reduction).toBe(0);
+    expect(result.illumination).toBe(0);
     expect(result.hue).toBeNull();
     expect(result.intensity).toBeNull();
     expect(result.luminosity).toBeNull();
   });
-  it('returns zero reduction when no calendar moons', () => {
+  it('returns zero illumination when no calendar moons', () => {
     game.time.calendar = { moonsArray: [] };
     const result = calculateMoonIllumination(0.8);
-    expect(result.reduction).toBe(0);
+    expect(result.illumination).toBe(0);
   });
-  it('returns zero reduction when calendar has no moonsArray', () => {
+  it('returns zero illumination when calendar has no moonsArray', () => {
     game.time.calendar = {};
     const result = calculateMoonIllumination(0.8);
-    expect(result.reduction).toBe(0);
+    expect(result.illumination).toBe(0);
   });
-  it('calculates reduction for a full moon at night', () => {
+  it('calculates illumination for a full moon at night', () => {
     getMoonPhasePosition.mockReturnValue(0.5);
     game.time.calendar = { moonsArray: [{ name: 'Luna', cycleLength: 29.5, moonBrightnessMax: 0.15, referenceDate: { year: 0, month: 0, dayOfMonth: 0 } }] };
     const result = calculateMoonIllumination(0.8);
-    expect(result.reduction).toBeGreaterThan(0);
-    expect(result.reduction).toBeLessThanOrEqual(0.3);
+    expect(result.illumination).toBeCloseTo(0.15, 5);
   });
-  it('caps reduction at 0.3', () => {
+  it('dims illumination through the lunar eclipse subtypes', () => {
+    getMoonPhasePosition.mockReturnValue(0.5);
+    game.time.calendar = { moonsArray: [{ name: 'Luna', cycleLength: 29.5, moonBrightnessMax: 0.15, referenceDate: { year: 0, month: 0, dayOfMonth: 0 } }] };
+    getEclipseAtDate.mockReturnValue({ type: ECLIPSE_TYPES.PENUMBRAL_LUNAR });
+    const penumbral = calculateMoonIllumination(0.8).illumination;
+    getEclipseAtDate.mockReturnValue({ type: ECLIPSE_TYPES.PARTIAL_LUNAR });
+    const partial = calculateMoonIllumination(0.8).illumination;
+    getEclipseAtDate.mockReturnValue({ type: ECLIPSE_TYPES.TOTAL_LUNAR });
+    const total = calculateMoonIllumination(0.8).illumination;
+    expect(penumbral).toBeLessThan(0.15);
+    expect(partial).toBeLessThan(penumbral);
+    expect(total).toBeLessThan(partial);
+  });
+  it('tints the moon glow red during lunar totality', () => {
+    getMoonPhasePosition.mockReturnValue(0.5);
+    game.time.calendar = { moonsArray: [{ name: 'Luna', cycleLength: 29.5, moonBrightnessMax: 0.15, referenceDate: { year: 0, month: 0, dayOfMonth: 0 } }] };
+    getEclipseAtDate.mockReturnValue({ type: ECLIPSE_TYPES.TOTAL_LUNAR });
+    const result = calculateMoonIllumination(0.8);
+    expect(result.hue).toBe(0);
+    expect(result.intensity).toBeGreaterThan(0);
+  });
+  it('leaves a solar eclipse out of the moonlight term', () => {
+    getMoonPhasePosition.mockReturnValue(0.5);
+    game.time.calendar = { moonsArray: [{ name: 'Luna', cycleLength: 29.5, moonBrightnessMax: 0.15, referenceDate: { year: 0, month: 0, dayOfMonth: 0 } }] };
+    getEclipseAtDate.mockReturnValue({ type: ECLIPSE_TYPES.TOTAL_SOLAR });
+    const result = calculateMoonIllumination(0.8);
+    expect(result.illumination).toBeCloseTo(0.15, 5);
+  });
+  it('caps illumination at 0.3', () => {
     getMoonPhasePosition.mockReturnValue(0.5);
     game.time.calendar = {
       moonsArray: [
@@ -237,26 +312,19 @@ describe('calculateMoonIllumination()', () => {
       ]
     };
     const result = calculateMoonIllumination(1.0);
-    expect(result.reduction).toBeLessThanOrEqual(0.3);
+    expect(result.illumination).toBeLessThanOrEqual(0.3);
   });
   it('uses default moonBrightnessMax of 0.15 when not specified', () => {
     getMoonPhasePosition.mockReturnValue(0.5);
     game.time.calendar = { moonsArray: [{ name: 'Luna', cycleLength: 29.5, referenceDate: { year: 0, month: 0, dayOfMonth: 0 } }] };
     const result = calculateMoonIllumination(0.8);
-    expect(result.reduction).toBeGreaterThan(0);
+    expect(result.illumination).toBeGreaterThan(0);
   });
-  it('scales reduction with nightFactor (deeper night = more moon effect)', () => {
-    getMoonPhasePosition.mockReturnValue(0.5);
-    game.time.calendar = { moonsArray: [{ name: 'Luna', cycleLength: 29.5, moonBrightnessMax: 0.15, referenceDate: { year: 0, month: 0, dayOfMonth: 0 } }] };
-    const resultLight = calculateMoonIllumination(0.6);
-    const resultDark = calculateMoonIllumination(1.0);
-    expect(resultDark.reduction).toBeGreaterThan(resultLight.reduction);
-  });
-  it('returns no reduction for new moon (position 0)', () => {
+  it('returns no illumination for new moon (position 0)', () => {
     getMoonPhasePosition.mockReturnValue(0);
     game.time.calendar = { moonsArray: [{ name: 'Luna', cycleLength: 29.5, moonBrightnessMax: 0.15, referenceDate: { year: 0, month: 0, dayOfMonth: 0 } }] };
     const result = calculateMoonIllumination(0.8);
-    expect(result.reduction).toBeCloseTo(0, 5);
+    expect(result.illumination).toBeCloseTo(0, 5);
   });
   it('calculates hue from colored moons', () => {
     getMoonPhasePosition.mockReturnValue(0.5);
@@ -281,9 +349,40 @@ describe('calculateMoonIllumination()', () => {
   });
   it('returns expected structure', () => {
     const result = calculateMoonIllumination(0.3);
-    expect(result).toHaveProperty('reduction');
+    expect(result).toHaveProperty('illumination');
     expect(result).toHaveProperty('hue');
     expect(result).toHaveProperty('intensity');
     expect(result).toHaveProperty('luminosity');
+  });
+});
+
+describe('calculateSolarEclipseDarkness()', () => {
+  beforeEach(() => {
+    game.time.calendar = { moonsArray: [{ name: 'Luna', cycleLength: 29.5, referenceDate: { year: 0, month: 0, dayOfMonth: 0 } }] };
+    game.time.components = { year: 1, month: 0, dayOfMonth: 0, hour: 12, minute: 0, second: 0 };
+    getEclipseAtDate.mockReturnValue({ type: null });
+  });
+  it('returns 0 without an eclipse', () => {
+    expect(calculateSolarEclipseDarkness()).toBe(0);
+  });
+  it('returns 0 when the calendar has no moons', () => {
+    game.time.calendar = { moonsArray: [] };
+    getEclipseAtDate.mockReturnValue({ type: ECLIPSE_TYPES.TOTAL_SOLAR });
+    expect(calculateSolarEclipseDarkness()).toBe(0);
+  });
+  it('ranks the solar subtypes by obscuration', () => {
+    getEclipseAtDate.mockReturnValue({ type: ECLIPSE_TYPES.PARTIAL_SOLAR });
+    const partial = calculateSolarEclipseDarkness();
+    getEclipseAtDate.mockReturnValue({ type: ECLIPSE_TYPES.ANNULAR_SOLAR });
+    const annular = calculateSolarEclipseDarkness();
+    getEclipseAtDate.mockReturnValue({ type: ECLIPSE_TYPES.TOTAL_SOLAR });
+    const total = calculateSolarEclipseDarkness();
+    expect(partial).toBeGreaterThan(0);
+    expect(annular).toBeGreaterThan(partial);
+    expect(total).toBeGreaterThan(annular);
+  });
+  it('ignores lunar eclipses', () => {
+    getEclipseAtDate.mockReturnValue({ type: ECLIPSE_TYPES.TOTAL_LUNAR });
+    expect(calculateSolarEclipseDarkness()).toBe(0);
   });
 });

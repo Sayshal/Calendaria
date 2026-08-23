@@ -2,6 +2,7 @@ import { CalendarManager, CalendarRegistry, getEquivalentDates } from '../../cal
 import { HOOKS, MODULE, REPLACEABLE_ELEMENTS, SETTINGS, SOCKET_TYPES, TEMPLATES, WIDGET_POINTS } from '../../constants.mjs';
 import {
   NoteManager,
+  clampViewedYear,
   clearDisplayPropsCache,
   dayOfWeek,
   enrichNoteForDisplay,
@@ -16,6 +17,7 @@ import { TimeClock, getTimeIncrements } from '../../time/_module.mjs';
 import {
   CalendariaSocket,
   attachWidgetListeners,
+  buildCycleMonthPlan,
   buildOpenAppsMenuItem,
   buildWeatherLookup,
   buildWeatherPillData,
@@ -41,7 +43,6 @@ import {
   getEquivalentDateTooltip,
   getFestivalNoteForDay,
   getFirstMoonPhase,
-  buildCycleMonthPlan,
   getLeadingDays,
   getRestorePosition,
   getSelectedMoon,
@@ -81,6 +82,7 @@ import { WeatherManager } from '../../weather/_module.mjs';
 import { BigCal, NoteViewer, SecondaryCalendar, SettingsPanel, WeatherPickerApp } from '../_module.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
+const ctxMenu = foundry.applications.ux.ContextMenu.implementation;
 
 /**
  * MiniCal widget combining mini month view with time controls.
@@ -214,7 +216,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {object} date - The date to view
    */
   set viewedDate(date) {
-    this._viewedDate = date;
+    this._viewedDate = clampViewedYear(date, this.calendar);
   }
 
   /**
@@ -433,7 +435,8 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       windKph,
       windDirection,
       precipType,
-      precipIntensity: weather.precipitation?.intensity
+      precipIntensity: weather.precipitation?.intensity,
+      severity: WeatherManager.getSeverity(weather)
     });
     return { id: weather.id, label, icon: weather.icon, color: weather.color, temperature: temp, tooltipHtml, windSpeed, windKph, windDirection, precipType };
   }
@@ -663,6 +666,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const weekNumber = Math.floor(viewedDayOfMonth / daysInWeek);
     const totalWeeks = Math.ceil(daysInYear / daysInWeek);
     const fogEnabled = isFogEnabled();
+    const weatherLookup = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_WEATHER) ? buildWeatherLookup() : null;
     const weeks = [];
     for (let weekOffset = -1; weekOffset <= 1; weekOffset++) {
       const targetWeek = weekNumber + weekOffset;
@@ -687,6 +691,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
         const noteTextColor = noteColor ? MiniCal._getContrastTextColor(noteColor) : null;
         const festivalDay = dayIsFogged ? null : calendar.findFestivalDay({ year: dayYear - yearZero, month: 0, dayOfMonth });
         const moonData = !dayIsFogged ? getFirstMoonPhase(calendar, dayYear, 0, dayOfMonth) : null;
+        const wd = !dayIsFogged && weatherLookup ? getDayWeather(dayYear, 0, dayOfMonth, weatherLookup, weatherLookup.lookup) : null;
         const isIntercalary = festivalDay?.countsForWeekday === false;
         const festivalNameStr = festivalDay ? _loc(festivalDay.name) : null;
         const festivalInfo = festivalDay ? { name: festivalNameStr, description: festivalDay.description || '', color: festivalDay.color || '' } : null;
@@ -708,11 +713,15 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
           festivalName: dayIsFogged ? null : festivalNameStr,
           festivalColor: dayIsFogged ? '' : festivalDay?.color || '',
           festivalDescription: dayIsFogged ? '' : festivalDay?.description || '',
-          dayTooltip: dayIsFogged ? '' : generateDayTooltip(calendar, dayYear, 0, dayOfMonth, festivalInfo),
+          dayTooltip: dayIsFogged ? '' : generateDayTooltip(calendar, dayYear, 0, dayOfMonth, festivalInfo, wd, noteInfo.enriched),
           moonIcon: moonData?.icon ?? null,
           moonPhase: moonData?.tooltip ?? null,
           moonColor: moonData?.color ?? null,
-          isFromOtherWeek: weekOffset !== 0
+          isFromOtherWeek: weekOffset !== 0,
+          weatherIcon: wd?.icon ?? null,
+          weatherColor: wd?.color ?? null,
+          weatherTooltipHtml: buildWeatherPillData(wd).weatherTooltipHtml,
+          isForecast: wd?.isForecast ?? false
         };
         if (isIntercalary) dayData.isIntercalary = true;
         currentWeek.push(dayData);
@@ -811,7 +820,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
           const endTime = this._formatTime(end?.hour, end?.minute);
           timeLabel = `${startTime} - ${endTime}`;
         }
-        const authorName = enriched.author || _loc('CALENDARIA.Common.Unknown');
+        const authorName = enriched.author || _loc('ATLAS.Common.Unknown');
         let repeatLabel = MiniCal._getRepeatLabel(page.system.repeat);
         if (!repeatLabel && page.system.conditionTree) {
           const calendar = CalendarManager.getActiveCalendar();
@@ -894,7 +903,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     lines.push(`<strong style="color: ${enriched.color}">${esc(enriched.name)}</strong>`);
     lines.push(`<span>${esc(timeLabel)}</span>`);
     if (enriched.visibility !== 'visible') {
-      const visKey = enriched.visibility === 'hidden' ? 'CALENDARIA.Common.Hidden' : 'CALENDARIA.Note.Visibility.Secret';
+      const visKey = enriched.visibility === 'hidden' ? 'ATLAS.Common.Hidden' : 'CALENDARIA.Note.Visibility.Secret';
       const visIcon = enriched.visibility === 'hidden' ? 'fa-eye-slash' : 'fa-lock';
       lines.push(`<span><i class="fas ${visIcon}"></i> ${esc(_loc(visKey))}</span>`);
     }
@@ -986,7 +995,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       if (e.target.closest('#context-menu, .minical-day')) return;
       e.preventDefault();
       document.getElementById('context-menu')?.remove();
-      const menu = new foundry.applications.ux.ContextMenu.implementation(this.element, '.minical-container', this.#getContextMenuItems(), {
+      const menu = new ctxMenu(this.element, '.minical-container', this.#getContextMenuItems(), {
         fixed: true,
         jQuery: false,
         onOpen: () => document.getElementById('context-menu')?.classList.add('calendaria')
@@ -1102,16 +1111,11 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#hooks.push({ name: HOOKS.WEATHER_CHANGE, id: Hooks.on(HOOKS.WEATHER_CHANGE, () => debouncedRender()) });
     this.#hooks.push({ name: HOOKS.WIDGETS_REFRESH, id: Hooks.on(HOOKS.WIDGETS_REFRESH, () => this.render()) });
     this.#hooks.push({ name: HOOKS.DISPLAY_FORMATS_CHANGED, id: Hooks.on(HOOKS.DISPLAY_FORMATS_CHANGED, () => this.render()) });
-    new foundry.applications.ux.ContextMenu.implementation(
-      this.element,
-      '.minical-container',
-      [{ label: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', onClick: () => MiniCal.hide() }],
-      {
-        fixed: true,
-        jQuery: false,
-        onOpen: () => document.getElementById('context-menu')?.classList.add('calendaria')
-      }
-    );
+    new ctxMenu(this.element, '.minical-container', [{ label: 'ATLAS.Common.Close', icon: '<i class="fas fa-times"></i>', onClick: () => MiniCal.hide() }], {
+      fixed: true,
+      jQuery: false,
+      onOpen: () => document.getElementById('context-menu')?.classList.add('calendaria')
+    });
   }
 
   /** @override */
@@ -1316,7 +1320,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       onClick: () => this._toggleStickyPosition()
     });
     items.push(buildOpenAppsMenuItem());
-    items.push({ label: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', onClick: () => MiniCal.hide() });
+    items.push({ label: 'ATLAS.Common.Close', icon: '<i class="fas fa-times"></i>', onClick: () => MiniCal.hide() });
     return items;
   }
 
@@ -1745,7 +1749,8 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     if (confirmEnabled) {
       const dateStr = this._formatSelectedDate();
       const confirmed = await foundry.applications.api.DialogV2.confirm({
-        window: { title: _loc('CALENDARIA.MiniCal.SetCurrentDate') },
+        classes: ['calendaria'],
+        window: { title: 'CALENDARIA.MiniCal.SetCurrentDate' },
         content: `<p>${_loc('CALENDARIA.MiniCal.SetCurrentDateConfirm', { date: dateStr })}</p>`,
         rejectClose: false,
         modal: true
@@ -1821,9 +1826,10 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const options = calendars.map((c) => `<option value="${c.id}">${c.name}</option>`).join('');
     const content = `<form><div class="form-group"><label>${_loc('CALENDARIA.Common.Calendar')}</label><select name="calendarId">${options}</select></div></form>`;
     const result = await foundry.applications.api.DialogV2.prompt({
-      window: { title: _loc('CALENDARIA.MiniCal.SecondaryCalendar') },
+      classes: ['calendaria'],
+      window: { title: 'CALENDARIA.MiniCal.SecondaryCalendar' },
       content,
-      ok: { label: _loc('CALENDARIA.Common.Open'), callback: (_event, button) => button.form.elements.calendarId.value }
+      ok: { label: 'CALENDARIA.Common.Open', callback: (_event, button) => button.form.elements.calendarId.value }
     });
     if (result) SecondaryCalendar.open(result);
   }
@@ -2004,11 +2010,11 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
       round: _loc('CALENDARIA.Common.Round'),
       minute: _loc('CALENDARIA.Common.Minute'),
       hour: _loc('CALENDARIA.Common.Hour'),
-      day: _loc('CALENDARIA.Common.Day'),
+      day: _loc('ATLAS.Common.Day'),
       week: _loc('CALENDARIA.Common.Week'),
-      month: _loc('CALENDARIA.Common.Month'),
+      month: _loc('ATLAS.Common.Month'),
       season: _loc('CALENDARIA.Common.Season'),
-      year: _loc('CALENDARIA.Common.Year')
+      year: _loc('ATLAS.Common.Year')
     };
     return labels[key] || key;
   }

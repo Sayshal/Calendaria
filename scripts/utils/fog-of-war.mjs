@@ -1,7 +1,6 @@
 import { CalendarManager, CalendarRegistry } from '../calendar/_module.mjs';
 import { HOOKS, MODULE, SETTINGS } from '../constants.mjs';
 import { addDays, compareDays } from '../notes/_module.mjs';
-import { CalendariaSocket } from './socket.mjs';
 
 /** @type {Map<string, Array<{start: object, end: object}>>|null} Cached revealed ranges per calendar */
 let rangeCache = null;
@@ -87,7 +86,7 @@ export async function clearRanges(calendarId = null) {
  * @param {object} hookData - DAY_CHANGE hook data with {current, previous, calendar}
  */
 export async function autoRevealCurrentDay(hookData) {
-  if (!CalendariaSocket.isPrimaryGM()) return;
+  if (!ATLAS.isPrimaryGM) return;
   if (!isFogEnabled()) return;
   const config = game.settings.get(MODULE.ID, SETTINGS.FOG_OF_WAR_CONFIG);
   if (!config.autoReveal) return;

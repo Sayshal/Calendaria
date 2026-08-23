@@ -67,7 +67,7 @@ export default class CalendarManager {
    * @private
    */
   static async #seedDisplayFormatsForFreshWorld() {
-    if (!game.user?.isGM) return;
+    if (!ATLAS.isPrimaryGM) return;
     const activeCalendar = CalendarRegistry.getActive();
     if (!activeCalendar?.dateFormats) return;
     const current = game.settings.get(MODULE.ID, SETTINGS.DISPLAY_FORMATS);
@@ -89,7 +89,7 @@ export default class CalendarManager {
    */
   static async #syncLuxonSystemState(calendar) {
     if (!isLuxonSyncRequired()) return;
-    if (!game.user?.isGM) return;
+    if (!ATLAS.isPrimaryGM) return;
     const systemId = game.system.id;
     const current = game.settings.get(systemId, 'worldClock') ?? {};
     const theme = calendar?.metadata?.luxonSync?.theme;
@@ -163,7 +163,7 @@ export default class CalendarManager {
         ATLAS.log(1, `Failed to load custom calendar "${id}":`, error);
       }
     }
-    if (needsSave && game.user?.isGM) {
+    if (needsSave && ATLAS.isPrimaryGM) {
       try {
         await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_CALENDARS, customCalendars);
         ATLAS.log(3, 'Persisted normalized collection keys for custom calendars');
@@ -248,7 +248,7 @@ export default class CalendarManager {
         ATLAS.log(1, `Failed to apply override for calendar "${id}":`, error);
       }
     }
-    if (needsSave && game.user?.isGM) {
+    if (needsSave && ATLAS.isPrimaryGM) {
       for (const id of ids) {
         const cal = CalendarRegistry.get(id);
         const bundledData = this.#bundledData.get(id);

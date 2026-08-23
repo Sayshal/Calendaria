@@ -265,7 +265,14 @@ describe('getFieldValue()', () => {
       expect(getFieldValue(CONDITION_FIELDS.INTERCALARY, { year: 2024, month: 0, dayOfMonth: 0 })).toBe(false);
     });
     it('returns true for intercalary months', () => {
-      CalendarManager._configure({ months: { values: [ { name: 'Normal', days: 30 }, { name: 'Leap', days: 1, type: 'intercalary' } ] } });
+      CalendarManager._configure({
+        months: {
+          values: [
+            { name: 'Normal', days: 30 },
+            { name: 'Leap', days: 1, type: 'intercalary' }
+          ]
+        }
+      });
       expect(getFieldValue(CONDITION_FIELDS.INTERCALARY, { year: 2024, month: 1, dayOfMonth: 0 })).toBe(true);
     });
   });
@@ -556,13 +563,19 @@ describe('evaluateConditions()', () => {
     expect(evaluateConditions(conditions, { year: 2025, month: 0, dayOfMonth: 0 })).toBe(false);
   });
   it('requires ALL conditions to pass (AND logic)', () => {
-    const conditions = [ { field: 'year', op: '==', value: 2024 }, { field: 'month', op: '==', value: 6 } ];
+    const conditions = [
+      { field: 'year', op: '==', value: 2024 },
+      { field: 'month', op: '==', value: 6 }
+    ];
     expect(evaluateConditions(conditions, { year: 2024, month: 5, dayOfMonth: 0 })).toBe(true);
     expect(evaluateConditions(conditions, { year: 2024, month: 0, dayOfMonth: 0 })).toBe(false);
     expect(evaluateConditions(conditions, { year: 2025, month: 5, dayOfMonth: 0 })).toBe(false);
   });
   it('short-circuits on first failing condition', () => {
-    const conditions = [ { field: 'year', op: '==', value: 9999 }, { field: 'month', op: '==', value: 1 } ];
+    const conditions = [
+      { field: 'year', op: '==', value: 9999 },
+      { field: 'month', op: '==', value: 1 }
+    ];
     expect(evaluateConditions(conditions, { year: 2024, month: 0, dayOfMonth: 0 })).toBe(false);
   });
   it('supports startDate option for modulo', () => {
@@ -572,13 +585,19 @@ describe('evaluateConditions()', () => {
     expect(evaluateConditions(conditions, { year: 2023, month: 0, dayOfMonth: 0 }, { startDate })).toBe(false);
   });
   it('creates epoch context automatically for caching', () => {
-    const conditions = [ { field: 'dayOfYear', op: '>=', value: 1 }, { field: 'weekInYear', op: '>=', value: 1 } ];
+    const conditions = [
+      { field: 'dayOfYear', op: '>=', value: 1 },
+      { field: 'weekInYear', op: '>=', value: 1 }
+    ];
     expect(evaluateConditions(conditions, { year: 2024, month: 0, dayOfMonth: 0 })).toBe(true);
   });
   it('accepts external epoch context', () => {
     const date = { year: 2024, month: 0, dayOfMonth: 0 };
     const ctx = createEpochContext(date);
-    const conditions = [ { field: 'dayOfYear', op: '==', value: 1 }, { field: 'year', op: '==', value: 2024 } ];
+    const conditions = [
+      { field: 'dayOfYear', op: '==', value: 1 },
+      { field: 'year', op: '==', value: 2024 }
+    ];
     expect(evaluateConditions(conditions, date, { epochCtx: ctx })).toBe(true);
     expect(ctx._cache.dayOfYear).toBe(0);
   });
@@ -586,19 +605,28 @@ describe('evaluateConditions()', () => {
 
 describe('compound conditions', () => {
   it('"every 3rd year in summer" pattern', () => {
-    const conditions = [ { field: 'year', op: '%', value: 3 }, { field: 'season', op: '==', value: 2 } ];
+    const conditions = [
+      { field: 'year', op: '%', value: 3 },
+      { field: 'season', op: '==', value: 2 }
+    ];
     expect(evaluateConditions(conditions, { year: 2024, month: 6, dayOfMonth: 0 })).toBe(false);
     expect(evaluateConditions(conditions, { year: 2025, month: 0, dayOfMonth: 0 })).toBe(false);
     expect(evaluateConditions(conditions, { year: 2025, month: 6, dayOfMonth: 0 })).toBe(true);
   });
   it('"between two dates" pattern using compound date conditions', () => {
-    const conditions = [ { field: 'date', op: '>=', value: { year: 2024, month: 0, dayOfMonth: 0 } }, { field: 'date', op: '<=', value: { year: 2024, month: 11, dayOfMonth: 30 } } ];
+    const conditions = [
+      { field: 'date', op: '>=', value: { year: 2024, month: 0, dayOfMonth: 0 } },
+      { field: 'date', op: '<=', value: { year: 2024, month: 11, dayOfMonth: 30 } }
+    ];
     expect(evaluateConditions(conditions, { year: 2024, month: 6, dayOfMonth: 0 })).toBe(true);
     expect(evaluateConditions(conditions, { year: 2023, month: 6, dayOfMonth: 0 })).toBe(false);
     expect(evaluateConditions(conditions, { year: 2025, month: 6, dayOfMonth: 0 })).toBe(false);
   });
   it('"weekday + month" pattern for specific day selection', () => {
-    const conditions = [ { field: 'month', op: '==', value: 1 }, { field: 'weekday', op: '==', value: 2 } ];
+    const conditions = [
+      { field: 'month', op: '==', value: 1 },
+      { field: 'weekday', op: '==', value: 2 }
+    ];
     const result = evaluateConditions(conditions, { year: 2024, month: 0, dayOfMonth: 0 });
     expect(typeof result).toBe('boolean');
   });
@@ -786,12 +814,18 @@ describe('validateConditionTree()', () => {
     expect(result.errors[0]).toContain('threshold');
   });
   it('validates nested groups recursively', () => {
-    const nested = createGroup('or', [ createGroup('and', [ { field: 'month', op: '==', value: 6 }, { field: 'day', op: '==', value: 15 } ]), { field: 'year', op: '==', value: 2024 } ]);
+    const nested = createGroup('or', [
+      createGroup('and', [
+        { field: 'month', op: '==', value: 6 },
+        { field: 'day', op: '==', value: 15 }
+      ]),
+      { field: 'year', op: '==', value: 2024 }
+    ]);
     const result = validateConditionTree(nested);
     expect(result.valid).toBe(true);
   });
   it('reports errors in nested children', () => {
-    const nested = createGroup('and', [ createGroup('or', [{ field: 'month' }]) ]);
+    const nested = createGroup('and', [createGroup('or', [{ field: 'month' }])]);
     const result = validateConditionTree(nested);
     expect(result.valid).toBe(false);
     expect(result.errors.some((e) => e.includes('operator'))).toBe(true);
@@ -813,11 +847,20 @@ describe('validateConditions()', () => {
     expect(validateConditions('bad').valid).toBe(false);
   });
   it('validates mixed conditions and groups', () => {
-    const conditions = [ { field: 'year', op: '==', value: 2024 }, createGroup('or', [ { field: 'month', op: '==', value: 1 }, { field: 'month', op: '==', value: 6 } ]) ];
+    const conditions = [
+      { field: 'year', op: '==', value: 2024 },
+      createGroup('or', [
+        { field: 'month', op: '==', value: 1 },
+        { field: 'month', op: '==', value: 6 }
+      ])
+    ];
     expect(validateConditions(conditions).valid).toBe(true);
   });
   it('reports indexed errors', () => {
-    const conditions = [ { field: 'year', op: '==', value: 2024 }, { op: '==', value: 2024 } ];
+    const conditions = [
+      { field: 'year', op: '==', value: 2024 },
+      { op: '==', value: 2024 }
+    ];
     const result = validateConditions(conditions);
     expect(result.valid).toBe(false);
     expect(result.errors[0]).toContain('[1]');
@@ -827,11 +870,17 @@ describe('validateConditions()', () => {
 describe('evaluateGroup() — AND mode', () => {
   const date = { year: 2024, month: 5, dayOfMonth: 14 };
   it('returns true when all children pass', () => {
-    const group = createGroup('and', [ { field: 'year', op: '==', value: 2024 }, { field: 'month', op: '==', value: 6 } ]);
+    const group = createGroup('and', [
+      { field: 'year', op: '==', value: 2024 },
+      { field: 'month', op: '==', value: 6 }
+    ]);
     expect(evaluateGroup(group, date)).toBe(true);
   });
   it('returns false when one child fails', () => {
-    const group = createGroup('and', [ { field: 'year', op: '==', value: 2024 }, { field: 'month', op: '==', value: 7 } ]);
+    const group = createGroup('and', [
+      { field: 'year', op: '==', value: 2024 },
+      { field: 'month', op: '==', value: 7 }
+    ]);
     expect(evaluateGroup(group, date)).toBe(false);
   });
   it('returns true for empty children (vacuous truth)', () => {
@@ -843,11 +892,17 @@ describe('evaluateGroup() — AND mode', () => {
 describe('evaluateGroup() — OR mode', () => {
   const date = { year: 2024, month: 5, dayOfMonth: 14 };
   it('returns true when at least one child passes', () => {
-    const group = createGroup('or', [ { field: 'year', op: '==', value: 9999 }, { field: 'month', op: '==', value: 6 } ]);
+    const group = createGroup('or', [
+      { field: 'year', op: '==', value: 9999 },
+      { field: 'month', op: '==', value: 6 }
+    ]);
     expect(evaluateGroup(group, date)).toBe(true);
   });
   it('returns false when all children fail', () => {
-    const group = createGroup('or', [ { field: 'year', op: '==', value: 9999 }, { field: 'month', op: '==', value: 12 } ]);
+    const group = createGroup('or', [
+      { field: 'year', op: '==', value: 9999 },
+      { field: 'month', op: '==', value: 12 }
+    ]);
     expect(evaluateGroup(group, date)).toBe(false);
   });
   it('returns false for empty children', () => {
@@ -859,11 +914,17 @@ describe('evaluateGroup() — OR mode', () => {
 describe('evaluateGroup() — NAND mode', () => {
   const date = { year: 2024, month: 5, dayOfMonth: 14 };
   it('returns false when all children pass', () => {
-    const group = createGroup('nand', [ { field: 'year', op: '==', value: 2024 }, { field: 'month', op: '==', value: 6 } ]);
+    const group = createGroup('nand', [
+      { field: 'year', op: '==', value: 2024 },
+      { field: 'month', op: '==', value: 6 }
+    ]);
     expect(evaluateGroup(group, date)).toBe(false);
   });
   it('returns true when at least one child fails', () => {
-    const group = createGroup('nand', [ { field: 'year', op: '==', value: 2024 }, { field: 'month', op: '==', value: 12 } ]);
+    const group = createGroup('nand', [
+      { field: 'year', op: '==', value: 2024 },
+      { field: 'month', op: '==', value: 12 }
+    ]);
     expect(evaluateGroup(group, date)).toBe(true);
   });
   it('returns true for empty children (NAND of nothing)', () => {
@@ -875,15 +936,24 @@ describe('evaluateGroup() — NAND mode', () => {
 describe('evaluateGroup() — XOR mode', () => {
   const date = { year: 2024, month: 5, dayOfMonth: 14 };
   it('returns true when exactly one child passes', () => {
-    const group = createGroup('xor', [ { field: 'year', op: '==', value: 2024 }, { field: 'month', op: '==', value: 12 } ]);
+    const group = createGroup('xor', [
+      { field: 'year', op: '==', value: 2024 },
+      { field: 'month', op: '==', value: 12 }
+    ]);
     expect(evaluateGroup(group, date)).toBe(true);
   });
   it('returns false when multiple children pass', () => {
-    const group = createGroup('xor', [ { field: 'year', op: '==', value: 2024 }, { field: 'month', op: '==', value: 6 } ]);
+    const group = createGroup('xor', [
+      { field: 'year', op: '==', value: 2024 },
+      { field: 'month', op: '==', value: 6 }
+    ]);
     expect(evaluateGroup(group, date)).toBe(false);
   });
   it('returns false when no children pass', () => {
-    const group = createGroup('xor', [ { field: 'year', op: '==', value: 9999 }, { field: 'month', op: '==', value: 12 } ]);
+    const group = createGroup('xor', [
+      { field: 'year', op: '==', value: 9999 },
+      { field: 'month', op: '==', value: 12 }
+    ]);
     expect(evaluateGroup(group, date)).toBe(false);
   });
   it('returns false for empty children', () => {
@@ -897,7 +967,11 @@ describe('evaluateGroup() — COUNT mode', () => {
   it('returns true when threshold is met', () => {
     const group = createGroup(
       'count',
-      [ { field: 'year', op: '==', value: 2024 }, { field: 'month', op: '==', value: 6 }, { field: 'day', op: '==', value: 99 } ],
+      [
+        { field: 'year', op: '==', value: 2024 },
+        { field: 'month', op: '==', value: 6 },
+        { field: 'day', op: '==', value: 99 }
+      ],
       { threshold: 2 }
     );
     expect(evaluateGroup(group, date)).toBe(true);
@@ -905,7 +979,11 @@ describe('evaluateGroup() — COUNT mode', () => {
   it('returns false when threshold is not met', () => {
     const group = createGroup(
       'count',
-      [ { field: 'year', op: '==', value: 2024 }, { field: 'month', op: '==', value: 12 }, { field: 'day', op: '==', value: 99 } ],
+      [
+        { field: 'year', op: '==', value: 2024 },
+        { field: 'month', op: '==', value: 12 },
+        { field: 'day', op: '==', value: 99 }
+      ],
       { threshold: 2 }
     );
     expect(evaluateGroup(group, date)).toBe(false);
@@ -913,7 +991,10 @@ describe('evaluateGroup() — COUNT mode', () => {
   it('returns true when all pass and threshold is met', () => {
     const group = createGroup(
       'count',
-      [ { field: 'year', op: '==', value: 2024 }, { field: 'month', op: '==', value: 6 } ],
+      [
+        { field: 'year', op: '==', value: 2024 },
+        { field: 'month', op: '==', value: 6 }
+      ],
       { threshold: 2 }
     );
     expect(evaluateGroup(group, date)).toBe(true);
@@ -928,15 +1009,34 @@ describe('evaluateGroup() — COUNT mode', () => {
 describe('evaluateGroup() — nested groups', () => {
   const date = { year: 2024, month: 5, dayOfMonth: 14 };
   it('evaluates nested AND inside OR', () => {
-    const group = createGroup('or', [ createGroup('and', [ { field: 'year', op: '==', value: 2024 }, { field: 'month', op: '==', value: 6 } ]), { field: 'year', op: '==', value: 2025 } ]);
+    const group = createGroup('or', [
+      createGroup('and', [
+        { field: 'year', op: '==', value: 2024 },
+        { field: 'month', op: '==', value: 6 }
+      ]),
+      { field: 'year', op: '==', value: 2025 }
+    ]);
     expect(evaluateGroup(group, date)).toBe(true);
   });
   it('evaluates nested OR inside AND', () => {
-    const group = createGroup('and', [ { field: 'year', op: '==', value: 2024 }, createGroup('or', [ { field: 'month', op: '==', value: 1 }, { field: 'month', op: '==', value: 6 } ]) ]);
+    const group = createGroup('and', [
+      { field: 'year', op: '==', value: 2024 },
+      createGroup('or', [
+        { field: 'month', op: '==', value: 1 },
+        { field: 'month', op: '==', value: 6 }
+      ])
+    ]);
     expect(evaluateGroup(group, date)).toBe(true);
   });
   it('returns false for deeply nested failing conditions', () => {
-    const group = createGroup('and', [ createGroup('or', [ createGroup('and', [ { field: 'year', op: '==', value: 2024 }, { field: 'month', op: '==', value: 12 } ]) ]) ]);
+    const group = createGroup('and', [
+      createGroup('or', [
+        createGroup('and', [
+          { field: 'year', op: '==', value: 2024 },
+          { field: 'month', op: '==', value: 12 }
+        ])
+      ])
+    ]);
     expect(evaluateGroup(group, date)).toBe(false);
   });
   it('stops evaluation at MAX_NESTING_DEPTH', () => {
@@ -953,7 +1053,10 @@ describe('evaluateEntry()', () => {
     expect(evaluateEntry({ field: 'year', op: '==', value: 9999 }, date)).toBe(false);
   });
   it('evaluates groups', () => {
-    const group = createGroup('or', [ { field: 'year', op: '==', value: 9999 }, { field: 'month', op: '==', value: 6 } ]);
+    const group = createGroup('or', [
+      { field: 'year', op: '==', value: 9999 },
+      { field: 'month', op: '==', value: 6 }
+    ]);
     expect(evaluateEntry(group, date)).toBe(true);
   });
 });
@@ -961,15 +1064,30 @@ describe('evaluateEntry()', () => {
 describe('evaluateConditions() with groups', () => {
   const date = { year: 2024, month: 5, dayOfMonth: 14 };
   it('evaluates mixed flat conditions and groups (implicit AND)', () => {
-    const conditions = [ { field: 'year', op: '==', value: 2024 }, createGroup('or', [ { field: 'month', op: '==', value: 1 }, { field: 'month', op: '==', value: 6 } ]) ];
+    const conditions = [
+      { field: 'year', op: '==', value: 2024 },
+      createGroup('or', [
+        { field: 'month', op: '==', value: 1 },
+        { field: 'month', op: '==', value: 6 }
+      ])
+    ];
     expect(evaluateConditions(conditions, date)).toBe(true);
   });
   it('fails when group in mixed array fails', () => {
-    const conditions = [ { field: 'year', op: '==', value: 2024 }, createGroup('or', [ { field: 'month', op: '==', value: 1 }, { field: 'month', op: '==', value: 12 } ]) ];
+    const conditions = [
+      { field: 'year', op: '==', value: 2024 },
+      createGroup('or', [
+        { field: 'month', op: '==', value: 1 },
+        { field: 'month', op: '==', value: 12 }
+      ])
+    ];
     expect(evaluateConditions(conditions, date)).toBe(false);
   });
   it('backward compatible with flat-only arrays', () => {
-    const conditions = [ { field: 'year', op: '==', value: 2024 }, { field: 'month', op: '==', value: 6 } ];
+    const conditions = [
+      { field: 'year', op: '==', value: 2024 },
+      { field: 'month', op: '==', value: 6 }
+    ];
     expect(evaluateConditions(conditions, date)).toBe(true);
   });
   it('still returns true for empty/null/undefined', () => {
@@ -983,20 +1101,32 @@ describe('complex scheduling patterns with groups', () => {
   it('"any 2 of 3 moon phases" using COUNT', () => {
     const group = createGroup(
       'count',
-      [ { field: 'year', op: '==', value: 2024 }, { field: 'month', op: '==', value: 6 }, { field: 'day', op: '==', value: 99 } ],
+      [
+        { field: 'year', op: '==', value: 2024 },
+        { field: 'month', op: '==', value: 6 },
+        { field: 'day', op: '==', value: 99 }
+      ],
       { threshold: 2 }
     );
     const date = { year: 2024, month: 5, dayOfMonth: 14 };
     expect(evaluateGroup(group, date)).toBe(true);
   });
   it('"(Event A AND Season B) OR Event C" pattern', () => {
-    const conditions = [ createGroup('or', [ createGroup('and', [ { field: 'year', op: '==', value: 2024 }, { field: 'month', op: '==', value: 6 } ]), { field: 'day', op: '==', value: 1 } ]) ];
+    const conditions = [
+      createGroup('or', [
+        createGroup('and', [
+          { field: 'year', op: '==', value: 2024 },
+          { field: 'month', op: '==', value: 6 }
+        ]),
+        { field: 'day', op: '==', value: 1 }
+      ])
+    ];
     expect(evaluateConditions(conditions, { year: 2024, month: 5, dayOfMonth: 14 })).toBe(true);
     expect(evaluateConditions(conditions, { year: 2025, month: 0, dayOfMonth: 0 })).toBe(true);
     expect(evaluateConditions(conditions, { year: 2025, month: 1, dayOfMonth: 5 })).toBe(false);
   });
   it('"not during winter" using NAND with season', () => {
-    const conditions = [ createGroup('nand', [ { field: 'season', op: '==', value: 4 } ]) ];
+    const conditions = [createGroup('nand', [{ field: 'season', op: '==', value: 4 }])];
     expect(evaluateConditions(conditions, { year: 2024, month: 5, dayOfMonth: 14 })).toBe(true);
   });
   it('"exactly one of three weekdays" using XOR', () => {
@@ -1004,7 +1134,11 @@ describe('complex scheduling patterns with groups', () => {
     const weekdayValue = getFieldValue(CONDITION_FIELDS.WEEKDAY, date);
     const otherDay1 = weekdayValue === 1 ? 2 : 1;
     const otherDay2 = weekdayValue === 3 ? 4 : 3;
-    const group = createGroup('xor', [ { field: 'weekday', op: '==', value: weekdayValue }, { field: 'weekday', op: '==', value: otherDay1 }, { field: 'weekday', op: '==', value: otherDay2 } ]);
+    const group = createGroup('xor', [
+      { field: 'weekday', op: '==', value: weekdayValue },
+      { field: 'weekday', op: '==', value: otherDay1 },
+      { field: 'weekday', op: '==', value: otherDay2 }
+    ]);
     expect(evaluateGroup(group, date)).toBe(true);
   });
 });
@@ -1090,7 +1224,10 @@ describe('canConditionTreeMatchRange()', () => {
     expect(canConditionTreeMatchRange(tree, rangeStart, rangeEnd)).toBe(false);
   });
   it('returns true for OR groups (conservative)', () => {
-    const tree = createGroup('or', [ { field: 'year', op: '==', value: 2020 }, { field: 'year', op: '==', value: 2024 } ]);
+    const tree = createGroup('or', [
+      { field: 'year', op: '==', value: 2020 },
+      { field: 'year', op: '==', value: 2024 }
+    ]);
     expect(canConditionTreeMatchRange(tree, rangeStart, rangeEnd)).toBe(true);
   });
   it('returns true for null/undefined tree', () => {
@@ -1147,13 +1284,19 @@ describe('getSearchDistanceFromTree()', () => {
     expect(getSearchDistanceFromTree(createGroup('and', []))).toBe(yearLen);
   });
   it('takes minimum of multiple AND children', () => {
-    const tree = createGroup('and', [ { field: 'day', op: '%', value: 10 }, { field: 'weekday', op: '==', value: 1 } ]);
+    const tree = createGroup('and', [
+      { field: 'day', op: '%', value: 10 },
+      { field: 'weekday', op: '==', value: 1 }
+    ]);
     expect(getSearchDistanceFromTree(tree)).toBe(7);
   });
   it('takes maximum for OR children', () => {
     const cal = CalendarManager.getActiveCalendar();
     const yearLen = cal.getDaysInYear(0);
-    const tree = createGroup('or', [ { field: 'day', op: '%', value: 3 }, { field: 'month', op: '==', value: 6 } ]);
+    const tree = createGroup('or', [
+      { field: 'day', op: '%', value: 3 },
+      { field: 'month', op: '==', value: 6 }
+    ]);
     expect(getSearchDistanceFromTree(tree)).toBe(yearLen);
   });
 });
@@ -1326,7 +1469,14 @@ describe('isLeapYear field', () => {
     expect(value).toBe(false);
   });
   it('works in a condition tree with date conditions', () => {
-    const tree = { type: 'group', mode: 'and', children: [ { type: 'condition', field: CONDITION_FIELDS.IS_LEAP_YEAR, op: '==', value: true }, { type: 'condition', field: CONDITION_FIELDS.DAY_OF_YEAR, op: '==', value: 60 } ] };
+    const tree = {
+      type: 'group',
+      mode: 'and',
+      children: [
+        { type: 'condition', field: CONDITION_FIELDS.IS_LEAP_YEAR, op: '==', value: true },
+        { type: 'condition', field: CONDITION_FIELDS.DAY_OF_YEAR, op: '==', value: 60 }
+      ]
+    };
     const leapDate = { year: 2000, month: 1, dayOfMonth: 28 };
     const nonLeapDate = { year: 2001, month: 1, dayOfMonth: 28 };
     const result1 = evaluateConditions(tree.children, leapDate);

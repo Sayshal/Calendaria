@@ -86,6 +86,18 @@ export function monthsBetween(startDate, endDate) {
 }
 
 /**
+ * Clamp a viewed date to the calendar's earliest navigable year.
+ * @param {object} date  Viewed date in display years
+ * @param {object} [cal]  Calendar to use (defaults to active calendar)
+ * @returns {object}  The date, clamped to year 1 when the calendar forbids negative years
+ */
+export function clampViewedYear(date, cal) {
+  const calendar = cal || CalendarManager.getActiveCalendar();
+  if (!date || calendar?.years?.allowNegativeYears !== false) return date;
+  return date.year < 1 ? { ...date, year: 1 } : date;
+}
+
+/**
  * Get day of week for a date (0 = first day of week).
  * @param {object} date  Date to check
  * @param {object} [cal]  Calendar to use (defaults to active calendar)

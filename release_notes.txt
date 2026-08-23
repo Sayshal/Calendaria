@@ -1,17 +1,94 @@
+## Breaking Changes
+
+- Chat timestamps are now driven entirely by the Timestamp display format, and the Show Time in Chat Timestamps setting that did nothing has been removed
+- Existing weather history is moved under the active calendar on load, dropping any days that calendar cannot represent, and zone forecast plans are filed under the calendar that defines the zone
+- The Primary GM picker and its Multiplayer Sync section are gone from the Module settings tab; Calendaria now follows the shared ATLAS primary GM instead of its own setting
+
+## New Features
+
+- Added a Character History built-in note preset, offered in the picker to GMs only, with the notes it creates readable by players
+- Added pauseCinematic, resumeCinematic, and isCinematicPaused to the public API, plus calendaria.cinematicPause and calendaria.cinematicResume hooks
+- Calendaria now registers night, rain, snow, and storm playlist sections with VGMusic, letting you assign scene music that follows the clock and the current weather
+- Calendars can define named days in the calendar editor's Named Days fieldset, numbered per year or per month, with optional repeating so the list cycles through the rest of the year
+- Each almanac page lists the past week day by day with its recorded weather and note links, upcoming moon phase peaks, and the coming week's forecast snapshot at player accuracy, plus a Chronicle link for the week ahead
+- Format string previews in the calendar editor and settings panel now flag letter runs that match no token, such as a wrong-case yyyy, with a warning color and tooltip
+- Linked subjects appear as a metadata row in the note view mode, and each name opens its document sheet
+- Mirrored to-dos are removed automatically when the note is deleted, its reminder is set to none, or the opt-in is unchecked
+- New Weekly Almanac toggle on the Chronicle settings tab, off by default, publishes one journal page per in-world week to a shared journal players can read
+- New `[namedDay]` and `[namedDayAbbr]` format tokens print the current day's name in any custom date format, and the calendar day tooltip shows it too
+- New api.getWeatherSeverityLabel(), api.getWeatherSeverityLevel(), and api.getWeatherSeverityLevels() expose the named severity bands to other modules
+- Note reminders can now be mirrored into the Don't Forget module as to-dos via a new opt-in checkbox in the note reminder settings, shown only when Don't Forget is active
+- Notes now have a Subjects field on the Content tab: drop any document onto it to link it, click a chip to open the document or the x to remove it
+- Pause and resume issued by the GM are broadcast to all connected players, matching how play and abort already sync
+- Pinned dates respect player visibility: past dates follow fog of war, future dates in the weather enrichers follow the weather forecast permission, and a day that does not exist in that month is rejected as invalid
+- Scene darkness now reacts to eclipses when moon sync is on: a lunar eclipse dims that moon's light by subtype, and a total lunar eclipse leaves the scene at near-full night darkness
+- Scenes opted out of darkness sync are skipped by the night section
+- Solar eclipses now raise daytime darkness when moon sync is on, with partial, annular, and total each imposing a higher darkness floor
+- Sun, moon, weather, and calendar-fact enrichers now accept an explicit date, written positionally as day month year (`5 3 1492`) or as `date="5 3 1492"`, and render that date instead of the current one; the moon, format, peek, and forecast enrichers take the named form only
+- The Chronicle toolbar gained a subject filter dropdown that narrows the scroll to notes linked to the selected documents, with a badge count and a clear option
+- The Weather Picker shows the pending severity band in its details panel, updating as the temperature, wind, and precipitation fields change
+- The cal.notes enricher accepts links=true to render matching notes as clickable links for a date or date range, and renders nothing when no notes match
+- The moon glow tint turns blood-red during a total lunar eclipse
+- Those same enrichers placed inside a dated journal note now default to the note's start date, with `now` available to force the current date instead
+- Time-advance cinematics can now be paused and resumed from the API, with the overlay left on screen and its ambient effects still running while the timeline is frozen
+- VGMusic's playlist configuration prompt now shows a hint under each Calendaria section describing when its night, rain, snow, or storm playlist plays
+- Weather enrichers accept a `zone` token to look up a specific weather zone, and a pinned date with no recorded weather now shows a muted badge instead of a generic error
+- Weather music outranks night music, combat music still wins over both, and severe weather resolves to the storm section regardless of precipitation type
+- Weather severity is now a 0 to 10 score that stacks wind, precipitation, temperature extremity, and darkness penalty with the strongest hazard weighted heaviest, so compound weather outranks any single hazard
+- Weather tooltips in the HUD, mini calendar, big calendar, and forecast pills now show a named severity band when severity is above zero
+- api.getCurrentSeason() now takes an optional world-time timestamp, returning the season at that time instead of only the current one
+- api.updateNote() now applies a content field, letting external modules rewrite a note body instead of only its title and date fields
+
 ## Bug Fixes
 
-- Calendar exports store the current year relative to year zero, so re-importing no longer shifts the date by year zero twice
-- Edits to preset calendars now persist across reloads; deletions of preset entries (eras, months, moons, festivals) were previously dropped when the saved override was cleaned on save
-- Exports of monthless calendars can now be imported; the format check and NoMonths validation accept calendars that define days per year without months
-- Macro dropdowns in the note sheet, weather picker, weather editor, and preset manager now list only macros the user can see; a stored selection stays listed even if hidden
-- One-time caveat: preset overrides saved before this fix already lost their deletion markers, so entries deleted from a preset calendar may reappear once and must be deleted again
-- Saving a preset calendar override now shows an error notification when it fails instead of failing silently
-- The import preview shows a day-year date for monthless calendars and counts days from days per year
-- The note sheet hides its macro field entirely when no macros are selectable
+- Bulk-deleting notes from the note viewer now reports them as deleted instead of updated
+- Button widgets registered by other modules now honor their declared color in the HUD, matching how indicator widgets already do
+- CALENDARIA.api.updateNote now reads startDate and endDate month and day as 1-indexed, matching createNote, so API-driven note edits no longer land a month and day early
+- Festival icons saved in custom calendars and default calendar overrides are stripped of their old Font Awesome prefix once on load, so those icons render again, and the three Hijri festival icons ship in the current form
+- Festival note seeding, note folder and ownership rebuilds, rest time advancement, migrations, and the dawn, dusk, season, and moon macro triggers now run on the primary GM only, so worlds with several GMs connected no longer fire them more than once
+- Fixed light theme contrast on the HUD time shortcuts, the sticky context item, and the mini calendar day hover
+- Fixed the note reminder fields staying disabled after switching the reminder type back from none
+- Forecast dates on monthless calendars now advance by day instead of by year, and the stored forecast plan is cleared once on those worlds so bad future-year entries regenerate
+- Importing a settings export from an older version now converts bare weather sound names to full paths and cleans up festival icon prefixes
+- Localization call sites across the settings panel, calendar editor, note sheet condition builder, token reference dialog, and date pickers now point at the renamed ATLAS keys, so those labels and hints resolve to real text instead of showing raw key names
+- Luxon sync under PF2e/SF2e no longer overwrites a calendar's authored Year Zero Weekday, and the derived weekday now applies only to the calendar it was computed from
+- Saving the settings panel as a player now skips world-scoped settings and keeps writing the rest, instead of one rejected setting stopping every later write
+- Setting a scene's Weather FX Override to "off" no longer silences weather ambience; only the per-scene Weather Sound toggle stops it
+- The Auto-Generate Weather toggle in the settings panel now sticks across reloads instead of being reset from the active calendar's stored value on every load
+- The calendar editor's Allow Negative Years checkbox now works: with it cleared, the mini and big calendars stop navigating below year 1
+- The calendar editor's Reset Weekdays checkbox now works: with it set, the weekday cycle restarts at the calendar's first weekday on the first day of every year
+- The per-scene weather sound toggle is now honoured during bulk weather changes such as large time advances, and follows the scene you are viewing rather than the active scene
+- The sticky zones setting now registers with its own name and hint labels instead of placeholder keys, and the fog of war navigation setting's name points at a real key instead of a mispathed one
+- The sun dial's sky now re-fits when the dial window is resized instead of staying at its old size until the next render
+- Toggling Weather Sound Effects or changing Weather Sound Volume now takes effect right away instead of waiting for the next weather or scene change
+- Traveller calendar short, long, and full dates now print the year instead of a literal "yyyy"
+- Weather history and forecast plans are now stored per calendar, so switching calendars no longer shows one calendar's recorded weather on another calendar's dates
+- Weather pills and weather-aware day tooltips now appear on day cells in the big and mini calendar week views for monthless calendars
+- Widget indicators in the HUD now scale with the built-in weather, season, era, and cycle indicators instead of rendering smaller
 
 ## Changes
 
-- Note macros now check the author's execute permission at run time; a macro is skipped when its non-GM author cannot execute it, unless it is a GM-configured preset default macro
-- The Preset Manager now opens only for GMs, and the Macros settings tab no longer loads macro data for non-GM users
-- The note sheet rejects macro assignments from non-GM users who lack permission to execute the chosen macro
-- Verified compatibility bumped to Foundry 14.365
+- Active navigation tabs in the settings panel and calendar editor no longer get a tinted background fill, keeping only the coloured left border to mark the selection
+- Cleared the remaining lint warnings by dropping an unused import, correcting a JSDoc type, and simplifying seven regular expressions, with no change to behavior
+- Dialog titles, dialog buttons, and notification text now pass localization keys straight to Foundry instead of localizing twice, with no change to the strings shown
+- Every Calendaria application, dialog, and tooltip now follows the picked ATLAS theme instead of falling back to Foundry's palette or a hardcoded dark fallback
+- Moonlight now caps how dark a scene can get instead of being subtracted, so a full moon lightens the scene to a fixed level rather than scaling with how deep the night is
+- Navigation tab labels dropped the core text shadow in their active and hover states, and the chronicle toolbar title now follows the theme title colour
+- Note sheet and note viewer checkboxes now pull their colours from the shared ATLAS theme bridge instead of a local override, so they match every other themed module
+- Repository tooling switched to CRLF line endings, gained its own editor and task settings, and stopped tracking .prettierignore so it stays local per checkout, with no change to module behavior
+- Rich text editors inside the module, including the preset manager, now use the module theme for their toolbar, dropdown menus, and editing area, matching the note sheet
+- Shared UI labels across the settings panel, calendar editor, weather apps, and note sheets now come from the common ATLAS string set, so a few read differently, such as the rest advance mode options now offering Automatic and Custom
+- The TimeKeeper no longer shows a read-only clock tray to players who lack permission to change the date and time, and the clock display stays static for them on hover
+- The Year Zero Weekday field in the calendar editor is locked with a system-managed hint while Luxon sync is active, shows the weekday actually in effect, and keeps your stored value when the sync theme is cleared
+- The leftover theme tab template from before ATLAS took over theming is removed, with no change to what the settings panel shows
+- The release workflow now reads the module id from module.json instead of a hardcoded value, so the Foundry package listing and Discord release post always point at the right package
+- The season indicator label now uses the theme text colour, with the season hue kept on its icon
+- The settings panel no longer builds GM-only tabs or their inputs for players, so those controls never reach a player's form
+- The weekly almanac section on the chronicle tab is now GM-only
+- Verified compatibility bumped to Foundry v14.366
+- Weather icons and borders in the HUD chip, weather picker, and climate editor now blend the weather hue toward the theme text colour, so pale or near-surface weather colours stay readable on every ATLAS theme
+
+## Documentation
+
+- MIT license copyright holder changed from "Tyler" to "3 Death Saves"
+- Translation contributions no longer go through Weblate; localization strings live in 3DS-ATLAS, and CONTRIBUTING.md now points there

@@ -363,7 +363,7 @@ export default class TimeTracker {
    * @private
    */
   static #executeGlobalTrigger(triggerKey, context) {
-    if (!game.user.isGM) return;
+    if (!ATLAS.isPrimaryGM) return;
     const config = this.#getMacroConfig();
     const macroId = config.global?.[triggerKey];
     if (!macroId) return;
@@ -400,7 +400,7 @@ export default class TimeTracker {
    * @private
    */
   static #executeSeasonMacros(data) {
-    if (!game.user.isGM) return;
+    if (!ATLAS.isPrimaryGM) return;
     const config = this.#getMacroConfig();
     const seasonTriggers = config.season || [];
     if (!seasonTriggers.length) return;
@@ -416,7 +416,7 @@ export default class TimeTracker {
    * @private
    */
   static #executeMoonPhaseMacros(changedMoons) {
-    if (!game.user.isGM) return;
+    if (!ATLAS.isPrimaryGM) return;
     const config = this.#getMacroConfig();
     const moonTriggers = config.moonPhase || [];
     if (!moonTriggers.length) return;

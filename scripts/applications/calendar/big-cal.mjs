@@ -3,6 +3,7 @@ import { HOOKS, MODULE, REPLACEABLE_ELEMENTS, SETTINGS, SOCKET_TYPES, TEMPLATES,
 import {
   NoteManager,
   addDays,
+  clampViewedYear,
   clearDisplayPropsCache,
   dayOfWeek,
   daysBetween,
@@ -184,7 +185,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
    * @param {object} date - The date to view
    */
   set viewedDate(date) {
-    this._viewedDate = date;
+    this._viewedDate = clampViewedYear(date, this.calendar);
   }
 
   /**
@@ -577,6 +578,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const daysInYear = calendar.getDaysInYear(year - yearZero);
     const showMoons = canViewMoons() && calendar.moonsArray.length;
     const fogEnabled = isFogEnabled();
+    const weatherLookup = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SHOW_WEATHER) ? buildWeatherLookup() : null;
     const weekNumber = Math.floor(viewedDayOfMonth / daysInWeek);
     const totalWeeks = Math.ceil(daysInYear / daysInWeek);
     const weeks = [];
@@ -620,6 +622,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
         const weekdayData = calendar.weekdaysArray[i % daysInWeek];
         const festivalNoteId = this._getFestivalNoteId(festivalDay);
         const festivalIconIsImage = typeof festivalDay?.icon === 'string' && !festivalDay.icon.startsWith('fa') && (festivalDay.icon.includes('/') || festivalDay.icon.includes('.'));
+        const wd = !dayIsFogged && weatherLookup ? getDayWeather(dayYear, 0, dayOfMonth, weatherLookup, weatherLookup.lookup) : null;
+        const festivalInfo = festivalDay ? { name: _loc(festivalDay.name), description: festivalDay.description || '', color: festivalDay.color || '' } : null;
         const dayData = {
           day: dayNum,
           dayOfMonth,
@@ -635,10 +639,12 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
           festivalIconIsImage: !dayIsFogged && festivalIconIsImage,
           festivalIcon: !dayIsFogged && festivalDay?.icon ? (festivalIconIsImage ? festivalDay.icon : `fas ${festivalDay.icon}`) : '',
           festivalNoteId: dayIsFogged ? '' : festivalNoteId,
+          dayTooltip: dayIsFogged ? '' : generateDayTooltip(calendar, dayYear, 0, dayOfMonth, festivalInfo, wd, dayNotes),
           moonPhases,
           isRestDay: weekdayData?.isRestDay || false,
           isFromOtherWeek: weekOffset !== 0,
-          isIntercalary
+          isIntercalary,
+          ...buildWeatherPillData(wd)
         };
         currentWeek.push(dayData);
       }
@@ -1574,7 +1580,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
         }
       });
     }
-    items.push({ label: 'CALENDARIA.Common.Close', icon: '<i class="fas fa-times"></i>', onClick: () => this.close() });
+    items.push({ label: 'ATLAS.Common.Close', icon: '<i class="fas fa-times"></i>', onClick: () => this.close() });
     return items;
   }
 
@@ -1936,7 +1942,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const page = journal?.pages.get(pageId);
     if (page) {
       const confirmed = await foundry.applications.api.DialogV2.confirm({
-        window: { title: _loc('CALENDARIA.Common.DeleteNote') },
+        classes: ['calendaria'],
+        window: { title: 'CALENDARIA.Common.DeleteNote' },
         content: `<p>${_loc('CALENDARIA.ContextMenu.DeleteConfirm', { name: page.name })}</p>`,
         rejectClose: false,
         modal: true
@@ -2090,7 +2097,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       windKph,
       windDirection,
       precipType,
-      precipIntensity: weather.precipitation?.intensity
+      precipIntensity: weather.precipitation?.intensity,
+      severity: WeatherManager.getSeverity(weather)
     });
     return { id: weather.id, label, icon: weather.icon, color: weather.color, temperature: temp, tooltipHtml, windSpeed, windKph, windDirection, precipType };
   }

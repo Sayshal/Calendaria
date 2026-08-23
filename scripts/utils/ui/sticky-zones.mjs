@@ -171,7 +171,7 @@ function getIndicatorPosition(zone, hudWidth, hudHeight) {
 export function showSnapIndicator(zone, hudWidth, hudHeight) {
   if (!snapIndicator) {
     snapIndicator = document.createElement('div');
-    snapIndicator.className = 'calendaria-snap-indicator';
+    snapIndicator.className = 'calendaria calendaria-snap-indicator';
     document.body.appendChild(snapIndicator);
   }
   const pos = getIndicatorPosition(zone, hudWidth, hudHeight);

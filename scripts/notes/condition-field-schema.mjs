@@ -42,7 +42,7 @@ const CATEGORY_LABELS = {
   moon: 'CALENDARIA.Common.Moon',
   cycle: 'CALENDARIA.Common.Cycle',
   era: 'CALENDARIA.Common.Era',
-  other: 'CALENDARIA.Common.Other'
+  other: 'ATLAS.Common.Other'
 };
 
 /** @type {string[]} Category display order */
@@ -50,17 +50,17 @@ const CATEGORY_ORDER = ['date', 'weekday', 'week', 'season', 'moon', 'cycle', 'e
 
 /** @type {Object<string, string>} Operator display labels */
 const OPERATOR_LABELS = {
-  [CONDITION_OPERATORS.EQUAL]: 'CALENDARIA.Condition.Operator.equal',
-  [CONDITION_OPERATORS.NOT_EQUAL]: 'CALENDARIA.Condition.Operator.notEqual',
-  [CONDITION_OPERATORS.GREATER_EQUAL]: 'CALENDARIA.Condition.Operator.greaterEqual',
-  [CONDITION_OPERATORS.LESS_EQUAL]: 'CALENDARIA.Condition.Operator.lessEqual',
-  [CONDITION_OPERATORS.GREATER]: 'CALENDARIA.Condition.Operator.greater',
-  [CONDITION_OPERATORS.LESS]: 'CALENDARIA.Condition.Operator.less',
-  [CONDITION_OPERATORS.MODULO]: 'CALENDARIA.Condition.Operator.modulo',
-  [CONDITION_OPERATORS.DAYS_AGO]: 'CALENDARIA.Condition.Operator.daysAgo',
-  [CONDITION_OPERATORS.DAYS_FROM_NOW]: 'CALENDARIA.Condition.Operator.daysFromNow',
-  [CONDITION_OPERATORS.WITHIN_LAST]: 'CALENDARIA.Condition.Operator.withinLast',
-  [CONDITION_OPERATORS.WITHIN_NEXT]: 'CALENDARIA.Condition.Operator.withinNext'
+  [CONDITION_OPERATORS.EQUAL]: 'ATLAS.Common.Equals',
+  [CONDITION_OPERATORS.NOT_EQUAL]: 'CALENDARIA.Condition.Operator.NotEqual',
+  [CONDITION_OPERATORS.GREATER_EQUAL]: 'CALENDARIA.Condition.Operator.GreaterEqual',
+  [CONDITION_OPERATORS.LESS_EQUAL]: 'CALENDARIA.Condition.Operator.LessEqual',
+  [CONDITION_OPERATORS.GREATER]: 'CALENDARIA.Condition.Operator.Greater',
+  [CONDITION_OPERATORS.LESS]: 'CALENDARIA.Condition.Operator.Less',
+  [CONDITION_OPERATORS.MODULO]: 'CALENDARIA.Condition.Operator.Modulo',
+  [CONDITION_OPERATORS.DAYS_AGO]: 'CALENDARIA.Condition.Operator.DaysAgo',
+  [CONDITION_OPERATORS.DAYS_FROM_NOW]: 'CALENDARIA.Condition.Operator.DaysFromNow',
+  [CONDITION_OPERATORS.WITHIN_LAST]: 'CALENDARIA.Condition.Operator.WithinLast',
+  [CONDITION_OPERATORS.WITHIN_NEXT]: 'CALENDARIA.Condition.Operator.WithinNext'
 };
 
 /**
@@ -72,29 +72,29 @@ const FIELD_REGISTRY = {
     inputType: 'number',
     operators: ALL_OPS,
     category: 'date',
-    label: 'CALENDARIA.Common.Year'
+    label: 'ATLAS.Common.Year'
   },
   [CONDITION_FIELDS.MONTH]: {
     inputType: 'select',
     operators: COMPARE_OPS,
     category: 'date',
-    label: 'CALENDARIA.Common.Month',
+    label: 'ATLAS.Common.Month',
     getOptions: (cal) => (cal?.monthsArray ?? []).map((m, i) => ({ value: i + 1, label: _loc(m.name) }))
   },
   [CONDITION_FIELDS.DAY]: {
     inputType: 'number',
     operators: ALL_OPS,
     category: 'date',
-    label: 'CALENDARIA.Common.Day'
+    label: 'ATLAS.Common.Day'
   },
   [CONDITION_FIELDS.MONTH_IN_CALENDAR]: {
     inputType: 'select',
     operators: EQUALITY_OPS,
     category: 'date',
-    label: 'CALENDARIA.Condition.Field.monthInCalendar',
+    label: 'CALENDARIA.Condition.Field.MonthInCalendar',
     needsValue2: true,
-    value2Label: 'CALENDARIA.Condition.Field.targetCalendar',
-    value2Hint: 'CALENDARIA.Condition.Field.targetCalendarHint',
+    value2Label: 'CALENDARIA.Condition.Field.TargetCalendar',
+    value2Hint: 'CALENDARIA.Condition.Field.TargetCalendarHint',
     value2Type: 'string',
     value2Semantic: 'calendarId',
     getOptions: (_cal, value2) => (CalendarRegistry.get(value2)?.monthsArray ?? []).map((m, i) => ({ value: i + 1, label: _loc(m.name) })),
@@ -108,10 +108,10 @@ const FIELD_REGISTRY = {
     inputType: 'number',
     operators: EQUALITY_OPS,
     category: 'date',
-    label: 'CALENDARIA.Condition.Field.dayInCalendar',
+    label: 'CALENDARIA.Condition.Field.DayInCalendar',
     needsValue2: true,
-    value2Label: 'CALENDARIA.Condition.Field.targetCalendar',
-    value2Hint: 'CALENDARIA.Condition.Field.targetCalendarHint',
+    value2Label: 'CALENDARIA.Condition.Field.TargetCalendar',
+    value2Hint: 'CALENDARIA.Condition.Field.TargetCalendarHint',
     value2Type: 'string',
     value2Semantic: 'calendarId',
     getValue2Options: () =>
@@ -124,13 +124,13 @@ const FIELD_REGISTRY = {
     inputType: 'number',
     operators: ALL_OPS,
     category: 'date',
-    label: 'CALENDARIA.Condition.Field.dayOfYear'
+    label: 'CALENDARIA.Condition.Field.DayOfYear'
   },
   [CONDITION_FIELDS.DAYS_BEFORE_MONTH_END]: {
     inputType: 'number',
     operators: ALL_OPS,
     category: 'date',
-    label: 'CALENDARIA.Condition.Field.daysBeforeMonthEnd'
+    label: 'CALENDARIA.Condition.Field.DaysBeforeMonthEnd'
   },
   [CONDITION_FIELDS.WEEKDAY]: {
     inputType: 'select',
@@ -143,43 +143,43 @@ const FIELD_REGISTRY = {
     inputType: 'number',
     operators: ALL_OPS,
     category: 'weekday',
-    label: 'CALENDARIA.Condition.Field.weekNumberInMonth'
+    label: 'CALENDARIA.Condition.Field.WeekNumberInMonth'
   },
   [CONDITION_FIELDS.INVERSE_WEEK_NUMBER]: {
     inputType: 'number',
     operators: ALL_OPS,
     category: 'weekday',
-    label: 'CALENDARIA.Condition.Field.inverseWeekNumber'
+    label: 'CALENDARIA.Condition.Field.InverseWeekNumber'
   },
   [CONDITION_FIELDS.WEEK_IN_MONTH]: {
     inputType: 'number',
     operators: ALL_OPS,
     category: 'week',
-    label: 'CALENDARIA.Condition.Field.weekInMonth'
+    label: 'CALENDARIA.Condition.Field.WeekInMonth'
   },
   [CONDITION_FIELDS.WEEK_IN_YEAR]: {
     inputType: 'number',
     operators: ALL_OPS,
     category: 'week',
-    label: 'CALENDARIA.Condition.Field.weekInYear'
+    label: 'CALENDARIA.Condition.Field.WeekInYear'
   },
   [CONDITION_FIELDS.TOTAL_WEEK]: {
     inputType: 'number',
     operators: ALL_OPS,
     category: 'week',
-    label: 'CALENDARIA.Condition.Field.totalWeek'
+    label: 'CALENDARIA.Condition.Field.TotalWeek'
   },
   [CONDITION_FIELDS.WEEKS_BEFORE_MONTH_END]: {
     inputType: 'number',
     operators: ALL_OPS,
     category: 'week',
-    label: 'CALENDARIA.Condition.Field.weeksBeforeMonthEnd'
+    label: 'CALENDARIA.Condition.Field.WeeksBeforeMonthEnd'
   },
   [CONDITION_FIELDS.WEEKS_BEFORE_YEAR_END]: {
     inputType: 'number',
     operators: ALL_OPS,
     category: 'week',
-    label: 'CALENDARIA.Condition.Field.weeksBeforeYearEnd'
+    label: 'CALENDARIA.Condition.Field.WeeksBeforeYearEnd'
   },
   [CONDITION_FIELDS.SEASON]: {
     inputType: 'select',
@@ -193,49 +193,49 @@ const FIELD_REGISTRY = {
     inputType: 'number',
     operators: ALL_OPS,
     category: 'season',
-    label: 'CALENDARIA.Condition.Field.seasonPercent',
+    label: 'CALENDARIA.Condition.Field.SeasonPercent',
     available: (cal) => (cal?.seasonsArray?.length ?? 0) > 0
   },
   [CONDITION_FIELDS.SEASON_DAY]: {
     inputType: 'number',
     operators: ALL_OPS,
     category: 'season',
-    label: 'CALENDARIA.Condition.Field.seasonDay',
+    label: 'CALENDARIA.Condition.Field.SeasonDay',
     available: (cal) => (cal?.seasonsArray?.length ?? 0) > 0
   },
   [CONDITION_FIELDS.IS_LONGEST_DAY]: {
     inputType: 'boolean',
     operators: BOOLEAN_OPS,
     category: 'season',
-    label: 'CALENDARIA.Condition.Field.isLongestDay',
+    label: 'CALENDARIA.Condition.Field.IsLongestDay',
     available: (cal) => (cal?.seasonsArray?.length ?? 0) > 0
   },
   [CONDITION_FIELDS.IS_SHORTEST_DAY]: {
     inputType: 'boolean',
     operators: BOOLEAN_OPS,
     category: 'season',
-    label: 'CALENDARIA.Condition.Field.isShortestDay',
+    label: 'CALENDARIA.Condition.Field.IsShortestDay',
     available: (cal) => (cal?.seasonsArray?.length ?? 0) > 0
   },
   [CONDITION_FIELDS.IS_SPRING_EQUINOX]: {
     inputType: 'boolean',
     operators: BOOLEAN_OPS,
     category: 'season',
-    label: 'CALENDARIA.Condition.Field.isSpringEquinox',
+    label: 'CALENDARIA.Condition.Field.IsSpringEquinox',
     available: (cal) => (cal?.seasonsArray?.length ?? 0) > 0
   },
   [CONDITION_FIELDS.IS_AUTUMN_EQUINOX]: {
     inputType: 'boolean',
     operators: BOOLEAN_OPS,
     category: 'season',
-    label: 'CALENDARIA.Condition.Field.isAutumnEquinox',
+    label: 'CALENDARIA.Condition.Field.IsAutumnEquinox',
     available: (cal) => (cal?.seasonsArray?.length ?? 0) > 0
   },
   [CONDITION_FIELDS.MOON_PHASE_INDEX]: {
     inputType: 'select',
     operators: EQUALITY_OPS,
     category: 'moon',
-    label: 'CALENDARIA.Condition.Field.moonPhaseIndex',
+    label: 'CALENDARIA.Condition.Field.MoonPhaseIndex',
     needsValue2: true,
     value2Label: 'CALENDARIA.Common.Moon',
     value2Hint: 'CALENDARIA.Condition.Builder.Tooltip.MoonSelect',
@@ -249,7 +249,7 @@ const FIELD_REGISTRY = {
     inputType: 'number',
     operators: ALL_OPS,
     category: 'moon',
-    label: 'CALENDARIA.Condition.Field.moonPhase',
+    label: 'CALENDARIA.Condition.Field.MoonPhase',
     needsValue2: true,
     value2Label: 'CALENDARIA.Common.Moon',
     value2Hint: 'CALENDARIA.Condition.Builder.Tooltip.MoonSelect',
@@ -262,7 +262,7 @@ const FIELD_REGISTRY = {
     inputType: 'number',
     operators: ALL_OPS,
     category: 'moon',
-    label: 'CALENDARIA.Condition.Field.moonPhaseCountMonth',
+    label: 'CALENDARIA.Condition.Field.MoonPhaseCountMonth',
     needsValue2: true,
     value2Label: 'CALENDARIA.Common.Moon',
     value2Hint: 'CALENDARIA.Condition.Builder.Tooltip.MoonSelect',
@@ -275,7 +275,7 @@ const FIELD_REGISTRY = {
     inputType: 'number',
     operators: ALL_OPS,
     category: 'moon',
-    label: 'CALENDARIA.Condition.Field.moonPhaseCountYear',
+    label: 'CALENDARIA.Condition.Field.MoonPhaseCountYear',
     needsValue2: true,
     value2Label: 'CALENDARIA.Common.Moon',
     value2Hint: 'CALENDARIA.Condition.Builder.Tooltip.MoonSelect',
@@ -288,7 +288,7 @@ const FIELD_REGISTRY = {
     inputType: 'number',
     operators: ALL_OPS,
     category: 'moon',
-    label: 'CALENDARIA.Condition.Field.moonPhaseCountEpoch',
+    label: 'CALENDARIA.Condition.Field.MoonPhaseCountEpoch',
     needsValue2: true,
     value2Label: 'CALENDARIA.Common.Moon',
     value2Hint: 'CALENDARIA.Condition.Builder.Tooltip.MoonSelect',
@@ -301,7 +301,7 @@ const FIELD_REGISTRY = {
     inputType: 'select',
     operators: EQUALITY_OPS,
     category: 'moon',
-    label: 'CALENDARIA.Condition.Field.moonSubPhase',
+    label: 'CALENDARIA.Condition.Field.MoonSubPhase',
     needsValue2: true,
     value2Label: 'CALENDARIA.Common.Moon',
     value2Hint: 'CALENDARIA.Condition.Builder.Tooltip.MoonSelect',
@@ -319,7 +319,7 @@ const FIELD_REGISTRY = {
     inputType: 'select',
     operators: EQUALITY_OPS,
     category: 'cycle',
-    label: 'CALENDARIA.Condition.Field.cycle',
+    label: 'CALENDARIA.Condition.Field.Cycle',
     needsValue2: true,
     value2Label: 'CALENDARIA.Common.Cycle',
     value2Hint: 'CALENDARIA.Condition.Builder.Tooltip.CycleSelect',
@@ -349,26 +349,26 @@ const FIELD_REGISTRY = {
     inputType: 'number',
     operators: ALL_OPS,
     category: 'era',
-    label: 'CALENDARIA.Condition.Field.eraYear',
+    label: 'CALENDARIA.Condition.Field.EraYear',
     available: (cal) => (cal?.erasArray?.length ?? 0) > 0
   },
   [CONDITION_FIELDS.INTERCALARY]: {
     inputType: 'boolean',
     operators: BOOLEAN_OPS,
     category: 'other',
-    label: 'CALENDARIA.Condition.Field.intercalary'
+    label: 'CALENDARIA.Condition.Field.Intercalary'
   },
   [CONDITION_FIELDS.IS_LEAP_YEAR]: {
     inputType: 'boolean',
     operators: BOOLEAN_OPS,
     category: 'other',
-    label: 'CALENDARIA.Condition.Field.isLeapYear'
+    label: 'CALENDARIA.Condition.Field.IsLeapYear'
   },
   [CONDITION_FIELDS.ECLIPSE]: {
     inputType: 'select',
     operators: EQUALITY_OPS,
     category: 'other',
-    label: 'CALENDARIA.Condition.Field.eclipse',
+    label: 'CALENDARIA.Condition.Field.Eclipse',
     getOptions: () => [
       { value: 'totalSolar', label: _loc('CALENDARIA.Eclipse.TotalSolar') },
       { value: 'partialSolar', label: _loc('CALENDARIA.Eclipse.PartialSolar') },
@@ -389,28 +389,28 @@ const FIELD_REGISTRY = {
     inputType: 'boolean',
     operators: BOOLEAN_OPS,
     category: 'other',
-    label: 'CALENDARIA.Condition.Field.isEclipse',
+    label: 'CALENDARIA.Condition.Field.IsEclipse',
     available: (cal) => (cal?.moonsArray ?? []).some((m) => m.eclipseMode && m.eclipseMode !== 'never')
   },
   [CONDITION_FIELDS.IS_SOLAR_ECLIPSE]: {
     inputType: 'boolean',
     operators: BOOLEAN_OPS,
     category: 'other',
-    label: 'CALENDARIA.Condition.Field.isSolarEclipse',
+    label: 'CALENDARIA.Condition.Field.IsSolarEclipse',
     available: (cal) => (cal?.moonsArray ?? []).some((m) => m.eclipseMode && m.eclipseMode !== 'never')
   },
   [CONDITION_FIELDS.IS_LUNAR_ECLIPSE]: {
     inputType: 'boolean',
     operators: BOOLEAN_OPS,
     category: 'other',
-    label: 'CALENDARIA.Condition.Field.isLunarEclipse',
+    label: 'CALENDARIA.Condition.Field.IsLunarEclipse',
     available: (cal) => (cal?.moonsArray ?? []).some((m) => m.eclipseMode && m.eclipseMode !== 'never')
   },
   [CONDITION_FIELDS.RANDOM]: {
     inputType: 'number',
     operators: COMPARE_OPS,
     category: 'other',
-    label: 'CALENDARIA.Condition.Field.random',
+    label: 'CALENDARIA.Condition.Field.Random',
     needsValue2: true,
     value2Label: 'CALENDARIA.Condition.Builder.Seed',
     value2Hint: 'CALENDARIA.Condition.Builder.Tooltip.Seed',
@@ -428,13 +428,13 @@ const FIELD_REGISTRY = {
     inputType: 'number',
     operators: ALL_OPS,
     category: 'date',
-    label: 'CALENDARIA.Condition.Field.epoch'
+    label: 'CALENDARIA.Condition.Field.Epoch'
   },
   [CONDITION_FIELDS.WEATHER]: {
     inputType: 'select',
     operators: EQUALITY_OPS,
     category: 'other',
-    label: 'CALENDARIA.Condition.Field.weather',
+    label: 'CALENDARIA.Condition.Field.Weather',
     getOptions: () => {
       const presets = game.settings?.get?.('calendaria', 'customWeatherPresets') ?? {};
       return Object.entries(presets).map(([id, p]) => ({ value: id, label: p.name || id }));
@@ -458,13 +458,13 @@ const FIELD_REGISTRY = {
     inputType: 'special',
     operators: BOOLEAN_OPS,
     category: 'other',
-    label: 'CALENDARIA.Condition.Field.computed'
+    label: 'CALENDARIA.Condition.Field.Computed'
   },
   [CONDITION_FIELDS.EVENT]: {
     inputType: 'number',
     operators: EVENT_OPS,
     category: 'other',
-    label: 'CALENDARIA.Condition.Field.event',
+    label: 'ATLAS.Common.Event',
     needsValue2: true,
     value2Label: 'CALENDARIA.Condition.Builder.EventNoteSelect',
     value2Hint: 'CALENDARIA.Condition.Builder.Tooltip.EventSelect',

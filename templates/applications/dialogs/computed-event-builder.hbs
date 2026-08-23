@@ -30,13 +30,13 @@
             </select>
             {{#if isDateAnchor}}
               <select name="chain.{{index}}.anchorMonth" class="cb-value-select" data-tooltip
-                aria-label="{{localize 'CALENDARIA.Common.Month'}}">
+                aria-label="{{localize 'ATLAS.Common.Month'}}">
                 {{#each ../months}}
                   <option value="{{index}}" {{#if (eq index ../dateAnchorMonth)}}selected{{/if}}>{{name}}</option>
                 {{/each}}
               </select>
               <span class="cb-labeled-input">
-                <span class="cb-inline-label">{{localize "CALENDARIA.Common.Day"}}</span>
+                <span class="cb-inline-label">{{localize "ATLAS.Common.Day"}}</span>
                 <input type="number" name="chain.{{index}}.anchorDay" value="{{dateAnchorDay}}" min="1" class="cb-value-input">
               </span>
             {{/if}}
@@ -44,7 +44,7 @@
 
           {{#if isFirstAfter}}
             <select name="chain.{{index}}.condition" class="cb-value-select" data-tooltip
-              aria-label="{{localize 'CALENDARIA.Condition.Builder.ConditionLabel'}}">
+              aria-label="{{localize 'ATLAS.Common.Condition'}}">
               {{#each ../conditionTypes}}
                 <option value="{{value}}" {{#if (eq value ../condition)}}selected{{/if}}>{{label}}</option>
               {{/each}}
@@ -79,7 +79,7 @@
 
           {{#if isDaysAfter}}
             <span class="cb-labeled-input">
-              <span class="cb-inline-label">{{localize "CALENDARIA.Common.Days"}}</span>
+              <span class="cb-inline-label">{{localize "ATLAS.Common.Days"}}</span>
               <input type="number" name="chain.{{index}}.params.days" value="{{params.days}}" class="cb-value-input"
                 data-tooltip aria-label="{{localize 'CALENDARIA.Note.ComputedDaysHint'}}">
             </span>
@@ -123,21 +123,21 @@
     {{#each overrides}}
       <div class="cb-condition-row">
         <span class="cb-labeled-input">
-          <span class="cb-inline-label">{{localize "CALENDARIA.Common.Year"}}</span>
+          <span class="cb-inline-label">{{localize "ATLAS.Common.Year"}}</span>
           <input type="number" name="override.{{year}}.year" value="{{year}}" step="1" class="cb-value-input">
         </span>
         <select name="override.{{year}}.month" class="cb-value-select" data-tooltip
-          aria-label="{{localize 'CALENDARIA.Common.Month'}}">
+          aria-label="{{localize 'ATLAS.Common.Month'}}">
           {{#each ../months}}
             <option value="{{index}}" {{#if (eq index ../month)}}selected{{/if}}>{{name}}</option>
           {{/each}}
         </select>
         <span class="cb-labeled-input">
-          <span class="cb-inline-label">{{localize "CALENDARIA.Common.Day"}}</span>
+          <span class="cb-inline-label">{{localize "ATLAS.Common.Day"}}</span>
           <input type="number" name="override.{{year}}.day" value="{{day}}" min="1" max="31" class="cb-value-input">
         </span>
         <a class="cb-remove" data-action="removeOverride" data-year="{{year}}" data-tooltip
-          aria-label="{{localize 'CALENDARIA.Common.Delete'}}">
+          aria-label="{{localize 'ATLAS.Common.Delete'}}">
           <i class="fas fa-times"></i>
         </a>
       </div>
@@ -145,7 +145,7 @@
 
     <div class="cb-group-actions">
       <button type="button" class="cb-add-btn" data-action="addOverride">
-        <i class="fas fa-plus"></i> {{localize "CALENDARIA.Note.ComputedAddOverride"}}
+        <i class="fas fa-plus"></i> {{localize "ATLAS.Common.AddOverride"}}
       </button>
     </div>
   </fieldset>

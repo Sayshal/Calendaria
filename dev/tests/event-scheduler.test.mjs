@@ -14,9 +14,10 @@ vi.mock('../../scripts/utils/localization.mjs', () => ({
   })
 }));
 vi.mock('../../scripts/utils/socket.mjs', () => ({
-  CalendariaSocket: { isPrimaryGM: vi.fn(() => true), emit: vi.fn() }
+  CalendariaSocket: { emit: vi.fn() }
 }));
-vi.mock('../../scripts/constants.mjs', async (importOriginal) => ({ ...(await importOriginal()),
+vi.mock('../../scripts/constants.mjs', async (importOriginal) => ({
+  ...(await importOriginal()),
   MODULE: { ID: 'calendaria' },
   HOOKS: { EVENT_TRIGGERED: 'calendaria.eventTriggered', EVENT_DAY_CHANGED: 'calendaria.eventDayChanged' }
 }));
@@ -30,7 +31,9 @@ vi.mock('../../scripts/notes/date-utils.mjs', () => {
       if (a.dayOfMonth !== b.dayOfMonth) return a.dayOfMonth < b.dayOfMonth ? -1 : 1;
       return 0;
     }),
-    _setCurrentDate: (d) => { currentDate = d; }
+    _setCurrentDate: (d) => {
+      currentDate = d;
+    }
   };
 });
 vi.mock('../../scripts/notes/note-manager.mjs', () => ({
@@ -73,7 +76,7 @@ let worldTimeBase = 0;
 const WT = () => worldTimeBase + TRIGGER_CHECK_INTERVAL + 1;
 beforeEach(async () => {
   worldTimeBase += 1_000_000;
-  CalendariaSocket.isPrimaryGM.mockReturnValue(true);
+  ATLAS.isPrimaryGM = true;
   NoteManager.isInitialized.mockReturnValue(true);
   NoteManager.getAllNotes.mockReturnValue([]);
   NoteManager.getFullNote.mockReturnValue(null);
@@ -91,7 +94,7 @@ beforeEach(async () => {
 
 describe('EventScheduler.onUpdateWorldTime()', () => {
   it('does nothing when not primary GM', async () => {
-    CalendariaSocket.isPrimaryGM.mockReturnValue(false);
+    ATLAS.isPrimaryGM = false;
     await EventScheduler.onUpdateWorldTime(WT(), 1800);
     expect(NoteManager.getAllNotes).not.toHaveBeenCalled();
   });

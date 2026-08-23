@@ -131,9 +131,13 @@ function renderButton(widget, location) {
   const icon = resolveValue(widget.icon);
   const tooltip = resolveValue(widget.tooltip);
   const label = resolveValue(widget.label);
+  const color = resolveValue(widget.color);
+  const style = color ? `style="--widget-color: ${color}"` : '';
   const baseClass = getButtonClass(location);
   const moduleClass = `widget-${widget.moduleId}`;
-  return `<button type="button" class="${baseClass} calendaria-widget ${moduleClass}" data-widget-id="${widget.fullId}" ${tooltip ? `data-tooltip="${tooltip}"` : ''}>${icon ? `<i class="${icon}"></i>` : ''}${label && !icon ? label : ''}</button>`;
+  return `<button type="button" class="${baseClass} calendaria-widget ${moduleClass}" data-widget-id="${widget.fullId}" ${style} ${tooltip ? `data-tooltip="${tooltip}"` : ''}>
+    ${icon ? `<i class="${icon}"></i>` : ''}${label && !icon ? label : ''}
+    </button>`;
 }
 
 /**

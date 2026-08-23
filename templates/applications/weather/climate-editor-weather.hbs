@@ -26,7 +26,7 @@
           <p class="hint">{{localize "CALENDARIA.Editor.Weather.Zone.SeasonAliasesHint"}}</p>
           <div class="form-group">
             <label
-              for="alias-{{this.seasonName}}-name">{{localize "CALENDARIA.Editor.Weather.Zone.SeasonAliasName"}}</label>
+              for="alias-{{this.seasonName}}-name">{{localize "ATLAS.Common.Name"}}</label>
             <div class="form-fields">
               <input type="text" id="alias-{{this.seasonName}}-name" name="alias_{{this.seasonName}}_name"
                 value="{{this.aliasName}}"
@@ -52,7 +52,7 @@
             </div>
           </div>
           <div class="form-group">
-            <label>{{localize "CALENDARIA.Editor.Weather.Zone.SeasonAliasColor"}}</label>
+            <label>{{localize "ATLAS.Common.Color"}}</label>
             <div class="form-fields">
               <color-picker name="alias_{{this.seasonName}}_color" value="{{this.aliasColor}}"
                 data-parent-color="{{this.parentColor}}"></color-picker>
@@ -76,14 +76,14 @@
           data-tooltip="{{localize 'CALENDARIA.Weather.Wind.SpeedHint'}}">{{localize "CALENDARIA.Weather.Wind.SpeedRange"}}</label>
         <div class="form-fields range">
           <select name="windSpeedMin">
-            <option value="">{{localize "CALENDARIA.Common.Default"}}</option>
+            <option value="">{{localize "ATLAS.Common.Default"}}</option>
             {{#each windSpeedMinOptions}}
               <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
             {{/each}}
           </select>
           <i class="fa-solid fa-right-long"></i>
           <select name="windSpeedMax">
-            <option value="">{{localize "CALENDARIA.Common.Default"}}</option>
+            <option value="">{{localize "ATLAS.Common.Default"}}</option>
             {{#each windSpeedMaxOptions}}
               <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
             {{/each}}
