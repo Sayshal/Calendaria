@@ -14,6 +14,7 @@
 - Format string previews in the calendar editor and settings panel now flag letter runs that match no token, such as a wrong-case yyyy, with a warning color and tooltip
 - Linked subjects appear as a metadata row in the note view mode, and each name opens its document sheet
 - Mirrored to-dos are removed automatically when the note is deleted, its reminder is set to none, or the opt-in is unchecked
+- New Particle Background and Token Trails settings turn on the matching FXMaster preset options, with a per-scene override for each alongside the existing splash override
 - New Weekly Almanac toggle on the Chronicle settings tab, off by default, publishes one journal page per in-world week to a shared journal players can read
 - New `[namedDay]` and `[namedDayAbbr]` format tokens print the current day's name in any custom date format, and the calendar day tooltip shows it too
 - New api.getWeatherSeverityLabel(), api.getWeatherSeverityLevel(), and api.getWeatherSeverityLevels() expose the named severity bands to other modules
@@ -44,6 +45,7 @@
 - Bulk-deleting notes from the note viewer now reports them as deleted instead of updated
 - Button widgets registered by other modules now honor their declared color in the HUD, matching how indicator widgets already do
 - CALENDARIA.api.updateNote now reads startDate and endDate month and day as 1-indexed, matching createNote, so API-driven note edits no longer land a month and day early
+- Editing a weather in the picker no longer discards the preset's environment tint and darkness penalty when it saves the result as custom weather
 - Festival icons saved in custom calendars and default calendar overrides are stripped of their old Font Awesome prefix once on load, so those icons render again, and the three Hijri festival icons ship in the current form
 - Festival note seeding, note folder and ownership rebuilds, rest time advancement, migrations, and the dawn, dusk, season, and moon macro triggers now run on the primary GM only, so worlds with several GMs connected no longer fire them more than once
 - Fixed light theme contrast on the HUD time shortcuts, the sticky context item, and the mini calendar day hover
@@ -65,6 +67,8 @@
 - Weather history and forecast plans are now stored per calendar, so switching calendars no longer shows one calendar's recorded weather on another calendar's dates
 - Weather pills and weather-aware day tooltips now appear on day cells in the big and mini calendar week views for monthless calendars
 - Widget indicators in the HUD now scale with the built-in weather, season, era, and cycle indicators instead of rendering smaller
+- Wind speed now drives FXMaster particle speed and precipitation intensity drives particle density, so both fields change the effect instead of only the FX Speed and Density selects
+- Windy weather now plays FXMaster's windy preset instead of clearing the scene of effects, on FXMaster+ where that preset ships
 
 ## Changes
 
@@ -84,6 +88,7 @@
 - The release workflow now reads the module id from module.json instead of a hardcoded value, so the Foundry package listing and Discord release post always point at the right package
 - The season indicator label now uses the theme text colour, with the season hue kept on its icon
 - The settings panel no longer builds GM-only tabs or their inputs for players, so those controls never reach a player's form
+- The very-low FX Speed and Density level now slows particles instead of stopping them dead, and both selects are relabelled to say they adjust relative to wind speed and precipitation intensity
 - The weekly almanac section on the chronicle tab is now GM-only
 - Verified compatibility bumped to Foundry v14.366
 - Weather icons and borders in the HUD chip, weather picker, and climate editor now blend the weather hue toward the theme text colour, so pale or near-surface weather colours stay readable on every ATLAS theme
