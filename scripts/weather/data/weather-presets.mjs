@@ -283,7 +283,7 @@ export const STANDARD_WEATHER = [
     precipitation: { type: null, intensity: 0 },
     inertiaWeight: 1.0,
     hudEffect: 'gust',
-    fxPreset: null,
+    fxPreset: 'windy',
     fxDensity: null,
     fxSpeed: null,
     fxColor: null,

@@ -21,6 +21,20 @@ function getPrecipIntensityLabel(value) {
 }
 
 /**
+ * Extract the environment and darkness fields that a preset applies, so custom weather can keep them.
+ * @param {object|null} weather - Weather state to read from
+ * @returns {object} darknessPenalty, environmentBase, environmentDark and environmentCycle
+ */
+function pickEnvironment(weather) {
+  return {
+    darknessPenalty: weather?.darknessPenalty ?? 0,
+    environmentBase: weather?.environmentBase ?? null,
+    environmentDark: weather?.environmentDark ?? null,
+    environmentCycle: weather?.environmentCycle ?? null
+  };
+}
+
+/**
  * Weather picker application with selectable presets.
  */
 export default class WeatherPickerApp extends HandlebarsApplicationMixin(ApplicationV2) {
@@ -241,12 +255,12 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
       const fxLevels = ['very-low', 'low', 'medium', 'high', 'very-high'];
       const currentFxDensity = this.#fxDensity !== null ? this.#fxDensity : (currentWeather?.fxDensity ?? '');
       context.fxDensityOptions = [
-        { value: '', label: _loc('ATLAS.Common.Default'), selected: !currentFxDensity },
+        { value: '', label: _loc('CALENDARIA.FxParam.NoChange'), selected: !currentFxDensity },
         ...fxLevels.map((v) => ({ value: v, label: _loc(`CALENDARIA.FxParam.${v}`), selected: v === currentFxDensity }))
       ];
       const currentFxSpeed = this.#fxSpeed !== null ? this.#fxSpeed : (currentWeather?.fxSpeed ?? '');
       context.fxSpeedOptions = [
-        { value: '', label: _loc('ATLAS.Common.Default'), selected: !currentFxSpeed },
+        { value: '', label: _loc('CALENDARIA.FxParam.NoChange'), selected: !currentFxSpeed },
         ...fxLevels.map((v) => ({ value: v, label: _loc(`CALENDARIA.FxParam.${v}`), selected: v === currentFxSpeed }))
       ];
       context.fxColor = this.#fxColor !== null ? this.#fxColor : (currentWeather?.fxColor ?? '');
@@ -346,6 +360,8 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
     const fxDensity = fd.fxDensity || null;
     const fxSpeed = fd.fxSpeed || null;
     const fxColor = fd.fxColor || null;
+    const basePreset = this.#selectedPresetId ? getPreset(this.#selectedPresetId, WeatherManager.getCustomPresets()) : null;
+    const environment = basePreset ? WeatherManager.resolveEnvironment(basePreset) : pickEnvironment(WeatherManager.getCurrentWeather(zoneId));
     if (this.#selectedPresetId && !this.#customEdited) {
       const preset = getPreset(this.#selectedPresetId, WeatherManager.getCustomPresets());
       const nativeFx = preset?.fxPreset || '';
@@ -396,6 +412,7 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
           fxDensity,
           fxSpeed,
           fxColor,
+          ...environment,
           zoneId,
           period: periodField
         });
@@ -423,9 +440,9 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
           fxDensity,
           fxSpeed,
           fxColor,
+          ...environment,
           inertiaWeight: preset?.inertiaWeight ?? 1,
-          chance: preset?.chance ?? 1,
-          darknessPenalty: preset?.darknessPenalty ?? 0
+          chance: preset?.chance ?? 1
         });
       }
     }

@@ -218,6 +218,21 @@ export default class WeatherManager {
   }
 
   /**
+   * Resolve a preset's environment and darkness values with visual overrides applied.
+   * @param {object|null} preset - Weather preset object
+   * @returns {object} Resolved darknessPenalty, environmentBase, environmentDark and environmentCycle
+   */
+  static resolveEnvironment(preset) {
+    if (!preset) return { darknessPenalty: 0, environmentBase: null, environmentDark: null, environmentCycle: null };
+    return {
+      darknessPenalty: this.#resolveDarknessPenalty(preset),
+      environmentBase: this.#resolveEnvironmentBase(preset),
+      environmentDark: this.#resolveEnvironmentDark(preset),
+      environmentCycle: this.#resolveEnvironmentCycle(preset)
+    };
+  }
+
+  /**
    * Re-resolve environment overrides for a preset in all cached weather zones.
    * @param {string} presetId - The preset ID whose overrides changed
    */
@@ -474,6 +489,7 @@ export default class WeatherManager {
       darknessPenalty: weatherData.darknessPenalty ?? 0,
       environmentBase: weatherData.environmentBase ?? null,
       environmentDark: weatherData.environmentDark ?? null,
+      environmentCycle: weatherData.environmentCycle ?? null,
       fxPreset: weatherData.fxPreset ?? null,
       soundFx: weatherData.soundFx ?? null,
       fxMacro: weatherData.fxMacro ?? null,
@@ -1982,8 +1998,14 @@ export default class WeatherManager {
       ...(preset.tempMax != null && { tempMax: preset.tempMax }),
       ...(preset.hudEffect && { hudEffect: preset.hudEffect }),
       ...(preset.fxPreset && { fxPreset: preset.fxPreset }),
+      ...(preset.fxDensity && { fxDensity: preset.fxDensity }),
+      ...(preset.fxSpeed && { fxSpeed: preset.fxSpeed }),
+      ...(preset.fxColor && { fxColor: preset.fxColor }),
       ...(preset.soundFx && { soundFx: preset.soundFx }),
       ...(preset.fxMacro && { fxMacro: preset.fxMacro }),
+      ...(preset.environmentBase && { environmentBase: preset.environmentBase }),
+      ...(preset.environmentDark && { environmentDark: preset.environmentDark }),
+      ...(preset.environmentCycle != null && { environmentCycle: preset.environmentCycle }),
       ...(preset.inertiaWeight != null && { inertiaWeight: preset.inertiaWeight }),
       ...(preset.chance != null && { chance: preset.chance }),
       ...(preset.darknessPenalty != null && { darknessPenalty: preset.darknessPenalty })

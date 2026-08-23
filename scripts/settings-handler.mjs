@@ -1408,6 +1408,22 @@ export default class CalendariaSettings {
         type: new NumberField({ initial: 1.0, min: 0, max: 3, step: 0.1 }),
         onChange: () => syncWeatherToScene()
       },
+      [SETTINGS.FXMASTER_BACKGROUND]: {
+        name: 'CALENDARIA.Settings.FXMaster.Background.Name',
+        hint: 'CALENDARIA.Settings.FXMaster.Background.Hint',
+        scope: 'world',
+        config: false,
+        type: new BooleanField({ initial: false }),
+        onChange: () => syncWeatherToScene()
+      },
+      [SETTINGS.FXMASTER_TOKEN_TRAILS]: {
+        name: 'CALENDARIA.Settings.FXMaster.TokenTrails.Name',
+        hint: 'CALENDARIA.Settings.FXMaster.TokenTrails.Hint',
+        scope: 'world',
+        config: false,
+        type: new BooleanField({ initial: false }),
+        onChange: () => syncWeatherToScene()
+      },
       [SETTINGS.FXMASTER_SPLASH]: {
         name: 'CALENDARIA.Settings.FXMaster.Splash.Name',
         hint: 'CALENDARIA.Settings.FXMaster.Splash.Hint',

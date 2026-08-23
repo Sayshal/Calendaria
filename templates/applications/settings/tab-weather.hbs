@@ -237,7 +237,8 @@
         </div>
 
         <div class="form-group">
-          <label for="fxmasterDarknessActivationEnabled">{{localize "CALENDARIA.Settings.FXMaster.DarknessActivation.Name"}}</label>
+          <label
+            for="fxmasterDarknessActivationEnabled">{{localize "CALENDARIA.Settings.FXMaster.DarknessActivation.Name"}}</label>
           <div class="form-fields">
             <input type="checkbox" id="fxmasterDarknessActivationEnabled" name="fxmasterDarknessActivationEnabled"
               {{#if fxmasterDarknessActivationEnabled}}checked{{/if}} />
@@ -247,20 +248,22 @@
 
         {{#if fxmasterDarknessActivationEnabled}}
           <div class="form-group">
-            <label for="fxmasterDarknessActivationMin">{{localize "CALENDARIA.Settings.FXMaster.DarknessActivationMin.Name"}}</label>
+            <label
+              for="fxmasterDarknessActivationMin">{{localize "CALENDARIA.Settings.FXMaster.DarknessActivationMin.Name"}}</label>
             <div class="form-fields range-field">
-              <input type="range" id="fxmasterDarknessActivationMin" name="fxmasterDarknessActivationMin" min="0" max="1"
-                step="0.05" value="{{fxmasterDarknessActivationMin}}">
+              <input type="range" id="fxmasterDarknessActivationMin" name="fxmasterDarknessActivationMin" min="0"
+                max="1" step="0.05" value="{{fxmasterDarknessActivationMin}}">
               <span class="range-value">{{fxmasterDarknessActivationMin}}</span>
             </div>
             <p class="hint">{{localize "CALENDARIA.Settings.FXMaster.DarknessActivationMin.Hint"}}</p>
           </div>
 
           <div class="form-group">
-            <label for="fxmasterDarknessActivationMax">{{localize "CALENDARIA.Settings.FXMaster.DarknessActivationMax.Name"}}</label>
+            <label
+              for="fxmasterDarknessActivationMax">{{localize "CALENDARIA.Settings.FXMaster.DarknessActivationMax.Name"}}</label>
             <div class="form-fields range-field">
-              <input type="range" id="fxmasterDarknessActivationMax" name="fxmasterDarknessActivationMax" min="0" max="1"
-                step="0.05" value="{{fxmasterDarknessActivationMax}}">
+              <input type="range" id="fxmasterDarknessActivationMax" name="fxmasterDarknessActivationMax" min="0"
+                max="1" step="0.05" value="{{fxmasterDarknessActivationMax}}">
               <span class="range-value">{{fxmasterDarknessActivationMax}}</span>
             </div>
             <p class="hint">{{localize "CALENDARIA.Settings.FXMaster.DarknessActivationMax.Hint"}}</p>
@@ -281,6 +284,24 @@
             <input type="checkbox" id="fxmasterSplash" name="fxmasterSplash" {{#if fxmasterSplash}}checked{{/if}} />
           </div>
           <p class="hint">{{localize "CALENDARIA.Settings.FXMaster.Splash.Hint"}}</p>
+        </div>
+
+        <div class="form-group">
+          <label for="fxmasterBackground">{{localize "CALENDARIA.Settings.FXMaster.Background.Name"}}</label>
+          <div class="form-fields">
+            <input type="checkbox" id="fxmasterBackground" name="fxmasterBackground"
+              {{#if fxmasterBackground}}checked{{/if}} />
+          </div>
+          <p class="hint">{{localize "CALENDARIA.Settings.FXMaster.Background.Hint"}}</p>
+        </div>
+
+        <div class="form-group">
+          <label for="fxmasterTokenTrails">{{localize "CALENDARIA.Settings.FXMaster.TokenTrails.Name"}}</label>
+          <div class="form-fields">
+            <input type="checkbox" id="fxmasterTokenTrails" name="fxmasterTokenTrails"
+              {{#if fxmasterTokenTrails}}checked{{/if}} />
+          </div>
+          <p class="hint">{{localize "CALENDARIA.Settings.FXMaster.TokenTrails.Hint"}}</p>
         </div>
 
         <div class="form-group">

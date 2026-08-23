@@ -1,8 +1,10 @@
 import { HOOKS, MODULE, SCENE_FLAGS, SETTINGS } from '../constants.mjs';
 import { WeatherManager } from '../weather/_module.mjs';
 
-/** FXMaster relative-level labels mapped to their numeric multipliers, matching FXMaster's RELATIVE_LEVEL_SCALE. */
-const FXMASTER_SPEED_LABEL_TO_NUMBER = { 'very-low': 0, low: 0.5, medium: 1, high: 1.5, 'very-high': 2 };
+/**
+ * FXMaster relative-level labels mapped to their numeric multipliers.
+ */
+const FXMASTER_LEVEL_TO_NUMBER = { 'very-low': 0.1, low: 0.5, medium: 1, high: 1.5, 'very-high': 2 };
 
 /** 8-point cardinal directions accepted by FXMaster, keyed by compass degrees. */
 const FXMASTER_CARDINALS = [
@@ -111,7 +113,10 @@ function onSceneUpdate(scene, change) {
   const fxOverrideKey = `flags.${MODULE.ID}.${SCENE_FLAGS.WEATHER_FX_OVERRIDE}`;
   const topDownKey = `flags.${MODULE.ID}.${SCENE_FLAGS.FXMASTER_TOP_DOWN_OVERRIDE}`;
   const splashKey = `flags.${MODULE.ID}.${SCENE_FLAGS.FXMASTER_SPLASH_OVERRIDE}`;
-  if (!(fxOverrideKey in flat) && !(topDownKey in flat) && !(splashKey in flat)) return;
+  const backgroundKey = `flags.${MODULE.ID}.${SCENE_FLAGS.FXMASTER_BACKGROUND_OVERRIDE}`;
+  const tokenTrailsKey = `flags.${MODULE.ID}.${SCENE_FLAGS.FXMASTER_TOKEN_TRAILS_OVERRIDE}`;
+  const watched = [fxOverrideKey, topDownKey, splashKey, backgroundKey, tokenTrailsKey];
+  if (!watched.some((key) => key in flat)) return;
   syncWeatherToScene();
 }
 
@@ -228,11 +233,52 @@ function clampToDownward(blowDeg, maxAngle = 45) {
 }
 
 /**
+ * Convert an FXMaster relative-level value (label or number) to its numeric multiplier.
+ * @param {string|number|null} value - Relative level label, explicit multiplier, or null for no change
+ * @returns {number} Multiplier, 1 when unset or unrecognized
+ */
+function toLevelMultiplier(value) {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  return FXMASTER_LEVEL_TO_NUMBER[String(value ?? '').toLowerCase()] ?? 1;
+}
+
+/**
+ * Convert a 0-5 weather wind speed to an FXMaster particle speed multiplier, with moderate wind as the neutral point.
+ * @param {number} speed - Wind speed on the 0-5 WIND_SPEEDS scale
+ * @returns {number} Speed multiplier between 0.5 and 1.75
+ */
+function windSpeedToMultiplier(speed) {
+  const clamped = Math.min(Math.max(Number(speed ?? 2), 0), 5);
+  return 0.5 + clamped * 0.25;
+}
+
+/**
+ * Convert precipitation intensity to an FXMaster particle density multiplier, with moderate intensity as the neutral point.
+ * @param {object} [precipitation] - Weather precipitation block
+ * @returns {number} Density multiplier, 1 when the weather has no precipitation
+ */
+function intensityToMultiplier(precipitation) {
+  if (!precipitation?.type) return 1;
+  return 0.5 + Math.min(Math.max(Number(precipitation.intensity ?? 0.5), 0), 1);
+}
+
+/**
+ * Resolve a boolean FXMaster option from its per-scene 'on'/'off' flag, falling back to the global setting.
+ * @param {string} flag - Scene flag key holding the override
+ * @param {string} setting - Global setting key used when the scene defers
+ * @returns {boolean} Whether the option is enabled for the current scene
+ */
+function resolveSceneToggle(flag, setting) {
+  const override = canvas?.scene?.getFlag(MODULE.ID, flag);
+  return override === 'on' || (override !== 'off' && game.settings.get(MODULE.ID, setting));
+}
+
+/**
  * Build options object for FXMaster preset playback.
  * @param {object} weather - Current weather state
  * @returns {object} Options for FXMaster play/switch
  */
-function buildPresetOptions(weather) {
+export function buildPresetOptions(weather) {
   const options = {};
   const sceneTopDown = canvas?.scene?.getFlag(MODULE.ID, SCENE_FLAGS.FXMASTER_TOP_DOWN_OVERRIDE);
   const useTopDown = sceneTopDown === 'topdown' || (sceneTopDown !== 'sideview' && game.settings.get(MODULE.ID, SETTINGS.FXMASTER_TOP_DOWN));
@@ -259,16 +305,14 @@ function buildPresetOptions(weather) {
     const levels = fxLevels.filter((id) => validIds.has(id));
     if (levels.length) options.levels = levels;
   }
-  if (weather.fxDensity) options.density = weather.fxDensity;
   const speedMult = game.settings.get(MODULE.ID, SETTINGS.FXMASTER_SPEED_MULTIPLIER) ?? 1;
-  if (speedMult !== 1) {
-    const baseMult = typeof weather.fxSpeed === 'number' ? weather.fxSpeed : (FXMASTER_SPEED_LABEL_TO_NUMBER[String(weather.fxSpeed ?? 'medium').toLowerCase()] ?? 1);
-    options.speed = baseMult * speedMult;
-  } else if (weather.fxSpeed) options.speed = weather.fxSpeed;
+  options.speed = windSpeedToMultiplier(weather.wind?.speed) * toLevelMultiplier(weather.fxSpeed) * speedMult;
+  options.density = intensityToMultiplier(weather.precipitation) * toLevelMultiplier(weather.fxDensity);
   if (weather.fxColor) options.color = weather.fxColor;
   if (game.settings.get(MODULE.ID, SETTINGS.FXMASTER_SOUND_FX)) options.soundFx = true;
-  const sceneSplash = canvas?.scene?.getFlag(MODULE.ID, SCENE_FLAGS.FXMASTER_SPLASH_OVERRIDE);
-  options.splash = sceneSplash === 'on' || (sceneSplash !== 'off' && game.settings.get(MODULE.ID, SETTINGS.FXMASTER_SPLASH));
+  options.background = resolveSceneToggle(SCENE_FLAGS.FXMASTER_BACKGROUND_OVERRIDE, SETTINGS.FXMASTER_BACKGROUND);
+  options.tokenTrails = resolveSceneToggle(SCENE_FLAGS.FXMASTER_TOKEN_TRAILS_OVERRIDE, SETTINGS.FXMASTER_TOKEN_TRAILS);
+  options.splash = resolveSceneToggle(SCENE_FLAGS.FXMASTER_SPLASH_OVERRIDE, SETTINGS.FXMASTER_SPLASH);
   return options;
 }
 
