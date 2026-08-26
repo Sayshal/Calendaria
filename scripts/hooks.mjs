@@ -3,7 +3,17 @@ import { BigCal, Chronicle, HUD, MiniCal, Stopwatch, SunDial, TimeKeeper } from 
 import { CalendarManager } from './calendar/_module.mjs';
 import { HOOKS, MODULE, SCENE_FLAGS, SETTINGS } from './constants.mjs';
 import { FestivalManager } from './festivals/_module.mjs';
-import { onDayChangeForBastions, onLongRest, onPF1eRest, onPF2eRest, onPreRest, onShortRest, patchBastionButton } from './integrations/_module.mjs';
+import {
+  onDayChangeForBastions,
+  onItemPilesGetActiveHolidays,
+  onItemPilesGetHolidays,
+  onLongRest,
+  onPF1eRest,
+  onPF2eRest,
+  onPreRest,
+  onShortRest,
+  patchBastionButton
+} from './integrations/_module.mjs';
 import { NoteManager, clearComputedDateCache } from './notes/_module.mjs';
 import { TimeClock, onMoonPhaseChange, onUpdateScene, onWeatherChange } from './time/_module.mjs';
 import {
@@ -67,6 +77,8 @@ export function registerHooks() {
   Hooks.on('dnd5e.preShortRest', onPreRest);
   Hooks.on('pf1ActorRest', onPF1eRest);
   Hooks.on('pf2e.restForTheNight', onPF2eRest);
+  Hooks.on('item-piles-getHolidays', onItemPilesGetHolidays);
+  Hooks.on('item-piles-getActiveHolidays', onItemPilesGetActiveHolidays);
   Hooks.on('getSceneControlButtons', onGetSceneControlButtons);
   Hooks.on('preCreateChatMessage', onPreCreateChatMessage);
   Hooks.on('preDeleteFolder', NoteManager.onPreDeleteFolder.bind(NoteManager));
