@@ -2,6 +2,7 @@ import { findFestivalDay as findFestivalDayViaNotes, getLeapYearDescription, int
 import { DEFAULT_MOON_PHASES, MOON_VISIBILITY } from '../constants.mjs';
 import { NoteManager } from '../notes/_module.mjs';
 import { resolveRandomizedPhase } from './_module.mjs';
+import { formatCustom } from '../utils/formatting/format-utils.mjs';
 
 const { ArrayField, BooleanField, NumberField, SchemaField, StringField, TypedObjectField } = foundry.data.fields;
 
@@ -183,6 +184,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       nextDby = this.totalDaysBeforeYear(year + 1);
     }
     dayOfMonth -= dby;
+    const day = dayOfMonth;
     let month = 0;
     const months = this.monthsArray;
     const isLeap = this.isLeapYear(year);
@@ -193,8 +195,16 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       dayOfMonth -= d;
       month++;
     }
+    if (month >= months.length && months.length) {
+      month = months.length - 1;
+      const m = months[month];
+      const lastDays = isLeap && m.leapDays != null ? m.leapDays : m.days;
+      dayOfMonth = Math.min(dayOfMonth, lastDays - 1);
+    }
     const dayOfWeek = this._computeDayOfWeek({ year, month, dayOfMonth });
-    return { year, month, dayOfMonth, dayOfWeek, hour, minute, second };
+    const seasonRecord = this.getCurrentSeason({ year, month, dayOfMonth });
+    const season = seasonRecord ? this.seasonsArray.indexOf(seasonRecord) : null;
+    return { year, month, dayOfMonth, day, dayOfWeek, season, leapYear: isLeap, hour, minute, second };
   }
 
   /** @override */
@@ -210,6 +220,15 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     totalDays += dayOfMonth;
     const totalSeconds = totalDays * secondsPerDay + hour * secondsPerHour + minute * secondsPerMinute + second;
     return totalSeconds - CalendariaCalendar.epochOffset - (this.epochDayOffset ?? 0) * secondsPerDay;
+  }
+
+  /** @override */
+  format(time = game.time.worldTime, formatter = 'timestamp', options = {}) {
+    if (formatter !== 'timestamp') return super.format(time, formatter, options);
+    const raw = typeof time === 'number' ? this.timeToComponents(time) : time;
+    const components = { ...raw, year: raw.year + (this.years?.yearZero ?? 0) };
+    const formatStr = this.isMonthless ? 'YYYY-DDD HH:mm:ss' : 'YYYY-MM-DD HH:mm:ss';
+    return formatCustom(this, components, formatStr);
   }
 
   /**
