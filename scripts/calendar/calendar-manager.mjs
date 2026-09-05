@@ -23,7 +23,14 @@ export default class CalendarManager {
     const cal = game.time.calendar;
     if (!cal) return;
     for (const prop of ['months', 'days', 'seasons']) if (cal[prop]?.values && !Array.isArray(cal[prop].values)) cal[prop].values = Object.values(cal[prop].values);
-    if (cal.months?.values && cal.days) cal.days.daysPerLeapYear = cal.months.values.reduce((sum, m) => sum + (m.leapDays ?? m.days ?? 0), 0);
+    if (!cal.days) return;
+    if (cal.months?.values?.length) {
+      cal.days.daysPerYear ??= cal.months.values.reduce((sum, m) => sum + (m.days ?? 0), 0);
+      cal.days.daysPerLeapYear = cal.months.values.reduce((sum, m) => sum + (m.leapDays ?? m.days ?? 0), 0);
+    } else {
+      cal.days.daysPerYear ??= 365;
+      cal.days.daysPerLeapYear = cal.days.daysPerYear + 1;
+    }
   }
 
   /**
