@@ -23,7 +23,7 @@ import {
   usesDomParenting,
   warnShowToAll
 } from '../../utils/_module.mjs';
-import { SettingsPanel } from '../_module.mjs';
+import { CinematicOverlay, SettingsPanel } from '../_module.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -83,10 +83,7 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
     const isMonthless = calendar?.isMonthless ?? false;
     const stickyIncrement = (game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_STICKY_STATES) || {}).increment;
     const appSettings = TimeClock.getAppSettings('time-keeper');
-    if (stickyIncrement && stickyIncrement !== appSettings.incrementKey) {
-      TimeClock.setAppIncrement('time-keeper', stickyIncrement);
-      TimeClock.setIncrement(stickyIncrement);
-    }
+    if (stickyIncrement && stickyIncrement !== appSettings.incrementKey) TimeClock.setAppIncrement('time-keeper', stickyIncrement);
     context.increments = Object.entries(getTimeIncrements())
       .filter(([key]) => !isMonthless || key !== 'month')
       .map(([key, seconds]) => ({ key, label: this.#formatIncrementLabel(key), seconds, selected: key === appSettings.incrementKey }));
@@ -127,16 +124,15 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     this.#enableDragging();
     const incrementSelect = this.element.querySelector('[data-action="increment"]');
-    incrementSelect?.addEventListener('change', (e) => {
+    incrementSelect?.addEventListener('change', async (e) => {
       TimeClock.setAppIncrement('time-keeper', e.target.value);
-      TimeClock.setIncrement(e.target.value);
-      this.#saveStickyStates({ increment: e.target.value });
+      await this.#saveStickyStates({ increment: e.target.value });
       this.render();
     });
     if (incrementSelect && canChangeDateTime()) {
       incrementSelect.addEventListener(
         'wheel',
-        (event) => {
+        async (event) => {
           event.preventDefault();
           const incrementKeys = Object.keys(getTimeIncrements());
           const currentKey = TimeClock.getAppSettings('time-keeper').incrementKey || 'minute';
@@ -147,8 +143,7 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
           if (newIndex === currentIndex) return;
           const newKey = incrementKeys[newIndex];
           TimeClock.setAppIncrement('time-keeper', newKey);
-          TimeClock.setIncrement(newKey);
-          this.#saveStickyStates({ increment: newKey });
+          await this.#saveStickyStates({ increment: newKey });
           this.render();
         },
         { passive: false }
@@ -420,36 +415,42 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
     ui.notifications.info('CALENDARIA.TimeKeeper.ContextMenu.PositionReset', { localize: true });
   }
 
+  /**
+   * Advance time by a configured jump, measured in the Timekeeper's own increment unit.
+   * @param {string} jumpKey - The jump key (dec2, dec1, inc1, inc2)
+   * @param {number} fallback - Amount used when the setting has no entry for this increment
+   */
+  static #applyJump(jumpKey, fallback) {
+    if (!canChangeDateTime()) return;
+    const incrementKey = TimeClock.getAppSettings('time-keeper').incrementKey || 'minute';
+    const jumps = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_TIME_JUMPS) || {};
+    const amount = jumps[incrementKey]?.[jumpKey] || fallback;
+    const totalSeconds = amount * (getTimeIncrements()[incrementKey] || 60);
+    if (!game.user.isGM) {
+      CalendariaSocket.emit(SOCKET_TYPES.TIME_REQUEST, { action: 'advance', delta: totalSeconds });
+      return;
+    }
+    CinematicOverlay.gatedAdvance(totalSeconds);
+  }
+
   /** Decrement time by configured dec2 amount. */
   static #onDec2() {
-    const jumps = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_TIME_JUMPS) || {};
-    const currentJumps = jumps[TimeClock.incrementKey] || { dec2: -5 };
-    const amount = currentJumps.dec2 || -5;
-    TimeClock.forward(amount);
+    TimeKeeper.#applyJump('dec2', -5);
   }
 
   /** Decrement time by configured dec1 amount. */
   static #onDec1() {
-    const jumps = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_TIME_JUMPS) || {};
-    const currentJumps = jumps[TimeClock.incrementKey] || { dec1: -1 };
-    const amount = currentJumps.dec1 || -1;
-    TimeClock.forward(amount);
+    TimeKeeper.#applyJump('dec1', -1);
   }
 
   /** Increment time by configured inc1 amount. */
   static #onInc1() {
-    const jumps = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_TIME_JUMPS) || {};
-    const currentJumps = jumps[TimeClock.incrementKey] || { inc1: 1 };
-    const amount = currentJumps.inc1 || 1;
-    TimeClock.forward(amount);
+    TimeKeeper.#applyJump('inc1', 1);
   }
 
   /** Increment time by configured inc2 amount. */
   static #onInc2() {
-    const jumps = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_TIME_JUMPS) || {};
-    const currentJumps = jumps[TimeClock.incrementKey] || { inc2: 5 };
-    const amount = currentJumps.inc2 || 5;
-    TimeClock.forward(amount);
+    TimeKeeper.#applyJump('inc2', 5);
   }
 
   /**
@@ -550,13 +551,14 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
    * @returns {{dec2Tooltip: string|null, dec1Tooltip: string|null, inc1Tooltip: string|null, inc2Tooltip: string|null, dec2: number|null, dec1: number|null, inc1: number|null, inc2: number|null}} Tooltip strings and values
    */
   #getJumpTooltips() {
+    const incrementKey = TimeClock.getAppSettings('time-keeper').incrementKey || 'minute';
     const jumps = game.settings.get(MODULE.ID, SETTINGS.TIMEKEEPER_TIME_JUMPS) || {};
-    const currentJumps = jumps[TimeClock.incrementKey] || {};
+    const currentJumps = jumps[incrementKey] || {};
     const dec2 = currentJumps.dec2 ?? null;
     const dec1 = currentJumps.dec1 ?? null;
     const inc1 = currentJumps.inc1 ?? null;
     const inc2 = currentJumps.inc2 ?? null;
-    const unitLabel = this.#formatIncrementLabel(TimeClock.incrementKey);
+    const unitLabel = this.#formatIncrementLabel(incrementKey);
     const formatTooltip = (val) => (val !== null ? `${val > 0 ? '+' : ''}${val} ${unitLabel}` : null);
     return { dec2Tooltip: formatTooltip(dec2), dec1Tooltip: formatTooltip(dec1), inc1Tooltip: formatTooltip(inc1), inc2Tooltip: formatTooltip(inc2), dec2, dec1, inc1, inc2 };
   }
