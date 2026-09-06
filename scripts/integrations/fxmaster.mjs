@@ -312,6 +312,7 @@ export function buildPresetOptions(weather) {
   if (game.settings.get(MODULE.ID, SETTINGS.FXMASTER_SOUND_FX)) options.soundFx = true;
   options.background = resolveSceneToggle(SCENE_FLAGS.FXMASTER_BACKGROUND_OVERRIDE, SETTINGS.FXMASTER_BACKGROUND);
   options.tokenTrails = resolveSceneToggle(SCENE_FLAGS.FXMASTER_TOKEN_TRAILS_OVERRIDE, SETTINGS.FXMASTER_TOKEN_TRAILS);
+  options.aboveDarkness = resolveSceneToggle(SCENE_FLAGS.FXMASTER_ABOVE_DARKNESS_OVERRIDE, SETTINGS.FXMASTER_ABOVE_DARKNESS);
   options.splash = resolveSceneToggle(SCENE_FLAGS.FXMASTER_SPLASH_OVERRIDE, SETTINGS.FXMASTER_SPLASH);
   return options;
 }

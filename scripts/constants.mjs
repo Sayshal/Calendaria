@@ -117,6 +117,7 @@ export const SETTINGS = {
   FXMASTER_SOUND_FX: 'fxMasterSoundFx',
   FXMASTER_SPEED_MULTIPLIER: 'fxmasterSpeedMultiplier',
   FXMASTER_SPLASH: 'fxmasterSplash',
+  FXMASTER_ABOVE_DARKNESS: 'fxmasterAboveDarkness',
   FXMASTER_TOKEN_TRAILS: 'fxmasterTokenTrails',
   FXMASTER_TOP_DOWN: 'fxmasterTopDown',
   GM_OVERRIDE_CLEARS_FORECAST: 'gmOverrideClearsForecast',
@@ -239,6 +240,7 @@ export const SCENE_FLAGS = {
   DARKNESS_WEATHER_SYNC: 'darknessWeatherSync',
   FXMASTER_BACKGROUND_OVERRIDE: 'fxmasterBackgroundOverride',
   FXMASTER_SPLASH_OVERRIDE: 'fxmasterSplashOverride',
+  FXMASTER_ABOVE_DARKNESS_OVERRIDE: 'fxmasterAboveDarknessOverride',
   FXMASTER_TOKEN_TRAILS_OVERRIDE: 'fxmasterTokenTrailsOverride',
   FXMASTER_TOP_DOWN_OVERRIDE: 'fxmasterTopDownOverride',
   HUD_HIDE_FOR_PLAYERS: 'hudHideForPlayers',
@@ -402,10 +404,10 @@ export const COMPASS_DIRECTIONS = { N: 0, NNE: 22.5, NE: 45, ENE: 67.5, E: 90, E
 
 /** @type {Object<string, object>} Intraday weather period definitions tied to threshold hooks */
 export const WEATHER_PERIODS = {
-  NIGHT: { id: 'night', index: 0, label: 'CALENDARIA.Common.Night', icon: 'fa-moon' },
-  MORNING: { id: 'morning', index: 1, label: 'CALENDARIA.Format.ApproxTime.Morning', icon: 'fa-sun' },
-  AFTERNOON: { id: 'afternoon', index: 2, label: 'CALENDARIA.Format.ApproxTime.Afternoon', icon: 'fa-cloud-sun' },
-  EVENING: { id: 'evening', index: 3, label: 'CALENDARIA.Format.ApproxTime.Evening', icon: 'fa-cloud-moon' }
+  NIGHT: { id: 'night', index: 0, label: 'CALENDARIA.Common.Night', icon: 'fa-moon', band: [0, 0.3] },
+  MORNING: { id: 'morning', index: 1, label: 'CALENDARIA.Format.ApproxTime.Morning', icon: 'fa-sun', band: [0.25, 0.6] },
+  AFTERNOON: { id: 'afternoon', index: 2, label: 'CALENDARIA.Format.ApproxTime.Afternoon', icon: 'fa-cloud-sun', band: [0.65, 1] },
+  EVENING: { id: 'evening', index: 3, label: 'CALENDARIA.Format.ApproxTime.Evening', icon: 'fa-cloud-moon', band: [0.35, 0.7] }
 };
 
 /** @enum {string} Condition field identifiers for the unified condition engine. */

@@ -1416,6 +1416,14 @@ export default class CalendariaSettings {
         type: new BooleanField({ initial: false }),
         onChange: () => syncWeatherToScene()
       },
+      [SETTINGS.FXMASTER_ABOVE_DARKNESS]: {
+        name: 'CALENDARIA.Settings.FXMaster.AboveDarkness.Name',
+        hint: 'CALENDARIA.Settings.FXMaster.AboveDarkness.Hint',
+        scope: 'world',
+        config: false,
+        type: new BooleanField({ initial: true }),
+        onChange: () => syncWeatherToScene()
+      },
       [SETTINGS.FXMASTER_TOKEN_TRAILS]: {
         name: 'CALENDARIA.Settings.FXMaster.TokenTrails.Name',
         hint: 'CALENDARIA.Settings.FXMaster.TokenTrails.Hint',
