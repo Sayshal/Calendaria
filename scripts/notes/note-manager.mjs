@@ -492,7 +492,8 @@ export default class NoteManager {
   }
 
   /**
-   * Delete all calendar notes.
+   * Delete all calendar notes, removing the wrapper journal Calendaria created for each one.
+   * Festival notes are included, so the festival seed record should be cleared by the caller when they must not return.
    * @param {object} [options] - Options
    * @param {string} [options.calendarId] - Only delete notes for this calendar
    * @returns {Promise<number>} Number of notes deleted
@@ -500,17 +501,19 @@ export default class NoteManager {
   static async deleteAllNotes(options = {}) {
     if (!canDeleteNotes()) return 0;
     let notes = this.getAllNotes();
-    if (notes.length === 0) return 0;
     if (options.calendarId) notes = notes.filter((note) => note.calendarId === options.calendarId);
-    const pagesToDelete = [];
-    for (const note of notes) {
-      const page = this.getFullNote(note.id);
-      if (page) pagesToDelete.push(page);
-    }
+    if (notes.length === 0) return 0;
+    const wasBypassing = this.#bypassDeleteProtection;
+    this.#bypassDeleteProtection = true;
     let deletedCount = 0;
-    for (const page of pagesToDelete) {
-      await page.delete();
-      deletedCount++;
+    try {
+      for (const note of notes) {
+        if (!this.getFullNote(note.id)) continue;
+        await this.deleteNote(note.id);
+        deletedCount++;
+      }
+    } finally {
+      this.#bypassDeleteProtection = wasBypassing;
     }
     ATLAS.log(3, `Deleted ${deletedCount} calendar notes`);
     return deletedCount;

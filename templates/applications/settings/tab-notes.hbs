@@ -60,6 +60,19 @@
         <p class="hint">{{localize "CALENDARIA.Settings.SyncFestivals.Hint"}}</p>
       </div>
     </fieldset>
+    <fieldset data-section="cleanup">
+      <legend>{{localize "CALENDARIA.SettingsPanel.Section.Cleanup"}}</legend>
+      <div class="form-group">
+        <label>{{localize "CALENDARIA.Settings.RemoveAllNotes.Name"}}</label>
+        <div class="form-fields">
+          <button type="button" data-action="removeAllNotes" class="open-manager-btn">
+            <i class="fas fa-trash"></i>
+            {{localize "CALENDARIA.Settings.RemoveAllNotes.Name"}}
+          </button>
+        </div>
+        <p class="hint">{{localize "CALENDARIA.Settings.RemoveAllNotes.Hint"}}</p>
+      </div>
+    </fieldset>
   {{/if}}
   <fieldset data-section="enricher-reference">
     <legend>{{localize "CALENDARIA.SettingsPanel.Section.Enrichers"}}</legend>

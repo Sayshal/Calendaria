@@ -183,6 +183,7 @@ globalThis.foundry = {
       ApplicationV2: class ApplicationV2 {},
       HandlebarsApplicationMixin: (base) => base,
       DialogV2: {
+        confirm: vi.fn(() => Promise.resolve(false)),
         wait: vi.fn(() => Promise.resolve('cancel')),
         prompt: vi.fn(() => Promise.resolve(null))
       }

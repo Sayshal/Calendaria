@@ -4,6 +4,7 @@ export * from './chat/chat-commands.mjs';
 export * from './chat/chat-timestamp.mjs';
 export * from './chronicle-data.mjs';
 export * from './combat-behavior.mjs';
+export * from './deactivation.mjs';
 export * from './eclipse-calculator.mjs';
 export * from './enrichers.mjs';
 export * from './fog-of-war.mjs';

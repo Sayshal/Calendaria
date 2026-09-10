@@ -6,6 +6,8 @@
 
 ## New Features
 
+- Turning Calendaria off in Manage Modules now offers to remove the calendar notes it created, so a disabled module no longer leaves invalid journal pages that error on every world load
+- Added a Remove All Calendar Notes button to the Notes settings tab for cleaning up before disabling or uninstalling the module
 - Added a Character History built-in note preset, offered in the picker to GMs only, with the notes it creates readable by players
 - Added pauseCinematic, resumeCinematic, and isCinematicPaused to the public API, plus calendaria.cinematicPause and calendaria.cinematicResume hooks
 - Calendaria now registers night, rain, snow, and storm playlist sections with VGMusic, letting you assign scene music that follows the clock and the current weather
@@ -42,6 +44,7 @@
 
 ## Bug Fixes
 
+- deleteAllNotes now removes the wrapper journal Calendaria creates for each note instead of leaving empty journal entries behind
 - Bulk-deleting notes from the note viewer now reports them as deleted instead of updated
 - Button widgets registered by other modules now honor their declared color in the HUD, matching how indicator widgets already do
 - CALENDARIA.api.updateNote now reads startDate and endDate month and day as 1-indexed, matching createNote, so API-driven note edits no longer land a month and day early

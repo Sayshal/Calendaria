@@ -16,10 +16,12 @@ import {
   canViewStopwatch,
   canViewSunDial,
   canViewTimeKeeper,
+  countCalendarNotes,
   exportSettings,
   importSettings,
   printCurrentMonth,
   printCurrentYear,
+  removeAllCalendarNotes,
   validateFormatString
 } from '../../utils/_module.mjs';
 import { WeatherManager } from '../../weather/_module.mjs';
@@ -92,6 +94,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       openWeatherEditor: SettingsPanel.#onOpenWeatherEditor,
       openWeatherProbabilities: SettingsPanel.#onOpenWeatherProbabilities,
       syncFestivals: SettingsPanel.#onSyncFestivals,
+      removeAllNotes: SettingsPanel.#onRemoveAllNotes,
       regenerateAllWeather: SettingsPanel.#onRegenerateAllWeather,
       navigateToSetting: SettingsPanel.#onNavigateToSetting,
       showTokenReference: SettingsPanel.#onShowTokenReference,
@@ -2694,6 +2697,28 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     await FestivalManager.clearSeedRecord(calendarId);
     const created = await FestivalManager.seedFestivalNotes(calendarId, calendar);
     ui.notifications.info(_loc(created ? 'CALENDARIA.Settings.SyncFestivals.Done' : 'CALENDARIA.Settings.SyncFestivals.NoneCreated'));
+  }
+
+  /**
+   * Remove every calendar note after confirmation, so the module can be disabled or uninstalled without leaving invalid pages.
+   */
+  static async #onRemoveAllNotes() {
+    const count = countCalendarNotes();
+    if (!count) {
+      ui.notifications.info('CALENDARIA.Settings.RemoveAllNotes.None', { localize: true });
+      return;
+    }
+    const confirmed = await foundry.applications.api.DialogV2.confirm({
+      classes: ['calendaria'],
+      window: { title: 'CALENDARIA.Settings.RemoveAllNotes.Name', icon: 'fas fa-triangle-exclamation' },
+      content: `<p>${_loc('CALENDARIA.Settings.RemoveAllNotes.Confirm', { count })}</p>`,
+      yes: { label: 'CALENDARIA.Settings.RemoveAllNotes.Name', icon: 'fas fa-trash' },
+      no: { label: 'ATLAS.Common.Cancel', icon: 'fas fa-times', default: true },
+      rejectClose: false
+    });
+    if (!confirmed) return;
+    const deleted = await removeAllCalendarNotes();
+    ui.notifications.info(_loc('CALENDARIA.Settings.RemoveAllNotes.Done', { count: deleted }));
   }
 
   /**

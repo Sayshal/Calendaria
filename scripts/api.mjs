@@ -819,11 +819,13 @@ export const CalendariaAPI = {
   },
 
   /**
-   * Delete all calendar notes.
+   * Delete all calendar notes, including the wrapper journals Calendaria created for them.
+   * @param {object} [options] - Options
+   * @param {string} [options.calendarId] - Only delete notes for this calendar
    * @returns {Promise<number>} Number of notes deleted
    */
-  async deleteAllNotes() {
-    return await NoteManager.deleteAllNotes();
+  async deleteAllNotes(options = {}) {
+    return await NoteManager.deleteAllNotes(options);
   },
 
   /**

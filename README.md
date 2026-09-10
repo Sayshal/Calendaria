@@ -110,4 +110,12 @@ Find **Calendaria** in Foundry's Module Browser, or paste this manifest URL:
 https://github.com/Sayshal/calendaria/releases/latest/download/module.json
 ```
 
+## Disabling or Uninstalling
+
+Calendar notes, including the festival notes Calendaria seeds for each calendar, are real journal pages of a type only this module understands. If the module is disabled while they exist, Foundry reports every one of them as invalid on each world load and the journals appear empty.
+
+When you turn Calendaria off in **Manage Modules**, it offers to remove its notes first. You can also do this at any time from **Settings → Notes → Remove All Calendar Notes**, or with `CALENDARIA.api.deleteAllNotes()`. Notes you choose to keep work again as soon as the module is re-enabled.
+
+---
+
 Questions? Ideas? Join us on [Discord](https://discord.gg/PzzUwU9gdz) or check the [Wiki](https://wiki.3deathsaves.com/calendaria/).
