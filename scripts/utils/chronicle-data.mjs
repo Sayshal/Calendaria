@@ -45,7 +45,7 @@ function resolveStubDisplayProps(stub) {
  * @param {number} [maxLength] - Maximum excerpt length
  * @returns {string} Plain text excerpt
  */
-export function buildExcerpt(html, maxLength = 150) {
+function buildExcerpt(html, maxLength = 150) {
   if (!html) return '';
   const div = document.createElement('div');
   div.innerHTML = html;

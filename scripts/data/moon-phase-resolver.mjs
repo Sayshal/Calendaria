@@ -76,7 +76,7 @@ export function resolveRandomizedPhase(moon, absoluteDay, dateComponents = null,
  * @param {number} [yearZero] - Calendar yearZero offset, used to convert anchor display-year to internal-year
  * @returns {number|null} Phase position if anchored, null otherwise
  */
-export function findAnchorPhasePosition(moon, dateComponents, yearZero = 0) {
+function findAnchorPhasePosition(moon, dateComponents, yearZero = 0) {
   if (!dateComponents || !moon.anchorPhases) return null;
   const anchors = Object.values(moon.anchorPhases);
   if (!anchors.length) return null;
@@ -95,7 +95,7 @@ export function findAnchorPhasePosition(moon, dateComponents, yearZero = 0) {
  * @param {number} phaseIndex - Index of the phase
  * @returns {number} Midpoint position 0-1
  */
-export function getPhasePositionFromIndex(moon, phaseIndex) {
+function getPhasePositionFromIndex(moon, phaseIndex) {
   const phases = moon.phases ? Object.values(moon.phases) : [];
   if (!phases.length) return 0;
   const idx = Math.min(phaseIndex, phases.length - 1);

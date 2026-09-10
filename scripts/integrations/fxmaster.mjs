@@ -33,7 +33,7 @@ function getFxApi() {
  * @param {object} [scene] - Scene document (defaults to canvas scene)
  * @returns {boolean} True if FX should be active on this scene
  */
-export function isFxEnabledForScene(scene) {
+function isFxEnabledForScene(scene) {
   const override = scene?.getFlag?.(MODULE.ID, SCENE_FLAGS.WEATHER_FX_OVERRIDE);
   if (override === 'on') return true;
   if (override === 'off') return false;

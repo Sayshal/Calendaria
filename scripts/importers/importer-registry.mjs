@@ -17,7 +17,7 @@ const IMPORTERS = new Map();
  * @param {object} ImporterClass - The importer class to register
  * @throws {Error} If importer is invalid or already registered
  */
-export function registerImporter(ImporterClass) {
+function registerImporter(ImporterClass) {
   if (!ImporterClass?.id) throw new Error('Importer class must have a static id property');
   if (IMPORTERS.has(ImporterClass.id)) return;
   IMPORTERS.set(ImporterClass.id, ImporterClass);
@@ -28,7 +28,7 @@ export function registerImporter(ImporterClass) {
  * Get all registered importers.
  * @returns {Array<object>} - All importer objects
  */
-export function getAvailableImporters() {
+function getAvailableImporters() {
   return [...IMPORTERS.values()];
 }
 

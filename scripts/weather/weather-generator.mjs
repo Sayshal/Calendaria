@@ -65,7 +65,7 @@ function weightedSelect(weights, randomFn = Math.random) {
  * @param {number|string|null|undefined} value - Stored temperature value
  * @returns {boolean} True if value is a relative modifier string
  */
-export function isRelativeTempModifier(value) {
+function isRelativeTempModifier(value) {
   return typeof value === 'string' && /[+-]$/.test(value);
 }
 
