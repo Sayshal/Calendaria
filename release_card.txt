@@ -1,0 +1,17 @@
+## Breaking Changes
+
+- Chat timestamps now follow the Timestamp display format alone, and the Show Time in Chat Timestamps setting that did nothing is removed.
+- Weather history and zone forecast plans are now stored per calendar; existing history moves under the active calendar on load, dropping days it cannot represent.
+- The Primary GM picker and Multiplayer Sync section are gone from the Module settings tab; Calendaria follows the shared ATLAS primary GM instead.
+
+## New Features
+
+- A Weekly Almanac toggle publishes one journal page per in-world week that players can read, with each past day's weather and notes, upcoming moon phase peaks, and the coming week's forecast.
+- Notes gain a Subjects field that links any dropped document; linked subjects show in the note view, and a Chronicle toolbar filter narrows the scroll by subject.
+- Calendars can define named days, numbered per year or per month with optional repeating, printed by the new [namedDay] and [namedDayAbbr] format tokens.
+- Weather severity is now a 0 to 10 score stacking wind, precipitation, temperature, and darkness, with named severity bands in weather tooltips, the Weather Picker, and a new API.
+- With moon sync on, solar eclipses raise daytime darkness, a lunar eclipse dims that moon's light, and the moon glow turns blood-red during a total lunar eclipse.
+
+## Bug Fixes
+
+- 27 bugs squashed

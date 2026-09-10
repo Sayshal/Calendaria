@@ -37,9 +37,6 @@
   "relationships": {
     "requires": [
       {
-        "compatibility": {
-          "minimum": "1.3.2"
-        },
         "id": "3ds-atlas",
         "type": "module"
       }
