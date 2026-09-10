@@ -2710,9 +2710,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     const confirmed = await foundry.applications.api.DialogV2.confirm({
       classes: ['calendaria'],
-      window: { title: 'CALENDARIA.Settings.RemoveAllNotes.Name', icon: 'fas fa-triangle-exclamation' },
+      window: { title: 'CALENDARIA.Settings.RemoveAllNotes.Name' },
       content: `<p>${_loc('CALENDARIA.Settings.RemoveAllNotes.Confirm', { count })}</p>`,
-      yes: { label: 'CALENDARIA.Settings.RemoveAllNotes.Name', icon: 'fas fa-trash' },
+      yes: { label: 'CALENDARIA.Settings.RemoveAllNotes.Button', icon: 'fas fa-trash' },
       no: { label: 'ATLAS.Common.Cancel', icon: 'fas fa-times', default: true },
       rejectClose: false
     });

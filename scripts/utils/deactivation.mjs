@@ -40,7 +40,7 @@ export async function promptNoteCleanupBeforeDisable() {
   const remove = await foundry.applications.api.DialogV2.confirm({
     classes: ['calendaria'],
     modal: true,
-    window: { title: 'CALENDARIA.Deactivation.Title', icon: 'fas fa-triangle-exclamation' },
+    window: { title: 'CALENDARIA.Deactivation.Title' },
     position: { width: 480 },
     content: `<p>${_loc('CALENDARIA.Deactivation.Body', { count })}</p><p>${_loc('CALENDARIA.Deactivation.Hint')}</p>`,
     yes: { label: 'CALENDARIA.Deactivation.Remove', icon: 'fas fa-trash' },
