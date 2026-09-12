@@ -534,7 +534,6 @@
       }
     }
 
-    /* ── Timeline View Mode ── */
     &.chronicle--timeline {
       .scroll-container {
         padding: 0;

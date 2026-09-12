@@ -15,20 +15,6 @@
       0 0.5rem 2rem rgb(0 0 0 / 30%),
       0 0 0 0.0625rem var(--atlas-border);
 
-    input[type='checkbox'],
-    input[type='checkbox']:checked,
-    input[type='checkbox']:indeterminate {
-      width: var(--checkbox-size);
-      height: var(--checkbox-size);
-      border: 0.0625rem solid var(--atlas-border);
-      border-radius: 0.1875rem;
-
-      &:checked,
-      &:indeterminate {
-        border-color: transparent;
-      }
-    }
-
     .note-viewer-search {
       gap: 0.5rem;
       grid-area: search;

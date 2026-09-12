@@ -82,4 +82,51 @@
     color: var(--atlas-text);
     background: var(--atlas-bg);
   }
+
+  input[type='checkbox'],
+  input[type='radio'] {
+    place-items: center;
+    display: inline-grid;
+    width: var(--checkbox-size);
+    height: var(--checkbox-size);
+    border: 0.0625rem solid var(--atlas-border);
+    border-radius: 0.1875rem;
+    background: var(--atlas-input-bg);
+
+    &::after {
+      content: none;
+    }
+
+    &::before {
+      position: static;
+      width: auto;
+      height: auto;
+      color: transparent;
+      font-size: 0.7em;
+      font-family: var(--font-awesome);
+      content: '\f00c';
+    }
+
+    &:checked,
+    &:indeterminate {
+      border-color: var(--atlas-primary);
+      background: var(--atlas-primary);
+
+      &::before {
+        color: var(--atlas-text-on-color);
+      }
+    }
+
+    &:indeterminate::before {
+      content: '\f068';
+    }
+  }
+
+  input[type='radio'] {
+    border-radius: 50%;
+
+    &::before {
+      content: '\f111';
+    }
+  }
 }

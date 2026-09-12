@@ -5,7 +5,6 @@
   row-gap: 0.25rem;
 }
 
-/* Keep tabs at content width so the strip wraps instead of clipping when many tabs are present. */
 .scene-config nav.tabs > * {
   flex-shrink: 0;
 }
