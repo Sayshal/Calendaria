@@ -105,7 +105,7 @@ export function overrideChatLogTimestamps() {
  * @param {number} worldTime - The world time in seconds
  * @returns {string} Formatted date string
  */
-export function formatWorldTime(worldTime) {
+function formatWorldTime(worldTime) {
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return '';
   const components = calendar.timeToComponents(worldTime);

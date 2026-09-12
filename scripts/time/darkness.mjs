@@ -51,7 +51,7 @@ export function calculateDarknessFromTime(hours, minutes, hoursPerDay = 24, minu
  * @param {object} [scene] - Scene for zone resolution
  * @returns {number} Darkness level between 0.0 (brightest) and 1.0 (darkest)
  */
-export function getCurrentDarkness(scene = null) {
+function getCurrentDarkness(scene = null) {
   const calendar = game.time.calendar;
   const components = game.time.components;
   const hours = components.hour ?? 0;
@@ -222,7 +222,7 @@ function lerpHue(a, b, t) {
  * @param {object} [scene] - The scene to check for climate zone override
  * @returns {{base: {hue: number|null, intensity: number|null, saturation: number|null, luminosity: number|null, shadows: number|null}, dark: {hue: number|null, intensity: number|null, saturation: number|null, luminosity: number|null, shadows: number|null}}|null} - environment config
  */
-export function calculateEnvironmentLighting(scene) {
+function calculateEnvironmentLighting(scene) {
   const colorShiftSync = resolveSceneSync(scene, SCENE_FLAGS.COLOR_SHIFT_SYNC, SETTINGS.COLOR_SHIFT_SYNC);
   const activeZone = WeatherManager.getActiveZone?.(null, scene);
   const currentWeather = WeatherManager.getCurrentWeather?.(null, scene);

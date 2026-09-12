@@ -489,6 +489,17 @@ function formatCountdown(days) {
 }
 
 /**
+ * Format a signed duration as a countdown string.
+ * @param {number} delta - Seconds remaining (positive = future, negative = past)
+ * @param {string} value - Pre-formatted duration string
+ * @returns {string} Localized countdown string
+ */
+function formatCountdownDuration(delta, value) {
+  if (delta === 0) return _loc('CALENDARIA.Enricher.Label.Now');
+  return _loc(delta > 0 ? 'CALENDARIA.Enricher.Label.TimeUntil' : 'CALENDARIA.Enricher.Label.TimeAgo', { value });
+}
+
+/**
  * Parse date math expression.
  * @param {string} input - Date math expression
  * @returns {Array<{amount: number, unit: string}>} Array of operations
@@ -756,11 +767,38 @@ function enrichCountdown(config, label) {
   const target = parseDateFromValues(config.values);
   if (!target) return createErrorElement('CALENDARIA.Enricher.Error.InvalidDate');
   const current = getCurrentDateTime(calendar, components);
+  if (config.time != null) return countdownToClockTime(config, label, calendar, current, target);
   const days = daysBetween(toInternal(current), toInternal(target));
   const abs = Math.abs(days);
   const unit = abs === 1 ? _loc('CALENDARIA.Common.UnitDay') : _loc('ATLAS.Common.Days');
   const text = label || formatCountdown(days);
   const tooltip = _loc('CALENDARIA.Enricher.Tooltip.Countdown', { date: formatDate(target, 'dateLong', calendar), value: `${abs} ${unit}` });
+  return createContentLink('countdown', text, { calYear: target.year, calMonth: target.month, calDay: target.day }, 'fa-hourglass-half', tooltip, config.raw);
+}
+
+/**
+ * Countdown to a clock time on the target date, resolved in hours and minutes.
+ * @param {object} config - Parsed enricher config (config.time holds the HH:MM target)
+ * @param {string|null} label - Custom label override
+ * @param {object} calendar - Calendar instance
+ * @param {object} current - Current public date/time components
+ * @param {object} target - Target public date {year, month, day}
+ * @returns {HTMLElement} Enricher element
+ */
+function countdownToClockTime(config, label, calendar, current, target) {
+  const token = String(config.time);
+  const parsed = parseClockToken(token, calendar);
+  if (!parsed) return createErrorElement('CALENDARIA.Enricher.Error.InvalidTime', { value: token });
+  const secondsPerMinute = calendar?.days?.secondsPerMinute ?? 60;
+  const minutesPerHour = calendar?.days?.minutesPerHour ?? 60;
+  const yearZero = calendar?.years?.yearZero ?? 0;
+  const dayStart = (d) => calendar.componentsToTime({ year: d.year - yearZero, month: d.month - 1, dayOfMonth: d.day - 1 });
+  const nowSeconds = (current.hour ?? 0) * minutesPerHour * secondsPerMinute + (current.minute ?? 0) * secondsPerMinute + (current.second ?? 0);
+  const delta = dayStart(target) + parsed.targetSecondsOfDay - (dayStart(current) + nowSeconds);
+  const abs = Math.abs(delta);
+  const value = formatDuration({ hours: Math.floor(abs / (minutesPerHour * secondsPerMinute)), minutes: Math.floor((abs % (minutesPerHour * secondsPerMinute)) / secondsPerMinute) });
+  const text = label || formatCountdownDuration(delta, value);
+  const tooltip = _loc('CALENDARIA.Enricher.Tooltip.Countdown', { date: `${formatDate(target, 'dateLong', calendar)} ${parsed.label}`, value });
   return createContentLink('countdown', text, { calYear: target.year, calMonth: target.month, calDay: target.day }, 'fa-hourglass-half', tooltip, config.raw);
 }
 

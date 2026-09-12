@@ -9,7 +9,7 @@ import { WeatherManager, getPreset } from '../../weather/_module.mjs';
  * @param {number} t - Interpolation factor (0-1)
  * @returns {number[]} [r, g, b] array
  */
-export function lerpColorRgb(color1, color2, t) {
+function lerpColorRgb(color1, color2, t) {
   const r1 = parseInt(color1.slice(1, 3), 16);
   const g1 = parseInt(color1.slice(3, 5), 16);
   const b1 = parseInt(color1.slice(5, 7), 16);

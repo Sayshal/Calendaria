@@ -52,10 +52,10 @@ vi.mock('../../scripts/constants.mjs', () => ({
     EXTREME: { id: 'extreme', value: 5, label: 'Extreme', kph: 250 }
   },
   WEATHER_PERIODS: {
-    NIGHT: { id: 'night', index: 0, label: 'Night', icon: 'fa-moon' },
-    MORNING: { id: 'morning', index: 1, label: 'Morning', icon: 'fa-sun-bright' },
-    AFTERNOON: { id: 'afternoon', index: 2, label: 'Afternoon', icon: 'fa-sun' },
-    EVENING: { id: 'evening', index: 3, label: 'Evening', icon: 'fa-cloud-moon' }
+    NIGHT: { id: 'night', index: 0, label: 'Night', icon: 'fa-moon', band: [0, 0.3] },
+    MORNING: { id: 'morning', index: 1, label: 'Morning', icon: 'fa-sun-bright', band: [0.25, 0.6] },
+    AFTERNOON: { id: 'afternoon', index: 2, label: 'Afternoon', icon: 'fa-sun', band: [0.65, 1] },
+    EVENING: { id: 'evening', index: 3, label: 'Evening', icon: 'fa-cloud-moon', band: [0.35, 0.7] }
   }
 }));
 
@@ -553,9 +553,9 @@ describe('generateIntradayWeather()', () => {
     expect(Object.keys(result.periods)).toEqual(['night', 'morning', 'afternoon', 'evening']);
   });
 
-  it('returns a dominant entry from morning period', () => {
+  it('returns a dominant entry from the afternoon period', () => {
     const result = generateIntradayWeather({ seasonClimate: climate, zoneConfig, year: 2024, month: 5, dayOfMonth: 10 });
-    expect(result.dominant).toBe(result.periods.morning);
+    expect(result.dominant).toBe(result.periods.afternoon);
   });
 
   it('produces deterministic results', () => {
@@ -593,6 +593,40 @@ describe('generateIntradayWeather()', () => {
     expect(result.periods.morning.preset.id).toBe(nightId);
     expect(result.periods.afternoon.preset.id).toBe(nightId);
     expect(result.periods.evening.preset.id).toBe(nightId);
+  });
+
+  it('keeps each period inside its diurnal band', () => {
+    const bands = { night: [0, 0.3], morning: [0.25, 0.6], afternoon: [0.65, 1], evening: [0.35, 0.7] };
+    for (let day = 1; day <= 30; day++) {
+      const result = generateIntradayWeather({ seasonClimate: climate, zoneConfig, year: 2024, month: 5, dayOfMonth: day, carryOverChance: 0 });
+      for (const [id, [lo, hi]] of Object.entries(bands)) {
+        const span = climate.temperatures.max - climate.temperatures.min;
+        const min = Math.round(climate.temperatures.min + span * lo);
+        const max = Math.round(climate.temperatures.min + span * hi);
+        expect(result.periods[id].temperature).toBeGreaterThanOrEqual(min);
+        expect(result.periods[id].temperature).toBeLessThanOrEqual(max);
+      }
+    }
+  });
+
+  it('runs warmest in the afternoon and coldest at night', () => {
+    let afternoonOverEvening = 0;
+    let eveningOverNight = 0;
+    const days = 30;
+    for (let day = 1; day <= days; day++) {
+      const { periods } = generateIntradayWeather({ seasonClimate: climate, zoneConfig, year: 2024, month: 5, dayOfMonth: day, carryOverChance: 0 });
+      if (periods.afternoon.temperature > periods.evening.temperature) afternoonOverEvening++;
+      if (periods.evening.temperature > periods.night.temperature) eveningOverNight++;
+    }
+    expect(afternoonOverEvening).toBeGreaterThan(days * 0.8);
+    expect(eveningOverNight).toBeGreaterThan(days * 0.8);
+  });
+
+  it('re-rolls a carried-over period into its own band', () => {
+    const result = generateIntradayWeather({ seasonClimate: climate, zoneConfig, year: 2024, month: 5, dayOfMonth: 10, carryOverChance: 100 });
+    const span = climate.temperatures.max - climate.temperatures.min;
+    expect(result.periods.afternoon.temperature).toBeGreaterThanOrEqual(Math.round(climate.temperatures.min + span * 0.65));
+    expect(result.periods.night.temperature).toBeLessThanOrEqual(Math.round(climate.temperatures.min + span * 0.3));
   });
 
   it('0% carry-over generates independently', () => {

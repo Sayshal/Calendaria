@@ -8,7 +8,7 @@ import { canViewWeatherForecast } from '../permissions.mjs';
 import { CalendariaSocket } from '../socket.mjs';
 
 /** Time unit aliases mapping to component fields. */
-export const TIME_UNIT_MAP = {
+const TIME_UNIT_MAP = {
   second: 'second',
   seconds: 'second',
   secs: 'second',
@@ -48,7 +48,7 @@ export const TIME_UNIT_MAP = {
  * @param {number} hours - Decimal hours
  * @returns {string} Formatted time string
  */
-export function formatHours(hours) {
+function formatHours(hours) {
   const h = Math.floor(hours);
   const m = Math.round((hours - h) * 60);
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;

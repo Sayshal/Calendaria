@@ -60,6 +60,9 @@ export default class TimeClock {
   /** @type {boolean} Guard against overlapping commits */
   static #committing = false;
 
+  /** @type {boolean} Guard against overlapping smooth advances */
+  static #smoothing = false;
+
   /** @type {boolean} Whether the clock is currently running */
   static #running = false;
 
@@ -397,6 +400,49 @@ export default class TimeClock {
     if (this.#running) await this.#flushAccumulated();
     await game.time.advance(-amount);
     ATLAS.log(3, `Time reversed by ${amount}s for ${appId}`);
+  }
+
+  /**
+   * Advance time in even steps, pausing a running clock for the duration.
+   * @param {number} seconds - Total game seconds to advance; negative reverses
+   * @param {object} [options] - Advance options
+   * @param {number} [options.duration] - Real-world milliseconds to spread the advance over
+   * @param {number} [options.fps] - Steps per real second, clamped to 1-60
+   * @returns {Promise<number>} The resulting world time
+   */
+  static async smoothAdvance(seconds, { duration = 3000, fps = 20 } = {}) {
+    if (!this.canAdjustTime()) return game.time.worldTime;
+    if (!Number.isFinite(seconds) || seconds === 0) return game.time.worldTime;
+    if (!game.user.isGM) {
+      CalendariaSocket.emit(SOCKET_TYPES.TIME_REQUEST, { action: 'advance', delta: seconds });
+      return game.time.worldTime;
+    }
+    if (this.#smoothing) {
+      ATLAS.log(2, 'Smooth advance already in progress; ignoring the new request.');
+      return game.time.worldTime;
+    }
+    const ms = Math.max(0, Math.min(60000, Number(duration) || 0));
+    const rate = Math.max(1, Math.min(60, Math.floor(Number(fps) || 0)));
+    const steps = Math.max(1, Math.min(600, Math.round((ms / 1000) * rate)));
+    const wasRunning = this.#running;
+    this.#smoothing = true;
+    if (wasRunning) this.stop();
+    try {
+      const interval = ms / steps;
+      let applied = 0;
+      for (let step = 1; step <= steps; step++) {
+        const target = Math.round((seconds * step) / steps);
+        const delta = target - applied;
+        applied = target;
+        if (delta) await game.time.advance(delta);
+        if (interval > 0 && step < steps) await new Promise((resolve) => setTimeout(resolve, interval));
+      }
+      ATLAS.log(3, `Time advanced smoothly by ${seconds}s over ${ms}ms in ${steps} steps`);
+    } finally {
+      this.#smoothing = false;
+      if (wasRunning) this.start();
+    }
+    return game.time.worldTime;
   }
 
   /**

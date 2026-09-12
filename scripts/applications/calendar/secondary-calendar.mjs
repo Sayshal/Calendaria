@@ -1,7 +1,7 @@
 import { CalendarRegistry, getCurrentDateOn } from '../../calendar/_module.mjs';
 import { HOOKS, TEMPLATES } from '../../constants.mjs';
 import { dayOfWeek } from '../../notes/_module.mjs';
-import { buildCycleMonthPlan, formatCustom, getLeadingDays } from '../../utils/_module.mjs';
+import { buildCycleMonthPlan, formatCustom, getLeadingDays, getWeekStartIndex } from '../../utils/_module.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -160,17 +160,22 @@ export class SecondaryCalendar extends HandlebarsApplicationMixin(ApplicationV2)
     const { year } = date;
     const viewedDay = date.dayOfMonth ?? 0;
     const daysInWeek = calendar.daysInWeek;
+    const weekStartIdx = getWeekStartIndex(calendar);
     const yearZero = calendar.years?.yearZero ?? 0;
     const daysInYear = calendar.getDaysInYear(year - yearZero);
-    const weekNumber = Math.floor(viewedDay / daysInWeek);
+    const weekNumber = Math.floor((viewedDay - weekStartIdx) / daysInWeek);
     const currentDate = getCurrentDateOn(this.#calendarId);
     const todayYear = currentDate?.year;
     const todayDay = currentDate?.dayOfMonth ?? 0;
-    const weekdays = calendar.weekdaysArray.map((w) => ({ name: _loc(w.name), abbreviation: _loc(w.abbreviation || w.name).slice(0, 2) }));
+    const weekdaysRaw = calendar.weekdaysArray;
+    const weekdays = Array.from({ length: weekdaysRaw.length }, (_, i) => weekdaysRaw[(i + weekStartIdx) % weekdaysRaw.length]).map((w) => ({
+      name: _loc(w.name),
+      abbreviation: _loc(w.abbreviation || w.name).slice(0, 2)
+    }));
     const weeks = [];
     for (let weekOffset = -1; weekOffset <= 1; weekOffset++) {
       const targetWeek = weekNumber + weekOffset;
-      const weekStartDay = targetWeek * daysInWeek + 1;
+      const weekStartDay = targetWeek * daysInWeek + weekStartIdx + 1;
       const currentWeek = [];
       for (let i = 0; i < daysInWeek; i++) {
         let dayNum = weekStartDay + i;

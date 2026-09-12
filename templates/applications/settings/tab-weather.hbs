@@ -296,6 +296,15 @@
         </div>
 
         <div class="form-group">
+          <label for="fxmasterAboveDarkness">{{localize "CALENDARIA.Settings.FXMaster.AboveDarkness.Name"}}</label>
+          <div class="form-fields">
+            <input type="checkbox" id="fxmasterAboveDarkness" name="fxmasterAboveDarkness"
+              {{#if fxmasterAboveDarkness}}checked{{/if}} />
+          </div>
+          <p class="hint">{{localize "CALENDARIA.Settings.FXMaster.AboveDarkness.Hint"}}</p>
+        </div>
+
+        <div class="form-group">
           <label for="fxmasterTokenTrails">{{localize "CALENDARIA.Settings.FXMaster.TokenTrails.Name"}}</label>
           <div class="form-fields">
             <input type="checkbox" id="fxmasterTokenTrails" name="fxmasterTokenTrails"

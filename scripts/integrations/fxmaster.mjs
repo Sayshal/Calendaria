@@ -33,7 +33,7 @@ function getFxApi() {
  * @param {object} [scene] - Scene document (defaults to canvas scene)
  * @returns {boolean} True if FX should be active on this scene
  */
-export function isFxEnabledForScene(scene) {
+function isFxEnabledForScene(scene) {
   const override = scene?.getFlag?.(MODULE.ID, SCENE_FLAGS.WEATHER_FX_OVERRIDE);
   if (override === 'on') return true;
   if (override === 'off') return false;
@@ -312,6 +312,7 @@ export function buildPresetOptions(weather) {
   if (game.settings.get(MODULE.ID, SETTINGS.FXMASTER_SOUND_FX)) options.soundFx = true;
   options.background = resolveSceneToggle(SCENE_FLAGS.FXMASTER_BACKGROUND_OVERRIDE, SETTINGS.FXMASTER_BACKGROUND);
   options.tokenTrails = resolveSceneToggle(SCENE_FLAGS.FXMASTER_TOKEN_TRAILS_OVERRIDE, SETTINGS.FXMASTER_TOKEN_TRAILS);
+  options.aboveDarkness = resolveSceneToggle(SCENE_FLAGS.FXMASTER_ABOVE_DARKNESS_OVERRIDE, SETTINGS.FXMASTER_ABOVE_DARKNESS);
   options.splash = resolveSceneToggle(SCENE_FLAGS.FXMASTER_SPLASH_OVERRIDE, SETTINGS.FXMASTER_SPLASH);
   return options;
 }

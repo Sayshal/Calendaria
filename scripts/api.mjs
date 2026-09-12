@@ -220,9 +220,12 @@ export const CalendariaAPI = {
    * @param {number|object} delta - Seconds to advance, or an object with day/hour/minute/second keys
    * @param {object} [options] - Options
    * @param {boolean} [options.cinematic] - Whether to trigger the cinematic overlay
+   * @param {boolean} [options.smooth] - Whether to step the advance instead of jumping
+   * @param {number} [options.duration] - Milliseconds to spread a smooth advance over
+   * @param {number} [options.fps] - Steps per real second for a smooth advance
    * @returns {Promise<number>} New world time after advancement
    */
-  async advanceTime(delta, { cinematic = false } = {}) {
+  async advanceTime(delta, { cinematic = false, smooth = false, duration = 3000, fps = 20 } = {}) {
     if (!canChangeDateTime()) {
       ui.notifications.error('CALENDARIA.Permissions.NoAccess', { localize: true });
       return game.time.worldTime;
@@ -239,6 +242,7 @@ export const CalendariaAPI = {
       return game.time.worldTime;
     }
     if (cinematic) await CinematicOverlay.triggerFromAdvance(delta);
+    else if (smooth) return TimeClock.smoothAdvance(delta, { duration, fps });
     else await game.time.advance(delta);
     return game.time.worldTime;
   },

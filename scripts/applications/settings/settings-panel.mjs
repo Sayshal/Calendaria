@@ -802,6 +802,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.FXMASTER_SOUND_FX]: { tab: 'weather', label: 'CALENDARIA.Settings.FXMaster.SoundFX.Name' },
     [SETTINGS.FXMASTER_SPLASH]: { tab: 'weather', label: 'CALENDARIA.Settings.FXMaster.Splash.Name' },
     [SETTINGS.FXMASTER_BACKGROUND]: { tab: 'weather', label: 'CALENDARIA.Settings.FXMaster.Background.Name' },
+    [SETTINGS.FXMASTER_ABOVE_DARKNESS]: { tab: 'weather', label: 'CALENDARIA.Settings.FXMaster.AboveDarkness.Name' },
     [SETTINGS.FXMASTER_TOKEN_TRAILS]: { tab: 'weather', label: 'CALENDARIA.Settings.FXMaster.TokenTrails.Name' },
     [SETTINGS.WEATHER_INERTIA]: { tab: 'weather', label: 'CALENDARIA.Settings.WeatherInertia.Name' },
     [SETTINGS.WEATHER_HISTORY_DAYS]: { tab: 'weather', label: 'CALENDARIA.Settings.WeatherHistoryDays.Name' },
@@ -931,6 +932,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       SETTINGS.FXMASTER_SOUND_FX,
       SETTINGS.FXMASTER_SPLASH,
       SETTINGS.FXMASTER_BACKGROUND,
+      SETTINGS.FXMASTER_ABOVE_DARKNESS,
       SETTINGS.FXMASTER_TOKEN_TRAILS
     ],
     'module-integration': [SETTINGS.SHOW_TOOLBAR_BUTTON, SETTINGS.TOOLBAR_APPS, SETTINGS.SHOW_JOURNAL_FOOTER, SETTINGS.ENRICHER_CLICK_TARGET],
@@ -1589,6 +1591,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.fxmasterSoundFx = game.settings.get(MODULE.ID, SETTINGS.FXMASTER_SOUND_FX);
     context.fxmasterSplash = game.settings.get(MODULE.ID, SETTINGS.FXMASTER_SPLASH);
     context.fxmasterBackground = game.settings.get(MODULE.ID, SETTINGS.FXMASTER_BACKGROUND);
+    context.fxmasterAboveDarkness = game.settings.get(MODULE.ID, SETTINGS.FXMASTER_ABOVE_DARKNESS);
     context.fxmasterTokenTrails = game.settings.get(MODULE.ID, SETTINGS.FXMASTER_TOKEN_TRAILS);
     context.fxmasterSpeedMultiplier = game.settings.get(MODULE.ID, SETTINGS.FXMASTER_SPEED_MULTIPLIER) ?? 1.0;
     context.weatherSoundFx = game.settings.get(MODULE.ID, SETTINGS.WEATHER_SOUND_FX);
@@ -1949,6 +1952,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('fxmasterSoundFx' in data) await SettingsPanel.#set(SETTINGS.FXMASTER_SOUND_FX, !!data.fxmasterSoundFx);
     if ('fxmasterSplash' in data) await SettingsPanel.#set(SETTINGS.FXMASTER_SPLASH, !!data.fxmasterSplash);
     if ('fxmasterBackground' in data) await SettingsPanel.#set(SETTINGS.FXMASTER_BACKGROUND, !!data.fxmasterBackground);
+    if ('fxmasterAboveDarkness' in data) await SettingsPanel.#set(SETTINGS.FXMASTER_ABOVE_DARKNESS, !!data.fxmasterAboveDarkness);
     if ('fxmasterTokenTrails' in data) await SettingsPanel.#set(SETTINGS.FXMASTER_TOKEN_TRAILS, !!data.fxmasterTokenTrails);
     if ('fxmasterSpeedMultiplier' in data) await SettingsPanel.#set(SETTINGS.FXMASTER_SPEED_MULTIPLIER, Number(data.fxmasterSpeedMultiplier));
     if ('weatherSoundFx' in data) await SettingsPanel.#set(SETTINGS.WEATHER_SOUND_FX, !!data.weatherSoundFx);

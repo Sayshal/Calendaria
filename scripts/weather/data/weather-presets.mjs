@@ -61,7 +61,15 @@ export const SOUND_FX_OPTIONS = [
   `${SOUND_BASE}/snow-frost.ogg`,
   `${SOUND_BASE}/hurricane-monsoon-tornado.ogg`,
   `${SOUND_BASE}/sandstorm-dust-devil.ogg`,
-  `${SOUND_BASE}/wind.ogg`
+  `${SOUND_BASE}/wind.ogg`,
+  `${SOUND_BASE}/aether-haze.ogg`,
+  `${SOUND_BASE}/ashfall.ogg`,
+  `${SOUND_BASE}/black-sun.ogg`,
+  `${SOUND_BASE}/gravewind.ogg`,
+  `${SOUND_BASE}/nullfront.ogg`,
+  `${SOUND_BASE}/plague-miasma.ogg`,
+  `${SOUND_BASE}/spore-cloud.ogg`,
+  `${SOUND_BASE}/veilfall.ogg`
 ];
 
 /**
@@ -577,7 +585,7 @@ export const ENVIRONMENTAL_WEATHER = [
     fxDensity: null,
     fxSpeed: null,
     fxColor: null,
-    soundFx: null
+    soundFx: `${SOUND_BASE}/ashfall.ogg`
   },
   {
     id: 'sandstorm',
@@ -768,7 +776,7 @@ export const FANTASY_WEATHER = [
     fxDensity: 'low',
     fxSpeed: 'very-low',
     fxColor: null,
-    soundFx: null
+    soundFx: `${SOUND_BASE}/black-sun.ogg`
   },
   {
     id: 'ley-surge',
@@ -814,7 +822,7 @@ export const FANTASY_WEATHER = [
     fxDensity: null,
     fxSpeed: 'very-low',
     fxColor: null,
-    soundFx: null
+    soundFx: `${SOUND_BASE}/aether-haze.ogg`
   },
   {
     id: 'nullfront',
@@ -837,7 +845,7 @@ export const FANTASY_WEATHER = [
     fxDensity: 'low',
     fxSpeed: 'very-low',
     fxColor: null,
-    soundFx: null
+    soundFx: `${SOUND_BASE}/nullfront.ogg`
   },
   {
     id: 'permafrost-surge',
@@ -883,7 +891,7 @@ export const FANTASY_WEATHER = [
     fxDensity: null,
     fxSpeed: 'high',
     fxColor: null,
-    soundFx: `${SOUND_BASE}/wind.ogg`
+    soundFx: `${SOUND_BASE}/gravewind.ogg`
   },
   {
     id: 'veilfall',
@@ -906,7 +914,7 @@ export const FANTASY_WEATHER = [
     fxDensity: 'low',
     fxSpeed: 'low',
     fxColor: null,
-    soundFx: null
+    soundFx: `${SOUND_BASE}/veilfall.ogg`
   },
   {
     id: 'arcane-winds',
@@ -1021,7 +1029,7 @@ export const FANTASY_WEATHER = [
     fxDensity: null,
     fxSpeed: 'very-low',
     fxColor: null,
-    soundFx: null
+    soundFx: `${SOUND_BASE}/spore-cloud.ogg`
   },
   {
     id: 'divine-light',
@@ -1067,7 +1075,7 @@ export const FANTASY_WEATHER = [
     fxDensity: 'high',
     fxSpeed: 'very-low',
     fxColor: null,
-    soundFx: null
+    soundFx: `${SOUND_BASE}/plague-miasma.ogg`
   }
 ];
 

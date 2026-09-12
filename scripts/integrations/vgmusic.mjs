@@ -28,7 +28,7 @@ let lastState = null;
  * Check if the VGMusic module is installed and active.
  * @returns {boolean} Whether VGMusic is active
  */
-export function isVGMusicActive() {
+function isVGMusicActive() {
   return game.modules.get('vgmusic')?.active ?? false;
 }
 

@@ -43,7 +43,7 @@ export async function mirrorReminder(note, message, targets) {
  * @param {string} noteId - The calendar note id
  * @returns {Promise<void>}
  */
-export async function clearMirroredToDos(noteId) {
+async function clearMirroredToDos(noteId) {
   if (!isDontForgetActive()) return;
   for (const reminder of findMirrored(noteId)) await DONTFORGET.api.deleteReminder(reminder.id, reminder.userId, SOURCE);
 }

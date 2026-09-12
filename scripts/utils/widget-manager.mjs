@@ -75,7 +75,7 @@ export function getRegisteredWidgets(insertPoint) {
  * @param {string} insertPoint - Insertion point
  * @returns {Array<object>} Widget configs
  */
-export function getWidgetsForPoint(insertPoint) {
+function getWidgetsForPoint(insertPoint) {
   return Array.from(widgets.values()).filter((w) => w.insertAt === insertPoint && !w.replaces);
 }
 

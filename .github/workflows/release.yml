@@ -7,6 +7,10 @@ on:
 
 env:
   REPO_URL: https://github.com/${{ github.repository }}
+  # Per-repo values. Nothing else in this file may differ between repos.
+  PREMIUM: 'false'
+  PING_ROLES: '1384920094597185556 1447730718464806973'
+  ACCENT_COLOR: '0x5b4b8a'
 
 jobs:
   build:
@@ -48,16 +52,20 @@ jobs:
       - name: Build
         run: npm run build
 
-      # Update module.json with version and download URLs
+      # Stamp the packaged manifest. Free modules distribute through GitHub releases;
+      # premium modules keep their Foundry-hosted manifest URL and gain the protected flag.
       - name: Update module.json
-        uses: microsoft/variable-substitution@v1
-        with:
-          files: 'dist/module.json'
-        env:
-          version: ${{ env.VERSION }}
-          download: ${{ env.RELEASE_DOWNLOAD_URL }}
-          manifest: ${{ env.LATEST_MANIFEST_URL }}
-          flags.hotReload: false
+        run: |
+          jq --arg version "$VERSION" \
+             --arg download "$RELEASE_DOWNLOAD_URL" \
+             --arg manifest "$LATEST_MANIFEST_URL" \
+             --argjson premium "$PREMIUM" '
+            .version = $version
+            | if has("flags") and (.flags | has("hotReload")) then .flags.hotReload = false else . end
+            | if $premium then .protected = true else .download = $download | .manifest = $manifest end
+          ' dist/module.json > module.tmp.json
+          mv module.tmp.json dist/module.json
+          cat dist/module.json
 
       # Verify the version in module.json matches the tag
       - name: Verify version
@@ -92,7 +100,7 @@ jobs:
           allowUpdates: true
           omitNameDuringUpdate: true
           draft: false
-          prerelease: true
+          prerelease: false
           omitDraftDuringUpdate: true
           omitPrereleaseDuringUpdate: true
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -110,92 +118,98 @@ jobs:
           echo "title=$(jq -r '.title' dist/module.json)" >> $GITHUB_OUTPUT
           echo "compat_min=$(jq -r '.compatibility.minimum' dist/module.json)" >> $GITHUB_OUTPUT
           echo "compat_verified=$(jq -r '.compatibility.verified' dist/module.json)" >> $GITHUB_OUTPUT
-          COMPAT_MAX=$(jq -r '.compatibility.maximum // empty' dist/module.json)
-          echo "compat_max=$COMPAT_MAX" >> $GITHUB_OUTPUT
+          echo "compat_max=$(jq -r '.compatibility.maximum // empty' dist/module.json)" >> $GITHUB_OUTPUT
 
-      # Release to Foundry Package API
+      # Release to Foundry Package API (free modules only; premium uploads stay manual)
       - name: Release Foundry Package
+        if: env.PREMIUM != 'true'
         run: |
-          COMPAT_MAX="${{ steps.module.outputs.compat_max }}"
-          if [ -n "$COMPAT_MAX" ]; then
-            MAX_LINE="\"maximum\": \"$COMPAT_MAX\""
-          else
-            MAX_LINE=""
-          fi
-
           jq -n \
             --arg id "${{ env.MODULE_ID }}" \
             --arg version "${{ env.VERSION }}" \
             --arg manifest "${{ env.RELEASE_MANIFEST_URL }}" \
             --arg download "${{ env.RELEASE_DOWNLOAD_URL }}" \
             --arg notes "${{ env.REPO_URL }}/releases/tag/${{ env.TAG_NAME }}" \
-            --arg min "${{ steps.module.outputs.compat_min }}" \
-            --arg verified "${{ steps.module.outputs.compat_verified }}" \
-            --arg max "$COMPAT_MAX" \
-            '{id: $id, release: {version: $version, manifest: $manifest, download: $download, notes: $notes, compatibility: ({minimum: $min, verified: $verified} + if $max != "" then {maximum: $max} else {} end)}}' \
-            > payload.json
+            --arg compat_min "${{ steps.module.outputs.compat_min }}" \
+            --arg compat_verified "${{ steps.module.outputs.compat_verified }}" \
+            --arg compat_max "${{ steps.module.outputs.compat_max }}" \
+            '{
+              id: $id,
+              release: {
+                version: $version,
+                manifest: $manifest,
+                download: $download,
+                notes: $notes,
+                compatibility: (
+                  {minimum: $compat_min, verified: $compat_verified}
+                  + (if $compat_max == "" then {} else {maximum: $compat_max} end)
+                )
+              }
+            }' > payload.json
 
           cat payload.json
 
-          curl -X POST "https://foundryvtt.com/_api/packages/release_version/" \
+          curl -sS --fail-with-body -X POST "https://foundryvtt.com/_api/packages/release_version/" \
             -H "Content-Type: application/json" \
             -H "Authorization: ${{ secrets.FOUNDRY_API_TOKEN }}" \
             -d @payload.json
 
-      # Post release notification to Discord
+      # Post the release card to Discord (Components v2, same shape as Mork/utils/premium-post.mjs)
       - name: Post to Discord
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
           RELEASE_BODY: ${{ steps.release.outputs.body }}
           MODULE_TITLE: ${{ steps.module.outputs.title }}
-          VERSION: ${{ env.VERSION }}
-          COMPAT_MIN: ${{ steps.module.outputs.compat_min }}
-          COMPAT_MAX: ${{ steps.module.outputs.compat_max }}
-          FOUNDRY_URL: https://foundryvtt.com/packages/${{ env.MODULE_ID }}
-          RELEASE_PAGE: ${{ env.REPO_URL }}/releases/tag/${{ env.TAG_NAME }}
         run: |
-          python3 -c "
+          python3 - <<'PY'
           import json, os
 
-          # Read curated release notes, fall back to the GitHub release body
-          notes = ''
-          if os.path.isfile('release_notes.txt') and os.path.getsize('release_notes.txt') > 0:
-              with open('release_notes.txt', 'r', encoding='utf-8') as f:
-                  notes = f.read().strip()
-          if not notes:
-              notes = os.environ.get('RELEASE_BODY', 'New release available!')
+          def read(path):
+              if os.path.isfile(path) and os.path.getsize(path) > 0:
+                  with open(path, encoding='utf-8') as f:
+                      return f.read().strip()
+              return ''
 
-          # Discord embed description cap
-          if len(notes) > 2000:
-              notes = notes[:1997] + '...'
+          # release_card.txt is the card body; fall back to the GitHub release body
+          body = read('release_card.txt') or os.environ.get('RELEASE_BODY', '').strip() or 'New release available!'
 
-          title = os.environ.get('MODULE_TITLE', 'Calendaria') + ' v' + os.environ.get('VERSION', '')
-          compat_min = os.environ.get('COMPAT_MIN', '')
-          compat_max = os.environ.get('COMPAT_MAX', '')
-          release_page = os.environ.get('RELEASE_PAGE', '')
-          foundry_url = os.environ.get('FOUNDRY_URL', 'https://foundryvtt.com/packages/calendaria')
+          # Components v2 caps combined text content at 4000 characters
+          if len(body) > 3800:
+              body = body[:3797] + '...'
 
-          payload = json.dumps({
-              'content': '<@&1384920094597185556> <@&1447730718464806973>',
-              'embeds': [{
-                  'title': title,
-                  'url': release_page,
-                  'description': notes,
-                  'fields': [
-                      {'name': 'Core Compatibility', 'value': compat_min if compat_min == compat_max else f'{compat_min} - {compat_max}', 'inline': True},
-                      {'name': 'Foundry Package', 'value': f'[Install from Foundry]({foundry_url})', 'inline': True}
-                  ],
-                  'color': 16750848
-              }]
-          })
+          roles = os.environ['PING_ROLES'].split()
+          title = os.environ['MODULE_TITLE'] + ' v' + os.environ['VERSION']
+          package_url = 'https://foundryvtt.com/packages/' + os.environ['MODULE_ID']
+          wiki_url = 'https://wiki.3deathsaves.com/' + os.environ['MODULE_ID']
+          separator = {'type': 14, 'divider': True, 'spacing': 1}
 
-          print('JSON Payload:')
-          print(json.dumps(json.loads(payload), indent=2))
+          payload = {
+              'flags': 1 << 15,
+              'components': [
+                  {'type': 10, 'content': ' '.join('<@&' + r + '>' for r in roles)},
+                  {'type': 17, 'accent_color': int(os.environ['ACCENT_COLOR'], 16), 'components': [
+                      {'type': 12, 'items': [{'media': {'url': 'attachment://banner.png'}}]},
+                      {'type': 10, 'content': '# ' + title},
+                      separator,
+                      {'type': 10, 'content': body},
+                      separator,
+                      {'type': 1, 'components': [
+                          {'type': 2, 'style': 5, 'label': 'Package Page', 'url': package_url},
+                          {'type': 2, 'style': 5, 'label': 'Wiki', 'url': wiki_url},
+                          {'type': 2, 'style': 5, 'label': 'Support on Patreon', 'url': 'https://www.patreon.com/3deathsaves'}
+                      ]}
+                  ]}
+              ],
+              'allowed_mentions': {'parse': [], 'roles': roles},
+              'attachments': [{'id': 0, 'filename': 'banner.png'}]
+          }
 
-          with open('/tmp/discord_payload.json', 'w') as f:
-              f.write(payload)
-          "
+          print(json.dumps(payload, indent=2))
+          with open('/tmp/discord_payload.json', 'w', encoding='utf-8') as f:
+              json.dump(payload, f)
+          PY
 
-          curl -sS -H "Content-Type: application/json" \
-              -d @/tmp/discord_payload.json \
-              $DISCORD_WEBHOOK
+          curl -sS --fail-with-body \
+              -F "payload_json=</tmp/discord_payload.json;type=application/json" \
+              -F "files[0]=@banner.png;type=image/png" \
+              "$DISCORD_WEBHOOK?wait=true&with_components=true"
