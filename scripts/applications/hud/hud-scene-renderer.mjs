@@ -59,7 +59,7 @@ export const SKY_OVERRIDES = {
 };
 
 /** @type {Object<string, object>} Effect configuration definitions. */
-export const EFFECT_CONFIGS = {
+const EFFECT_CONFIGS = {
   clear: { particles: 0 },
   'clouds-light': {
     texture: 'cloud',

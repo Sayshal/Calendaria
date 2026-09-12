@@ -661,16 +661,17 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const { year } = date;
     const viewedDayOfMonth = date.dayOfMonth ?? 0;
     const daysInWeek = calendar.daysInWeek;
+    const weekStartIdx = getWeekStartIndex(calendar);
     const yearZero = calendar.years?.yearZero ?? 0;
     const daysInYear = calendar.getDaysInYear(year - yearZero);
-    const weekNumber = Math.floor(viewedDayOfMonth / daysInWeek);
+    const weekNumber = Math.floor((viewedDayOfMonth - weekStartIdx) / daysInWeek);
     const totalWeeks = Math.ceil(daysInYear / daysInWeek);
     const fogEnabled = isFogEnabled();
     const weatherLookup = game.settings.get(MODULE.ID, SETTINGS.MINI_CAL_SHOW_WEATHER) ? buildWeatherLookup() : null;
     const weeks = [];
     for (let weekOffset = -1; weekOffset <= 1; weekOffset++) {
       const targetWeek = weekNumber + weekOffset;
-      const weekStartDay = targetWeek * daysInWeek + 1;
+      const weekStartDay = targetWeek * daysInWeek + weekStartIdx + 1;
       const currentWeek = [];
       for (let i = 0; i < daysInWeek; i++) {
         let dayNum = weekStartDay + i;
@@ -731,7 +732,8 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const viewedComponents = { month: 0, dayOfMonth: viewedDayOfMonth };
     const currentSeason = enrichSeasonData(calendar.getCurrentSeason?.(viewedComponents));
     const currentEra = calendar.getCurrentEra?.();
-    const weekdayData = calendar.weekdaysArray ?? [];
+    const weekdaysRaw = calendar.weekdaysArray ?? [];
+    const weekdayData = weekdaysRaw.length ? Array.from({ length: weekdaysRaw.length }, (_, i) => weekdaysRaw[(i + weekStartIdx) % weekdaysRaw.length]) : weekdaysRaw;
     const displayWeek = weekNumber + 1;
     const yearDisplay = String(year);
     const formattedHeader = `${_loc('CALENDARIA.Common.Week')} ${displayWeek}, ${yearDisplay}`;

@@ -697,7 +697,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         }
       });
     }
-    for (const rangeInput of this.element.querySelectorAll('input[name$=".moonBrightnessMax"]')) {
+    for (const rangeInput of this.element.querySelectorAll('.range-field input[type="range"]')) {
       rangeInput.addEventListener('input', (e) => {
         const display = e.target.closest('.form-fields')?.querySelector('.range-value');
         if (display) display.textContent = e.target.value;

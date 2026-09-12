@@ -532,7 +532,7 @@ export async function setDateTo(year, month, dayOfMonth, calendar = null) {
  * @param {number} dayOfMonth - Day (0-indexed)
  * @returns {Promise<object|null>} The created note page, or null if creation failed
  */
-export async function createNoteOnDate(year, month, dayOfMonth) {
+async function createNoteOnDate(year, month, dayOfMonth) {
   const components = game.time.components ?? {};
   const hour = components.hour ?? 12;
   const page = await NoteManager.createNote({
@@ -552,7 +552,7 @@ export async function createNoteOnDate(year, month, dayOfMonth) {
  * @param {object[]} [options.extraItems] - Additional context menu items to append
  * @returns {Array<object>} Context menu items
  */
-export function getDayContextMenuItems({ calendar, onSetDate, onCreateNote, extraItems } = {}) {
+function getDayContextMenuItems({ calendar, onSetDate, onCreateNote, extraItems } = {}) {
   return (target) => {
     const year = parseInt(target.dataset.year);
     const month = parseInt(target.dataset.month);

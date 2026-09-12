@@ -574,17 +574,18 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const { year } = date;
     const viewedDayOfMonth = date.dayOfMonth ?? 0;
     const daysInWeek = calendar.daysInWeek;
+    const weekStartIdx = getWeekStartIndex(calendar);
     const yearZero = calendar.years?.yearZero ?? 0;
     const daysInYear = calendar.getDaysInYear(year - yearZero);
     const showMoons = canViewMoons() && calendar.moonsArray.length;
     const fogEnabled = isFogEnabled();
     const weatherLookup = game.settings.get(MODULE.ID, SETTINGS.BIG_CAL_SHOW_WEATHER) ? buildWeatherLookup() : null;
-    const weekNumber = Math.floor(viewedDayOfMonth / daysInWeek);
+    const weekNumber = Math.floor((viewedDayOfMonth - weekStartIdx) / daysInWeek);
     const totalWeeks = Math.ceil(daysInYear / daysInWeek);
     const weeks = [];
     for (let weekOffset = -1; weekOffset <= 1; weekOffset++) {
       const targetWeek = weekNumber + weekOffset;
-      const weekStartDay = targetWeek * daysInWeek + 1;
+      const weekStartDay = targetWeek * daysInWeek + weekStartIdx + 1;
       const currentWeek = [];
       for (let i = 0; i < daysInWeek; i++) {
         let dayNum = weekStartDay + i;
@@ -619,7 +620,7 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
             .sort((a, b) => a.moonName.localeCompare(b.moonName));
           moonPhases = processMoonPhases(moonPhases);
         }
-        const weekdayData = calendar.weekdaysArray[i % daysInWeek];
+        const weekdayData = calendar.weekdaysArray[(i + weekStartIdx) % daysInWeek];
         const festivalNoteId = this._getFestivalNoteId(festivalDay);
         const festivalIconIsImage = typeof festivalDay?.icon === 'string' && !festivalDay.icon.startsWith('fa') && (festivalDay.icon.includes('/') || festivalDay.icon.includes('.'));
         const wd = !dayIsFogged && weatherLookup ? getDayWeather(dayYear, 0, dayOfMonth, weatherLookup, weatherLookup.lookup) : null;
@@ -653,7 +654,8 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const seasonDay = this._selectedDate ?? date;
     const currentSeason = enrichSeasonData(calendar.getCurrentSeason?.(seasonDay));
     const currentEra = calendar.getCurrentEra?.();
-    const weekdayData = calendar.weekdaysArray ?? [];
+    const weekdaysRaw = calendar.weekdaysArray ?? [];
+    const weekdayData = weekdaysRaw.length ? Array.from({ length: weekdaysRaw.length }, (_, i) => weekdaysRaw[(i + weekStartIdx) % weekdaysRaw.length]) : weekdaysRaw;
     const displayWeek = weekNumber + 1;
     const yearDisplay = String(year);
     const formattedHeader = `${_loc('CALENDARIA.Common.Week')} ${displayWeek}, ${yearDisplay}`;

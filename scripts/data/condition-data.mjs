@@ -39,7 +39,7 @@ export class BaseConditionData extends foundry.abstract.DataModel {
 /**
  * Data model for a single flat condition (field + operator + value).
  */
-export class ConditionData extends BaseConditionData {
+class ConditionData extends BaseConditionData {
   static {
     Object.defineProperty(this, 'TYPE', { value: 'condition' });
   }
@@ -59,7 +59,7 @@ export class ConditionData extends BaseConditionData {
 /**
  * Data model for a condition group (boolean logic container).
  */
-export class ConditionGroupData extends BaseConditionData {
+class ConditionGroupData extends BaseConditionData {
   static {
     Object.defineProperty(this, 'TYPE', { value: 'group' });
   }

@@ -65,7 +65,7 @@ function weightedSelect(weights, randomFn = Math.random) {
  * @param {number|string|null|undefined} value - Stored temperature value
  * @returns {boolean} True if value is a relative modifier string
  */
-export function isRelativeTempModifier(value) {
+function isRelativeTempModifier(value) {
   return typeof value === 'string' && /[+-]$/.test(value);
 }
 
@@ -164,9 +164,10 @@ export function mergeClimateConfig(seasonClimate, zoneOverride, zoneFallback, se
  * @param {string} [options.currentWeatherId] - Current weather ID for inertia calculation
  * @param {number} [options.inertia] - How much to favor current weather (0-1)
  * @param {object|null} [options.previousWeather] - Previous weather for value-level blending { temperature, wind }
+ * @param {object} [options.period] - Day period from WEATHER_PERIODS, whose band narrows the temperature range
  * @returns {object} Generated weather { preset, temperature }
  */
-export function generateWeather({ seasonClimate, zoneConfig, season, seed, customPresets = [], currentWeatherId = null, inertia = 0, previousWeather = null }) {
+export function generateWeather({ seasonClimate, zoneConfig, season, seed, customPresets = [], currentWeatherId = null, inertia = 0, previousWeather = null, period = null }) {
   const randomFn = seed != null ? seededRandom(seed) : Math.random;
   const zoneOverride = season && zoneConfig?.seasonOverrides?.[season];
   let { probabilities, tempRange } = mergeClimateConfig(seasonClimate, zoneOverride, zoneConfig, season);
@@ -220,6 +221,11 @@ export function generateWeather({ seasonClimate, zoneConfig, season, seed, custo
       finalTempRange.max = isRelativeTempModifier(effectiveTempMax) ? resolved : Math.min(finalTempRange.max, resolved);
     }
     if (finalTempRange.min > finalTempRange.max) finalTempRange = { ...tempRange };
+  }
+  if (period?.band) {
+    const span = finalTempRange.max - finalTempRange.min;
+    const banded = { min: finalTempRange.min + span * period.band[0], max: finalTempRange.min + span * period.band[1] };
+    if (banded.min <= banded.max) finalTempRange = banded;
   }
   let temperature = Math.round(finalTempRange.min + randomFn() * (finalTempRange.max - finalTempRange.min));
   const resolvedPreset = preset || { id: weatherId, label: weatherId, icon: 'fa-question', color: '#888888' };
@@ -347,17 +353,18 @@ export function generateIntradayWeather({
     if (!isFirst && prevResult && carryOverChance > 0) {
       const rng = seededRandom(seed + 7919);
       if (rng() * 100 < carryOverChance) {
-        periods[period.id] = { ...prevResult };
+        const banded = generateWeather({ seasonClimate, zoneConfig, season, seed, customPresets, currentWeatherId: prevId, inertia, previousWeather: prevWeather, period });
+        periods[period.id] = { ...prevResult, temperature: banded.temperature };
         continue;
       }
     }
-    const weather = generateWeather({ seasonClimate, zoneConfig, season, seed, customPresets, currentWeatherId: prevId, inertia, previousWeather: prevWeather });
+    const weather = generateWeather({ seasonClimate, zoneConfig, season, seed, customPresets, currentWeatherId: prevId, inertia, previousWeather: prevWeather, period });
     periods[period.id] = weather;
     prevId = weather.preset.id;
     prevWeather = { temperature: weather.temperature, wind: weather.wind };
     prevResult = weather;
   }
-  const dominant = periods.morning;
+  const dominant = periods.afternoon;
   return { dominant, periods };
 }
 

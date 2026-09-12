@@ -1,7 +1,7 @@
 import { MODULE, SETTINGS } from '../../constants.mjs';
 
 /** @type {number} Snap detection radius in pixels. */
-export const SNAP_DISTANCE = 50;
+const SNAP_DISTANCE = 50;
 
 /** @type {string} CSS class for wobble animation. */
 export const WOBBLE_CLASS = 'near-snap';
@@ -10,7 +10,7 @@ export const WOBBLE_CLASS = 'near-snap';
 const SIDEBAR_BUFFER = 8;
 
 /** @type {string} CSS class for pinned/docked state. */
-export const PINNED_CLASS = 'calendaria-pinned';
+const PINNED_CLASS = 'calendaria-pinned';
 
 /** @type {HTMLElement|null} Shared snap indicator element. */
 let snapIndicator = null;
@@ -96,7 +96,7 @@ const ZONE_CONFIG = {
  * @param {number} hudHeight - Height of the HUD element
  * @returns {Array<object>} Array of zone definitions
  */
-export function getStickyZones(hudWidth, hudHeight) {
+function getStickyZones(hudWidth, hudHeight) {
   const zones = [];
   const hud = document.querySelector('.calendaria-hud');
   const isSliceMode = hud?.classList.contains('slice-mode') || hud?.classList.contains('compact');
@@ -168,7 +168,7 @@ function getIndicatorPosition(zone, hudWidth, hudHeight) {
  * @param {number} hudWidth - Width of the HUD element
  * @param {number} hudHeight - Height of the HUD element
  */
-export function showSnapIndicator(zone, hudWidth, hudHeight) {
+function showSnapIndicator(zone, hudWidth, hudHeight) {
   if (!snapIndicator) {
     snapIndicator = document.createElement('div');
     snapIndicator.className = 'calendaria calendaria-snap-indicator';
@@ -299,7 +299,7 @@ export function finalizeDrag(dragHandle, activeZone, app, hudWidth, hudHeight, p
  * @param {string} zoneId - The zone ID to check
  * @returns {boolean} Whether the zone is valid
  */
-export function isZoneValid(zoneId) {
+function isZoneValid(zoneId) {
   return !!ZONE_CONFIG[zoneId];
 }
 
@@ -344,7 +344,7 @@ export function restorePinnedState(element, zoneId) {
  * @param {number} hudHeight - HUD height
  * @returns {{left: number, top: number}|null} Position or null if zone not found
  */
-export function getZonePosition(zoneId, hudWidth, hudHeight) {
+function getZonePosition(zoneId, hudWidth, hudHeight) {
   const zones = getStickyZones(hudWidth, hudHeight);
   const zone = zones.find((z) => z.id === zoneId);
   if (!zone) return null;

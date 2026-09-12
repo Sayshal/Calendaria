@@ -68,13 +68,13 @@ export function patchBastionButton() {
   if (originalConfirmAdvance) return;
   originalConfirmAdvance = game.dnd5e.bastion.confirmAdvance.bind(game.dnd5e.bastion);
   game.dnd5e.bastion.confirmAdvance = async function patchedConfirmAdvance() {
-    if (!game.user.isGM) return;
+    if (!game.user.isGM) return false;
     if (!game.settings.get(MODULE.ID, SETTINGS.ADVANCE_BASTION_ORDERS)) return originalConfirmAdvance();
     const bastionConfig = game.settings.get('dnd5e', 'bastionConfiguration');
     if (!bastionConfig?.enabled) return originalConfirmAdvance();
     if (TimeClock.locked) {
       ui.notifications.warn('CALENDARIA.Bastion.ClockLocked', { localize: true });
-      return;
+      return false;
     }
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) return originalConfirmAdvance();
@@ -85,9 +85,10 @@ export function patchBastionButton() {
       rejectClose: false,
       window: { icon: 'fa-solid fa-chess-rook', title: 'CALENDARIA.Bastion.AdvanceTitle' }
     });
-    if (!proceed) return;
+    if (!proceed) return false;
     const secondsPerDay = getSecondsPerDay(calendar);
     await game.time.advance(duration * secondsPerDay);
+    return true;
   };
   document.getElementById('bastion-turn')?.remove();
   game.dnd5e.bastion.initializeUI?.();
