@@ -92,6 +92,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       openWeatherEditor: SettingsPanel.#onOpenWeatherEditor,
       openWeatherProbabilities: SettingsPanel.#onOpenWeatherProbabilities,
       syncFestivals: SettingsPanel.#onSyncFestivals,
+      removeNotes: SettingsPanel.#onRemoveNotes,
       regenerateAllWeather: SettingsPanel.#onRegenerateAllWeather,
       navigateToSetting: SettingsPanel.#onNavigateToSetting,
       showTokenReference: SettingsPanel.#onShowTokenReference,
@@ -2698,6 +2699,11 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     await FestivalManager.clearSeedRecord(calendarId);
     const created = await FestivalManager.seedFestivalNotes(calendarId, calendar);
     ui.notifications.info(_loc(created ? 'CALENDARIA.Settings.SyncFestivals.Done' : 'CALENDARIA.Settings.SyncFestivals.NoneCreated'));
+  }
+
+  /** Ask which calendar notes to delete, then delete them. */
+  static async #onRemoveNotes() {
+    await FestivalManager.promptNoteCleanup();
   }
 
   /**

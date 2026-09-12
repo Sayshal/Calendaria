@@ -75,22 +75,75 @@ export default class FestivalManager {
   }
 
   /**
-   * Delete all festival notes for a calendar (used on calendar reset/delete).
-   * @param {string} calendarId - Calendar ID
+   * Clear the seed record for every calendar.
+   * @returns {Promise<void>}
+   */
+  static async clearAllSeedRecords() {
+    if (!game.user?.isGM) return;
+    await game.settings.set(MODULE.ID, SETTINGS.SEEDED_CALENDARS, new Set());
+  }
+
+  /**
+   * Delete all festival notes for a calendar, or for every calendar when no id is given.
+   * @param {string} [calendarId] - Calendar ID, omitted to cover every calendar
    * @returns {Promise<number>} Number of notes deleted
    */
-  static async deleteAllFestivalNotes(calendarId) {
-    const notes = this.getFestivalNotes(calendarId);
+  static async deleteAllFestivalNotes(calendarId = null) {
+    const notes = calendarId ? this.getFestivalNotes(calendarId) : this.getAllFestivalNotes();
     if (!notes.length) return 0;
     NoteManager.enableBypassDeleteProtection();
     let deleted = 0;
-    for (const stub of notes) {
-      await NoteManager.deleteNote(stub.id);
-      deleted++;
+    try {
+      for (const stub of notes) {
+        await NoteManager.deleteNote(stub.id);
+        deleted++;
+      }
+    } finally {
+      NoteManager.disableBypassDeleteProtection();
     }
-    NoteManager.disableBypassDeleteProtection();
-    ATLAS.log(3, `Deleted ${deleted} festival notes for ${calendarId}`);
+    ATLAS.log(3, `Deleted ${deleted} festival notes for ${calendarId ?? 'all calendars'}`);
     return deleted;
+  }
+
+  /**
+   * Ask the GM which calendar notes to delete, then delete them.
+   * @param {object} [options] - Options
+   * @param {boolean} [options.disabling] - Use the wording for a module being switched off
+   * @returns {Promise<number>} Number of notes deleted
+   */
+  static async promptNoteCleanup({ disabling = false } = {}) {
+    const festivals = this.getAllFestivalNotes().length;
+    const total = NoteManager.getAllNotes().length;
+    if (!total) {
+      if (!disabling) ui.notifications.info('CALENDARIA.Settings.RemoveNotes.None', { localize: true });
+      return 0;
+    }
+    const intro = disabling ? 'CALENDARIA.Settings.RemoveNotes.Disabling' : 'CALENDARIA.Settings.RemoveNotes.Prompt';
+    const choice = await foundry.applications.api.DialogV2.wait({
+      classes: ['calendaria', 'remove-notes-dialog'],
+      modal: true,
+      window: { title: 'CALENDARIA.Settings.RemoveNotes.Name' },
+      content: `<p>${_loc(intro)}</p><p>${_loc('CALENDARIA.Settings.RemoveNotes.Explain', { festivals, others: total - festivals })}</p>`,
+      buttons: [
+        { action: 'festivals', label: 'CALENDARIA.Settings.RemoveNotes.Festivals', icon: 'fas fa-star' },
+        { action: 'all', label: 'CALENDARIA.Settings.RemoveNotes.All', icon: 'fas fa-trash' },
+        { action: 'cancel', label: 'ATLAS.Common.Cancel', icon: 'fas fa-times', default: true }
+      ],
+      rejectClose: false
+    });
+    if (choice !== 'festivals' && choice !== 'all') return 0;
+    const deleted = choice === 'all' ? await NoteManager.deleteAllNotes() : await this.deleteAllFestivalNotes();
+    await this.clearAllSeedRecords();
+    ui.notifications.info(_loc('CALENDARIA.Settings.RemoveNotes.Done', { count: deleted }));
+    return deleted;
+  }
+
+  /**
+   * Get every festival note stub in the world.
+   * @returns {object[]} Festival note stubs
+   */
+  static getAllFestivalNotes() {
+    return NoteManager.getAllNotes().filter((stub) => stub.flagData?.linkedFestival);
   }
 
   /**

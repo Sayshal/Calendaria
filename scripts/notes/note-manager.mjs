@@ -508,9 +508,14 @@ export default class NoteManager {
       if (page) pagesToDelete.push(page);
     }
     let deletedCount = 0;
-    for (const page of pagesToDelete) {
-      await page.delete();
-      deletedCount++;
+    this.enableBypassDeleteProtection();
+    try {
+      for (const page of pagesToDelete) {
+        await this.deleteNote(page.id);
+        deletedCount++;
+      }
+    } finally {
+      this.disableBypassDeleteProtection();
     }
     ATLAS.log(3, `Deleted ${deletedCount} calendar notes`);
     return deletedCount;

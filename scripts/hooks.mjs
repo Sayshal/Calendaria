@@ -44,6 +44,21 @@ function onCanvasReadyForHUD() {
 }
 
 /**
+ * Offer to remove festival notes when the GM turns Calendaria off in Manage Modules.
+ * @param {object} setting - The updated setting document
+ * @param {object} _changes - The applied changes
+ * @param {object} _options - Update options
+ * @param {string} userId - ID of the user who made the change
+ * @returns {Promise<void>}
+ */
+async function onModuleConfigurationChange(setting, _changes, _options, userId) {
+  if (setting.key !== 'core.moduleConfiguration' || userId !== game.user.id || !game.user.isGM) return;
+  if (!game.modules.get(MODULE.ID)?.active) return;
+  if (game.settings.get('core', 'moduleConfiguration')?.[MODULE.ID] !== false) return;
+  await FestivalManager.promptNoteCleanup({ disabling: true });
+}
+
+/**
  * Register all hooks for the Calendaria module.
  */
 export function registerHooks() {
@@ -81,6 +96,7 @@ export function registerHooks() {
   Hooks.on('updateScene', onUpdateScene);
   Hooks.on('canvasReady', onCanvasReadyForHUD);
   Hooks.on('updateSetting', CalendarManager.onUpdateSetting.bind(CalendarManager));
+  Hooks.on('updateSetting', onModuleConfigurationChange);
   Hooks.on('updateWorldTime', TimeClock.onUpdateWorldTime.bind(TimeClock));
   Hooks.on(HOOKS.DAY_CHANGE, autoRevealCurrentDay);
   Hooks.on(HOOKS.DAY_CHANGE, onDayChangeForBastions);

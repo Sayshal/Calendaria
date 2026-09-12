@@ -179,6 +179,10 @@
     }
   }
 
+  &.remove-notes-dialog {
+    max-width: 36rem;
+  }
+
   &.token-reference-dialog {
     .content {
       gap: 1rem;
