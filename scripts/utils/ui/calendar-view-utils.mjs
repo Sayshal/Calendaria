@@ -1,6 +1,6 @@
 import { BigCal, HUD, MiniCal, NoteViewer, Stopwatch, SunDial, TimeKeeper } from '../../applications/_module.mjs';
 import { CalendarManager, CalendarRegistry, getEquivalentDates } from '../../calendar/_module.mjs';
-import { MODULE, NOTE_VISIBILITY, SETTINGS, SOCKET_TYPES, TEMPLATES } from '../../constants.mjs';
+import { MODULE, NOTE_VISIBILITY, SEASON_DEFAULTS, SETTINGS, SOCKET_TYPES, TEMPLATES } from '../../constants.mjs';
 import { NoteManager, addDays, compareDays, extractNoteMatchData, getEffectiveDuration, isRecurringMatch, resolveNoteDisplayProps } from '../../notes/_module.mjs';
 import { WeatherManager } from '../../weather/_module.mjs';
 import {
@@ -18,6 +18,7 @@ import {
   isMoonVisible,
   isRevealed,
   revealRange,
+  seasonalTypeFrom,
   toRomanNumeral
 } from '../_module.mjs';
 
@@ -139,15 +140,7 @@ export function enrichSeasonData(season, { zone } = {}) {
   const aliasZone = zone === undefined ? WeatherManager.getActiveZone(null, game.scenes?.active) : zone;
   const aliased = WeatherManager.applySeasonAlias(season, aliasZone) ?? season;
   if (aliased.icon && aliased.color) return aliased;
-  const seasonName = _loc(aliased.name).toLowerCase();
-  const SEASON_DEFAULTS = {
-    autumn: { icon: 'fas fa-leaf', color: '#d2691e' },
-    fall: { icon: 'fas fa-leaf', color: '#d2691e' },
-    winter: { icon: 'fas fa-snowflake', color: '#87ceeb' },
-    spring: { icon: 'fas fa-seedling', color: '#90ee90' },
-    summer: { icon: 'fas fa-sun', color: '#ffd700' }
-  };
-  const match = Object.keys(SEASON_DEFAULTS).find((key) => seasonName.includes(key));
+  const match = seasonalTypeFrom(aliased.seasonalType, _loc(aliased.name));
   const defaults = match ? SEASON_DEFAULTS[match] : { icon: 'fas fa-leaf', color: '#666666' };
   return { ...aliased, icon: aliased.icon || defaults.icon, color: aliased.color || defaults.color };
 }

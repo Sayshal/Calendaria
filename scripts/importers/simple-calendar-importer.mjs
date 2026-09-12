@@ -1,19 +1,12 @@
 import { CalendarManager } from '../calendar/_module.mjs';
-import { ASSETS } from '../constants.mjs';
+import { ASSETS, SEASON_DEFAULTS } from '../constants.mjs';
 import { FestivalManager } from '../festivals/_module.mjs';
 import { NoteManager, addCustomPreset, getAllPresets } from '../notes/_module.mjs';
+import { seasonalTypeFrom } from '../utils/calendar-math.mjs';
 import BaseImporter from './base-importer.mjs';
 
 /** Both module IDs to support original SC and SC Reborn. */
 const SC_MODULE_IDS = ['foundryvtt-simple-calendar', 'foundryvtt-simple-calendar-reborn'];
-
-/** Map SC season icon strings to FontAwesome classes. */
-const SEASON_ICON_MAP = {
-  spring: 'fa-seedling',
-  summer: 'fa-sun',
-  fall: 'fa-leaf',
-  winter: 'fa-snowflake'
-};
 
 /**
  * Importer for Simple Calendar module data.
@@ -386,7 +379,15 @@ export default class SimpleCalendarImporter extends BaseImporter {
       let dayEnd = (monthDayStarts[nextRegIdx] ?? 0) + (nextSeason.startingDay ?? 0) - 1;
       if (dayEnd < dayStart) dayEnd += totalDays;
       if (dayEnd < 0) dayEnd = totalDays - 1;
-      return { name: season.name, dayStart, dayEnd: dayEnd >= totalDays ? dayEnd - totalDays : dayEnd, color: season.color || '', icon: SEASON_ICON_MAP[season.icon] || '' };
+      const seasonalType = seasonalTypeFrom(season.icon, season.name);
+      return {
+        name: season.name,
+        dayStart,
+        dayEnd: dayEnd >= totalDays ? dayEnd - totalDays : dayEnd,
+        color: season.color || '',
+        icon: SEASON_DEFAULTS[seasonalType]?.icon ?? '',
+        seasonalType
+      };
     });
   }
 

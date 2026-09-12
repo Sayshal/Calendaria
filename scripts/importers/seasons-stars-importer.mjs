@@ -1,16 +1,8 @@
 import { CalendarManager } from '../calendar/_module.mjs';
-import { ASSETS } from '../constants.mjs';
+import { ASSETS, SEASON_DEFAULTS } from '../constants.mjs';
 import { NoteManager, addCustomPreset, getAllPresets } from '../notes/_module.mjs';
+import { seasonalTypeFrom } from '../utils/calendar-math.mjs';
 import BaseImporter from './base-importer.mjs';
-
-/** @type {Object<string, string>} Map S&S season icon strings to FontAwesome classes. */
-const SEASON_ICON_MAP = {
-  spring: 'fa-seedling',
-  summer: 'fa-sun',
-  fall: 'fa-leaf',
-  autumn: 'fa-leaf',
-  winter: 'fa-snowflake'
-};
 
 /**
  * Importer for Seasons & Stars module data.
@@ -229,18 +221,16 @@ export default class SeasonsStarsImporter extends BaseImporter {
       const endMonthIdx = (season.endMonth ?? season.startMonth ?? 1) - 1;
       const dayStart = (monthStartDays[startMonthIdx] ?? 0) + ((season.startDay ?? 1) - 1);
       const dayEnd = (monthStartDays[endMonthIdx] ?? 0) + ((season.endDay ?? months[endMonthIdx]?.days ?? 1) - 1);
-      return { name: season.name, dayStart: dayStart % daysInYear, dayEnd: dayEnd % daysInYear, color: this.#mapSeasonColor(season.icon), icon: SEASON_ICON_MAP[season.icon] || '' };
+      const seasonalType = seasonalTypeFrom(season.icon, season.name);
+      return {
+        name: season.name,
+        dayStart: dayStart % daysInYear,
+        dayEnd: dayEnd % daysInYear,
+        color: SEASON_DEFAULTS[seasonalType]?.color ?? '',
+        icon: SEASON_DEFAULTS[seasonalType]?.icon ?? '',
+        seasonalType
+      };
     });
-  }
-
-  /**
-   * Map S&S season icon to color.
-   * @param {string} icon - S&S season icon
-   * @returns {string} Hex color
-   */
-  #mapSeasonColor(icon) {
-    const colorMap = { winter: '#87CEEB', spring: '#90EE90', summer: '#FFD700', fall: '#DEB887', autumn: '#DEB887' };
-    return colorMap[icon] || '#888888';
   }
 
   /**

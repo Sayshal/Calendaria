@@ -111,6 +111,43 @@ async function migrateStoredFestivalIcons() {
 }
 
 /**
+ * Add the missing `fas ` family class to season icons imported without one.
+ * @param {object} calendars - Calendar data keyed by calendar id
+ * @returns {boolean} True when at least one icon was rewritten
+ */
+export function prefixSeasonIconFamilies(calendars) {
+  if (!calendars || typeof calendars !== 'object') return false;
+  let changed = false;
+  for (const data of Object.values(calendars)) {
+    for (const season of Object.values(data?.seasons?.values ?? {})) {
+      const icon = season?.icon;
+      if (typeof icon !== 'string' || !icon.startsWith('fa-') || icon.includes(' ')) continue;
+      season.icon = `fas ${icon}`;
+      changed = true;
+    }
+  }
+  return changed;
+}
+
+/**
+ * Repair season icons on imported calendars that were stored without a Font Awesome family class.
+ * @since 1.4.1
+ * @deprecated Remove in 1.6.0
+ * @returns {Promise<void>}
+ */
+async function migrateStoredSeasonIcons() {
+  const KEY = 'seasonIconFamilyMigrationComplete';
+  if (game.settings.get(MODULE.ID, KEY)) return;
+  for (const setting of [SETTINGS.CUSTOM_CALENDARS, SETTINGS.DEFAULT_OVERRIDES]) {
+    const stored = game.settings.get(MODULE.ID, setting);
+    if (!prefixSeasonIconFamilies(stored)) continue;
+    await game.settings.set(MODULE.ID, setting, stored);
+    ATLAS.log(3, `Added missing season icon family classes to ${setting}`);
+  }
+  await game.settings.set(MODULE.ID, KEY, true);
+}
+
+/**
  * Run all migrations.
  * @returns {Promise<void>}
  */
@@ -118,4 +155,5 @@ export async function runAllMigrations() {
   if (!ATLAS.isPrimaryGM) return;
   await migrateIntervalConditionField();
   await migrateStoredFestivalIcons();
+  await migrateStoredSeasonIcons();
 }

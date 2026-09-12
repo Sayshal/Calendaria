@@ -217,6 +217,22 @@ export function getSeasonDay(dayOfYear, seasons, totalDays, idx, internalYear = 
 }
 
 /**
+ * Derive a canonical seasonal type from an icon key or season name.
+ * @param {...string} values - Candidate strings, checked in order
+ * @returns {'spring'|'summer'|'autumn'|'winter'|null} Canonical type, or null when nothing matches
+ */
+export function seasonalTypeFrom(...values) {
+  for (const value of values) {
+    const text = String(value ?? '').toLowerCase();
+    if (text.includes('spring')) return 'spring';
+    if (text.includes('summer')) return 'summer';
+    if (text.includes('autumn') || text.includes('fall')) return 'autumn';
+    if (text.includes('winter')) return 'winter';
+  }
+  return null;
+}
+
+/**
  * Find a season by its canonical type using the seasonalType metadata.
  * @param {object[]} seasons - Seasons array
  * @param {'spring'|'summer'|'autumn'|'winter'} type - Canonical seasonal type

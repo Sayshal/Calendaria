@@ -376,6 +376,14 @@ export const MOON_PHASE_LABELS = [
   'CALENDARIA.MoonPhase.WaningCrescent'
 ];
 
+/** @type {Object<string, object>} Icon and color fallbacks per canonical seasonal type */
+export const SEASON_DEFAULTS = {
+  spring: { icon: 'fas fa-seedling', color: '#90ee90' },
+  summer: { icon: 'fas fa-sun', color: '#ffd700' },
+  autumn: { icon: 'fas fa-leaf', color: '#d2691e' },
+  winter: { icon: 'fas fa-snowflake', color: '#87ceeb' }
+};
+
 /** @type {Object<string, object>} Wind speed scale (0-5). Canonical values stored in kph; imperial conversion at display time. */
 export const WIND_SPEEDS = {
   CALM: { id: 'calm', value: 0, label: 'CALENDARIA.Weather.Wind.Calm', kph: 5 },

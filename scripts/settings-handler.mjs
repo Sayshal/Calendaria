@@ -414,6 +414,7 @@ export default class CalendariaSettings {
       },
       intervalConditionFieldMigrationComplete: { name: 'Interval Condition Field Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       festivalIconPrefixMigrationComplete: { name: 'Festival Icon Prefix Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
+      seasonIconFamilyMigrationComplete: { name: 'Season Icon Family Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.DARKNESS_SYNC]: {
         name: 'CALENDARIA.Settings.DarknessSync.Name',
         hint: 'CALENDARIA.Settings.DarknessSync.Hint',

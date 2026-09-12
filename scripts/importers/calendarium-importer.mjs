@@ -1,5 +1,6 @@
-import { ASSETS, MOON_PHASE_LABELS } from '../constants.mjs';
+import { ASSETS, MOON_PHASE_LABELS, SEASON_DEFAULTS } from '../constants.mjs';
 import { NoteManager, addCustomPreset, getAllPresets } from '../notes/_module.mjs';
+import { seasonalTypeFrom } from '../utils/calendar-math.mjs';
 import BaseImporter from './base-importer.mjs';
 
 /**
@@ -242,12 +243,14 @@ export default class CalendariumImporter extends BaseImporter {
       let dayEnd = (monthDayStarts[nextSeason.date?.month] ?? 0) + Math.max(0, (nextSeason.date?.day ?? 1) - 1) - 1;
       if (dayEnd < 0) dayEnd = totalDays - 1;
       if (dayEnd < dayStart) dayEnd += totalDays;
+      const seasonalType = seasonalTypeFrom(season.kind, season.name);
       return {
         name: season.name,
         dayStart,
         dayEnd: dayEnd >= totalDays ? dayEnd - totalDays : dayEnd,
         color: Array.isArray(season.color) ? season.color[0] : season.color || null,
-        icon: this.#mapSeasonIcon(season.kind)
+        icon: SEASON_DEFAULTS[seasonalType]?.icon ?? null,
+        seasonalType
       };
     });
   }
@@ -260,22 +263,16 @@ export default class CalendariumImporter extends BaseImporter {
    * @returns {object[]} - Transformed periodic seasons array
    */
   #transformPeriodicSeasons(seasons, totalDays) {
-    return seasons.map((season) => ({
-      name: season.name,
-      duration: season.duration || Math.floor(totalDays / seasons.length),
-      color: Array.isArray(season.color) ? season.color[0] : season.color || null,
-      icon: this.#mapSeasonIcon(season.kind)
-    }));
-  }
-
-  /**
-   * Map Calendarium season kind to icon.
-   * @param {string} kind - Season kind (Winter, Spring, Summer, Autumn)
-   * @returns {string|null} - Icon class or null
-   */
-  #mapSeasonIcon(kind) {
-    const icons = { Winter: 'fas fa-snowflake', Spring: 'fas fa-seedling', Summer: 'fas fa-sun', Autumn: 'fas fa-leaf' };
-    return icons[kind] || null;
+    return seasons.map((season) => {
+      const seasonalType = seasonalTypeFrom(season.kind, season.name);
+      return {
+        name: season.name,
+        duration: season.duration || Math.floor(totalDays / seasons.length),
+        color: Array.isArray(season.color) ? season.color[0] : season.color || null,
+        icon: SEASON_DEFAULTS[seasonalType]?.icon ?? null,
+        seasonalType
+      };
+    });
   }
 
   /**

@@ -18,6 +18,7 @@ import {
   getTotalDaysInYear,
   getTotalDaysSinceEpoch,
   isInSeasonRange,
+  seasonalTypeFrom,
   seededRandom
 } from '../../scripts/utils/calendar-math.mjs';
 
@@ -288,6 +289,19 @@ describe('findSeasonIndexByType()', () => {
     expect(findSeasonIndexByType([], 'spring')).toBe(-1);
     expect(findSeasonIndexByType(null, 'spring')).toBe(-1);
     expect(findSeasonIndexByType([{ seasonalType: 'spring' }], '')).toBe(-1);
+  });
+});
+
+describe('seasonalTypeFrom()', () => {
+  it('maps foreign icon keys and names, treating fall as autumn', () => {
+    expect(seasonalTypeFrom('spring')).toBe('spring');
+    expect(seasonalTypeFrom('fall')).toBe('autumn');
+    expect(seasonalTypeFrom('Winter')).toBe('winter');
+    expect(seasonalTypeFrom('', 'High Summer')).toBe('summer');
+  });
+  it('returns null when nothing matches', () => {
+    expect(seasonalTypeFrom(undefined, 'The Melting')).toBeNull();
+    expect(seasonalTypeFrom()).toBeNull();
   });
 });
 
