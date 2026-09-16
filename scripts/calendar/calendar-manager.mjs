@@ -103,7 +103,6 @@ export default class CalendarManager {
     if (theme) {
       const update = {};
       if (current.dateTheme !== theme) update.dateTheme = theme;
-      if (current.showClockButton === false) update.showClockButton = true;
       if (Object.keys(update).length === 0) return;
       try {
         await game.settings.set(systemId, 'worldClock', { ...current, ...update });
