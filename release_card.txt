@@ -1,11 +1,3 @@
-## New Features
-
-- CalendariaAPI.advanceTime gains smooth, duration and fps options for gradual time advancement.
-- Core's game.time.calendar.format() now routes through Calendaria's token engine.
-- New FXMaster Above Darkness toggle, with a per-scene override.
-- New Remove Calendar Notes button, also offered when Calendaria is disabled.
-- The [[countdown]] enricher accepts time=HH:MM to count down to a clock time.
-
 ## Bug Fixes
 
-- 7 bugs squashed
+- 1 bugs squashed

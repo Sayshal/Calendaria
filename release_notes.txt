@@ -1,26 +1,3 @@
-## New Features
-
-- CalendariaAPI.advanceTime gains smooth, duration and fps options for gradual time advancement
-- Core's game.time.calendar.format() now routes through Calendaria's token engine
-- Moon sliders in the calendar editor show their value while dragging
-- New FXMaster Above Darkness toggle on the Weather settings tab, with a per-scene override
-- New Remove Calendar Notes button on the Notes tab, also offered when Calendaria is disabled, deleting festival notes or every calendar note
-- Note cleanup clears festival seed records and each note's wrapper journal
-- Seven weather presets gained their own ambient loop, and gravewind no longer shares the wind ambience
-- The [[countdown]] enricher accepts time=HH:MM to count down to a clock time
-- timeToComponents now also returns day, leapYear and season
-
 ## Bug Fixes
 
-- Bastion turn advancement matches the dnd5e 6.0.x contract, and monthless calendars no longer produce NaN dates across a year boundary
-- Imported seasons carry a canonical seasonalType, so solstice detection, note recurrence and icon fallbacks resolve on non-English season names
-- Intraday temperatures follow diurnal bands, with the daily headline read from the afternoon
-- Monthless calendars honor the configured week start
-- Season icons on calendars imported from Simple Calendar and Seasons & Stars now render, with a migration for existing imports
-- Timekeeper jump buttons and the unit picker follow the Timekeeper's own increment instead of the shared clock increment
-- timeToComponents clamps month and dayOfMonth to the last valid month instead of returning an out-of-range index
-
-## Changes
-
-- Checkboxes and radios follow the atlas theme instead of Foundry's core duotone layer
-- The shared wind ambience was re-encoded from 4.2 MB to 1.9 MB
+- PF2e and SF2e World Clock button no longer turns back on when a Luxon-compatible calendar is active
