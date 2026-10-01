@@ -1,3 +1,7 @@
+## New Features
+
+- New End Hold setting keeps the final date on screen before a cinematic closes
+
 ## Bug Fixes
 
-- 1 bugs squashed
+- 5 bugs squashed
