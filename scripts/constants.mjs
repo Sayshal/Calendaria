@@ -59,6 +59,7 @@ export const SETTINGS = {
   CHRONICLE_SHOW_WEATHER: 'chronicleShowWeather',
   CHRONICLE_VIEW_MODE: 'chronicleViewMode',
   CINEMATIC_ENABLED: 'cinematicEnabled',
+  CINEMATIC_END_HOLD: 'cinematicEndHold',
   CINEMATIC_EVENT_MAX_CARDS: 'cinematicEventMaxCards',
   CINEMATIC_EVENT_WEIGHTING: 'cinematicEventWeighting',
   CINEMATIC_ON_REST: 'cinematicOnRest',

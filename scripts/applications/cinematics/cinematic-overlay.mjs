@@ -10,6 +10,12 @@ const FADE_MS = 300;
 /** @type {number} */
 const MAX_PARTICLES = 30;
 
+/** @type {number} In-game days per real second where the sky starts settling toward midnight. */
+const SKY_DAMP_START = 0.5;
+
+/** @type {number} In-game days per real second where the sky is fully held at midnight. */
+const SKY_DAMP_FULL = 1;
+
 /** @type {object[]} */
 const SKY_WAYPOINTS = [
   { t: 0.0, hour: 0 },
@@ -34,6 +40,7 @@ export default class CinematicOverlay {
   static #animationId = null;
   static #startRealTime = 0;
   static #totalDuration = 0;
+  static #endHold = 0;
   static #resolvePromise = null;
   static #keydownHandler = null;
   static #particles = [];
@@ -165,6 +172,7 @@ export default class CinematicOverlay {
     ATLAS.log(3, `Cinematic starting: ${payload.keyframes.length} keyframes, ${payload.deltaSeconds}s skip`);
     const panelMs = game.settings.get(MODULE.ID, SETTINGS.CINEMATIC_PANEL_DURATION) || 3000;
     this.#totalDuration = Math.max(1000, payload.keyframes.length * panelMs);
+    this.#endHold = game.settings.get(MODULE.ID, SETTINGS.CINEMATIC_END_HOLD) ?? 0;
     if (!this.#element) this.#buildDOM();
     this.#initPixi();
     this.#seedFirstFrame(payload.keyframes[0]);
@@ -219,11 +227,12 @@ export default class CinematicOverlay {
   static #animate(timestamp) {
     if (this.#aborted) return;
     const elapsed = timestamp - this.#startRealTime;
-    const progress = Math.min(1, elapsed / this.#totalDuration);
+    const linearProgress = Math.min(1, elapsed / this.#totalDuration);
+    const progress = foundry.canvas.animation.CanvasAnimation.easeInOutCosine(linearProgress);
     const keyframes = this.#payload.keyframes;
     const frameIndex = Math.min(keyframes.length - 1, Math.floor(progress * keyframes.length));
     const panelProgress = progress * keyframes.length - frameIndex;
-    const dayFraction = this.#computeDayFraction(progress);
+    const dayFraction = this.#dampDayFraction(this.#computeDayFraction(progress), linearProgress);
     if (frameIndex !== this.#currentFrame) {
       const prevKf = this.#currentFrame >= 0 ? keyframes[this.#currentFrame] : null;
       this.#currentFrame = frameIndex;
@@ -234,8 +243,8 @@ export default class CinematicOverlay {
     this.#updateBackground(dayFraction);
     this.#updateEffects(dayFraction);
     this.#tickDateCounter(frameIndex, panelProgress, progress);
-    this.#updateProgressBar(progress);
-    if (progress >= 1) {
+    this.#updateProgressBar(linearProgress);
+    if (elapsed >= this.#totalDuration + this.#endHold) {
       this.#complete();
       return;
     }
@@ -259,6 +268,23 @@ export default class CinematicOverlay {
     const secondsPerMinute = calendar.days?.secondsPerMinute ?? 60;
     const hoursInDay = components.hour + components.minute / minutesPerHour + components.second / (minutesPerHour * secondsPerMinute);
     return Math.max(0, Math.min(1, hoursInDay / hoursPerDay));
+  }
+
+  /**
+   * Pull the sky toward midnight while days pass too fast for a readable day-night cycle.
+   * @param {number} dayFraction - Actual time-of-day fraction
+   * @param {number} linearProgress - Un-eased playback progress
+   * @returns {number} Damped time-of-day fraction
+   */
+  static #dampDayFraction(dayFraction, linearProgress) {
+    const days = CalendarManager.getActiveCalendar()?.days;
+    const secondsPerDay = (days?.hoursPerDay ?? 24) * (days?.minutesPerHour ?? 60) * (days?.secondsPerMinute ?? 60);
+    const easedSpeed = (Math.PI / 2) * Math.sin(Math.PI * linearProgress);
+    const daysPerSecond = ((Math.abs(this.#payload.deltaSeconds) / secondsPerDay) * easedSpeed) / (this.#totalDuration / 1000);
+    const damping = Math.max(0, Math.min(1, (daysPerSecond - SKY_DAMP_START) / (SKY_DAMP_FULL - SKY_DAMP_START)));
+    const offset = dayFraction > 0.5 ? dayFraction - 1 : dayFraction;
+    const damped = offset * (1 - damping);
+    return damped < 0 ? damped + 1 : damped;
   }
 
   /** Complete the cinematic naturally. */

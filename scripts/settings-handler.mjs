@@ -51,6 +51,13 @@ export default class CalendariaSettings {
         config: false,
         type: new NumberField({ initial: 3000, min: 1000, max: 6000, step: 100, integer: true })
       },
+      [SETTINGS.CINEMATIC_END_HOLD]: {
+        name: 'CALENDARIA.Cinematic.Settings.EndHold.Name',
+        hint: 'CALENDARIA.Cinematic.Settings.EndHold.Hint',
+        scope: 'world',
+        config: false,
+        type: new NumberField({ initial: 2000, min: 0, max: 5000, step: 500, integer: true })
+      },
       [SETTINGS.CINEMATIC_SHOW_WEATHER]: {
         name: 'CALENDARIA.Common.ShowWeather',
         hint: 'CALENDARIA.Cinematic.Settings.ShowWeather.Hint',

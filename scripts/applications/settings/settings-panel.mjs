@@ -692,6 +692,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.CINEMATIC_THRESHOLD_UNIT]: { tab: 'cinematics', label: 'CALENDARIA.Cinematic.Settings.ThresholdUnit.Name' },
     [SETTINGS.CINEMATIC_ON_REST]: { tab: 'cinematics', label: 'CALENDARIA.Cinematic.Settings.OnRest.Name' },
     [SETTINGS.CINEMATIC_PANEL_DURATION]: { tab: 'cinematics', label: 'CALENDARIA.Cinematic.Settings.PanelDuration.Name' },
+    [SETTINGS.CINEMATIC_END_HOLD]: { tab: 'cinematics', label: 'CALENDARIA.Cinematic.Settings.EndHold.Name' },
     [SETTINGS.CINEMATIC_SHOW_WEATHER]: { tab: 'cinematics', label: 'CALENDARIA.Common.ShowWeather' },
     [SETTINGS.CINEMATIC_SHOW_MOONS]: { tab: 'cinematics', label: 'CALENDARIA.Common.ShowMoonPhases' },
     [SETTINGS.CINEMATIC_SHOW_EVENTS]: { tab: 'cinematics', label: 'CALENDARIA.Cinematic.Settings.ShowEvents.Name' },
@@ -953,7 +954,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     'chronicle-almanac': [SETTINGS.WEEKLY_ALMANAC],
     'fog-of-war': [SETTINGS.FOG_OF_WAR_ENABLED, SETTINGS.FOG_OF_WAR_CONFIG, SETTINGS.FOG_OF_WAR_START_DATE, SETTINGS.FOG_OF_WAR_REVEAL_INTERMEDIATE, SETTINGS.FOG_OF_WAR_NAV_MODE],
     'cinematic-behavior': [SETTINGS.CINEMATIC_ENABLED, SETTINGS.CINEMATIC_THRESHOLD, SETTINGS.CINEMATIC_THRESHOLD_UNIT, SETTINGS.CINEMATIC_ON_REST],
-    'cinematic-animation': [SETTINGS.CINEMATIC_PANEL_DURATION],
+    'cinematic-animation': [SETTINGS.CINEMATIC_PANEL_DURATION, SETTINGS.CINEMATIC_END_HOLD],
     'cinematic-content': [SETTINGS.CINEMATIC_SHOW_WEATHER, SETTINGS.CINEMATIC_SHOW_MOONS, SETTINGS.CINEMATIC_SHOW_EVENTS, SETTINGS.CINEMATIC_EVENT_WEIGHTING, SETTINGS.CINEMATIC_EVENT_MAX_CARDS]
   };
 
@@ -1459,6 +1460,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     context.cinematicEnabled = game.settings.get(MODULE.ID, SETTINGS.CINEMATIC_ENABLED);
     context.cinematicThreshold = game.settings.get(MODULE.ID, SETTINGS.CINEMATIC_THRESHOLD);
     context.cinematicPanelDuration = game.settings.get(MODULE.ID, SETTINGS.CINEMATIC_PANEL_DURATION);
+    context.cinematicEndHold = game.settings.get(MODULE.ID, SETTINGS.CINEMATIC_END_HOLD);
     context.cinematicShowWeather = game.settings.get(MODULE.ID, SETTINGS.CINEMATIC_SHOW_WEATHER);
     context.cinematicShowMoons = game.settings.get(MODULE.ID, SETTINGS.CINEMATIC_SHOW_MOONS);
     context.cinematicShowEvents = game.settings.get(MODULE.ID, SETTINGS.CINEMATIC_SHOW_EVENTS);
@@ -2094,6 +2096,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('cinematicThreshold' in data) await SettingsPanel.#set(SETTINGS.CINEMATIC_THRESHOLD, Math.max(1, parseInt(data.cinematicThreshold) || 1));
     if ('cinematicThresholdUnit' in data) await SettingsPanel.#set(SETTINGS.CINEMATIC_THRESHOLD_UNIT, data.cinematicThresholdUnit);
     if ('cinematicPanelDuration' in data) await SettingsPanel.#set(SETTINGS.CINEMATIC_PANEL_DURATION, Math.max(1000, Math.min(6000, parseInt(data.cinematicPanelDuration) || 3000)));
+    if ('cinematicEndHold' in data) await SettingsPanel.#set(SETTINGS.CINEMATIC_END_HOLD, Math.max(0, Math.min(5000, parseInt(data.cinematicEndHold) || 0)));
     if ('cinematicShowWeather' in data) await SettingsPanel.#set(SETTINGS.CINEMATIC_SHOW_WEATHER, !!data.cinematicShowWeather);
     if ('cinematicShowMoons' in data) await SettingsPanel.#set(SETTINGS.CINEMATIC_SHOW_MOONS, !!data.cinematicShowMoons);
     if ('cinematicShowEvents' in data) await SettingsPanel.#set(SETTINGS.CINEMATIC_SHOW_EVENTS, !!data.cinematicShowEvents);
@@ -2935,16 +2938,16 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       }
     }
     if (partId === 'cinematics') {
-      const rangeInput = htmlElement.querySelector('input[name="cinematicPanelDuration"]');
-      const rangeGroup = rangeInput?.closest('.form-group');
-      const numberInput = rangeGroup?.querySelector('.range-value');
-      if (rangeInput && numberInput) {
+      for (const name of ['cinematicPanelDuration', 'cinematicEndHold']) {
+        const rangeInput = htmlElement.querySelector(`input[name="${name}"]`);
+        const numberInput = rangeInput?.closest('.form-group')?.querySelector('.range-value');
+        if (!rangeInput || !numberInput) continue;
         rangeInput.addEventListener('input', (e) => {
           numberInput.value = e.target.value;
         });
         numberInput.addEventListener('input', (e) => {
-          const val = Math.max(100, Math.min(5000, parseInt(e.target.value) || 300));
-          rangeInput.value = val;
+          const min = Number(rangeInput.min);
+          rangeInput.value = Math.max(min, Math.min(Number(rangeInput.max), parseInt(e.target.value) || min));
           rangeInput.dispatchEvent(new Event('input', { bubbles: true }));
         });
       }
