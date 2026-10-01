@@ -1,0 +1,143 @@
+/* WFRP 4e styles every dark-theme application from the system layer. The modules layer outranks it, so these restore core values at minimal specificity and Calendaria's own rules still win. */
+:where(body.system-wfrp4e .calendaria).application {
+  background: var(--background);
+}
+
+:where(body.system-wfrp4e .calendaria.application) {
+  > .window-header {
+    border-image: none;
+    font-size: var(--font-size-13);
+    font-family: inherit;
+
+    > button {
+      color: var(--button-text-color);
+
+      &:hover {
+        color: var(--button-hover-text-color);
+        background: var(--button-hover-background-color);
+      }
+    }
+
+    > * i {
+      opacity: 1;
+    }
+
+    button.header-control {
+      --button-size: 1.5rem;
+
+      background-image: none;
+    }
+  }
+
+  .window-content {
+    padding: var(--spacer-16);
+    border: none;
+    border-image: none;
+    box-shadow: none;
+  }
+
+  input[type='search'] {
+    border: 0.0625rem solid var(--input-border-color);
+    border-image: none;
+    outline: 0.0625rem solid transparent;
+    color: var(--input-text-color);
+    background: var(--input-background-color);
+    box-shadow: var(--input-box-shadow);
+
+    &:focus {
+      outline: 0.125rem solid var(--input-focus-outline-color);
+    }
+
+    &::placeholder {
+      color: var(--input-placeholder-color);
+    }
+  }
+
+  nav.sheet-tabs {
+    border-top: 0.0625rem solid var(--color-tabs-border);
+    border-bottom: 0.0625rem solid var(--color-tabs-border);
+
+    &.top-tabs {
+      border-top: none;
+    }
+
+    > a {
+      padding: 0;
+      border: none;
+      color: var(--color-text-secondary);
+      line-height: inherit;
+      background: none;
+
+      &:hover {
+        color: var(--color-text-primary);
+      }
+
+      &.active {
+        color: var(--color-text-emphatic);
+      }
+    }
+  }
+
+  .form-footer button {
+    border: 0.0625rem solid var(--button-border-color);
+    border-image: none;
+    color: var(--button-text-color);
+    background: var(--button-background-color);
+    box-shadow: none;
+
+    &:hover {
+      border-color: var(--button-hover-border-color);
+      color: var(--button-hover-text-color);
+      background: var(--button-hover-background-color);
+    }
+
+    &:focus {
+      outline: 0.0625rem solid var(--button-focus-outline-color);
+      box-shadow: 0 0 0.25rem var(--button-focus-outline-color);
+    }
+  }
+}
+
+:where(body.system-wfrp4e .calendaria.application.standard-form) .window-content {
+  margin-top: 0;
+
+  :is(input[type='text'], input[type='number'], input[type='password'], input[type='date'], input[type='time'], input[type='datetime-local'], input[type='search'], input[type='file'], select) {
+    height: var(--input-height);
+    border: 0.0625rem solid var(--input-border-color);
+    border-radius: 0.25rem;
+    outline: 0.0625rem solid transparent;
+    color: var(--input-text-color);
+    line-height: var(--input-height);
+    background: var(--input-background-color);
+    box-shadow: var(--input-box-shadow);
+
+    &:focus {
+      outline: 0.125rem solid var(--input-focus-outline-color);
+    }
+  }
+
+  :is(formula-input, .input-group) > input {
+    border: none;
+  }
+
+  input[type='radio'] {
+    outline: none;
+    line-height: normal;
+    box-shadow: none;
+  }
+
+  input[type='range'] {
+    height: var(--input-height);
+    border: none;
+    border-radius: 0.25rem;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  input[type='color'] {
+    height: 1.25rem;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+  }
+}

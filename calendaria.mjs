@@ -47,6 +47,7 @@ import './styles/scene-config.css';
 import './styles/secondary-calendar.css';
 import './styles/settings.css';
 import './styles/sun-dial.css';
+import './styles/system-compat.css';
 import './styles/theme.css';
 import './styles/time-keeper.css';
 import './styles/tooltips.css';
