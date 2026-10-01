@@ -123,6 +123,8 @@ jobs:
       # Release to Foundry Package API (free modules only; premium uploads stay manual)
       - name: Release Foundry Package
         if: env.PREMIUM != 'true'
+        env:
+          FOUNDRY_API_TOKEN: ${{ secrets.FOUNDRY_API_TOKEN }}
         run: |
           jq -n \
             --arg id "${{ env.MODULE_ID }}" \
@@ -151,7 +153,7 @@ jobs:
 
           curl -sS --fail-with-body -X POST "https://foundryvtt.com/_api/packages/release_version/" \
             -H "Content-Type: application/json" \
-            -H "Authorization: ${{ secrets.FOUNDRY_API_TOKEN }}" \
+            -H "Authorization: $FOUNDRY_API_TOKEN" \
             -d @payload.json
 
       # Post the release card to Discord (Components v2, same shape as Mork/utils/premium-post.mjs)
