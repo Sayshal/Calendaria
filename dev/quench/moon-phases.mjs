@@ -80,6 +80,35 @@ export function registerMoonPhases(quench) {
           const changed = phaseBefore.name !== phaseAfter.name;
           assert.ok(changed, 'Moon phase should change after 15 days');
         });
+        it('reset anchors keep the cycle aligned when yearZero is not 0', function () {
+          const cal = api.getActiveCalendar();
+          if (!cal) {
+            this.skip();
+            return;
+          }
+          const data = cal.toObject();
+          data.years.yearZero = 1;
+          const year = 5;
+          const prevYearDays = cal.getDaysInYear(year - 1);
+          const cycleLength = prevYearDays % 28 === 0 ? 29 : 28;
+          const phases = ['Full', 'Waning', 'New', 'Waxing'].map((name, i) => [`p${i}`, { name, start: i / 4, end: (i + 1) / 4 }]);
+          data.moons = {
+            test: {
+              name: 'Test Moon',
+              cycleLength,
+              phaseMode: 'fixed',
+              referenceDate: { year: 1, month: 0, dayOfMonth: 0 },
+              phases: Object.fromEntries(phases),
+              anchorPhases: { a0: { year: null, month: 0, dayOfMonth: 0, phaseIndex: 0, resetCycle: true } }
+            }
+          };
+          const testCal = new cal.constructor(data);
+          const lastDay = Math.min(cal.monthsArray[0].days, cycleLength) - 1;
+          for (let day = 1; day <= lastDay; day++) {
+            const phase = testCal.getMoonPhase(0, { year, month: 0, dayOfMonth: day, hour: 0, minute: 0, second: 0 });
+            assert.strictEqual(phase.dayInCycle, day, `Day ${day} after the anchor should be day ${day} of the cycle`);
+          }
+        });
       });
     },
     { displayName: 'Calendaria: Moon Phases' }

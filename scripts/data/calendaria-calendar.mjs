@@ -1328,7 +1328,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       const calibrationAnchor = this.#findMostRecentResetAnchor(moon, dateComp, currentDays, yearZero) ?? this.#findSoftAnchor(moon);
       if (calibrationAnchor) {
         const anchorInternalYear = calibrationAnchor.year != null ? calibrationAnchor.year - yearZero : dateComp.year;
-        const anchorDays = this._componentsToDays({ year: anchorInternalYear, month: calibrationAnchor.month, dayOfMonth: calibrationAnchor.dayOfMonth });
+        const anchorDays = calibrationAnchor.anchorDays ?? this._componentsToDays({ year: anchorInternalYear, month: calibrationAnchor.month, dayOfMonth: calibrationAnchor.dayOfMonth });
         const daysSinceAnchor = currentDays - anchorDays;
         const anchorPhase = phases[calibrationAnchor.phaseIndex] ?? phases[0];
         const anchorPhaseStart = anchorPhase?.start ?? (calibrationAnchor.phaseIndex ?? 0) / Math.max(1, phases.length);
@@ -1411,7 +1411,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    * @param {object} dateComp - Current date {year, month, dayOfMonth}
    * @param {number} currentDays - Current absolute day number
    * @param {number} [yearZero] - Calendar yearZero offset, used to convert anchor display-year to internal-year
-   * @returns {object|null} The most recent reset anchor or null
+   * @returns {object|null} The most recent reset anchor with its absolute anchorDays, or null
    */
   #findMostRecentResetAnchor(moon, dateComp, currentDays, yearZero = 0) {
     if (!moon.anchorPhases) return null;
@@ -1423,13 +1423,13 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
       const internalYear = anchor.year != null ? anchor.year - yearZero : dateComp.year;
       const anchorDays = this._componentsToDays({ year: internalYear, month: anchor.month, dayOfMonth: anchor.dayOfMonth });
       if (anchorDays <= currentDays && anchorDays > bestDays) {
-        best = { ...anchor, year: internalYear };
+        best = { ...anchor, anchorDays };
         bestDays = anchorDays;
       }
       if (anchor.year == null) {
         const prevYearDays = this._componentsToDays({ year: dateComp.year - 1, month: anchor.month, dayOfMonth: anchor.dayOfMonth });
         if (prevYearDays <= currentDays && prevYearDays > bestDays) {
-          best = { ...anchor, year: dateComp.year - 1 };
+          best = { ...anchor, anchorDays: prevYearDays };
           bestDays = prevYearDays;
         }
       }
