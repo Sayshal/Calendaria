@@ -173,7 +173,8 @@ export function calculateTimeOfDayColor(currentHour, hoursPerDay, sunrise = null
   const night = { hue: colorShift?.nightHue ?? 220, intensity: 0.12, luminosity: 0 };
   const transitionMinutes = colorShift?.transitionMinutes ?? 60;
   const transitionHours = transitionMinutes / minutesPerHour;
-  const blend = (a, b, t) => ({ hue: lerpHue(a.hue, b.hue, t), intensity: lerp(a.intensity, b.intensity, t), luminosity: lerp(a.luminosity, b.luminosity, t) });
+  const blendHue = (a, b, t) => (a.intensity === 0 ? b.hue : b.intensity === 0 ? a.hue : lerpHue(a.hue, b.hue, t));
+  const blend = (a, b, t) => ({ hue: blendHue(a, b, t), intensity: lerp(a.intensity, b.intensity, t), luminosity: lerp(a.luminosity, b.luminosity, t) });
   if (sunrise == null || sunset == null) {
     const mid = hoursPerDay / 2;
     const quarter = hoursPerDay / 4;
@@ -218,6 +219,24 @@ function lerpHue(a, b, t) {
 }
 
 /**
+ * Blend two hues as intensity-weighted vectors so a faint hue barely shifts a strong one.
+ * @param {number} hueA - First hue (0-360)
+ * @param {number} intensityA - First hue's intensity
+ * @param {number} hueB - Second hue (0-360)
+ * @param {number} intensityB - Second hue's intensity
+ * @param {number} t - Weight toward the second hue (0-1)
+ * @returns {number} Blended hue (0-360)
+ */
+function blendHueByIntensity(hueA, intensityA, hueB, intensityB, t) {
+  const toRad = Math.PI / 180;
+  const weightA = (1 - t) * intensityA;
+  const weightB = t * intensityB;
+  const x = weightA * Math.cos(hueA * toRad) + weightB * Math.cos(hueB * toRad);
+  const y = weightA * Math.sin(hueA * toRad) + weightB * Math.sin(hueB * toRad);
+  return (((Math.atan2(y, x) / toRad) % 360) + 360) % 360;
+}
+
+/**
  * Calculate environment lighting overrides from time-of-day, climate zone, and weather.
  * @param {object} [scene] - The scene to check for climate zone override
  * @returns {{base: {hue: number|null, intensity: number|null, saturation: number|null, luminosity: number|null, shadows: number|null}, dark: {hue: number|null, intensity: number|null, saturation: number|null, luminosity: number|null, shadows: number|null}}|null} - environment config
@@ -257,11 +276,9 @@ function calculateEnvironmentLighting(scene) {
   }
   const applyOverrides = (target, source, hueBlend = 1) => {
     if (!source) return;
-    if (source.hue != null) {
-      if (hueBlend < 1 && target.hue != null) target.hue = lerpHue(target.hue, source.hue, hueBlend);
-      else target.hue = source.hue;
-    }
-    if (source.saturation != null) target.intensity = source.saturation;
+    const blending = hueBlend < 1 && target.hue != null && target.intensity > 0;
+    if (source.hue != null) target.hue = blending ? blendHueByIntensity(target.hue, target.intensity, source.hue, source.saturation ?? target.intensity, hueBlend) : source.hue;
+    if (source.saturation != null) target.intensity = blending ? lerp(target.intensity, source.saturation, hueBlend) : source.saturation;
     if (source.colorSaturation != null) target.saturation = source.colorSaturation;
     if (source.luminosity != null) target.luminosity = source.luminosity;
     if (source.shadows != null) target.shadows = source.shadows;
@@ -270,7 +287,7 @@ function calculateEnvironmentLighting(scene) {
   applyOverrides(base, activeZone?.environmentBase);
   applyOverrides(dark, activeZone?.environmentDark);
   applyOverrides(base, currentWeather?.environmentBase, weatherHueBlend);
-  applyOverrides(dark, currentWeather?.environmentDark, weatherHueBlend);
+  applyOverrides(dark, currentWeather?.environmentDark ?? currentWeather?.environmentBase, weatherHueBlend);
   let cycle = null;
   if (activeZone?.environmentCycle != null) cycle = activeZone.environmentCycle;
   if (currentWeather?.environmentCycle != null) cycle = currentWeather.environmentCycle;
