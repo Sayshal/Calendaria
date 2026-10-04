@@ -8,7 +8,7 @@ export function patchTooltipActivate() {
   const t = game.tooltip;
   const o = t.activate.bind(t);
   t.activate = function (element, options = {}) {
-    if (!options.text && !options.html && element?.ariaLabel && element?.dataset?.tooltip === '') options.text = element.ariaLabel;
+    if (!options.text && !options.html && element?.ariaLabel && element?.dataset?.tooltip === '' && element.closest('.calendaria')) options.html = element.ariaLabel;
     return o(element, options);
   };
 }
