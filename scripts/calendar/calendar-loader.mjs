@@ -18,6 +18,7 @@ export const BUNDLED_CALENDARS = [
   'harptos',
   'hijri',
   'imperial-warhammer',
+  'intergalactic-astramark',
   'krynn-elven',
   'krynn-solamnia',
   'renescara',

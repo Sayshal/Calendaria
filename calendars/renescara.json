@@ -965,19 +965,19 @@
     "firstage00000000": {
       "name": "First Age",
       "abbreviation": "FA",
-      "startYear": -2000,
-      "endYear": -500
+      "startYear": -1264,
+      "endYear": 1236
     },
     "darkcenturies000": {
       "name": "Dark Centuries",
       "abbreviation": "DC",
-      "startYear": -500,
-      "endYear": 0
+      "startYear": 1236,
+      "endYear": 1489
     },
     "secondage0000000": {
       "name": "Second Age",
       "abbreviation": "SA",
-      "startYear": 1,
+      "startYear": 1489,
       "endYear": null
     }
   },

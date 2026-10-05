@@ -1,0 +1,225 @@
+{
+  "id": "intergalactic-astramark",
+  "name": "CALENDARIA.Calendar.IntergalacticAstramark.Name",
+  "years": {
+    "yearZero": 47544,
+    "firstWeekday": 0,
+    "leapYear": null
+  },
+  "epochDayOffset": 149,
+  "months": {
+    "values": {
+      "primus0000000000": {
+        "name": "Primus",
+        "abbreviation": "Pri",
+        "ordinal": 1,
+        "days": 30
+      },
+      "stellaris0000000": {
+        "name": "Stellaris",
+        "abbreviation": "Ste",
+        "ordinal": 2,
+        "days": 30
+      },
+      "florens000000000": {
+        "name": "Florens",
+        "abbreviation": "Flo",
+        "ordinal": 3,
+        "days": 30
+      },
+      "solara0000000000": {
+        "name": "Solara",
+        "abbreviation": "Sol",
+        "ordinal": 4,
+        "days": 30
+      },
+      "crescens00000000": {
+        "name": "Crescens",
+        "abbreviation": "Cre",
+        "ordinal": 5,
+        "days": 30
+      },
+      "apex000000000000": {
+        "name": "Apex",
+        "abbreviation": "Ape",
+        "ordinal": 6,
+        "days": 30
+      },
+      "harvest000000000": {
+        "name": "Harvest",
+        "abbreviation": "Har",
+        "ordinal": 7,
+        "days": 30
+      },
+      "autumnis00000000": {
+        "name": "Autumnis",
+        "abbreviation": "Aut",
+        "ordinal": 8,
+        "days": 30
+      },
+      "twilight00000000": {
+        "name": "Twilight",
+        "abbreviation": "Twi",
+        "ordinal": 9,
+        "days": 30
+      },
+      "hibernus00000000": {
+        "name": "Hibernus",
+        "abbreviation": "Hib",
+        "ordinal": 10,
+        "days": 30
+      },
+      "darkening0000000": {
+        "name": "Darkening",
+        "abbreviation": "Dar",
+        "ordinal": 11,
+        "days": 30
+      },
+      "renewal000000000": {
+        "name": "Renewal",
+        "abbreviation": "Ren",
+        "ordinal": 12,
+        "days": 30
+      }
+    }
+  },
+  "days": {
+    "values": {
+      "firstday00000000": {
+        "name": "First Day",
+        "ordinal": 1,
+        "abbreviation": "D1"
+      },
+      "secondday0000000": {
+        "name": "Second Day",
+        "ordinal": 2,
+        "abbreviation": "D2"
+      },
+      "thirdday00000000": {
+        "name": "Third Day",
+        "ordinal": 3,
+        "abbreviation": "D3"
+      },
+      "fourthday0000000": {
+        "name": "Fourth Day",
+        "ordinal": 4,
+        "abbreviation": "D4"
+      },
+      "fifthday00000000": {
+        "name": "Fifth Day",
+        "ordinal": 5,
+        "abbreviation": "D5"
+      },
+      "sixthday00000000": {
+        "name": "Sixth Day",
+        "ordinal": 6,
+        "abbreviation": "D6"
+      },
+      "seventhday000000": {
+        "name": "Seventh Day",
+        "ordinal": 7,
+        "abbreviation": "D7"
+      },
+      "eighthday0000000": {
+        "name": "Eighth Day",
+        "ordinal": 8,
+        "abbreviation": "D8"
+      },
+      "ninthday00000000": {
+        "name": "Ninth Day",
+        "ordinal": 9,
+        "abbreviation": "D9"
+      },
+      "tenthday00000000": {
+        "name": "Tenth Day",
+        "ordinal": 10,
+        "abbreviation": "D10"
+      }
+    },
+    "daysPerYear": 360,
+    "hoursPerDay": 24,
+    "minutesPerHour": 60,
+    "secondsPerMinute": 60
+  },
+  "festivals": {},
+  "moons": {},
+  "seasons": {
+    "values": {}
+  },
+  "daylight": {
+    "enabled": false
+  },
+  "eras": {
+    "beforetheastrama": {
+      "name": "Before the Astramark",
+      "abbreviation": "BA",
+      "startYear": -999999,
+      "endYear": 0
+    },
+    "longsilence00000": {
+      "name": "The Long Silence",
+      "abbreviation": "LS",
+      "startYear": 1,
+      "endYear": 37347
+    },
+    "kindling00000000": {
+      "name": "The Kindling",
+      "abbreviation": "KI",
+      "startYear": 37347,
+      "endYear": 42347
+    },
+    "thresholdage0000": {
+      "name": "The Threshold Age",
+      "abbreviation": "TA",
+      "startYear": 42347,
+      "endYear": 46347
+    },
+    "firstcollapsepre": {
+      "name": "The First Collapse & Preservation Era",
+      "abbreviation": "FC",
+      "startYear": 46347,
+      "endYear": 46847
+    },
+    "goldenage0000000": {
+      "name": "The Golden Age",
+      "abbreviation": "GA",
+      "startYear": 46847,
+      "endYear": 50347
+    },
+    "longwatch0000000": {
+      "name": "The Long Watch",
+      "abbreviation": "LW",
+      "startYear": 50347,
+      "endYear": null
+    }
+  },
+  "canonicalHours": {},
+  "amPmNotation": {
+    "am": "Ante Meridiem",
+    "pm": "Post Meridiem",
+    "amAbbr": "AM",
+    "pmAbbr": "PM"
+  },
+  "cycles": {},
+  "weeks": {
+    "enabled": true,
+    "type": "month-based",
+    "names": {}
+  },
+  "dateFormats": {
+    "short": "D MMM",
+    "long": "Do MMMM, Y [IA]",
+    "full": "EEEE, Do MMMM, Y [IA]",
+    "time": "HH:mm",
+    "time12": "h:mm a",
+    "weekHeader": "[Cycle] W [of] MMMM, Y",
+    "yearHeader": "Y [IA]",
+    "yearLabel": "Y G"
+  },
+  "metadata": {
+    "id": "intergalactic-astramark",
+    "description": "CALENDARIA.Calendar.IntergalacticAstramark.Description",
+    "author": "calendaria",
+    "system": "Trisurus"
+  }
+}
