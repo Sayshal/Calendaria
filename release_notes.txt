@@ -1,15 +1,16 @@
 ## New Features
 
-- End Hold world setting on the Cinematics tab keeps the final date on screen before the cinematic closes
+- Added the Intergalactic Astramark bundled calendar with 12 months of 30 days, 10-day weeks and its canon eras; its dates line up with Renescara when both calendars read the same world time
 
 ## Bug Fixes
 
-- Calendaria windows under the WFRP 4e system with the dark theme no longer pick up WFRP styling; headers, content padding, inputs, tabs and footer buttons use core Foundry styling
-- Cinematic sky settles toward night when days pass too fast for a readable day-night cycle, instead of flashing between day and night
-- Cinematic slider number inputs clamp to their own slider range; Panel Duration no longer clamps to 100-5000
-- Discord links in the settings footer and Module tab point to a working server invite
-- Moon phases no longer drift on calendars with a non-zero year zero that use cycle-reset anchors
+- Calendaria aria-label tooltip fallback now applies only inside Calendaria apps; other modules' tooltips use core handling again
+- Calendaria tooltips with HTML in their aria-label now render the markup instead of showing it as raw text
+- Daytime scene lighting no longer drifts toward red as the dawn and dusk tint fades around midday
+- Weather ambience below full intensity now blends its hue with the time-of-day and climate zone hue weighted by each color's intensity; a faint hue no longer pulls a strong one off color
+- Weather ambience below full intensity now blends lighting intensity instead of replacing it
+- Weather presets with only base ambience settings now also apply them to darkness lighting
 
 ## Changes
 
-- Cinematic time skip playback eases in and out, starting and ending slowly
+- Renescara era start and end years now match its canon Reckoning years

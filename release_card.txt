@@ -1,7 +1,7 @@
 ## New Features
 
-- New End Hold setting keeps the final date on screen before a cinematic closes
+- New Intergalactic Astramark bundled calendar lines up with Renescara on the same world time
 
 ## Bug Fixes
 
-- 5 bugs squashed
+- 6 bugs squashed
