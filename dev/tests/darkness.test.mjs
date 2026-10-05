@@ -117,10 +117,11 @@ describe('calculateTimeOfDayColor()', () => {
     const result = calculateTimeOfDayColor(0, 24, 6, 18, colorShift);
     expect(result.hue).toBe(180);
   });
-  it('blends dawn to midday between sunrise and mid', () => {
+  it('holds dawn hue while fading intensity toward midday', () => {
     const result = calculateTimeOfDayColor(9, 24, 6, 18);
-    expect(result.hue).toBeLessThan(30);
-    expect(result.hue).toBeGreaterThanOrEqual(0);
+    expect(result.hue).toBe(30);
+    expect(result.intensity).toBeGreaterThan(0);
+    expect(result.intensity).toBeLessThan(0.15);
   });
   it('returns valid hue/intensity/luminosity structure', () => {
     const result = calculateTimeOfDayColor(12, 24, 6, 18);
