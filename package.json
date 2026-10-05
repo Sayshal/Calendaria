@@ -35,7 +35,7 @@
   "devDependencies": {
     "@eslint/js": "^9.13.0",
     "@rollup/plugin-terser": "^1.0.0",
-    "@vitest/coverage-v8": "^4.1.8",
+    "@vitest/coverage-v8": "^5.0.3",
     "eslint": "^9.27.0",
     "eslint-plugin-jsdoc": "^50.8.0",
     "globals": "^15.15.0",
