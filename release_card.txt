@@ -1,7 +1,3 @@
-## New Features
-
-- New Intergalactic Astramark bundled calendar lines up with Renescara on the same world time
-
 ## Bug Fixes
 
-- 6 bugs squashed
+- 3 bugs squashed

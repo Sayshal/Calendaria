@@ -1,16 +1,5 @@
-## New Features
-
-- Added the Intergalactic Astramark bundled calendar with 12 months of 30 days, 10-day weeks and its canon eras; its dates line up with Renescara when both calendars read the same world time
-
 ## Bug Fixes
 
-- Calendaria aria-label tooltip fallback now applies only inside Calendaria apps; other modules' tooltips use core handling again
-- Calendaria tooltips with HTML in their aria-label now render the markup instead of showing it as raw text
-- Daytime scene lighting no longer drifts toward red as the dawn and dusk tint fades around midday
-- Weather ambience below full intensity now blends its hue with the time-of-day and climate zone hue weighted by each color's intensity; a faint hue no longer pulls a strong one off color
-- Weather ambience below full intensity now blends lighting intensity instead of replacing it
-- Weather presets with only base ambience settings now also apply them to darkness lighting
-
-## Changes
-
-- Renescara era start and end years now match its canon Reckoning years
+- Simple Calendar import: intercalary months now import as real months instead of festivals, and leap-only months no longer fail validation; notes on intercalary days keep their actual dates
+- Simple Calendar import: seasons now anchor on SC month and day, and leap year rules keep SC's starting year
+- Simple Calendar live import: current date now keeps the day of month and time of day, and accounts for leap years and intercalary months
