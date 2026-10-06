@@ -9,6 +9,63 @@ import BaseImporter from './base-importer.mjs';
 const SC_MODULE_IDS = ['foundryvtt-simple-calendar', 'foundryvtt-simple-calendar-reborn'];
 
 /**
+ * Test a display year against an SC leap year rule, matching the imported leap year config.
+ * @param {object} leapYear - SC leap year config
+ * @param {number} year - Display year (yearZero applied)
+ * @returns {boolean} True if the year is a leap year
+ */
+function isScLeapYear(leapYear = {}, year) {
+  const offsetYear = year - (leapYear.startingYear ?? 0);
+  if (leapYear.rule === 'gregorian') return offsetYear % 4 === 0 && (offsetYear % 100 !== 0 || offsetYear % 400 === 0);
+  if (leapYear.rule === 'custom' && leapYear.customMod > 0) return offsetYear % leapYear.customMod === 0;
+  return false;
+}
+
+/**
+ * Convert worldTime to an SC-style date using SC calendar data, walking leap years and intercalary months.
+ * @param {number} worldTime - Raw world time in seconds
+ * @param {object} calendar - SC calendar data
+ * @returns {{year: number, month: number, day: number, hour: number, minute: number, seconds: number}} Internal year, SC month index, 0-based day and time of day
+ */
+function scWorldTimeToDate(worldTime, calendar) {
+  const minutesPerHour = calendar.time?.minutesInHour ?? 60;
+  const secondsPerMinute = calendar.time?.secondsInMinute ?? 60;
+  const secondsPerHour = minutesPerHour * secondsPerMinute;
+  const secondsPerDay = (calendar.time?.hoursInDay ?? 24) * secondsPerHour;
+  const timeOfDay = ((worldTime % secondsPerDay) + secondsPerDay) % secondsPerDay;
+  const time = { hour: Math.floor(timeOfDay / secondsPerHour), minute: Math.floor((timeOfDay % secondsPerHour) / secondsPerMinute), seconds: timeOfDay };
+  const months = calendar.months || [];
+  const yearZero = calendar.year?.yearZero ?? 0;
+  const monthLength = (month, isLeap) => (isLeap ? (month.numberOfLeapYearDays ?? month.numberOfDays) : month.numberOfDays) || 0;
+  const daysInYear = (year) => {
+    const isLeap = isScLeapYear(calendar.leapYear, yearZero + year);
+    return months.reduce((sum, m) => sum + monthLength(m, isLeap), 0);
+  };
+  if (months.reduce((sum, m) => sum + monthLength(m, false), 0) <= 0) return { year: 0, month: 0, day: 0, ...time };
+  let year = 0;
+  let remaining = Math.floor(worldTime / secondsPerDay);
+  while (remaining < 0) {
+    year--;
+    remaining += daysInYear(year);
+  }
+  while (remaining >= daysInYear(year)) {
+    remaining -= daysInYear(year);
+    year++;
+  }
+  const isLeap = isScLeapYear(calendar.leapYear, yearZero + year);
+  let month = 0;
+  for (let i = 0; i < months.length; i++) {
+    const monthDays = monthLength(months[i], isLeap);
+    if (remaining < monthDays) {
+      month = i;
+      break;
+    }
+    remaining -= monthDays;
+  }
+  return { year, month, day: remaining, ...time };
+}
+
+/**
  * Importer for Simple Calendar module data.
  * @extends BaseImporter
  */
@@ -87,8 +144,7 @@ export default class SimpleCalendarImporter extends BaseImporter {
       }
     }
     this.#scNoteCategories = this.#extractNoteCategories(calendars);
-    const worldTime = game.time.worldTime;
-    const currentDate = this.#worldTimeToDate(worldTime, calendars[0]);
+    const currentDate = scWorldTimeToDate(game.time.worldTime, calendars[0]);
     return { calendars, notes, currentDate, exportVersion: 2 };
   }
 
@@ -114,104 +170,13 @@ export default class SimpleCalendarImporter extends BaseImporter {
     const calendar = Array.isArray(calendars) ? calendars[calendarIndex] : calendars;
     const sourceCd = data.currentDate || calendar?.currentDate;
     if (!sourceCd) return null;
-    const monthMap = this.#buildMonthMap(calendar?.months);
-    const remapped = this.#remapMonthDay(sourceCd.month ?? 0, sourceCd.day ?? 0, monthMap);
-    if (data.currentDate && !calendar?.time) return { year: sourceCd.year, month: remapped.month, dayOfMonth: remapped.dayOfMonth, hour: sourceCd.hour ?? 0, minute: sourceCd.minute ?? 0 };
+    const month = sourceCd.month ?? 0;
+    const dayOfMonth = sourceCd.day ?? 0;
+    if (data.currentDate && !calendar?.time) return { year: sourceCd.year, month, dayOfMonth, hour: sourceCd.hour ?? 0, minute: sourceCd.minute ?? 0 };
     const secondsPerHour = (calendar?.time?.minutesInHour ?? 60) * (calendar?.time?.secondsInMinute ?? 60);
     const hour = Math.floor((sourceCd.seconds ?? 0) / secondsPerHour);
     const minute = Math.floor(((sourceCd.seconds ?? 0) % secondsPerHour) / (calendar?.time?.secondsInMinute ?? 60));
-    return { year: sourceCd.year, month: remapped.month, dayOfMonth: remapped.dayOfMonth, hour, minute };
-  }
-
-  /**
-   * Build a remap from SC month index (incl. intercalaries) to Calendaria month index (regular only).
-   * @param {object[]} scMonths - Source SC months array
-   * @returns {{regularIndex: Map<number, number>, lastRegularBefore: Map<number, number>, lastRegularDays: Map<number, number>, intercalary: Set<number>, regularCount: number}} Index maps and intercalary set
-   * @private
-   */
-  #buildMonthMap(scMonths = []) {
-    const regularIndex = new Map();
-    const lastRegularBefore = new Map();
-    const lastRegularDays = new Map();
-    const intercalary = new Set();
-    let regIdx = 0;
-    let lastReg = 0;
-    let lastRegDays = 0;
-    let hasSeenRegular = false;
-    for (let i = 0; i < scMonths.length; i++) {
-      if (scMonths[i]?.intercalary) {
-        intercalary.add(i);
-        lastRegularBefore.set(i, hasSeenRegular ? lastReg : 0);
-        lastRegularDays.set(i, lastRegDays);
-      } else {
-        regularIndex.set(i, regIdx);
-        lastReg = regIdx;
-        lastRegDays = scMonths[i]?.numberOfDays || 0;
-        hasSeenRegular = true;
-        regIdx++;
-      }
-    }
-    return { regularIndex, lastRegularBefore, lastRegularDays, intercalary, regularCount: regIdx };
-  }
-
-  /**
-   * Remap an SC (month, day) pair to a Calendaria (month, dayOfMonth) pair.
-   * @param {number} scMonth - Source month index
-   * @param {number} scDay - Source day index (0-based)
-   * @param {object} monthMap - From {@link #buildMonthMap}
-   * @returns {{month: number, dayOfMonth: number, wasIntercalary: boolean}} Remapped position and origin flag
-   * @private
-   */
-  #remapMonthDay(scMonth, scDay, monthMap) {
-    if (monthMap.intercalary.has(scMonth)) {
-      const month = monthMap.lastRegularBefore.get(scMonth) ?? 0;
-      const lastDays = monthMap.lastRegularDays.get(scMonth) ?? 0;
-      const dayOfMonth = lastDays > 0 ? lastDays - 1 : 0;
-      return { month, dayOfMonth, wasIntercalary: true };
-    }
-    if (monthMap.regularIndex.has(scMonth)) return { month: monthMap.regularIndex.get(scMonth), dayOfMonth: scDay, wasIntercalary: false };
-    const fallback = monthMap.regularCount > 0 ? monthMap.regularCount - 1 : 0;
-    ATLAS.log(2, `Simple Calendar import: SC month ${scMonth} out of bounds (regularCount=${monthMap.regularCount}); clamped to ${fallback}`);
-    return { month: fallback, dayOfMonth: scDay, wasIntercalary: false };
-  }
-
-  /**
-   * Convert worldTime to date components using SC calendar data.
-   * @param {number} worldTime - Raw world time in seconds
-   * @param {object} calendar - SC calendar data
-   * @returns {{year: number, month: number, dayOfMonth: number, hour: number, minute: number}} Date components
-   */
-  #worldTimeToDate(worldTime, calendar) {
-    const hoursPerDay = calendar.time?.hoursInDay ?? 24;
-    const minutesPerHour = calendar.time?.minutesInHour ?? 60;
-    const secondsPerMinute = calendar.time?.secondsInMinute ?? 60;
-    const secondsPerDay = hoursPerDay * minutesPerHour * secondsPerMinute;
-    const months = calendar.months || [];
-    const regularMonths = months.filter((m) => !m.intercalary);
-    const daysPerYear = regularMonths.reduce((sum, m) => sum + (m.numberOfDays || 0), 0);
-    const totalDays = Math.floor(worldTime / secondsPerDay);
-    let year = Math.floor(totalDays / daysPerYear);
-    let dayOfYear = totalDays % daysPerYear;
-    if (totalDays < 0) {
-      year = Math.floor(totalDays / daysPerYear);
-      dayOfYear = ((totalDays % daysPerYear) + daysPerYear) % daysPerYear;
-    }
-    let month = 0;
-    let remainingDays = dayOfYear;
-    for (let i = 0; i < regularMonths.length; i++) {
-      const monthDays = regularMonths[i].numberOfDays || 30;
-      if (remainingDays < monthDays) {
-        month = i;
-        break;
-      }
-      remainingDays -= monthDays;
-      month = i + 1;
-    }
-    const timeOfDay = ((worldTime % secondsPerDay) + secondsPerDay) % secondsPerDay;
-    const secondsPerHour = minutesPerHour * secondsPerMinute;
-    const hour = Math.floor(timeOfDay / secondsPerHour);
-    const minute = Math.floor((timeOfDay % secondsPerHour) / secondsPerMinute);
-    return { year, month, dayOfMonth: remainingDays, hour, minute };
+    return { year: sourceCd.year, month, dayOfMonth, hour, minute };
   }
 
   /**
@@ -233,7 +198,6 @@ export default class SimpleCalendarImporter extends BaseImporter {
     });
     const months = this.#transformMonths(calendar.months, weekdayNumericToIndex);
     const daysPerYear = months.reduce((sum, m) => sum + (m.days || 0), 0);
-    const festivals = this.#extractFestivals(calendar.months);
     const toKeyedObject = (arr) => {
       const out = {};
       for (const item of arr) out[foundry.utils.randomID()] = item;
@@ -247,7 +211,6 @@ export default class SimpleCalendarImporter extends BaseImporter {
       leapYearConfig: this.#transformLeapYearConfig(calendar.leapYear),
       seasons: { values: toKeyedObject(this.#transformSeasons(calendar.seasons, calendar.months)) },
       moons: this.#transformMoons(calendar.moons),
-      festivals,
       eras: this.#transformEras(calendar.year),
       daylight: this.#transformDaylight(calendar.seasons),
       metadata: {
@@ -275,16 +238,20 @@ export default class SimpleCalendarImporter extends BaseImporter {
    * @returns {object[]} Calendaria months array
    */
   #transformMonths(months = [], weekdayNumericToIndex = new Map()) {
-    return months
-      .filter((m) => !m.intercalary)
-      .map((month, index) => ({
+    let lastRegularOrdinal = 1;
+    return months.map((month, index) => {
+      if (!month.intercalary) lastRegularOrdinal = month.numericRepresentation || index + 1;
+      else if (month.intercalaryInclude) ATLAS.log(2, `Simple Calendar import: intercalary month "${month.name}" counts toward weekdays, imported as a regular month`);
+      return {
         name: month.name,
         abbreviation: month.abbreviation || month.name.substring(0, 3),
         days: month.numberOfDays,
         leapDays: month.numberOfLeapYearDays !== month.numberOfDays ? month.numberOfLeapYearDays : undefined,
-        ordinal: month.numericRepresentation || index + 1,
+        ordinal: lastRegularOrdinal,
+        type: month.intercalary && !month.intercalaryInclude ? 'intercalary' : undefined,
         startingWeekday: month.startingWeekday != null ? (weekdayNumericToIndex.get(month.startingWeekday) ?? null) : null
-      }));
+      };
+    });
   }
 
   /**
@@ -320,8 +287,8 @@ export default class SimpleCalendarImporter extends BaseImporter {
    */
   #transformYears(year = {}, leapYear = {}) {
     const result = { yearZero: year.yearZero ?? 0, firstWeekday: year.firstWeekday ?? 0, leapYear: null, names: [] };
-    if (leapYear.rule === 'gregorian') result.leapYear = { leapStart: 0, leapInterval: 4 };
-    else if (leapYear.rule === 'custom' && leapYear.customMod > 0) result.leapYear = { leapStart: 0, leapInterval: leapYear.customMod };
+    if (leapYear.rule === 'gregorian') result.leapYear = { leapStart: leapYear.startingYear ?? 0, leapInterval: 4 };
+    else if (leapYear.rule === 'custom' && leapYear.customMod > 0) result.leapYear = { leapStart: leapYear.startingYear ?? 0, leapInterval: leapYear.customMod };
     if (year.yearNames?.length) {
       const start = year.yearNamesStart ?? 0;
       result.names = year.yearNames.map((name, i) => ({ year: start + i, name }));
@@ -335,55 +302,34 @@ export default class SimpleCalendarImporter extends BaseImporter {
    * @returns {object|null} Calendaria leapYearConfig
    */
   #transformLeapYearConfig(leapYear = {}) {
-    if (leapYear.rule === 'gregorian') return { rule: 'gregorian', start: 0 };
-    else if (leapYear.rule === 'custom' && leapYear.customMod > 0) return { rule: 'simple', interval: leapYear.customMod, start: 0 };
+    if (leapYear.rule === 'gregorian') return { rule: 'gregorian', start: leapYear.startingYear ?? 0 };
+    else if (leapYear.rule === 'custom' && leapYear.customMod > 0) return { rule: 'simple', interval: leapYear.customMod, start: leapYear.startingYear ?? 0 };
     return null;
   }
 
   /**
    * Transform SC seasons to Calendaria format.
    * @param {object[]} seasons - SC seasons array
-   * @param {object[]} scMonths - Original SC months array (for day calculations)
+   * @param {object[]} scMonths - Original SC months array (for month lengths)
    * @returns {object[]} Calendaria seasons array
    */
   #transformSeasons(seasons = [], scMonths = []) {
     if (!seasons.length) return [];
-    const regularMonths = scMonths.filter((m) => !m.intercalary);
-    const monthDayStarts = [];
-    let dayCount = 0;
-    for (const month of regularMonths) {
-      monthDayStarts.push(dayCount);
-      dayCount += month.numberOfDays || 0;
-    }
-    const totalDays = dayCount;
-    const scToRegularIndex = new Map();
-    let regularIdx = 0;
-    for (let i = 0; i < scMonths.length; i++) {
-      if (!scMonths[i].intercalary) {
-        scToRegularIndex.set(i, regularIdx);
-        regularIdx++;
-      }
-    }
-    const sortedSeasons = [...seasons].sort((a, b) => {
-      const aRegIdx = scToRegularIndex.get(a.startingMonth) ?? 0;
-      const bRegIdx = scToRegularIndex.get(b.startingMonth) ?? 0;
-      const aDay = (monthDayStarts[aRegIdx] ?? 0) + (a.startingDay ?? 0);
-      const bDay = (monthDayStarts[bRegIdx] ?? 0) + (b.startingDay ?? 0);
-      return aDay - bDay;
-    });
+    const sortedSeasons = [...seasons].sort((a, b) => (a.startingMonth ?? 0) - (b.startingMonth ?? 0) || (a.startingDay ?? 0) - (b.startingDay ?? 0));
+    const lastMonth = Math.max(scMonths.length - 1, 0);
     return sortedSeasons.map((season, index) => {
-      const regIdx = scToRegularIndex.get(season.startingMonth) ?? 0;
-      const dayStart = (monthDayStarts[regIdx] ?? 0) + (season.startingDay ?? 0);
       const nextSeason = sortedSeasons[(index + 1) % sortedSeasons.length];
-      const nextRegIdx = scToRegularIndex.get(nextSeason.startingMonth) ?? 0;
-      let dayEnd = (monthDayStarts[nextRegIdx] ?? 0) + (nextSeason.startingDay ?? 0) - 1;
-      if (dayEnd < dayStart) dayEnd += totalDays;
-      if (dayEnd < 0) dayEnd = totalDays - 1;
+      const nextMonth = nextSeason.startingMonth ?? 0;
+      const nextDay = nextSeason.startingDay ?? 0;
+      const monthEnd = nextDay > 0 ? nextMonth : nextMonth > 0 ? nextMonth - 1 : lastMonth;
+      const endMonthDays = Math.max(scMonths[monthEnd]?.numberOfDays ?? 0, scMonths[monthEnd]?.numberOfLeapYearDays ?? 0);
       const seasonalType = seasonalTypeFrom(season.icon, season.name);
       return {
         name: season.name,
-        dayStart,
-        dayEnd: dayEnd >= totalDays ? dayEnd - totalDays : dayEnd,
+        monthStart: season.startingMonth ?? 0,
+        dayStart: season.startingDay ?? 0,
+        monthEnd,
+        dayEnd: nextDay > 0 ? nextDay - 1 : Math.max(endMonthDays - 1, 0),
         color: season.color || '',
         icon: SEASON_DEFAULTS[seasonalType]?.icon ?? '',
         seasonalType
@@ -455,37 +401,6 @@ export default class SimpleCalendarImporter extends BaseImporter {
   }
 
   /**
-   * Extract festivals from SC intercalary months.
-   * @param {object[]} months - SC months array
-   * @returns {object[]} Calendaria festivals array
-   */
-  #extractFestivals(months = []) {
-    const festivals = [];
-    let lastRegularMonthIndex = 0;
-    let lastRegularMonthDays = 0;
-    let regularCount = 0;
-    for (const month of months) {
-      if (month.intercalary) {
-        const targetMonth = regularCount > 0 ? lastRegularMonthIndex : 0;
-        const countsForWeekday = month.intercalaryInclude === true;
-        for (let day = 0; day < month.numberOfDays; day++) {
-          festivals.push({
-            name: month.numberOfDays === 1 ? month.name : `${month.name} (Day ${day + 1})`,
-            month: targetMonth,
-            dayOfMonth: regularCount > 0 ? lastRegularMonthDays - 1 : 0,
-            countsForWeekday
-          });
-        }
-      } else {
-        lastRegularMonthIndex = regularCount;
-        lastRegularMonthDays = month.numberOfDays || 30;
-        regularCount++;
-      }
-    }
-    return festivals;
-  }
-
-  /**
    * Transform SC year prefix/postfix into era.
    * @param {object} year - SC year config
    * @returns {object[]} Calendaria eras array
@@ -543,47 +458,27 @@ export default class SimpleCalendarImporter extends BaseImporter {
    */
   async extractNotes(data) {
     const notes = data.notes || {};
-    const calendars = data.calendars || (data.months ? [data] : []);
-    const monthMaps = new Map();
-    for (const cal of calendars) monthMaps.set(cal.id || 'default', this.#buildMonthMap(cal.months));
-    const fallbackMap = monthMaps.values().next().value || this.#buildMonthMap([]);
     const allNotes = [];
-    for (const [calId, calendarNotes] of Object.entries(notes)) {
-      const monthMap = monthMaps.get(calId) || fallbackMap;
+    for (const calendarNotes of Object.values(notes)) {
       for (const note of calendarNotes) {
         const noteData = SimpleCalendarImporter.#getFlag(note, 'noteData');
         if (!noteData) continue;
         const content = note.pages?.[0]?.text?.content || '';
-        const startTransformed = this.#transformNoteDate(noteData.startDate, monthMap);
-        const endTransformed = this.#transformNoteDate(noteData.endDate, monthMap);
-        const suggestedType = SimpleCalendarImporter.#classifyNote({ repeats: noteData.repeats, wasIntercalary: startTransformed.wasIntercalary });
         allNotes.push({
           name: note.name,
           content,
-          startDate: startTransformed.date,
-          endDate: endTransformed.date,
+          startDate: this.#transformNoteDate(noteData.startDate),
+          endDate: this.#transformNoteDate(noteData.endDate),
           allDay: noteData.allDay ?? true,
           repeat: this.#transformRepeatRule(noteData.repeats),
           categories: noteData.categories || [],
           originalId: note._id,
-          suggestedType
+          suggestedType: noteData.repeats === 3 ? 'festival' : 'note'
         });
       }
     }
     ATLAS.log(3, `Extracted ${allNotes.length} notes from Simple Calendar data`);
     return allNotes;
-  }
-
-  /**
-   * Choose `note` vs `festival` for an SC entry.
-   * @param {{repeats: number, wasIntercalary: boolean}} info - SC repeat code and intercalary-anchor flag
-   * @returns {'note'|'festival'} Suggested type
-   * @private
-   */
-  static #classifyNote({ wasIntercalary, repeats }) {
-    if (wasIntercalary) return 'festival';
-    if (repeats === 3) return 'festival';
-    return 'note';
   }
 
   /**
@@ -663,18 +558,12 @@ export default class SimpleCalendarImporter extends BaseImporter {
   }
 
   /**
-   * Transform SC note date to Calendaria format with month-index remap.
+   * Transform SC note date to Calendaria format.
    * @param {object} date - SC date object
-   * @param {object} monthMap - From {@link #buildMonthMap}
-   * @returns {{date: {year:number, month:number, dayOfMonth:number, hour:number, minute:number, second:number}, wasIntercalary: boolean}} Calendaria-format date plus intercalary-origin flag
+   * @returns {{year:number, month:number, dayOfMonth:number, hour:number, minute:number, second:number}} Calendaria-format date
    */
-  #transformNoteDate(date = {}, monthMap = null) {
-    const safeMap = monthMap || this.#buildMonthMap([]);
-    const remapped = this.#remapMonthDay(date.month ?? 0, date.day ?? 0, safeMap);
-    return {
-      date: { year: date.year ?? 0, month: remapped.month, dayOfMonth: remapped.dayOfMonth, hour: date.hour ?? 0, minute: date.minute ?? 0, second: date.seconds ?? 0 },
-      wasIntercalary: remapped.wasIntercalary
-    };
+  #transformNoteDate(date = {}) {
+    return { year: date.year ?? 0, month: date.month ?? 0, dayOfMonth: date.day ?? 0, hour: date.hour ?? 0, minute: date.minute ?? 0, second: date.seconds ?? 0 };
   }
 
   /**

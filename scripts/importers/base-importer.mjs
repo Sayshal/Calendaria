@@ -153,7 +153,7 @@ export default class BaseImporter {
     for (let i = 0; i < months.length; i++) {
       const month = months[i];
       if (!month.name) errors.push(_loc('CALENDARIA.Importer.Error.MonthMissingName', { num: i + 1 }));
-      if (!month.days || month.days < 1) errors.push(_loc('CALENDARIA.Importer.Error.MonthNoDays', { num: i + 1 }));
+      if ((!month.days || month.days < 1) && !(month.leapDays > 0)) errors.push(_loc('CALENDARIA.Importer.Error.MonthNoDays', { num: i + 1 }));
     }
     return { valid: errors.length === 0, errors };
   }
