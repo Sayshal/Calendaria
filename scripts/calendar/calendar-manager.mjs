@@ -424,6 +424,22 @@ export default class CalendarManager {
   }
 
   /**
+   * Recursively replace legacy (possibly repeated) `-=key` markers with a ForcedDeletion on the bare key.
+   * @param {object} data - Stored override data (mutated in place)
+   */
+  static migrateLegacyDeletionKeys(data) {
+    for (const key of Object.keys(data)) {
+      const value = data[key];
+      if (key.startsWith('-=')) {
+        delete data[key];
+        data[key.replace(/^(?:-=)+/, '')] ??= _del;
+      } else if (value && typeof value === 'object' && !Array.isArray(value)) {
+        CalendarManager.migrateLegacyDeletionKeys(value);
+      }
+    }
+  }
+
+  /**
    * Recursively strip empty-string values from a delta.
    * @param {object} delta - Delta object (mutated in place)
    * @param {object} bundled - Pristine bundled data to compare against

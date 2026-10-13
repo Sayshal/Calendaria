@@ -16,6 +16,15 @@ const renderHUD = () => foundry.applications.instances.get('calendaria-hud')?.re
 const renderHUDBar = () => foundry.applications.instances.get('calendaria-hud')?.render({ parts: ['bar'] });
 const refreshWeatherSoundDebounced = foundry.utils.debounce(refreshWeatherSound, 250);
 
+/** ObjectField that migrates legacy `-=key` markers before core cleaning, which throws on non-null values. */
+class OverridesField extends ObjectField {
+  /** @override */
+  _cleanType(data, options, _state) {
+    CalendarManager.migrateLegacyDeletionKeys(data);
+    return super._cleanType(data, options, _state);
+  }
+}
+
 /**
  * Static class encapsulating all Calendaria module settings.
  */
@@ -1105,7 +1114,7 @@ export default class CalendariaSettings {
         type: new StringField({ initial: 'gregorian', blank: true }),
         requiresReload: true
       },
-      [SETTINGS.DEFAULT_OVERRIDES]: { name: 'Default Calendar Overrides', scope: 'world', config: false, type: new ObjectField({ initial: {} }) },
+      [SETTINGS.DEFAULT_OVERRIDES]: { name: 'Default Calendar Overrides', scope: 'world', config: false, type: new OverridesField({ initial: {} }) },
       [SETTINGS.CUSTOM_PRESETS]: { name: 'Custom Presets', scope: 'world', config: false, type: new ArrayField(new ObjectField(), { initial: [] }), onChange: () => invalidatePresetCache() },
       [SETTINGS.CHAT_TIMESTAMP_MODE]: {
         name: 'CALENDARIA.Settings.ChatTimestampMode.Name',
