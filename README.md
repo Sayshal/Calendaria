@@ -2,7 +2,7 @@
 
 Your campaign's time deserves more than a number in the corner.
 
-![Calendaria Hero](https://wiki.3deathsaves.com/calendaria/hero.gif)
+![Calendaria Hero](https://wiki.3deathsaves.com/calendaria/hero.png)
 
 ![GitHub release](https://img.shields.io/github/v/release/Sayshal/calendaria?style=for-the-badge)
 ![GitHub Downloads (specific asset, all releases)](<https://img.shields.io/github/downloads/Sayshal/calendaria/module.zip?style=for-the-badge&logo=foundryvirtualtabletop&logoColor=white&logoSize=auto&label=Downloads%20(Total)&color=ff144f>)
@@ -26,17 +26,11 @@ A walkthrough of most major features, graciously created by the BaileyWiki team.
 
 <img src="https://wiki.3deathsaves.com/calendaria/hud-dome.png" alt="Calendar HUD - Dome" width="750">
 
-<img src="https://wiki.3deathsaves.com/calendaria/hud-compact.png" alt="Calendar HUD - Compact" width="750">
-
 **MiniCal & BigCal:** Quick month view for daily use, plus full month/week/year views when you need the big picture. Day cells show weather pips, moon phases, and note indicators. Hover for details, click to add notes, right-click for context actions.
-
-<img src="https://wiki.3deathsaves.com/calendaria/mini-calendar.png" alt="MiniCal" width="750">
 
 <img src="https://wiki.3deathsaves.com/calendaria/calendar-month.png" alt="Calendar - Month View" width="750">
 
 **Smart Notes:** Schedule notes with a condition engine: 41 fields, 11 operators, boolean logic (AND/OR/NAND/XOR/COUNT), and nesting up to 5 levels deep. "Every full moon", "2nd Tuesday in winter", "3 days after Festival X" all work. Notes support three visibility levels (Visible/Hidden/Secret), three display styles (icon/pip/banner), and multi-day durations that render as continuous bars in BigCal. Note presets define defaults and force overrides. Get reminded via chat, popup, or notification.
-
-<img src="https://wiki.3deathsaves.com/calendaria/note-form.png" alt="Note Editor" width="750">
 
 <img src="https://wiki.3deathsaves.com/calendaria/condition-builder.png" alt="Condition Builder" width="750">
 
@@ -44,23 +38,15 @@ A walkthrough of most major features, graciously created by the BaileyWiki team.
 
 <img src="https://wiki.3deathsaves.com/calendaria/weather-picker.png" alt="Weather Picker" width="750">
 
-<img src="https://wiki.3deathsaves.com/calendaria/moons-eclipses.png" alt="Moons & Eclipses" width="750">
-
 **Cinematic Time Skip:** Fullscreen animated overlay when time advances by large amounts. PixiJS-rendered sky with day/night cycle, star field, sun arc, shooting stars, and moon orbs with phase masking. A date counter ticks through intermediate days while event cards scroll past. Auto-triggers on configurable thresholds or via a dedicated button in the Set Date dialog. Syncs across all connected clients.
 
 <img src="https://wiki.3deathsaves.com/calendaria/cinematic-time-skip.gif" alt="Cinematic Time Skip" width="750">
 
 **Chronicle Timeline:** Infinite-scroll timeline showing notes, festivals, season banners, moon phases, and weather history. Two layouts: vertical scroll and alternating left/right timeline cards. Respects fog of war. Three depth modes: Title Only, Excerpts, and Full. Accessible from BigCal, MiniCal, HUD, context menus, toolbar, and API.
 
-<img src="https://wiki.3deathsaves.com/calendaria/chronicle-timeline.png" alt="Chronicle Timeline" width="750">
-
 **Fog of War:** Players only see dates the GM has revealed. BigCal shows a striped overlay on fogged dates with interactions disabled. MiniCal dims fogged cells. Notes, weather, moons, and festivals are hidden on unrevealed days. Features include a Campaign Start Date lower bound, auto-reveal on day change with configurable radius, and a "Reveal Today to Here" context menu action.
 
-<img src="https://wiki.3deathsaves.com/calendaria/fog-of-war.png" alt="Fog of War" width="750">
-
 **Text Enrichers:** 51 inline enrichers across 8 categories (Date & Time, Time Math, Calendar, Sun & Daylight, Moon, Weather, Notes, Composite). Embed live calendar data in journal entries, chat, and item descriptions: `[[weather]]`, `[[moon]]`, `[[countdown 1492-6-15]]`, `[[sunrise]]`, `[[season]]`. Enrichers update live when calendar data changes and support cross-calendar targeting.
-
-<img src="https://wiki.3deathsaves.com/calendaria/text-enrichers.png" alt="Text Enrichers" width="750">
 
 ---
 
@@ -78,15 +64,11 @@ A walkthrough of most major features, graciously created by the BaileyWiki team.
 
 Forgotten Realms, Greyhawk, Eberron, Exandria, Golarion, Warhammer, Starfinder, Dark Sun, Dragonlance, and more. Or build your own with the Calendar Editor; import from Simple Calendar, Fantasy-Calendar.com, and others.
 
-<img src="https://wiki.3deathsaves.com/calendaria/calendar-editor.png" alt="Calendar Editor" width="750">
-
 ---
 
 ## Make It Yours
 
 15 theme presets, custom color editor, and a searchable settings panel. Export your setup to share between worlds.
-
-<img src="https://wiki.3deathsaves.com/calendaria/theme-comparison.png" alt="Theme Comparison" width="750">
 
 ---
 
