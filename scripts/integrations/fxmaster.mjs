@@ -84,7 +84,7 @@ export function initializeFXMaster() {
   if (restoredName) {
     const weather = WeatherManager.getCurrentWeather();
     const expectedFx = weather?.fxPreset || null;
-    if (expectedFx !== restoredName) playWeather(weather || null);
+    if (expectedFx !== restoredName) playWeather(weather || null, canvas?.scene);
   } else {
     syncWeatherToScene();
   }
@@ -133,7 +133,7 @@ export function syncWeatherToScene(sceneOverride) {
     return;
   }
   const weather = WeatherManager.getCurrentWeather(null, scene);
-  playWeather(weather || null);
+  playWeather(weather || null, scene);
 }
 
 /**
@@ -154,7 +154,7 @@ function onWeatherChange({ current, zoneId: _zoneId, bulk, visualOnly } = {}) {
       return;
     }
     const weather = WeatherManager.getCurrentWeather();
-    playWeather(weather || null);
+    playWeather(weather || null, scene);
     return;
   }
   const scene = game.scenes?.active;
@@ -162,7 +162,7 @@ function onWeatherChange({ current, zoneId: _zoneId, bulk, visualOnly } = {}) {
     stopAllFX();
     return;
   }
-  playWeather(current || null);
+  playWeather(current || null, scene);
 }
 
 /**
@@ -180,8 +180,9 @@ export async function stopAllFX() {
 /**
  * Play the weather preset, stopping any others via switch().
  * @param {object|null} weather - Weather to play, or null to just stop
+ * @param {object} [scene] - Scene whose overrides shape the preset options
  */
-async function playWeather(weather) {
+async function playWeather(weather, scene) {
   const fxApi = getFxApi();
   if (!fxApi) return;
   const fxName = weather?.fxPreset || null;
@@ -195,7 +196,7 @@ async function playWeather(weather) {
     await stopAllFX();
     return;
   }
-  const options = buildPresetOptions(weather);
+  const options = buildPresetOptions(weather, scene);
   options.silent = true;
   await fxApi.switch(fxName, options);
   ATLAS.log(3, `FXMaster playing weather: ${fxName}`);
@@ -264,23 +265,25 @@ function intensityToMultiplier(precipitation) {
 
 /**
  * Resolve a boolean FXMaster option from its per-scene 'on'/'off' flag, falling back to the global setting.
+ * @param {object} scene - Scene whose flag is read
  * @param {string} flag - Scene flag key holding the override
  * @param {string} setting - Global setting key used when the scene defers
- * @returns {boolean} Whether the option is enabled for the current scene
+ * @returns {boolean} Whether the option is enabled for the scene
  */
-function resolveSceneToggle(flag, setting) {
-  const override = canvas?.scene?.getFlag(MODULE.ID, flag);
+function resolveSceneToggle(scene, flag, setting) {
+  const override = scene?.getFlag(MODULE.ID, flag);
   return override === 'on' || (override !== 'off' && game.settings.get(MODULE.ID, setting));
 }
 
 /**
  * Build options object for FXMaster preset playback.
  * @param {object} weather - Current weather state
+ * @param {object} [scene] - Scene whose overrides apply (defaults to canvas scene)
  * @returns {object} Options for FXMaster play/switch
  */
-export function buildPresetOptions(weather) {
+export function buildPresetOptions(weather, scene = canvas?.scene) {
   const options = {};
-  const sceneTopDown = canvas?.scene?.getFlag(MODULE.ID, SCENE_FLAGS.FXMASTER_TOP_DOWN_OVERRIDE);
+  const sceneTopDown = scene?.getFlag(MODULE.ID, SCENE_FLAGS.FXMASTER_TOP_DOWN_OVERRIDE);
   const useTopDown = sceneTopDown === 'topdown' || (sceneTopDown !== 'sideview' && game.settings.get(MODULE.ID, SETTINGS.FXMASTER_TOP_DOWN));
   const forceDownward = !useTopDown || game.settings.get(MODULE.ID, SETTINGS.FXMASTER_FORCE_DOWNWARD);
   if (weather.wind?.direction != null) {
@@ -299,9 +302,9 @@ export function buildPresetOptions(weather) {
     options.darknessActivationMin = Math.min(dMin, dMax);
     options.darknessActivationMax = Math.max(dMin, dMax);
   }
-  const fxLevels = canvas?.scene?.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_LEVELS);
+  const fxLevels = scene?.getFlag(MODULE.ID, SCENE_FLAGS.WEATHER_FX_LEVELS);
   if (Array.isArray(fxLevels) && fxLevels.length) {
-    const validIds = new Set([...(canvas.scene.levels ?? [])].map((l) => l.id));
+    const validIds = new Set([...(scene.levels ?? [])].map((l) => l.id));
     const levels = fxLevels.filter((id) => validIds.has(id));
     if (levels.length) options.levels = levels;
   }
@@ -310,10 +313,10 @@ export function buildPresetOptions(weather) {
   options.density = intensityToMultiplier(weather.precipitation) * toLevelMultiplier(weather.fxDensity);
   if (weather.fxColor) options.color = weather.fxColor;
   if (game.settings.get(MODULE.ID, SETTINGS.FXMASTER_SOUND_FX)) options.soundFx = true;
-  options.background = resolveSceneToggle(SCENE_FLAGS.FXMASTER_BACKGROUND_OVERRIDE, SETTINGS.FXMASTER_BACKGROUND);
-  options.tokenTrails = resolveSceneToggle(SCENE_FLAGS.FXMASTER_TOKEN_TRAILS_OVERRIDE, SETTINGS.FXMASTER_TOKEN_TRAILS);
-  options.aboveDarkness = resolveSceneToggle(SCENE_FLAGS.FXMASTER_ABOVE_DARKNESS_OVERRIDE, SETTINGS.FXMASTER_ABOVE_DARKNESS);
-  options.splash = resolveSceneToggle(SCENE_FLAGS.FXMASTER_SPLASH_OVERRIDE, SETTINGS.FXMASTER_SPLASH);
+  options.background = resolveSceneToggle(scene, SCENE_FLAGS.FXMASTER_BACKGROUND_OVERRIDE, SETTINGS.FXMASTER_BACKGROUND);
+  options.tokenTrails = options.background && resolveSceneToggle(scene, SCENE_FLAGS.FXMASTER_TOKEN_TRAILS_OVERRIDE, SETTINGS.FXMASTER_TOKEN_TRAILS);
+  options.aboveDarkness = resolveSceneToggle(scene, SCENE_FLAGS.FXMASTER_ABOVE_DARKNESS_OVERRIDE, SETTINGS.FXMASTER_ABOVE_DARKNESS);
+  options.splash = resolveSceneToggle(scene, SCENE_FLAGS.FXMASTER_SPLASH_OVERRIDE, SETTINGS.FXMASTER_SPLASH);
   return options;
 }
 
