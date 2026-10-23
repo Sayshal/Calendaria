@@ -462,8 +462,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     const weeks = [];
     let currentWeek = [];
     const showMoons = canViewMoons() && calendar.moonsArray.length;
-    const hasFixedStart = monthData?.startingWeekday != null;
-    const rawStartDayOfWeek = hasFixedStart ? monthData.startingWeekday : dayOfWeek({ year, month, dayOfMonth: 0 });
+    const rawStartDayOfWeek = dayOfWeek({ year, month, dayOfMonth: 0 });
     const weekStartIdx = cyclePlan ? 0 : getWeekStartIndex(calendar);
     const startDayOfWeek = (((rawStartDayOfWeek - weekStartIdx) % daysInWeek) + daysInWeek) % daysInWeek;
     if (!cyclePlan && startDayOfWeek > 0) {

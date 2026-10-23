@@ -113,8 +113,7 @@ export class SecondaryCalendar extends HandlebarsApplicationMixin(ApplicationV2)
     const todayYear = currentDate?.year;
     const todayMonth = currentDate?.month;
     const todayDay = currentDate?.dayOfMonth;
-    const hasFixedStart = monthData?.startingWeekday != null;
-    const startDayOfWeek = hasFixedStart ? monthData.startingWeekday : dayOfWeek({ year, month, dayOfMonth: 0 }, calendar);
+    const startDayOfWeek = dayOfWeek({ year, month, dayOfMonth: 0 }, calendar);
     const cyclePlan = buildCycleMonthPlan(calendar, year, month);
     const cycleCells = cyclePlan ? new Map() : null;
     const weeks = [];

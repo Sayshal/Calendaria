@@ -48,6 +48,37 @@ export function toRomanNumeral(n) {
 }
 
 /**
+ * Weekday for plain calendar objects without `_computeDayOfWeek`.
+ * @param {object} calendar - The calendar data
+ * @param {number} internalYear - Internal year (display year minus yearZero)
+ * @param {number} month - Month index
+ * @param {number} dayOfMonth - 0-indexed day of month
+ * @param {number} dayOfYear - 0-indexed day of year
+ * @param {number} weekdayCount - Number of weekdays
+ * @returns {number} 0-based weekday index
+ */
+function fallbackWeekday(calendar, internalYear, month, dayOfMonth, dayOfYear, weekdayCount) {
+  let totalDaysFromPriorYears = 0;
+  if (calendar?.totalDaysBeforeYear) {
+    totalDaysFromPriorYears = calendar.totalDaysBeforeYear(internalYear);
+  } else if (calendar?.getDaysInYear) {
+    if (internalYear > 0) for (let y = 0; y < internalYear; y++) totalDaysFromPriorYears += calendar.getDaysInYear(y);
+    else if (internalYear < 0) for (let y = -1; y >= internalYear; y--) totalDaysFromPriorYears -= calendar.getDaysInYear(y);
+  }
+  const totalDays = totalDaysFromPriorYears + dayOfYear;
+  const firstWeekday = calendar?.effectiveFirstWeekday ?? calendar?.years?.firstWeekday ?? 0;
+  const nonCountingFestivalsInYear = calendar?.countNonWeekdayFestivalsBefore?.({ year: internalYear, month, dayOfMonth }) ?? 0;
+  const nonCountingFestivalsFromPriorYears = calendar?.countNonWeekdayFestivalsBeforeYear?.(internalYear) ?? 0;
+  const intercalaryInYear = calendar?.countIntercalaryDaysBefore?.({ year: internalYear, month, dayOfMonth }) ?? 0;
+  const intercalaryFromPriorYears = calendar?.countIntercalaryDaysBeforeYear?.(internalYear) ?? 0;
+  const nonCountingTotal = nonCountingFestivalsFromPriorYears + nonCountingFestivalsInYear + intercalaryFromPriorYears + intercalaryInYear;
+  const countingDays = totalDays - nonCountingTotal;
+  const cyclePos = calendar?._computeCyclePosition?.({ year: internalYear, month, dayOfMonth }) ?? calendar?.resolveCyclePosition?.(countingDays);
+  if (cyclePos) return cyclePos.weekdayIndex;
+  return weekdayCount > 0 ? (((countingDays + firstWeekday) % weekdayCount) + weekdayCount) % weekdayCount : 0;
+}
+
+/**
  * Prepared date parts passed to formatters.
  * @param {object} calendar - The calendar data
  * @param {object} components - Time components { year, month, dayOfMonth (0-indexed), hour, minute, second }
@@ -72,23 +103,9 @@ export function dateFormattingParts(calendar, components) {
   if (!isMonthless && calendar?.getDaysInMonth) for (let m = 0; m < month; m++) daysInMonthsBefore += calendar.getDaysInMonth(m, internalYear);
   else if (!isMonthless) daysInMonthsBefore = months.slice(0, month).reduce((sum, m) => sum + (m.days || 0), 0);
   const dayOfYear = isMonthless ? dayOfMonth : daysInMonthsBefore + dayOfMonth;
-  let totalDaysFromPriorYears = 0;
-  if (calendar?.totalDaysBeforeYear) {
-    totalDaysFromPriorYears = calendar.totalDaysBeforeYear(internalYear);
-  } else if (calendar?.getDaysInYear) {
-    if (internalYear > 0) for (let y = 0; y < internalYear; y++) totalDaysFromPriorYears += calendar.getDaysInYear(y);
-    else if (internalYear < 0) for (let y = -1; y >= internalYear; y--) totalDaysFromPriorYears -= calendar.getDaysInYear(y);
-  }
-  const totalDays = totalDaysFromPriorYears + dayOfYear;
-  const firstWeekday = calendar?.effectiveFirstWeekday ?? calendar?.years?.firstWeekday ?? 0;
-  const nonCountingFestivalsInYear = calendar?.countNonWeekdayFestivalsBefore?.({ year: internalYear, month, dayOfMonth }) ?? 0;
-  const nonCountingFestivalsFromPriorYears = calendar?.countNonWeekdayFestivalsBeforeYear?.(internalYear) ?? 0;
-  const intercalaryInYear = calendar?.countIntercalaryDaysBefore?.({ year: internalYear, month, dayOfMonth }) ?? 0;
-  const intercalaryFromPriorYears = calendar?.countIntercalaryDaysBeforeYear?.(internalYear) ?? 0;
-  const nonCountingTotal = nonCountingFestivalsFromPriorYears + nonCountingFestivalsInYear + intercalaryFromPriorYears + intercalaryInYear;
-  const countingDays = totalDays - nonCountingTotal;
-  const cyclePos = calendar?.resolveCyclePosition?.(countingDays);
-  const weekday = cyclePos ? cyclePos.weekdayIndex : weekdays.length > 0 ? (((countingDays + firstWeekday) % weekdays.length) + weekdays.length) % weekdays.length : 0;
+  const weekday = calendar?._computeDayOfWeek
+    ? calendar._computeDayOfWeek({ year: internalYear, month, dayOfMonth })
+    : fallbackWeekday(calendar, internalYear, month, dayOfMonth, dayOfYear, weekdays.length);
   const weekdayData = weekdays[weekday];
   const weekdayName = weekdayData?.name ? _loc(weekdayData.name) : '';
   const weekdayAbbr = weekdayData?.abbreviation ? _loc(weekdayData.abbreviation) : weekdayName.slice(0, 3);

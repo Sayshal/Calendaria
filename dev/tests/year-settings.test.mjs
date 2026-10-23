@@ -103,3 +103,97 @@ describe('_computeDayOfWeek() with resetWeekdays', () => {
     expect(computeDayOfWeek(cal, { year: 9, month: 0, dayOfMonth: 0 })).toBe(3);
   });
 });
+
+/**
+ * Extend the stub with real festival and intercalary counting backed by fixed festival entries.
+ * @param {object} options - Stub options
+ * @param {Array<object>} [options.festivals] - Non-counting festival entries
+ * @param {object} [options.months] - Month data overrides keyed by month index
+ * @param {object} [options.years] - The years config under test
+ * @returns {object} Calendar stub
+ */
+function stubFestivalCalendar({ festivals = [], months = {}, years = {} } = {}) {
+  const stub = stubCalendar(years);
+  stub.monthsArray = stub.monthsArray.map((m, i) => ({ ...m, name: `Month ${i + 1}`, ...months[i] }));
+  stub.isLeapYear = () => false;
+  stub._getNonCountingFestivalEntries = () => festivals;
+  for (const name of ['countNonWeekdayFestivalsBefore', 'countIntercalaryDaysBefore', '_calculateDayOfYear', '_calculateDayOfYearFromMonthDay', '_computeDayOfWeek']) {
+    stub[name] = CalendariaCalendar.prototype[name].bind(stub);
+  }
+  return stub;
+}
+
+describe('_computeDayOfWeek() with fixed month starts', () => {
+  const earlierFestivals = [
+    { month: 0, dayOfMonth: 10, duration: 1 },
+    { month: 1, dayOfMonth: 5, duration: 2 }
+  ];
+
+  it('starts on startingWeekday after earlier non-counting festivals and intercalary months', () => {
+    const cal = stubFestivalCalendar({ festivals: earlierFestivals, months: { 1: { type: 'intercalary', days: 30 }, 2: { startingWeekday: 3 } } });
+    expect(computeDayOfWeek(cal, { year: 2, month: 2, dayOfMonth: 0 })).toBe(3);
+    expect(computeDayOfWeek(cal, { year: 2, month: 2, dayOfMonth: 1 })).toBe(4);
+  });
+
+  it('does not advance the weekday across non-counting festival days within the month', () => {
+    const cal = stubFestivalCalendar({ festivals: [...earlierFestivals, { month: 2, dayOfMonth: 4, duration: 1 }], months: { 2: { startingWeekday: 3 } } });
+    expect(computeDayOfWeek(cal, { year: 0, month: 2, dayOfMonth: 3 })).toBe(6);
+    expect(computeDayOfWeek(cal, { year: 0, month: 2, dayOfMonth: 5 })).toBe(0);
+  });
+});
+
+/**
+ * Extend the festival stub with a two-row week cycle (a full week, then a three-day week).
+ * @param {object} options - Options forwarded to stubFestivalCalendar
+ * @returns {object} Calendar stub
+ */
+function stubCycleCalendar(options) {
+  const stub = stubFestivalCalendar(options);
+  stub.weekCycle = [
+    { name: 'Long', days: [0, 1, 2, 3, 4, 5, 6] },
+    { name: 'Short', days: [0, 2, 4] }
+  ];
+  stub._getDaysPerYear = () => ({ regular: 360, leap: 360 });
+  stub._getLeapYearLookup = () => ({ key: '' });
+  for (const name of [
+    '_computeCyclePosition',
+    '_cyclePositionAtSlot',
+    '_cycleSegmentFor',
+    '_cycleSegmentAt',
+    '_cycleRowAtSlot',
+    '_cycleSegmentDelta',
+    '_cycleYearBase',
+    'weekIndexSinceEpoch',
+    'weekNumberInMonth'
+  ]) {
+    stub[name] = CalendariaCalendar.prototype[name].bind(stub);
+  }
+  return stub;
+}
+
+describe('week cycle with fixed month starts', () => {
+  it('restarts the cycle on startingWeekday without advancing across non-counting days', () => {
+    const cal = stubCycleCalendar({ festivals: [{ month: 2, dayOfMonth: 4, duration: 1 }], months: { 2: { startingWeekday: 3 } } });
+    expect(computeDayOfWeek(cal, { year: 5, month: 2, dayOfMonth: 0 })).toBe(3);
+    expect(computeDayOfWeek(cal, { year: 5, month: 2, dayOfMonth: 3 })).toBe(6);
+    expect(computeDayOfWeek(cal, { year: 5, month: 2, dayOfMonth: 5 })).toBe(0);
+    expect(cal._computeCyclePosition({ year: 5, month: 2, dayOfMonth: 5 }).cycleRow).toBe(1);
+  });
+
+  it('keeps weekIndexSinceEpoch monotonic in single-row steps across fixed-start restarts', () => {
+    const cal = stubCycleCalendar({ months: { 2: { startingWeekday: 3 }, 7: { startingWeekday: 5 } } });
+    let prev = null;
+    for (let year = -2; year <= 2; year++) {
+      for (let month = 0; month < 12; month++) {
+        for (let dayOfMonth = 0; dayOfMonth < 30; dayOfMonth++) {
+          const week = cal.weekIndexSinceEpoch({ year, month, dayOfMonth });
+          if (prev != null) expect(week - prev).toBeGreaterThanOrEqual(0);
+          if (prev != null) expect(week - prev).toBeLessThanOrEqual(1);
+          prev = week;
+        }
+      }
+      expect(cal.weekNumberInMonth({ year, month: 2, dayOfMonth: 0 })).toBe(1);
+      expect(cal.weekIndexSinceEpoch({ year, month: 7, dayOfMonth: 0 })).toBe(cal.weekIndexSinceEpoch({ year, month: 6, dayOfMonth: 29 }) + 1);
+    }
+  });
+});

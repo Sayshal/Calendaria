@@ -1841,10 +1841,19 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   resolveCyclePosition(countingDays) {
     const cycle = this.weekCycle;
     if (!cycle) return null;
+    return this._cyclePositionAtSlot(cycle, countingDays + this.effectiveFirstWeekday);
+  }
+
+  /**
+   * Resolve an unbounded flat cycle slot (rows concatenated in order) into a week-cycle position.
+   * @param {Array<{name: string, days: number[]}>} cycle - Normalized cycle rows
+   * @param {number} slot - Flat slot, wrapped modulo the cycle length
+   * @returns {{weekdayIndex: number, cycleRow: number, posInRow: number, rowLength: number, cycleLength: number}|null} Position
+   */
+  _cyclePositionAtSlot(cycle, slot) {
     let cycleLength = 0;
     for (const r of cycle) cycleLength += r.days.length;
-    const firstWeekday = this.effectiveFirstWeekday;
-    let pos = (((countingDays + firstWeekday) % cycleLength) + cycleLength) % cycleLength;
+    let pos = ((slot % cycleLength) + cycleLength) % cycleLength;
     for (let row = 0; row < cycle.length; row++) {
       const rowLength = cycle[row].days.length;
       if (pos < rowLength) return { weekdayIndex: cycle[row].days[pos], cycleRow: row, posInRow: pos, rowLength, cycleLength };
@@ -1875,8 +1884,112 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
    * @returns {{weekdayIndex: number, cycleRow: number, posInRow: number, rowLength: number, cycleLength: number}|null} Position, or null when no cycle is active
    */
   _computeCyclePosition(components) {
-    if (!this.weekCycle) return null;
-    return this.resolveCyclePosition(this._countingDaysFor(components));
+    const cycle = this.weekCycle;
+    if (!cycle) return null;
+    const countingDays = this._countingDaysFor(components);
+    const segment = this._cycleSegmentFor(components, cycle);
+    if (!segment) return this._cyclePositionAtSlot(cycle, countingDays + this.effectiveFirstWeekday);
+    return this._cyclePositionAtSlot(cycle, segment.slot + countingDays - segment.origin);
+  }
+
+  /**
+   * Find the fixed-start month whose cycle restart governs a date.
+   * @param {object} components - Internal-year components ({year, month, dayOfMonth})
+   * @param {Array<{name: string, days: number[]}>} cycle - Normalized cycle rows
+   * @returns {{year: number, month: number, origin: number, slot: number}|null} Segment start, or null when no month has a fixed start
+   */
+  _cycleSegmentFor(components, cycle) {
+    const months = this.monthsArray;
+    for (let m = components.month; m >= 0; m--) if (months[m]?.startingWeekday != null) return this._cycleSegmentAt(components.year, m, cycle);
+    for (let m = months.length - 1; m > components.month; m--) if (months[m]?.startingWeekday != null) return this._cycleSegmentAt(components.year - 1, m, cycle);
+    return null;
+  }
+
+  /**
+   * Build the cycle restart for a fixed-start month.
+   * @param {number} year - Internal year
+   * @param {number} month - Month index with a startingWeekday
+   * @param {Array<{name: string, days: number[]}>} cycle - Normalized cycle rows
+   * @returns {{year: number, month: number, origin: number, slot: number}} Counting-day origin of the month's day 0 and its anchor slot
+   */
+  _cycleSegmentAt(year, month, cycle) {
+    const target = this.monthsArray[month].startingWeekday;
+    const flat = cycle.flatMap((r) => r.days);
+    let slot = flat.indexOf(target);
+    if (slot === -1)
+      slot = Math.max(
+        0,
+        flat.findIndex((wd) => wd > target)
+      );
+    return { year, month, origin: this._countingDaysFor({ year, month, dayOfMonth: 0 }), slot };
+  }
+
+  /**
+   * Absolute row index of an unbounded flat cycle slot.
+   * @param {Array<{name: string, days: number[]}>} cycle - Normalized cycle rows
+   * @param {number} slot - Flat slot
+   * @returns {number} Row index counting whole cycles
+   */
+  _cycleRowAtSlot(cycle, slot) {
+    const pos = this._cyclePositionAtSlot(cycle, slot);
+    return Math.floor(slot / pos.cycleLength) * cycle.length + pos.cycleRow;
+  }
+
+  /**
+   * Week-index change from one fixed-start segment to the next.
+   * @param {Array<{name: string, days: number[]}>} cycle - Normalized cycle rows
+   * @param {{origin: number, slot: number}} prev - Earlier segment
+   * @param {{origin: number, slot: number}} next - Later segment
+   * @returns {number} Rows between the two segment starts
+   */
+  _cycleSegmentDelta(cycle, prev, next) {
+    const naturalSlot = prev.slot + next.origin - prev.origin;
+    const prevRow = this._cycleRowAtSlot(cycle, prev.slot);
+    const cycleLength = this._cyclePositionAtSlot(cycle, 0).cycleLength;
+    if ((((naturalSlot - next.slot) % cycleLength) + cycleLength) % cycleLength === 0) return this._cycleRowAtSlot(cycle, naturalSlot) - prevRow;
+    return this._cycleRowAtSlot(cycle, naturalSlot - 1) - prevRow + 1;
+  }
+
+  /**
+   * Week index of the first fixed-start segment in a year, memoized per year.
+   * @param {number} year - Internal year
+   * @param {Array<{name: string, days: number[]}>} cycle - Normalized cycle rows
+   * @param {number[]} fixedMonths - Month indices with a startingWeekday, ascending
+   * @returns {number} Week index at the year's first segment start
+   */
+  _cycleYearBase(year, cycle, fixedMonths) {
+    const key = JSON.stringify([
+      cycle,
+      fixedMonths.map((m) => this.monthsArray[m].startingWeekday),
+      this.effectiveFirstWeekday,
+      this._getDaysPerYear(),
+      this._getLeapYearLookup().key,
+      this._getNonCountingFestivalEntries()
+    ]);
+    if (this.__cycleBase?.key !== key) this.__cycleBase = { key, years: new Map() };
+    const cache = this.__cycleBase.years;
+    if (cache.has(year)) return cache.get(year);
+    const yearDelta = (y) => {
+      let delta = 0;
+      let prev = this._cycleSegmentAt(y, fixedMonths[0], cycle);
+      for (let i = 1; i <= fixedMonths.length; i++) {
+        const next = i < fixedMonths.length ? this._cycleSegmentAt(y, fixedMonths[i], cycle) : this._cycleSegmentAt(y + 1, fixedMonths[0], cycle);
+        delta += this._cycleSegmentDelta(cycle, prev, next);
+        prev = next;
+      }
+      return delta;
+    };
+    const step = year > 0 ? 1 : -1;
+    let y = year;
+    while (y !== 0 && !cache.has(y)) y -= step;
+    if (!cache.has(y)) cache.set(y, this._cycleRowAtSlot(cycle, this._cycleSegmentAt(0, fixedMonths[0], cycle).origin + this.effectiveFirstWeekday));
+    let base = cache.get(y);
+    while (y !== year) {
+      base += step > 0 ? yearDelta(y) : -yearDelta(y - 1);
+      y += step;
+      cache.set(y, base);
+    }
+    return base;
   }
 
   /**
@@ -1887,21 +2000,20 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   weekIndexSinceEpoch(components) {
     const cycle = this.weekCycle;
     if (!cycle) return null;
-    let cycleLength = 0;
-    for (const r of cycle) cycleLength += r.days.length;
-    const firstWeekday = this.effectiveFirstWeekday;
-    const p = this._countingDaysFor(components) + firstWeekday;
-    const completeCycles = Math.floor(p / cycleLength);
-    let r = p - completeCycles * cycleLength;
-    let rowIndex = cycle.length - 1;
-    for (let row = 0; row < cycle.length; row++) {
-      if (r < cycle[row].days.length) {
-        rowIndex = row;
-        break;
-      }
-      r -= cycle[row].days.length;
+    const countingDays = this._countingDaysFor(components);
+    const segment = this._cycleSegmentFor(components, cycle);
+    if (!segment) return this._cycleRowAtSlot(cycle, countingDays + this.effectiveFirstWeekday);
+    const fixedMonths = this.monthsArray.flatMap((m, i) => (m?.startingWeekday != null ? [i] : []));
+    let base = this._cycleYearBase(segment.year, cycle, fixedMonths);
+    let prev = this._cycleSegmentAt(segment.year, fixedMonths[0], cycle);
+    for (const m of fixedMonths) {
+      if (m > segment.month) break;
+      if (m === fixedMonths[0]) continue;
+      const next = this._cycleSegmentAt(segment.year, m, cycle);
+      base += this._cycleSegmentDelta(cycle, prev, next);
+      prev = next;
     }
-    return completeCycles * cycle.length + rowIndex;
+    return base + this._cycleRowAtSlot(cycle, segment.slot + countingDays - segment.origin) - this._cycleRowAtSlot(cycle, segment.slot);
   }
 
   /**
@@ -1951,6 +2063,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     if (!cycle || !weeks) return weeks * daysInWeek;
     const pos = this._computeCyclePosition(components);
     if (!pos) return weeks * daysInWeek;
+    if (this.monthsArray.some((m) => m?.startingWeekday != null)) return this._walkWeekStepDays(components, weeks, pos.weekdayIndex);
     const n = cycle.length;
     const dir = Math.sign(weeks);
     let delta = 0;
@@ -1988,6 +2101,44 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
   }
 
   /**
+   * Walk day by day to the cycle row `weeks` rows away, honouring fixed-start restarts.
+   * @param {object} components - Internal-year components ({year, month, dayOfMonth})
+   * @param {number} weeks - Signed, non-zero number of weeks to step
+   * @param {number} weekday - Starting weekday index
+   * @returns {number} Day delta to apply to dayOfMonth
+   */
+  _walkWeekStepDays(components, weeks, weekday) {
+    const dir = Math.sign(weeks);
+    const lastMonth = this.monthsArray.length - 1;
+    const targetRow = this.weekIndexSinceEpoch(components) + weeks;
+    let { year, month, dayOfMonth } = components;
+    let delta = 0;
+    let lastInRow = null;
+    for (;;) {
+      dayOfMonth += dir;
+      delta += dir;
+      while (dayOfMonth >= this.getDaysInMonth(month, year)) {
+        dayOfMonth = 0;
+        month = month === lastMonth ? 0 : month + 1;
+        if (month === 0) year++;
+      }
+      while (dayOfMonth < 0) {
+        month = month === 0 ? lastMonth : month - 1;
+        if (month === lastMonth) year--;
+        dayOfMonth = this.getDaysInMonth(month, year) - 1;
+      }
+      const date = { year, month, dayOfMonth };
+      if (this.monthsArray[month]?.type === 'intercalary' || this.findFestivalDay(date)?.countsForWeekday === false) continue;
+      const row = this.weekIndexSinceEpoch(date);
+      if (dir > 0 ? row > targetRow : row < targetRow) return lastInRow;
+      if (row !== targetRow) continue;
+      const wd = this._computeCyclePosition(date).weekdayIndex;
+      if (dir > 0 ? wd >= weekday : wd <= weekday) return delta;
+      lastInRow = delta;
+    }
+  }
+
+  /**
    * Compute the day-of-week index for decomposed time components.
    * @param {object} components - Components from timeToComponents ({year, month, dayOfMonth})
    * @returns {number} 0-based weekday index
@@ -2000,7 +2151,10 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     if (monthData?.startingWeekday != null) {
       const dayIndex = components.dayOfMonth ?? 0;
       const ctx = { year: components.year, month: components.month, dayOfMonth: dayIndex };
-      const nonCounting = (this.countNonWeekdayFestivalsBefore?.(ctx) ?? 0) + (this.countIntercalaryDaysBefore?.(ctx) ?? 0);
+      const monthStart = { ...ctx, dayOfMonth: 0 };
+      const festivalDays = (this.countNonWeekdayFestivalsBefore?.(ctx) ?? 0) - (this.countNonWeekdayFestivalsBefore?.(monthStart) ?? 0);
+      const intercalaryDays = (this.countIntercalaryDaysBefore?.(ctx) ?? 0) - (this.countIntercalaryDaysBefore?.(monthStart) ?? 0);
+      const nonCounting = festivalDays + intercalaryDays;
       return (monthData.startingWeekday + dayIndex - nonCounting + daysInWeek * 100) % daysInWeek;
     }
     const firstWeekday = this.effectiveFirstWeekday;
