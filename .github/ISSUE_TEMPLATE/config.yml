@@ -1,5 +1,5 @@
-blank_issues_enabled: true
+blank_issues_enabled: false
 contact_links:
-  - name: Get In Touch
-    url: https://discord.gg/PzzUwU9gdz
-    about: Join our Discord server to get in touch with the developers and other users of Calendaria!
+  - name: Report a bug or suggest a feature
+    url: https://3deathsaves.com/report?module=calendaria
+    about: Reports go through 3deathsaves.com so we get the troubleshooter details and can follow up with you on Discord.
