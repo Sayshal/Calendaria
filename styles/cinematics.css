@@ -259,10 +259,10 @@
   }
 
   .cinematic-moon-phase-name {
-    color: var(--atlas-text-dim);
+    color: var(--atlas-text);
     font-style: italic;
     font-size: 0.7rem;
-    text-shadow: 0 0.0625rem 0.25rem rgb(0 0 0 / 80%);
+    opacity: 0.85;
   }
 
   .cinematic-moon--full .cinematic-moon-icon-wrap {

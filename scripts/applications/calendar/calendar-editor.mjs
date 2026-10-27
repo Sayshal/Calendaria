@@ -305,6 +305,12 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /** @override */
+  _configureRenderOptions(options) {
+    super._configureRenderOptions(options);
+    options.window = { ...options.window, title: this.title };
+  }
+
+  /** @override */
   get title() {
     const name = this.#calendarData?.name || _loc('CALENDARIA.Editor.NewCalendar');
     return _loc('CALENDARIA.Editor.TitleEdit', { name });

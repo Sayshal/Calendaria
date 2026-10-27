@@ -24,6 +24,14 @@ export function onGetSceneControlButtons(controls) {
   for (const appId of toolbarApps) {
     const def = TOOLBAR_APP_DEFS[appId];
     if (!def) continue;
-    controls.notes.tools[`calendaria-${appId}`] = { name: `calendaria-${appId}`, title: _loc(def.label), icon: `fas ${def.icon}`, visible: def.canView(), onChange: def.toggle, button: true };
+    controls.notes.tools[`calendaria-${appId}`] = {
+      name: `calendaria-${appId}`,
+      order: Object.keys(controls.notes.tools).length + 1,
+      title: _loc(def.label),
+      icon: `fas ${def.icon}`,
+      visible: def.canView(),
+      onChange: def.toggle,
+      button: true
+    };
   }
 }

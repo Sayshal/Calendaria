@@ -239,7 +239,7 @@ export default class CinematicOverlay {
       this.#renderKeyframe(keyframes[frameIndex], prevKf);
       if (this.#pixiApp) this.#emitPageFlipParticles();
     }
-    this.#syncEventCardsToVisualDay(progress);
+    this.#syncEventCardsToVisualDay(frameIndex, panelProgress);
     this.#updateBackground(dayFraction);
     this.#updateEffects(dayFraction);
     this.#tickDateCounter(frameIndex, panelProgress, progress);
@@ -414,9 +414,7 @@ export default class CinematicOverlay {
     const current = keyframes[frameIndex];
     const next = keyframes[frameIndex + 1];
     if (!current) return;
-    const startWt = current.worldTime;
-    const endWt = next ? next.worldTime : current.worldTime;
-    const interpWt = Math.floor(startWt + (endWt - startWt) * panelProgress);
+    const interpWt = this.#visualWorldTime(frameIndex, panelProgress);
     const calendar = CalendarManager.getActiveCalendar();
     if (!calendar) {
       label.textContent = current.dateLabel;
@@ -601,14 +599,28 @@ export default class CinematicOverlay {
   }
 
   /**
-   * Swap event cards when the interpolated visual day changes so cards always match the day being shown on the clock.
-   * @param {number} progress - Overall cinematic progress (0-1)
+   * Interpolate worldTime between the current and next keyframe.
+   * @param {number} frameIndex - Current keyframe index
+   * @param {number} panelProgress - 0-1 within current panel
+   * @returns {number} Interpolated worldTime
    */
-  static #syncEventCardsToVisualDay(progress) {
-    const { startTime, endTime, keyframes } = this.#payload ?? {};
+  static #visualWorldTime(frameIndex, panelProgress) {
+    const keyframes = this.#payload.keyframes;
+    const startWt = keyframes[frameIndex].worldTime;
+    const endWt = keyframes[frameIndex + 1]?.worldTime ?? startWt;
+    return Math.floor(startWt + (endWt - startWt) * panelProgress);
+  }
+
+  /**
+   * Swap event cards when the interpolated visual day changes so cards always match the day shown on the date label.
+   * @param {number} frameIndex - Current keyframe index
+   * @param {number} panelProgress - 0-1 within current panel
+   */
+  static #syncEventCardsToVisualDay(frameIndex, panelProgress) {
+    const { keyframes } = this.#payload;
     const calendar = CalendarManager.getActiveCalendar();
-    if (startTime == null || !keyframes?.length || !calendar) return;
-    const components = calendar.timeToComponents(startTime + (endTime - startTime) * progress);
+    if (!calendar) return;
+    const components = calendar.timeToComponents(this.#visualWorldTime(frameIndex, panelProgress));
     const dayKey = `${components.year + (calendar.years?.yearZero ?? 0)}-${components.month}-${components.dayOfMonth}`;
     if (dayKey === this.#lastVisualDayKey) return;
     this.#lastVisualDayKey = dayKey;

@@ -1,5 +1,5 @@
 import { CalendarManager } from '../calendar/_module.mjs';
-import { CONDITION_FIELDS, CONDITION_OPERATORS } from '../constants.mjs';
+import { CONDITION_FIELDS, CONDITION_OPERATORS, DEFAULT_MOON_PHASES } from '../constants.mjs';
 import { findSeasonIndexByType, getDayOfYear, getMidpoint, getSeasonDayOfYearBounds, normalizeRawDoy, seededRandom } from '../utils/_module.mjs';
 import {
   EpochDataCache,
@@ -206,6 +206,19 @@ function phaseEntryMatches(entry, target) {
 }
 
 /**
+ * Build a phase-index matcher for a target token, falling back to cycle position when no phase matches by key or name.
+ * @param {Array[]} entries - Phase entries from Object.entries(moon.phases)
+ * @param {string} target - Lowercased target token, e.g. 'full'
+ * @returns {Function} Predicate taking a phase index
+ */
+function phaseIndexMatcher(entries, target) {
+  if (entries.some((entry) => phaseEntryMatches(entry, target))) return (index) => phaseEntryMatches(entries[index], target);
+  const position = Object.entries(DEFAULT_MOON_PHASES).find((entry) => phaseEntryMatches(entry, target))?.[1].start;
+  const targetIndex = position == null ? -1 : entries.findIndex(([, phase]) => position >= (phase?.start ?? 0) && position < (phase?.end ?? 1));
+  return (index) => index === targetIndex;
+}
+
+/**
  * Resolve "first X after" condition.
  * @param {object} startDate - Date to search from
  * @param {string} condition - Condition type (moonPhase, weekday)
@@ -218,6 +231,7 @@ function resolveFirstAfter(startDate, condition, params, calendar) {
   const inclusive = params?.inclusive === true;
   const boundary = inclusive ? { ...startDate } : addDays(startDate, 1);
   let currentDate = { ...startDate };
+  let matches = null;
   for (let i = 0; i < maxSearch; i++) {
     if (i > 0 || !inclusive) currentDate = addDays(currentDate, 1);
     switch (condition) {
@@ -228,12 +242,13 @@ function resolveFirstAfter(startDate, condition, params, calendar) {
         if (moonIndex >= moons.length) return null;
         const entries = Object.entries(moons[moonIndex].phases ?? {});
         if (!entries.length) return null;
+        matches ??= phaseIndexMatcher(entries, targetPhase);
         const info = getMoonPhaseInfoAt(calendar, currentDate, moonIndex);
-        if (!info || !phaseEntryMatches(entries[info.phaseIndex], targetPhase)) break;
+        if (!info || !matches(info.phaseIndex)) break;
         const previous = addDays(currentDate, -1);
         const previousInfo = getMoonPhaseInfoAt(calendar, previous, moonIndex);
         // Only resolve on the band's first day, so the chosen day is the same wherever the scan starts.
-        if (previousInfo && phaseEntryMatches(entries[previousInfo.phaseIndex], targetPhase)) break;
+        if (previousInfo && matches(previousInfo.phaseIndex)) break;
         const phaseStart = entries[info.phaseIndex]?.[1]?.start ?? 0;
         const onBand = cycleDistance(info.position, phaseStart);
         const beforeBand = previousInfo ? cycleDistance(previousInfo.position, phaseStart) : Infinity;

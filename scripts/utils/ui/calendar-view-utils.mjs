@@ -915,29 +915,30 @@ export function setupDayContextMenu(container, selector, calendar, options = {})
  * @returns {object} A ContextMenuEntry object
  */
 export function buildOpenAppsMenuItem() {
-  const pointer = { x: 0, y: 0 };
-  const onMove = (e) => {
-    pointer.x = e.clientX;
-    pointer.y = e.clientY;
-  };
-  document.addEventListener('pointermove', onMove, { passive: true });
   return {
     label: 'CALENDARIA.Common.Open',
     icon: '<i class="fas fa-arrow-right"></i>',
-    onClick: () => {
-      document.removeEventListener('pointermove', onMove);
+    onClick: (event) => {
+      const parentMenu = ui.context;
+      const anchor = event.target.closest('.context-item')?.getBoundingClientRect();
+      // Keep the parent menu open beside the submenu; it closes with the submenu.
+      if (parentMenu) {
+        parentMenu.close = async () => {
+          delete parentMenu.close;
+        };
+      }
+      const subItems = [
+        { label: 'CALENDARIA.Common.BigCal', icon: '<i class="fas fa-calendar-days"></i>', onClick: () => BigCal.show(), canView: canViewBigCal },
+        { label: 'CALENDARIA.Common.MiniCal', icon: '<i class="fas fa-calendar-alt"></i>', onClick: () => MiniCal.show(), canView: canViewMiniCal },
+        { label: 'CALENDARIA.SettingsPanel.Tab.HUD', icon: '<i class="fas fa-layer-group"></i>', onClick: () => HUD.show(), canView: canViewHUD },
+        { label: 'CALENDARIA.Common.TimeKeeper', icon: '<i class="fas fa-clock"></i>', onClick: () => TimeKeeper.show(), canView: canViewTimeKeeper },
+        { label: 'CALENDARIA.Common.StopWatch', icon: '<i class="fas fa-stopwatch"></i>', onClick: () => Stopwatch.show(), canView: canViewStopwatch },
+        { label: 'CALENDARIA.SettingsPanel.Tab.SunDial', icon: '<i class="fas fa-sun"></i>', onClick: () => SunDial.show(), canView: canViewSunDial },
+        { label: 'CALENDARIA.Chronicle.Title', icon: '<i class="fas fa-scroll"></i>', onClick: () => CALENDARIA.apps.Chronicle.show(), canView: canViewChronicle }
+      ].filter((item) => item.canView());
+      const subMenu = new ContextMenu(document.body, '.calendaria-open-submenu-no-match', subItems, { fixed: true, jQuery: false, onClose: () => parentMenu?.close() });
       requestAnimationFrame(async () => {
-        const subItems = [
-          { label: 'CALENDARIA.Common.BigCal', icon: '<i class="fas fa-calendar-days"></i>', onClick: () => BigCal.show(), canView: canViewBigCal },
-          { label: 'CALENDARIA.Common.MiniCal', icon: '<i class="fas fa-calendar-alt"></i>', onClick: () => MiniCal.show(), canView: canViewMiniCal },
-          { label: 'CALENDARIA.SettingsPanel.Tab.HUD', icon: '<i class="fas fa-layer-group"></i>', onClick: () => HUD.show(), canView: canViewHUD },
-          { label: 'CALENDARIA.Common.TimeKeeper', icon: '<i class="fas fa-clock"></i>', onClick: () => TimeKeeper.show(), canView: canViewTimeKeeper },
-          { label: 'CALENDARIA.Common.StopWatch', icon: '<i class="fas fa-stopwatch"></i>', onClick: () => Stopwatch.show(), canView: canViewStopwatch },
-          { label: 'CALENDARIA.SettingsPanel.Tab.SunDial', icon: '<i class="fas fa-sun"></i>', onClick: () => SunDial.show(), canView: canViewSunDial },
-          { label: 'CALENDARIA.Chronicle.Title', icon: '<i class="fas fa-scroll"></i>', onClick: () => CALENDARIA.apps.Chronicle.show(), canView: canViewChronicle }
-        ].filter((item) => item.canView());
-        const subMenu = new ContextMenu(document.body, '.calendaria-open-submenu-no-match', subItems, { fixed: true, jQuery: false });
-        await subMenu.render(document.body, { event: { clientX: pointer.x, clientY: pointer.y } });
+        await subMenu.render(document.body, { event: { clientX: anchor?.right ?? event.clientX, clientY: anchor?.top ?? event.clientY } });
         ui.context = subMenu;
       });
     }

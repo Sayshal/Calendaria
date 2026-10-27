@@ -356,7 +356,8 @@ function resolveValueName(field, value, calendar, value2) {
     const monthName = months[value.month]?.name ? _loc(months[value.month].name) : value.month + 1;
     return `${monthName} ${(value.dayOfMonth ?? 0) + 1}, ${value.year}`;
   }
-  return String(value ?? '');
+  const option = getValueOptions(field, calendar, value2)?.find((o) => o.value === value);
+  return option ? option.label : String(value ?? '');
 }
 
 /**
@@ -372,6 +373,10 @@ function describeOneCondition(cond, calendar) {
   const valueStr = resolveValueName(field, value, calendar, value2);
   const booleanFields = ['isLongestDay', 'isShortestDay', 'isSpringEquinox', 'isAutumnEquinox', 'intercalary', 'isLeapYear'];
   if (booleanFields.includes(field)) return value ? fieldLabel : `not ${fieldLabel}`;
+  if (field === CONDITION_FIELDS.MOON_PHASE_INDEX && (op === '==' || op === '!=')) {
+    const moonName = getValue2Options(field, calendar)?.find((o) => o.value === value2)?.label ?? fieldLabel;
+    return `${moonName}: ${op === '!=' ? 'not ' : ''}${valueStr}`;
+  }
   if (op === '==') {
     if (field === 'month') return valueStr;
     if (field === 'weekday') return valueStr;

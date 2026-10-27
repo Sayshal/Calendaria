@@ -2427,7 +2427,7 @@ export const CalendariaAPI = {
       startDate: { year: festivalData.startDate.year, month: (festivalData.startDate.month ?? 1) - 1, dayOfMonth: (festivalData.startDate.day ?? 1) - 1, hour: 0, minute: 0 },
       allDay: true,
       linkedFestival: { calendarId, festivalKey: foundry.utils.randomID() },
-      categories: festivalData.categories ?? ['festival'],
+      categories: festivalData.categories ?? [],
       color: festivalData.color || '#f0a500',
       icon: festivalData.icon ? `fas ${festivalData.icon}` : 'fas fa-masks-theater',
       visibility: NOTE_VISIBILITY.VISIBLE,

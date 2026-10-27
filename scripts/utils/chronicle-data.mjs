@@ -24,7 +24,7 @@ export function buildWeatherSentence(w) {
   if (label) fragments.push(label);
   if (temp) fragments.push(temp);
   if (windLabel && w.wind.speed > 0) fragments.push(dir ? `${windLabel} winds from the ${dir}` : `${windLabel} winds`);
-  if (precip) fragments.push(precip);
+  if (precip && !label) fragments.push(precip);
   if (!fragments.length) return null;
   return fragments.join(', ');
 }
@@ -48,8 +48,8 @@ function resolveStubDisplayProps(stub) {
 function buildExcerpt(html, maxLength = 150) {
   if (!html) return '';
   const div = document.createElement('div');
-  div.innerHTML = html;
-  const text = div.textContent || '';
+  div.innerHTML = html.replace(/<\/(p|div|h[1-6]|li|blockquote|tr|td|th|pre)>|<br\s*\/?>/gi, '$& ');
+  const text = (div.textContent || '').replace(/\s+/g, ' ').trim();
   return text.length > maxLength ? `${text.slice(0, maxLength).trimEnd()}...` : text;
 }
 
