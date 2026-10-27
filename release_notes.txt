@@ -1,5 +1,17 @@
 ## Bug Fixes
 
-- Fixed calendar settings failing to register when stored calendar overrides contained corrupted legacy deletion entries; those entries are now repaired on load
-- Fixed FXMaster token trails forcing the particle background on when Particle Background is off; per-scene FXMaster overrides are now read from the scene being synced
-- Fixed months with a fixed starting weekday not restarting the weekday count each month; only that month's intercalary and non-weekday festival days are counted, the HUD, date formatting, and all calendar views share one weekday calculation, and week-cycle calendars restart the cycle at fixed-start months
+- "Open" submenu in app context menus now opens beside the main menu instead of replacing it
+- API `createFestival` no longer assigns a nonexistent `festival` category by default
+- Calendar Editor Months tab column header now reads "Days" instead of "days"
+- Calendar Editor window title now updates when switching, creating or duplicating calendars
+- Chronicle and Weekly Almanac weather lines no longer repeat the precipitation type after the weather name
+- Chronicle note excerpts no longer run headings, list items and paragraphs together
+- Cinematic event cards now match the day shown on the date label
+- Cinematic moon phase name is now readable on light themes
+- Computed event "First After > Moon Phase" now resolves on calendars with custom moon phase names
+- Note Schedule tab eclipse, moon sub-phase, month in other calendar and weather conditions now show the option label instead of a raw value
+- Note Schedule tab moon phase conditions now show the moon and phase name instead of a raw phase index
+
+## Changes
+
+- Calendaria scene control buttons now appear after the existing Notes tools
