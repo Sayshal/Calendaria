@@ -455,16 +455,15 @@ export function formatApproximateDate(calendar, components) {
 const TOKEN_REGEX = /\[([^\]]+)]|{([^}]+)}|YYYY|YY|Y|MMMM|MMM|MM|Mo|M|EEEEE|EEEE|EEE|EE|E|dddd|ddd|dd|Do|DDD|DD|D|d|e|GGGG|GGG|GG|G|QQQQ|QQQ|QQ|Q|zzzz|z|ww|w|W|HH|H|hh|h|mm|m|ss|s|A|a/g;
 
 /**
- * Format a date using a custom format string with tokens.
+ * Values for bracketed and curly custom tokens in a format string.
  * @param {object} calendar - Calendar data
  * @param {object} components - Date components
- * @param {string} formatStr - Format string with tokens
- * @returns {string} - Formatted date string
+ * @param {object} parts - Parts from dateFormattingParts
+ * @returns {object} - Custom token values keyed by token name
  */
-export function formatCustom(calendar, components, formatStr) {
-  const parts = dateFormattingParts(calendar, components);
+function customTokenContext(calendar, components, parts) {
   const cycleNum = getCycleNumber(calendar, components);
-  const customContext = {
+  return {
     moon: getMoonPhaseName(calendar, components),
     era: parts.era,
     eraAbbr: parts.eraAbbr,
@@ -487,6 +486,18 @@ export function formatCustom(calendar, components, formatStr) {
     meridiemFull: parts.meridiemFull,
     yearName: parts.yearName
   };
+}
+
+/**
+ * Format a date using a custom format string with tokens.
+ * @param {object} calendar - Calendar data
+ * @param {object} components - Date components
+ * @param {string} formatStr - Format string with tokens
+ * @returns {string} - Formatted date string
+ */
+export function formatCustom(calendar, components, formatStr) {
+  const parts = dateFormattingParts(calendar, components);
+  const customContext = /[[{]/.test(formatStr) ? customTokenContext(calendar, components, parts) : {};
   const tokenMap = {
     YYYY: parts.yyyy,
     YY: parts.yy,

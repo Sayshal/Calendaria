@@ -75,6 +75,7 @@ export function overrideChatLogTimestamps() {
   ChatLog.prototype.updateTimestamps = function () {
     const mode = game.settings.get(MODULE.ID, SETTINGS.CHAT_TIMESTAMP_MODE);
     if (mode === 'disabled') return originalUpdateTimestamps.call(this);
+    const formatted = new Map();
     for (const li of document.querySelectorAll('.chat-message[data-message-id]')) {
       const message = game.messages.get(li.dataset.messageId);
       if (!message?.timestamp) continue;
@@ -82,7 +83,8 @@ export function overrideChatLogTimestamps() {
       if (!stamp) continue;
       const flags = message.flags?.[MODULE.ID];
       if (flags?.worldTime !== undefined) {
-        const formattedDate = formatWorldTime(flags.worldTime);
+        if (!formatted.has(flags.worldTime)) formatted.set(flags.worldTime, formatWorldTime(flags.worldTime));
+        const formattedDate = formatted.get(flags.worldTime);
         if (formattedDate) {
           if (mode === 'replace') {
             if (hasMoonIconMarkers(formattedDate)) stamp.innerHTML = renderMoonIcons(formattedDate);
