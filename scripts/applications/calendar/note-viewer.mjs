@@ -876,7 +876,7 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
     const content = `<div class="form-group"><label>${_loc('CALENDARIA.Common.Visibility')}</label>
       <select id="bulk-visibility-select">
         <option value="visible">${_loc('CALENDARIA.Note.Visibility.Visible')}</option>
-        <option value="hidden">${_loc('ATLAS.Common.Hidden')}</option>
+        <option value="hidden">${_loc('CALENDARIA.Note.Visibility.Hidden')}</option>
         <option value="secret">${_loc('CALENDARIA.Note.Visibility.Secret')}</option>
       </select></div>`;
     const result = await foundry.applications.api.DialogV2.prompt({

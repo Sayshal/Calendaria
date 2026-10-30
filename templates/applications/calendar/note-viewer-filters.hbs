@@ -16,13 +16,13 @@
     <div class="filter-group">
       <label class="filter-label">{{localize "CALENDARIA.Common.Visibility"}}</label>
       <select class="filter-select filter-visibility">
-        <option value="all" {{#if (eq visibility "all")}}selected{{/if}}>{{localize "ATLAS.Common.All"}}
+        <option value="all" {{#if (eq visibility "all")}}selected{{/if}}>{{localize "CALENDARIA.Common.Any"}}
         </option>
         <option value="visible" {{#if (eq visibility "visible")}}selected{{/if}}>
           {{localize "CALENDARIA.Note.Visibility.Visible"}}
         </option>
         <option value="hidden" {{#if (eq visibility "hidden")}}selected{{/if}}>
-          {{localize "ATLAS.Common.Hidden"}}
+          {{localize "CALENDARIA.Note.Visibility.Hidden"}}
         </option>
         <option value="secret" {{#if (eq visibility "secret")}}selected{{/if}}>
           {{localize "CALENDARIA.Note.Visibility.Secret"}}
@@ -53,7 +53,7 @@
     <div class="filter-group">
       <label class="filter-label">{{localize "ATLAS.Common.Author"}}</label>
       <select class="filter-select filter-author">
-        <option value="all" {{#if (eq author "all")}}selected{{/if}}>{{localize "ATLAS.Common.All"}}
+        <option value="all" {{#if (eq author "all")}}selected{{/if}}>{{localize "CALENDARIA.Common.Any"}}
         </option>
         {{#each authors}}
           <option value="{{this.id}}" {{#if this.selected}}selected{{/if}}>{{this.name}}</option>

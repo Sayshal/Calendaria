@@ -904,7 +904,7 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
     lines.push(`<strong style="color: ${enriched.color}">${esc(enriched.name)}</strong>`);
     lines.push(`<span>${esc(timeLabel)}</span>`);
     if (enriched.visibility !== 'visible') {
-      const visKey = enriched.visibility === 'hidden' ? 'ATLAS.Common.Hidden' : 'CALENDARIA.Note.Visibility.Secret';
+      const visKey = enriched.visibility === 'hidden' ? 'CALENDARIA.Note.Visibility.Hidden' : 'CALENDARIA.Note.Visibility.Secret';
       const visIcon = enriched.visibility === 'hidden' ? 'fa-eye-slash' : 'fa-lock';
       lines.push(`<span><i class="fas ${visIcon}"></i> ${esc(_loc(visKey))}</span>`);
     }

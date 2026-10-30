@@ -385,7 +385,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const visibility = this.document.system.visibility || 'visible';
     const visibilityConfig = {
       visible: { icon: 'fa-eye', label: 'CALENDARIA.Note.Visibility.Visible', badge: null },
-      hidden: { icon: 'fa-eye-slash', label: 'ATLAS.Common.Hidden', badge: _loc('ATLAS.Common.Hidden') },
+      hidden: { icon: 'fa-eye-slash', label: 'CALENDARIA.Note.Visibility.Hidden', badge: _loc('CALENDARIA.Note.Visibility.Hidden') },
       secret: { icon: 'fa-lock', label: 'CALENDARIA.Note.Visibility.Secret', badge: _loc('CALENDARIA.Note.Visibility.Secret') }
     };
     const vis = visibilityConfig[visibility] || visibilityConfig.visible;

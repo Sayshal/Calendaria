@@ -14,7 +14,7 @@
     <div class="settings-row">
       <fieldset>
         <legend
-          data-tooltip-html="<b>{{localize 'CALENDARIA.Note.Visibility.Visible'}}</b>: {{localize 'CALENDARIA.Note.Visibility.VisibleHint'}}<br><b>{{localize 'ATLAS.Common.Hidden'}}</b>: {{localize 'CALENDARIA.Note.Visibility.HiddenHint'}}<br><b>{{localize 'CALENDARIA.Note.Visibility.Secret'}}</b>: {{localize 'CALENDARIA.Note.Visibility.SecretHint'}}">
+          data-tooltip-html="<b>{{localize 'CALENDARIA.Note.Visibility.Visible'}}</b>: {{localize 'CALENDARIA.Note.Visibility.VisibleHint'}}<br><b>{{localize 'CALENDARIA.Note.Visibility.Hidden'}}</b>: {{localize 'CALENDARIA.Note.Visibility.HiddenHint'}}<br><b>{{localize 'CALENDARIA.Note.Visibility.Secret'}}</b>: {{localize 'CALENDARIA.Note.Visibility.SecretHint'}}">
           {{localize "CALENDARIA.Common.Visibility"}}
         </legend>
         <div class="visibility-group">
@@ -24,7 +24,7 @@
                 {{localize "CALENDARIA.Note.Visibility.Visible"}}
               </option>
               <option value="hidden" {{#if (eq system.visibility "hidden")}}selected{{/if}}>
-                {{localize "ATLAS.Common.Hidden"}}
+                {{localize "CALENDARIA.Note.Visibility.Hidden"}}
               </option>
               {{#if isGM}}
                 <option value="secret" {{#if (eq system.visibility "secret")}}selected{{/if}}>
