@@ -20,6 +20,9 @@ export default class ReminderScheduler {
   /** @type {number} Last world time when reminders were checked */
   static #lastCheckTime = 0;
 
+  /** @type {Map<number, object>} Dates N days after the date being checked, reset per check */
+  static #daysAhead = new Map();
+
   /** @type {boolean} Flag to skip reminders on next update (for timepoint jumps) */
   static #skipNext = false;
 
@@ -79,18 +82,18 @@ export default class ReminderScheduler {
     if (!calendar) return;
     const activeCalendarId = calendar.metadata?.id || CalendarRegistry.getActiveId() || 'unknown';
     const allNotes = NoteManager.getAllNotes();
+    this.#daysAhead.clear();
     let fired = 0;
     for (const note of allNotes) {
       if (note.calendarId && note.calendarId !== activeCalendarId) continue;
       if (note.flagData.reminderOffset == null || note.flagData.reminderOffset < 0) continue;
       if (note.flagData.silent) continue;
+      if (!this.#shouldFireReminder(note, calendar, currentDate)) continue;
       const reminderKey = `${note.id}:${currentDate.year}-${currentDate.month}-${currentDate.dayOfMonth}`;
       if (this.#firedToday.has(reminderKey)) continue;
-      if (this.#shouldFireReminder(note, calendar, currentDate)) {
-        this.#fireReminder(note);
-        this.#firedToday.add(reminderKey);
-        fired++;
-      }
+      this.#fireReminder(note);
+      this.#firedToday.add(reminderKey);
+      fired++;
     }
     if (fired > 0) ATLAS.log(3, `Fired ${fired} reminder(s) at ${currentDate.year}-${currentDate.month}-${currentDate.dayOfMonth} ${currentDate.hour}:${currentDate.minute}`);
   }
@@ -107,6 +110,11 @@ export default class ReminderScheduler {
     const startDate = note.flagData.startDate;
     if (!startDate) return false;
     if (!currentDate) return false;
+    const hasRecurrence = note.flagData.repeat && note.flagData.repeat !== 'never';
+    const tree = note.flagData.conditionTree;
+    const hasConditions = note.flagData.conditions?.length > 0 || (tree && (tree.children?.length > 0 || (tree.type === 'condition' && tree.field)));
+    const lastDate = note.flagData.endDate?.year ? note.flagData.endDate : startDate;
+    if (!hasRecurrence && !hasConditions && this.#dateValue(currentDate) > this.#dateValue(lastDate)) return false;
     const minutesPerHour = calendar?.days?.minutesPerHour ?? 60;
     const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
     const minutesInDay = hoursPerDay * minutesPerHour;
@@ -117,9 +125,6 @@ export default class ReminderScheduler {
     const daysBefore = shift > 0 ? Math.floor((shift - 1) / minutesInDay) + 1 : 0;
     const reminderMinuteOfDay = eventMinuteOfDay + daysBefore * minutesInDay - offsetMinutes;
     const currentMinutes = currentDate.hour * minutesPerHour + currentDate.minute;
-    const hasRecurrence = note.flagData.repeat && note.flagData.repeat !== 'never';
-    const tree = note.flagData.conditionTree;
-    const hasConditions = note.flagData.conditions?.length > 0 || (tree && (tree.children?.length > 0 || (tree.type === 'condition' && tree.field)));
     if (hasRecurrence || hasConditions) {
       const occursToday = isRecurringMatch(note.flagData, currentDate);
       let occursOnReminderDay = false;
@@ -169,16 +174,15 @@ export default class ReminderScheduler {
     const unit = note.flagData.reminderUnit || 'hour';
     const minutesPerHour = calendar?.days?.minutesPerHour ?? 60;
     const minutesInDay = (calendar?.days?.hoursPerDay ?? 24) * minutesPerHour;
-    const daysPerYear = calendar?.getDaysInYear?.() ?? (calendar?.monthsArray?.reduce((sum, m) => sum + (m.days || 0), 0) || 365);
     switch (unit) {
       case 'day':
         return value * minutesInDay;
       case 'week':
         return value * (Object.keys(calendar?.days?.values ?? {}).length || 7) * minutesInDay;
       case 'month':
-        return value * Math.round(daysPerYear / (calendar?.monthsArray?.length || 12)) * minutesInDay;
+        return value * Math.round(this.#daysPerYear(calendar) / (calendar?.monthsArray?.length || 12)) * minutesInDay;
       case 'year':
-        return value * daysPerYear * minutesInDay;
+        return value * this.#daysPerYear(calendar) * minutesInDay;
       default:
         return value * minutesPerHour;
     }
@@ -193,12 +197,21 @@ export default class ReminderScheduler {
    * @private
    */
   static #isDateInRange(date, startDate, endDate) {
-    const dateVal = date.year * 10000 + date.month * 100 + date.dayOfMonth;
-    const startVal = startDate.year * 10000 + startDate.month * 100 + startDate.dayOfMonth;
+    const dateVal = this.#dateValue(date);
+    const startVal = this.#dateValue(startDate);
     if (dateVal < startVal) return false;
     if (!endDate || !endDate.year) return dateVal === startVal;
-    const endVal = endDate.year * 10000 + endDate.month * 100 + endDate.dayOfMonth;
-    return dateVal <= endVal;
+    return dateVal <= this.#dateValue(endDate);
+  }
+
+  /**
+   * Collapse a date into a sortable number.
+   * @param {object} date - Date components
+   * @returns {number} Sortable date value
+   * @private
+   */
+  static #dateValue(date) {
+    return date.year * 10000 + date.month * 100 + date.dayOfMonth;
   }
 
   /**
@@ -234,9 +247,22 @@ export default class ReminderScheduler {
    * @private
    */
   static #getDateNDaysAhead(currentDate, calendar, n) {
-    let date = currentDate;
+    let date = this.#daysAhead.get(n);
+    if (date) return date;
+    date = currentDate;
     for (let i = 0; i < n; i++) date = this.#getNextDay(date, calendar);
+    this.#daysAhead.set(n, date);
     return date;
+  }
+
+  /**
+   * Count the days in the calendar year.
+   * @param {object} calendar - Active calendar
+   * @returns {number} Days per year
+   * @private
+   */
+  static #daysPerYear(calendar) {
+    return calendar?.getDaysInYear?.() ?? (calendar?.monthsArray?.reduce((sum, m) => sum + (m.days || 0), 0) || 365);
   }
 
   /**

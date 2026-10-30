@@ -77,13 +77,15 @@ export default class TimeTracker {
     this.#fireDateTimeChangeHook(this.#lastComponents, currentComponents, delta, calendar);
     this.#checkPeriodChanges(this.#lastComponents, currentComponents, calendar);
     this.#checkThresholds(this.#lastWorldTime, worldTime, calendar);
-    this.#checkMoonPhaseChanges(calendar);
-    this.#checkRestDayChange(calendar);
+    const moonPhases = this.#getCurrentMoonPhases();
+    const restDay = this.#isCurrentDayRestDay();
+    this.#checkMoonPhaseChanges(calendar, moonPhases);
+    this.#checkRestDayChange(calendar, restDay);
     this.#lastWorldTime = worldTime;
     this.#lastComponents = foundry.utils.deepClone(currentComponents);
     this.#lastSeason = currentComponents?.season ?? null;
-    this.#lastMoonPhases = this.#getCurrentMoonPhases();
-    this.#lastRestDay = this.#isCurrentDayRestDay();
+    this.#lastMoonPhases = moonPhases;
+    this.#lastRestDay = restDay;
   }
 
   /**
@@ -314,12 +316,12 @@ export default class TimeTracker {
   /**
    * Check for moon phase changes and fire hooks/macros.
    * @param {object} calendar - The active calendar
+   * @param {Map<number, number>|null} currentPhases - Current phase index per moon
    * @private
    */
-  static #checkMoonPhaseChanges(calendar) {
+  static #checkMoonPhaseChanges(calendar, currentPhases) {
     if (!calendar?.moonsArray?.length) return;
     if (!this.#lastMoonPhases) return;
-    const currentPhases = this.#getCurrentMoonPhases();
     if (!currentPhases) return;
     const changedMoons = [];
     for (const [moonIndex, currentPhaseIndex] of currentPhases) {
@@ -445,11 +447,11 @@ export default class TimeTracker {
   /**
    * Check for rest day status change and fire hook if changed.
    * @param {object} calendar - The active calendar
+   * @param {boolean} currentRestDay - Whether the current day is a rest day
    * @private
    */
-  static #checkRestDayChange(calendar) {
+  static #checkRestDayChange(calendar, currentRestDay) {
     if (this.#lastRestDay === null) return;
-    const currentRestDay = this.#isCurrentDayRestDay();
     if (this.#lastRestDay !== currentRestDay) {
       const weekdayInfo = calendar?.getWeekdayForDate?.();
       const hookData = {
