@@ -250,6 +250,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   _onClose(options) {
     super._onClose(options);
     this.#destroySearchDropdown();
+    document.removeEventListener('click', this.#onOutsideSearchClick);
   }
 
   /** Toggle nav between full labels and icon-only mode. */
@@ -334,6 +335,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
   /** Reference to the search results dropdown appended to body */
   #searchDropdown = null;
 
+  /** Document click handler that closes the search dropdown, replaced on each search input wiring */
+  #onOutsideSearchClick = null;
+
   /**
    * Setup search input listeners.
    */
@@ -358,13 +362,15 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         searchInput.blur();
       }
     });
-    document.addEventListener('click', (e) => {
+    document.removeEventListener('click', this.#onOutsideSearchClick);
+    this.#onOutsideSearchClick = (e) => {
       if (!this.#searchDropdown) return;
       if (!searchInput.contains(e.target) && !this.#searchDropdown.contains(e.target)) {
         this.#destroySearchDropdown();
         searchInput.value = '';
       }
-    });
+    };
+    document.addEventListener('click', this.#onOutsideSearchClick);
   }
 
   /**
