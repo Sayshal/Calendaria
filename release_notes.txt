@@ -1,17 +1,11 @@
 ## Bug Fixes
 
-- "Open" submenu in app context menus now opens beside the main menu instead of replacing it
-- API `createFestival` no longer assigns a nonexistent `festival` category by default
-- Calendar Editor Months tab column header now reads "Days" instead of "days"
-- Calendar Editor window title now updates when switching, creating or duplicating calendars
-- Chronicle and Weekly Almanac weather lines no longer repeat the precipitation type after the weather name
-- Chronicle note excerpts no longer run headings, list items and paragraphs together
-- Cinematic event cards now match the day shown on the date label
-- Cinematic moon phase name is now readable on light themes
-- Computed event "First After > Moon Phase" now resolves on calendars with custom moon phase names
-- Note Schedule tab eclipse, moon sub-phase, month in other calendar and weather conditions now show the option label instead of a raw value
-- Note Schedule tab moon phase conditions now show the moon and phase name instead of a raw phase index
+- Settings panel search no longer adds an extra document click listener on every re-render, and removes it when the panel closes
 
 ## Changes
 
-- Calendaria scene control buttons now appear after the existing Notes tools
+- Chat timestamp refresh formats each world time once and reuses it for messages sharing that time
+- Date formatting skips moon phase, cycle, canonical hour and approximate time lookups when the format string has no bracketed or curly tokens
+- Note viewer visibility and author filters now label the unfiltered option "Any" instead of "All"
+- Reduced per-tick work for note reminders and time change hooks by skipping past one-time notes early, caching upcoming date lookups and computing moon phase and rest day state once per tick
+- Renamed the "Hidden" note visibility option to "Author" across the note sheet, note viewer, mini calendar tooltips and note panel badges
