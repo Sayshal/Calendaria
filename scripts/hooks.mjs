@@ -1,5 +1,5 @@
 import { registerBatches } from '../dev/quench/index.mjs';
-import { BigCal, Chronicle, HUD, MiniCal, Stopwatch, SunDial, TimeKeeper } from './applications/_module.mjs';
+import { BigCal, CalendarNoteSheet, Chronicle, HUD, MiniCal, Stopwatch, SunDial, TimeKeeper } from './applications/_module.mjs';
 import { CalendarManager } from './calendar/_module.mjs';
 import { HOOKS, MODULE, SCENE_FLAGS, SETTINGS } from './constants.mjs';
 import { FestivalManager } from './festivals/_module.mjs';
@@ -91,6 +91,9 @@ export function registerHooks() {
   Hooks.on('renderChatMessageHTML', onRenderAnnouncementMessage);
   Hooks.on('renderChatMessageHTML', onRenderChatMessageHTML);
   Hooks.on('renderDocumentDirectory', onRenderDocumentDirectory);
+  Hooks.on('renderJournalEntryPageSheet', (app, element) => {
+    if (app instanceof CalendarNoteSheet) element.classList.remove('dnd5e2', 'dnd5e2-journal', 'titlebar', 'dialog-lg');
+  });
   Hooks.on('updateJournalEntry', NoteManager.onUpdateJournalEntry.bind(NoteManager));
   Hooks.on('updateJournalEntryPage', NoteManager.onUpdateJournalEntryPage.bind(NoteManager));
   Hooks.on('updateScene', onUpdateScene);

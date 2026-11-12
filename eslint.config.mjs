@@ -137,5 +137,5 @@ export default [
   },
   jsdoc.configs['flat/recommended'],
   { files: ['**/*.mjs'], rules: { 'no-undef': 'error' } },
-  { ignores: ['**/node_modules/*', '**/coverage/*', 'dev/**', 'foundry/**', 'dnd5e/**', 'dist/**'] }
+  { ignores: ['**/node_modules/*', '**/coverage/*', 'dev/**', 'foundry/**', 'dnd5e/**', 'dist/**', 'todo/**'] }
 ];
