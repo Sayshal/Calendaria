@@ -24,7 +24,7 @@ import {
   formatForLocation,
   getActiveZone,
   getEquivalentDateTooltip,
-  getMoonRenderInfo,
+  getMoonRenderPosition,
   getNotesOnDay,
   getRestorePosition,
   getSidebarBuffer,
@@ -1041,8 +1041,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       const moonList = showAll ? sortedMoons : sortedMoons.slice(0, 1);
       for (let mi = 0; mi < moonList.length; mi++) {
         const moon = moonList[mi];
-        const { position, isFull, isNew } = getMoonRenderInfo(moon, components, calendar);
-        moons.push({ phase: position, color: moon.color || null, name: moon.name || '', isFull, isNew });
+        moons.push({ phase: getMoonRenderPosition(moon, components, calendar), color: moon.color || null, name: moon.name || '' });
       }
     }
     if (this.#sceneRenderer) this.#sceneRenderer.update({ hour, sunrise, sunset, hoursPerDay, moons, skyColors: tintedColors, starAlpha });

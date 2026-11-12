@@ -1,11 +1,8 @@
 ## Bug Fixes
 
-- Settings panel search no longer adds an extra document click listener on every re-render, and removes it when the panel closes
+- HUD and Sun Dial now draw a moon at the middle of its current phase when that phase covers over half the cycle
+- Note sheets in dnd5e worlds no longer pick up dnd5e journal styling, which hid the window title and swapped the fonts
 
 ## Changes
 
-- Chat timestamp refresh formats each world time once and reuses it for messages sharing that time
-- Date formatting skips moon phase, cycle, canonical hour and approximate time lookups when the format string has no bracketed or curly tokens
-- Note viewer visibility and author filters now label the unfiltered option "Any" instead of "All"
-- Reduced per-tick work for note reminders and time change hooks by skipping past one-time notes early, caching upcoming date lookups and computing moon phase and rest day state once per tick
-- Renamed the "Hidden" note visibility option to "Author" across the note sheet, note viewer, mini calendar tooltips and note panel badges
+- Verified compatibility with dnd5e 6.1.0

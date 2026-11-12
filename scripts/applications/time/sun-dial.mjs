@@ -13,7 +13,7 @@ import {
   computeStarAlpha,
   finalizeDrag,
   formatForLocation,
-  getMoonRenderInfo,
+  getMoonRenderPosition,
   getRestorePosition,
   getSidebarBuffer,
   getSkyColorsRgb,
@@ -368,8 +368,7 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
       const components = game.time.components;
       for (let mi = 0; mi < moonList.length; mi++) {
         const moon = moonList[mi];
-        const { position, isFull, isNew } = getMoonRenderInfo(moon, components, calendar);
-        moons.push({ phase: position, color: moon.color || null, name: moon.name || '', isFull, isNew });
+        moons.push({ phase: getMoonRenderPosition(moon, components, calendar), color: moon.color || null, name: moon.name || '' });
       }
     }
     this.#sceneRenderer.update({ hour, sunrise, sunset, hoursPerDay, moons, skyColors: tintedColors, starAlpha });

@@ -143,7 +143,7 @@ Hooks.once('ready', async () => {
   if (game.settings.get(MODULE.ID, SETTINGS.FORCE_STOPWATCH)) await game.settings.set(MODULE.ID, SETTINGS.SHOW_STOPWATCH, true);
   if (game.settings.get(MODULE.ID, SETTINGS.FORCE_SUN_DIAL)) await game.settings.set(MODULE.ID, SETTINGS.SHOW_SUN_DIAL, true);
   if (game.settings.get(MODULE.ID, SETTINGS.FORCE_TIME_KEEPER)) await game.settings.set(MODULE.ID, SETTINGS.SHOW_TIME_KEEPER, true);
-  if (game.system.id === 'dnd5e' && foundry.utils.isNewerVersion(game.system.version, '5.1.10')) {
+  if (game.system.id === 'dnd5e') {
     const calendarConfig = game.settings.get('dnd5e', 'calendarConfig');
     if (calendarConfig?.enabled) {
       await game.settings.set('dnd5e', 'calendarConfig', { ...calendarConfig, enabled: false });

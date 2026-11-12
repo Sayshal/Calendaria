@@ -27,23 +27,23 @@ export function getMoonPhasePosition(moon, date, calendar = null) {
 }
 
 /**
- * Get drawing info for a moon: its phase position plus whether it is in its true Full or New band.
+ * Get the phase position (0-1) to draw a moon at, snapping to the band midpoint when its phase spans over half the cycle.
  * @param {object} moon - Moon definition (must be an entry in `calendar.moonsArray`)
  * @param {object} date - Date to check { year, month, dayOfMonth }
  * @param {object} [calendar] - Calendar instance (uses active if not provided)
- * @returns {{position: number, isFull: boolean, isNew: boolean}} Render info
+ * @returns {number} Render position from 0 to 1
  */
-export function getMoonRenderInfo(moon, date, calendar = null) {
+export function getMoonRenderPosition(moon, date, calendar = null) {
   calendar = calendar || CalendarManager.getActiveCalendar();
-  if (!calendar || !moon) return { position: 0, isFull: false, isNew: false };
+  if (!calendar || !moon) return 0;
   const moonIndex = calendar.moonsArray?.indexOf(moon) ?? -1;
-  if (moonIndex < 0) return { position: 0, isFull: false, isNew: false };
+  if (moonIndex < 0) return 0;
   const phase = calendar.getMoonPhase(moonIndex, date);
   const position = Number.isFinite(phase?.position) ? phase.position : 0;
-  const phases = moon.phases ? Object.values(moon.phases) : [];
-  const current = phases[phase?.phaseIndex ?? -1];
-  const inBand = (p, x) => (p.end > p.start ? x >= p.start && x < p.end : x >= p.start || x < p.end);
-  return { position, isFull: !!current && inBand(current, 0.5), isNew: !!current && inBand(current, 0) };
+  const band = Object.values(moon.phases ?? {})[phase?.phaseIndex ?? -1];
+  if (band?.start == null || band.end == null) return position;
+  const end = band.end > band.start ? band.end : band.end + 1;
+  return end - band.start > 0.5 ? ((band.start + end) / 2) % 1 : position;
 }
 
 /**

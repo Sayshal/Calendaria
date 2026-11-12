@@ -248,7 +248,6 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     this.#renderHeaderControls();
     this.element.classList.toggle('view-mode', this.isViewMode);
     this.element.classList.toggle('edit-mode', this.isEditMode);
-    this.element.classList.remove('dnd5e2', 'dnd5e-journal');
     for (const select of this.element.querySelectorAll('select[data-ownership-user]')) select.addEventListener('change', (e) => this.#onOwnershipChange(e));
     const dropzone = this.element.querySelector('.subjects-dropzone');
     if (dropzone) {
