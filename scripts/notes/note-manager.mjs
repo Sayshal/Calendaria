@@ -338,9 +338,10 @@ export default class NoteManager {
    * @param {string} [options.creatorId]  User ID of creator (for socket-created notes)
    * @param {false|'edit'|'view'} [options.openSheet]  Open the note sheet after creation in the given mode, or false to skip (default 'edit')
    * @param {'ui'|undefined} [options.source]  Pass 'ui' for interactive callers to trigger preset selection dialog
+   * @param {string[]} [options.lockedFields]  Note data fields set explicitly by the caller, which preset defaults must not replace
    * @returns {Promise<object>} Created journal entry page
    */
-  static async createNote({ name, content = '', noteData, calendarId, journalData = {}, creatorId, openSheet = 'edit', source }) {
+  static async createNote({ name, content = '', noteData, calendarId, journalData = {}, creatorId, openSheet = 'edit', source, lockedFields = [] }) {
     if (!canAddNotes()) {
       ui.notifications.warn('CALENDARIA.Permissions.NoAccess', { localize: true });
       return null;
@@ -352,7 +353,7 @@ export default class NoteManager {
       const result = await this.#resolvePresetForNewNote(sanitized);
       if (result === false) return null;
     }
-    applyPresetDefaultsToNoteData(sanitized, sanitized.categories);
+    applyPresetDefaultsToNoteData(sanitized, sanitized.categories, lockedFields);
     if (!content) content = getPresetContentTemplate(sanitized.categories) || '';
     if (!calendarId) {
       const activeCalendar = CalendarManager.getActiveCalendar();
@@ -360,7 +361,7 @@ export default class NoteManager {
       calendarId = activeCalendar.metadata.id;
     }
     if (!game.user.isGM && !game.user.can('JOURNAL_CREATE')) {
-      CalendariaSocket.emit(SOCKET_TYPES.CREATE_NOTE, { name, content, noteData: sanitized, calendarId, journalData, requesterId: game.user.id, openSheet });
+      CalendariaSocket.emit(SOCKET_TYPES.CREATE_NOTE, { name, content, noteData: sanitized, calendarId, journalData, requesterId: game.user.id, openSheet, lockedFields });
       ATLAS.log(3, `Note creation requested via GM: ${name}`);
       return null;
     }
@@ -373,8 +374,8 @@ export default class NoteManager {
     if (presetMerged.name && name === _loc('CALENDARIA.Note.NewNote')) name = presetMerged.name;
     if (!sanitized.categories?.length && !sanitized.linkedFestival) {
       const defaultPreset = getPresetDefinition(DEFAULT_PRESET_ID);
-      sanitized.icon = defaultPreset.icon;
-      sanitized.color = defaultPreset.color;
+      if (!lockedFields.includes('icon')) sanitized.icon = defaultPreset.icon;
+      if (!lockedFields.includes('color')) sanitized.color = defaultPreset.color;
     }
     const ownership = this.#buildOwnership(sanitized.visibility, actualCreatorId);
     if (presetMerged.defaultOwnership != null && sanitized.visibility === NOTE_VISIBILITY.VISIBLE) {

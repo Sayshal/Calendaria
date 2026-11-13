@@ -808,6 +808,14 @@ describe('createNote', () => {
     expect(call.noteData.categories).toEqual(['quest']);
     expect(call.noteData.visibility).toBe('hidden');
   });
+  it('locks only the fields the caller passed', async () => {
+    canAddNotes.mockReturnValue(true);
+    NoteManager.createNote.mockResolvedValue({});
+    await CalendariaAPI.createNote({ name: 'Due', startDate: { year: 1, month: 1, day: 1 }, visibility: 'hidden', reminderType: 'toast', reminderOffset: 0 });
+    const call = NoteManager.createNote.mock.calls[0][0];
+    expect(call.lockedFields).toEqual(['visibility', 'reminderType', 'reminderOffset']);
+    expect(call.noteData.allDay).toBe(true);
+  });
 });
 
 describe('updateNote', () => {

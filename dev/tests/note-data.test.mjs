@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   addCustomPreset,
+  applyPresetDefaultsToNoteData,
   deleteCustomPreset,
   getAllPresets,
   getDefaultNoteData,
@@ -386,5 +387,21 @@ describe('getPresetDefinition()', () => {
   it('returns null for unknown category', () => {
     game.settings.get.mockReturnValue([]);
     expect(getPresetDefinition('nonexistent')).toBeNull();
+  });
+});
+
+describe('applyPresetDefaultsToNoteData()', () => {
+  it('replaces default-valued fields with default preset values', () => {
+    const noteData = { ...getDefaultNoteData(), reminderType: 'toast', reminderOffset: 0 };
+    applyPresetDefaultsToNoteData(noteData, []);
+    expect(noteData.reminderType).toBe('chat');
+    expect(noteData.reminderOffset).toBe(1);
+  });
+  it('keeps locked fields even when they match the schema default', () => {
+    const noteData = { ...getDefaultNoteData(), reminderType: 'toast', reminderOffset: 0, visibility: 'hidden' };
+    applyPresetDefaultsToNoteData(noteData, [], ['reminderType', 'reminderOffset', 'visibility']);
+    expect(noteData.reminderType).toBe('toast');
+    expect(noteData.reminderOffset).toBe(0);
+    expect(noteData.visibility).toBe('hidden');
   });
 });

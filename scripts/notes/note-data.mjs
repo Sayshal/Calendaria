@@ -517,9 +517,10 @@ export function getPresetContentTemplate(presetIds) {
  * Apply preset defaults to note data. Only sets fields that are null/undefined on the note.
  * @param {object} noteData  Note data to augment
  * @param {string[]} presetIds  Preset IDs to pull defaults from
+ * @param {string[]} [lockedFields]  Note data fields set explicitly by the caller, left untouched
  * @returns {object}  Augmented note data (mutated)
  */
-export function applyPresetDefaultsToNoteData(noteData, presetIds) {
+export function applyPresetDefaultsToNoteData(noteData, presetIds, lockedFields = []) {
   const defaults = getPresetDefaults(presetIds);
   if (!Object.keys(defaults).length) return noteData;
   const fieldMap = {
@@ -539,7 +540,7 @@ export function applyPresetDefaultsToNoteData(noteData, presetIds) {
   };
   const noteDefaults = getDefaultNoteData();
   for (const [defaultKey, noteKey] of Object.entries(fieldMap)) {
-    if (defaults[defaultKey] == null) continue;
+    if (defaults[defaultKey] == null || lockedFields.includes(noteKey)) continue;
     if (noteData[noteKey] === noteDefaults[noteKey] || noteData[noteKey] == null) noteData[noteKey] = defaults[defaultKey];
   }
   if (defaults.owners?.length) {

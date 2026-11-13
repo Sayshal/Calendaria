@@ -340,14 +340,15 @@ export class CalendariaSocket {
    * @param {string} data.calendarId - Calendar ID
    * @param {object} data.journalData - Additional journal data
    * @param {string} data.requesterId - User ID of the requesting player
+   * @param {string[]} [data.lockedFields] - Note data fields the requester set explicitly
    * @returns {void}
    */
   static async #handleCreateNote(data) {
     if (!ATLAS.isPrimaryGM) return;
-    const { name, content, noteData, calendarId, journalData, requesterId } = data;
+    const { name, content, noteData, calendarId, journalData, requesterId, lockedFields } = data;
     ATLAS.log(3, `Primary GM handling note creation request: ${name}`);
     const noteDataWithAuthor = { ...noteData, author: requesterId };
-    const page = await NoteManager.createNote({ name, content, noteData: noteDataWithAuthor, calendarId, journalData, creatorId: requesterId });
+    const page = await NoteManager.createNote({ name, content, noteData: noteDataWithAuthor, calendarId, journalData, creatorId: requesterId, lockedFields });
     if (page && requesterId) this.emit(SOCKET_TYPES.CREATE_NOTE_COMPLETE, { pageId: page.id, journalId: page.parent.id, requesterId });
   }
 

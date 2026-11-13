@@ -870,12 +870,12 @@ export const CalendariaAPI = {
     content = '',
     startDate,
     endDate,
-    allDay = true,
+    allDay,
     conditionTree,
     categories = [],
     icon,
     color,
-    visibility = 'visible',
+    visibility,
     displayStyle,
     subjects = [],
     reminderType,
@@ -892,12 +892,12 @@ export const CalendariaAPI = {
     const noteData = {
       startDate: { year: startDate.year, month: (startDate.month ?? 1) - 1, dayOfMonth: (startDate.day ?? 1) - 1, hour: startDate.hour ?? 0, minute: startDate.minute ?? 0 },
       endDate: endDate ? { year: endDate.year, month: (endDate.month ?? 1) - 1, dayOfMonth: (endDate.day ?? 1) - 1, hour: endDate.hour ?? 23, minute: endDate.minute ?? 59 } : null,
-      allDay,
+      allDay: allDay ?? true,
       conditionTree: conditionTree ?? null,
       categories,
       icon: icon || 'fas fa-calendar-day',
       color: color || '#4a90e2',
-      visibility,
+      visibility: visibility ?? 'visible',
       displayStyle: displayStyle || DISPLAY_STYLES.ICON,
       subjects
     };
@@ -906,7 +906,9 @@ export const CalendariaAPI = {
     if (reminderUsers !== undefined) noteData.reminderUsers = reminderUsers;
     if (reminderOffset !== undefined) noteData.reminderOffset = reminderOffset;
     if (reminderUnit !== undefined) noteData.reminderUnit = reminderUnit;
-    return await NoteManager.createNote({ name, content, noteData, openSheet });
+    const explicit = { allDay, icon, color, visibility, displayStyle, reminderType, reminderTargets, reminderOffset };
+    const lockedFields = Object.keys(explicit).filter((key) => explicit[key] !== undefined);
+    return await NoteManager.createNote({ name, content, noteData, openSheet, lockedFields });
   },
 
   /**

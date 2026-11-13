@@ -209,7 +209,8 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
 
   /** @override */
   componentsToTime(components) {
-    const { year = 0, month = 0, dayOfMonth = 0, hour = 0, minute = 0, second = 0 } = components;
+    const { year = 0, month = 0, dayOfMonth = 0, day = 0, hour = 0, minute = 0, second = 0 } = components;
+    const usesDayOfYear = components.month === undefined && components.dayOfMonth === undefined;
     const secondsPerMinute = this.days?.secondsPerMinute ?? 60;
     const minutesPerHour = this.days?.minutesPerHour ?? 60;
     const hoursPerDay = this.days?.hoursPerDay ?? 24;
@@ -217,7 +218,7 @@ export default class CalendariaCalendar extends foundry.data.CalendarData {
     const secondsPerDay = secondsPerHour * hoursPerDay;
     let totalDays = this.totalDaysBeforeYear(year);
     for (let m = 0; m < month; m++) totalDays += this.getDaysInMonth(m, year);
-    totalDays += dayOfMonth;
+    totalDays += usesDayOfYear ? day : dayOfMonth;
     const totalSeconds = totalDays * secondsPerDay + hour * secondsPerHour + minute * secondsPerMinute + second;
     return totalSeconds - CalendariaCalendar.epochOffset - (this.epochDayOffset ?? 0) * secondsPerDay;
   }
