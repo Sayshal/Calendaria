@@ -6,6 +6,7 @@ import {
   CalendariaSocket,
   applyWeatherSkyTint,
   buildOpenAppsMenuItem,
+  canChangeDateTime,
   canViewMoons,
   canViewSunDial,
   checkStickyZones,
@@ -52,6 +53,9 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @type {Function|null} Bound mouse up handler for cleanup */
   #boundMouseUp = null;
+
+  /** @type {Function|null} Bound right mouse down handler for cleanup */
+  #boundRightMouseDown = null;
 
   /** @type {Function|null} Bound escape handler for cleanup */
   #boundEscape = null;
@@ -173,6 +177,7 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     context.running = TimeClock.running;
     context.clockDisabled = TimeClock.disabled;
     context.clockLocked = TimeClock.locked || TimeClock.disabled;
+    context.canChangeTime = canChangeDateTime();
     return context;
   }
 
@@ -206,10 +211,12 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#updateSceneForHour({ hours: this.#currentHours, minutes: this.#currentMinutes });
     this.#setupDialInteraction();
     SunDial.refreshStickyStates();
-    this.#boundEscape = (e) => {
-      if (e.key === 'Escape') this.close();
-    };
-    window.addEventListener('keydown', this.#boundEscape);
+    if (!this.#boundEscape) {
+      this.#boundEscape = (e) => {
+        if (e.key === 'Escape') this.close();
+      };
+      window.addEventListener('keydown', this.#boundEscape);
+    }
     if (this.#closeOnClickOutside && !this.#boundClickOutside) {
       this.#boundClickOutside = (e) => {
         if (!this.element.contains(e.target)) this.close();
@@ -246,12 +253,9 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
       Hooks.off(HOOKS.CLOCK_START_STOP, this.#clockHookId);
       this.#clockHookId = null;
     }
-    if (this.#boundMouseMove) window.removeEventListener('mousemove', this.#boundMouseMove);
-    if (this.#boundMouseUp) window.removeEventListener('mouseup', this.#boundMouseUp);
+    this.#removeDialListeners();
     if (this.#boundEscape) window.removeEventListener('keydown', this.#boundEscape);
     if (this.#boundClickOutside) document.removeEventListener('mousedown', this.#boundClickOutside);
-    this.#boundMouseMove = null;
-    this.#boundMouseUp = null;
     this.#boundEscape = null;
     this.#boundClickOutside = null;
     if (this.#resizeHandler) {
@@ -494,8 +498,20 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     label.textContent = `${sign}${dayOffset} ${_loc('ATLAS.Common.Days')}`;
   }
 
+  /** Remove window listeners added by the dial interaction. */
+  #removeDialListeners() {
+    if (this.#boundMouseMove) window.removeEventListener('mousemove', this.#boundMouseMove);
+    if (this.#boundMouseUp) window.removeEventListener('mouseup', this.#boundMouseUp);
+    if (this.#boundRightMouseDown) window.removeEventListener('mousedown', this.#boundRightMouseDown, true);
+    this.#boundMouseMove = null;
+    this.#boundMouseUp = null;
+    this.#boundRightMouseDown = null;
+  }
+
   /** Setup handle drag and time input interaction. */
   #setupDialInteraction() {
+    this.#removeDialListeners();
+    if (!canChangeDateTime()) return;
     const sky = this.element.querySelector('.sky');
     const handle = this.element.querySelector('.handle');
     if (!sky || !handle) return;
@@ -572,6 +588,7 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     };
     handle.addEventListener('mousedown', onMouseDown);
     window.addEventListener('mousedown', onRightMouseDown, true);
+    this.#boundRightMouseDown = onRightMouseDown;
     this.#boundMouseMove = onMouseMove;
     this.#boundMouseUp = onMouseUp;
     window.addEventListener('mousemove', onMouseMove);
@@ -760,11 +777,13 @@ export class SunDial extends HandlebarsApplicationMixin(ApplicationV2) {
     const today = game.time.components;
     const calendar = CalendarManager.getActiveCalendar();
     const yearZero = calendar?.years?.yearZero ?? 0;
+    const days = game.time.calendar.days;
+    const end = game.time.calendar.timeToComponents(game.time.worldTime + days.minutesPerHour * days.secondsPerMinute);
     await NoteManager.createNote({
       name: _loc('CALENDARIA.Note.NewNote'),
       noteData: {
         startDate: { year: today.year + yearZero, month: today.month, dayOfMonth: today.dayOfMonth ?? 0, hour: today.hour ?? 0, minute: today.minute ?? 0 },
-        endDate: { year: today.year + yearZero, month: today.month, dayOfMonth: today.dayOfMonth ?? 0, hour: (today.hour ?? 0) + 1, minute: today.minute ?? 0 }
+        endDate: { year: end.year + yearZero, month: end.month, dayOfMonth: end.dayOfMonth ?? 0, hour: end.hour ?? 0, minute: end.minute ?? 0 }
       },
       source: 'ui'
     });

@@ -431,6 +431,7 @@ export default class CalendariaSettings {
       intervalConditionFieldMigrationComplete: { name: 'Interval Condition Field Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       festivalIconPrefixMigrationComplete: { name: 'Festival Icon Prefix Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       seasonIconFamilyMigrationComplete: { name: 'Season Icon Family Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
+      weatherPresetChanceMigrationComplete: { name: 'Weather Preset Chance Migration Complete', scope: 'world', config: false, type: new BooleanField({ initial: false }) },
       [SETTINGS.DARKNESS_SYNC]: {
         name: 'CALENDARIA.Settings.DarknessSync.Name',
         hint: 'CALENDARIA.Settings.DarknessSync.Hint',
@@ -1048,7 +1049,7 @@ export default class CalendariaSettings {
         type: new BooleanField({ initial: false }),
         onChange: async (value) => {
           if (value) {
-            await game.settings.set(MODULE.ID, SETTINGS.SHOW_BIG_CAL, true);
+            if (game.user.isGM) await game.settings.set(MODULE.ID, SETTINGS.SHOW_BIG_CAL, true);
             BigCal.show({ silent: true });
           }
         }
@@ -1074,7 +1075,7 @@ export default class CalendariaSettings {
         type: new BooleanField({ initial: false }),
         onChange: async (value) => {
           if (value) {
-            await game.settings.set(MODULE.ID, SETTINGS.SHOW_TIME_KEEPER, true);
+            if (game.user.isGM) await game.settings.set(MODULE.ID, SETTINGS.SHOW_TIME_KEEPER, true);
             TimeKeeper.show({ silent: true });
           }
         }
@@ -1087,7 +1088,7 @@ export default class CalendariaSettings {
         type: new BooleanField({ initial: false }),
         onChange: async (value) => {
           if (value) {
-            await game.settings.set(MODULE.ID, SETTINGS.SHOW_STOPWATCH, true);
+            if (game.user.isGM) await game.settings.set(MODULE.ID, SETTINGS.SHOW_STOPWATCH, true);
             Stopwatch.show({ silent: true });
           }
         }
@@ -1100,7 +1101,7 @@ export default class CalendariaSettings {
         type: new BooleanField({ initial: false }),
         onChange: async (value) => {
           if (value) {
-            await game.settings.set(MODULE.ID, SETTINGS.SHOW_SUN_DIAL, true);
+            if (game.user.isGM) await game.settings.set(MODULE.ID, SETTINGS.SHOW_SUN_DIAL, true);
             SunDial.show({ silent: true });
           }
         }
@@ -1237,20 +1238,21 @@ export default class CalendariaSettings {
         config: false,
         type: new ObjectField({
           initial: {
-            viewBigCal: { player: false, trusted: true, assistant: true },
-            viewChronicle: { player: false, trusted: true, assistant: true },
-            viewHUD: { player: true, trusted: true, assistant: true },
-            viewMiniCal: { player: false, trusted: true, assistant: true },
-            viewStopwatch: { player: false, trusted: true, assistant: true },
-            viewSunDial: { player: false, trusted: true, assistant: true },
-            viewTimeKeeper: { player: false, trusted: true, assistant: true },
-            addNotes: { player: true, trusted: true, assistant: true },
-            changeDateTime: { player: false, trusted: false, assistant: true },
-            changeActiveCalendar: { player: false, trusted: false, assistant: false },
-            changeWeather: { player: false, trusted: false, assistant: true },
-            deleteNotes: { player: false, trusted: false, assistant: true },
-            editCalendars: { player: false, trusted: false, assistant: false },
-            viewWeatherForecast: { player: false, trusted: true, assistant: true }
+            viewBigCal: { player: false, trusted: true },
+            viewChronicle: { player: false, trusted: true },
+            viewHUD: { player: true, trusted: true },
+            viewMiniCal: { player: false, trusted: true },
+            viewNotes: { player: true, trusted: true },
+            viewStopwatch: { player: false, trusted: true },
+            viewSunDial: { player: false, trusted: true },
+            viewTimeKeeper: { player: false, trusted: true },
+            addNotes: { player: true, trusted: true },
+            changeDateTime: { player: false, trusted: false },
+            changeActiveCalendar: { player: false, trusted: false },
+            changeWeather: { player: false, trusted: false },
+            deleteNotes: { player: false, trusted: false },
+            editCalendars: { player: false, trusted: false },
+            viewWeatherForecast: { player: false, trusted: true }
           }
         })
       },

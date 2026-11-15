@@ -13,7 +13,6 @@
         <span>{{localize "PERMISSION.Permission"}}</span>
         <span>{{localize "USER.RolePlayer"}}</span>
         <span>{{localize "USER.RoleTrusted"}}</span>
-        <span>{{localize "USER.RoleAssistant"}}</span>
       </header>
 
       <ul class="permissions-list">
@@ -23,8 +22,6 @@
             aria-label="{{localize 'USER.RolePlayer'}}" {{#if permissions.viewHUD.player}}checked{{/if}} />
           <input type="checkbox" name="permissions.viewHUD.trusted" data-tooltip
             aria-label="{{localize 'USER.RoleTrusted'}}" {{#if permissions.viewHUD.trusted}}checked{{/if}} />
-          <input type="checkbox" name="permissions.viewHUD.assistant" data-tooltip
-            aria-label="{{localize 'USER.RoleAssistant'}}" {{#if permissions.viewHUD.assistant}}checked{{/if}} />
           <p class="hint">{{localize "CALENDARIA.Permissions.ViewHUDHint"}}</p>
         </li>
         <li class="permission-row">
@@ -33,8 +30,6 @@
             aria-label="{{localize 'USER.RolePlayer'}}" {{#if permissions.viewBigCal.player}}checked{{/if}} />
           <input type="checkbox" name="permissions.viewBigCal.trusted" data-tooltip
             aria-label="{{localize 'USER.RoleTrusted'}}" {{#if permissions.viewBigCal.trusted}}checked{{/if}} />
-          <input type="checkbox" name="permissions.viewBigCal.assistant" data-tooltip
-            aria-label="{{localize 'USER.RoleAssistant'}}" {{#if permissions.viewBigCal.assistant}}checked{{/if}} />
           <p class="hint">{{localize "CALENDARIA.Permissions.ViewBigCalHint"}}</p>
         </li>
         <li class="permission-row">
@@ -43,8 +38,6 @@
             aria-label="{{localize 'USER.RolePlayer'}}" {{#if permissions.viewMiniCal.player}}checked{{/if}} />
           <input type="checkbox" name="permissions.viewMiniCal.trusted" data-tooltip
             aria-label="{{localize 'USER.RoleTrusted'}}" {{#if permissions.viewMiniCal.trusted}}checked{{/if}} />
-          <input type="checkbox" name="permissions.viewMiniCal.assistant" data-tooltip
-            aria-label="{{localize 'USER.RoleAssistant'}}" {{#if permissions.viewMiniCal.assistant}}checked{{/if}} />
           <p class="hint">{{localize "CALENDARIA.Permissions.ViewMiniCalHint"}}</p>
         </li>
         <li class="permission-row">
@@ -53,8 +46,6 @@
             aria-label="{{localize 'USER.RolePlayer'}}" {{#if permissions.viewNotes.player}}checked{{/if}} />
           <input type="checkbox" name="permissions.viewNotes.trusted" data-tooltip
             aria-label="{{localize 'USER.RoleTrusted'}}" {{#if permissions.viewNotes.trusted}}checked{{/if}} />
-          <input type="checkbox" name="permissions.viewNotes.assistant" data-tooltip
-            aria-label="{{localize 'USER.RoleAssistant'}}" {{#if permissions.viewNotes.assistant}}checked{{/if}} />
           <p class="hint">{{localize "CALENDARIA.Permissions.ViewNotesHint"}}</p>
         </li>
         <li class="permission-row">
@@ -63,8 +54,6 @@
             aria-label="{{localize 'USER.RolePlayer'}}" {{#if permissions.viewChronicle.player}}checked{{/if}} />
           <input type="checkbox" name="permissions.viewChronicle.trusted" data-tooltip
             aria-label="{{localize 'USER.RoleTrusted'}}" {{#if permissions.viewChronicle.trusted}}checked{{/if}} />
-          <input type="checkbox" name="permissions.viewChronicle.assistant" data-tooltip
-            aria-label="{{localize 'USER.RoleAssistant'}}" {{#if permissions.viewChronicle.assistant}}checked{{/if}} />
           <p class="hint">{{localize "CALENDARIA.Permissions.ViewChronicleHint"}}</p>
         </li>
         <li class="permission-row">
@@ -73,8 +62,6 @@
             aria-label="{{localize 'USER.RolePlayer'}}" {{#if permissions.viewTimeKeeper.player}}checked{{/if}} />
           <input type="checkbox" name="permissions.viewTimeKeeper.trusted" data-tooltip
             aria-label="{{localize 'USER.RoleTrusted'}}" {{#if permissions.viewTimeKeeper.trusted}}checked{{/if}} />
-          <input type="checkbox" name="permissions.viewTimeKeeper.assistant" data-tooltip
-            aria-label="{{localize 'USER.RoleAssistant'}}" {{#if permissions.viewTimeKeeper.assistant}}checked{{/if}} />
           <p class="hint">{{localize "CALENDARIA.Permissions.ViewTimeKeeperHint"}}</p>
         </li>
         <li class="permission-row">
@@ -83,8 +70,6 @@
             aria-label="{{localize 'USER.RolePlayer'}}" {{#if permissions.viewSunDial.player}}checked{{/if}} />
           <input type="checkbox" name="permissions.viewSunDial.trusted" data-tooltip
             aria-label="{{localize 'USER.RoleTrusted'}}" {{#if permissions.viewSunDial.trusted}}checked{{/if}} />
-          <input type="checkbox" name="permissions.viewSunDial.assistant" data-tooltip
-            aria-label="{{localize 'USER.RoleAssistant'}}" {{#if permissions.viewSunDial.assistant}}checked{{/if}} />
           <p class="hint">{{localize "CALENDARIA.Permissions.ViewSunDialHint"}}</p>
         </li>
         <li class="permission-row">
@@ -93,8 +78,6 @@
             aria-label="{{localize 'USER.RolePlayer'}}" {{#if permissions.viewStopwatch.player}}checked{{/if}} />
           <input type="checkbox" name="permissions.viewStopwatch.trusted" data-tooltip
             aria-label="{{localize 'USER.RoleTrusted'}}" {{#if permissions.viewStopwatch.trusted}}checked{{/if}} />
-          <input type="checkbox" name="permissions.viewStopwatch.assistant" data-tooltip
-            aria-label="{{localize 'USER.RoleAssistant'}}" {{#if permissions.viewStopwatch.assistant}}checked{{/if}} />
           <p class="hint">{{localize "CALENDARIA.Permissions.ViewStopwatchHint"}}</p>
         </li>
         <li class="permission-row">
@@ -103,8 +86,6 @@
             aria-label="{{localize 'USER.RolePlayer'}}" {{#if permissions.addNotes.player}}checked{{/if}} />
           <input type="checkbox" name="permissions.addNotes.trusted" data-tooltip
             aria-label="{{localize 'USER.RoleTrusted'}}" {{#if permissions.addNotes.trusted}}checked{{/if}} />
-          <input type="checkbox" name="permissions.addNotes.assistant" data-tooltip
-            aria-label="{{localize 'USER.RoleAssistant'}}" {{#if permissions.addNotes.assistant}}checked{{/if}} />
           <p class="hint">{{localize "CALENDARIA.Permissions.AddNotesHint"}}</p>
         </li>
         <li class="permission-row">
@@ -113,8 +94,6 @@
             aria-label="{{localize 'USER.RolePlayer'}}" {{#if permissions.deleteNotes.player}}checked{{/if}} />
           <input type="checkbox" name="permissions.deleteNotes.trusted" data-tooltip
             aria-label="{{localize 'USER.RoleTrusted'}}" {{#if permissions.deleteNotes.trusted}}checked{{/if}} />
-          <input type="checkbox" name="permissions.deleteNotes.assistant" data-tooltip
-            aria-label="{{localize 'USER.RoleAssistant'}}" {{#if permissions.deleteNotes.assistant}}checked{{/if}} />
           <p class="hint">{{localize "CALENDARIA.Permissions.DeleteNotesHint"}}</p>
         </li>
         <li class="permission-row">
@@ -123,8 +102,6 @@
             aria-label="{{localize 'USER.RolePlayer'}}" {{#if permissions.changeDateTime.player}}checked{{/if}} />
           <input type="checkbox" name="permissions.changeDateTime.trusted" data-tooltip
             aria-label="{{localize 'USER.RoleTrusted'}}" {{#if permissions.changeDateTime.trusted}}checked{{/if}} />
-          <input type="checkbox" name="permissions.changeDateTime.assistant" data-tooltip
-            aria-label="{{localize 'USER.RoleAssistant'}}" {{#if permissions.changeDateTime.assistant}}checked{{/if}} />
           <p class="hint">{{localize "CALENDARIA.Permissions.ChangeDateTimeHint"}}</p>
         </li>
         <li class="permission-row">
@@ -134,9 +111,6 @@
           <input type="checkbox" name="permissions.viewWeatherForecast.trusted" data-tooltip
             aria-label="{{localize 'USER.RoleTrusted'}}"
             {{#if permissions.viewWeatherForecast.trusted}}checked{{/if}} />
-          <input type="checkbox" name="permissions.viewWeatherForecast.assistant" data-tooltip
-            aria-label="{{localize 'USER.RoleAssistant'}}"
-            {{#if permissions.viewWeatherForecast.assistant}}checked{{/if}} />
           <p class="hint">{{localize "CALENDARIA.Permissions.ViewWeatherForecastHint"}}</p>
         </li>
         <li class="permission-row">
@@ -145,8 +119,6 @@
             aria-label="{{localize 'USER.RolePlayer'}}" {{#if permissions.changeWeather.player}}checked{{/if}} />
           <input type="checkbox" name="permissions.changeWeather.trusted" data-tooltip
             aria-label="{{localize 'USER.RoleTrusted'}}" {{#if permissions.changeWeather.trusted}}checked{{/if}} />
-          <input type="checkbox" name="permissions.changeWeather.assistant" data-tooltip
-            aria-label="{{localize 'USER.RoleAssistant'}}" {{#if permissions.changeWeather.assistant}}checked{{/if}} />
           <p class="hint">{{localize "CALENDARIA.Permissions.ChangeWeatherHint"}}</p>
         </li>
         <li class="permission-row">
@@ -156,9 +128,6 @@
           <input type="checkbox" name="permissions.changeActiveCalendar.trusted" data-tooltip
             aria-label="{{localize 'USER.RoleTrusted'}}"
             {{#if permissions.changeActiveCalendar.trusted}}checked{{/if}} />
-          <input type="checkbox" name="permissions.changeActiveCalendar.assistant" data-tooltip
-            aria-label="{{localize 'USER.RoleAssistant'}}"
-            {{#if permissions.changeActiveCalendar.assistant}}checked{{/if}} />
           <p class="hint">{{localize "CALENDARIA.Permissions.ChangeActiveCalendarHint"}}</p>
         </li>
         <li class="permission-row">
@@ -167,8 +136,6 @@
             aria-label="{{localize 'USER.RolePlayer'}}" {{#if permissions.editCalendars.player}}checked{{/if}} />
           <input type="checkbox" name="permissions.editCalendars.trusted" data-tooltip
             aria-label="{{localize 'USER.RoleTrusted'}}" {{#if permissions.editCalendars.trusted}}checked{{/if}} />
-          <input type="checkbox" name="permissions.editCalendars.assistant" data-tooltip
-            aria-label="{{localize 'USER.RoleAssistant'}}" {{#if permissions.editCalendars.assistant}}checked{{/if}} />
           <p class="hint">{{localize "CALENDARIA.Permissions.EditCalendarsHint"}}</p>
         </li>
       </ul>

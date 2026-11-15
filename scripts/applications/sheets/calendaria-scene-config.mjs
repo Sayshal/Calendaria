@@ -1,4 +1,4 @@
-import { MODULE, SCENE_FLAGS, TEMPLATES } from '../../constants.mjs';
+import { MODULE, SCENE_FLAGS, SETTINGS, TEMPLATES } from '../../constants.mjs';
 import { WeatherManager } from '../../weather/_module.mjs';
 
 /**
@@ -47,7 +47,7 @@ export class CalendariaSceneConfig extends foundry.applications.sheets.SceneConf
         context.colorShiftSync = threeWay(SCENE_FLAGS.COLOR_SHIFT_SYNC);
         context.weatherDarknessSync = threeWay(SCENE_FLAGS.DARKNESS_WEATHER_SYNC);
         context.moonDarknessSync = threeWay(SCENE_FLAGS.DARKNESS_MOON_SYNC);
-        context.brightnessMultiplier = doc.getFlag(MODULE.ID, SCENE_FLAGS.BRIGHTNESS_MULTIPLIER) ?? 1.0;
+        context.brightnessMultiplier = doc.getFlag(MODULE.ID, SCENE_FLAGS.BRIGHTNESS_MULTIPLIER) ?? game.settings.get(MODULE.ID, SETTINGS.DEFAULT_BRIGHTNESS_MULTIPLIER) ?? 1.0;
         context.hudHideForPlayers = doc.getFlag(MODULE.ID, SCENE_FLAGS.HUD_HIDE_FOR_PLAYERS) ?? false;
         context.climateZoneOverride = doc.getFlag(MODULE.ID, SCENE_FLAGS.CLIMATE_ZONE_OVERRIDE) ?? '';
         context.climateZones = WeatherManager.getCalendarZones?.() ?? [];
@@ -68,6 +68,14 @@ export class CalendariaSceneConfig extends foundry.applications.sheets.SceneConf
         context.sceneLevels = [...(doc.levels ?? [])].map((l) => ({ id: l.id, name: l.name, selected: selectedLevels.includes(l.id) }));
       }
       return context;
+    };
+    const origProcess = Base.prototype._processFormData;
+    Base.prototype._processFormData = function (event, form, formData) {
+      const submitData = origProcess.call(this, event, form, formData);
+      const moduleFlags = submitData.flags?.[MODULE.ID];
+      const unset = this.document.getFlag(MODULE.ID, SCENE_FLAGS.BRIGHTNESS_MULTIPLIER) === undefined;
+      if (unset && moduleFlags?.[SCENE_FLAGS.BRIGHTNESS_MULTIPLIER] === game.settings.get(MODULE.ID, SETTINGS.DEFAULT_BRIGHTNESS_MULTIPLIER)) delete moduleFlags[SCENE_FLAGS.BRIGHTNESS_MULTIPLIER];
+      return submitData;
     };
     const origAttach = Base.prototype._attachPartListeners;
     Base.prototype._attachPartListeners = function (partId, htmlElement, options) {

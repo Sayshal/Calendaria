@@ -24,6 +24,16 @@ function cond(field, op, value, extra = {}) {
   return { type: 'condition', field, op, value, ...extra };
 }
 
+/**
+ * Build an OR group matching any of the given eclipse types on one moon.
+ * @param {number} moonIndex - Moon index
+ * @param {string[]} types - Eclipse type values
+ * @returns {object} OR group
+ */
+function eclipseTypeGroup(moonIndex, types) {
+  return { type: 'group', mode: 'or', children: types.map((t) => cond('eclipse', '==', t, { value2: moonIndex })), threshold: null };
+}
+
 /** Sub-phase labels keyed by sub-phase value. */
 const SUB_PHASE_LABELS = { 1: 'CALENDARIA.Common.Rising', 2: 'CALENDARIA.Condition.MoonSubPhase.True', 3: 'CALENDARIA.Common.Fading' };
 
@@ -231,13 +241,13 @@ export function getConditionPresets(startDate) {
         id: `solarEclipse_${mi}`,
         group: 'eclipse',
         label: _loc(`${L}SolarEclipse`, { moon: moonName }),
-        tree: andGroup([cond('isSolarEclipse', '==', true)])
+        tree: andGroup([eclipseTypeGroup(mi, ['totalSolar', 'partialSolar', 'annularSolar'])])
       });
       p.push({
         id: `lunarEclipse_${mi}`,
         group: 'eclipse',
         label: _loc(`${L}LunarEclipse`, { moon: moonName }),
-        tree: andGroup([cond('isLunarEclipse', '==', true)])
+        tree: andGroup([eclipseTypeGroup(mi, ['totalLunar', 'partialLunar', 'penumbralLunar'])])
       });
     }
   }

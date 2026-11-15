@@ -429,7 +429,7 @@ export async function importSettings(onComplete) {
           }
         } catch (calError) {
           ATLAS.log(1, 'Calendar import failed:', calError);
-          ui.notifications.error(`Calendar import failed: ${calError.message}`);
+          ui.notifications.error(_loc('CALENDARIA.SettingsPanel.ImportSettings.CalendarFailed', { error: calError.message }));
         }
       }
       if (hasNotes && doImportNotes) {
@@ -439,7 +439,7 @@ export async function importSettings(onComplete) {
           if (noteCount > 0) ui.notifications.info(_loc('CALENDARIA.SettingsPanel.ImportSettings.NotesImported', { count: noteCount }));
         } catch (noteError) {
           ATLAS.log(1, 'Note import failed:', noteError);
-          ui.notifications.error(`Note import failed: ${noteError.message}`);
+          ui.notifications.error(_loc('CALENDARIA.SettingsPanel.ImportSettings.NotesFailed', { error: noteError.message }));
         }
       }
       if (onComplete) onComplete();

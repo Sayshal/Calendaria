@@ -17,7 +17,7 @@
   </div>
   <div class="time-display">
     <div class="day-offset"></div>
-    <input type="text" class="time" value="{{currentTime}}">
+    <input type="text" class="time" value="{{currentTime}}"{{#unless canChangeTime}} readonly{{/unless}}>
     <div class="dial-controls">
       <button type="button" class="dial-btn{{#if clockLocked}} clock-locked{{/if}}" data-action="toggleClock"
         data-tooltip

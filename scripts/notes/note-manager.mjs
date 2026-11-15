@@ -1,6 +1,6 @@
 import { CalendarManager, isBundledCalendar } from '../calendar/_module.mjs';
 import { HOOKS, MODULE, NOTE_VISIBILITY, SETTINGS, SOCKET_TYPES } from '../constants.mjs';
-import { CalendariaSocket, canAddNotes, canDeleteNotes } from '../utils/_module.mjs';
+import { CalendariaSocket, canAddNotes, canDeleteNote, canDeleteNotes } from '../utils/_module.mjs';
 import {
   DEFAULT_PRESET_ID,
   applyPresetDefaultsToNoteData,
@@ -300,6 +300,10 @@ export default class NoteManager {
         ATLAS.log(2, `Prevented deletion of festival note: ${journal.name}`);
         return false;
       }
+      if (journal.getFlag(MODULE.ID, 'isCalendarNote') && page && !canDeleteNote(page)) {
+        ui.notifications.warn('CALENDARIA.Permissions.NoAccess', { localize: true });
+        return false;
+      }
     }
   }
 
@@ -384,10 +388,16 @@ export default class NoteManager {
       ownership.default = Math.max(ownership.default ?? 0, level);
     }
     const journal = await JournalEntry.create({ name, folder: folder.id, ownership, flags: { [MODULE.ID]: { calendarId, isCalendarNote: true } }, ...journalData });
-    const page = await JournalEntryPage.create(
-      { name, type: 'calendaria.calendarnote', system: sanitized, text: { content }, title: { level: 1, show: true }, flags: { [MODULE.ID]: { calendarId } } },
-      { parent: journal }
-    );
+    let page;
+    try {
+      page = await JournalEntryPage.create(
+        { name, type: 'calendaria.calendarnote', system: sanitized, text: { content }, title: { level: 1, show: true }, flags: { [MODULE.ID]: { calendarId } } },
+        { parent: journal }
+      );
+    } finally {
+      if (!page) await journal.delete();
+    }
+    if (!page) return null;
     ATLAS.log(3, `Created calendar note: ${name}`);
     if (openSheet && (!creatorId || creatorId === game.user.id)) page.sheet.render(true, { mode: openSheet, forceMode: openSheet });
     return page;

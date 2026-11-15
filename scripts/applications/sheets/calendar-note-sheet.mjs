@@ -1,5 +1,5 @@
 import { CalendarManager, CalendarRegistry, getEquivalentDates } from '../../calendar/_module.mjs';
-import { MODULE, SETTINGS, SOCKET_TYPES, TEMPLATES } from '../../constants.mjs';
+import { MODULE, SETTINGS, TEMPLATES } from '../../constants.mjs';
 import { isDontForgetActive } from '../../integrations/dont-forget.mjs';
 import {
   addCustomPreset,
@@ -21,7 +21,7 @@ import {
   wrapInRootGroup
 } from '../../notes/_module.mjs';
 import { daysBetween } from '../../notes/date-utils.mjs';
-import { CalendariaSocket, formatForLocation, getAvailableMacros } from '../../utils/_module.mjs';
+import { canDeleteNote, formatForLocation, getAvailableMacros } from '../../utils/_module.mjs';
 import { CalendarEditor, ConditionBuilderDialog } from '../_module.mjs';
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
@@ -311,7 +311,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
       controlsContainer.appendChild(modeBtn);
     }
     if (this.isEditMode) {
-      if ((this.isAuthor || game.user.isGM) && this.document.id) {
+      if (canDeleteNote(this.document) && this.document.id) {
         const divider = document.createElement('span');
         divider.className = 'header-divider';
         controlsContainer.appendChild(divider);
@@ -834,11 +834,10 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const level = parseInt(select.value);
     if (!userId || !Number.isFinite(level)) return;
     const journal = this.document.parent;
-    if (!journal) return;
+    if (!journal || !game.user.isGM) return;
     NoteManager.enableSuppressOwnershipRebuild();
     try {
-      if (game.user.isGM) await journal.update({ ownership: { [userId]: level } });
-      else CalendariaSocket.emit(SOCKET_TYPES.OWNERSHIP_UPDATE, { journalId: journal.id, ownership: { [userId]: level } });
+      await journal.update({ ownership: { [userId]: level } });
     } finally {
       NoteManager.disableSuppressOwnershipRebuild();
     }
@@ -1082,7 +1081,7 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
    * @param {HTMLElement} _target - The clicked element
    */
   static async _onDeleteNote(_event, _target) {
-    if (!this.isAuthor && !game.user.isGM) return;
+    if (!canDeleteNote(this.document)) return;
     const confirmed = await foundry.applications.api.DialogV2.confirm({
       classes: ['calendaria'],
       window: { title: 'CALENDARIA.Common.DeleteNote' },
@@ -1138,15 +1137,16 @@ export class CalendarNoteSheet extends HandlebarsApplicationMixin(foundry.applic
     const conditions = tree?.children?.length ? tree.children : this.document.system.conditions || [];
     new ConditionBuilderDialog({
       conditions,
+      root: tree?.children?.length ? tree : null,
       document: this.document,
-      onChange: async (updated) => {
+      onChange: async (updated, root) => {
         const validation = validateConditions(updated);
         if (!validation.valid) {
           ui.notifications.error('CALENDARIA.Condition.Builder.ValidationError', { localize: true });
           ATLAS.log(2, 'Condition validation errors:', validation.errors);
           return;
         }
-        const tree = updated.length ? wrapInRootGroup(updated) : null;
+        const tree = updated.length ? wrapInRootGroup(updated, root) : null;
         const deps = tree ? extractEventDependencies(tree) : [];
         const updateData = { 'system.conditions': updated, 'system.conditionTree': tree };
         if (deps.length) {

@@ -6,6 +6,13 @@ import { CinematicOverlay } from '../_module.mjs';
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
+/** Skip event, reminder and threshold triggers for the next world time update. */
+function skipTimeTriggers() {
+  TimeTracker.skipNextHooks();
+  EventScheduler.skipNext();
+  ReminderScheduler.skipNext();
+}
+
 /**
  * Dialog for setting the current date/time and managing saved timepoints.
  */
@@ -224,17 +231,13 @@ export class SetDateDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!timepoint) return;
     const skipCheckbox = this.element.querySelector('input[name="skipTriggers"]');
     const skipTriggers = skipCheckbox?.checked ?? true;
-    if (skipTriggers) {
-      TimeTracker.skipNextHooks();
-      EventScheduler.skipNext();
-      ReminderScheduler.skipNext();
-    }
     const delta = timepoint.worldTime - game.time.worldTime;
     if (!game.user.isGM) {
-      CalendariaSocket.emit(SOCKET_TYPES.TIME_REQUEST, { action: 'advance', delta });
+      CalendariaSocket.emit(SOCKET_TYPES.TIME_REQUEST, { action: 'advance', delta, skipTriggers });
       this.close();
       return;
     }
+    if (skipTriggers) skipTimeTriggers();
     await game.time.advance(delta);
     ATLAS.log(3, `Jumped to timepoint: ${timepoint.name} (skip triggers: ${skipTriggers})`);
     this.close();
@@ -296,15 +299,11 @@ export class SetDateDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     const newTime = calendar.componentsToTime(newTimeComponents);
     const delta = newTime - game.time.worldTime;
     if (delta !== 0) {
-      if (skipTriggers) {
-        TimeTracker.skipNextHooks();
-        EventScheduler.skipNext();
-        ReminderScheduler.skipNext();
-      }
       if (!game.user.isGM) {
-        CalendariaSocket.emit(SOCKET_TYPES.TIME_REQUEST, { action: 'advance', delta });
+        CalendariaSocket.emit(SOCKET_TYPES.TIME_REQUEST, { action: 'advance', delta, skipTriggers });
         return;
       }
+      if (skipTriggers) skipTimeTriggers();
       await game.time.advance(delta);
       ATLAS.log(3, `Set date to ${year + yearZero}/${month + 1}/${day} ${hour}:${minute} (skip triggers: ${skipTriggers})`);
     }
@@ -331,16 +330,12 @@ export class SetDateDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     const newTime = calendar.componentsToTime({ year, month, dayOfMonth: day - 1, hour, minute, second: 0 });
     const delta = newTime - game.time.worldTime;
     if (delta === 0) return;
-    if (skipTriggers) {
-      TimeTracker.skipNextHooks();
-      EventScheduler.skipNext();
-      ReminderScheduler.skipNext();
-    }
     if (!game.user.isGM) {
-      CalendariaSocket.emit(SOCKET_TYPES.TIME_REQUEST, { action: 'advance', delta });
+      CalendariaSocket.emit(SOCKET_TYPES.TIME_REQUEST, { action: 'advance', delta, skipTriggers });
       this.close();
       return;
     }
+    if (skipTriggers) skipTimeTriggers();
     await CinematicOverlay.triggerFromAdvance(delta);
     ATLAS.log(3, `Cinematic advance to ${year + yearZero}/${month + 1}/${day} ${hour}:${minute}`);
     this.close();

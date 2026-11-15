@@ -12,10 +12,11 @@ const ALMANAC_JOURNAL_FLAG = 'isAlmanacJournal';
  * Build one list row.
  * @param {string} label - Row label (escaped here)
  * @param {string} body - Row body (already escaped, or enricher markup)
+ * @param {string} [separator] - Text between label and body
  * @returns {string} List item HTML
  */
-function row(label, body) {
-  return `<li><strong>${foundry.utils.escapeHTML(label)}</strong>: ${body}</li>`;
+function row(label, body, separator = ':') {
+  return `<li><strong>${foundry.utils.escapeHTML(label)}</strong>${separator} ${body}</li>`;
 }
 
 /**
@@ -51,7 +52,7 @@ function dayRow(calendar, date, weather) {
   const label = weekdayName ? `${formatDay(calendar, date)} (${_loc(weekdayName)})` : formatDay(calendar, date);
   const sentence = buildWeatherSentence(weather);
   const notes = `[[cal.notes ${date.dayOfMonth + 1} ${date.month + 1} ${date.year} links=true]]`;
-  return row(label, sentence ? `${foundry.utils.escapeHTML(sentence)} ${notes}` : notes);
+  return sentence ? row(label, `${foundry.utils.escapeHTML(sentence)} ${notes}`) : row(label, notes, '');
 }
 
 /**
@@ -63,7 +64,7 @@ function dayRow(calendar, date, weather) {
 export function buildAlmanacContent(calendar, weekStart) {
   const daysPerWeek = calendar.weekdaysArray?.length || 7;
   const yearZero = calendar.years?.yearZero ?? 0;
-  const moons = calendar.moonsArray ?? [];
+  const moons = game.settings.get(MODULE.ID, SETTINGS.HIDE_MOONS_FROM_PLAYERS) ? [] : (calendar.moonsArray ?? []);
   const reviewStart = addDays(weekStart, -daysPerWeek);
   const reviewRows = [];
   for (let i = 0; i < daysPerWeek; i++) {
@@ -83,7 +84,7 @@ export function buildAlmanacContent(calendar, weekStart) {
       if (moons[m].visibility === MOON_VISIBILITY.HIDDEN) continue;
       const phase = calendar.getMoonPhase?.(m, internal);
       if (!phase?.name || phase.dayWithinPhase !== Math.floor(phase.phaseDuration / 2)) continue;
-      moonRows.push(row(formatDay(calendar, date), foundry.utils.escapeHTML(`${moons[m].name}: ${_loc(phase.name)}`)));
+      moonRows.push(row(formatDay(calendar, date), foundry.utils.escapeHTML(`${_loc(moons[m].name)}: ${_loc(phase.name)}`)));
     }
     aheadRows.push(dayRow(calendar, date, forecastByDay.get(`${internal.year}.${internal.month}.${internal.dayOfMonth}`)));
   }

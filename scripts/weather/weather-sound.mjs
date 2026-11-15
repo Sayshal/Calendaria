@@ -145,11 +145,13 @@ function onCanvasReady() {
  * Handle weather change hook — play or stop sound.
  * @param {object} payload - Weather change hook payload
  * @param {object|null} payload.current - Current weather data
+ * @param {string} [payload.zoneId] - Zone ID the change applies to
  * @param {boolean} payload.bulk - Whether this is a bulk weather change
  * @param {boolean} payload.visualOnly - Whether this is a visual-only refresh (skip sound)
  */
-function onWeatherChange({ current, bulk, visualOnly } = {}) {
+function onWeatherChange({ current, zoneId, bulk, visualOnly } = {}) {
   if (visualOnly) return;
+  if (!bulk && zoneId !== (WeatherManager.getActiveZone(null, game.scenes?.active)?.id ?? WeatherManager.DEFAULT_ZONE)) return;
   playSound((bulk ? WeatherManager.getCurrentWeather() : current) || null);
 }
 

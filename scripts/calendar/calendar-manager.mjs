@@ -629,24 +629,14 @@ export default class CalendarManager {
   /**
    * Handle updateSetting hook for active calendar changes.
    * @param {object} setting - The setting that was updated
-   * @param {object} changes - The changes to the setting
    * @private
    */
-  static onUpdateSetting(setting, changes) {
+  static onUpdateSetting(setting) {
     if (setting.key === `${MODULE.ID}.${SETTINGS.ACTIVE_CALENDAR}`) {
-      const newCalendarId = changes.value;
+      const newCalendarId = setting.value;
       if (this.#isSwitchingCalendar) return;
       ATLAS.log(3, 'Active calendar updated (externally)');
-      if (newCalendarId && CalendarRegistry.has(newCalendarId)) {
-        CalendarRegistry.setActive(newCalendarId);
-        const calendar = CalendarRegistry.get(newCalendarId);
-        syncWithLuxon(calendar);
-        CONFIG.time.worldCalendarConfig = calendar.toObject();
-        CONFIG.time.worldCalendarClass = CalendariaCalendar;
-        CONFIG.time.roundTime = calendar.secondsPerRound ?? 6;
-        game.time.initializeCalendar();
-        this.#patchFoundryCalendar();
-      }
+      if (newCalendarId && CalendarRegistry.has(newCalendarId)) this.handleRemoteSwitch(newCalendarId);
     }
   }
 

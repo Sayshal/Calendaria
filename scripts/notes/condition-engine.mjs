@@ -3,7 +3,6 @@ import { CONDITION_FIELDS, CONDITION_GROUP_MODES, CONDITION_OPERATORS, MAX_NESTI
 import {
   checkSolsticeOrEquinox,
   getCalendarMoonPhaseIndex,
-  getCycleValue,
   getDayOfYear,
   getEclipseAtDate,
   getEclipseOnDate,
@@ -308,8 +307,8 @@ export function getFieldValue(field, date, value2 = null, epochCtx = null) {
       if (!cycle) return null;
       const stageKeys = Object.keys(cycle.stages ?? {});
       if (!stageKeys.length) return null;
-      const position = getCycleValue(date, cycle);
-      return stageKeys[position % stageKeys.length];
+      const entry = calendar.getCycleEntry?.(cyclesArr.indexOf(cycle), { ...toInternal(calendar, date), hour: 0, minute: 0, second: 0 });
+      return entry ? stageKeys[entry.index] : null;
     }
     case CONDITION_FIELDS.ERA: {
       const eras = calendar?.erasArray ?? [];
@@ -365,14 +364,12 @@ export function getFieldValue(field, date, value2 = null, epochCtx = null) {
     case CONDITION_FIELDS.IS_SOLAR_ECLIPSE: {
       const moons = calendar?.moonsArray ?? [];
       if (!moons.length) return false;
-      const result = getEclipseOnDate(moons, date, calendar);
-      return result !== null && isSolarEclipse(result.type);
+      return moons.some((moon) => isSolarEclipse(getEclipseAtDate(moon, date, calendar).type));
     }
     case CONDITION_FIELDS.IS_LUNAR_ECLIPSE: {
       const moons = calendar?.moonsArray ?? [];
       if (!moons.length) return false;
-      const result = getEclipseOnDate(moons, date, calendar);
-      return result !== null && isLunarEclipse(result.type);
+      return moons.some((moon) => isLunarEclipse(getEclipseAtDate(moon, date, calendar).type));
     }
     default:
       return null;

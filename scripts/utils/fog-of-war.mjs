@@ -97,6 +97,7 @@ export async function autoRevealCurrentDay(hookData) {
   const revealIntermediate = game.settings.get(MODULE.ID, SETTINGS.FOG_OF_WAR_REVEAL_INTERMEDIATE);
   let start = revealIntermediate ? { year: previous.year, month: previous.month, dayOfMonth: previous.dayOfMonth } : { year: current.year, month: current.month, dayOfMonth: current.dayOfMonth };
   let end = { year: current.year, month: current.month, dayOfMonth: current.dayOfMonth };
+  if (compareDays(start, end) > 0) [start, end] = [end, start];
   if (radius > 0) {
     start = addDays(start, -radius);
     end = addDays(end, radius);
@@ -122,7 +123,11 @@ export function isMonthFullyFogged(year, month, calendarId = null) {
   const monthStart = { year, month, dayOfMonth: 0 };
   const monthEnd = { year, month, dayOfMonth: daysInMonth - 1 };
   const startDate = getCompleteStartDate();
-  if (startDate && compareDays(monthEnd, startDate) < 0) return true;
+  if (startDate) {
+    const radius = game.settings.get(MODULE.ID, SETTINGS.FOG_OF_WAR_CONFIG).revealRadius || 0;
+    const floor = radius > 0 ? addDays(startDate, -radius) : startDate;
+    if (compareDays(monthEnd, floor) < 0) return true;
+  }
   const ranges = getRevealedRanges(calendarId);
   for (const range of ranges) if (compareDays(range.end, monthStart) >= 0 && compareDays(range.start, monthEnd) <= 0) return false;
   return true;

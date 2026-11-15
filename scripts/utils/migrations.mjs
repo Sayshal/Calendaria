@@ -148,6 +148,25 @@ async function migrateStoredSeasonIcons() {
 }
 
 /**
+ * Strip the unused `chance` field from stored custom weather presets.
+ * @since 1.4.10
+ * @deprecated Remove in 1.6.0
+ * @returns {Promise<void>}
+ */
+async function migrateWeatherPresetChance() {
+  const KEY = 'weatherPresetChanceMigrationComplete';
+  if (game.settings.get(MODULE.ID, KEY)) return;
+  const presets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
+  const stale = presets.filter((preset) => preset && 'chance' in preset);
+  if (stale.length) {
+    for (const preset of stale) delete preset.chance;
+    await game.settings.set(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS, presets);
+    ATLAS.log(3, `Stripped unused chance from ${stale.length} custom weather preset(s)`);
+  }
+  await game.settings.set(MODULE.ID, KEY, true);
+}
+
+/**
  * Run all migrations.
  * @returns {Promise<void>}
  */
@@ -156,4 +175,5 @@ export async function runAllMigrations() {
   await migrateIntervalConditionField();
   await migrateStoredFestivalIcons();
   await migrateStoredSeasonIcons();
+  await migrateWeatherPresetChance();
 }

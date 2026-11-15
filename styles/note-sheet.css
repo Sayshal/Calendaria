@@ -76,9 +76,12 @@
         width: 100%;
         min-width: unset;
         max-width: unset;
+        margin-bottom: 0.5rem;
         padding: 0;
+        border-top: none;
         border-right: none;
         border-bottom: 0.0625rem solid var(--atlas-border);
+        line-height: normal;
         overflow: hidden;
 
         .tab-group {
@@ -98,6 +101,7 @@
           border-bottom: 0.125rem solid transparent;
           border-radius: 0;
           color: var(--atlas-text-dim);
+          font-weight: bold;
           font-size: var(--font-size-12);
           text-transform: uppercase;
           letter-spacing: 0.03em;
@@ -343,9 +347,11 @@
       border-radius: 0.25rem;
 
       legend {
+        padding: 0 0.375rem;
         color: var(--atlas-text);
         font-weight: 600;
         font-size: var(--font-size-12);
+        text-transform: uppercase;
       }
     }
 
@@ -609,6 +615,7 @@
         flex: 1;
         flex-direction: column;
         min-height: 0;
+        margin: 0;
         overflow: hidden;
 
         .editor-menu {
@@ -663,11 +670,11 @@
           min-height: 28rem;
           overflow-y: auto;
           color: var(--atlas-text);
-          background: var(--atlas-input-bg);
+          background: transparent;
 
           textarea {
             color: var(--atlas-text);
-            background: var(--atlas-input-bg);
+            background: transparent;
           }
         }
       }

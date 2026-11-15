@@ -430,6 +430,7 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
           description: '',
           icon: data.customIcon?.trim() || preset?.icon || 'fa-question',
           color: data.customColor || preset?.color || '#888888',
+          hudEffect: game.settings.get(MODULE.ID, SETTINGS.WEATHER_VISUAL_OVERRIDES)?.[preset?.id]?.hudEffect || preset?.hudEffect,
           wind: windData,
           precipitation: precipData,
           tempMin: data.customTemp != null && data.customTemp !== '' ? fromDisplayUnit(parseInt(data.customTemp, 10)) : null,
@@ -441,8 +442,7 @@ export default class WeatherPickerApp extends HandlebarsApplicationMixin(Applica
           fxSpeed,
           fxColor,
           ...environment,
-          inertiaWeight: preset?.inertiaWeight ?? 1,
-          chance: preset?.chance ?? 1
+          inertiaWeight: preset?.inertiaWeight ?? 1
         });
       }
     }

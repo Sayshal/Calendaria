@@ -88,6 +88,9 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {boolean} Whether combat is currently active */
   #inCombat = false;
 
+  /** @type {boolean} Whether an encounter exists for the viewed scene */
+  #inEncounter = false;
+
   /** @type {Function|null} Debounced resize handler for window resize */
   #resizeHandler = null;
 
@@ -190,7 +193,8 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     if (dialStyle === 'slice') return true;
     if (this.isCompact) return true;
     const combatMode = game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_MODE);
-    if (this.#inCombat && (combatMode === 'compactCombat' || combatMode === 'compactEncounter')) return true;
+    if (combatMode === 'compactCombat') return this.#inCombat;
+    if (combatMode === 'compactEncounter') return this.#inEncounter;
     return false;
   }
 
@@ -424,14 +428,23 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
       name: 'deleteCombat',
       id: Hooks.on('deleteCombat', () => {
         this.#onCombatChange(false);
-        this.#onEncounterChange(false);
+        this.#onEncounterChange(!!game.combats.find((c) => c.isActive));
       })
     });
     this.#hooks.push({
       name: 'updateCombat',
       id: Hooks.on('updateCombat', () => this.#onCombatChange(!!game.combat?.started))
     });
+    this.#hooks.push({
+      name: 'canvasReady',
+      id: Hooks.on('canvasReady', () => {
+        const combat = game.combats.find((c) => c.isActive);
+        this.#onCombatChange(!!combat?.started);
+        this.#onEncounterChange(!!combat);
+      })
+    });
     this.#inCombat = !!game.combat?.started;
+    this.#inEncounter = !!game.combat;
     this.#resizeHandler = foundry.utils.debounce(() => requestAnimationFrame(() => this.#onViewportResize()), 200);
     window.addEventListener('resize', this.#resizeHandler);
     this.#fullscreenHandler = foundry.utils.debounce(() => this.#onViewportResize(), 50);
@@ -451,19 +464,17 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Handle encounter creation/deletion for encounter-level modes.
-   * @param {boolean} created - Whether an encounter was created
+   * @param {boolean} inEncounter - Whether an encounter now exists
    */
-  #onEncounterChange(created) {
-    const mode = game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_MODE);
-    if (mode === 'compactEncounter') {
-      if (created) this.render();
-      else if (!game.combat) this.render();
-    }
+  #onEncounterChange(inEncounter) {
+    if (this.#inEncounter === inEncounter) return;
+    this.#inEncounter = inEncounter;
+    if (game.settings.get(MODULE.ID, SETTINGS.HUD_COMBAT_MODE) === 'compactEncounter') this.render();
   }
 
   /** @override */
   async close(options = {}) {
-    if (!options.combat && !game.user.isGM && game.settings.get(MODULE.ID, SETTINGS.FORCE_HUD)) {
+    if (!options.combat && !options.force && !game.user.isGM && game.settings.get(MODULE.ID, SETTINGS.FORCE_HUD)) {
       ui.notifications.warn('CALENDARIA.Common.ForcedDisplayWarning', { localize: true });
       return;
     }
@@ -1386,11 +1397,13 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const today = game.time.components;
     const calendar = this.calendar;
     const yearZero = calendar?.years?.yearZero ?? 0;
+    const days = game.time.calendar.days;
+    const end = game.time.calendar.timeToComponents(game.time.worldTime + days.minutesPerHour * days.secondsPerMinute);
     await NoteManager.createNote({
       name: _loc('CALENDARIA.Note.NewNote'),
       noteData: {
         startDate: { year: today.year + yearZero, month: today.month, dayOfMonth: today.dayOfMonth ?? 0, hour: today.hour ?? 0, minute: today.minute ?? 0 },
-        endDate: { year: today.year + yearZero, month: today.month, dayOfMonth: today.dayOfMonth ?? 0, hour: (today.hour ?? 0) + 1, minute: today.minute ?? 0 }
+        endDate: { year: end.year + yearZero, month: end.month, dayOfMonth: end.dayOfMonth ?? 0, hour: end.hour ?? 0, minute: end.minute ?? 0 }
       },
       source: 'ui'
     });
@@ -1628,9 +1641,11 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Hide the HUD.
+   * @param {object} [options] - Close options
+   * @param {boolean} [options.force] - Close even when the HUD is forced for players
    */
-  static hide() {
-    this.instance?.close();
+  static hide(options = {}) {
+    this.instance?.close(options);
   }
 
   /**
@@ -1647,7 +1662,7 @@ export class HUD extends HandlebarsApplicationMixin(ApplicationV2) {
   static async resetPosition() {
     await game.settings.set(MODULE.ID, SETTINGS.CALENDAR_HUD_POSITION, null);
     if (this.instance?.rendered) {
-      this.hide();
+      await this.instance.close({ force: true });
       this.show();
     }
   }

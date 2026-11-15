@@ -335,6 +335,7 @@ export function getFirstMoonPhase(calendar, year, month, dayOfMonth) {
     .filter((m) => isMoonVisible(m))
     .sort((a, b) => _loc(a.name).localeCompare(_loc(b.name)));
   let moon = sortedMoons[0];
+  if (!moon) return null;
   if (selectedMoonOverride) {
     const overrideMoon = sortedMoons.find((m) => _loc(m.name) === selectedMoonOverride);
     if (overrideMoon) moon = overrideMoon;
@@ -528,9 +529,13 @@ export async function setDateTo(year, month, dayOfMonth, calendar = null) {
 async function createNoteOnDate(year, month, dayOfMonth) {
   const components = game.time.components ?? {};
   const hour = components.hour ?? 12;
+  const calendar = game.time.calendar;
+  const yearZero = calendar.years?.yearZero ?? 0;
+  const { minutesPerHour, secondsPerMinute } = calendar.days;
+  const end = calendar.timeToComponents(calendar.componentsToTime({ year: year - yearZero, month, dayOfMonth, hour, minute: 0, second: 0 }) + minutesPerHour * secondsPerMinute);
   const page = await NoteManager.createNote({
     name: _loc('CALENDARIA.Note.NewNote'),
-    noteData: { startDate: { year, month, dayOfMonth, hour, minute: 0 }, endDate: { year, month, dayOfMonth, hour: hour + 1, minute: 0 } },
+    noteData: { startDate: { year, month, dayOfMonth, hour, minute: 0 }, endDate: { year: end.year + yearZero, month: end.month, dayOfMonth: end.dayOfMonth, hour: end.hour, minute: 0 } },
     source: 'ui'
   });
   return page;

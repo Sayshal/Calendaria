@@ -4,7 +4,7 @@ import { NoteManager } from '../../notes/_module.mjs';
 import { WeatherManager } from '../../weather/_module.mjs';
 import { PRESET_FORMATTERS, formatCustom, resolveFormatString } from '../formatting/format-utils.mjs';
 import { isMoonVisible } from '../formatting/moon-utils.mjs';
-import { canViewWeatherForecast } from '../permissions.mjs';
+import { canAddNotes, canViewWeatherForecast } from '../permissions.mjs';
 import { CalendariaSocket } from '../socket.mjs';
 
 /** Time unit aliases mapping to component fields. */
@@ -159,19 +159,23 @@ export function cmdTime(formatStr) {
 export function cmdDateTime(formatStr) {
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return null;
-  const formatted = formatDate(null, formatStr || 'dateTimeLong');
+  const formatted = formatDate(null, formatStr || 'datetime24');
   return { content: formatted };
 }
 
 /**
  * /note — create a quick note.
  * @param {string} args - Note title and optional description
- * @returns {Promise<{ content: string }|null>} Null if no calendar or no title
+ * @returns {Promise<{content: string, denied: (boolean|undefined)}|null>} Null if no calendar or no title
  */
 export async function cmdNote(args) {
   const calendar = CalendarManager.getActiveCalendar();
   if (!calendar) return null;
   if (!args) return null;
+  if (!canAddNotes()) {
+    ui.notifications.warn('CALENDARIA.Permissions.NoAccess', { localize: true });
+    return { content: '', denied: true };
+  }
   const quotedMatch = args.match(/^"([^"]+)"(?:\s+"([^"]*)")?/);
   const title = quotedMatch ? quotedMatch[1] : args.trim();
   const description = quotedMatch?.[2] || '';
@@ -180,9 +184,6 @@ export async function cmdNote(args) {
   const noteData = {
     startDate: { year: dt.year, month: dt.month, dayOfMonth: dt.dayOfMonth, hour: dt.hour, minute: dt.minute },
     allDay: false,
-    categories: ['event'],
-    icon: 'fas fa-calendar-day',
-    color: '#4a90e2',
     visibility: 'visible'
   };
   const page = await NoteManager.createNote({ name: title, content: description, noteData, openSheet: 'edit' });
@@ -416,8 +417,7 @@ export function cmdCalendar() {
   const weather = WeatherManager.getCurrentWeather();
   if (weather) {
     const temp = WeatherManager.getTemperature();
-    const unit = game.settings.get('calendaria', 'temperatureUnit');
-    const tempStr = temp != null ? ` (${Math.round(temp)}°${unit === 'fahrenheit' ? 'F' : 'C'})` : '';
+    const tempStr = temp != null ? ` (${WeatherManager.formatTemperature(temp)})` : '';
     lines.push(`<strong>${_loc('CALENDARIA.Common.Weather')}:</strong> <i class="${weather.icon || 'fas fa-cloud'}"></i> ${_loc(weather.label)}${tempStr}`);
   }
   const calMoons = calendar.moonsArray;
@@ -444,10 +444,8 @@ export function cmdCalendar() {
 export function cmdCalendars() {
   const calendars = CalendarManager.getAllCalendarMetadata();
   if (!calendars?.length) return { content: _loc('CALENDARIA.ChatCommand.NoCalendars') };
-  const active = CalendarManager.getActiveCalendar();
   const lines = calendars.map((cal) => {
-    const isActive = cal.id === active?.id;
-    const marker = isActive ? ' <i class="fas fa-check"></i>' : '';
+    const marker = cal.isActive ? ' <i class="fas fa-check"></i>' : '';
     return `• <strong>${cal.name}</strong>${marker}`;
   });
   return { content: `<strong>${_loc('CALENDARIA.ChatCommand.AvailableCalendars')}:</strong><br>${lines.join('<br>')}` };

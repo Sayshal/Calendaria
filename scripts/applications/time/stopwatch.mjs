@@ -255,10 +255,10 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
     const outerR = size * 0.46;
     const bezelWidth = size * 0.035;
     const dialR = outerR - bezelWidth;
-    const textColor = this.#cssColor('--calendaria-text', 0x333333);
-    const bgColor = this.#cssColor('--calendaria-bg', 0x2a2a2a);
-    const borderColor = this.#cssColor('--calendaria-border', 0x888888);
-    const errorColor = this.#cssColor('--calendaria-error', 0xcc3333);
+    const textColor = this.#cssColor('--atlas-text', 0x333333);
+    const bgColor = this.#cssColor('--atlas-bg', 0x2a2a2a);
+    const borderColor = this.#cssColor('--atlas-border', 0x888888);
+    const errorColor = this.#cssColor('--atlas-error', 0xcc3333);
     this.#dialContainer = new PIXI.Container();
     this.#pixiApp.stage.addChild(this.#dialContainer);
     this.#drawCrownRing(cx, cy, outerR, size, borderColor);
@@ -896,13 +896,17 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
    * Persist stopwatch state to world settings.
    */
   #saveState() {
+    const savedAt = Date.now();
+    const savedWorldTime = game.time?.worldTime ?? 0;
+    const runningMs = this.#running && this.#startTime ? savedAt - this.#startTime : 0;
+    const runningGameSeconds = this.#running && this.#startWorldTime !== null ? savedWorldTime - this.#startWorldTime : 0;
     const state = {
       running: this.#running,
       mode: this.#mode,
-      elapsedMs: this.#elapsedMs,
-      elapsedGameSeconds: this.#elapsedGameSeconds,
-      savedAt: Date.now(),
-      savedWorldTime: game.time?.worldTime ?? 0,
+      elapsedMs: this.#elapsedMs + runningMs,
+      elapsedGameSeconds: this.#elapsedGameSeconds + runningGameSeconds,
+      savedAt,
+      savedWorldTime,
       laps: this.#laps,
       notification: this.#notification,
       notificationThreshold: this.#notificationThreshold,
@@ -1019,9 +1023,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
    * @returns {number} Current size in pixels
    */
   #getSize() {
-    if (!this.element) return 140;
-    const computed = getComputedStyle(this.element).getPropertyValue('--stopwatch-size');
-    return parseInt(computed) || 140;
+    return this.element?.querySelector('.face')?.offsetWidth || 140;
   }
 
   /**
@@ -1211,7 +1213,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
    * Show the Stopwatch.
    * @param {object} [options] - Show options
    * @param {boolean} [options.silent] - If true, don't show permission warning
-   * @returns {Stopwatch} The instance
+   * @returns {Stopwatch|null} The instance, or null if it cannot open
    */
   static show({ silent = false } = {}) {
     if (!canViewStopwatch()) {
@@ -1238,7 +1240,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
   /** Show and start the Stopwatch. */
   static start() {
     const instance = this.instance?.rendered ? this.instance : this.show();
-    if (!instance.#running) Stopwatch.#onStart.call(instance);
+    if (instance && !instance.#running) Stopwatch.#onStart.call(instance);
   }
 
   /** Pause the running Stopwatch. */
@@ -1250,6 +1252,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
   /** Toggle between start and pause. */
   static toggleStartPause() {
     const instance = this.instance?.rendered ? this.instance : this.show();
+    if (!instance) return;
     if (instance.#running) Stopwatch.#onPause.call(instance);
     else Stopwatch.#onStart.call(instance);
   }
@@ -1265,8 +1268,7 @@ export class Stopwatch extends HandlebarsApplicationMixin(ApplicationV2) {
   static restore() {
     const state = game.settings.get(MODULE.ID, SETTINGS.STOPWATCH_STATE);
     if (!state?.running) return;
-
-    this.show();
+    this.show({ silent: true });
   }
 
   /**

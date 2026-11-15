@@ -34,7 +34,7 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
     this._endDate = options.endDate || null;
     this._calendarId = options.calendarId || null;
     this._lockedRange = !!options.lockedRange;
-    this._entryDepth = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_ENTRY_DEPTH) || 'excerpt';
+    this._entryDepth = Chronicle.#readEntryDepth();
     this._showEmpty = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_SHOW_EMPTY) || false;
     this._viewMode = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_VIEW_MODE) || 'scroll';
     this._categoryFilterOverride = Array.isArray(options.categoryFilter) ? [...options.categoryFilter] : null;
@@ -110,6 +110,15 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
     else if (options.subjectFilter === null) instance._subjectFilter = [];
     instance.render({ force: true });
     return instance;
+  }
+
+  /**
+   * Read the stored entry depth, mapping the removed 'collapsible' option to 'excerpt'.
+   * @returns {string} Entry depth
+   */
+  static #readEntryDepth() {
+    const depth = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_ENTRY_DEPTH);
+    return !depth || depth === 'collapsible' ? 'excerpt' : depth;
   }
 
   /** Hide the chronicle. */
@@ -232,6 +241,15 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /** @override */
+  async close(options = {}) {
+    if (!options.combat && !game.user.isGM && game.settings.get(MODULE.ID, SETTINGS.FORCE_CHRONICLE)) {
+      ui.notifications.warn('CALENDARIA.Common.ForcedDisplayWarning', { localize: true });
+      return;
+    }
+    return super.close(options);
+  }
+
+  /** @override */
   async _onClose(options) {
     if (this._hooks) {
       this._hooks.forEach((hook) => Hooks.off(hook.name, hook.id));
@@ -259,7 +277,7 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
       name: 'updateSetting',
       id: Hooks.on('updateSetting', (setting) => {
         if (setting.key?.startsWith(`${MODULE.ID}.`) && scrollSettingKeys.has(setting.key.replace(`${MODULE.ID}.`, ''))) {
-          this._entryDepth = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_ENTRY_DEPTH);
+          this._entryDepth = Chronicle.#readEntryDepth();
           this._showEmpty = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_SHOW_EMPTY);
           this._viewMode = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_VIEW_MODE);
           if (!this._categoryFilterOverride) this._categoryFilter = Array.from(game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_CATEGORY_FILTER) ?? []);

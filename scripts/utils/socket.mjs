@@ -2,8 +2,9 @@ import { BigCal, Chronicle, CinematicOverlay, HUD, MiniCal, Stopwatch, SunDial, 
 import { CalendarManager } from '../calendar/_module.mjs';
 import { HOOKS, MODULE, SETTINGS, SOCKET_TYPES } from '../constants.mjs';
 import { NoteManager } from '../notes/_module.mjs';
+import { EventScheduler, ReminderScheduler, TimeTracker } from '../time/_module.mjs';
 import { WeatherManager } from '../weather/_module.mjs';
-import { canViewBigCal, canViewChronicle, canViewHUD, canViewMiniCal, canViewStopwatch, canViewSunDial, canViewTimeKeeper } from './_module.mjs';
+import { canChangeDateTime, canChangeWeather, canViewBigCal, canViewChronicle, canViewHUD, canViewMiniCal, canViewStopwatch, canViewSunDial, canViewTimeKeeper } from './_module.mjs';
 
 /**
  * Socket manager for handling multiplayer synchronization.
@@ -129,9 +130,10 @@ export class CalendariaSocket {
    * @param {object} message - The incoming socket message
    * @param {string} message.type - The message type
    * @param {object} message.data - The message data payload
+   * @param {string} senderId - ID of the user who sent the message
    * @returns {void}
    */
-  static #onMessage({ type, data }) {
+  static #onMessage({ type, data }, senderId) {
     switch (type) {
       case SOCKET_TYPES.CLOCK_UPDATE:
         this.#handleClockUpdate(data);
@@ -148,9 +150,6 @@ export class CalendariaSocket {
       case SOCKET_TYPES.NOTE_UPDATE:
         this.#handleNoteUpdate(data);
         break;
-      case SOCKET_TYPES.OWNERSHIP_UPDATE:
-        this.#handleOwnershipUpdate(data);
-        break;
       case SOCKET_TYPES.CALENDAR_SWITCH:
         this.#handleCalendarSwitch(data);
         break;
@@ -158,10 +157,10 @@ export class CalendariaSocket {
         this.#handleWeatherChange(data);
         break;
       case SOCKET_TYPES.WEATHER_REQUEST:
-        this.#handleWeatherRequest(data);
+        this.#handleWeatherRequest(data, senderId);
         break;
       case SOCKET_TYPES.TIME_REQUEST:
-        this.#handleTimeRequest(data);
+        this.#handleTimeRequest(data, senderId);
         break;
       case SOCKET_TYPES.CALENDAR_REQUEST:
         this.#handleCalendarRequest(data);
@@ -300,23 +299,6 @@ export class CalendariaSocket {
   }
 
   /**
-   * Handle ownership update request from a player.
-   * @private
-   * @param {object} data - The ownership update data
-   * @param {string} data.journalId - The journal entry ID
-   * @param {object} data.ownership - Ownership updates {userId: level}
-   */
-  static async #handleOwnershipUpdate(data) {
-    if (!ATLAS.isPrimaryGM) return;
-    const { journalId, ownership } = data;
-    if (!journalId || !ownership) return;
-    const journal = game.journal.get(journalId);
-    if (!journal) return;
-    ATLAS.log(3, `Primary GM handling ownership update for journal: ${journalId}`);
-    await journal.update({ ownership });
-  }
-
-  /**
    * Handle remote clock state update messages.
    * @private
    * @param {object} data - The clock update data
@@ -388,13 +370,16 @@ export class CalendariaSocket {
    * Handle weather change request from non-GM users.
    * @private
    * @param {object} data - The weather request data
-   * @param {string} [data.action] - The action: 'set', 'generate', or 'clear'
+   * @param {string} [data.action] - The action: 'set', 'generate', 'clear', 'sceneZone' or 'addPreset'
    * @param {string} [data.presetId] - The preset ID (for 'set' action)
    * @param {object} [data.options] - Additional options
+   * @param {string} senderId - ID of the requesting user
    * @returns {void}
    */
-  static async #handleWeatherRequest(data) {
+  static async #handleWeatherRequest(data, senderId) {
     if (!ATLAS.isPrimaryGM) return;
+    const sender = game.users.get(senderId);
+    if (!sender || !canChangeWeather(sender)) return;
     const { action, presetId, options = {} } = data;
     ATLAS.log(3, `Primary GM handling weather request: ${action}`, data);
     switch (action) {
@@ -406,6 +391,12 @@ export class CalendariaSocket {
         break;
       case 'clear':
         await WeatherManager.clearWeather(true, true, options.zoneId);
+        break;
+      case 'sceneZone':
+        await WeatherManager.setSceneZoneOverride(game.scenes.get(options.sceneId), options.zoneId);
+        break;
+      case 'addPreset':
+        await WeatherManager.addCustomPreset(options.preset, true);
         break;
     }
   }
@@ -419,12 +410,21 @@ export class CalendariaSocket {
    * @param {object} [data.components] - Time components (for 'set')
    * @param {object} [data.date] - Date object (for 'jump')
    * @param {boolean|null} [data.cinematicOverride] - Explicit cinematic override (true/false); null/undefined means threshold-gated
+   * @param {boolean} [data.skipTriggers] - Skip event, reminder and threshold triggers for this change
+   * @param {string} senderId - ID of the requesting user
    * @returns {void}
    */
-  static async #handleTimeRequest(data) {
+  static async #handleTimeRequest(data, senderId) {
     if (!ATLAS.isPrimaryGM) return;
-    const { action, delta, components, date, cinematicOverride = null } = data;
+    const sender = game.users.get(senderId);
+    if (!sender || !canChangeDateTime(sender)) return;
+    const { action, delta, components, date, cinematicOverride = null, skipTriggers = false } = data;
     ATLAS.log(3, `Primary GM handling time request: ${action}`, data);
+    if (skipTriggers) {
+      TimeTracker.skipNextHooks();
+      EventScheduler.skipNext();
+      ReminderScheduler.skipNext();
+    }
     const runAdvance = async (seconds) => {
       if (cinematicOverride === true) await CinematicOverlay.triggerFromAdvance(seconds);
       else if (cinematicOverride === false) await game.time.advance(seconds);
@@ -448,7 +448,8 @@ export class CalendariaSocket {
         const calendar = CalendarManager.getActiveCalendar();
         if (!calendar || !date) return;
         const current = game.time.components;
-        const targetComponents = { ...current, year: date.year, month: date.month, dayOfMonth: date.day };
+        const yearZero = calendar.years?.yearZero ?? 0;
+        const targetComponents = { ...current, year: date.year != null ? date.year - yearZero : current.year, month: date.month ?? current.month, dayOfMonth: date.dayOfMonth ?? current.dayOfMonth };
         const targetSeconds = calendar.componentsToTime(targetComponents);
         const timeDelta = targetSeconds - game.time.worldTime;
         await runAdvance(timeDelta);

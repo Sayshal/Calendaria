@@ -299,9 +299,10 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const isCustom = !builtinPreset;
     const effectId = data.hudEffect || 'clear';
     let effectChanged = false;
+    let stored = null;
     if (isCustom) {
       const presets = game.settings.get(MODULE.ID, SETTINGS.CUSTOM_WEATHER_PRESETS) || [];
-      const stored = presets.find((p) => p.id === presetId);
+      stored = presets.find((p) => p.id === presetId);
       effectChanged = stored && (stored.hudEffect || 'clear') !== effectId;
     } else {
       const overrides = (game.settings.get(MODULE.ID, SETTINGS.WEATHER_VISUAL_OVERRIDES) || {})[presetId] || {};
@@ -311,13 +312,14 @@ export class WeatherEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const environmentCycle = data.environmentCycle ?? true;
     const parseEnvField = (val) => (val !== '' && val != null ? parseFloat(val) : null);
     const darknessPenaltyRaw = parseEnvField(data.darknessPenalty);
-    const darknessPenalty = darknessPenaltyRaw == null ? 0 : Math.min(1, Math.max(0, darknessPenaltyRaw));
-    const baseHue = WeatherEditor.#normToHue(data.baseHue);
+    const darknessPenalty = darknessPenaltyRaw == null ? 0 : Math.min(1, Math.max(-1, darknessPenaltyRaw));
+    const keepUnsetHue = (hue, previous) => (isCustom && hue === 0 && previous == null ? null : hue);
+    const baseHue = keepUnsetHue(WeatherEditor.#normToHue(data.baseHue), stored?.environmentBase?.hue);
     const baseSat = parseEnvField(data.baseSaturation);
     const baseColorSat = parseEnvField(data.baseColorSaturation);
     const baseLum = parseEnvField(data.baseLuminosity);
     const baseShd = parseEnvField(data.baseShadows);
-    const darkHue = WeatherEditor.#normToHue(data.darkHue);
+    const darkHue = keepUnsetHue(WeatherEditor.#normToHue(data.darkHue), stored?.environmentDark?.hue);
     const darkSat = parseEnvField(data.darkSaturation);
     const darkColorSat = parseEnvField(data.darkColorSaturation);
     const darkLum = parseEnvField(data.darkLuminosity);

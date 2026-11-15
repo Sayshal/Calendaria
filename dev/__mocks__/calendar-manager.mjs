@@ -217,6 +217,8 @@ const defaultCalendar = addCalendarGetters({
 
   isLeapYear: vi.fn((year) => year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0)),
 
+  getCycleEntry: vi.fn((cycleIndex) => (activeCalendar.cyclesArray[cycleIndex] ? { name: '', index: 0, cycleNumber: 1 } : null)),
+
   getMoonPhase: vi.fn((moonIndex, components) => {
     const moon = activeCalendar.moonsArray[moonIndex];
     if (!moon) return null;

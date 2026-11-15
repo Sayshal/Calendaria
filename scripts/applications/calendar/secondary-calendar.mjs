@@ -232,11 +232,12 @@ export class SecondaryCalendar extends HandlebarsApplicationMixin(ApplicationV2)
     if (select) {
       select.addEventListener('change', (e) => {
         const newId = e.target.value;
-        if (newId && newId !== this.#calendarId) {
-          this.#calendarId = newId;
-          this.#viewedDate = null;
-          this.render();
-        }
+        if (!newId || newId === this.#calendarId) return;
+        const { left, top } = this.position;
+        this.close();
+        const existing = foundry.applications.instances.get(`calendaria-secondary-${newId}`);
+        if (existing) existing.render(true);
+        else new SecondaryCalendar({ calendarId: newId, position: { left, top } }).render(true);
       });
     }
   }

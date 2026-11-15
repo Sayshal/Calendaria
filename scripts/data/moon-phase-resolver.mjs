@@ -1,5 +1,5 @@
-/** @type {Map<string, {day: number, position: number}>} Per-moon position cache */
-const positionCache = new Map();
+/** @type {WeakMap<object, {signature: string, days: Map<number, number>}>} Per-moon position cache keyed by moon definition, then absolute day */
+const positionCache = new WeakMap();
 
 /**
  * Mulberry32 seeded PRNG. Returns a function that produces 0-1 floats.
@@ -52,19 +52,16 @@ function smoothNoise(seed, x) {
  * @returns {number} Phase position 0-1
  */
 export function resolveRandomizedPhase(moon, absoluteDay, dateComponents = null, yearZero = 0) {
-  const cacheKey = `${moon.phaseSeed ?? 0}_${absoluteDay}`;
-  const cached = positionCache.get(cacheKey);
-  if (cached?.day === absoluteDay) return cached.position;
-  const anchorPosition = findAnchorPhasePosition(moon, dateComponents, yearZero);
-  if (anchorPosition !== null) {
-    positionCache.set(cacheKey, { day: absoluteDay, position: anchorPosition });
-    return anchorPosition;
-  }
-  const position = calculateRandomizedPosition(moon, absoluteDay);
-  positionCache.set(cacheKey, { day: absoluteDay, position });
-  if (positionCache.size > 2000) {
-    const keys = positionCache.keys();
-    for (let i = 0; i < 500; i++) positionCache.delete(keys.next().value);
+  const signature = `${moon.phaseSeed ?? 0}|${moon.cycleLength}|${moon.cycleVariance ?? 0}|${JSON.stringify(moon.anchorPhases ?? null)}`;
+  let entry = positionCache.get(moon);
+  if (entry?.signature !== signature) positionCache.set(moon, (entry = { signature, days: new Map() }));
+  const moonCache = entry.days;
+  if (moonCache.has(absoluteDay)) return moonCache.get(absoluteDay);
+  const position = findAnchorPhasePosition(moon, dateComponents, yearZero) ?? calculateRandomizedPosition(moon, absoluteDay);
+  moonCache.set(absoluteDay, position);
+  if (moonCache.size > 2000) {
+    const keys = moonCache.keys();
+    for (let i = 0; i < 500; i++) moonCache.delete(keys.next().value);
   }
   return position;
 }

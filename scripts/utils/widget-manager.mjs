@@ -21,7 +21,6 @@ const replacements = new Map();
  * @param {Function} [config.onClick] - Click handler
  * @param {Function} [config.render] - Custom render function (for type='custom')
  * @param {Function} [config.onAttach] - Called when widget attached to DOM
- * @param {Function} [config.onDetach] - Called when widget detached
  * @param {boolean} [config.disabled] - If true with replaces, hides element entirely
  * @returns {boolean} Success
  */
@@ -135,7 +134,7 @@ function renderButton(widget, location) {
   const style = color ? `style="--widget-color: ${color}"` : '';
   const baseClass = getButtonClass(location);
   const moduleClass = `widget-${widget.moduleId}`;
-  return `<button type="button" class="${baseClass} calendaria-widget ${moduleClass}" data-widget-id="${widget.fullId}" ${style} ${tooltip ? `data-tooltip="${tooltip}"` : ''}>
+  return `<button type="button" class="${baseClass} calendaria-widget ${moduleClass}" data-widget-id="${widget.fullId}" ${style} ${tooltip ? `data-tooltip="${foundry.utils.escapeHTML(tooltip)}"` : ''}>
     ${icon ? `<i class="${icon}"></i>` : ''}${label && !icon ? label : ''}
     </button>`;
 }
@@ -154,7 +153,7 @@ function renderIndicator(widget, _location) {
   const style = color ? `style="--widget-color: ${color}"` : '';
   const clickable = widget.onClick ? ' clickable' : '';
   const moduleClass = `widget-${widget.moduleId}`;
-  return `<span class="calendaria-widget-indicator ${moduleClass}${clickable}" data-widget-id="${widget.fullId}" ${style} ${tooltip ? `data-tooltip="${tooltip}"` : ''}>${icon ? `<i class="${icon}"></i>` : ''}${label ? `<span class="widget-label">${label}</span>` : ''}</span>`;
+  return `<span class="calendaria-widget-indicator ${moduleClass}${clickable}" data-widget-id="${widget.fullId}" ${style} ${tooltip ? `data-tooltip="${foundry.utils.escapeHTML(tooltip)}"` : ''}>${icon ? `<i class="${icon}"></i>` : ''}${label ? `<span class="widget-label">${label}</span>` : ''}</span>`;
 }
 
 /**

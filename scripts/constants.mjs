@@ -578,7 +578,6 @@ export const SOCKET_TYPES = {
   HUD_VISIBILITY: 'hudVisibility',
   MINI_CAL_VISIBILITY: 'miniCalVisibility',
   NOTE_UPDATE: 'noteUpdate',
-  OWNERSHIP_UPDATE: 'ownershipUpdate',
   REMINDER_NOTIFY: 'reminderNotify',
   STOPWATCH_VISIBILITY: 'stopwatchVisibility',
   SUN_DIAL_VISIBILITY: 'sunDialVisibility',

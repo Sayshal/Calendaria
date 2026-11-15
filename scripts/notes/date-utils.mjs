@@ -321,9 +321,9 @@ export function isValidDate(date, calendarId) {
     if (date.dayOfMonth < 0 || date.dayOfMonth >= maxDays) return false;
   }
   if (date.hour !== undefined) {
-    const hoursPerDay = calendar.hours ?? 24;
+    const hoursPerDay = calendar.days?.hoursPerDay ?? 24;
     if (date.hour < 0 || date.hour >= hoursPerDay) return false;
   }
-  if (date.minute !== undefined) if (date.minute < 0 || date.minute >= 60) return false;
+  if (date.minute !== undefined) if (date.minute < 0 || date.minute >= (calendar.days?.minutesPerHour ?? 60)) return false;
   return true;
 }

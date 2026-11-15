@@ -673,6 +673,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.TIME_ADVANCE_INTERVAL]: { tab: 'time', label: 'CALENDARIA.Settings.TimeAdvanceInterval.Name' },
     [SETTINGS.AUTO_GENERATE_WEATHER]: { tab: 'weather', label: 'CALENDARIA.Settings.AutoGenerate.Name' },
     [SETTINGS.TEMPERATURE_UNIT]: { tab: 'weather', label: 'CALENDARIA.Common.Temperature' },
+    [SETTINGS.TEMPERATURE_SHOW_BOTH]: { tab: 'weather', label: 'CALENDARIA.Settings.TemperatureShowBoth.Name' },
     [SETTINGS.PRECIPITATION_UNIT]: { tab: 'weather', label: 'CALENDARIA.Common.Precipitation' },
     [SETTINGS.WIND_SPEED_UNIT]: { tab: 'weather', label: 'CALENDARIA.Settings.WindSpeedUnit.Name' },
     [SETTINGS.SHOW_CHRONICLE]: { tab: 'chronicle', label: 'CALENDARIA.Settings.ShowChronicle.Name' },
@@ -683,6 +684,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.CHRONICLE_HUD_BUTTON]: { tab: 'chronicle', label: 'CALENDARIA.Chronicle.Settings.HudButton.Name' },
     [SETTINGS.CHRONICLE_ENTRY_DEPTH]: { tab: 'chronicle', label: 'CALENDARIA.Chronicle.Settings.EntryDepth.Name' },
     [SETTINGS.CHRONICLE_SHOW_EMPTY]: { tab: 'chronicle', label: 'CALENDARIA.Chronicle.Settings.ShowEmpty.Name' },
+    [SETTINGS.CHRONICLE_EMPTY_CONTENT_TYPES]: { tab: 'chronicle', label: 'CALENDARIA.Chronicle.Settings.EmptyContentTypes.Name' },
     [SETTINGS.CHRONICLE_SHOW_WEATHER]: { tab: 'chronicle', label: 'CALENDARIA.Common.ShowWeather' },
     [SETTINGS.CHRONICLE_SHOW_SEASON_CHANGES]: { tab: 'chronicle', label: 'CALENDARIA.Chronicle.Settings.ShowSeasonChanges.Name' },
     [SETTINGS.WEEKLY_ALMANAC]: { tab: 'chronicle', label: 'CALENDARIA.Settings.WeeklyAlmanac.Name' },
@@ -710,6 +712,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.DARKNESS_SYNC_ALL_SCENES]: { tab: 'canvas', label: 'CALENDARIA.Settings.DarknessSyncAllScenes.Name' },
     [SETTINGS.DARKNESS_WEATHER_SYNC]: { tab: 'canvas', label: 'CALENDARIA.Settings.DarknessWeatherSync.Name' },
     [SETTINGS.AMBIENCE_SYNC]: { tab: 'canvas', label: 'CALENDARIA.Settings.AmbienceSync.Name' },
+    [SETTINGS.AMBIENCE_INTENSITY]: { tab: 'canvas', label: 'CALENDARIA.Settings.AmbienceIntensity.Name' },
+    [SETTINGS.WEATHER_AMBIENCE_INTENSITY]: { tab: 'canvas', label: 'CALENDARIA.Settings.WeatherAmbienceIntensity.Name' },
     [SETTINGS.COLOR_SHIFT_SYNC]: { tab: 'canvas', label: 'CALENDARIA.Settings.ColorShiftSync.Name' },
     [SETTINGS.DARKNESS_MOON_SYNC]: { tab: 'canvas', label: 'CALENDARIA.Settings.DarknessMoonSync.Name' },
     [SETTINGS.DEFAULT_BRIGHTNESS_MULTIPLIER]: { tab: 'canvas', label: 'CALENDARIA.Settings.DefaultBrightnessMultiplier.Name' },
@@ -717,8 +721,12 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.SHOW_TOOLBAR_BUTTON]: { tab: 'module', label: 'CALENDARIA.Settings.ShowToolbarButton.Name' },
     [SETTINGS.TOOLBAR_APPS]: { tab: 'module', label: 'CALENDARIA.Settings.ToolbarApps.Name' },
     [SETTINGS.SHOW_JOURNAL_FOOTER]: { tab: 'module', label: 'CALENDARIA.Settings.ShowJournalFooter.Name' },
+    [SETTINGS.ENRICHER_CLICK_TARGET]: { tab: 'module', label: 'CALENDARIA.Settings.EnricherClickTarget.Name' },
     [SETTINGS.SHOW_CALENDAR_HUD]: { tab: 'hud', label: 'CALENDARIA.Settings.ShowCalendarHUD.Name' },
     [SETTINGS.FORCE_HUD]: { tab: 'hud', label: 'CALENDARIA.Common.ForceDisplayForAll' },
+    [SETTINGS.FORCE_HUD_LOCK]: { tab: 'hud', label: 'CALENDARIA.Settings.ForceHUDLock.Name' },
+    [SETTINGS.FORCE_HUD_ZONE]: { tab: 'hud', label: 'CALENDARIA.Settings.ForceHUDZone.Name' },
+    [SETTINGS.HUD_BORDER_GLOW]: { tab: 'hud', label: 'CALENDARIA.Settings.HUDBorderGlow.Name' },
     [SETTINGS.CALENDAR_HUD_LOCKED]: { tab: 'hud', label: 'CALENDARIA.Settings.CalendarHUDLocked.Name' },
     [SETTINGS.CALENDAR_HUD_MODE]: { tab: 'hud', label: 'CALENDARIA.Settings.CalendarHUDMode.Name' },
     [SETTINGS.HUD_DIAL_STYLE]: { tab: 'hud', label: 'CALENDARIA.Settings.HUDDialStyle.Name' },
@@ -754,6 +762,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.MINI_CAL_CONFIRM_SET_DATE]: { tab: 'miniCal', label: 'CALENDARIA.Settings.ConfirmSetDate.Name' },
     [SETTINGS.MINI_CAL_AUTO_OPEN_NOTES]: { tab: 'miniCal', label: 'CALENDARIA.Settings.AutoOpenNotes.Name' },
     [SETTINGS.MINI_CAL_SHOW_WEATHER]: { tab: 'miniCal', label: 'CALENDARIA.Common.ShowWeather' },
+    [SETTINGS.MINI_CAL_SHOW_TIME]: { tab: 'miniCal', label: 'CALENDARIA.Settings.MiniCalShowTime.Name' },
+    [SETTINGS.MINI_CAL_HEADER_SHOW_SELECTED]: { tab: 'miniCal', label: 'CALENDARIA.Common.ShowSelectedDateInHeader' },
     [SETTINGS.MINI_CAL_SHOW_SEASON]: { tab: 'miniCal', label: 'CALENDARIA.Common.ShowSeason' },
     [SETTINGS.MINI_CAL_SHOW_ERA]: { tab: 'miniCal', label: 'CALENDARIA.Common.ShowEra' },
     [SETTINGS.MINI_CAL_SHOW_CYCLES]: { tab: 'miniCal', label: 'CALENDARIA.Common.ShowCycles' },
@@ -769,6 +779,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     [SETTINGS.BIG_CAL_AUTO_FADE]: { tab: 'bigcal', label: 'CALENDARIA.Settings.AutoFade.Name' },
     [SETTINGS.BIG_CAL_IDLE_OPACITY]: { tab: 'bigcal', label: 'CALENDARIA.Settings.IdleOpacity.Name' },
     [SETTINGS.BIG_CAL_SHOW_WEATHER]: { tab: 'bigcal', label: 'CALENDARIA.Common.ShowWeather' },
+    [SETTINGS.BIG_CAL_HEADER_SHOW_SELECTED]: { tab: 'bigcal', label: 'CALENDARIA.Common.ShowSelectedDateInHeader' },
     [SETTINGS.BIG_CAL_SHOW_SEASON]: { tab: 'bigcal', label: 'CALENDARIA.Common.ShowSeason' },
     [SETTINGS.BIG_CAL_SHOW_ERA]: { tab: 'bigcal', label: 'CALENDARIA.Common.ShowEra' },
     [SETTINGS.BIG_CAL_SHOW_CYCLES]: { tab: 'bigcal', label: 'CALENDARIA.Common.ShowCycles' },
@@ -873,7 +884,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       SETTINGS.MINI_CAL_SHOW_ERA,
       SETTINGS.MINI_CAL_ERA_DISPLAY_MODE,
       SETTINGS.MINI_CAL_SHOW_CYCLES,
-      SETTINGS.MINI_CAL_CYCLES_DISPLAY_MODE
+      SETTINGS.MINI_CAL_CYCLES_DISPLAY_MODE,
+      SETTINGS.MINI_CAL_SHOW_TIME,
+      SETTINGS.MINI_CAL_HEADER_SHOW_SELECTED
     ],
     'minical-sticky': [SETTINGS.MINI_CAL_STICKY_STATES],
     'minical-time-jumps': [SETTINGS.MINI_CAL_TIME_JUMPS],
@@ -886,7 +899,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       SETTINGS.BIG_CAL_SHOW_ERA,
       SETTINGS.BIG_CAL_ERA_DISPLAY_MODE,
       SETTINGS.BIG_CAL_SHOW_CYCLES,
-      SETTINGS.BIG_CAL_CYCLES_DISPLAY_MODE
+      SETTINGS.BIG_CAL_CYCLES_DISPLAY_MODE,
+      SETTINGS.BIG_CAL_HEADER_SHOW_SELECTED
     ],
     'timekeeper-display': [SETTINGS.SHOW_TIME_KEEPER, SETTINGS.FORCE_TIME_KEEPER, SETTINGS.TIMEKEEPER_AUTO_FADE, SETTINGS.TIMEKEEPER_IDLE_OPACITY, SETTINGS.TIMEKEEPER_COMBAT_MODE],
     'timekeeper-sticky': [SETTINGS.TIMEKEEPER_STICKY_STATES],
@@ -921,9 +935,12 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       SETTINGS.AMBIENCE_SYNC,
       SETTINGS.COLOR_SHIFT_SYNC,
       SETTINGS.DARKNESS_MOON_SYNC,
-      SETTINGS.DEFAULT_BRIGHTNESS_MULTIPLIER
+      SETTINGS.DEFAULT_BRIGHTNESS_MULTIPLIER,
+      SETTINGS.DARKNESS_SYNC_ALL_SCENES,
+      SETTINGS.AMBIENCE_INTENSITY,
+      SETTINGS.WEATHER_AMBIENCE_INTENSITY
     ],
-    'weather-units': [SETTINGS.TEMPERATURE_UNIT, SETTINGS.TEMPERATURE_SHOW_BOTH, SETTINGS.PRECIPITATION_UNIT],
+    'weather-units': [SETTINGS.TEMPERATURE_UNIT, SETTINGS.TEMPERATURE_SHOW_BOTH, SETTINGS.PRECIPITATION_UNIT, SETTINGS.WIND_SPEED_UNIT],
     'weather-generation': [
       SETTINGS.AUTO_GENERATE_WEATHER,
       SETTINGS.WEATHER_INERTIA,
@@ -1452,9 +1469,8 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     const depth = context.chronicleEntryDepth;
     context.depthOptions = [
       { value: 'title', label: _loc('CALENDARIA.Chronicle.Depth.Title'), selected: depth === 'title' },
-      { value: 'excerpt', label: _loc('CALENDARIA.Chronicle.Depth.Excerpt'), selected: depth === 'excerpt' },
-      { value: 'full', label: _loc('CALENDARIA.Common.Full'), selected: depth === 'full' },
-      { value: 'collapsible', label: _loc('CALENDARIA.Chronicle.Depth.Collapsible'), selected: depth === 'collapsible' }
+      { value: 'excerpt', label: _loc('CALENDARIA.Chronicle.Depth.Excerpt'), selected: depth === 'excerpt' || depth === 'collapsible' },
+      { value: 'full', label: _loc('CALENDARIA.Common.Full'), selected: depth === 'full' }
     ];
   }
 
@@ -1717,26 +1733,26 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   async #preparePermissionsContext(context) {
     const defaults = {
-      viewBigCal: { player: false, trusted: true, assistant: true },
-      viewChronicle: { player: false, trusted: true, assistant: true },
-      viewHUD: { player: true, trusted: true, assistant: true },
-      viewMiniCal: { player: false, trusted: true, assistant: true },
-      viewNotes: { player: true, trusted: true, assistant: true },
-      viewStopwatch: { player: false, trusted: true, assistant: true },
-      viewSunDial: { player: false, trusted: true, assistant: true },
-      viewTimeKeeper: { player: false, trusted: true, assistant: true },
-      addNotes: { player: true, trusted: true, assistant: true },
-      changeDateTime: { player: false, trusted: false, assistant: true },
-      changeActiveCalendar: { player: false, trusted: false, assistant: false },
-      changeWeather: { player: false, trusted: false, assistant: true },
-      deleteNotes: { player: false, trusted: false, assistant: true },
-      editCalendars: { player: false, trusted: false, assistant: false },
-      viewWeatherForecast: { player: false, trusted: true, assistant: true }
+      viewBigCal: { player: false, trusted: true },
+      viewChronicle: { player: false, trusted: true },
+      viewHUD: { player: true, trusted: true },
+      viewMiniCal: { player: false, trusted: true },
+      viewNotes: { player: true, trusted: true },
+      viewStopwatch: { player: false, trusted: true },
+      viewSunDial: { player: false, trusted: true },
+      viewTimeKeeper: { player: false, trusted: true },
+      addNotes: { player: true, trusted: true },
+      changeDateTime: { player: false, trusted: false },
+      changeActiveCalendar: { player: false, trusted: false },
+      changeWeather: { player: false, trusted: false },
+      deleteNotes: { player: false, trusted: false },
+      editCalendars: { player: false, trusted: false },
+      viewWeatherForecast: { player: false, trusted: true }
     };
     const saved = game.settings.get(MODULE.ID, SETTINGS.PERMISSIONS) || {};
     context.permissions = {};
     for (const [key, defaultVal] of Object.entries(defaults)) {
-      context.permissions[key] = { player: saved[key]?.player ?? defaultVal.player, trusted: saved[key]?.trusted ?? defaultVal.trusted, assistant: saved[key]?.assistant ?? defaultVal.assistant };
+      context.permissions[key] = { player: saved[key]?.player ?? defaultVal.player, trusted: saved[key]?.trusted ?? defaultVal.trusted };
     }
     context.hideMoonsFromPlayers = game.settings.get(MODULE.ID, SETTINGS.HIDE_MOONS_FROM_PLAYERS);
   }
@@ -1833,7 +1849,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
     if ('showToolbarButton' in data) await SettingsPanel.#set(SETTINGS.SHOW_TOOLBAR_BUTTON, data.showToolbarButton);
     if ('toolbarApps' in data) {
       const apps = Array.isArray(data.toolbarApps) ? data.toolbarApps : data.toolbarApps ? [data.toolbarApps] : [];
-      await SettingsPanel.#set(SETTINGS.TOOLBAR_APPS, new Set(apps));
+      await SettingsPanel.#set(SETTINGS.TOOLBAR_APPS, new Set(apps.filter(Boolean)));
     }
     if ('showJournalFooter' in data) await SettingsPanel.#set(SETTINGS.SHOW_JOURNAL_FOOTER, data.showJournalFooter);
     if ('enricherClickTarget' in data) await SettingsPanel.#set(SETTINGS.ENRICHER_CLICK_TARGET, data.enricherClickTarget);
@@ -1993,7 +2009,10 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       await SettingsPanel.#set(SETTINGS.SUN_DIAL_STICKY_STATES, { position: !!data.sunDialStickyPosition });
       SunDial.refreshStickyStates();
     }
-    if ('hudStickySection' in data) await SettingsPanel.#set(SETTINGS.HUD_STICKY_STATES, { tray: !!data.hudStickyTray, position: !!data.hudStickyPosition });
+    if ('hudStickySection' in data) {
+      const current = game.settings.get(MODULE.ID, SETTINGS.HUD_STICKY_STATES) || {};
+      await SettingsPanel.#set(SETTINGS.HUD_STICKY_STATES, { ...current, tray: !!data.hudStickyTray });
+    }
     if ('calendarHUDLocked' in data) await SettingsPanel.#set(SETTINGS.CALENDAR_HUD_LOCKED, data.calendarHUDLocked);
     if ('stickyZonesEnabled' in data) await SettingsPanel.#set(SETTINGS.HUD_STICKY_ZONES_ENABLED, data.stickyZonesEnabled);
     if ('allowSidebarOverlap' in data) await SettingsPanel.#set(SETTINGS.ALLOW_SIDEBAR_OVERLAP, data.allowSidebarOverlap);
@@ -2092,8 +2111,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       for (const key of permissionKeys) {
         permissions[key] = {
           player: !!data.permissions?.[key]?.player,
-          trusted: !!data.permissions?.[key]?.trusted,
-          assistant: !!data.permissions?.[key]?.assistant
+          trusted: !!data.permissions?.[key]?.trusted
         };
       }
       await SettingsPanel.#set(SETTINGS.PERMISSIONS, permissions);
@@ -2319,7 +2337,9 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
       hud: { setting: SETTINGS.CALENDAR_HUD_POSITION, appId: 'calendaria-hud' },
       timekeeper: { setting: SETTINGS.TIME_KEEPER_POSITION, appId: 'calendaria-timekeeper' },
       sunDial: { setting: SETTINGS.SUN_DIAL_POSITION, appId: 'calendaria-sun-dial' },
-      chronicle: { setting: SETTINGS.CHRONICLE_POSITION, appId: 'calendaria-chronicle' }
+      chronicle: { setting: SETTINGS.CHRONICLE_POSITION, appId: 'calendaria-chronicle' },
+      bigcal: { setting: SETTINGS.CALENDAR_POSITION, appId: 'calendaria-big-cal' },
+      stopwatch: { setting: SETTINGS.STOPWATCH_POSITION, appId: 'calendaria-stopwatch' }
     };
     const { setting, appId } = config[targetType] || {};
     if (!setting) return;
@@ -2958,7 +2978,7 @@ export class SettingsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
         });
       }
     }
-    const formatParts = ['hud', 'timekeeper', 'miniCal', 'bigcal', 'chat', 'stopwatch', 'notes', 'cinematics'];
+    const formatParts = ['hud', 'timekeeper', 'miniCal', 'bigcal', 'chat', 'stopwatch', 'notes', 'cinematics', 'sunDial'];
     if (formatParts.includes(partId)) {
       const presetSelects = htmlElement.querySelectorAll('select[name*="Preset"]');
       presetSelects.forEach((select) => {

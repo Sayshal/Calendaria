@@ -159,15 +159,6 @@ export default class WeatherManager {
   static async initialize() {
     if (this.#initialized) return;
     this.#currentWeatherByZone = game.settings.get(MODULE.ID, SETTINGS.CURRENT_WEATHER) || {};
-    // Rename the stale literal 'undefined' zone key written before zones were keyed. @since 0.10.2 — remove in 1.0.0
-    if ('undefined' in this.#currentWeatherByZone) {
-      this.#currentWeatherByZone[this.DEFAULT_ZONE] = this.#currentWeatherByZone['undefined'];
-      delete this.#currentWeatherByZone['undefined'];
-      if (ATLAS.isPrimaryGM) {
-        await game.settings.set(MODULE.ID, SETTINGS.CURRENT_WEATHER, this.#currentWeatherByZone);
-        ATLAS.log(3, 'Migrated stale "undefined" weather zone key to _default');
-      }
-    }
     Hooks.on(HOOKS.DAY_CHANGE, this.#onDayChange.bind(this));
     Hooks.on('updateScene', this.#onSceneActivated.bind(this));
     Hooks.on(HOOKS.MIDNIGHT, () => this.#onPeriodThreshold(WEATHER_PERIODS.NIGHT.id));
@@ -315,12 +306,13 @@ export default class WeatherManager {
     if (!game.settings.get(MODULE.ID, SETTINGS.INTRADAY_WEATHER)) return;
     if (!ATLAS.isPrimaryGM) return;
     const zones = this.#getEffectiveZones();
-    let anyChanged = false;
+    const previousByZone = {};
     for (const zone of zones) {
       const weather = this.#currentWeatherByZone[zone.id];
       if (!weather?.periods) continue;
       const periodWeather = weather.periods[periodId];
       if (!periodWeather) continue;
+      previousByZone[zone.id] = { ...weather };
       Object.assign(weather, {
         id: periodWeather.preset?.id ?? periodWeather.id,
         label: periodWeather.preset?.label ?? periodWeather.label,
@@ -344,13 +336,13 @@ export default class WeatherManager {
         weather.soundFx = this.#resolveSoundFx(preset);
         weather.fxMacro = this.#resolveFxMacro(preset);
       }
-      anyChanged = true;
     }
-    if (!anyChanged) return;
+    if (!Object.keys(previousByZone).length) return;
     await game.settings.set(MODULE.ID, SETTINGS.CURRENT_WEATHER, this.#currentWeatherByZone);
     Hooks.callAll(HOOKS.WEATHER_CHANGE, { bulk: true });
     Hooks.callAll(HOOKS.WEATHER_PERIOD_CHANGE, { period: periodId });
     CalendariaSocket.emit('weatherChange', { weatherByZone: this.#currentWeatherByZone, bulk: true });
+    this.#runFxMacros(previousByZone);
     ATLAS.log(3, `Intraday weather period changed to: ${periodId}`);
   }
 
@@ -387,7 +379,7 @@ export default class WeatherManager {
       return this.getCurrentWeather(zoneId);
     }
     if (!options.fromSocket && !game.user.isGM && canChangeWeather()) {
-      CalendariaSocket.emit('weatherRequest', { action: 'set', presetId, options: { temperature: options.temperature, zoneId } });
+      CalendariaSocket.emit('weatherRequest', { action: 'set', presetId, options: { ...options, broadcast: undefined, zoneId } });
       return this.getCurrentWeather(zoneId);
     }
     const customPresets = this.getCustomPresets();
@@ -900,7 +892,7 @@ export default class WeatherManager {
         }
       } else {
         const curDay = data.current.dayOfMonth ?? 0;
-        const histEntry = history?.[data.current.year]?.[data.current.month]?.[curDay]?.[zone.id];
+        const histEntry = history?.[data.current.year - yearZero]?.[data.current.month]?.[curDay]?.[zone.id];
         if (histEntry) {
           const preset = getPreset(histEntry.id, customPresets) ?? {};
           weatherUpdates[zone.id] = {
@@ -962,6 +954,7 @@ export default class WeatherManager {
         }
       }
     }
+    const previousByZone = { ...this.#currentWeatherByZone };
     for (const [zid, weather] of Object.entries(weatherUpdates)) this.#currentWeatherByZone[zid] = weather;
     if (history) {
       for (const [zid, weather] of Object.entries(weatherUpdates)) this.#addHistoryEntry(history, year, month, dayOfMonth, zid, weather);
@@ -970,6 +963,23 @@ export default class WeatherManager {
     await Promise.all([game.settings.set(MODULE.ID, SETTINGS.CURRENT_WEATHER, this.#currentWeatherByZone), history ? this.#setHistory(history) : null]);
     Hooks.callAll(HOOKS.WEATHER_CHANGE, { bulk: true });
     CalendariaSocket.emit('weatherChange', { weatherByZone: this.#currentWeatherByZone, bulk: true });
+    this.#runFxMacros(Object.fromEntries(Object.keys(weatherUpdates).map((zid) => [zid, previousByZone[zid] ?? null])));
+  }
+
+  /**
+   * Run each zone's weather effect macro after weather changes outside #saveWeather.
+   * @param {object} previousByZone - Previous weather keyed by the zone IDs that changed
+   * @private
+   */
+  static #runFxMacros(previousByZone) {
+    const customPresets = this.getCustomPresets();
+    for (const [zoneId, previousWeather] of Object.entries(previousByZone)) {
+      const weather = this.#currentWeatherByZone[zoneId];
+      if (!weather) continue;
+      const preset = getPreset(weather.id, customPresets);
+      const macroId = weather.fxMacro ?? (preset ? this.#resolveFxMacro(preset) : null);
+      if (macroId) executeMacroById(macroId, { weather, previousWeather, zoneId });
+    }
   }
 
   /**
@@ -1019,6 +1029,7 @@ export default class WeatherManager {
     const history = this.#getHistory();
     const seasonData = calendar.getCurrentSeason?.(game.time.components);
     const season = seasonData?.name ?? null;
+    const previousByZone = Object.fromEntries(zones.map((zone) => [zone.id, this.#currentWeatherByZone[zone.id] ?? null]));
     for (const zone of zones) {
       const zoneConfig = zone;
       const zonePlan = fullPlan[zone.id] ?? {};
@@ -1115,6 +1126,7 @@ export default class WeatherManager {
     await Promise.all([game.settings.set(MODULE.ID, SETTINGS.CURRENT_WEATHER, this.#currentWeatherByZone), this.#setHistory(history)]);
     Hooks.callAll(HOOKS.WEATHER_CHANGE, { bulk: true });
     CalendariaSocket.emit('weatherChange', { weatherByZone: this.#currentWeatherByZone, bulk: true });
+    this.#runFxMacros(previousByZone);
     await this.#clearForecastPlan();
     await this.#ensureForecastPlan();
     ATLAS.log(3, `Backfilled ${daysToFill} days of weather history for ${zones.length} zones`);
@@ -1840,6 +1852,10 @@ export default class WeatherManager {
    */
   static async setSceneZoneOverride(scene, zoneId) {
     if (!scene) return;
+    if (!game.user.isGM) {
+      if (canChangeWeather()) CalendariaSocket.emit('weatherRequest', { action: 'sceneZone', options: { sceneId: scene.id, zoneId } });
+      return;
+    }
     if (zoneId === null) await scene.setFlag(MODULE.ID, SCENE_FLAGS.CLIMATE_ZONE_OVERRIDE, 'none');
     else if (zoneId) await scene.setFlag(MODULE.ID, SCENE_FLAGS.CLIMATE_ZONE_OVERRIDE, zoneId);
     else await scene.unsetFlag(MODULE.ID, SCENE_FLAGS.CLIMATE_ZONE_OVERRIDE);
@@ -1975,10 +1991,15 @@ export default class WeatherManager {
    * @param {string} [preset.icon] - Icon class
    * @param {string} [preset.color] - Display color
    * @param {string} [preset.description] - Description
+   * @param {boolean} [fromSocket] - Whether this is a GM executing a socket request
    * @returns {Promise<object>} The added preset
    */
-  static async addCustomPreset(preset) {
-    if (!canChangeWeather()) return null;
+  static async addCustomPreset(preset, fromSocket = false) {
+    if (!fromSocket && !canChangeWeather()) return null;
+    if (!game.user.isGM) {
+      CalendariaSocket.emit('weatherRequest', { action: 'addPreset', options: { preset } });
+      return preset;
+    }
     const customPresets = this.getCustomPresets();
     if (customPresets.some((p) => p.id === preset.id) || ALL_PRESETS.some((p) => p.id === preset.id)) {
       ATLAS.log(2, `Weather preset ID already exists: ${preset.id}`);
@@ -2007,7 +2028,6 @@ export default class WeatherManager {
       ...(preset.environmentDark && { environmentDark: preset.environmentDark }),
       ...(preset.environmentCycle != null && { environmentCycle: preset.environmentCycle }),
       ...(preset.inertiaWeight != null && { inertiaWeight: preset.inertiaWeight }),
-      ...(preset.chance != null && { chance: preset.chance }),
       ...(preset.darknessPenalty != null && { darknessPenalty: preset.darknessPenalty })
     };
     customPresets.push(newPreset);

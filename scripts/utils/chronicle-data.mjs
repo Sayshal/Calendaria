@@ -23,7 +23,7 @@ export function buildWeatherSentence(w) {
   const fragments = [];
   if (label) fragments.push(label);
   if (temp) fragments.push(temp);
-  if (windLabel && w.wind.speed > 0) fragments.push(dir ? `${windLabel} winds from the ${dir}` : `${windLabel} winds`);
+  if (windLabel && w.wind.speed > 0) fragments.push(dir ? _loc('CALENDARIA.Chronicle.WindFrom', { wind: windLabel, direction: dir }) : _loc('CALENDARIA.Chronicle.Wind', { wind: windLabel }));
   if (precip && !label) fragments.push(precip);
   if (!fragments.length) return null;
   return fragments.join(', ');
@@ -78,7 +78,7 @@ function compassLabel(degrees) {
  * @param {object} [options] - Build options
  * @param {string} [options.calendarId] - Calendar ID (defaults to active)
  * @param {boolean} [options.showEmpty] - Include days with no events
- * @param {string} [options.entryDepth] - Content depth: title, excerpt, full, collapsible
+ * @param {string} [options.entryDepth] - Content depth: title, excerpt, full
  * @param {string[]} [options.categoryFilter] - Preset IDs to include; empty/missing = no filter
  * @param {string[]} [options.subjectFilter] - Subject document UUIDs to include; empty/missing = no filter
  * @returns {object[]} Array of day entry objects
@@ -137,10 +137,10 @@ export function buildScrollEntries(startDate, endDate, options = {}) {
         const prevEntry = entries.length > 0 ? entries[entries.length - 1] : null;
         if (prevEntry && !prevEntry.fogged) {
           prevEntry.banners ??= [];
-          prevEntry.banners.push({ type: 'season', icon: prevSeasonIcon, label: `${prevSeasonName} is ending`, color: prevSeasonColor });
+          prevEntry.banners.push({ type: 'season', icon: prevSeasonIcon, label: _loc('CALENDARIA.Chronicle.SeasonEnding', { season: prevSeasonName }), color: prevSeasonColor });
           if (prevEntry.isEmpty) prevEntry.isEmpty = false;
         }
-        banners.push({ type: 'season', icon: season.icon || 'fas fa-leaf', label: `${seasonName} Begins`, color: season.color || '#84cc16' });
+        banners.push({ type: 'season', icon: season.icon || 'fas fa-leaf', label: _loc('CALENDARIA.Chronicle.SeasonBegins', { season: seasonName }), color: season.color || '#84cc16' });
       }
       prevSeasonName = seasonName;
       prevSeasonIcon = season?.icon || 'fas fa-leaf';

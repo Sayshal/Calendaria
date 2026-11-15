@@ -89,6 +89,7 @@ async function handleCommand(cmd, match) {
       try {
         const result = await cmdNote(arg);
         if (!result) return noCalMsg();
+        if (result.denied) return;
         ui.notifications.info('CALENDARIA.ChatCommand.NoteCreated', { localize: true });
       } catch {
         ui.notifications.error('CALENDARIA.ChatCommand.NoteError', { localize: true });

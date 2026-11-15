@@ -1,7 +1,7 @@
 import { CalendarManager } from '../../calendar/_module.mjs';
 import { DISPLAY_STYLES, HOOKS, MODULE, NOTE_VISIBILITY, SETTINGS, TEMPLATES } from '../../constants.mjs';
 import { NoteManager, compareDates, filterNotes, formatNoteDate, getAllPresets, getAvailableAuthors, getCurrentDate } from '../../notes/_module.mjs';
-import { canAddNotes, canDeleteNotes } from '../../utils/_module.mjs';
+import { canAddNotes, canDeleteNote } from '../../utils/_module.mjs';
 
 const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
 const ContextMenu = foundry.applications.ux.ContextMenu.implementation;
@@ -624,7 +624,6 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
   #setupContextMenu() {
     const el = this.element;
     if (!el) return;
-    const isGM = game.user.isGM;
     new ContextMenu(el, '.note-row', [], {
       fixed: true,
       jQuery: false,
@@ -661,7 +660,7 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
             CALENDARIA.api.navigateToDate(year, month + 1, dayOfMonth + 1);
           }
         });
-        if (isGM && canDeleteNotes()) {
+        if (editPage && canDeleteNote(editPage)) {
           items.push({
             label: _loc('ATLAS.Common.Delete'),
             icon: '<i class="fas fa-trash"></i>',
@@ -752,11 +751,13 @@ export class NoteViewer extends HandlebarsApplicationMixin(ApplicationV2) {
     const today = game.time.components;
     const calendar = CalendarManager.getActiveCalendar();
     const yearZero = calendar?.years?.yearZero ?? 0;
+    const days = game.time.calendar.days;
+    const end = game.time.calendar.timeToComponents(game.time.worldTime + days.minutesPerHour * days.secondsPerMinute);
     await NoteManager.createNote({
       name: _loc('CALENDARIA.Note.NewNote'),
       noteData: {
         startDate: { year: today.year + yearZero, month: today.month, dayOfMonth: today.dayOfMonth ?? 0, hour: today.hour ?? 0, minute: today.minute ?? 0 },
-        endDate: { year: today.year + yearZero, month: today.month, dayOfMonth: today.dayOfMonth ?? 0, hour: (today.hour ?? 0) + 1, minute: today.minute ?? 0 }
+        endDate: { year: end.year + yearZero, month: end.month, dayOfMonth: end.dayOfMonth ?? 0, hour: end.hour ?? 0, minute: end.minute ?? 0 }
       },
       source: 'ui'
     });

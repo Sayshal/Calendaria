@@ -615,7 +615,7 @@
 
     .permissions-table {
       gap: 0.5rem 1rem;
-      grid-template-columns: 1fr 4.5rem 4.5rem 4.5rem;
+      grid-template-columns: 1fr 4.5rem 4.5rem;
       display: grid;
       align-items: center;
     }

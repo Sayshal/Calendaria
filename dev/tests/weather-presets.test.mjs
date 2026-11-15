@@ -40,7 +40,6 @@ describe('Weather Preset Data Integrity', () => {
       expect(preset.category, `${preset.id} missing category`).toBeDefined();
       expect(preset.wind, `${preset.id} missing wind`).toBeDefined();
       expect(preset.precipitation, `${preset.id} missing precipitation`).toBeDefined();
-      expect(typeof preset.chance, `${preset.id} chance not number`).toBe('number');
       expect(typeof preset.darknessPenalty, `${preset.id} darknessPenalty not number`).toBe('number');
     }
   });

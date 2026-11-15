@@ -20,13 +20,17 @@ export function getTimeIncrements() {
   const daysPerYear = days.daysPerYear ?? 365;
   const secsPerHour = secsPerMinute * minutesPerHour;
   const secsPerDay = secsPerHour * hoursPerDay;
-  const monthDays = cal?.monthsArray?.[0]?.days ?? Math.floor(daysPerYear / 12);
+  const components = cal ? game.time.components : null;
+  const monthDays = (components && cal.getDaysInMonth?.(components.month, components.year)) || cal?.monthsArray?.[0]?.days || Math.floor(daysPerYear / 12);
   const secsPerMonth = secsPerDay * monthDays;
-  const seasonDays = seasons[0]?.duration ?? Math.floor(daysPerYear / 4);
+  const currentSeason = components ? cal.getCurrentSeason?.(components) : null;
+  const seasonSpan = currentSeason?.dayStart != null && currentSeason?.dayEnd != null ? ((currentSeason.dayEnd - currentSeason.dayStart + daysPerYear) % daysPerYear) + 1 : null;
+  const seasonDays = currentSeason?.duration ?? seasonSpan ?? Math.floor(daysPerYear / (seasons.length || 4));
   const secsPerSeason = secsPerDay * seasonDays;
   const secsPerYear = secsPerDay * daysPerYear;
   const secsPerRound = cal?.secondsPerRound ?? 6;
-  return { second: 1, round: secsPerRound, minute: secsPerMinute, hour: secsPerHour, day: secsPerDay, week: secsPerDay * 7, month: secsPerMonth, season: secsPerSeason, year: secsPerYear };
+  const secsPerWeek = secsPerDay * (cal?.daysInWeek ?? 7);
+  return { second: 1, round: secsPerRound, minute: secsPerMinute, hour: secsPerHour, day: secsPerDay, week: secsPerWeek, month: secsPerMonth, season: secsPerSeason, year: secsPerYear };
 }
 
 /**
@@ -109,6 +113,10 @@ export default class TimeClock {
    * Toggle the clock lock state. When locked, all time advancement is blocked.
    */
   static async toggleLock() {
+    if (!game.user.isGM) {
+      ui.notifications.warn('CALENDARIA.TimeClock.NoPermission', { localize: true });
+      return;
+    }
     this.#locked = !this.#locked;
     if (this.#locked && this.#running) this.stop();
     await game.settings.set(MODULE.ID, SETTINGS.CLOCK_LOCKED, this.#locked);

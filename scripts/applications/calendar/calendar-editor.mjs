@@ -1,5 +1,5 @@
 import { CalendarManager, CalendarRegistry, isBundledCalendar, preLocalizeCalendar } from '../../calendar/_module.mjs';
-import { ASSETS, DEFAULT_MOON_PHASES, HOOKS, MOON_VISIBILITY, TEMPLATES } from '../../constants.mjs';
+import { ASSETS, DEFAULT_MOON_PHASES, HOOKS, MODULE, MOON_VISIBILITY, SETTINGS, TEMPLATES } from '../../constants.mjs';
 import CalendariaCalendar from '../../data/calendaria-calendar.mjs';
 import { FestivalManager } from '../../festivals/_module.mjs';
 import { createImporter } from '../../importers/_module.mjs';
@@ -136,6 +136,9 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {string[]|null} Moon keys as of the last load or save, for reference repair on save. */
   #savedMoonKeys = null;
 
+  /** @type {string[]|null} Season keys as of the last load or save, for macro trigger repair on save. */
+  #savedSeasonKeys = null;
+
   /** @type {boolean} Flag indicating if we're editing an existing calendar */
   #isEditing = false;
 
@@ -151,11 +154,17 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {{year: number, month: number, day: number}|null} Pending current date to apply after import */
   #pendingCurrentDate = null;
 
+  /** @type {object[]|null} Undated events to migrate to journal entries after import */
+  #pendingUndatedEvents = null;
+
   /** @type {object|null} Pending preset aliases to restore after import */
   #pendingPresetAliases = null;
 
   /** @type {boolean} Whether the editor has unsaved changes */
   #isDirty = false;
+
+  /** @type {boolean} Whether festival notes should be deleted on next save (after a reset) */
+  #pendingFestivalWipe = false;
 
   /** @type {number|null} Hook ID for note update listener */
   #noteUpdateHookId = null;
@@ -267,10 +276,12 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       if (calObj.seasons?.values) this.#calendarData.seasons.values = calObj.seasons.values;
       preLocalizeCalendar(this.#calendarData);
       this.#savedMoonKeys = Object.keys(this.#calendarData.moons ?? {});
+      this.#savedSeasonKeys = Object.keys(this.#calendarData.seasons?.values ?? {});
     } else {
       this.#initializeBlankCalendar();
     }
     this.#isDirty = false;
+    this.#pendingFestivalWipe = false;
   }
 
   /**
@@ -285,12 +296,12 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     if (data.days?.values) this.#calendarData.days.values = data.days.values;
     if (data.seasons?.values) this.#calendarData.seasons.values = data.seasons.values;
     if (suggestedId) this.#calendarData.metadata.suggestedId = suggestedId;
-    if (this.#calendarData.metadata?.pendingNotes?.length > 0) {
-      this.#pendingNotes = this.#calendarData.metadata.pendingNotes;
-      this.#pendingImporterId = this.#calendarData.metadata.importerId;
-      delete this.#calendarData.metadata.pendingNotes;
-      delete this.#calendarData.metadata.importerId;
-    }
+    if (this.#calendarData.metadata?.pendingNotes?.length > 0) this.#pendingNotes = this.#calendarData.metadata.pendingNotes;
+    if (this.#calendarData.metadata?.undatedEvents?.length > 0) this.#pendingUndatedEvents = this.#calendarData.metadata.undatedEvents;
+    if (this.#calendarData.metadata?.importerId) this.#pendingImporterId = this.#calendarData.metadata.importerId;
+    delete this.#calendarData.metadata?.pendingNotes;
+    delete this.#calendarData.metadata?.undatedEvents;
+    delete this.#calendarData.metadata?.importerId;
     if (this.#calendarData._pendingCurrentDate) {
       this.#pendingCurrentDate = this.#calendarData._pendingCurrentDate;
       delete this.#calendarData._pendingCurrentDate;
@@ -691,15 +702,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         const isDefault = color.toLowerCase() === '#b8b8b8';
         preview.style.setProperty('--moon-color', color);
         preview.classList.toggle('tinted', !isDefault);
-        const match = event.target.name.match(/moons\.(\d+)\.color/);
-        if (match) {
-          const moonItem = event.target.closest('.moon-item');
-          if (moonItem) {
-            for (const el of moonItem.querySelectorAll('.slider-segment, .phase-icon-btn')) {
-              el.style.setProperty('--moon-color', color);
-              el.classList.toggle('tinted', !isDefault);
-            }
-          }
+        const moonItem = event.target.closest('.moon-item');
+        for (const el of moonItem?.querySelectorAll('.slider-segment, .phase-icon-btn') ?? []) {
+          el.style.setProperty('--moon-color', color);
+          el.classList.toggle('tinted', !isDefault);
         }
       });
     }
@@ -1062,11 +1068,8 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#calendarData.amPmNotation.amAbbr = data['amPmNotation.amAbbr'] || 'AM';
     this.#calendarData.amPmNotation.pmAbbr = data['amPmNotation.pmAbbr'] || 'PM';
     if (!this.#calendarData.dateFormats) this.#calendarData.dateFormats = {};
-    this.#calendarData.dateFormats.short = data['dateFormats.short'] || '{{d}} {{b}}';
-    this.#calendarData.dateFormats.long = data['dateFormats.long'] || '{{d}} {{B}}, {{y}}';
-    this.#calendarData.dateFormats.full = data['dateFormats.full'] || '{{B}} {{d}}, {{y}}';
-    this.#calendarData.dateFormats.time = data['dateFormats.time'] || '{{H}}:{{M}}';
-    this.#calendarData.dateFormats.time12 = data['dateFormats.time12'] || '{{h}}:{{M}} {{p}}';
+    const defaultFormats = CalendarEditor.#createBlankCalendar().dateFormats;
+    for (const key of ['short', 'long', 'full', 'time', 'time12']) this.#calendarData.dateFormats[key] = data[`dateFormats.${key}`] || defaultFormats[key];
     if (data['dateFormats.weekHeader'] != null) this.#calendarData.dateFormats.weekHeader = data['dateFormats.weekHeader'];
     if (data['dateFormats.yearHeader'] != null) this.#calendarData.dateFormats.yearHeader = data['dateFormats.yearHeader'];
     if (data['dateFormats.yearLabel'] != null) this.#calendarData.dateFormats.yearLabel = data['dateFormats.yearLabel'];
@@ -2603,12 +2606,7 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         else calendar = await CalendarManager.updateCustomCalendar(this.#calendarId, this.#calendarData);
         calendarId = this.#calendarId;
       } else {
-        const id =
-          this.#calendarData.metadata?.suggestedId ||
-          this.#calendarData.name
-            .toLowerCase()
-            .replace(/[^\da-z]/g, '-')
-            .replace(/-+/g, '-');
+        const id = this.#calendarData.metadata?.suggestedId || this.#calendarData.name.slugify({ strict: true });
         calendar = await CalendarManager.createCustomCalendar(id, this.#calendarData);
         if (!calendar) throw new Error(`Failed to create calendar: ${id}`);
         calendarId = calendar.metadata?.id;
@@ -2623,6 +2621,10 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
           if (mapping.some((v, i) => v !== i)) await repairMoonIndexReferences(calendarId, mapping);
         }
         this.#savedMoonKeys = Object.keys(this.#calendarData.moons ?? {});
+        if (calendarId && this.#savedSeasonKeys && calendarId === CalendarManager.getActiveCalendar()?.metadata?.id) await this.#repairSeasonTriggers();
+        this.#savedSeasonKeys = Object.keys(this.#calendarData.seasons?.values ?? {});
+        if (calendarId && this.#pendingFestivalWipe) await FestivalManager.deleteAllFestivalNotes(calendarId);
+        this.#pendingFestivalWipe = false;
         if (calendarId) await FestivalManager.seedFestivalNotes(calendarId, calendar);
         ATLAS.log(3, `Checking for pending notes: ${this.#pendingNotes?.length || 0}, importerId: ${this.#pendingImporterId}, calendarId: ${calendarId}`);
         if (this.#pendingNotes?.length > 0 && this.#pendingImporterId && calendarId) {
@@ -2633,6 +2635,14 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
             if (result.count > 0) ui.notifications.info(_loc('CALENDARIA.Editor.NotesImported', { count: result.count }));
             if (result.errors?.length > 0) ATLAS.log(1, 'Note import errors:', result.errors);
             this.#pendingNotes = null;
+          }
+        }
+        if (this.#pendingUndatedEvents?.length > 0 && this.#pendingImporterId && calendarId) {
+          const importer = createImporter(this.#pendingImporterId);
+          if (importer) {
+            importer._undatedEvents = this.#pendingUndatedEvents;
+            await importer.migrateUndatedEvents(this.#calendarData.name);
+            this.#pendingUndatedEvents = null;
           }
         }
         if (this.#pendingCurrentDate && this.#pendingImporterId && calendarId) {
@@ -2787,8 +2797,9 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       rejectClose: false
     });
     if (confirmed) {
-      if (this.#calendarId) await FestivalManager.deleteAllFestivalNotes(this.#calendarId);
       this.#initializeBlankCalendar();
+      this.#pendingFestivalWipe = !!this.#calendarId;
+      this.#isDirty = true;
       ui.notifications.info('CALENDARIA.Editor.ResetComplete', { localize: true });
       this.render();
     }
@@ -2862,6 +2873,20 @@ export class CalendarEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     } else {
       ui.notifications.error('CALENDARIA.Error.CalendarDeleteFailed', { localize: true });
     }
+  }
+
+  /**
+   * Remap season macro triggers after seasons were removed or reordered, dropping triggers for deleted seasons.
+   * @private
+   */
+  async #repairSeasonTriggers() {
+    const newKeys = Object.keys(this.#calendarData.seasons?.values ?? {});
+    const mapping = this.#savedSeasonKeys.map((k) => newKeys.indexOf(k));
+    if (!mapping.some((v, i) => v !== i)) return;
+    const config = foundry.utils.deepClone(game.settings.get(MODULE.ID, SETTINGS.MACRO_TRIGGERS));
+    if (!config.season?.length) return;
+    config.season = config.season.filter((t) => t.seasonIndex === -1 || mapping[t.seasonIndex] >= 0).map((t) => (t.seasonIndex === -1 ? t : { ...t, seasonIndex: mapping[t.seasonIndex] }));
+    await game.settings.set(MODULE.ID, SETTINGS.MACRO_TRIGGERS, config);
   }
 
   /**

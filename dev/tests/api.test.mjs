@@ -60,6 +60,7 @@ vi.mock('../../scripts/notes/note-manager.mjs', () => ({
     getNotesInRange: vi.fn(() => []),
     getNotesByPreset: vi.fn(() => []),
     getPresetDefinitions: vi.fn(() => []),
+    getPresetDefinition: vi.fn(() => null),
     createNote: vi.fn(async () => ({})),
     updateNote: vi.fn(async () => ({})),
     deleteNote: vi.fn(async () => true),
@@ -675,10 +676,10 @@ describe('formatting helpers', () => {
     expect(timeSince).toHaveBeenCalledWith({ year: 0, month: -1, dayOfMonth: 0 }, game.time.components);
   });
   it('timeSince uses provided currentDate', () => {
-    const target = { year: 0, month: 0, dayOfMonth: 0 };
-    const current = { year: 1, month: 0, dayOfMonth: 0 };
+    const target = { year: 0, month: 1, day: 1 };
+    const current = { year: 1, month: 1, day: 1 };
     CalendariaAPI.timeSince(target, current);
-    expect(timeSince).toHaveBeenCalledWith({ year: 0, month: -1, dayOfMonth: 0 }, current);
+    expect(timeSince).toHaveBeenCalledWith({ year: 0, month: 0, dayOfMonth: 0 }, { year: 1, month: 0, dayOfMonth: 0 });
   });
   it('getFormatTokens delegates to getAvailableTokens', () => {
     const result = CalendariaAPI.getFormatTokens();
@@ -781,6 +782,14 @@ describe('createNote', () => {
     expect(call.noteData.icon).toBe('fas fa-calendar-day');
     expect(call.noteData.color).toBe('#4a90e2');
     expect(call.noteData.visibility).toBe('visible');
+  });
+  it('uses the first preset icon and color when none are supplied', async () => {
+    canAddNotes.mockReturnValue(true);
+    NoteManager.getPresetDefinition.mockReturnValueOnce({ id: 'quest', icon: 'fas fa-scroll', color: '#123456' });
+    await CalendariaAPI.createNote({ name: 'Q', startDate: { year: 1, month: 1, day: 1 }, categories: ['quest'] });
+    const call = NoteManager.createNote.mock.calls.at(-1)[0];
+    expect(call.noteData.icon).toBe('fas fa-scroll');
+    expect(call.noteData.color).toBe('#123456');
   });
   it('passes all custom options with 1-indexed to 0-indexed conversion', async () => {
     canAddNotes.mockReturnValue(true);

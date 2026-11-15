@@ -850,16 +850,11 @@ export class MiniCal extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /**
    * Format the selected date as a label.
-   * @returns {string} Formatted date string (e.g., "January 15, 1492")
+   * @returns {string} Formatted date string using the note viewer date format
    */
   _formatSelectedDate() {
     if (!this._selectedDate) return '';
-    const { year, month, dayOfMonth } = this._selectedDate;
-    const calendar = this.calendar;
-    const monthData = calendar.monthsArray[month];
-    const monthName = monthData ? _loc(monthData.name) : '';
-    const yearDisplay = String(year);
-    return `${monthName} ${dayOfMonth + 1}, ${yearDisplay}`;
+    return formatForLocation(this.calendar, { ...this._selectedDate, hour: 0, minute: 0, second: 0 }, 'noteViewerDate');
   }
 
   /**

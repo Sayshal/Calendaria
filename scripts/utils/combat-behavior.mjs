@@ -44,7 +44,7 @@ export function registerWidgetCombatHooks({ settingKey, showSettingKey, getInsta
   });
 
   Hooks.on('updateCombat', () => {
-    if (!game.combat?.started) onCombatEnd();
+    if (!isCombatBlocked(settingKey)) onCombatEnd();
   });
 }
 

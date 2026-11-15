@@ -104,6 +104,7 @@
       color: transparent;
       font-size: 0.7em;
       font-family: var(--font-awesome);
+      line-height: 1;
       content: '\f00c';
     }
 

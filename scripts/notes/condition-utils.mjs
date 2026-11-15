@@ -60,12 +60,13 @@ export function createDefaultGroup(mode = CONDITION_GROUP_MODES.AND) {
 /**
  * Wrap a flat conditions array into a root group for the builder.
  * @param {Array} conditions - Flat conditions array from note data
+ * @param {object} [root] - Existing root group whose mode and threshold are kept
  * @returns {object} Root group containing the conditions
  */
-export function wrapInRootGroup(conditions) {
+export function wrapInRootGroup(conditions, root) {
   const children = foundry.utils.deepClone(conditions ?? []);
   for (const child of children) if (!child.type) child.type = 'condition';
-  return { type: 'group', mode: CONDITION_GROUP_MODES.AND, children, threshold: null };
+  return { type: 'group', mode: root?.mode ?? CONDITION_GROUP_MODES.AND, children, threshold: root?.threshold ?? null };
 }
 
 /**

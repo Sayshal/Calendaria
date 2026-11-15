@@ -1,6 +1,6 @@
 import { BigCal, Chronicle, MiniCal } from '../applications/_module.mjs';
 import { CalendarManager, CalendarRegistry } from '../calendar/_module.mjs';
-import { COMPASS_DIRECTIONS, HOOKS, MODULE, SETTINGS, WIND_SPEEDS } from '../constants.mjs';
+import { COMPASS_DIRECTIONS, HOOKS, MODULE, NOTE_VISIBILITY, SETTINGS, WIND_SPEEDS } from '../constants.mjs';
 import { NoteManager, addDays, addMonths, addYears, compareDates, compareDays, daysBetween, getNextOccurrences, monthsBetween } from '../notes/_module.mjs';
 import TimeClock, { getTimeIncrements } from '../time/time-clock.mjs';
 import {
@@ -1489,7 +1489,7 @@ function enrichNextFullMoon(config, label) {
   const targetMoon = moonsArr[moonIndex];
   if (!targetMoon || !isMoonVisible(targetMoon)) return createErrorElement('CALENDARIA.Enricher.Error.MoonNotFound', { index: moonIndex });
   const nextFull = getNextFullMoon(targetMoon, target.internal);
-  if (!nextFull) return createErrorElement('CALENDARIA.Common.NoConvergence');
+  if (!nextFull) return createErrorElement('CALENDARIA.Enricher.Error.NoFullMoonFound');
   const nextDate = internalToPublic(nextFull, calendar);
   const { isLive, configStr } = liveArgs(target, config.raw);
   if (isCountdown) {
@@ -1737,15 +1737,17 @@ function enrichForecast(config, label) {
   const blocked = blockedElement(target, components, true);
   if (blocked) return blocked;
   const days = config.values.length > 0 && !isNaN(config.values[0]) ? parseInt(config.values[0]) : 3;
-  const forecast = WeatherManager.getForecast({ days, start: target.internal, zoneId: resolveZone(config)?.id });
+  const zoneId = resolveZone(config)?.id;
+  const forecast = WeatherManager.getForecast({ days, start: target.internal, zoneId });
   if (!forecast?.length) return createErrorElement('CALENDARIA.Enricher.Error.NoWeather');
   const { isLive, configStr } = liveArgs(target, config.raw || '');
   if (label) return createElement('forecast', label, configStr, isLive);
-  const currentWeather = WeatherManager.getCurrentWeather();
+  const currentWeather = WeatherManager.getCurrentWeather(zoneId);
   if (currentWeather && forecast.length > 0) {
     const first = forecast[0];
     if (first.year === components.year && first.month === components.month && first.dayOfMonth === components.dayOfMonth) {
-      forecast[0] = { ...first, preset: currentWeather.preset ?? first.preset, temperature: currentWeather.temperature ?? first.temperature, wind: currentWeather.wind ?? first.wind };
+      const preset = currentWeather.label ? { ...first.preset, label: currentWeather.label } : first.preset;
+      forecast[0] = { ...first, preset, temperature: currentWeather.temperature ?? first.temperature, wind: currentWeather.wind ?? first.wind };
     }
   }
   const container = document.createElement('span');
@@ -1947,6 +1949,16 @@ function enrichEvent(config, label) {
 }
 
 /**
+ * Drop secret notes unless the user is a GM showing secret notes, matching the calendar views.
+ * @param {object[]} notes - Note stubs
+ * @returns {object[]} Notes the current user may see listed
+ */
+function withoutSecretNotes(notes) {
+  if (game.user.isGM && game.settings.get(MODULE.ID, SETTINGS.SHOW_SECRET_NOTES)) return notes;
+  return notes.filter((n) => n.flagData?.visibility !== NOTE_VISIBILITY.SECRET);
+}
+
+/**
  * Notes as clickable links for a date or `from to` range. Renders nothing when no notes match.
  * @param {object} config - Parsed enricher config
  * @param {object} calendar - Resolved calendar instance
@@ -1964,7 +1976,7 @@ function buildNoteLinks(config, calendar, components) {
   let date = { year: start.year, month: start.month - 1, dayOfMonth: start.day - 1 };
   for (let guard = 0; guard < 366 && compareDates(date, last) <= 0; guard++) {
     const dateStr = range ? formatDate({ year: date.year, month: date.month + 1, day: date.dayOfMonth + 1 }, 'dateLong', calendar) : null;
-    for (const note of NoteManager.getNotesForDate(date.year, date.month, date.dayOfMonth)) {
+    for (const note of withoutSecretNotes(NoteManager.getNotesForDate(date.year, date.month, date.dayOfMonth))) {
       if (container.childNodes.length) container.append(', ');
       if (dateStr) {
         const dateEl = document.createElement('strong');
@@ -1995,8 +2007,10 @@ function enrichNotes(config, label) {
       const yearZero = calendar?.years?.yearZero ?? 0;
       const internalMonth = current.month - 1;
       const daysInMonth = calendar?.getDaysInMonth(internalMonth, current.year - yearZero) ?? 30;
-      count = NoteManager.getNotesInRange({ year: current.year, month: internalMonth, dayOfMonth: 0 }, { year: current.year, month: internalMonth, dayOfMonth: daysInMonth - 1 }).length;
-    } else count = NoteManager.getNotesForDate(current.year, current.month - 1, current.day - 1).length;
+      count = withoutSecretNotes(
+        NoteManager.getNotesInRange({ year: current.year, month: internalMonth, dayOfMonth: 0 }, { year: current.year, month: internalMonth, dayOfMonth: daysInMonth - 1 })
+      ).length;
+    } else count = withoutSecretNotes(NoteManager.getNotesForDate(current.year, current.month - 1, current.day - 1)).length;
     let text;
     if (count === 0) text = _loc('CALENDARIA.Enricher.Label.NoNotes');
     else if (count === 1) text = _loc('CALENDARIA.Enricher.Label.NoteCountOne');
@@ -2011,10 +2025,10 @@ function enrichNotes(config, label) {
   if (config.values.length > 0) {
     const date = parseDateFromValues(config.values);
     if (!date) return createErrorElement('CALENDARIA.Enricher.Error.InvalidDate');
-    notes = NoteManager.getNotesForDate(date.year, date.month - 1, date.day - 1);
+    notes = withoutSecretNotes(NoteManager.getNotesForDate(date.year, date.month - 1, date.day - 1));
   } else {
     const current = getCurrentDateTime(calendar, components);
-    notes = NoteManager.getNotesForDate(current.year, current.month - 1, current.day - 1);
+    notes = withoutSecretNotes(NoteManager.getNotesForDate(current.year, current.month - 1, current.day - 1));
     isLive = true;
   }
   if (!notes.length) {

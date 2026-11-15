@@ -2,35 +2,35 @@ import { MODULE, SETTINGS } from '../constants.mjs';
 
 /** @type {Object<string, object>} Default permission settings for each action. */
 const DEFAULTS = {
-  viewBigCal: { player: false, trusted: true, assistant: true },
-  viewChronicle: { player: false, trusted: true, assistant: true },
-  viewHUD: { player: true, trusted: true, assistant: true },
-  viewMiniCal: { player: false, trusted: true, assistant: true },
-  viewNotes: { player: true, trusted: true, assistant: true },
-  viewStopwatch: { player: false, trusted: true, assistant: true },
-  viewSunDial: { player: false, trusted: true, assistant: true },
-  viewTimeKeeper: { player: false, trusted: true, assistant: true },
-  addNotes: { player: true, trusted: true, assistant: true },
-  changeDateTime: { player: false, trusted: false, assistant: true },
-  changeActiveCalendar: { player: false, trusted: false, assistant: false },
-  changeWeather: { player: false, trusted: false, assistant: true },
-  deleteNotes: { player: false, trusted: false, assistant: true },
-  editCalendars: { player: false, trusted: false, assistant: false },
-  viewWeatherForecast: { player: false, trusted: true, assistant: true }
+  viewBigCal: { player: false, trusted: true },
+  viewChronicle: { player: false, trusted: true },
+  viewHUD: { player: true, trusted: true },
+  viewMiniCal: { player: false, trusted: true },
+  viewNotes: { player: true, trusted: true },
+  viewStopwatch: { player: false, trusted: true },
+  viewSunDial: { player: false, trusted: true },
+  viewTimeKeeper: { player: false, trusted: true },
+  addNotes: { player: true, trusted: true },
+  changeDateTime: { player: false, trusted: false },
+  changeActiveCalendar: { player: false, trusted: false },
+  changeWeather: { player: false, trusted: false },
+  deleteNotes: { player: false, trusted: false },
+  editCalendars: { player: false, trusted: false },
+  viewWeatherForecast: { player: false, trusted: true }
 };
 
 /**
- * Check if the current user has a specific permission.
+ * Check if a user has a specific permission.
  * @param {string} permissionKey - The permission key to check
+ * @param {User} [user] - User to check, defaults to the current user
  * @returns {boolean} True if user has the permission
  */
-export function hasPermission(permissionKey) {
-  if (game.user.isGM) return true;
+export function hasPermission(permissionKey, user = game.user) {
+  if (user.isGM) return true;
   const saved = game.settings.get(MODULE.ID, SETTINGS.PERMISSIONS) || {};
   const perms = saved[permissionKey] || DEFAULTS[permissionKey] || {};
   if (perms.player) return true;
-  if (perms.trusted && game.user.isTrusted) return true;
-  if (perms.assistant && game.user.role === CONST.USER_ROLES.ASSISTANT) return true;
+  if (perms.trusted && user.isTrusted) return true;
   return false;
 }
 
@@ -115,11 +115,12 @@ export function canAddNotes() {
 }
 
 /**
- * Check if the current user can change the date/time.
+ * Check if a user can change the date/time.
+ * @param {User} [user] - User to check, defaults to the current user
  * @returns {boolean} True if user has permission
  */
-export function canChangeDateTime() {
-  return hasPermission('changeDateTime');
+export function canChangeDateTime(user) {
+  return hasPermission('changeDateTime', user);
 }
 
 /**
@@ -131,11 +132,12 @@ export function canChangeActiveCalendar() {
 }
 
 /**
- * Check if the current user can change weather.
+ * Check if a user can change weather.
+ * @param {User} [user] - User to check, defaults to the current user
  * @returns {boolean} True if user has permission
  */
-export function canChangeWeather() {
-  return hasPermission('changeWeather');
+export function canChangeWeather(user) {
+  return hasPermission('changeWeather', user);
 }
 
 /**
@@ -144,6 +146,16 @@ export function canChangeWeather() {
  */
 export function canDeleteNotes() {
   return hasPermission('deleteNotes');
+}
+
+/**
+ * Check if the current user can delete a specific note: GMs and the author always, other owners only with Delete Notes.
+ * @param {object} page - Calendar note page
+ * @returns {boolean} True if the user may delete the note
+ */
+export function canDeleteNote(page) {
+  if (game.user.isGM || page?.system?.author?._id === game.user.id) return true;
+  return !!(page?.parent ?? page)?.isOwner && canDeleteNotes();
 }
 
 /**
@@ -176,7 +188,6 @@ export function getUsersWithPermission(permissionKey) {
     if (user.isGM) return true;
     if (perms.player) return true;
     if (perms.trusted && user.isTrusted) return true;
-    if (perms.assistant && user.role === CONST.USER_ROLES.ASSISTANT) return true;
     return false;
   });
 }
@@ -193,7 +204,6 @@ export function getBlockedActiveUsers(permissionKey) {
     if (!user.active || user.isGM) return false;
     if (perms.player) return false;
     if (perms.trusted && user.isTrusted) return false;
-    if (perms.assistant && user.role === CONST.USER_ROLES.ASSISTANT) return false;
     return true;
   });
 }

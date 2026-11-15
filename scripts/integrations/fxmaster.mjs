@@ -115,7 +115,9 @@ function onSceneUpdate(scene, change) {
   const splashKey = `flags.${MODULE.ID}.${SCENE_FLAGS.FXMASTER_SPLASH_OVERRIDE}`;
   const backgroundKey = `flags.${MODULE.ID}.${SCENE_FLAGS.FXMASTER_BACKGROUND_OVERRIDE}`;
   const tokenTrailsKey = `flags.${MODULE.ID}.${SCENE_FLAGS.FXMASTER_TOKEN_TRAILS_OVERRIDE}`;
-  const watched = [fxOverrideKey, topDownKey, splashKey, backgroundKey, tokenTrailsKey];
+  const aboveDarknessKey = `flags.${MODULE.ID}.${SCENE_FLAGS.FXMASTER_ABOVE_DARKNESS_OVERRIDE}`;
+  const levelsKey = `flags.${MODULE.ID}.${SCENE_FLAGS.WEATHER_FX_LEVELS}`;
+  const watched = [fxOverrideKey, topDownKey, splashKey, backgroundKey, tokenTrailsKey, aboveDarknessKey, levelsKey];
   if (!watched.some((key) => key in flat)) return;
   syncWeatherToScene();
 }
@@ -144,7 +146,7 @@ export function syncWeatherToScene(sceneOverride) {
  * @param {boolean} payload.bulk - Whether this is a bulk weather change
  * @param {boolean} payload.visualOnly - Whether this is a visual-only refresh (skip FX)
  */
-function onWeatherChange({ current, zoneId: _zoneId, bulk, visualOnly } = {}) {
+function onWeatherChange({ current, zoneId, bulk, visualOnly } = {}) {
   if (visualOnly) return;
   if (!ATLAS.isPrimaryGM) return;
   if (bulk) {
@@ -158,6 +160,7 @@ function onWeatherChange({ current, zoneId: _zoneId, bulk, visualOnly } = {}) {
     return;
   }
   const scene = game.scenes?.active;
+  if (zoneId !== (WeatherManager.getActiveZone(null, scene)?.id ?? WeatherManager.DEFAULT_ZONE)) return;
   if (!isFxEnabledForScene(scene)) {
     stopAllFX();
     return;

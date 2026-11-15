@@ -32,12 +32,13 @@ export class ConditionBuilderDialog extends HandlebarsApplicationMixin(Applicati
   /**
    * @param {object} options - Application options
    * @param {Array} [options.conditions] - Initial flat conditions array
-   * @param {Function} [options.onChange] - Callback when conditions change
+   * @param {object} [options.root] - Existing root group whose mode and threshold are kept
+   * @param {Function} [options.onChange] - Callback when conditions change, receives (conditions, rootGroup)
    * @param {object} [options.document] - Source note document (used to resolve its calendar)
    */
   constructor(options = {}) {
     super(options);
-    if (options.conditions?.length) this.#tree = wrapInRootGroup(options.conditions);
+    if (options.conditions?.length) this.#tree = wrapInRootGroup(options.conditions, options.root);
     if (options.onChange) this.#onChange = options.onChange;
     if (options.document) this.#document = options.document;
   }
@@ -279,7 +280,7 @@ export class ConditionBuilderDialog extends HandlebarsApplicationMixin(Applicati
    * Notify listener of tree changes.
    */
   #notifyChange() {
-    if (this.#onChange) this.#onChange(unwrapFromRootGroup(this.#tree));
+    if (this.#onChange) this.#onChange(unwrapFromRootGroup(this.#tree), this.#tree);
   }
 
   /**

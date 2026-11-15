@@ -491,9 +491,9 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       return;
     }
     const seasonNames = this.#seasonNames.length ? this.#seasonNames : ['CALENDARIA.Season.Spring', 'CALENDARIA.Season.Summer', 'CALENDARIA.Season.Autumn', 'CALENDARIA.Season.Winter'];
-    const baseHue = ClimateEditor.#normToHue(data.baseHue);
+    const baseHue = ClimateEditor.#submittedHue(data.baseHue, this.#data.environmentBase?.hue);
     const baseSat = data.baseSaturation !== '' && data.baseSaturation != null ? parseFloat(data.baseSaturation) : null;
-    const darkHue = ClimateEditor.#normToHue(data.darkHue);
+    const darkHue = ClimateEditor.#submittedHue(data.darkHue, this.#data.environmentDark?.hue);
     const darkSat = data.darkSaturation !== '' && data.darkSaturation != null ? parseFloat(data.darkSaturation) : null;
     const forceSolstice = data.forceSolstice;
     const lockSunTimes = !!data.lockSunTimes;
@@ -567,11 +567,14 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const csHueFields = ['dawnHue', 'duskHue', 'nightHue'];
     for (const field of csHueFields) {
       const key = `colorShift${field.charAt(0).toUpperCase()}${field.slice(1)}`;
-      colorShiftResult[field] = ClimateEditor.#normToHue(data[key]);
+      colorShiftResult[field] = ClimateEditor.#submittedHue(data[key], this.#data.colorShift?.[field]);
     }
     const tmVal = data.colorShiftTransitionMinutes;
     colorShiftResult.transitionMinutes = tmVal !== '' && tmVal != null ? parseFloat(tmVal) : null;
     result.colorShift = colorShiftResult;
+    this.#data.environmentBase = result.environmentBase;
+    this.#data.environmentDark = result.environmentDark;
+    this.#data.colorShift = colorShiftResult;
     const seasonAliases = {};
     const calendarSeasons = this.#calendarData?.seasons?.values ?? CalendarManager.getCalendar(this.#calendarId)?.seasons?.values ?? {};
     const parentColorByName = {};
@@ -726,6 +729,17 @@ export class ClimateEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     if (val === '' || val == null) return null;
     const num = parseFloat(val);
     return Number.isFinite(num) ? Math.round(num * 360) : null;
+  }
+
+  /**
+   * Convert a submitted hue-slider value, keeping an unset hue unset when the slider was left at 0.
+   * @param {number|string|null} val - Normalized hue value (0-1)
+   * @param {number|null} previous - Previously stored hue in degrees
+   * @returns {number|null} Hue in degrees (0-360)
+   */
+  static #submittedHue(val, previous) {
+    const hue = ClimateEditor.#normToHue(val);
+    return hue === 0 && previous == null ? null : hue;
   }
 
   /**

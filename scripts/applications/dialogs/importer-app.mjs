@@ -52,6 +52,9 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {object[]|null} Extracted notes for selection UI */
   #extractedNotes = null;
 
+  /** @type {object[]|null} Undated events to migrate to journal entries */
+  #undatedEvents = null;
+
   /** @type {string|null} Name of loaded file */
   #loadedFileName = null;
 
@@ -165,6 +168,7 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
         this.#previewData.currentDate = '—';
       }
       this.#extractedNotes = await importer.extractNotes(this.#rawData);
+      this.#undatedEvents = importer._undatedEvents;
       if (this.#extractedNotes) {
         this.#extractedNotes.forEach((note) => {
           const month = (note.startDate?.month ?? 0) + 1;
@@ -189,11 +193,7 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   #generateId(name) {
     if (!name) return `imported-${Date.now()}`;
-    return name
-      .toLowerCase()
-      .replace(/[^\da-z]+/g, '-')
-      .replace(/^-|-$/g, '')
-      .substring(0, 32);
+    return name.slugify({ strict: true }).replace(/^-|-$/g, '').substring(0, 32);
   }
 
   /**
@@ -206,6 +206,7 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#suggestedId = null;
     this.#errorMessage = null;
     this.#extractedNotes = null;
+    this.#undatedEvents = null;
     this.#loadedFileName = null;
     this.#loadedFromModule = false;
     this.#sourceCalendars = null;
@@ -433,12 +434,13 @@ export class ImporterApp extends HandlebarsApplicationMixin(ApplicationV2) {
         if (noteType === 'note') pendingNotes.push(note);
       });
     }
+    if (!this.#transformedData.metadata) this.#transformedData.metadata = {};
+    this.#transformedData.metadata.importerId = this.#selectedImporterId;
     if (pendingNotes.length > 0) {
       ATLAS.log(3, `${pendingNotes.length} notes queued for pending import`);
-      if (!this.#transformedData.metadata) this.#transformedData.metadata = {};
       this.#transformedData.metadata.pendingNotes = pendingNotes;
-      this.#transformedData.metadata.importerId = this.#selectedImporterId;
     }
+    if (this.#undatedEvents?.length > 0) this.#transformedData.metadata.undatedEvents = this.#undatedEvents;
     await this.close();
     CalendarEditor.createFromData(this.#transformedData, { suggestedId: calendarId });
     ui.notifications.info('CALENDARIA.Importer.OpeningEditor', { localize: true });

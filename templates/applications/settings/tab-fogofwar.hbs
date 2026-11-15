@@ -21,7 +21,7 @@
         <label class="inline-label">{{localize "ATLAS.Common.Year"}}</label>
         <input type="number" name="fogStartYear" value="{{fogStartYear}}" />
         <label class="inline-label">{{localize "ATLAS.Common.Month"}}</label>
-        <select name="fogStartMonth" data-action="fogStartMonthChanged">
+        <select name="fogStartMonth">
           <option value="">—</option>
           {{#each fogStartMonths}}
             <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>

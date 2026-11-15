@@ -134,7 +134,7 @@ export class TimeKeeper extends HandlebarsApplicationMixin(ApplicationV2) {
         'wheel',
         async (event) => {
           event.preventDefault();
-          const incrementKeys = Object.keys(getTimeIncrements());
+          const incrementKeys = Array.from(incrementSelect.options, (option) => option.value);
           const currentKey = TimeClock.getAppSettings('time-keeper').incrementKey || 'minute';
           const currentIndex = incrementKeys.indexOf(currentKey);
           if (currentIndex === -1) return;

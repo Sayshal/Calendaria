@@ -39,7 +39,7 @@ const WIDGET_COMBAT_CONFIGS = [
 function onCanvasReadyForHUD() {
   if (game.user.isGM) return;
   const hideForPlayers = canvas?.scene?.getFlag(MODULE.ID, SCENE_FLAGS.HUD_HIDE_FOR_PLAYERS);
-  if (hideForPlayers) HUD.hide();
+  if (hideForPlayers) HUD.hide({ force: true });
   else if (game.settings.get(MODULE.ID, SETTINGS.SHOW_CALENDAR_HUD)) HUD.show({ silent: true });
 }
 

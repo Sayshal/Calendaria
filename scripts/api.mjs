@@ -129,6 +129,28 @@ function toPublic(date) {
 }
 
 /**
+ * Convert a public API date to internal components, also removing the active calendar's yearZero offset.
+ * @param {object} date - Public API date object
+ * @returns {object} Internal components with internal year
+ */
+function toInternalComponents(date) {
+  const d = toInternal(date);
+  if (d.year != null) d.year -= CalendarManager.getActiveCalendar()?.years?.yearZero ?? 0;
+  return d;
+}
+
+/**
+ * Convert internal components (internal year) to a public API date with display year.
+ * @param {object} date - Internal components
+ * @returns {object} Public API date object
+ */
+function toPublicComponents(date) {
+  const d = toPublic(date);
+  if (d.year != null) d.year += CalendarManager.getActiveCalendar()?.years?.yearZero ?? 0;
+  return d;
+}
+
+/**
  * Strip content from note stubs for lightweight API responses.
  * Stubs already carry content from the index; this removes it when not requested.
  * @param {object[]} stubs - Array of note stubs
@@ -474,7 +496,7 @@ export const CalendariaAPI = {
    * @returns {number} Phase position from 0 (new moon) to 1
    */
   getMoonPhasePosition(moon, date = null) {
-    return getMoonPhasePosition(moon, date ? toInternal(date) : game.time.components);
+    return getMoonPhasePosition(moon, date ? toInternalComponents(date) : game.time.components);
   },
 
   /**
@@ -484,7 +506,7 @@ export const CalendariaAPI = {
    * @returns {boolean} True if moon is full
    */
   isMoonFull(moon, date = null) {
-    return isMoonFull(moon, date ? toInternal(date) : game.time.components);
+    return isMoonFull(moon, date ? toInternalComponents(date) : game.time.components);
   },
 
   /**
@@ -496,9 +518,9 @@ export const CalendariaAPI = {
    * @returns {object|null} Next convergence date { year, month, day }, or null if not found
    */
   getNextConvergence(moons, startDate = null, options = {}) {
-    const start = startDate ? toInternal(startDate) : game.time.components;
+    const start = startDate ? toInternalComponents(startDate) : game.time.components;
     const result = getNextConvergence(moons, start, options);
-    return result ? toPublic(result) : null;
+    return result ? toPublicComponents(result) : null;
   },
 
   /**
@@ -510,9 +532,9 @@ export const CalendariaAPI = {
    * @returns {object|null} Next full moon date { year, month, day }
    */
   getNextFullMoon(moon, startDate = null, options = {}) {
-    const start = startDate ? toInternal(startDate) : game.time.components;
+    const start = startDate ? toInternalComponents(startDate) : game.time.components;
     const result = getNextFullMoon(moon, start, options);
-    return result ? toPublic(result) : null;
+    return result ? toPublicComponents(result) : null;
   },
 
   /**
@@ -524,7 +546,7 @@ export const CalendariaAPI = {
    * @returns {object[]} Array of convergence dates
    */
   getConvergencesInRange(moons, startDate, endDate, options = {}) {
-    return getConvergencesInRange(moons, toInternal(startDate), toInternal(endDate), options).map(toPublic);
+    return getConvergencesInRange(moons, toInternalComponents(startDate), toInternalComponents(endDate), options).map(toPublicComponents);
   },
 
   /**
@@ -536,7 +558,7 @@ export const CalendariaAPI = {
   getEclipse(moonOrIndex, date = null) {
     const calendar = CalendarManager.getActiveCalendar();
     const moon = typeof moonOrIndex === 'number' ? calendar?.moonsArray?.[moonOrIndex] : moonOrIndex;
-    return getEclipseAtDate(moon, date ? toInternal(date) : game.time.components, calendar);
+    return getEclipseAtDate(moon, date ? toInternalComponents(date) : game.time.components, calendar);
   },
 
   /**
@@ -546,7 +568,7 @@ export const CalendariaAPI = {
    */
   isEclipse(date = null) {
     const calendar = CalendarManager.getActiveCalendar();
-    return isEclipseOnDate(calendar?.moonsArray ?? [], date ? toInternal(date) : game.time.components, calendar);
+    return isEclipseOnDate(calendar?.moonsArray ?? [], date ? toInternalComponents(date) : game.time.components, calendar);
   },
 
   /**
@@ -560,10 +582,10 @@ export const CalendariaAPI = {
   getNextEclipse(moonOrIndex, startDate = null, options = {}) {
     const calendar = CalendarManager.getActiveCalendar();
     const moon = typeof moonOrIndex === 'number' ? calendar?.moonsArray?.[moonOrIndex] : moonOrIndex;
-    const start = startDate ? toInternal(startDate) : game.time.components;
+    const start = startDate ? toInternalComponents(startDate) : game.time.components;
     const result = getNextEclipse(moon, start, { ...options, calendar });
     if (!result) return null;
-    return { ...result, date: toPublic(result.date) };
+    return { ...result, date: toPublicComponents(result.date) };
   },
 
   /**
@@ -577,7 +599,7 @@ export const CalendariaAPI = {
   getEclipsesInRange(moonOrIndex, startDate, endDate, options = {}) {
     const calendar = CalendarManager.getActiveCalendar();
     const moon = typeof moonOrIndex === 'number' ? calendar?.moonsArray?.[moonOrIndex] : moonOrIndex;
-    return getEclipsesInRange(moon, toInternal(startDate), toInternal(endDate), { ...options, calendar }).map((e) => ({ ...e, date: toPublic(e.date) }));
+    return getEclipsesInRange(moon, toInternalComponents(startDate), toInternalComponents(endDate), { ...options, calendar }).map((e) => ({ ...e, date: toPublicComponents(e.date) }));
   },
 
   /**
@@ -667,9 +689,9 @@ export const CalendariaAPI = {
    */
   getTimeUntilTarget(targetHour) {
     const components = game.time.components;
-    const hoursPerDay = this.calendar?.days?.hoursPerDay ?? 24;
-    const minutesPerHour = this.calendar?.days?.minutesPerHour ?? 60;
-    const secondsPerMinute = this.calendar?.days?.secondsPerMinute ?? 60;
+    const hoursPerDay = CalendarManager.getActiveCalendar()?.days?.hoursPerDay ?? 24;
+    const minutesPerHour = CalendarManager.getActiveCalendar()?.days?.minutesPerHour ?? 60;
+    const secondsPerMinute = CalendarManager.getActiveCalendar()?.days?.secondsPerMinute ?? 60;
     const currentHour = components.hour + components.minute / minutesPerHour + components.second / (minutesPerHour * secondsPerMinute);
     const hoursUntil = currentHour < targetHour ? targetHour - currentHour : hoursPerDay - currentHour + targetHour;
     const hours = Math.floor(hoursUntil);
@@ -771,13 +793,13 @@ export const CalendariaAPI = {
 
   /**
    * Get relative time description between two dates.
-   * @param {object} targetDate - Target date { year, month, dayOfMonth }
-   * @param {object} [currentDate] - Current date (defaults to current time)
+   * @param {object} targetDate - Target date { year, month (1-indexed), day (1-indexed) }
+   * @param {object} [currentDate] - Current date in the same form (defaults to current time)
    * @returns {string} Relative time string (e.g., "3 days ago", "in 2 weeks")
    */
   timeSince(targetDate, currentDate = null) {
-    currentDate = currentDate || game.time.components;
-    return timeSince(toInternal(targetDate), currentDate);
+    const current = currentDate ? toInternalComponents(currentDate) : game.time.components;
+    return timeSince(toInternalComponents(targetDate), current);
   },
 
   /**
@@ -855,7 +877,7 @@ export const CalendariaAPI = {
    * @param {string} [options.icon] - Icon path or class
    * @param {string} [options.color] - Event color (hex)
    * @param {string} [options.visibility] - Visibility level: 'visible', 'hidden', 'secret' (default 'visible')
-   * @param {string} [options.displayStyle] - Display style: 'icon', 'pip', 'banner' (default 'label')
+   * @param {string} [options.displayStyle] - Display style: 'icon', 'pip', 'banner' (defaults to the preset's display style)
    * @param {string[]} [options.subjects] - Document UUIDs this note is about (actors, journals, items)
    * @param {string} [options.reminderType] - Reminder delivery: 'none', 'toast', 'chat', 'dialog'
    * @param {string} [options.reminderTargets] - Reminder audience: 'all', 'gm', 'author', 'specific', 'viewers'
@@ -889,14 +911,15 @@ export const CalendariaAPI = {
       ui.notifications.error('CALENDARIA.Permissions.NoAccess', { localize: true });
       return null;
     }
+    const preset = categories.length ? NoteManager.getPresetDefinition(categories[0]) : null;
     const noteData = {
       startDate: { year: startDate.year, month: (startDate.month ?? 1) - 1, dayOfMonth: (startDate.day ?? 1) - 1, hour: startDate.hour ?? 0, minute: startDate.minute ?? 0 },
       endDate: endDate ? { year: endDate.year, month: (endDate.month ?? 1) - 1, dayOfMonth: (endDate.day ?? 1) - 1, hour: endDate.hour ?? 23, minute: endDate.minute ?? 59 } : null,
       allDay: allDay ?? true,
       conditionTree: conditionTree ?? null,
       categories,
-      icon: icon || 'fas fa-calendar-day',
-      color: color || '#4a90e2',
+      icon: icon || preset?.icon || 'fas fa-calendar-day',
+      color: color || preset?.color || '#4a90e2',
       visibility: visibility ?? 'visible',
       displayStyle: displayStyle || DISPLAY_STYLES.ICON,
       subjects
@@ -1188,7 +1211,6 @@ export const CalendariaAPI = {
    * @param {object} [options.startDate] - Start date { year, month (0-indexed), dayOfMonth (0-indexed) }
    * @param {object} [options.endDate] - End date
    * @param {string} [options.calendarId] - Calendar ID
-   * @param {string} [options.theme] - Theme: parchment, logbook, arcane, modern
    * @param {string[]|null} [options.categoryFilter] - Preset IDs to restrict the view to; null restores the saved filter
    * @param {string[]|null} [options.subjectFilter] - Subject document UUIDs to restrict the view to; null clears it
    * @returns {Chronicle} The instance
@@ -1514,7 +1536,7 @@ export const CalendariaAPI = {
     const sunset = this.getSunset(zone);
     if (sunrise === null || sunset === null) return true;
     const components = game.time.components;
-    const minutesPerHour = this.calendar?.days?.minutesPerHour ?? 60;
+    const minutesPerHour = CalendarManager.getActiveCalendar()?.days?.minutesPerHour ?? 60;
     const currentHour = components.hour + components.minute / minutesPerHour;
     return currentHour >= sunrise && currentHour < sunset;
   },
@@ -1541,9 +1563,9 @@ export const CalendariaAPI = {
       return game.time.worldTime;
     }
     const components = game.time.components;
-    const hoursPerDay = this.calendar?.days?.hoursPerDay ?? 24;
-    const minutesPerHour = this.calendar?.days?.minutesPerHour ?? 60;
-    const secondsPerMinute = this.calendar?.days?.secondsPerMinute ?? 60;
+    const hoursPerDay = CalendarManager.getActiveCalendar()?.days?.hoursPerDay ?? 24;
+    const minutesPerHour = CalendarManager.getActiveCalendar()?.days?.minutesPerHour ?? 60;
+    const secondsPerMinute = CalendarManager.getActiveCalendar()?.days?.secondsPerMinute ?? 60;
     const secondsPerHour = minutesPerHour * secondsPerMinute;
     const currentHour = components.hour + components.minute / minutesPerHour + components.second / secondsPerHour;
     const zone = WeatherManager.getActiveZone?.(null, game.scenes?.active);
@@ -1767,6 +1789,7 @@ export const CalendariaAPI = {
    * @param {number} [options.days] - Number of days to forecast
    * @param {string} [options.zoneId] - Zone ID override
    * @param {number} [options.accuracy] - Accuracy override (GM only)
+   * @param {boolean} [options.playerView] - Return the forecast as players see it, using the world forecast accuracy
    * @returns {object[]} Array of forecast entries with `isVaried` flag
    */
   getWeatherForecast(options = {}) {
@@ -1774,7 +1797,8 @@ export const CalendariaAPI = {
       ui.notifications.warn('CALENDARIA.Permissions.NoAccess', { localize: true });
       return [];
     }
-    const accuracy = game.user.isGM ? (options.accuracy ?? 100) : undefined;
+    let accuracy;
+    if (game.user.isGM) accuracy = options.playerView ? options.accuracy : (options.accuracy ?? 100);
     return WeatherManager.getForecast({ ...options, accuracy });
   },
 
@@ -2214,7 +2238,6 @@ export const CalendariaAPI = {
    * @param {Function} [config.onClick] - Click handler (receives event)
    * @param {Function} [config.render] - Custom render function for type='custom'
    * @param {Function} [config.onAttach] - Called when widget attached to DOM
-   * @param {Function} [config.onDetach] - Called when widget detached
    * @param {boolean} [config.disabled] - If true with replaces, hides element entirely
    * @returns {boolean} True if registered successfully
    */

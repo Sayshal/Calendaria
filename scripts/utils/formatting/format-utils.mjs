@@ -149,7 +149,19 @@ export function dateFormattingParts(calendar, components) {
   const daysPerWeek = weekdays.length || 7;
   const cycleComponents = { year: internalYear, month, dayOfMonth };
   const weekOfYear = calendar?.weekNumberInYear?.(cycleComponents) ?? Math.ceil((dayOfYear + 1) / daysPerWeek);
-  const weekOfMonth = calendar?.weekNumberInMonth?.(cycleComponents) ?? Math.ceil((dayOfMonth + 1) / daysPerWeek);
+  let weekOfMonth = calendar?.weekNumberInMonth?.(cycleComponents);
+  if (weekOfMonth == null) {
+    let monthOffset = 0;
+    if (!isMonthless && weekdays.length) {
+      const firstWeekday = calendar?._computeDayOfWeek
+        ? calendar._computeDayOfWeek({ year: internalYear, month, dayOfMonth: 0 })
+        : fallbackWeekday(calendar, internalYear, month, 0, daysInMonthsBefore, weekdays.length);
+      const weekStartId = calendar?.years?.weekStartWeekdayId;
+      const weekStartIdx = Math.max(0, weekStartId ? Object.keys(calendar?.days?.values ?? {}).indexOf(weekStartId) : 0);
+      monthOffset = (((firstWeekday - weekStartIdx) % daysPerWeek) + daysPerWeek) % daysPerWeek;
+    }
+    weekOfMonth = Math.ceil((dayOfMonth + 1 + monthOffset) / daysPerWeek);
+  }
   let namedWeek = '';
   let namedWeekAbbr = '';
   let currentWeek = null;
@@ -468,7 +480,7 @@ function customTokenContext(calendar, components, parts) {
     era: parts.era,
     eraAbbr: parts.eraAbbr,
     yearInEra: parts.eraYear,
-    yearInEraOrdinal: parts.eraYear != null ? ordinal(parts.eraYear) : '',
+    yearInEraOrdinal: parts.eraYear !== '' && parts.eraYear != null ? ordinal(parts.eraYear) : '',
     season: parts.season,
     seasonAbbr: parts.seasonAbbr,
     namedWeek: parts.namedWeek,
@@ -699,7 +711,7 @@ function getMoonPhaseName(calendar, components, moonSelector) {
   const moons = resolveArray(calendar, 'moonsArray', 'moons');
   if (!moons.length) return '';
   let moonIndex = resolveMoonIndex(moons, moonSelector);
-  if (!isMoonVisible(moons[moonIndex])) return '';
+  if (!canViewMoons() || !isMoonVisible(moons[moonIndex])) return '';
   if (calendar.getMoonPhase && calendar.componentsToTime) {
     const yearZero = calendar.years?.yearZero ?? 0;
     const internalComponents = { ...components, year: components.year - yearZero };
