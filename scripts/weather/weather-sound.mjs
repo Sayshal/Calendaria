@@ -11,6 +11,15 @@ let activeSound = null;
 /** @type {string|null} Full path of the currently playing sound (for dedup). */
 let activeSoundKey = null;
 
+/** @type {Promise<void>} Tail of the serialized sound transition chain. */
+let transition = Promise.resolve();
+
+/** @type {object|null} Most recently requested weather, read when the queued transition runs. */
+let requestedWeather = null;
+
+/** @type {Promise<void>|null} Pending audio-unlock wait, shared by every call made while audio is locked. */
+let pendingUnlock = null;
+
 /** @type {boolean} Whether the current client is inside a core SuppressWeather region, muting Calendaria's audio. */
 let suppressedByRegion = false;
 
@@ -178,25 +187,42 @@ function isSoundDisabledForScene(scene) {
 }
 
 /**
- * Play the ambient sound loop for the current weather with crossfade.
- * @param {object|null} weather - Current weather state
+ * Append a step to the sound transition chain so transitions never overlap.
+ * @param {Function} step - Async step to run once prior transitions settle
+ * @returns {Promise<*>} Resolves with the step's return value
  */
-async function playSound(weather) {
+function enqueue(step) {
+  const run = transition.then(step);
+  transition = run.catch((error) => ATLAS.log(1, 'Weather sound transition failed:', error));
+  return run;
+}
+
+/**
+ * Request the ambient sound loop for the given weather; overlapping requests collapse to the latest.
+ * @param {object|null} weather - Current weather state
+ * @returns {Promise<void>} Resolves when the queued transition finishes
+ */
+function playSound(weather) {
+  requestedWeather = weather;
+  return enqueue(playRequestedSound);
+}
+
+/** Crossfade to the most recently requested weather sound. Runs inside the transition chain. */
+async function playRequestedSound() {
   if (!game.settings.get(MODULE.ID, SETTINGS.WEATHER_SOUND_FX) || isSoundDisabledForScene(canvas?.scene)) {
-    stopSound();
+    await stopSound();
     return;
   }
   if (game.audio.locked) {
-    game.audio.awaitFirstGesture().then(() => playSound(weather));
+    pendingUnlock ??= game.audio.awaitFirstGesture().then(() => {
+      pendingUnlock = null;
+      playSound(WeatherManager.getCurrentWeather() || null);
+    });
     return;
   }
-  const soundKey = weather?.soundFx || null;
-  const src = resolveWeatherSoundPath(soundKey);
+  const src = resolveWeatherSoundPath(requestedWeather?.soundFx || null);
   if (src === activeSoundKey && activeSound?.playing) return;
-  const oldSound = activeSound;
-  activeSound = null;
-  activeSoundKey = null;
-  if (oldSound) await fadeOutAndStop(oldSound);
+  await stopSound();
   if (!src) return;
   try {
     const sound = await game.audio.play(src, { loop: true, volume: 0, context: game.audio.environment });
@@ -211,7 +237,7 @@ async function playSound(weather) {
 }
 
 /**
- * Fade out and stop the currently playing weather sound.
+ * Fade out and stop the currently playing weather sound. Only call from inside the transition chain.
  */
 async function stopSound() {
   if (activeSound) {
@@ -244,7 +270,17 @@ export function refreshWeatherSound() {
  * @param {object} [options.context] - Audio context override (default: game.audio.environment)
  * @returns {Promise<boolean>} True if playback started successfully
  */
-export async function playStandaloneSound(src, options = {}) {
+export function playStandaloneSound(src, options = {}) {
+  return enqueue(() => playStandaloneStep(src, options));
+}
+
+/**
+ * Crossfade to an arbitrary audio file. Runs inside the transition chain.
+ * @param {string} src - Foundry audio path
+ * @param {object} options - Playback options, see {@link playStandaloneSound}
+ * @returns {Promise<boolean>} True if playback started successfully
+ */
+async function playStandaloneStep(src, options) {
   if (!game.settings.get(MODULE.ID, SETTINGS.WEATHER_SOUND_FX)) {
     ATLAS.log(2, 'Weather sounds are disabled');
     return false;
@@ -258,10 +294,7 @@ export async function playStandaloneSound(src, options = {}) {
     return false;
   }
   if (src === activeSoundKey && activeSound?.playing) return true;
-  const oldSound = activeSound;
-  activeSound = null;
-  activeSoundKey = null;
-  if (oldSound) await fadeOutAndStop(oldSound);
+  await stopSound();
   const fadeDuration = options.fade ?? FADE_MS;
   try {
     const sound = await game.audio.play(src, { loop: options.loop ?? true, volume: 0, context: options.context ?? game.audio.environment });
@@ -283,7 +316,16 @@ export async function playStandaloneSound(src, options = {}) {
  * @param {number} [options.fade] - Fade-out duration in ms (default: 2000)
  * @returns {Promise<boolean>} True if a sound was stopped
  */
-export async function stopStandaloneSound(options = {}) {
+export function stopStandaloneSound(options = {}) {
+  return enqueue(() => stopStandaloneStep(options));
+}
+
+/**
+ * Fade out and stop the current weather sound. Runs inside the transition chain.
+ * @param {object} options - Stop options, see {@link stopStandaloneSound}
+ * @returns {Promise<boolean>} True if a sound was stopped
+ */
+async function stopStandaloneStep(options) {
   if (!activeSound) return false;
   const stoppingKey = activeSoundKey;
   const sound = activeSound;
