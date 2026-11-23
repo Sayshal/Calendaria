@@ -1,6 +1,6 @@
 import { CalendarManager } from '../calendar/_module.mjs';
 import { COMPASS_DIRECTIONS, MODULE, SETTINGS, WIND_SPEEDS } from '../constants.mjs';
-import { NoteManager, addDays, compareDates, dayOfWeek } from '../notes/_module.mjs';
+import { NoteManager, addDays, compareDates } from '../notes/_module.mjs';
 import { WeatherManager } from '../weather/_module.mjs';
 import { isFogEnabled, isRevealed } from './fog-of-war.mjs';
 import { dateFormattingParts } from './formatting/format-utils.mjs';
@@ -92,7 +92,6 @@ export function buildScrollEntries(startDate, endDate, options = {}) {
   const fogEnabled = isFogEnabled();
   const isGM = game.user.isGM;
   const moons = calendar.moonsArray || [];
-  const weekdays = calendar.weekdaysArray || [];
   const yearZero = calendar.years?.yearZero ?? 0;
   const showWeather = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_SHOW_WEATHER);
   const showMoons = canViewMoons();
@@ -118,13 +117,12 @@ export function buildScrollEntries(startDate, endDate, options = {}) {
     const { year, month, dayOfMonth } = current;
     const fogged = !isGM && fogEnabled && !isRevealed(year, month, dayOfMonth, calendarId);
     if (fogged) {
-      entries.push(buildFoggedEntry(current, calendar, weekdays));
+      entries.push(buildFoggedEntry(current, calendar));
       current = addDays(current, 1);
       continue;
     }
     const parts = dateFormattingParts(calendar, { year, month, dayOfMonth });
-    const weekdayIndex = dayOfWeek(current, calendar);
-    const weekdayName = weekdays[weekdayIndex]?.name ? _loc(weekdays[weekdayIndex].name) : '';
+    const weekdayName = parts.dddd;
     const isToday = year === today.year && month === today.month && dayOfMonth === today.dayOfMonth;
     const isPastOrToday = compareDates(current, today) <= 0;
     const internalComponents = { year: year - yearZero, month, dayOfMonth };
@@ -213,14 +211,11 @@ export function buildScrollEntries(startDate, endDate, options = {}) {
  * Build a fogged (hidden) entry placeholder.
  * @param {object} date - Date object { year, month, dayOfMonth }
  * @param {object} calendar - Calendar instance
- * @param {object[]} weekdays - Array of weekday definitions
  * @returns {object} Fogged entry object
  */
-function buildFoggedEntry(date, calendar, weekdays) {
+function buildFoggedEntry(date, calendar) {
   const parts = dateFormattingParts(calendar, date);
-  const weekdayIndex = dayOfWeek(date, calendar);
-  const weekdayName = weekdays[weekdayIndex]?.name ? _loc(weekdays[weekdayIndex].name) : '';
-  return { date: { ...date }, formattedDate: `${parts.D} ${parts.MMMM} ${parts.y}`, weekday: weekdayName, fogged: true, isToday: false, notes: [], banners: [], hasFestival: false, isEmpty: true };
+  return { date: { ...date }, formattedDate: `${parts.D} ${parts.MMMM} ${parts.y}`, weekday: parts.dddd, fogged: true, isToday: false, notes: [], banners: [], hasFestival: false, isEmpty: true };
 }
 
 /**

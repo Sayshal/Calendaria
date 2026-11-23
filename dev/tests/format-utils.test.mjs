@@ -423,6 +423,19 @@ describe('dateFormattingParts()', () => {
       expect(parts.M).toBe('');
       expect(parts.MM).toBe('');
       expect(parts.MMMM).toBe('Midwinter');
+      for (const token of ['E', 'EE', 'EEE', 'EEEE', 'EEEEE', 'e', 'd', 'dd', 'ddd', 'dddd']) expect(parts[token]).toBe('');
+    });
+    it('blanks weekday tokens for intercalary month days', () => {
+      const values = mockCalendar.months.values.map((m, i) => (i === 0 ? { ...m, name: 'Mitterfruhl', type: 'intercalary' } : m));
+      const intercalaryCal = addCalendarGetters({ ...mockCalendar, months: { values } });
+      const parts = dateFormattingParts(intercalaryCal, components);
+      expect(parts.MMMM).toBe('Mitterfruhl');
+      for (const token of ['E', 'EE', 'EEE', 'EEEE', 'EEEEE', 'e', 'd', 'dd', 'ddd', 'dddd']) expect(parts[token]).toBe('');
+    });
+    it('keeps weekday tokens on counting days', () => {
+      const parts = dateFormattingParts(mockCalendar, components);
+      expect(parts.dddd).not.toBe('');
+      expect(parts.e).not.toBe('');
     });
   });
 

@@ -107,8 +107,8 @@ export function dateFormattingParts(calendar, components) {
     ? calendar._computeDayOfWeek({ year: internalYear, month, dayOfMonth })
     : fallbackWeekday(calendar, internalYear, month, dayOfMonth, dayOfYear, weekdays.length);
   const weekdayData = weekdays[weekday];
-  const weekdayName = weekdayData?.name ? _loc(weekdayData.name) : '';
-  const weekdayAbbr = weekdayData?.abbreviation ? _loc(weekdayData.abbreviation) : weekdayName.slice(0, 3);
+  const weekdayName = !isIntercalaryFestival && weekdayData?.name ? _loc(weekdayData.name) : '';
+  const weekdayAbbr = isIntercalaryFestival ? '' : weekdayData?.abbreviation ? _loc(weekdayData.abbreviation) : weekdayName.slice(0, 3);
   const hoursPerDay = calendar?.days?.hoursPerDay ?? 24;
   const midday = Math.floor(hoursPerDay / 2);
   const hour12 = hour === 0 ? midday : hour > midday ? hour - midday : hour;
@@ -232,8 +232,8 @@ export function dateFormattingParts(calendar, components) {
     EEE: weekdayAbbr,
     EEEE: weekdayName,
     EEEEE: weekdayName?.charAt(0) || '',
-    e: weekday,
-    d: weekday,
+    e: isIntercalaryFestival ? '' : weekday,
+    d: isIntercalaryFestival ? '' : weekday,
     dd: weekdayAbbr?.slice(0, 2) || '',
     ddd: weekdayAbbr,
     dddd: weekdayName,

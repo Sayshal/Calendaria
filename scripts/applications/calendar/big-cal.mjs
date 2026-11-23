@@ -501,21 +501,15 @@ export class BigCal extends HandlebarsApplicationMixin(ApplicationV2) {
       if (intercalaryDays.length > 0 && startPosition > 0) for (let i = 0; i < startPosition; i++) currentWeek.push({ empty: true });
       while (remainingSlots > 0) {
         const checkMonthDays = calendar.getDaysInMonth(checkMonth, checkYear - yearZero);
-        const monthData = calendar.monthsArray[checkMonth];
-        const isIntercalaryMonth = monthData?.type === 'intercalary';
+        const isIntercalaryMonth = calendar.monthsArray[checkMonth]?.type === 'intercalary';
         const festivalDay = calendar.findFestivalDay({ year: checkYear - yearZero, month: checkMonth, dayOfMonth: dayInMonth - 1 });
-        const skipFestival = festivalDay?.countsForWeekday === false && !isIntercalaryMonth;
-        if (!skipFestival) {
-          const monthName = isIntercalaryMonth ? _loc(monthData?.name ?? '') : '';
+        if (!isIntercalaryMonth && festivalDay?.countsForWeekday !== false) {
           currentWeek.push({
             day: dayInMonth,
             dayOfMonth: dayInMonth - 1,
             year: checkYear,
             month: checkMonth,
             isFromOtherMonth: true,
-            isIntercalaryMonth,
-            monthName,
-            monthInitial: monthName ? monthName.charAt(0) : '',
             isToday: this._isToday(checkYear, checkMonth, dayInMonth - 1)
           });
           remainingSlots--;
