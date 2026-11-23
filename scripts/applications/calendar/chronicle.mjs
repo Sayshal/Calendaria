@@ -217,7 +217,10 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
     if (options.isFirstRender) {
       this.#restorePosition();
       this.#initContextMenu();
-      if (!this._lockedRange) this._scrollToToday = true;
+      if (!this._lockedRange) {
+        this._scrollToToday = true;
+        this._needsFill = true;
+      }
     }
     this.#registerHooks();
     this.#bindSelectListeners();
@@ -234,7 +237,8 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     requestAnimationFrame(() => {
       this._loading = false;
-      if (this._lockedRange) return;
+      if (this._lockedRange || !this._needsFill) return;
+      this._needsFill = false;
       const container = this.element?.querySelector('.scroll-container');
       if (container && container.scrollHeight <= container.clientHeight) this.#loadEarlier(container);
     });
@@ -276,7 +280,9 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
     this._hooks.push({
       name: 'updateSetting',
       id: Hooks.on('updateSetting', (setting) => {
-        if (setting.key?.startsWith(`${MODULE.ID}.`) && scrollSettingKeys.has(setting.key.replace(`${MODULE.ID}.`, ''))) {
+        const key = setting.key?.startsWith(`${MODULE.ID}.`) ? setting.key.replace(`${MODULE.ID}.`, '') : null;
+        if (scrollSettingKeys.has(key)) {
+          if (key === SETTINGS.CHRONICLE_CATEGORY_FILTER || key === SETTINGS.CHRONICLE_SHOW_EMPTY) this.#resetRange();
           this._entryDepth = Chronicle.#readEntryDepth();
           this._showEmpty = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_SHOW_EMPTY);
           this._viewMode = game.settings.get(MODULE.ID, SETTINGS.CHRONICLE_VIEW_MODE);
@@ -351,7 +357,7 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
         else current.add(id);
         const selected = Array.from(current);
         this._categoryFilter = selected;
-        this._restoreScrollTop = this.element?.querySelector('.scroll-container')?.scrollTop ?? null;
+        this.#resetRange();
         if (!this._categoryFilterOverride) await game.settings.set(MODULE.ID, SETTINGS.CHRONICLE_CATEGORY_FILTER, selected);
         await this.render();
       });
@@ -360,7 +366,7 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
       event.preventDefault();
       this._categoryFilter = [];
       this._categoryFilterOverride = null;
-      this._restoreScrollTop = this.element?.querySelector('.scroll-container')?.scrollTop ?? null;
+      this.#resetRange();
       await game.settings.set(MODULE.ID, SETTINGS.CHRONICLE_CATEGORY_FILTER, []);
       await this.render();
     });
@@ -374,16 +380,29 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
         if (current.has(uuid)) current.delete(uuid);
         else current.add(uuid);
         this._subjectFilter = Array.from(current);
-        this._restoreScrollTop = this.element?.querySelector('.scroll-container')?.scrollTop ?? null;
+        this.#resetRange();
         await this.render();
       });
     });
     el.querySelector('.subject-filter-clear')?.addEventListener('click', async (event) => {
       event.preventDefault();
       this._subjectFilter = [];
-      this._restoreScrollTop = this.element?.querySelector('.scroll-container')?.scrollTop ?? null;
+      this.#resetRange();
       await this.render();
     });
+  }
+
+  /** Reset the loaded date range to the default window so filter changes don't render an ever-growing range. */
+  #resetRange() {
+    if (this._lockedRange) {
+      this._restoreScrollTop = this.element?.querySelector('.scroll-container')?.scrollTop ?? null;
+      return;
+    }
+    this._startDate = null;
+    this._endDate = null;
+    this._restoreScrollTop = null;
+    this._scrollToToday = true;
+    this._needsFill = true;
   }
 
   /**
@@ -603,6 +622,7 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
    */
   static async #onToggleEmptyDays(_event, _target) {
     this._showEmpty = !this._showEmpty;
+    this.#resetRange();
     await game.settings.set(MODULE.ID, SETTINGS.CHRONICLE_SHOW_EMPTY, this._showEmpty);
     await this.render();
   }
@@ -666,6 +686,7 @@ export class Chronicle extends HandlebarsApplicationMixin(ApplicationV2) {
     this._startDate = defaults.startDate;
     this._endDate = defaults.endDate;
     this._scrollToToday = true;
+    this._needsFill = true;
     await this.render();
   }
 
